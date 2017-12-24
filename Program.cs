@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using dialogic;
 
 namespace dialogic {
 
@@ -12,8 +11,7 @@ namespace dialogic {
             Dialog d = new Dialog();
             d.Say("Welcome to my tank...");
             d.Pause(500);
-            d.Say("Do you want to play?");
-            d.Ask("yes", "no");
+            d.Ask("Do you want to play?", "yes", "no");
 
             ConsoleRunner.Play(d);
         }
@@ -46,8 +44,8 @@ namespace dialogic {
             return this;
         }
 
-        public Dialog Ask(params string[] choices) {
-            actions.Add(new Choice(choices));
+        public Dialog Ask(string prompt, params string[] choices) {
+            actions.Add(new Choice(prompt, choices));
             // actions.Add(new Wait());
             return this;
         }
@@ -58,44 +56,60 @@ namespace dialogic {
     }
 
     public class Choice : ScriptEvent {
-        private static int IDGEN = 0;
 
         //private Say prompt;
-        private string[] choices;
-        private int id = ++IDGEN;
+        public string[] choices;
+        public int selected;
 
-        public Choice(params string[] options) {
+        public Choice(string prompt, params string[] options) {
+            this.text = prompt;
             this.choices = options;
         }
         public override int Run() {
+            base.Run();
             for (int i = 0; i < choices.Length; i++) {
                 Console.WriteLine("  " + (i + 1) + ") " + choices[i]);
             }
             return -1;
         }
+        public bool validate(string input) {
+            int i;
+            if (int.TryParse(input, out i)) {
+                if (i > 0 && i <= choices.Length) {
+                    selected = --i;
+                    return true;
+                }
+            }
+            return false;
+        }
+
     }
 
     public abstract class ScriptEvent {
-        public string text = "";
+        internal static int IDGEN = 0;
 
-        public abstract int Run(); // return -1=pause, 0=continue, #=pauseFor
+        public int id = ++IDGEN;
+        public string actor = "Guppy", text = "";
+
+        public virtual int Run() {
+            Console.WriteLine(this.actor + ": " + this.text);
+            return 0;
+        } // return -1=pause, 0=continue, #=pauseFor
     }
 
     public class Say : ScriptEvent {
-        private string speaker;
 
         public Say(string text) {
-            this.speaker = "Guppy";
             this.text = text;
         }
 
-        public Say(string speaker, string text) {
-            this.speaker = speaker;
+        public Say(string actor, string text) {
+            this.actor = actor;
             this.text = text;
         }
 
         public override int Run() {
-            Console.WriteLine(this.speaker + ": " + this.text);
+            Console.WriteLine(this.actor + ": " + this.text);
             return 0;
         }
     }
@@ -122,16 +136,24 @@ namespace dialogic {
             new ConsoleRunner(d).Run();
         }
 
-        public override void OnChoice(int choiceIndex) {
-            Console.WriteLine(lastSay().text + ": " + choiceIndex);
-            //this.thread.Interrupt();
+        public override void OnChoice(string input) {
+            Choice last = currentChoice();
+            if (last.validate(input)) {
+                Console.WriteLine("(" + last.id + ": " + last.text + " -> " + last.choices[last.selected] + ")");
+            } else {
+                Console.WriteLine("BAD INPUT: " + input + ", Expecting # 1-" + last.choices.Length);
+                this.step(-1);
+            }
         }
 
-        private ScriptEvent lastSay()
-        {
+        private void step(int steps) {
+            cursor += steps;
+        }
+
+        private Choice currentChoice() {
             for (var i = cursor; i >= 0; i--) {
-                if (dialog.actions[i] is Say) {
-                    return dialog.actions[i];
+                if (dialog.actions[i] is Choice) {
+                    return (Choice) dialog.actions[i];
                 }
             }
             return null;
@@ -140,22 +162,13 @@ namespace dialogic {
         public override DialogRunner Run() {
             int rc = -1;
             for (cursor = 0; cursor < dialog.actions.Count; cursor++) {
-            //foreach (var action in ) {
+                //foreach (var action in ) {
                 var action = dialog.actions[cursor];
                 rc = action.Run();
                 if (rc >= 0) {
                     Thread.Sleep(rc);
                 } else {
-                    while (rc <= 0) {
-                        ConsoleKeyInfo cki = Console.ReadKey(true);
-                        if (int.TryParse(cki.KeyChar.ToString(), out rc)) {
-                            this.OnChoice(rc);
-                            break;
-                        } else {
-                            Console.WriteLine("???");
-                            rc = -1;
-                        }
-                    }
+                    this.OnChoice(Console.ReadKey(true).KeyChar.ToString());
                 }
             }
             Console.WriteLine("Dialog Complete");
@@ -171,7 +184,7 @@ namespace dialogic {
             this.dialog = d;
         }
 
-        public abstract void OnChoice(int choiceIndex);
+        public abstract void OnChoice(string input);
 
         public abstract DialogRunner Run();
     }
