@@ -8,7 +8,7 @@ namespace dialogic {
     // NEXT: pass labels to react React()
     //     : allow Ask() to work as label-based conditional: Ask("Yes or No?", "label1", "label2");
     //     : Ask() should be Ask(prompt, labels[], responses[])   ??
-    
+
     public class Program {
         static void Main(string[] args) {
 
@@ -145,7 +145,6 @@ namespace dialogic {
         }
 
         public void Reactions(params Action[] reactions) {
-            Console.WriteLine("Choice.Reactions: " + reactions.Length);
             this.reactions = reactions;
         }
 

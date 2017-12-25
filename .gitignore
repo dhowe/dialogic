@@ -1,2 +1,7 @@
 bin 
 obj
+*.exe
+*.class
+dsl/*.java
+dsl/*.tokens
+dsl/*.interp
