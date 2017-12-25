@@ -5,6 +5,10 @@ using System.Threading;
 
 namespace dialogic {
 
+    // NEXT: pass labels to react React()
+    //     : allow Ask() to work as label-based conditional: Ask("Yes or No?", "label1", "label2");
+    //     : Ask() should be Ask(prompt, labels[], responses[])   ??
+    
     public class Program {
         static void Main(string[] args) {
 
@@ -14,8 +18,12 @@ namespace dialogic {
             .Label("Start")
                 .Say("Welcome to my tank...")
                 .Pause(500)
-                .Label("Prompt")
+                .Label("Prompt1")
                 .Ask("Do you want to play?", "yes", "no")
+                .React(() => { Console.WriteLine("React1"); },
+                    () => { Console.WriteLine("React2"); })
+                .Label("Prompt2")
+                .Ask("Do you want to go first?", "yes", "no")
                 .React(() => { Console.WriteLine("React1"); },
                     () => { Console.WriteLine("React2"); })
                 .Goto("Start")
@@ -234,6 +242,7 @@ namespace dialogic {
         }
 
         public override DialogRunner Run() {
+            Console.WriteLine("");
             int rc = -1;
             for (cursor = 0; cursor < dialog.events.Count; cursor++) {
                 var evt = dialog.events[cursor];
@@ -250,42 +259,30 @@ namespace dialogic {
     } 
 
     public abstract class DialogRunner {
-
         protected Dialog dialog;
-
         public int cursor;
-
         public DialogRunner(Dialog d) {
             this.dialog = d;
         }
-
         public abstract void OnChoice(string input);
-
         public int GotoLabel(string label) {
-            Console.WriteLine("GotoLabel: " + label);
             for (int i = 0; i < dialog.events.Count; i++) {
                 ScriptEvent evt = dialog.events[i];
-                Console.Write("  check: " + evt.GetType() + " " + evt.text);
                 if (evt is Label && evt.text == label) {
-                    Console.WriteLine("HIT");
-                    return this.StepTo(i);
-                } else
-                    Console.WriteLine(" FAIL");
+                    return this.Cursor(i);
+                }
             }
             return -1;
         }
-
+        public abstract DialogRunner Run();
         public int Step(int steps) {
             cursor += steps;
             return cursor;
         }
-
-        public int StepTo(int target) {
+        public int Cursor(int target) {
             cursor = target;
             return cursor;
         }
-
-        public abstract DialogRunner Run();
     }
 
 }
