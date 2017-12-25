@@ -1,6 +1,8 @@
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
-public class DialogicListener extends ParseTreeListener implements GuppyScriptListener {
+// NEXT: resolve errors in Eclipse and/or convert to Visitor
+
+public class DialogicListener implements GuppyScriptListener {
 	/**
 	 * Enter a parse tree produced by {@link GuppyScriptParser#dialog}.
 	 * @param ctx the parse tree
@@ -10,7 +12,7 @@ public class DialogicListener extends ParseTreeListener implements GuppyScriptLi
 	 * Exit a parse tree produced by {@link GuppyScriptParser#dialog}.
 	 * @param ctx the parse tree
 	 */
-	public void exitDialog(GuppyScriptParser.DialogContext ctx) {
+	public void exitDialog(GuppyScriptParser.DialogContext ctx) { }
 	/**
 	 * Enter a parse tree produced by {@link GuppyScriptParser#line}.
 	 * @param ctx the parse tree
@@ -41,4 +43,5 @@ public class DialogicListener extends ParseTreeListener implements GuppyScriptLi
 	 * @param ctx the parse tree
 	 */
 	public void exitText(GuppyScriptParser.TextContext ctx) { }
+
 }
