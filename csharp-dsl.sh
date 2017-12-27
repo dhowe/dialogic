@@ -1,13 +1,17 @@
 set -e
 
-OUTDIR=cs
+OUTDIR=.
 
 find . | grep "$OUTDIR/GScript*.\(cs\|interp\|tokens\)" |  xargs rm
 
 echo
-ANTLR4='/usr/bin/java -jar /usr/local/lib/antlr-4.7.1-complete.jar -Dlanguage=CSharp'
+ANTLR4='/usr/bin/java -jar /usr/local/lib/antlr-4.7.1-complete.jar'
+ANTLR4+=' -Dlanguage=CSharp -visitor -no-listener'
 echo ANTLR: $ANTLR4 -o $OUTDIR GScript.g4 
 $ANTLR4 -o $OUTDIR GScript.g4
+
+cp Visitor.tmpl $OUTDIR/GScriptVisitor2.cs
+exit
 
 echo
 pushd $OUTDIR > /dev/null
@@ -19,7 +23,7 @@ popd > /dev/null
 
 echo
 echo CREATED:
-ls $OUTDIR
+ls $OUTDIRrm
 
 
 exit
