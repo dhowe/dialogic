@@ -1,32 +1,30 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 
-namespace dialogic {
+namespace Dialogic {
 
-    // NEXT: pass labels to react React()
-    //     : allow Ask() to work as label-based conditional: Ask("Yes or No?", "label1", "label2");
-    //     : Ask() should be Ask(prompt, labels[], responses[])   ??
+    // NEXT: 
 
-    public class Program {
+    public class App {
         static void Main(string[] args) {
 
-            Dialog d;
-            (d = new Dialog())
-
+            (new Dialog())
             .Label("Start")
                 .Say("Welcome to my tank...")
-                .Pause(500)
+                //.Pause(500)
                 .Label("Prompt1")
-                .Ask("Do you want to play?", "yes", "no")
-                .React(() => { Console.WriteLine("React1"); },
-                    () => { Console.WriteLine("React2"); })
+                .Ask("Do you want to play?",
+                    new KeyValuePair<string, string>("yes", "Prompt2"),
+                    new KeyValuePair<string, string>("no", "Prompt1"))
                 .Label("Prompt2")
-                .Ask("Do you want to go first?", "yes", "no")
-                .React(() => { Console.WriteLine("React1"); },
-                    () => { Console.WriteLine("React2"); })
-                .Goto("Start")
+                .Ask("Do you want to go first?",
+                    new KeyValuePair<string, string>("yes", "Game"),
+                    new KeyValuePair<string, string>("no", "Prompt2"))
+                .Label("Game")
+                .Say("Ok, let's play!...")
                 .Run();
         }
     }
@@ -70,16 +68,35 @@ namespace dialogic {
             return this;
         }
 
+        public Dialog Ask(string prompt, params KeyValuePair<string, string>[] choices) {
+
+            foreach (var item in choices) {
+
+            }
+            events.Add(new Prompt(this, prompt, choices));
+            return this;
+        }
+
         public Dialog Ask(string prompt, params string[] choices) {
             events.Add(new Prompt(this, prompt, choices));
             return this;
         }
 
         public Dialog React(params string[] labels) {
+            object c = events[events.Count - 1];
+            if (!(c is Prompt)) {
+                throw new Exception("React() must be followed by Ask()");
+            }
+            Prompt prompt = (Prompt) c;
+            if (labels.Length != prompt.options.Length) {
+                throw new Exception("React() must get the same number of arguments as Ask()");
+            }
             Action[] reactions = new Action[labels.Length];
             for (int i = 0; i < reactions.Length; i++) {
-                reactions[i] = () => { Console.WriteLine("goto " + labels[i]); };
+                string label = labels[i];
+                reactions[i] = (() => { new Goto(this, label).Fire(); });
             }
+            prompt.Reactions(reactions);
             return this;
         }
 
@@ -88,11 +105,11 @@ namespace dialogic {
             if (!(c is Prompt)) {
                 throw new Exception("React() must be followed by Ask()");
             }
-            Prompt choice = (Prompt) c;
-            if (reactions.Length != choice.options.Length) {
+            Prompt prompt = (Prompt) c;
+            if (reactions.Length != prompt.options.Length) {
                 throw new Exception("React() must get the same number of arguments as Ask()");
             }
-            ((Prompt) c).Reactions(reactions);
+            prompt.Reactions(reactions);
             return this;
         }
 
@@ -113,7 +130,6 @@ namespace dialogic {
         public DialogRunner Run() {
             return this.Run(new ConsoleRunner(this));
         }
-
     }
 
     public class Label : ScriptEvent {
@@ -140,9 +156,22 @@ namespace dialogic {
         public int selected, attempts = 0;
         public Action[] reactions;
 
-        public Prompt(Dialog d, string prompt, params string[] options) : base(d, prompt) {
+        public Prompt(Dialog d, string prompt, string[] options, Action[] reactions) : base(d, prompt) {
             this.options = options;
+            this.reactions = reactions;
         }
+
+        public Prompt(Dialog d, string prompt, params KeyValuePair<string, string>[] pairs) : base(d, prompt) {
+            this.options = new string[pairs.Length];
+            this.reactions = new Action[pairs.Length];
+            for (int i = 0; i < pairs.Length; i++) {
+                this.options[i] = pairs[i].Key;
+                string label = pairs[i].Value;
+                reactions[i] = (() => { new Goto(d, label).Fire(); });
+            }
+        }
+
+        public Prompt(Dialog d, string prompt, params string[] options) : this(d, prompt, options, null) { }
 
         public void Reactions(params Action[] reactions) {
             this.reactions = reactions;
@@ -150,6 +179,7 @@ namespace dialogic {
 
         public void React() {
             if (this.reactions != null) {
+                L.g(text + " -> " + options[selected] + " (" + this.reactions[selected] + ")\n");
                 this.reactions[selected].Invoke();
             } else {
                 Console.WriteLine("(" + id + ": " + text + " -> " + options[selected] + ")");
@@ -163,6 +193,7 @@ namespace dialogic {
             }
             return -1;
         }
+
         public bool Accept(string input) {
             int i;
             attempts++;
@@ -283,5 +314,32 @@ namespace dialogic {
             return cursor;
         }
     }
-
+    static class L {
+        // static void og<T>( < T > o) {
+        //     if (s == null || s.Length == 0)
+        //         Console.WriteLine();
+        //     if (s.Length > 1) {
+        //         string ss = "";
+        //         for (int i = 0; i < s.Length; i++) {
+        //             ss += s[i] + ",";
+        //         }
+        //         s[0] = ss.Substring(0, ss.Length - 1);
+        //     }
+        //     Console.WriteLine(s[0]);
+        // }
+        public static void g<T>(T o) {
+            if (o is string) {
+                Console.WriteLine(o);
+            } else if (o is IEnumerable) {
+                var col = (IEnumerable) o;
+                string s = "{ ";
+                foreach (var item in col) {
+                    s += item.ToString() + ", ";
+                }
+                Console.WriteLine(s.Substring(0, s.Length - 2) + " }");
+            } else {
+                Console.WriteLine(o.ToString());
+            }
+        }
+    }
 }

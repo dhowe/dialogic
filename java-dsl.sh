@@ -1,9 +1,8 @@
-
-OUTDIR=java
-rm $OUTDIR/*.* 2> /dev/null
-
 set -e
 
+OUTDIR=java
+
+find . | grep "$OUTDIR/GuppyScript*.\(java\|class\|interp\|tokens\)" |  xargs rm
 
 echo
 ANTLR4='/usr/bin/java -jar /usr/local/lib/antlr-4.7.1-complete.jar'
@@ -17,11 +16,14 @@ echo JAVAC: $JAVAC GuppyScript*.java
 $JAVAC GuppyScript*.java
 popd > /dev/null
 
+cp DialogicListener.java $OUTDIR
+
 echo
 echo CREATED:
 ls $OUTDIR
 
-cp DialogicListener.java $OUTDIR
+
+exit
 
 echo
 pushd $OUTDIR > /dev/null

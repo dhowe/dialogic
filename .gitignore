@@ -1,3 +1,5 @@
+.antlr
+misc
 bin 
 obj
 *.exe
