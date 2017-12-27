@@ -13,7 +13,7 @@ namespace Dialogic {
 
         public DialogRunner runtime;
 
-        public Dialog() : this("start") { }
+        public Dialog() : this("default") { }
 
         public Dialog(string name) {
             this.name = name;

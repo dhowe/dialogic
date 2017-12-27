@@ -1,3 +1,6 @@
+GScript*.cs
+GScript*.tokens
+GScript*.interp
 .antlr
 tmp
 misc
