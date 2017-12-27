@@ -7,6 +7,8 @@ using IToken = Antlr4.Runtime.IToken;
 using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 
 namespace Dialogic {
+    
+    // NEXT: implement visitor methods to create a Dialog object or []
 
     public class ScriptRunner : GScriptBaseVisitor<Dialog> {
 
@@ -40,11 +42,8 @@ namespace Dialogic {
             GScriptParser parser = new GScriptParser(tokens);
             parser.AddErrorListener(new ThrowExceptionErrorListener());
 
-            var context = parser.dialog();
-            var visitor = new ScriptRunner();
-            var dialogs = visitor.Visit(context);
-
-            System.Console.WriteLine(dialogs);
+            var result = new ScriptRunner().Visit(parser.dialog());
+            Console.WriteLine(result);
         }
 
         class ThrowExceptionErrorListener : IAntlrErrorListener<IToken> {
