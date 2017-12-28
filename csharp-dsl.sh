@@ -10,7 +10,6 @@ ANTLR4+=' -Dlanguage=CSharp -visitor -no-listener'
 echo ANTLR: $ANTLR4 -o $OUTDIR GScript.g4 
 $ANTLR4 -o $OUTDIR GScript.g4
 
-cp Visitor.tmpl $OUTDIR/GScriptVisitor2.cs
 exit
 
 echo
