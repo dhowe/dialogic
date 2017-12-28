@@ -5,7 +5,7 @@
     "tasks": [
         {
             "label": "build",
-            "command": "dotnet build",
+            "command": "dotnet run --project gscript.csproj",
             "type": "shell",
             "group": "build",
             "problemMatcher": "$msCompile"

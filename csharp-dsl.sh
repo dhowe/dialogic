@@ -10,6 +10,9 @@ ANTLR4+=' -Dlanguage=CSharp -visitor -no-listener'
 echo ANTLR: $ANTLR4 -o $OUTDIR GScript.g4 
 $ANTLR4 -o $OUTDIR GScript.g4
 
+# remove [System.CLSCompliant(false)] to avoid warnings 
+sed -i '' '/\[System.CLSCompliant(false)\]/d' GScript*.cs
+
 exit
 
 echo
