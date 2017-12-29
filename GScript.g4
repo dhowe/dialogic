@@ -2,19 +2,20 @@ grammar GScript;
 
 ////////////////////// PARSER ////////////////////////////
 
-dialog: expr+ EOF;
+dialog: expr+;
 
-expr: command SPC* args;
+expr: command arg*;
 
-command: (say | gotu | pause | label | ask);
+arg: (QSTRING | INT | WORD);
 
-args: (QSTRING | INT);
+command: (say | gotu | pause | label | ask | opt);
 
-say: 'Say';
+say: 'Say' ;
 gotu: 'Goto';
 pause: 'Pause';
 label: 'Label';
 ask: 'Ask';
+opt: 'Opt';
 
 // func: funcname LPAREN expression RPAREN
 
@@ -36,5 +37,5 @@ NEWLINE: ('\r'? '\n' | '\r')+ -> skip;
 
 WORD: (LOWERCASE | UPPERCASE | PUNCT | DIGIT)+;
 
-SPC : (' ' | '\t');
+SPC : (' ' | '\t') -> skip;
 

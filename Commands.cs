@@ -90,6 +90,8 @@ namespace Dialogic {
         public int selected, attempts = 0;
         public Action[] reactions;
 
+        public Ask(Dialog d, string prompt) : base(d, prompt) { }
+
         public Ask(Dialog d, string prompt, string[] options, Action[] reactions) : base(d, prompt) {
             this.options = options;
             this.reactions = reactions;
@@ -123,7 +125,7 @@ namespace Dialogic {
 
         public override int Fire() {
             base.Fire();
-            for (int i = 0; i < options.Length; i++) {
+            for (int i = 0; options != null && i < options.Length; i++) {
                 Console.WriteLine("  " + (i + 1) + ") " + options[i]);
             }
             return -1;
@@ -162,5 +164,6 @@ namespace Dialogic {
 
         public override string ToString() => "Ask " + text; // TODO
     }
+
 
 }

@@ -1,9 +1,14 @@
 Say 'Welcome to my tank...'
 Pause 500
-
+Label Prompt1
+Ask 'Do you want to play a game?'
+Opt 'Yes' Prompt2
+Opt 'No'
 
 /*Label Prompt1 
-Ask 'Do you want to play a game?'
+Ask 'Do you want to play a game?' 
+Branch 'Yes'
+Branch 'No'
     Branch 'yes' Prompt2 
     Branch 'no' Prompt1  
 
