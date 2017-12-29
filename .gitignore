@@ -1,4 +1,6 @@
 GScript*.cs
+GScript*.java
+GScript*.class
 GScript*.tokens
 GScript*.interp
 .antlr

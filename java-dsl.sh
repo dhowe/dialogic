@@ -5,7 +5,7 @@ OUTDIR=java
 find . | grep "$OUTDIR/GScript*.\(java\|class\|interp\|tokens\)" |  xargs rm
 
 echo
-ANTLR4='/usr/bin/java -jar /usr/local/lib/antlr-4.7.1-complete.jar'
+ANTLR4='/usr/bin/java -jar lib/antlr-4.7.1-complete.jar'
 echo ANTLR: $ANTLR4 -o $OUTDIR GScript.g4 
 $ANTLR4 -o $OUTDIR GScript.g4
 

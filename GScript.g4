@@ -2,13 +2,13 @@ grammar GScript;
 
 ////////////////////// PARSER ////////////////////////////
 
-dialog: line+ EOF;
+dialog: expr + EOF;
 
-line: SPC* command SPC* body;
+expr: SPC* command SPC* args  (NEWLINE+ | EOF) ;
 
 command: (say | gotu | pause | label | ask);
 
-body: (QSTRING | INT)+;
+args: (QSTRING | INT);
 
 say: 'Say';
 gotu: 'Goto';
@@ -24,9 +24,11 @@ ask: 'Ask';
 fragment LOWERCASE: [a-z];
 fragment UPPERCASE: [A-Z];
 fragment DIGIT: [0-9];
-fragment PUNCT: [:;'",`!.?-];
+fragment PUNCT: [:;",`!.?-];
 
 INT: DIGIT+;
+
+COMMENT: '/*' .*? '*/' NEWLINE? -> skip;
 
 QSTRING: '\'' (WORD | SPC | NEWLINE)+ '\''; 
 
