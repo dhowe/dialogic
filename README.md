@@ -18,3 +18,5 @@ Ask 'Ok, do you want to go first?',
 
 Label Game 
 Say 'Ok, let's play!' 
+Pause 500 
+
