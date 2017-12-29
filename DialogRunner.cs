@@ -8,49 +8,30 @@ namespace Dialogic {
 
     public abstract class DialogRunner {
 
-        static void Main(string[] args) {
-
-            (new Dialog())
-                .Say("Welcome to my tank...")
-                .Pause(500)
-                .Label("Prompt1")
-                .Ask("Do you want to play?",
-                    Branch("yes", "Prompt2"),
-                    Branch("no", "Prompt1"))
-                .Label("Prompt2")
-                .Ask("Ok, do you want to go first?",
-                    Branch("yes", "Game"),
-                    Branch("no", "Prompt2"))
-                .Label("Game")
-                .Say("Ok, let's play!...")
-                .Run();
-
-            /* TODO
-            .Ask("Do you want to play?",
-                if("yes", "Prompt2"),
-                if("no", "Prompt1"))
-                OR
-            .Ask("Do you want to play?", if("yes", "Prompt2"), if("no", "Prompt1")) */
-        }
-
         protected Dialog dialog;
+
         public int cursor;
+
         public DialogRunner(Dialog d) {
             this.dialog = d;
         }
+
         public abstract void OnChoice(string input);
 
         public int GotoLabel(string label) {
+            Console.WriteLine("GotoLabel: " + label);
             for (int i = 0; i < dialog.events.Count; i++) {
                 Command evt = dialog.events[i];
                 if (evt is Label && evt.text == label) {
+                    Console.WriteLine("->" + label);
                     return this.Cursor(i);
                 }
             }
-            return -1;
+            throw new Exception("Label '" + label + "' not found!");
         }
 
         public abstract DialogRunner Run();
+
         public int Step(int steps) {
             cursor += steps;
             return cursor;
@@ -66,6 +47,8 @@ namespace Dialogic {
         }
     }
 
+    // //////////////////////////////////////////////////////////////////////
+
     public class ConsoleRunner : DialogRunner {
 
         public ConsoleRunner(Dialog d) : base(d) { }
@@ -75,13 +58,14 @@ namespace Dialogic {
         }
 
         public override void OnChoice(string input) {
+            Console.WriteLine("OnChoice: "+input);
             Ask last = CurrentChoice();
             if (!last.Accept(input)) {
                 this.Step(-1);
             }
         }
 
-        private Ask CurrentChoice() {
+        public Ask CurrentChoice() {
             for (var i = cursor; i >= 0; i--) {
                 if (dialog.events[i] is Ask) {
                     return (Ask) dialog.events[i];
@@ -122,7 +106,7 @@ namespace Dialogic {
                 var col = (IEnumerable) o;
                 string s = "{ ";
                 foreach (var item in col) {
-                    s += item.ToString()+ ", ";
+                    s += item.ToString() + ", ";
                 }
                 Console.WriteLine(s.Substring(0, s.Length - 2) + " }");
             } else {

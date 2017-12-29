@@ -14,7 +14,10 @@ using System.Text;
 
 namespace Dialogic {
 
-    // NEXT: add branching Ask/Prompt function
+    /* NEXT: 
+        create subclass of Action that includes name prop
+        label uniqueness
+    */
 
     public class Visitor : GScriptBaseVisitor<Dialog> {
 
@@ -91,6 +94,7 @@ namespace Dialogic {
         public override Dialog VisitLabel([NotNull] GScriptParser.LabelContext context) {
 
             string[] args = ParseArgs(context, 1);
+            // TODO: check that label is unique
             dialog.AddEvent(new Label(dialog, args[0]));
             return VisitChildren(context);
         }
@@ -101,13 +105,38 @@ namespace Dialogic {
             return VisitChildren(context);
         }
 
+        private Command LastOfType(List<Command> commands, Type typeToFind) {
+            for (var i = commands.Count - 1; i >= 0; i--) {
+                Command c = commands[i];
+                if (c.GetType() == typeToFind) {
+                    return dialog.events[i];
+                }
+            }
+            return null;
+        }
+
         public override Dialog VisitOpt([NotNull] GScriptParser.OptContext context) {
+
+            Command last = LastOfType(dialog.events, typeof(Ask));
+            if (!(last is Ask)) throw new Exception("Opt must be preceded by Ask");
             string[] args = ParseArgs(context);
-            dialog.AddEvent(new Opt(dialog, args[0]));
+            Ask ask = (Ask) last;
+            switch (args.Length) {
+                case 2:
+                    ask.AddOption(args[0], args[1]);
+                    break;
+                case 1:
+                    ask.AddOption(args[0]);
+                    break;
+                default:
+                    throw new Exception("Invalid # of args");
+            }
+
+            //dialog.AddEvent(new Opt(dialog, args[0]));
             return VisitChildren(context);
         }
 
-        private string[] ParseArgs(ParserRuleContext context, int numArgs = 0) {
+        private string[] ParseArgs(RuleContext context, int numArgs = 0) {
 
             List<ArgContext> acs = FindChildren(context.Parent.Parent, typeof(ArgContext));
             if (numArgs > 0 && acs.Count != numArgs) {

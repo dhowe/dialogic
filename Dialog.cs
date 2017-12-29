@@ -46,51 +46,6 @@ namespace Dialogic {
             return this;
         }
 
-        public Dialog Ask(string prompt, params KeyValuePair<string, string>[] choices) {
-
-            foreach (var item in choices) {
-
-            }
-            events.Add(new Ask(this, prompt, choices));
-            return this;
-        }
-
-        public Dialog Ask(string prompt, params string[] choices) {
-            events.Add(new Ask(this, prompt, choices));
-            return this;
-        }
-
-        /*public Dialog React(params string[] labels) {
-            object c = events[events.Count - 1];
-            if (!(c is Prompt)) {
-                throw new Exception("React() must be followed by Ask()");
-            }
-            Prompt prompt = (Prompt) c;
-            if (labels.Length != prompt.options.Length) {
-                throw new Exception("React() must get the same number of arguments as Ask()");
-            }
-            Action[] reactions = new Action[labels.Length];
-            for (int i = 0; i < reactions.Length; i++) {
-                string label = labels[i];
-                reactions[i] = (() => { new Gotu(this, label).Fire(); });
-            }
-            prompt.Reactions(reactions);
-            return this;
-        }
-
-        public Dialog React(params Action[] reactions) {
-            object c = events[events.Count - 1];
-            if (!(c is Prompt)) {
-                throw new Exception("React() must be followed by Ask()");
-            }
-            Prompt prompt = (Prompt) c;
-            if (reactions.Length != prompt.options.Length) {
-                throw new Exception("React() must get the same number of arguments as Ask()");
-            }
-            prompt.Reactions(reactions);
-            return this;
-        }*/
-
         public DialogRunner Run(Type t) {
 
             if (!typeof(DialogRunner).IsAssignableFrom(t)) {

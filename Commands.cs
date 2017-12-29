@@ -20,15 +20,15 @@ namespace Dialogic {
         protected Dialog dialog;
 
         public virtual int Fire() {
-            Console.WriteLine(this.actor + ": " + cleanString(this.text));
+            Out(this.actor + ": " + cleanString(this.text));
             return 0;
         } // return -1=pause, 0=continue, #=pauseFor#
 
+        public virtual void Out(object s) => Console.WriteLine(s);
+
         public virtual string cleanString(string text) {
-            var str = text;
-            str = new Regex("^ *'").Replace(str, "");
-            str = new Regex("' *$").Replace(str, "");
-            return str;
+            var str = new Regex("^ *'").Replace(text, "");
+            return new Regex("' *$").Replace(str, "");
         }
 
         public Command(Dialog d) : this(d, null) { }
@@ -86,84 +86,83 @@ namespace Dialogic {
     }
 
     public class Ask : Command {
-        public string[] options;
+
+        public static readonly Action NO_OP = (() => { });
+
         public int selected, attempts = 0;
-        public Action[] reactions;
 
-        public Ask(Dialog d, string prompt) : base(d, prompt) { }
+        public List<KeyValuePair<string, Action>> options;
 
-        public Ask(Dialog d, string prompt, string[] options, Action[] reactions) : base(d, prompt) {
-            this.options = options;
-            this.reactions = reactions;
+        public Ask(Dialog d, string prompt) : base(d, prompt) {
+
+            this.options = new List<KeyValuePair<string, Action>>();
         }
 
-        public Ask(Dialog d, string prompt, params KeyValuePair<string, string>[] pairs) : base(d, prompt) {
-            this.options = new string[pairs.Length];
-            this.reactions = new Action[pairs.Length];
-            for (int i = 0; i < pairs.Length; i++) {
-                this.options[i] = pairs[i].Key;
-                string label = pairs[i].Value;
-                reactions[i] = (() => { new Gotu(d, label).Fire(); });
-            }
+        public void AddOption(string s) {
+            AddOption(s, (string) null);
         }
 
-        public Ask(Dialog d, string prompt, params string[] options) : this(d, prompt, options, null) { }
-
-        public void Reactions(params Action[] reactions) {
-
-            this.reactions = reactions;
+        public void AddOption(string s, string label) {
+            var action = label != null ? (() => { new Gotu(dialog, label).Fire(); }) : NO_OP;
+            AddOption(s, action);
         }
 
-        public void React() {
-            if (this.reactions != null) {
-                L.g(text + " -> " + options[selected] + " (" + this.reactions[selected] + ")\n");
-                this.reactions[selected].Invoke();
-            } else {
-                Console.WriteLine("(" + id + ": " + text + " -> " + options[selected] + ")");
-            }
+        public void AddOption(string s, Action todo) {
+            options.Add(new KeyValuePair<string, Action>(s, todo));
         }
 
         public override int Fire() {
             base.Fire();
-            for (int i = 0; options != null && i < options.Length; i++) {
-                Console.WriteLine("  " + (i + 1) + ") " + options[i]);
+            for (int i = 0; options != null && i < options.Count; i++) {
+                Out("  " + (i + 1) + ") " + options[i].Key);
             }
             return -1;
         }
 
         public bool Accept(string input) {
+            Console.WriteLine("Accept: "+input);
+            
+            if (this.options.Count > 0) {
 
-            if (this.reactions == null || this.reactions.Length < 1) {
-                return defaultReaction(input);
-            }
-
-            int i;
-            attempts++;
-            if (int.TryParse(input, out i)) {
-                if (i > 0 && i <= options.Length) {
-                    selected = --i;
-                    this.React();
-                    return true;
+                int i;
+                attempts++;
+                if (int.TryParse(input, out i)) {
+                    if (i > 0 && i <= options.Count) {
+                        selected = --i;
+                        this.React();
+                        return true;
+                    }
                 }
+                Out("\n" + actor + ": Please select a # from 1-" + options.Count + "\n");
+                return false;
             }
-            if (dialog.runtime is ConsoleRunner) { // tmp
-                Console.WriteLine("\n" + actor + ": Please select a # from 1-" + options.Length + "\n");
-            }
-            return false;
+
+            return DefaultReaction(input);
         }
 
-        private bool defaultReaction(string input) {
+        public void React() {
+            if (this.options.Count > 0) {
+                Out(text + " -> " + options[selected].Key + " (" + options[selected].Value + ")\n");
+                this.options[selected].Value.Invoke();
+            } else {
+                Console.WriteLine("(" + id + ": " + text + " -> " + options[selected].Key + ")");
+            }
+        }
+
+        private bool DefaultReaction(string input) {
             if (input == "y" || input == "Y") {
                 return true;
             }
-            if (dialog.runtime is ConsoleRunner) { // tmp
-                Console.WriteLine("\n" + actor + ": Sorry, I don't understand '" + input + "'\n");
-            }
+            Out("\n" + actor + ": Sorry, I don't understand '" + input + "'\n");
             return false;
         }
 
-        public override string ToString() => "Ask " + text; // TODO
+        public override string ToString() {
+             var s = "Ask " + text + " -> ["; 
+             foreach (var o in options) {
+                 s += o.Key + ", ";
+             }
+             return s.Substring(0, s.Length-2) + "]";
+        }
     }
-
-
 }
