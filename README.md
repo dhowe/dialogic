@@ -3,7 +3,7 @@ a scripting language for generative dialogs
 
 
 ````
-Say 'Welcome to my tank...' 
+Say 'Welcome to my world...' 
 Pause 500 
 
 Label Prompt1 
