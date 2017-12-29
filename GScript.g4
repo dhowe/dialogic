@@ -1,14 +1,14 @@
 grammar GScript;
 
-////////////////////// LEXER ////////////////////////////
+////////////////////// PARSER ////////////////////////////
 
 dialog: line+ EOF;
 
-line: command SPACE body NEWLINE;
+line: SPC* command SPC* body NEWLINE;
 
 command: (say | gotu | pause | label | ask);
 
-body: (WORD | SPACE )+;
+body: (WORD | SPC)+;
 
 say: 'Say';
 gotu: 'Goto';
@@ -18,17 +18,17 @@ ask: 'Ask';
 
 // func: funcname LPAREN expression RPAREN
 
-//////////////////////// PARSER /////////////////////////
+//////////////////////// LEXER /////////////////////////
 
 
 fragment LOWERCASE: [a-z];
 fragment UPPERCASE: [A-Z];
 fragment DIGIT: [0-9];
-fragment PUNCT: [:'",`!-];
+fragment PUNCT: [:;'",`!.?-];
 
 NEWLINE: ('\r'? '\n' | '\r')+;
 
 WORD: (LOWERCASE | UPPERCASE | PUNCT | DIGIT)+;
 
-SPACE : (' ' | '\t');
+SPC : (' ' | '\t');
 

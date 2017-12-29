@@ -9,15 +9,28 @@ using Antlr4.Runtime.Tree;
 using IToken = Antlr4.Runtime.IToken;
 using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 using BodyContext = GScriptParser.BodyContext;
+using System.Text;
 
 namespace Dialogic {
 
-    // NEXT: implement visitor methods to create a Dialog object or []
+    // NEXT: add branching Ask/Prompt function
 
     public class Visitor : GScriptBaseVisitor<Dialog> {
 
-        public Dialog dialog = new Dialog();
+        public static void Main(string[] args) {
 
+            //string input = "Say I would like to emphasize this\nPause 1000\n";
+            string input = File.ReadAllText("test-script.gs", Encoding.UTF8);
+            ITokenSource lexer = new GScriptLexer(new AntlrInputStream(input));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            GScriptParser parser = new GScriptParser(tokens);
+            parser.AddErrorListener(new ThrowExceptionErrorListener());
+            Dialog result = new Visitor().Visit(parser.dialog());
+            Console.WriteLine(result);
+            result.Run();
+        }
+
+        public Dialog dialog = new Dialog();
 
         public override Dialog Visit(IParseTree tree) {
             //Console.WriteLine("Visit ->");
@@ -64,21 +77,19 @@ namespace Dialogic {
         //     return VisitChildren(context);
         // }
 
-        Dictionary<Type, Type> typemap = new Dictionary<Type, Type>() { { typeof(GScriptParser.SayContext), typeof(Dialogic.Say) }, { typeof(GScriptParser.GotuContext), typeof(Dialogic.Gotu) }, { typeof(GScriptParser.PauseContext), typeof(Dialogic.Pause) }, { typeof(GScriptParser.LabelContext), typeof(Dialogic.Label) }, { typeof(GScriptParser.AskContext), typeof(Dialogic.Prompt) },
+        Dictionary<Type, Type> typemap = new Dictionary<Type, Type>() { { typeof(GScriptParser.SayContext), typeof(Dialogic.Say) }, { typeof(GScriptParser.GotuContext), typeof(Dialogic.Gotu) }, { typeof(GScriptParser.PauseContext), typeof(Dialogic.Pause) }, { typeof(GScriptParser.LabelContext), typeof(Dialogic.Label) }, { typeof(GScriptParser.AskContext), typeof(Dialogic.Ask) },
         };
 
         public override Dialog VisitCommand([NotNull] GScriptParser.CommandContext context) {
 
-            if (false) {
-                Console.WriteLine("VisitCommand");
-                var parent = context.Parent;
-                var type = typemap[context.GetChild(0).GetType()];
-                var body = findChildOfType(parent, typeof(GScriptParser.CommandContext)).GetText();
-                Command c = (Command) Activator.CreateInstance(type, dialog);
-                dialog.AddEvent(c); // TODO: need to make the other Command(Dialog) constructors
-                Console.WriteLine("  " + type + ": " + body);
-            }
-            //dialog.AddEvent(new Say(dialog, body));
+            /*Console.WriteLine("VisitCommand");
+            var parent = context.Parent;
+            var type = typemap[context.GetChild(0).GetType()];
+            var body = findChildOfType(parent, typeof(GScriptParser.CommandContext)).GetText();
+            Command c = (Command) Activator.CreateInstance(type, dialog);
+            dialog.AddEvent(c); // TODO: need to make the other Command(Dialog) constructors
+            Console.WriteLine("  " + type + ": " + body);*/
+
             return VisitChildren(context);
         }
 
@@ -90,6 +101,7 @@ namespace Dialogic {
             dialog.AddEvent(new Say(dialog, body));
             return VisitChildren(context);
         }
+
         public override Dialog VisitPause([NotNull] GScriptParser.PauseContext context) {
 
             //Console.WriteLine("VisitSay");
@@ -99,23 +111,20 @@ namespace Dialogic {
             return VisitChildren(context);
         }
 
+        public override Dialog VisitAsk([NotNull] GScriptParser.AskContext context) {
+
+            //Console.WriteLine("VisitAsk");
+            var parent = context.Parent.Parent;
+            var body = findChildOfType(parent, typeof(BodyContext)).GetText();
+            dialog.AddEvent(new Ask(dialog, body, new string[]{}));
+            return VisitChildren(context);
+        }
+
         class ThrowExceptionErrorListener : IAntlrErrorListener<IToken> {
             void IAntlrErrorListener<IToken>.SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol,
                 int line, int charPositionInLine, string msg, RecognitionException e) {
                 throw new System.Exception("SyntaxError: " + line + " " + msg);
             }
-        }
-
-        public static void Main(string[] args) {
-
-            string input = "Say I would like to emphasize this\nPause 1000\n";
-            ITokenSource lexer = new GScriptLexer(new AntlrInputStream(input));
-            ITokenStream tokens = new CommonTokenStream(lexer);
-            GScriptParser parser = new GScriptParser(tokens);
-            parser.AddErrorListener(new ThrowExceptionErrorListener());
-
-            var result = new Visitor().Visit(parser.dialog());
-            Console.WriteLine(result);
         }
     }
 }

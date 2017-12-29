@@ -51,12 +51,12 @@ namespace Dialogic {
             foreach (var item in choices) {
 
             }
-            events.Add(new Prompt(this, prompt, choices));
+            events.Add(new Ask(this, prompt, choices));
             return this;
         }
 
         public Dialog Ask(string prompt, params string[] choices) {
-            events.Add(new Prompt(this, prompt, choices));
+            events.Add(new Ask(this, prompt, choices));
             return this;
         }
 

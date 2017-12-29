@@ -75,16 +75,16 @@ namespace Dialogic {
         }
 
         public override void OnChoice(string input) {
-            Prompt last = CurrentChoice();
+            Ask last = CurrentChoice();
             if (!last.Accept(input)) {
                 this.Step(-1);
             }
         }
 
-        private Prompt CurrentChoice() {
+        private Ask CurrentChoice() {
             for (var i = cursor; i >= 0; i--) {
-                if (dialog.events[i] is Prompt) {
-                    return (Prompt) dialog.events[i];
+                if (dialog.events[i] is Ask) {
+                    return (Ask) dialog.events[i];
                 }
             }
             return null;
@@ -122,7 +122,7 @@ namespace Dialogic {
                 var col = (IEnumerable) o;
                 string s = "{ ";
                 foreach (var item in col) {
-                    s += item.ToString() + ", ";
+                    s += item.ToString()+ ", ";
                 }
                 Console.WriteLine(s.Substring(0, s.Length - 2) + " }");
             } else {
