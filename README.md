@@ -17,4 +17,4 @@ Ask 'Ok, do you want to go first?',
     Branch 'no' Prompt2  
 
 Label Game 
-Say 'Ok, let's play!...' 
+Say 'Ok, let's play!' 
