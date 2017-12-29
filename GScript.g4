@@ -2,9 +2,9 @@ grammar GScript;
 
 ////////////////////// PARSER ////////////////////////////
 
-dialog: expr + EOF;
+dialog: expr+ EOF;
 
-expr: SPC* command SPC* args  (NEWLINE+ | EOF) ;
+expr: command SPC* args;
 
 command: (say | gotu | pause | label | ask);
 
@@ -32,7 +32,7 @@ COMMENT: '/*' .*? '*/' NEWLINE? -> skip;
 
 QSTRING: '\'' (WORD | SPC | NEWLINE)+ '\''; 
 
-NEWLINE: ('\r'? '\n' | '\r')+;
+NEWLINE: ('\r'? '\n' | '\r')+ -> skip;
 
 WORD: (LOWERCASE | UPPERCASE | PUNCT | DIGIT)+;
 
