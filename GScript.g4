@@ -4,11 +4,11 @@ grammar GScript;
 
 dialog: line+ EOF;
 
-line: SPC* command SPC* body NEWLINE;
+line: SPC* command SPC* body;
 
 command: (say | gotu | pause | label | ask);
 
-body: (WORD | SPC)+;
+body: (QSTRING | INT)+;
 
 say: 'Say';
 gotu: 'Goto';
@@ -25,6 +25,10 @@ fragment LOWERCASE: [a-z];
 fragment UPPERCASE: [A-Z];
 fragment DIGIT: [0-9];
 fragment PUNCT: [:;'",`!.?-];
+
+INT: DIGIT+;
+
+QSTRING: '\'' (WORD | SPC | NEWLINE)+ '\''; 
 
 NEWLINE: ('\r'? '\n' | '\r')+;
 
