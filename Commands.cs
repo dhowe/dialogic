@@ -1,11 +1,27 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Dialogic {
+
+    public struct Func {
+        public Action action;
+
+        public string name;
+
+        public Func(string name, Action action) {
+            this.name = name;
+            this.action = action;
+        }
+
+        public void Invoke() => action.Invoke();
+
+        public override string ToString() => "Action." + name;
+    }
 
     public abstract class Command {
 
@@ -13,9 +29,7 @@ namespace Dialogic {
 
         public int id = ++IDGEN;
 
-        public string actor = "Guppy";
-
-        public string text = "";
+        public string actor = "Guppy", text = "";
 
         protected Dialog dialog;
 
@@ -87,15 +101,15 @@ namespace Dialogic {
 
     public class Ask : Command {
 
-        public static readonly Action NO_OP = (() => { });
+        public static readonly Func NO_OP = new Func("NO_OP", (() => { }));
 
         public int selected, attempts = 0;
 
-        public List<KeyValuePair<string, Action>> options;
+        public List<KeyValuePair<string, Func>> options;
 
         public Ask(Dialog d, string prompt) : base(d, prompt) {
 
-            this.options = new List<KeyValuePair<string, Action>>();
+            this.options = new List<KeyValuePair<string, Func>>();
         }
 
         public void AddOption(string s) {
@@ -103,12 +117,12 @@ namespace Dialogic {
         }
 
         public void AddOption(string s, string label) {
-            var action = label != null ? (() => { new Gotu(dialog, label).Fire(); }) : NO_OP;
+            var action = label != null ? new Func(label, (() => { new Gotu(dialog, label).Fire(); })) : NO_OP;
             AddOption(s, action);
         }
 
-        public void AddOption(string s, Action todo) {
-            options.Add(new KeyValuePair<string, Action>(s, todo));
+        public void AddOption(string s, Func todo) {
+            options.Add(new KeyValuePair<string, Func>(s, todo));
         }
 
         public override int Fire() {
@@ -120,8 +134,8 @@ namespace Dialogic {
         }
 
         public bool Accept(string input) {
-            Console.WriteLine("Accept: "+input);
-            
+            //Console.WriteLine("Accept: " + input);
+
             if (this.options.Count > 0) {
 
                 int i;
@@ -158,11 +172,11 @@ namespace Dialogic {
         }
 
         public override string ToString() {
-             var s = "Ask " + text + " -> ["; 
-             foreach (var o in options) {
-                 s += o.Key + ", ";
-             }
-             return s.Substring(0, s.Length-2) + "]";
+            var s = "Ask " + text + " -> [";
+            foreach (var o in options) {
+                s += o.Key + ", ";
+            }
+            return s.Substring(0, s.Length - 2) + "]";
         }
     }
 }

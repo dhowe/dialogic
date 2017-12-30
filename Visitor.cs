@@ -1,5 +1,3 @@
-#pragma warning disable 3021
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,8 +13,10 @@ using System.Text;
 namespace Dialogic {
 
     /* NEXT: 
-        create subclass of Action that includes name prop
-        label uniqueness
+        
+        Decide on format for labels [LABEL_NAME]  ?
+        Handle single-quotes in strings ?
+        Verify label uniqueness on parse
     */
 
     public class Visitor : GScriptBaseVisitor<Dialog> {

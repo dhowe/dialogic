@@ -19,11 +19,11 @@ namespace Dialogic {
         public abstract void OnChoice(string input);
 
         public int GotoLabel(string label) {
-            Console.WriteLine("GotoLabel: " + label);
+            //Console.WriteLine("GotoLabel: " + label);
             for (int i = 0; i < dialog.events.Count; i++) {
                 Command evt = dialog.events[i];
                 if (evt is Label && evt.text == label) {
-                    Console.WriteLine("->" + label);
+                    //Console.WriteLine(" -> " + label);
                     return this.Cursor(i);
                 }
             }
@@ -41,10 +41,6 @@ namespace Dialogic {
             cursor = target;
             return cursor;
         }
-
-        public static KeyValuePair<string, string> Branch(string v1, string v2) {
-            return new KeyValuePair<string, string>(v1, v2);
-        }
     }
 
     // //////////////////////////////////////////////////////////////////////
@@ -58,7 +54,7 @@ namespace Dialogic {
         }
 
         public override void OnChoice(string input) {
-            Console.WriteLine("OnChoice: "+input);
+            //Console.WriteLine("OnChoice: "+input);
             Ask last = CurrentChoice();
             if (!last.Accept(input)) {
                 this.Step(-1);

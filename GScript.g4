@@ -37,5 +37,7 @@ NEWLINE: ('\r'? '\n' | '\r')+ -> skip;
 
 WORD: (LOWERCASE | UPPERCASE | PUNCT | DIGIT)+;
 
+// LABEL: '[' (LOWERCASE | UPPERCASE | DIGIT | '_')+ ']';
+
 SPC : (' ' | '\t') -> skip;
 
