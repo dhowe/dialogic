@@ -18,16 +18,16 @@ namespace Dialogic {
 
         public abstract void OnChoice(string input);
 
-        public int GotoLabel(string label) {
-            //Console.WriteLine("GotoLabel: " + label);
+        public int GotoChat(string chat) {
+            //Console.WriteLine("GotoChat: " + chat);
             for (int i = 0; i < dialog.events.Count; i++) {
                 Command evt = dialog.events[i];
-                if (evt is Label && evt.text == label) {
-                    //Console.WriteLine(" -> " + label);
+                if (evt is Chat && evt.text == chat) {
+                    //Console.WriteLine(" -> " + chat);
                     return this.Cursor(i);
                 }
             }
-            throw new Exception("Label '" + label + "' not found!");
+            throw new Exception("Chat '" + chat + "' not found!");
         }
 
         public abstract DialogRunner Run();

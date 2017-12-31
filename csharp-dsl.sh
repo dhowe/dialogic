@@ -7,7 +7,7 @@ find . | grep "$OUTDIR/GScript*.\(cs\|interp\|tokens\)" |  xargs rm
 echo
 ANTLR4='/usr/bin/java -jar lib/antlr-4.7.1-complete.jar'
 ANTLR4+=' -Dlanguage=CSharp -visitor -no-listener'
-echo ANTLR: $ANTLR4 -o $OUTDIR GScript.g4 
+#echo ANTLR: $ANTLR4 -o $OUTDIR GScript.g4 
 $ANTLR4 -o $OUTDIR GScript.g4
 
 # remove [System.CLSCompliant(false)] to avoid warnings 

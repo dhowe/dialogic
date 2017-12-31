@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <StartupObject>Dialogic.Visitor</StartupObject>
+    <StartupObject>Dialogic.ScriptReader</StartupObject>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>

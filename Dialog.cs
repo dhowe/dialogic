@@ -7,43 +7,25 @@ using System.Threading;
 namespace Dialogic {
     public class Dialog {
 
-        public List<Command> events;
+        public List<Command> events { get; private set; }
 
-        public DialogRunner runtime;
+        public DialogRunner runtime { get; private set; }
 
-        public string name; // unused (multiple? is this not just a label?)
+        public string name { get; private set; } // just start chat?
+
+        public List<IDialogListener> listeners { get; private set; }
+
+        public void Addlistener(IDialogListener listener) {
+            listeners.Add(listener);
+        }
 
         public Dialog() : this("Default") { }
 
         public Dialog(string name) {
             this.name = name;
-            events = new List<Command>();
-            events.Add(new Label(this, "START"));
-        }
-
-        public Dialog Label(string text) {
-            events.Add(new Label(this, text));
-            return this;
-        }
-
-        public Dialog Say(string text) {
-            events.Add(new Say(this, text));
-            return this;
-        }
-
-        // public Dialog Wait() {
-        //     events.Add(new Pause(this));
-        //     return this;
-        // }
-
-        public Dialog Gotu(string label) {
-            events.Add(new Gotu(this, label));
-            return this;
-        }
-
-        public Dialog Pause(int ms) {
-            events.Add(new Pause(this, ms));
-            return this;
+            this.events = new List<Command>();
+            this.events.Add(new Chat(this, "START"));
+            this.listeners = new List<IDialogListener>();
         }
 
         public DialogRunner Run(Type t) {
@@ -72,7 +54,7 @@ namespace Dialogic {
         public override string ToString() {
             string indent = "  ", s = "\n";
             foreach (var evt in events) {
-                if (!(evt is Label)) s += indent;
+                if (!(evt is Chat)) s += indent;
                 s += evt.ToString() + "\n";
             }
             return s + "\n";

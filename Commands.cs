@@ -56,15 +56,26 @@ namespace Dialogic {
         public override string ToString() => GetType().ToString(); //.Replace("Dialogic.", "") + text;
     }
 
-    public class Label : Command {
-        public Label(Dialog d, string text) : base(d, text) {
+    public class Chat : Command {
+        public Chat(Dialog d, string text) : base(d, text) {
             if (string.IsNullOrWhiteSpace(text)) {
                 throw new ArgumentException("Invalid argument", nameof(text));
             }
         }
 
         public override int Fire() => 0;
-        public override string ToString() => "Label " + text;
+        public override string ToString() => "Chat " + text;
+    }
+
+    public class Do : Command {
+        public Do(Dialog d, string text) : base(d, text) {
+            if (string.IsNullOrWhiteSpace(text)) {
+                throw new ArgumentException("Invalid argument", nameof(text));
+            }
+        }
+
+        public override int Fire() => 0;
+        public override string ToString() => "Do " + text;
     }
 
     public class Say : Command {
@@ -75,25 +86,25 @@ namespace Dialogic {
         public override string ToString() => "Say " + text;
     }
 
-    public class Pause : Command {
+    public class Wait : Command {
         private int millis = -1; // wait forever
 
-        public Pause(Dialog d) : base(d, "") { }
+        public Wait(Dialog d) : base(d, "") { }
 
-        public Pause(Dialog d, int ms) : base(d, "") {
+        public Wait(Dialog d, int ms) : base(d, "") {
             millis = ms;
         }
         public override int Fire() => millis;
 
         public override string ToString() {
-            return millis > -1 ? "Pause " + millis : "Pause"; // || "Wait"
+            return millis > -1 ? "Wait " + millis : "Pause"; // || "Wait"
         }
     }
-    public class Gotu : Command { // TODO: validate labels pre-Run()
+    public class Gotu : Command {
         public Gotu(Dialog d, string text) : base(d, text) { }
 
         public override int Fire() {
-            dialog.runtime.GotoLabel(text);
+            dialog.runtime.GotoChat(text);
             return 0;
         }
         public override string ToString() => "Goto " + text;
@@ -116,8 +127,8 @@ namespace Dialogic {
             AddOption(s, (string) null);
         }
 
-        public void AddOption(string s, string label) {
-            var action = label != null ? new Func(label, (() => { new Gotu(dialog, label).Fire(); })) : NO_OP;
+        public void AddOption(string s, string chat) {
+            var action = chat != null ? new Func(chat, (() => { new Gotu(dialog, chat).Fire(); })) : NO_OP;
             AddOption(s, action);
         }
 

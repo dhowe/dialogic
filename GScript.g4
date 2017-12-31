@@ -1,43 +1,59 @@
 grammar GScript;
 
-////////////////////// PARSER ////////////////////////////
+//////////////////////// PARSER /////////////////////////
 
-dialog: expr+;
+dialog: line+;
 
-expr: command arg*;
+line: expr (NEWLINE | EOF);
 
-arg: (QSTRING | INT | WORD);
+expr: '[' command '] ' args; 
 
-command: (say | gotu | pause | label | ask | opt);
+args: TEXT; 
 
-say: 'Say' ;
-gotu: 'Goto';
-pause: 'Pause';
-label: 'Label';
-ask: 'Ask';
-opt: 'Opt';
+commandx: (
+		'Say'
+		| 'Goto'
+		| 'Wait'
+		| 'Chat'
+		| 'Ask'
+		| 'Opt'
+		| 'Do'
+		 
+	);
+    
+command: (
+		sayCmd
+		| gotoCmd
+		| waitCmd
+		| chatCmd
+		| askCmd
+		| optCmd
+		| doCmd
+	);
 
+sayCmd: 'Say';
+gotoCmd: 'Goto';
+waitCmd: 'Wait';
+chatCmd: 'Chat';
+askCmd: 'Ask';
+optCmd: 'Opt';
+doCmd: 'Do';
 // func: funcname LPAREN expression RPAREN
 
 //////////////////////// LEXER /////////////////////////
 
-
 fragment LOWERCASE: [a-z];
 fragment UPPERCASE: [A-Z];
 fragment DIGIT: [0-9];
-fragment PUNCT: [:;",`!.?-];
+fragment PUNCT: [:;",`'!.?-];
 
-INT: DIGIT+;
+SPACE: (' ' | '\t');
+COMMENT: '/*' .*? '*/' -> skip;
+NEWLINE: ('\r'? '\n' | '\r')+;
+TEXT: (LOWERCASE | UPPERCASE | PUNCT | DIGIT | SPACE)+;
+//WORD: (LOWERCASE | UPPERCASE | PUNCT | DIGIT)+;
 
-COMMENT: '/*' .*? '*/' NEWLINE? -> skip;
-
-QSTRING: '\'' (WORD | SPC | NEWLINE)+ '\''; 
-
-NEWLINE: ('\r'? '\n' | '\r')+ -> skip;
-
-WORD: (LOWERCASE | UPPERCASE | PUNCT | DIGIT)+;
 
 // LABEL: '[' (LOWERCASE | UPPERCASE | DIGIT | '_')+ ']';
-
-SPC : (' ' | '\t') -> skip;
+// IDENT: (LOWERCASE | UPPERCASE | '_' | DIGIT);
 

@@ -3,20 +3,22 @@ a scripting language for generative dialogs
 
 
 ````
-Say 'Welcome to my world...' 
-Pause 500 
+Say 'Welcome to my World...'
+Wait 500
 
-Label Prompt1 
-Ask 'Do you want to play a game?'
-    Branch 'yes' Prompt2 
-    Branch 'no' Prompt1  
+Chat Prompt1
+    Ask 'Do you want to play a game?'
+    Opt 'Yes' Prompt2
+    Opt 'No'  Prompt1
 
-Label Prompt2 
-Ask 'Ok, do you want to go first?',
-    Branch 'yes' Game
-    Branch 'no' Prompt2  
+Chat Prompt2 
+    Do Twirl
+    Ask 'Ok, who goes first?'
+    Opt 'Me' Game
+    Opt 'You' Prompt2
 
-Label Game 
-Say 'Ok, let's play!' 
-Pause 500 
-
+Chat Game 
+    Do Flip
+    Wait 500
+    Say 'Ok, lets play!...' 
+    Wait 500
