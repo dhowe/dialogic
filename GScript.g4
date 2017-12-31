@@ -22,22 +22,22 @@ commandx: (
 	);
     
 command: (
-		sayCmd
-		| gotoCmd
-		| waitCmd
-		| chatCmd
-		| askCmd
-		| optCmd
-		| doCmd
+		say
+		| gotu
+		| wayt
+		| chat
+		| ask
+		| opt
+		| du
 	);
 
-sayCmd: 'Say';
-gotoCmd: 'Goto';
-waitCmd: 'Wait';
-chatCmd: 'Chat';
-askCmd: 'Ask';
-optCmd: 'Opt';
-doCmd: 'Do';
+say: 'Say';
+gotu: 'Goto';
+wayt : 'Wait';
+chat: 'Chat';
+ask: 'Ask';
+opt: 'Opt';
+du: 'Do';
 // func: funcname LPAREN expression RPAREN
 
 //////////////////////// LEXER /////////////////////////
