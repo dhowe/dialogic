@@ -1,6 +1,8 @@
 [Say] Welcome to my World...
-[Wait] 500
+[Wait] 2000
 
+
+/*
 [Chat] Prompt1
 [Ask] Do you want to play a game?
 [Opt] Yes Prompt2
@@ -19,7 +21,7 @@
 [Say] Ok, lets play!... 
 [Wait] 500
 
-/*
+
 [COMMENT] Game 
 [Do] Flip
 */

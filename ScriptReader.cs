@@ -9,7 +9,7 @@ using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 using ArgsContext = GScriptParser.ArgsContext;
 using System.Collections;
 using System.Text;
-using Dialogic;
+using System.Threading;
 
 namespace Dialogic {
 
@@ -19,42 +19,70 @@ namespace Dialogic {
         Verify chat-name uniqueness on parse
     */
 
-    public class ScriptReader : GScriptBaseVisitor<Dialog> {
+    public class ConsoleRunner : IChatListener {
+        static int count = 0;
+        void IChatListener.onChatEvent(Command c) {
+            Console.WriteLine("ChatEvent#"+(++count)+" "+c);
+
+            //Atom.Out(c);
+            /*             if (c is Wait) {
+                            Thread.Sleep(((Wait) c).millis);
+                        } else {
+
+                        } */
+        }
+    }
+
+    public class ScriptReader : GScriptBaseVisitor<Chat> {
+
+        private Chat data;
 
         public static void Main(string[] args) {
 
-            //string input = "Say I would like to emphasize this\nPause 1000\n";
-            string input = File.ReadAllText("test-script.gs", Encoding.UTF8);
+            ScriptReader reader = new ScriptReader();
+            reader.Load("test-script.gs");
+            reader.AddListener(new ConsoleRunner());
+            //Console.WriteLine(reader.data);
+            reader.Run();
+        }
+
+        public void AddListener(IChatListener icl) => this.data.AddListener(icl);
+
+        public void Run() => data.Fire();
+
+        public void Load(string file) {
+
+            //string input = "[Say] I would like to emphasize this\n[Wait] 1000\n";
+            data = (Chat) Command.create("Chat", Path.GetFileNameWithoutExtension(file));
+
+            string input = File.ReadAllText(file, Encoding.UTF8);
             ITokenSource lexer = new GScriptLexer(new AntlrInputStream(input));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             GScriptParser parser = new GScriptParser(tokens);
             parser.AddErrorListener(new ThrowExceptionErrorListener());
-            Dialog result = new ScriptReader().Visit(parser.dialog());
-            Out(result);
-            result.Run();
+            this.Visit(parser.dialog());
         }
 
-        public Dialog dialog = new Dialog();
+        public static void Out(object s) => Console.WriteLine(s);
 
-        public static void Out(object s) {
-            Console.WriteLine(s);
-        }
-        public static void Err(object s) {
-            Console.WriteLine("\n[ERROR] " + s + "\n");
-        }
+        public static void Err(object s) => Console.WriteLine("\n[ERROR] " + s + "\n");
 
-        public override Dialog Visit(IParseTree tree) {
-            //Console.WriteLine("Visit ->");
+        public override Chat Visit(IParseTree tree) {
+
             base.Visit(tree);
-            return dialog;
+            return data;
         }
 
-        public override Dialog VisitGotu([NotNull] GScriptParser.GotuContext context) {
-            //Console.WriteLine("VisitGotu: ");
+        public override Chat VisitExpr([NotNull] GScriptParser.ExprContext context) {
+
+            var cmd = context.GetChild<GScriptParser.CommandContext>(0);
+            var args = context.GetChild<GScriptParser.ArgsContext>(0);
+            data.AddCommand(Command.create(cmd.GetText(), args.GetText()));
+            //Out(bcmd.GetText() + " -> " + args.GetText());
             return VisitChildren(context);
         }
 
-        /*public override Dialog VisitCommand([NotNull] GScriptParser.CommandContext context) {
+        /*public override Chat VisitCommand([NotNull] GScriptParser.CommandContext context) {
 
             Console.WriteLine("VisitCommand");
 
@@ -62,67 +90,39 @@ namespace Dialogic {
             var type = typemap[context.GetChild(0).GetType()];
             var body = findChildren(parent, typeof(GScriptParser.CommandContext)).GetText();
             Command c = (Command) Activator.CreateInstance(type, dialog);
-            dialog.AddEvent(c); // TODO: need to make the other Command(Dialog) constructors
+            dialog.AddEvent(c); // TODO: need to make the other Command(Chat) constructors
             Console.WriteLine("  " + type + ": " + body);
 
             return VisitChildren(context);
         }
-        public Dialog VisitAny([NotNull] ParserRuleContext context) {
+        public Chat VisitAny([NotNull] ParserRuleContext context) {
             var parent = context.Parent;
             var type = typemap[context.GetChild(0).GetType()];
             var body = findChildren(parent, typeof(GScriptParser.CommandContext)) [0].GetText();
             Command c = (Command) Activator.CreateInstance(type, dialog);
-            dialog.AddEvent(c); // TODO: need to make the other Command(Dialog) constructors
+            dialog.AddEvent(c); // TODO: need to make the other Command(Chat) constructors
             Console.WriteLine("  " + type + ": " + body);
             return dialog;
         }*/
 
-        public override Dialog VisitSay([NotNull] GScriptParser.SayContext context) {
-
-            string[] args = ParseArgs(context, 1);
-            dialog.AddEvent(new Say(dialog, args[0]));
-            return VisitChildren(context);
-        }
-
-        public override Dialog VisitWayt([NotNull] GScriptParser.WaytContext context) {
+        /*public Chat VisitWay(RuleContext context) {
 
             string[] args = ParseArgs(context, 1);
             dialog.AddEvent(new Wait(dialog, int.Parse(args[0])));
             return VisitChildren(context);
-        }
-
-        public override Dialog VisitChat([NotNull] GScriptParser.ChatContext context) {
-
-            string[] args = ParseArgs(context, 1);
-            // TODO: check that chat-name is unique
-            dialog.AddEvent(new Chat(dialog, args[0]));
-            return VisitChildren(context);
-        }
-
-        public override Dialog VisitDu([NotNull] GScriptParser.DuContext context) {
-
-            string[] args = ParseArgs(context, 1);
-            dialog.AddEvent(new Do(dialog, args[0]));
-            return VisitChildren(context);
-        }
-
-        public override Dialog VisitAsk([NotNull] GScriptParser.AskContext context) {
-            string[] args = ParseArgs(context);
-            dialog.AddEvent(new Ask(dialog, args[0]));
-            return VisitChildren(context);
-        }
+        }*/
 
         private Command LastOfType(List<Command> commands, Type typeToFind) {
             for (var i = commands.Count - 1; i >= 0; i--) {
                 Command c = commands[i];
                 if (c.GetType() == typeToFind) {
-                    return dialog.events[i];
+                    return data.commands[i];
                 }
             }
             return null;
         }
 
-        public override Dialog VisitOpt([NotNull] GScriptParser.OptContext context) {
+        /*public Chat VisitOpt(RuleContext context) {
 
             Command last = LastOfType(dialog.events, typeof(Ask));
             if (!(last is Ask)) throw new Exception("Opt must be preceded by Ask");
@@ -141,12 +141,12 @@ namespace Dialogic {
 
             //dialog.AddEvent(new Opt(dialog, args[0]));
             return VisitChildren(context);
-        }
+        }*/
 
         private string TypeFromContext(RuleContext context, bool qualified = false) {
             var cname = context.GetType().ToString();
             var tname = cname.Replace("GScriptParser+", "").Replace("Context", "");
-            return qualified ? "Dialogic." + tname : tname;
+            return qualified ? "Chatic." + tname : tname;
         }
 
         private string[] ParseArgs(RuleContext context, int numArgs = 0) {
@@ -166,9 +166,9 @@ namespace Dialogic {
         private string argsToString(List<ArgsContext> contexts) {
             string s = "";
             foreach (var context in contexts) {
-               s += context.GetText() + ", ";
+                s += context.GetText() + ", ";
             }
-            return s.Substring(0, s.Length-2);
+            return s.Substring(0, s.Length - 2);
         }
 
         private List<ArgsContext> FindChildren(RuleContext parent, Type typeToFind) {
@@ -194,7 +194,7 @@ namespace Dialogic {
                 throw new System.Exception("SyntaxError: " + line + " " + msg);
             }
         }
-        Dictionary<Type, Type> typemap = new Dictionary<Type, Type>() { { typeof(GScriptParser.SayContext), typeof(Dialogic.Say) }, { typeof(GScriptParser.GotuContext), typeof(Dialogic.Gotu) }, { typeof(GScriptParser.DuContext), typeof(Dialogic.Do) }, { typeof(GScriptParser.WaytContext), typeof(Dialogic.Wait) }, { typeof(GScriptParser.ChatContext), typeof(Dialogic.Chat) }, { typeof(GScriptParser.AskContext), typeof(Dialogic.Ask) },
-        };
+        //Dictionary<Type, Type> typemap = new Dictionary<Type, Type>() { { typeof(GScriptParser.SayContext), typeof(Chatic.Say) }, { typeof(GScriptParser.GotuContext), typeof(Chatic.Gotu) }, { typeof(GScriptParser.DuContext), typeof(Chatic.Do) }, { typeof(GScriptParser.WaytContext), typeof(Chatic.Wait) }, { typeof(GScriptParser.ChatContext), typeof(Chatic.Chat) }, { typeof(GScriptParser.AskContext), typeof(Chatic.Ask) },};
     }
+
 }

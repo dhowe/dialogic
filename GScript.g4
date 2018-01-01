@@ -10,7 +10,7 @@ expr: '[' command '] ' args;
 
 args: TEXT; 
 
-commandx: (
+command: (
 		'Say'
 		| 'Goto'
 		| 'Wait'
@@ -18,10 +18,9 @@ commandx: (
 		| 'Ask'
 		| 'Opt'
 		| 'Do'
-		 
 	);
     
-command: (
+/* command: (
 		say
 		| gotu
 		| wayt
@@ -37,7 +36,7 @@ wayt : 'Wait';
 chat: 'Chat';
 ask: 'Ask';
 opt: 'Opt';
-du: 'Do';
+du: 'Do'; */
 // func: funcname LPAREN expression RPAREN
 
 //////////////////////// LEXER /////////////////////////
@@ -51,9 +50,8 @@ SPACE: (' ' | '\t');
 COMMENT: '/*' .*? '*/' -> skip;
 NEWLINE: ('\r'? '\n' | '\r')+;
 TEXT: (LOWERCASE | UPPERCASE | PUNCT | DIGIT | SPACE)+;
+
 //WORD: (LOWERCASE | UPPERCASE | PUNCT | DIGIT)+;
-
-
 // LABEL: '[' (LOWERCASE | UPPERCASE | DIGIT | '_')+ ']';
 // IDENT: (LOWERCASE | UPPERCASE | '_' | DIGIT);
 

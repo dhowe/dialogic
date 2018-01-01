@@ -1,193 +1,105 @@
-﻿using System;
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Dialogic {
 
-    public struct Func {
-        public Action action;
+    public abstract class Atom {
 
-        public string name;
+        protected static int IDGEN = 0;
 
-        public Func(string name, Action action) {
-            this.name = name;
-            this.action = action;
-        }
+        protected static string PACKAGE = "Dialogic.";
 
-        public void Invoke() => action.Invoke();
+        public static void Out(object s) => Console.WriteLine(s);
 
-        public override string ToString() => "Action." + name;
-    }
+        public abstract void Fire();
 
-    public abstract class Command {
+        public string id { get; protected set; }
 
-        internal static int IDGEN = 0;
-
-        public int id = ++IDGEN;
-
-        public string actor = "Guppy", text = "";
-
-        protected Dialog dialog;
-
-        public virtual int Fire() {
-            Out(this.actor + ": " + cleanString(this.text));
-            return 0;
-        } // return -1=pause, 0=continue, #=pauseFor#
-
-        public virtual void Out(object s) => Console.WriteLine(s);
-
-        public virtual string cleanString(string text) {
-            var str = new Regex("^ *'").Replace(text, "");
-            return new Regex("' *$").Replace(str, "");
-        }
-
-        public Command(Dialog d) : this(d, null) { }
-
-        public Command(Dialog d, string text) {
-            this.dialog = d ??
-                throw new ArgumentNullException(nameof(d));
-            if (text != null) this.text = text;
-        }
-
-        public override string ToString() => GetType().ToString(); //.Replace("Dialogic.", "") + text;
+        public Atom() => this.id = (++IDGEN).ToString();
     }
 
     public class Chat : Command {
-        public Chat(Dialog d, string text) : base(d, text) {
-            if (string.IsNullOrWhiteSpace(text)) {
-                throw new ArgumentException("Invalid argument", nameof(text));
-            }
+
+        public List<Command> commands { get; private set; }
+        public List<IChatListener> listeners { get; private set; }
+
+        protected override void Init(string name) {
+            base.Init(name);
+            this.commands = new List<Command>();
+            this.listeners = new List<IChatListener>();
         }
 
-        public override int Fire() => 0;
-        public override string ToString() => "Chat " + text;
-    }
-
-    public class Do : Command {
-        public Do(Dialog d, string text) : base(d, text) {
-            if (string.IsNullOrWhiteSpace(text)) {
-                throw new ArgumentException("Invalid argument", nameof(text));
-            }
+        public override void Fire() {
+            //commands.ForEach((Command c) => {
+            listeners.ForEach((IChatListener l) => {
+                l.onChatEvent(this);
+            });
+            //});
         }
 
-        public override int Fire() => 0;
-        public override string ToString() => "Do " + text;
+        //public void Fire() => commands.ForEach(a => a.Fire());
+        //public void AddChild(Chat c) => this.children.Add(c);
+
+        public void AddCommand(Command c) => this.commands.Add(c);
+
+/*         public override string ToString() {
+           return base.ToString();
+        }
+ */
+        public string AsTree() {
+            string ind = "  ", s = '\n' + base.ToString() + '\n';
+            foreach (var c in commands)
+                s += ind + c.ToString() + "\n";
+            return s + "\n";
+        }
+
+        public Chat AddListener(IChatListener icl) {
+            this.listeners.Add(icl);
+            return this;
+        }
     }
 
-    public class Say : Command {
-        public Say(Dialog d, string text) : base(d, text) { }
-        // public Say(Dialog d, string actor, string text) : base(d, text) {
-        //     this.actor = actor;
-        // }
-        public override string ToString() => "Say " + text;
+    public abstract class Command : Atom {
+
+        public string text { get; private set; }
+
+        public static Command create(string type, string args) {
+
+            Type cmdType = Type.GetType(PACKAGE + type) ??
+                throw new TypeLoadException("No type: " + PACKAGE + type);
+            Command cmd = (Command) Activator.CreateInstance(cmdType);
+            cmd.Init(args);
+            return cmd;
+        }
+
+        protected virtual void Init(string args) {
+            //Out("Create: " + this.TypeName());
+            this.text = args;
+        }
+
+        public override void Fire() {
+            Out(this.ToString());
+        }
+
+        protected virtual string TypeName() {
+            return this.GetType().ToString().Replace(PACKAGE, "");
+        }
+
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " + text;
     }
+
+    public class Say : Command { }
 
     public class Wait : Command {
-        private int millis = -1; // wait forever
 
-        public Wait(Dialog d) : base(d, "") { }
+        public int millis { get; protected set; } // wait forever
 
-        public Wait(Dialog d, int ms) : base(d, "") {
-            millis = ms;
-        }
-        public override int Fire() => millis;
+        protected override void Init(string args) => this.millis = int.Parse(args);
 
-        public override string ToString() {
-            return millis > -1 ? "Wait " + millis : "Pause"; // || "Wait"
-        }
-    }
-    public class Gotu : Command {
-        public Gotu(Dialog d, string text) : base(d, text) { }
+        //public override void Fire() => Out("blah");
 
-        public override int Fire() {
-            dialog.runtime.GotoChat(text);
-            return 0;
-        }
-        public override string ToString() => "Goto " + text;
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " + millis;
     }
 
-    public class Ask : Command {
-
-        public static readonly Func NO_OP = new Func("NO_OP", (() => { }));
-
-        public int selected, attempts = 0;
-
-        public List<KeyValuePair<string, Func>> options;
-
-        public Ask(Dialog d, string prompt) : base(d, prompt) {
-
-            this.options = new List<KeyValuePair<string, Func>>();
-        }
-
-        public void AddOption(string s) {
-            AddOption(s, (string) null);
-        }
-
-        public void AddOption(string s, string chat) {
-            var action = chat != null ? new Func(chat, (() => { new Gotu(dialog, chat).Fire(); })) : NO_OP;
-            AddOption(s, action);
-        }
-
-        public void AddOption(string s, Func todo) {
-            options.Add(new KeyValuePair<string, Func>(s, todo));
-        }
-
-        public override int Fire() {
-            base.Fire();
-            for (int i = 0; options != null && i < options.Count; i++) {
-                Out("  " + (i + 1) + ") " + options[i].Key);
-            }
-            return -1;
-        }
-
-        public bool Accept(string input) {
-            //Console.WriteLine("Accept: " + input);
-
-            if (this.options.Count > 0) {
-
-                int i;
-                attempts++;
-                if (int.TryParse(input, out i)) {
-                    if (i > 0 && i <= options.Count) {
-                        selected = --i;
-                        this.React();
-                        return true;
-                    }
-                }
-                Out("\n" + actor + ": Please select a # from 1-" + options.Count + "\n");
-                return false;
-            }
-
-            return DefaultReaction(input);
-        }
-
-        public void React() {
-            if (this.options.Count > 0) {
-                Out(text + " -> " + options[selected].Key + " (" + options[selected].Value + ")\n");
-                this.options[selected].Value.Invoke();
-            } else {
-                Console.WriteLine("(" + id + ": " + text + " -> " + options[selected].Key + ")");
-            }
-        }
-
-        private bool DefaultReaction(string input) {
-            if (input == "y" || input == "Y") {
-                return true;
-            }
-            Out("\n" + actor + ": Sorry, I don't understand '" + input + "'\n");
-            return false;
-        }
-
-        public override string ToString() {
-            var s = "Ask " + text + " -> [";
-            foreach (var o in options) {
-                s += o.Key + ", ";
-            }
-            return s.Substring(0, s.Length - 2) + "]";
-        }
-    }
+    public class Do : Command { }
 }
