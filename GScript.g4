@@ -12,7 +12,7 @@ args: TEXT;
 
 command: (
 		'Say'
-		| 'Goto'
+		| 'Go'
 		| 'Wait'
 		| 'Chat'
 		| 'Ask'

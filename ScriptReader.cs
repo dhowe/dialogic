@@ -14,109 +14,102 @@ using System.Threading;
 namespace Dialogic {
 
     /* NEXT: 
+        QUESTION: Are chats hierarchical?
         Decide on format for chat-names [CHAT_NAME]  ?
         Handle single-quotes in strings ?
         Verify chat-name uniqueness on parse
     */
 
     public class ConsoleRunner : IChatListener {
-        static int count = 0;
+
         void IChatListener.onChatEvent(Command c) {
-            Console.WriteLine("ChatEvent#"+(++count)+" "+c);
-
-            //Atom.Out(c);
-            /*             if (c is Wait) {
-                            Thread.Sleep(((Wait) c).millis);
-                        } else {
-
-                        } */
+            Chat.Out(c);
         }
     }
 
     public class ScriptReader : GScriptBaseVisitor<Chat> {
 
-        private Chat data;
+        private Chat graph;
 
         public static void Main(string[] args) {
 
-            ScriptReader reader = new ScriptReader();
-            reader.Load("test-script.gs");
-            reader.AddListener(new ConsoleRunner());
-            //Console.WriteLine(reader.data);
-            reader.Run();
+            Chat c = new Chat();
+            c.AddCommand(Command.create("Say", "Hello"));
+            c.AddCommand(Command.create("Do", "Flip"));
+            Chat d = (Chat) Command.create("Chat", "Part2");
+            c.AddCommand(d);
+            c.AddCommand(Command.create("Do", "Flip2"));
+
+            Console.WriteLine(c.AsTree());
         }
 
-        public void AddListener(IChatListener icl) => this.data.AddListener(icl);
+        public static void Mainx(string[] args) {
 
-        public void Run() => data.Fire();
+            ScriptReader sman = new ScriptReader();
+            sman.Parse("[Say] I would like to emphasize this\n[Wait] 1000\n");
+            Console.WriteLine(sman);
+            //Chat chat = reader.Load("test-script.gs");
+            //reader.AddListener(new ConsoleRunner());
+            //Console.WriteLine(chat.AsTree());
+            //reader.Run();
+        }
 
-        public void Load(string file) {
+        public override string ToString() {
+            Chat current = graph;
+            string ind = "  ", s = '\n' + base.ToString() + '\n';
+            for (int i = 0; i < current.commands.Count; i++) {
+                var cmd = current.commands[i];
+                if (cmd is Chat) {
+                    current = (Chat) cmd;
+                    i = 0;
+                } else {
+                    s += ind + cmd.ToString() + "\n";
+                }
+            }
+            return s + "\n";
+        }
 
-            //string input = "[Say] I would like to emphasize this\n[Wait] 1000\n";
-            data = (Chat) Command.create("Chat", Path.GetFileNameWithoutExtension(file));
+        public Chat Parse(string text) {
+            GScriptParser parser = CreateParser(new AntlrInputStream(text));
+            IParseTree tree = parser.dialog();
+            graph = (Chat) Command.create("Chat", Path.GetFileNameWithoutExtension(text));
+            return Visit(tree);
+        }
 
-            string input = File.ReadAllText(file, Encoding.UTF8);
-            ITokenSource lexer = new GScriptLexer(new AntlrInputStream(input));
+        public void AddListener(IChatListener icl) => ChatManager.AddListener(icl);
+
+        private GScriptParser CreateParser(ICharStream txt) {
+
+            ITokenSource lexer = new GScriptLexer(txt);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             GScriptParser parser = new GScriptParser(tokens);
             parser.AddErrorListener(new ThrowExceptionErrorListener());
-            this.Visit(parser.dialog());
+            return parser;
         }
 
         public static void Out(object s) => Console.WriteLine(s);
 
         public static void Err(object s) => Console.WriteLine("\n[ERROR] " + s + "\n");
 
-        public override Chat Visit(IParseTree tree) {
-
-            base.Visit(tree);
-            return data;
-        }
-
         public override Chat VisitExpr([NotNull] GScriptParser.ExprContext context) {
 
-            var cmd = context.GetChild<GScriptParser.CommandContext>(0);
-            var args = context.GetChild<GScriptParser.ArgsContext>(0);
-            data.AddCommand(Command.create(cmd.GetText(), args.GetText()));
-            //Out(bcmd.GetText() + " -> " + args.GetText());
+            var cmd = context.GetChild<GScriptParser.CommandContext>(0).GetText();
+            var args = context.GetChild<GScriptParser.ArgsContext>(0).GetText();
+            Command c = Command.create(cmd, args);
+            if (c is Chat) {
+                graph = (Chat) c;
+            } else {
+                graph.AddCommand(c);
+            }
+            //Out(cmd.GetText() + " -> " + args.GetText());
             return VisitChildren(context);
         }
-
-        /*public override Chat VisitCommand([NotNull] GScriptParser.CommandContext context) {
-
-            Console.WriteLine("VisitCommand");
-
-            var parent = context.Parent;
-            var type = typemap[context.GetChild(0).GetType()];
-            var body = findChildren(parent, typeof(GScriptParser.CommandContext)).GetText();
-            Command c = (Command) Activator.CreateInstance(type, dialog);
-            dialog.AddEvent(c); // TODO: need to make the other Command(Chat) constructors
-            Console.WriteLine("  " + type + ": " + body);
-
-            return VisitChildren(context);
-        }
-        public Chat VisitAny([NotNull] ParserRuleContext context) {
-            var parent = context.Parent;
-            var type = typemap[context.GetChild(0).GetType()];
-            var body = findChildren(parent, typeof(GScriptParser.CommandContext)) [0].GetText();
-            Command c = (Command) Activator.CreateInstance(type, dialog);
-            dialog.AddEvent(c); // TODO: need to make the other Command(Chat) constructors
-            Console.WriteLine("  " + type + ": " + body);
-            return dialog;
-        }*/
-
-        /*public Chat VisitWay(RuleContext context) {
-
-            string[] args = ParseArgs(context, 1);
-            dialog.AddEvent(new Wait(dialog, int.Parse(args[0])));
-            return VisitChildren(context);
-        }*/
 
         private Command LastOfType(List<Command> commands, Type typeToFind) {
             for (var i = commands.Count - 1; i >= 0; i--) {
                 Command c = commands[i];
                 if (c.GetType() == typeToFind) {
-                    return data.commands[i];
+                    return graph.commands[i];
                 }
             }
             return null;
@@ -153,7 +146,7 @@ namespace Dialogic {
 
             List<ArgsContext> acs = FindChildren(context.Parent.Parent, typeof(ArgsContext));;
             if (numArgs > 0 && acs.Count != numArgs) {
-                Err($"'{TypeFromContext(context)}' expects {numArgs} args, but got {acs.Count}: '{argsToString(acs)}'");
+                Err($"'{TypeFromContext(context)}' expects {numArgs} args, but got {acs.Count}: '{ArgsToString(acs)}'");
                 return null;
             }
             string[] args = new string[acs.Count];
@@ -163,7 +156,7 @@ namespace Dialogic {
             return args;
         }
 
-        private string argsToString(List<ArgsContext> contexts) {
+        private string ArgsToString(List<ArgsContext> contexts) {
             string s = "";
             foreach (var context in contexts) {
                 s += context.GetText() + ", ";
@@ -194,7 +187,6 @@ namespace Dialogic {
                 throw new System.Exception("SyntaxError: " + line + " " + msg);
             }
         }
-        //Dictionary<Type, Type> typemap = new Dictionary<Type, Type>() { { typeof(GScriptParser.SayContext), typeof(Chatic.Say) }, { typeof(GScriptParser.GotuContext), typeof(Chatic.Gotu) }, { typeof(GScriptParser.DuContext), typeof(Chatic.Do) }, { typeof(GScriptParser.WaytContext), typeof(Chatic.Wait) }, { typeof(GScriptParser.ChatContext), typeof(Chatic.Chat) }, { typeof(GScriptParser.AskContext), typeof(Chatic.Ask) },};
     }
 
 }

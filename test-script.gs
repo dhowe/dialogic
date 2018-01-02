@@ -1,14 +1,24 @@
 [Say] Welcome to my World...
-[Wait] 2000
+[Wait] 1
+[Do] Twirl
+[Go] Chat3
 
+[Chat] Chat2
+[Say] Welcome to Chat2...
 
 /*
-[Chat] Prompt1
+[Chat] Chat3
+[Say] Welcome to Chat3...
+
 [Ask] Do you want to play a game?
-[Opt] Yes Prompt2
-[Opt] No Prompt1
+[Chat] Chat2
+[Say] Welcome to Chat2...
+[Wait] 2000
+[Ask] Do you want to play a game?
+[Opt] Yes -> Prompt2
+[Opt] No -> Prompt1
 
-
+[Chat] Prompt1
 [Chat] Prompt2 
 [Do] Twirl
 [Ask] Ok, who goes first?
