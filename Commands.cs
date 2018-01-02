@@ -4,84 +4,21 @@ using System.Threading;
 
 namespace Dialogic {
 
-    public static class ChatManager {
-
-        static Dictionary<string, Chat> chats = new Dictionary<string, Chat>();
-        static List<IChatListener> listeners = new List<IChatListener>();
-        static Stack<Chat> stack = new Stack<Chat>();
-        private static bool paused = false;
-
-        public static void AddListener(IChatListener icl) {
-            listeners.Add(icl);
-        }
-
-        internal static void Register(Chat c) {
-            Console.WriteLine("Register: Chat@" + c.id);
-            chats.Add(c.id, c);
-        }
-
-        private static void notifyListeners(Command c) {
-            listeners.ForEach(icl => icl.onChatEvent(c));
-            c.Fire();
-        }
-
-        public static void Run(Chat start) {
-            Chat current = start;
-            while (!paused) {
-                notifyListeners(current);
-                foreach (var c in current.commands) {
-                    if (c is Go) {
-                        current = lookup(c.text);
-                    } else {
-                        notifyListeners(c);
-                    }
-                }
-            }
-        }
-
-        private static Chat lookup(string id) {
-            return chats[id];
-        }
-    }
-
     public class Chat : Command {
 
-        public List<Command> commands { get; private set; }
+        public List<Command> commands = new List<Command>();
 
-        protected override void Init(string name) {
-            base.Init(name);
-        }
+        public Chat() : this("C" + Environment.TickCount) { }
 
-        public Chat() : base() {
-            this.commands = new List<Command>();
-            ChatManager.Register(this);
-            //Console.WriteLine("CHAT.id="+id);            
-        }
-
-        public void Run() => ChatManager.Run(this);
-
-        public void AddCommand(Command c) {
-            this.commands.Add(c);
-        }
+        public Chat(string name) : base() => this.text = name;
 
         public override string ToString() {
-            return base.ToString() + "#" + id.ToUpper();
-        }
-
-        public string AsTree() {
-            Chat parent = this;
-            string ind = "  ", s = '\n' + base.ToString() + '\n';
-            for (int i = 0; i < parent.commands.Count; i++) {
-                var cmd = parent.commands[i];
-                if (cmd is Chat) {
-                    s += ind + ((Chat) cmd).AsTree();
-                } else {
-                    s += ind + cmd.ToString() + "\n";
-                }
-            }
+            string s = base.ToString() + "\n";
+            commands.ForEach(c => s += "  " + c + "\n");
             return s;
-
         }
+
+        public void AddCommand(Command c) => this.commands.Add(c);
     }
 
     public abstract class Command {
@@ -105,26 +42,18 @@ namespace Dialogic {
             return cmd;
         }
 
-        public Command() {
-            this.id = (++IDGEN).ToString();
-        }
-
         public string id { get; protected set; }
 
-        public string text { get; private set; }
+        public string text { get; protected set; }
 
-        //public virtual void Fire() { }
+        public Command() => this.id = (++IDGEN).ToString();
 
-        protected virtual void Init(string args) {
-            //Out("Create: " + this.TypeName());
-            this.text = args;
-        }
+        public virtual void Init(string args) => this.text = args;
 
-        protected virtual string TypeName() {
-            return this.GetType().ToString().Replace(PACKAGE, "");
-        }
+        public virtual string TypeName() => this.GetType().ToString().Replace(PACKAGE, "");
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + text;
+
         public virtual void Fire() { }
     }
 
@@ -138,7 +67,7 @@ namespace Dialogic {
 
         public float seconds { get; protected set; }
 
-        protected override void Init(string args) {
+        public override void Init(string args) {
             this.seconds = float.MaxValue;
             if (args.Length > 0) {
                 this.seconds = float.Parse(args);
@@ -150,9 +79,11 @@ namespace Dialogic {
         }
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + seconds;
+
+        public int Millis() =>(int) (seconds * 1000);
     }
 
-    public class Ask : Wait {
+    public class Ask : Command {
 
         public static readonly Func NO_OP = new Func("NO_OP", (() => { }));
 
@@ -160,11 +91,10 @@ namespace Dialogic {
 
         public List<KeyValuePair<string, Func>> options;
 
-        protected override void Init(string args) {
-            Console.WriteLine("WAIT.ARGS: " + args);
-
-            this.seconds = float.Parse(args);
-        }
+      /*   public override void Init(string args) {
+            //this.seconds = float.Parse(args);
+            this.text = args;
+        } */
         /* 
                 public void AddOption(string s, string chat) {
                     var action = chat != null ? new Func(chat, (() => { new Got(dialog, chat).Fire(); })) : NO_OP;
