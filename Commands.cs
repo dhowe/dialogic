@@ -96,10 +96,10 @@ namespace Dialogic {
             this.text = args;
         } */
         /* 
-                public void AddOption(string s, string chat) {
-                    var action = chat != null ? new Func(chat, (() => { new Got(dialog, chat).Fire(); })) : NO_OP;
-                    AddOption(s, action);
-                } */
+        public void AddOption(string s, string chat) {
+            var action = chat != null ? new Func(chat, (() => { new Got(dialog, chat).Fire(); })) : NO_OP;
+            AddOption(s, action);
+        } */
 
         public void AddOption(string s, Func todo) {
             options.Add(new KeyValuePair<string, Func>(s, todo));
