@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Dialogic {
@@ -29,13 +30,18 @@ namespace Dialogic {
 
         public static void Out(object s) => Console.WriteLine(s);
 
-        public static Command create(string type, string args) {
+        private static string toMixedCase(string s) {
+            return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
+        }
 
-            return create(Type.GetType(PACKAGE + type) ??
+        public static Command Create(string type, string args) {
+
+            type = toMixedCase(type);
+            return Create(Type.GetType(PACKAGE + type) ??
                 throw new TypeLoadException("No type: " + PACKAGE + type), args);
         }
 
-        public static Command create(Type type, string args) {
+        public static Command Create(Type type, string args) {
 
             Command cmd = (Command) Activator.CreateInstance(type);
             cmd.Init(args);
@@ -83,33 +89,42 @@ namespace Dialogic {
         public int Millis() =>(int) (seconds * 1000);
     }
 
-    public class Ask : Command {
+    public class Opt : Command {
 
         public static readonly Func NO_OP = new Func("NO_OP", (() => { }));
 
+        public Func action;
+
+        public override void Init(string args) {
+            string[] arr = Regex.Split(args, " *=> *");
+            if (arr.Length < 1) {
+                throw new TypeLoadException("Bad args: " + args);
+            }
+            this.text = arr[0];
+            this.action = (arr.Length > 1) ? new Func(arr[1], (() => { Command.Create(typeof(Go), arr[1]).Fire(); })) : NO_OP;
+            //Console.WriteLine("text: " + text+" action: " + action.name);
+        }
+
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " + text + " (=> " + this.action.name + ")";
+    }
+
+    public class Ask : Command {
+
         public int selected, attempts = 0;
 
-        public List<KeyValuePair<string, Func>> options;
+        public List<Opt> options = new List<Opt>();
+        //public List<KeyValuePair<string, Func>> options;
 
-      /*   public override void Init(string args) {
-            //this.seconds = float.Parse(args);
-            this.text = args;
-        } */
-        /* 
-        public void AddOption(string s, string chat) {
-            var action = chat != null ? new Func(chat, (() => { new Got(dialog, chat).Fire(); })) : NO_OP;
-            AddOption(s, action);
-        } */
-
-        public void AddOption(string s, Func todo) {
-            options.Add(new KeyValuePair<string, Func>(s, todo));
+        public void AddOption(Opt o) {
+            //Console.WriteLine("Adding: " + o);
+            //options.Add(new KeyValuePair<string, Func>(o.text, o.action));
+            options.Add(o);
         }
     }
 
-    public struct Func {
+    public struct Func { // named Action
 
         public Action action;
-
         public string name;
 
         public Func(string name, Action action) {

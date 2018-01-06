@@ -1,15 +1,15 @@
 grammar GScript;
+
 //////////////////////// PARSER /////////////////////////
 
 dialog: line+;
-command: (SAY | WAIT | DO | ASK | OPT | GO | CALL);
+line: (command SPACE* | command SPACE+ args) (NEWLINE | EOF);
+command: (CHAT | SAY | WAIT | DO | ASK | OPT | GO | CALL);
 args: str | num | aexp;
 str:  WORD (SPACE WORD)*;
 num: DECIMAL;
 aexp: (str | num) SPACE* RARROW SPACE* label;
 label: WORD;
-line: (command SPACE* | command SPACE+ args) (NEWLINE | EOF);
-//funCall: funName '(' funCallArgs ')';
 
 //////////////////////// LEXER /////////////////////////
 
@@ -20,6 +20,7 @@ fragment PUNCT: [;:",`'!._?-];
 
 SAY: 'SAY';
 WAIT: 'WAIT';
+CHAT: 'CHAT';
 DO: 'DO';
 ASK: 'ASK';
 OPT: 'OPT'; // TODO
@@ -34,7 +35,7 @@ NEWLINE: ('\r'? '\n' | '\r')+;
 WORD: (LOWER | UPPER) (LOWER | UPPER | PUNCT | DIGIT)*;
 
 // NOT YET USED
-
+/*funCall: funName '(' funCallArgs ')';
 IF: 'if';
 THEN: 'then';
 AND: 'and';
@@ -54,5 +55,5 @@ LPAREN: '(';
 RPAREN: ')';
 LB: '[';
 RB: ']';
-UNDER: '_';
+UNDER: '_';*/
 

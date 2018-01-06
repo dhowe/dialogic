@@ -15,6 +15,7 @@ using System.Threading;
 namespace Dialogic {
 
     /* NEXT: 
+        Do validation, selection, and jump to label on answer
         Verify chat-name uniqueness on parse
     */
 
@@ -26,9 +27,16 @@ namespace Dialogic {
         }
 
         protected void Out(Command c) {
-            if (c is Wait || c is Go) return;
+            if (c is Wait || c is Go || c is Opt) return;
             if (c is Do || c is Chat) {
                 suffix += "\t[" + c.TypeName() + ": " + c.text + "]";
+            } else if (c is Ask) {
+                Ask a = (Ask) c;
+                Console.WriteLine(a.text + suffix);
+                for (int i = 0; i < a.options.Count; i++) {
+                    Opt opt = a.options[i];
+                    Console.WriteLine("(" + (i + 1) + ") " + opt.text +" => [" + opt.action.name+"]");
+                }
             } else {
                 Console.WriteLine(c.text + suffix);
                 suffix = "";
@@ -36,12 +44,15 @@ namespace Dialogic {
         }
     }
 
-    public class ChatManager : GScriptBaseVisitor<Chat> {
+    public class ChatManager : GScriptBaseVisitor<Chat> { // TODO: break into Manager/Runner
 
         List<Chat> chats = new List<Chat>();
+        Stack<Command> events = new Stack<Command>();
+        Stack<Command> parsed = new Stack<Command>();
         List<IChatListener> listeners = new List<IChatListener>();
 
         public static void Main(string[] args) {
+
             ChatManager sman = new ChatManager();
             sman.AddListener(new ConsoleListener());
             //sman.Parse("[Say] I would like to emphasize this\n[Wait] 1.5\n");
@@ -59,9 +70,20 @@ namespace Dialogic {
         private void AddChat(Chat c) => chats.Add(c);
 
         public void Run() {
-            var first = chats[0] ??
+            if (chats == null || chats.Count < 1) {
                 throw new Exception("No chats found!");
-            Run(first);
+            }
+            Run(chats[0]);
+        }
+
+        private Command LastOfType(Stack<Command> s, Type typeToFind) {
+            foreach (Command c in s) {
+                Console.WriteLine("  Checking " + c.GetType() + " ? " + typeToFind);
+                if (c.GetType() == typeToFind) {
+                    return c;
+                }
+            }
+            return null;
         }
 
         private void notifyListeners(Command c) {
@@ -103,7 +125,7 @@ namespace Dialogic {
         public Chat ParseText(string text) {
             GScriptParser parser = CreateParser(new AntlrInputStream(text));
             IParseTree tree = parser.dialog();
-            //graph = (Chat) Command.create("Chat", Path.GetFileNameWithoutExtension(text));
+            //graph = (Chat) Command.Create("Chat", Path.GetFileNameWithoutExtension(text));
             return Visit(tree);
         }
 
@@ -124,13 +146,23 @@ namespace Dialogic {
 
         public static void Err(object s) => Console.WriteLine("\n[ERROR] " + s + "\n");
 
-        public override Chat VisitExpr([NotNull] GScriptParser.ExprContext context) {
+        public override Chat VisitLine([NotNull] GScriptParser.LineContext context) {
 
             var cmd = context.GetChild<GScriptParser.CommandContext>(0).GetText();
             var args = context.GetChild<GScriptParser.ArgsContext>(0).GetText();
-            Command c = Command.create(cmd, args);
+            //Console.WriteLine("cmd: " + cmd+" args: " + args);
+            Command c = Command.Create(cmd, args);
             if (c is Chat) {
                 chats.Add((Chat) c);
+            } else if (c is Opt) {
+                Command last = LastOfType(parsed, typeof(Ask));
+                //Console.WriteLine("LAST=" + last);
+                // WORKING HERE ****
+
+                if (!(last is Ask)) {
+                    throw new Exception("Opt must be preceded by Ask");
+                }
+                ((Ask) last).AddOption((Opt) c);
             } else {
                 if (chats.Count == 0) {
                     chats.Add(new Chat());
@@ -138,18 +170,9 @@ namespace Dialogic {
                 //Console.WriteLine("Adding: " + c.GetType() + " to "+ chats.Last().text);
                 chats.Last().AddCommand(c);
             }
+            parsed.Push(c);
             return VisitChildren(context);
         }
-
-        /*private Command LastOfType(List<Command> commands, Type typeToFind) {
-            for (var i = commands.Count - 1; i >= 0; i--) {
-                Command c = commands[i];
-                if (c.GetType() == typeToFind) {
-                    return graph.commands[i];
-                }
-            }
-            return null;
-        }*/
 
         /*public Chat VisitOpt(RuleContext context) {
 
@@ -170,12 +193,6 @@ namespace Dialogic {
 
             //dialog.AddEvent(new Opt(dialog, args[0]));
             return VisitChildren(context);
-        }*/
-
-        private string TypeFromContext(RuleContext context, bool qualified = false) {
-            var cname = context.GetType().ToString();
-            var tname = cname.Replace("GScriptParser+", "").Replace("Context", "");
-            return qualified ? "Chatic." + tname : tname;
         }
 
         private List<ArgsContext> FindChildren(RuleContext parent, Type typeToFind) {
@@ -193,7 +210,7 @@ namespace Dialogic {
                 throw new Exception("No body found for: " + parent.GetText());
             }
             return result;
-        }
+        }*/
 
         class ThrowExceptionErrorListener : IAntlrErrorListener<IToken> {
             void IAntlrErrorListener<IToken>.SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol,
@@ -208,11 +225,11 @@ namespace Dialogic {
             Chat c = (new Chat());
             c.Init("Part1");
             cman.AddChat(c);
-            c.AddCommand(Command.create("Say", "Hello"));
-            c.AddCommand(Command.create("Do", "Flip"));
-            Chat d = (Chat) Command.create("Chat", "Part2");
+            c.AddCommand(Command.Create("Say", "Hello"));
+            c.AddCommand(Command.Create("Do", "Flip"));
+            Chat d = (Chat) Command.Create("Chat", "Part2");
             cman.AddChat(d);
-            d.AddCommand(Command.create("Do", "Flip2"));
+            d.AddCommand(Command.Create("Do", "Flip2"));
             Console.WriteLine(cman);
         }
 
