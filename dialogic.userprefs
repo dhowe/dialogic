@@ -1,0 +1,17 @@
+﻿<Properties StartupConfiguration="{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="dialogic/ChatManager.cs">
+    <Files>
+      <File FileName="dialogic/ChatManager.cs" Line="11" Column="19" />
+      <File FileName="dialogic/Commands.cs" Line="16" Column="63" />
+      <File FileName="dialogic/guppy-script.gs" Line="8" Column="32" />
+      <File FileName="dialogic/GuppyScript.g4" Line="15" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.dialogic PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>
