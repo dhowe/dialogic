@@ -5,10 +5,11 @@ grammar Dialogic;
 tree: line+;
 line: (command SPACE* | command SPACE+ args) (NEWLINE | EOF);
 command: (CHAT | SAY | WAIT | DO | ASK | OPT | GO | CALL);
-args: str | num | aexp;
+args: arg (delim arg)*;
+delim: SPACE* POUND SPACE*;
+arg: (str | num);
 str:  WORD (SPACE WORD)*;
 num: DECIMAL;
-aexp: (str | num) SPACE* RARROW SPACE* label;
 label: WORD;
 
 //////////////////////// LEXER /////////////////////////

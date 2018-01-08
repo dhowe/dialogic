@@ -5,10 +5,11 @@ using System.Threading;
 
 namespace Dialogic
 {
-
     public abstract class Command
     {
         protected static int IDGEN = 0;
+
+        protected static NoOp NOP = new NoOp();
 
         protected static string PACKAGE = "Dialogic.";
 
@@ -25,21 +26,23 @@ namespace Dialogic
             return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
         }
 
-        public static Command Create(string type, string args)
+        public static Command Create(string type, params string[] args)
         {
             type = ToMixedCase(type);
             return Create(Type.GetType(PACKAGE + type) ??
                 throw new TypeLoadException("No type: " + PACKAGE + type), args);
         }
 
-        public static Command Create(Type type, string args)
+        public static Command Create(Type type, params string[] args)
         {
             Command cmd = (Command)Activator.CreateInstance(type);
             cmd.Init(args);
             return cmd;
         }
 
-        public virtual void Init(string args) => this.Text = args;
+        protected static string QQ(string text) => "'" + text + "'";
+
+        public virtual void Init(params string[] args) => this.Text = String.Join("", args);
 
         public virtual string TypeName() => this.GetType().ToString().Replace(PACKAGE, "");
 
@@ -57,7 +60,9 @@ namespace Dialogic
 
     public class NoOp : Command { }
 
-    public class Say : Command { }
+    public class Say : Command { 
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " + QQ(Text);
+    }
 
     public class Do : Command { }
 
@@ -81,20 +86,14 @@ namespace Dialogic
 
     public class Wait : Command
     {
-        public float seconds { get; protected set; }
+        public float Seconds { get; protected set; }
 
-        public override void Init(string args)
-        {
-            this.seconds = float.MaxValue;
-            if (args.Length > 0)
-            {
-                this.seconds = float.Parse(args);
-            }
-        }
+        public override void Init(params string[] args) => 
+            Seconds = args.Length == 1 ? float.Parse(args[0]) : float.MaxValue;
 
-        public override string ToString() => "[" + TypeName().ToUpper() + "] " + seconds;
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " + Seconds;
 
-        public int Millis() => (int)(seconds * 1000);
+        public int Millis() => (int)(Seconds * 1000);
     }
 
     public class Opt : Command
@@ -103,41 +102,38 @@ namespace Dialogic
 
         public Opt() : this("") { }
 
-        public Opt(string text) : this(text, new NoOp()) { }
+        public Opt(string text) : this(text, NOP) { }
 
         public Opt(string text, Command action) : base() {
             this.Text = text;
             this.action = action;
         }
 
-        public override void Init(string args)
+        public override void Init(params string[] args)
         {
-            string[] arr = Regex.Split(args, " *=> *");
-            if (arr.Length < 1)
+            if (args.Length < 1)
             {
                 throw new TypeLoadException("Bad args: " + args);
             }
-            this.Text = arr[0];
-            this.action = (arr.Length > 1) ? Command.Create(typeof(Go), arr[1]) : null;
+            this.Text = args[0];
+            this.action = (args.Length > 1) ? Command.Create(typeof(Go), args[1]) : null;
         }
 
-        public override string ToString() => "[" + TypeName().ToUpper() 
-            + "] " + Text + " (=> " + this.action.Text + ")";
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " 
+            + QQ(Text) + (action is NoOp ? "" : " (-> " + action.Text + ")");
 
-        public string ActionText()
-        {
-            return action != null ? action.Text : "";
-        }
+        public string ActionText() => action != null ? action.Text : "";
     }
 
     public class Ask : Command
     {
         public int SelectedIdx { get; protected set; }
+
         public int attempts = 0;
 
         private float seconds = -1;
 
-        private List<Opt> options = new List<Opt>();
+        private readonly List<Opt> options = new List<Opt>();
 
         public List<Opt> Options() {
             
@@ -171,11 +167,17 @@ namespace Dialogic
             }
             return null;
         }
+
+        public override string ToString()
+        {
+            string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "\n";
+            Options().ForEach(o => s += "    " + o + "\n");
+            return s.Substring(0,s.Length-1);
+        }
     }
 
-    /*public struct Func
-    { // named Action
-
+    /*public struct Func  // named Action
+    {
         public Action action;
         public string name;
 
@@ -187,7 +189,6 @@ namespace Dialogic
         }
 
         public void Invoke() => action.Invoke();
-
         public override string ToString() => "Action." + name;
     }*/
 }
