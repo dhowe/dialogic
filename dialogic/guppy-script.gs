@@ -17,4 +17,5 @@ OPT Nah => RePrompt
 
 CHAT Game
 DO HappyFish
-SAY Great, let's play!
+ASK Great, let's play!
+SAY Done

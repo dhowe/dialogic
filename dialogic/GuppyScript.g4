@@ -27,6 +27,7 @@ OPT: 'OPT'; // TODO
 GO: 'GO';
 CALL: 'CALL'; // TODO
 
+POUND: '#';
 RARROW: '=>';
 DCOLON: '::';
 SPACE: (' ' | '\t');

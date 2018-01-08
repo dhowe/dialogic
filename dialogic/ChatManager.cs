@@ -13,9 +13,8 @@ namespace Dialogic
 
     /* NEXT: 
         Add argument separator and test lex/parse (->, =>, ::)
-        Handle timeout
-        Handle no Opts given
-        
+        Handle Ask timeout
+
         Verify chat-name uniqueness on parse
         Allow decimals like .4
     */
@@ -36,26 +35,31 @@ namespace Dialogic
                 suffix = "";
             }
 
-            if (c is Ask a)
+            if (c is Ask a) chatMan.Do(DoPrompt(a));
+        }
+
+        private Command DoPrompt(Ask a)
+        {
+            var opts = a.Options();
+            //Console.WriteLine($"Opts for {a.Text} = {opts}");
+            //opts.ForEach((obj) => Console.WriteLine($"opt={obj.Text}"));
+            for (int i = 0; i < opts.Count; i++)
             {
-                for (int i = 0; i < a.options.Count; i++)
-                {
-                    Opt opt = a.options[i];
-                    Console.WriteLine("(" + (i + 1) + ") " + opt.Text + " => [" + opt.action.Text + "]");
-                }
-
-                Command next = a.Choose(Console.ReadKey(true).KeyChar.ToString());;
-                while (next == null)
-                {
-                    Console.WriteLine("\nPlease select an option from 1-" + a.options.Count + "\n");
-                    next = a.Choose(Console.ReadKey(true).KeyChar.ToString());
-                }
-
-                Console.WriteLine("    (selected Opt#" + (a.selectedIdx + 1)
-                    + " => [" + a.Selected().action.Text + "]\n");
-                
-                chatMan.Do(next);
+                Console.WriteLine("(" + (i + 1) + ") " + opts[i].Text
+                    + " => [" + opts[i].ActionText() + "]");
             }
+
+            Command next = a.Choose(Console.ReadKey(true).KeyChar.ToString());
+            while (next == null)
+            {
+                Console.WriteLine("\nChoose an option from 1-" + opts.Count + "\n");
+                next = a.Choose(Console.ReadKey(true).KeyChar.ToString());
+            }
+
+            Console.WriteLine("    (selected Opt#" + (a.SelectedIdx + 1)
+                + " => [" + a.Selected().ActionText() + "]\n");
+
+            return next;
         }
     }
 
@@ -127,8 +131,9 @@ namespace Dialogic
 
         private void NotifyListeners(Command c)
         {
-            listeners.ForEach(icl => icl.onChatEvent(this, c));
-            //c.Fire();
+            listeners.ForEach((icl) => { 
+                if (!(c is NoOp)) icl.onChatEvent(this, c);
+            });
         }
 
         public void Run(string name) => Run(FindByName(name));
