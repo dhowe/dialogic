@@ -2,6 +2,6 @@ namespace Dialogic
 {
     public interface IChatListener
     {
-        void onChatEvent(ChatManager cm, Command c);
+        void onChatEvent(ChatScheduler cs, Command c);
     }
 }

@@ -2,7 +2,6 @@ grammar GuppyScript;
 
 //////////////////////// PARSER /////////////////////////
 
-dialog: line+;
 line: (command SPACE* | command SPACE+ args) (NEWLINE | EOF);
 command: (CHAT | SAY | WAIT | DO | ASK | OPT | GO | CALL);
 args: str | num | aexp;

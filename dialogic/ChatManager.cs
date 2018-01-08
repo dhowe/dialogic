@@ -23,7 +23,7 @@ namespace Dialogic
     {
         private string suffix = "";
 
-        void IChatListener.onChatEvent(ChatManager chatMan, Command c)
+        void IChatListener.onChatEvent(ChatScheduler cs, Command c)
         {
             if (c is Do || c is Chat)
             {
@@ -35,7 +35,7 @@ namespace Dialogic
                 suffix = "";
             }
 
-            if (c is Ask a) chatMan.Do(DoPrompt(a));
+            if (c is Ask a) cs.Do(DoPrompt(a));
         }
 
         private Command DoPrompt(Ask a)
@@ -63,22 +63,14 @@ namespace Dialogic
         }
     }
 
-    public class ChatManager : GuppyScriptBaseVisitor<Chat>
-    { // TODO: break into Manager/Runner
+    public class ChatScheduler {
 
-        List<Chat> chats = new List<Chat>();
-        //Stack<Command> events = new Stack<Command>();
-        Stack<Command> parsed = new Stack<Command>();
         List<IChatListener> listeners = new List<IChatListener>();
+        private ChatManager cman;
 
-        public static void Main(string[] args)
+        public ChatScheduler(ChatManager cman)
         {
-            ChatManager sman = new ChatManager();
-            sman.AddListener(new ConsoleListener());
-            //sman.Parse("[Say] I would like to emphasize this\n[Wait] 1.5\n");
-            sman.ParseFile("guppy-script.gs");
-            Console.WriteLine(sman);
-            sman.Run();
+            this.cman = cman;
         }
 
         public void Do(Command cmd)
@@ -90,7 +82,7 @@ namespace Dialogic
             else if (cmd is Go)
             {
                 //System.Console.WriteLine($"FINDING {cmd.Text}");
-                Run(FindByName(cmd.Text));
+                Run(cman.FindByName(cmd.Text));
             }
             NotifyListeners(cmd);
         }
@@ -102,6 +94,50 @@ namespace Dialogic
             chat.commands.ForEach((c) => Do(c));
         }
 
+        public void Start()
+        {
+            List<Chat> chats = cman.Chats();
+            if (chats == null || chats.Count < 1)
+            {
+                throw new Exception("No chats found!");
+            }
+            Run(chats[0]);
+        }
+
+        public void Run(string name) => Run(cman.FindByName(name));
+
+        private void NotifyListeners(Command c)
+        {
+            listeners.ForEach((icl) => {
+                if (!(c is NoOp)) icl.onChatEvent(this, c);
+            });
+        }
+
+        public void AddListener(IChatListener icl)
+        {
+            this.listeners.Add(icl);
+        }
+    }
+
+    public class ChatManager : GuppyScriptBaseVisitor<Chat>
+    { 
+
+        List<Chat> chats = new List<Chat>();
+        Stack<Command> parsed = new Stack<Command>();
+        //Stack<Command> events = new Stack<Command>();
+
+        public static void Main(string[] args)
+        {
+            ChatManager cman = new ChatManager();
+            //cman.Parse("[Say] I would like to emphasize this\n[Wait] 1.5\n");
+            cman.ParseFile("guppy-script.gs");
+
+            ChatScheduler sched = new ChatScheduler(cman);
+            sched.AddListener(new ConsoleListener());
+            sched.Start();
+        }
+
+
         public override string ToString()
         {
             string s = "";
@@ -111,15 +147,6 @@ namespace Dialogic
 
         private void AddChat(Chat c) => chats.Add(c);
 
-        public void Run()
-        {
-            if (chats == null || chats.Count < 1)
-            {
-                throw new Exception("No chats found!");
-            }
-            Run(chats[0]);
-        }
-
         private Command LastOfType(Stack<Command> s, Type typeToFind)
         {
             foreach (Command c in s)
@@ -128,15 +155,6 @@ namespace Dialogic
             }
             return null;
         }
-
-        private void NotifyListeners(Command c)
-        {
-            listeners.ForEach((icl) => { 
-                if (!(c is NoOp)) icl.onChatEvent(this, c);
-            });
-        }
-
-        public void Run(string name) => Run(FindByName(name));
 
         public Chat FindByName(string chatName)
         {
@@ -148,23 +166,20 @@ namespace Dialogic
             throw new KeyNotFoundException(chatName);
         }
 
-        public Chat ParseFile(string fname)
+        public void ParseFile(string fname)
         {
-            return ParseText(File.ReadAllText(fname, Encoding.UTF8));
+            ParseText(File.ReadAllText(fname, Encoding.UTF8));
         }
 
-        public Chat ParseText(string text)
+        public void ParseText(string text)
         {
             GuppyScriptParser parser = CreateParser(new AntlrInputStream(text));
             IParseTree tree = parser.dialog();
             //graph = (Chat) Command.Create("Chat", Path.GetFileNameWithoutExtension(text));
-            return Visit(tree);
+            Visit(tree);
+            Console.WriteLine(this);
         }
 
-        public void AddListener(IChatListener icl)
-        {
-            this.listeners.Add(icl);
-        }
 
         private GuppyScriptParser CreateParser(ICharStream txt)
         {
@@ -192,19 +207,12 @@ namespace Dialogic
             else if (c is Opt o)
             {
                 Command last = LastOfType(parsed, typeof(Ask));
-                if (!(last is Ask a))
-                {
-                    throw new Exception("Opt must be preceded by Ask");
-                }
+                if (!(last is Ask a)) throw new Exception("Opt must follow by Ask");
                 a.AddOption(o);
             }
             else
             {
-                if (chats.Count == 0)
-                {
-                    chats.Add(new Chat());
-                }
-                //Console.WriteLine("Adding: " + c.GetType() + " to "+ chats.Last().text);
+                if (chats.Count == 0) chats.Add(new Chat());
                 chats.Last().AddCommand(c);
             }
 
@@ -213,43 +221,10 @@ namespace Dialogic
             return VisitChildren(context);
         }
 
-        /*public Chat VisitOpt(RuleContext context) {
-
-            Command last = LastOfType(dialog.events, typeof(Ask));
-            if (!(last is Ask)) throw new Exception("Opt must be preceded by Ask");
-            string[] args = ParseArgs(context);
-            Ask ask = (Ask) last;
-            switch (args.Length) {
-                case 2:
-                    ask.AddOption(args[0], args[1]);
-                    break;
-                case 1:
-                    ask.AddOption(args[0]);
-                    break;
-                default:
-                    throw new Exception("Invalid # of args");
-            }
-
-            //dialog.AddEvent(new Opt(dialog, args[0]));
-            return VisitChildren(context);
+        public List<Chat> Chats()
+        {
+            return chats;
         }
-
-        private List<ArgsContext> FindChildren(RuleContext parent, Type typeToFind) {
-            if (parent == null) {
-                throw new Exception("Unexpected parent value: null");
-            }
-            List<ArgsContext> result = new List<ArgsContext>();
-            for (int i = 0; i < parent.ChildCount; i++) {
-                var child = parent.GetChild(i);
-                if (child.GetType() == typeToFind) {
-                    result.Add((ArgsContext) child);
-                }
-            }
-            if (result == null) {
-                throw new Exception("No body found for: " + parent.GetText());
-            }
-            return result;
-        }*/
 
         public static void Test(string[] args)
         {
@@ -266,5 +241,6 @@ namespace Dialogic
             Console.WriteLine(cman);
         }
 
+ 
     }
 }
