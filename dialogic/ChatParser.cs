@@ -11,27 +11,36 @@ namespace Dialogic
 {
 
     /* NEXT: 
-        Handle Ask timeout
+        Handle Ask timeout (defaultTime=10sec, defaultAction=repeat)
+
+        Handle variable if/then
+        Handle meta-tagging and chat-search (linq)
+
+        Update documentation in read me
+
         Verify chat-name uniqueness on parse
         Allow decimals like .4
     */
 
-    public class ChatManager : DialogicBaseVisitor<Chat>
+    public class ChatParser : DialogicBaseVisitor<Chat>
     {
+        protected List<Chat> chats;
+        protected Stack<Command> parsed;
 
-        List<Chat> chats = new List<Chat>();
-        Stack<Command> parsed = new Stack<Command>();
-        //Stack<Command> events = new Stack<Command>();
+        public ChatParser() {
+            chats = new List<Chat>();
+            parsed = new Stack<Command>();
+        }
 
         public static void Main(string[] args)
         {
-            ChatManager cman = new ChatManager();
-            //cman.Parse("[Say] I would like to emphasize this\n[Wait] 1.5\n");
-            cman.ParseFile("gscript.gs");
-
-            ChatScheduler sched = new ChatScheduler(cman);
-            sched.AddListener(new ConsoleListener());
-            //sched.Start();
+            //List<Chat> chats = ChatParser.ParseText("[Say] I would like to emphasize this\n[Wait] 1.5\n");
+            List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
+            ChatExecutor sched = new ChatExecutor(chats);
+            ConsoleClient cl = new ConsoleClient();
+            cl.Subscribe(sched);
+            //sched.AddListener(new ConsoleListener());
+            sched.Run();
         }
 
         public override string ToString()
@@ -52,34 +61,27 @@ namespace Dialogic
             return null;
         }
 
-        public Chat FindByName(string chatName)
+        public static List<Chat>ParseFile(string fname)
         {
-            for (int i = 0; i < chats.Count; i++)
-            {
-                if (chats[i].Text == chatName)
-                    return chats[i];
-            }
-            throw new KeyNotFoundException(chatName);
+            return ParseText(File.ReadAllText(fname, Encoding.UTF8));
         }
 
-        public void ParseFile(string fname)
+        public static List<Chat> ParseText(string text)
         {
-            ParseText(File.ReadAllText(fname, Encoding.UTF8));
-        }
-
-        public void ParseText(string text)
-        {
+            ChatParser cp = new ChatParser();
             DialogicParser parser = CreateParser(new AntlrInputStream(text));
             ParserRuleContext tree = parser.tree();
-            Visit(tree);
+            cp.Visit(tree);
             PrintLispTree(parser, tree);
-            Console.WriteLine(this);
+            Console.WriteLine(cp);
+            return cp.chats;
         }
 
         private static void PrintLispTree(DialogicParser parser, ParserRuleContext prc)
         {
             string tree = prc.ToStringTree(parser);
             int indentation = 1;
+            Console.WriteLine("PARSE-TREE");
             foreach (char c in tree)
             {
                 if (c == '(')
@@ -101,7 +103,7 @@ namespace Dialogic
         }
 
 
-        private DialogicParser CreateParser(ICharStream txt)
+        private static DialogicParser CreateParser(ICharStream txt)
         {
             ITokenSource lexer = new DialogicLexer(txt);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -151,7 +153,7 @@ namespace Dialogic
         public static void Test(string[] args)
         {
 
-            ChatManager cman = new ChatManager();
+            ChatParser cman = new ChatParser();
             Chat c = (new Chat());
             c.Init("Part1");
             cman.AddChat(c);

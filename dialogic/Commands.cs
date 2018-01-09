@@ -7,11 +7,11 @@ namespace Dialogic
 {
     public abstract class Command
     {
+        const string PACKAGE = "Dialogic.";
+
         protected static int IDGEN = 0;
 
-        protected static NoOp NOP = new NoOp();
-
-        protected static string PACKAGE = "Dialogic.";
+        protected static readonly Command NOP = new NoOp();
 
         public static void Out(object s) => Console.WriteLine(s);
 
@@ -21,10 +21,8 @@ namespace Dialogic
 
         protected Command() => this.Id = (++IDGEN).ToString();
 
-        private static string ToMixedCase(string s)
-        {
-            return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
-        }
+        private static string ToMixedCase(string s) => (s[0]+"").ToUpper() 
+            + s.Substring(1).ToLower();
 
         public static Command Create(string type, params string[] args)
         {
@@ -49,18 +47,20 @@ namespace Dialogic
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
     }
 
-    public class Go : Command { 
-        
+    public class Go : Command
+    {
         public Go() : base() { }
 
-        public Go(string text) : base() {
+        public Go(string text) : base()
+        {
             this.Text = text;
         }
     }
 
     public class NoOp : Command { }
 
-    public class Say : Command { 
+    public class Say : Command
+    {
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + QQ(Text);
     }
 
@@ -88,7 +88,7 @@ namespace Dialogic
     {
         public float Seconds { get; protected set; }
 
-        public override void Init(params string[] args) => 
+        public override void Init(params string[] args) =>
             Seconds = args.Length == 1 ? float.Parse(args[0]) : float.MaxValue;
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + Seconds;
@@ -104,7 +104,8 @@ namespace Dialogic
 
         public Opt(string text) : this(text, NOP) { }
 
-        public Opt(string text, Command action) : base() {
+        public Opt(string text, Command action) : base()
+        {
             this.Text = text;
             this.action = action;
         }
@@ -119,7 +120,7 @@ namespace Dialogic
             this.action = (args.Length > 1) ? Command.Create(typeof(Go), args[1]) : null;
         }
 
-        public override string ToString() => "[" + TypeName().ToUpper() + "] " 
+        public override string ToString() => "[" + TypeName().ToUpper() + "] "
             + QQ(Text) + (action is NoOp ? "" : " (-> " + action.Text + ")");
 
         public string ActionText() => action != null ? action.Text : "";
@@ -131,19 +132,20 @@ namespace Dialogic
 
         public int attempts = 0;
 
-        private float seconds = -1;
+        private float seconds = 2;
 
         private readonly List<Opt> options = new List<Opt>();
 
-        public List<Opt> Options() {
-            
-            if (options.Count < 1) {
+        public List<Opt> Options()
+        {
+            if (options.Count < 1)
+            {
                 options.Add(new Opt("Yes"));
                 options.Add(new Opt("No"));
             }
             return options;
         }
- 
+
         public int Millis() => seconds > -1 ? (int)(seconds * 1000) : Int32.MaxValue;
 
         public Opt Selected() => options[SelectedIdx];
@@ -168,11 +170,21 @@ namespace Dialogic
             return null;
         }
 
+        public void Fire()
+        {
+            var ask = this;
+            new Thread((ThreadStart)delegate ()
+            {
+                Thread.Sleep(ask.Millis());
+                //System.Console.WriteLine($"seconds={ask.seconds} expired!");
+            }).Start();
+        }
+
         public override string ToString()
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "\n";
             Options().ForEach(o => s += "    " + o + "\n");
-            return s.Substring(0,s.Length-1);
+            return s.Substring(0, s.Length - 1);
         }
     }
 

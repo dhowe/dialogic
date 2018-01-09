@@ -1,4 +1,4 @@
-SAY Welcome to my World...
+SAY Welcome to my World
 WAIT 0.2
 DO Twirl
 SAY Thanks for Visiting!

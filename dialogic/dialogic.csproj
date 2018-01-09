@@ -9,4 +9,14 @@
     <PackageReference Include="Antlr4" Version="4.6.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="ChatSource.cs" />
+    <Compile Remove="ChatListener.cs" />
+    <Compile Remove="IChatEvent.cs" />
+    <Compile Remove="ChatEvent.cs" />
+    <Compile Remove="ClientEvent.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Commands.tmp" />
+  </ItemGroup>
 </Project>

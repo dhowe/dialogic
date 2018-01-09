@@ -2,12 +2,21 @@
 
 namespace Dialogic
 {
-    public class ConsoleListener : IChatListener
+    public class ConsoleClient// : IChatListener
     {
         private string suffix = "";
 
-        void IChatListener.onChatEvent(ChatScheduler cs, Command c)
+        public void Subscribe(ChatExecutor cs)
         {
+            cs.Events += new ChatExecutor.ChatEventHandler(OnChatEvent);
+        }
+
+        private void OnChatEvent(ChatExecutor cs, ChatEventArgs e)
+        //void IChatListener.OnChatEvent(ChatEvent e)//cs, Command c)
+        {
+            //Out.WriteLine($"c={c.GetType()} {c.Text}"); 
+            Command c = e.Command;
+
             if (c is Do || c is Chat)
             {
                 suffix += "\t[" + c.TypeName() + ": " + c.Text + "]";
@@ -18,10 +27,13 @@ namespace Dialogic
                 suffix = "";
             }
 
-            if (c is Ask a) cs.Do(DoPrompt(a));
+            if (c is Ask a)
+            {
+                cs.Do(Prompt(a));
+            }
         }
 
-        private Command DoPrompt(Ask a)
+        private Command Prompt(Ask a)
         {
             var opts = a.Options();
             //.WriteLine($"Opts for {a.Text} = {opts}");
