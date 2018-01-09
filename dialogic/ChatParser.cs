@@ -10,13 +10,13 @@ using Antlr4.Runtime.Misc;
 namespace Dialogic
 {
 
-    /* NEXT: 
+    /* TODO: 
         Handle Ask timeout (defaultTime=10sec, defaultAction=repeat)
 
         Handle variable if/then
         Handle meta-tagging and chat-search (linq)
 
-        Update documentation in read me
+        Update documentation in readme
 
         Verify chat-name uniqueness on parse
         Allow decimals like .4
@@ -27,26 +27,26 @@ namespace Dialogic
         protected List<Chat> chats;
         protected Stack<Command> parsed;
 
-        public ChatParser() {
+        public ChatParser()
+        {
             chats = new List<Chat>();
             parsed = new Stack<Command>();
         }
 
         public static void Main(string[] args)
         {
-            //List<Chat> chats = ChatParser.ParseText("[Say] I would like to emphasize this\n[Wait] 1.5\n");
+            //ChatParser.ParseText("[Say] I would like to emphasize this\n[Wait] 1.5\n");
             List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
             ChatExecutor sched = new ChatExecutor(chats);
             ConsoleClient cl = new ConsoleClient();
             cl.Subscribe(sched);
-            //sched.AddListener(new ConsoleListener());
             sched.Run();
         }
 
         public override string ToString()
         {
             string s = "\n";
-            chats.ForEach(c => s += c + "\n");
+            chats.ForEach(cmd => s += ((cmd is Chat c ? c.ToTree() : cmd.ToString()) + "\n"));
             return s;
         }
 
@@ -61,7 +61,7 @@ namespace Dialogic
             return null;
         }
 
-        public static List<Chat>ParseFile(string fname)
+        public static List<Chat> ParseFile(string fname)
         {
             return ParseText(File.ReadAllText(fname, Encoding.UTF8));
         }
@@ -77,7 +77,14 @@ namespace Dialogic
             return cp.chats;
         }
 
-        private static void PrintLispTree(DialogicParser parser, ParserRuleContext prc)
+        private static DialogicParser CreateParser(ICharStream txt)
+        {
+            ITokenSource lexer = new DialogicLexer(txt);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            return new DialogicParser(tokens);
+        }
+
+        static void PrintLispTree(DialogicParser parser, ParserRuleContext prc)
         {
             string tree = prc.ToStringTree(parser);
             int indentation = 1;
@@ -102,18 +109,6 @@ namespace Dialogic
             Console.WriteLine("\n");
         }
 
-
-        private static DialogicParser CreateParser(ICharStream txt)
-        {
-            ITokenSource lexer = new DialogicLexer(txt);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            return new DialogicParser(tokens);
-        }
-
-        public static void Out(object s) => Console.WriteLine(s);
-
-        public static void Err(object s) => Console.WriteLine("\n[ERROR] " + s + "\n");
-
         public override Chat VisitLine([NotNull] DialogicParser.LineContext context)
         {
             var cmd = context.GetChild<DialogicParser.CommandContext>(0).GetText();
@@ -122,7 +117,7 @@ namespace Dialogic
             var args = Array.ConvertAll(xargs, arg => arg.GetText());
 
             //Console.WriteLine("cmd: " + cmd + " args: " + String.Join(",",args));
- 
+
             Command c = Command.Create(cmd, args);
             if (c is Chat)
             {
@@ -145,24 +140,10 @@ namespace Dialogic
             return VisitChildren(context);
         }
 
-        public List<Chat> Chats()
-        {
-            return chats;
-        }
+        public static void Out(object s) => Console.WriteLine(s);
 
-        public static void Test(string[] args)
-        {
+        public static void Err(object s) => Console.WriteLine("\n[ERROR] " + s + "\n");
 
-            ChatParser cman = new ChatParser();
-            Chat c = (new Chat());
-            c.Init("Part1");
-            cman.AddChat(c);
-            c.AddCommand(Command.Create("Say", "Hello"));
-            c.AddCommand(Command.Create("Do", "Flip"));
-            Chat d = (Chat)Command.Create("Chat", "Part2");
-            cman.AddChat(d);
-            d.AddCommand(Command.Create("Do", "Flip2"));
-            Console.WriteLine(cman);
-        }
+        public List<Chat> Chats() => chats;
     }
 }

@@ -12,9 +12,7 @@ namespace Dialogic
         }
 
         private void OnChatEvent(ChatExecutor cs, ChatEventArgs e)
-        //void IChatListener.OnChatEvent(ChatEvent e)//cs, Command c)
         {
-            //Out.WriteLine($"c={c.GetType()} {c.Text}"); 
             Command c = e.Command;
 
             if (c is Do || c is Chat)
@@ -27,8 +25,11 @@ namespace Dialogic
                 suffix = "";
             }
 
+
             if (c is Ask a)
             {
+                //cs.OnClientEvent(new ClientEventArgs(this, Prompt(a)));
+                //cs.OnUIEvent(new ClientEventArgs(this, Prompt(a)));
                 cs.Do(Prompt(a));
             }
         }
@@ -36,8 +37,7 @@ namespace Dialogic
         private Command Prompt(Ask a)
         {
             var opts = a.Options();
-            //.WriteLine($"Opts for {a.Text} = {opts}");
-            //opts.ForEach((obj) => Out.WriteLine($"opt={obj.Text}"));
+
             for (int i = 0; i < opts.Count; i++)
             {
                 Out.WriteLine("(" + (i + 1) + ") " + opts[i].Text

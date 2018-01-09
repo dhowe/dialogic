@@ -21,7 +21,7 @@ namespace Dialogic
 
         protected Command() => this.Id = (++IDGEN).ToString();
 
-        private static string ToMixedCase(string s) => (s[0]+"").ToUpper() 
+        private static string ToMixedCase(string s) => (s[0] + "").ToUpper()
             + s.Substring(1).ToLower();
 
         public static Command Create(string type, params string[] args)
@@ -74,7 +74,7 @@ namespace Dialogic
 
         public Chat(string name) : base() => this.Text = name;
 
-        public override string ToString()
+        public string ToTree()
         {
             string s = base.ToString() + "\n";
             commands.ForEach(c => s += "  " + c + "\n");
@@ -182,25 +182,16 @@ namespace Dialogic
 
         public override string ToString()
         {
+            string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "(";
+            Options().ForEach(o => s += o.Text + ",");
+            return s.Substring(0,s.Length-1)+ ")";
+        }
+
+        public string ToTree()
+        {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "\n";
             Options().ForEach(o => s += "    " + o + "\n");
             return s.Substring(0, s.Length - 1);
         }
     }
-
-    /*public struct Func  // named Action
-    {
-        public Action action;
-        public string name;
-
-        public Func(string name, Action action)
-        {
-
-            this.name = name;
-            this.action = action;
-        }
-
-        public void Invoke() => action.Invoke();
-        public override string ToString() => "Action." + name;
-    }*/
 }
