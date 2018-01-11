@@ -7,8 +7,8 @@ namespace Dialogic
 {
     public class ChatExecutor
     {
-        public delegate void ChatEventHandler(ChatExecutor ce, ChatEventArgs e);
-        public event ChatEventHandler Events;
+        public delegate void ChatEventHandler(ChatExecutor ce, ChatEvent e);
+        public event ChatEventHandler ChatEvents;
 
         protected List<Chat> chats;
         public bool logEvents = true;
@@ -20,17 +20,23 @@ namespace Dialogic
             if (logEvents) InitLog();
         }
 
+        public void Subscribe(ConsoleClient cc)
+        {
+            cc.UnityEvents += new ConsoleClient.UnityEventHandler(OnUnityEvent);
+        }
+
+        private void OnUnityEvent(MockUnityEvent e) {
+            
+            Console.WriteLine($"<{e.Message}>");
+        }
+
         public void Do(Command cmd)
         {
             RaiseEvent(cmd);
 
             if (cmd is Wait w)
             {
-                Thread.Sleep(w.Millis());
-            }
-            else if (cmd is Ask a)
-            {
-                a.Fire();
+                Thread.Sleep(w.Millis()); // better solution?
             }
             else if (cmd is Go)
             {
@@ -38,13 +44,11 @@ namespace Dialogic
             }
         }
 
-        //public void OnClientEvent(ClientEventArgs e) {}
-
         private void RaiseEvent(Command c)
         {
             if (c is NoOp) return;
             if (logEvents) Util.Log(LogFileName, c);
-            Events?.Invoke(this, new ChatEventArgs(c));
+            ChatEvents?.Invoke(this, new ChatEvent(c));
         }
 
         public void Run(Chat chat)

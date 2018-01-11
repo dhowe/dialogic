@@ -132,7 +132,7 @@ namespace Dialogic
 
         public int attempts = 0;
 
-        private float seconds = 2;
+        private float seconds = 5;
 
         private readonly List<Opt> options = new List<Opt>();
 
@@ -156,7 +156,7 @@ namespace Dialogic
             return this;
         }
 
-        public Command Choose(string input) // return next command or null
+        public Command Choose(string input) // return next Command or null
         {
             attempts++;
             if (int.TryParse(input, out int i))
@@ -167,17 +167,7 @@ namespace Dialogic
                     return this.options[SelectedIdx].action;
                 }
             }
-            return null;
-        }
-
-        public void Fire()
-        {
-            var ask = this;
-            new Thread((ThreadStart)delegate ()
-            {
-                Thread.Sleep(ask.Millis());
-                //System.Console.WriteLine($"seconds={ask.seconds} expired!");
-            }).Start();
+            throw new InvalidChoice(this);
         }
 
         public override string ToString()

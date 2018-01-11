@@ -38,8 +38,11 @@ namespace Dialogic
             //ChatParser.ParseText("[Say] I would like to emphasize this\n[Wait] 1.5\n");
             List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
             ChatExecutor sched = new ChatExecutor(chats);
-            ConsoleClient cl = new ConsoleClient();
-            cl.Subscribe(sched);
+
+            ConsoleClient cl = new ConsoleClient(); // Example client
+            cl.Subscribe(sched); // subscribe to chat events
+
+            sched.Subscribe(cl); // subscribe to Unity events
             sched.Run();
         }
 

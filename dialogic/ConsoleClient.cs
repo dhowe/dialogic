@@ -1,17 +1,37 @@
-﻿using Out = System.Console;
+﻿using System;
+using System.Threading;
+using Out = System.Console;
 
 namespace Dialogic
 {
-    public class ConsoleClient// : IChatListener
+    public class ConsoleClient // and example client
     {
+        public delegate void UnityEventHandler(MockUnityEvent e);
+        public event UnityEventHandler UnityEvents;
+
         private string suffix = "";
+
+        public ConsoleClient() {
+
+            new Thread(delegate ()
+            {
+                while (true)
+                {
+                    int ms = new Random().Next(5000, 10000);
+                    System.Console.WriteLine($"SleepFor: {ms}");
+                    Thread.Sleep(ms);
+                    UnityEvents?.Invoke(new MockUnityEvent());
+                }
+
+            }).Start();
+        }
 
         public void Subscribe(ChatExecutor cs)
         {
-            cs.Events += new ChatExecutor.ChatEventHandler(OnChatEvent);
+            cs.ChatEvents += new ChatExecutor.ChatEventHandler(OnChatEvent);
         }
 
-        private void OnChatEvent(ChatExecutor cs, ChatEventArgs e)
+        private void OnChatEvent(ChatExecutor cs, ChatEvent e)
         {
             Command c = e.Command;
 
@@ -25,11 +45,8 @@ namespace Dialogic
                 suffix = "";
             }
 
-
             if (c is Ask a)
             {
-                //cs.OnClientEvent(new ClientEventArgs(this, Prompt(a)));
-                //cs.OnUIEvent(new ClientEventArgs(this, Prompt(a)));
                 cs.Do(Prompt(a));
             }
         }
@@ -38,23 +55,36 @@ namespace Dialogic
         {
             var opts = a.Options();
 
+            // Print the possible options
             for (int i = 0; i < opts.Count; i++)
             {
                 Out.WriteLine("(" + (i + 1) + ") " + opts[i].Text
                     + " => [" + opts[i].ActionText() + "]");
             }
 
-            Command next = a.Choose(Out.ReadKey(true).KeyChar.ToString());
-            while (next == null)
+            Command next = null;
+            do // And prompt the user for a choice
             {
-                Out.WriteLine("\nChoose an option from 1-" + opts.Count + "\n");
-                next = a.Choose(Out.ReadKey(true).KeyChar.ToString());
-            }
+                try
+                {
+                    next = a.Choose(ConsoleReader.ReadLine(a, a.Millis()));
+                }
+                catch (PromptTimeout)
+                {
+                    Out.WriteLine("Hey! Anyone home?");
+                }
+                catch (InvalidChoice) { }
 
+                Out.WriteLine("\nChoose an option from 1-" + opts.Count + "\n");
+
+            } while (next == null);
+
+            // Print the selected option
             Out.WriteLine("    (selected Opt#" + (a.SelectedIdx + 1)
                 + " => [" + a.Selected().ActionText() + "]\n");
 
             return next;
         }
+
     }
 }

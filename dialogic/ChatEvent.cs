@@ -2,11 +2,11 @@
 
 namespace Dialogic
 {
-    public class ChatEventArgs : EventArgs
+    public class ChatEvent : EventArgs
     {
         protected Command command;
 
-        public ChatEventArgs(Command c)
+        public ChatEvent(Command c)
         {
             this.command = c;
         }

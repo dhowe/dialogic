@@ -5,7 +5,7 @@ SAY Thanks for Visiting!
 GO Prompt
 
 CHAT Prompt
-ASK Do you want to play a game? 
+ASK Do you want to play a game? # 5
 OPT Sure #Game
 OPT Nah #RePrompt
 
