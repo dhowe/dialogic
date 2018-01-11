@@ -10,9 +10,12 @@ using Antlr4.Runtime.Misc;
 namespace Dialogic
 {
 
+    // NEXT: lexing variables
+
     /* TODO: 
-        Handle variable if/then
-        Handle meta-tagging and chat-search (linq)
+        Variables
+        If/thens
+        Meta-tagging and chat-search (linq)
 
         Update documentation in readme
 
@@ -33,8 +36,8 @@ namespace Dialogic
 
         public static void Main(string[] args)
         {
-            //ChatParser.ParseText("[Say] I would like to emphasize this\n[Wait] 1.5\n");
-            List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
+            List<Chat> chats = ChatParser.ParseText("SAY Welcome to my $var1 world\n");
+            //List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
             ChatManager cm = new ChatManager(chats);
 
             ConsoleClient cl = new ConsoleClient(); // Example client
