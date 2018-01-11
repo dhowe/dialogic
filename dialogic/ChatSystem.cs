@@ -5,18 +5,24 @@ using System.Threading;
 
 namespace Dialogic
 {
-    public class ChatExecutor
+    public class ChatManager
     {
-        public delegate void ChatEventHandler(ChatExecutor ce, ChatEvent e);
-        public event ChatEventHandler ChatEvents;
+        public delegate void ChatEventHandler(ChatManager c, ChatEvent e);
+        public event ChatEventHandler ChatEvents; // event-stream
 
+        protected Dictionary<string, object> globals;
         protected List<Chat> chats;
         public bool logEvents = true;
         public string LogFileName = "dia.log";
 
-        public ChatExecutor(List<Chat> chats)
+        public ChatManager(List<Chat> chats)
         {
             this.chats = chats;
+            this.globals = new Dictionary<string, object>() { 
+                { "var1", "groovy" },
+                { "var2", true },
+                { "var3", 3.2 }
+            };
             if (logEvents) InitLog();
         }
 
@@ -25,8 +31,8 @@ namespace Dialogic
             cc.UnityEvents += new ConsoleClient.UnityEventHandler(OnUnityEvent);
         }
 
-        private void OnUnityEvent(MockUnityEvent e) {
-            
+        private void OnUnityEvent(MockUnityEvent e)
+        {
             Console.WriteLine($"<{e.Message}>");
         }
 

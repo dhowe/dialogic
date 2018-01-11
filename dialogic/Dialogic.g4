@@ -28,6 +28,7 @@ OPT: 'OPT'; // TODO
 GO: 'GO';
 CALL: 'CALL'; // TODO
 
+VAR: '$';
 POUND: '#';
 RARROW: '=>';
 DCOLON: '::';

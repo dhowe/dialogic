@@ -13,18 +13,17 @@ namespace Dialogic
         {
             getInput = new AutoResetEvent(false);
             gotInput = new AutoResetEvent(false);
-            inputThread = new Thread(reader);
-            inputThread.IsBackground = true;
+            inputThread = new Thread(Reader) { IsBackground = true };
             inputThread.Start();
         }
 
-        private static void reader()
+        private static void Reader()
         {
             while (true)
             {
                 getInput.WaitOne();
                 //input = Console.ReadLine();
-                input = Console.ReadKey().KeyChar.ToString();
+                input = Console.ReadKey(true).KeyChar.ToString();
                 gotInput.Set();
             }
         }

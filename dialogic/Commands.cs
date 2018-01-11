@@ -132,9 +132,19 @@ namespace Dialogic
 
         public int attempts = 0;
 
-        private float seconds = 5;
+        public float seconds = -1; // default=15?
 
         private readonly List<Opt> options = new List<Opt>();
+
+        public override void Init(params string[] args)
+        {
+            if (args.Length < 0 || args.Length > 2)
+            {
+                throw new TypeLoadException("Bad args: " + args.Length);
+            }
+            base.Init(args[0]);
+            if (args.Length > 1) this.seconds = float.Parse(args[1]);
+        }
 
         public List<Opt> Options()
         {

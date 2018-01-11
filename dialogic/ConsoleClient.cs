@@ -4,50 +4,50 @@ using Out = System.Console;
 
 namespace Dialogic
 {
-    public class ConsoleClient // and example client
+    public class ConsoleClient // An example client
     {
         public delegate void UnityEventHandler(MockUnityEvent e);
-        public event UnityEventHandler UnityEvents;
+        public event UnityEventHandler UnityEvents; // event-stream
 
-        private string suffix = "";
+        protected string suffix = "";
 
-        public ConsoleClient() {
-
-            new Thread(delegate ()
-            {
-                while (true)
-                {
-                    int ms = new Random().Next(5000, 10000);
-                    System.Console.WriteLine($"SleepFor: {ms}");
-                    Thread.Sleep(ms);
-                    UnityEvents?.Invoke(new MockUnityEvent());
-                }
-
-            }).Start();
-        }
-
-        public void Subscribe(ChatExecutor cs)
+        public ConsoleClient()
         {
-            cs.ChatEvents += new ChatExecutor.ChatEventHandler(OnChatEvent);
+            Thread t = new Thread(MockEvents) { IsBackground = true };
+            t.Start();
         }
 
-        private void OnChatEvent(ChatExecutor cs, ChatEvent e)
+        public void Subscribe(ChatManager cs)
+        {
+            cs.ChatEvents += new ChatManager.ChatEventHandler(OnChatEvent);
+        }
+
+        private void OnChatEvent(ChatManager cm, ChatEvent e)
+        {
+            HandleCommand(cm, e);
+        }
+
+        // =================== Implementations below =====================
+
+        private void HandleCommand(ChatManager cm, ChatEvent e)
         {
             Command c = e.Command;
 
-            if (c is Do || c is Chat)
+            if (c is Do || c is Chat) // just info in this context
             {
-                suffix += "\t[" + c.TypeName() + ": " + c.Text + "]";
+                suffix += "  [" + c.TypeName() + ": " + c.Text + "]";
+            }
+            else if (c is Ask a)
+            {
+                string sec = a.seconds > -1 ? " #" + a.seconds + "s" : "";
+                Out.WriteLine(c.Text + sec + suffix);
+                cm.Do(Prompt(a));
+                suffix = "";
             }
             else if (!(c is Wait || c is Opt || c is Go))
             {
                 Out.WriteLine(c.Text + suffix);
                 suffix = "";
-            }
-
-            if (c is Ask a)
-            {
-                cs.Do(Prompt(a));
             }
         }
 
@@ -71,11 +71,11 @@ namespace Dialogic
                 }
                 catch (PromptTimeout)
                 {
-                    Out.WriteLine("Hey! Anyone home?");
+                    Out.WriteLine("\nHey! Anyone home?");
                 }
                 catch (InvalidChoice) { }
 
-                Out.WriteLine("\nChoose an option from 1-" + opts.Count + "\n");
+                Out.WriteLine("Choose an option from 1-" + opts.Count + "\n");
 
             } while (next == null);
 
@@ -86,5 +86,14 @@ namespace Dialogic
             return next;
         }
 
+        private void MockEvents()
+        {
+            while (true)
+            {
+                int ms = new Random().Next(20000, 50000);
+                Thread.Sleep(ms);
+                UnityEvents?.Invoke(new MockUnityEvent());
+            }
+        }
     }
 }
