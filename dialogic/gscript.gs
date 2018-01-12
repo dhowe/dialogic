@@ -1,7 +1,7 @@
 SAY Welcome to my World
 WAIT 0.2
 DO Twirl
-SAY Thanks for Visiting!
+SAY Thanks  for Visiting!
 GO Prompt
 
 CHAT Prompt

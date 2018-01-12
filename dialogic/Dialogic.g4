@@ -6,7 +6,7 @@ tree: line+;
 line: (command SPACE* | command SPACE+ args) (NEWLINE | EOF);
 command: COMMAND;
 args: arg (DELIM arg)*;
-arg: WORD (SPACE WORD)*;
+arg: WORD (SPACE+ WORD)*;
 
 ////////////////////////////////////////////////////////////////////////
 
