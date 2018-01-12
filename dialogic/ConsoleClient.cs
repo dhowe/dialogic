@@ -41,11 +41,12 @@ namespace Dialogic
             {
                 string sec = a.seconds > -1 ? " #" + a.seconds + "s" : "";
                 Out.WriteLine(c.Text + sec + suffix);
-                cm.Do(Prompt(a));
                 suffix = "";
+                cm.Do(Prompt(a));
             }
             else if (!(c is Wait || c is Opt || c is Go))
             {
+                
                 Out.WriteLine(c.Text + suffix);
                 suffix = "";
             }

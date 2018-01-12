@@ -1,11 +1,11 @@
-SAY Welcome to my World
+SAY Welcome to my $emotion World
 WAIT 0.2
 DO Twirl
-SAY Thanks  for Visiting!
+SAY Thanks for Visiting $place!
 GO Prompt
 
 CHAT Prompt
-ASK Do you want to play a game? # 5
+ASK Do you want to $v a game? # 10
 OPT Sure # Game
 OPT Nah #RePrompt
 

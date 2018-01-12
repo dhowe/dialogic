@@ -45,7 +45,7 @@ namespace Dialogic
             ITokenSource lexer = new DialogicLexer(new AntlrInputStream(source));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             DialogicParser parser = new DialogicParser(tokens);
-            ParserRuleContext context = parser.tree();
+            ParserRuleContext context = parser.script();
             Visit(context);
             String tree = context.ToStringTree(parser);
             printPrettyLispTree(tree);

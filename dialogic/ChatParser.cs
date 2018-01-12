@@ -45,7 +45,7 @@ namespace Dialogic
             cl.Subscribe(cm); // Client subscribe to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
 
-            //cm.Run();
+            cm.Run();
         }
 
         public override string ToString()
@@ -75,9 +75,9 @@ namespace Dialogic
         {
             ChatParser cp = new ChatParser();
             DialogicParser parser = CreateParser(new AntlrInputStream(text));
-            ParserRuleContext tree = parser.tree();
-            cp.Visit(tree);
-            PrintLispTree(parser, tree);
+            ParserRuleContext prc = parser.script();
+            cp.Visit(prc);
+            PrintLispTree(parser, prc);
             Console.WriteLine(cp);
             return cp.chats;
         }

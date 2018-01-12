@@ -19,9 +19,10 @@ namespace Dialogic
         {
             this.chats = chats;
             this.globals = new Dictionary<string, object>() { 
-                { "var1", "groovy" },
-                { "var2", true },
-                { "var3", 3.2 }
+                { "emotion", "groovy" },
+                { "place", "Istanbul" },
+                { "v", "play" },
+                { "var3", 2 }
             };
             if (logEvents) InitLog();
         }
@@ -38,6 +39,7 @@ namespace Dialogic
 
         public void Do(Command cmd)
         {
+            HandleVars(cmd);
             RaiseEvent(cmd);
 
             if (cmd is Wait w)
@@ -48,6 +50,11 @@ namespace Dialogic
             {
                 Run(FindByName(cmd.Text));
             }
+        }
+
+        private void HandleVars(Command cmd)
+        {
+            cmd.HandleVars(globals);
         }
 
         private void RaiseEvent(Command c)

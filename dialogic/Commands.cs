@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
+using System.Linq;
 
 namespace Dialogic
 {
@@ -45,6 +44,22 @@ namespace Dialogic
         public virtual string TypeName() => this.GetType().ToString().Replace(PACKAGE, "");
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
+
+        public void HandleVars(Dictionary<string, object> globals)
+        {
+            if (Text == null || Text.Length < 1) return;
+
+            foreach (string s in SortByLength(globals.Keys))
+            {
+                //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
+                Text = Text.Replace("$" + s, globals[s].ToString());
+            }
+        }
+
+        static IEnumerable<string> SortByLength(IEnumerable<string> e)
+        {
+            return from s in e orderby s.Length descending select s;
+        }
     }
 
     public class Go : Command
