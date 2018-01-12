@@ -36,8 +36,8 @@ namespace Dialogic
 
         public static void Main(string[] args)
         {
-            List<Chat> chats = ChatParser.ParseText("SAY Welcome to my $var1 world\n");
-            //List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
+            //List<Chat> chats = ChatParser.ParseText("SAY Welcome to my $var1 world\n");
+            List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
             ChatManager cm = new ChatManager(chats);
 
             ConsoleClient cl = new ConsoleClient(); // Example client
@@ -45,7 +45,7 @@ namespace Dialogic
             cl.Subscribe(cm); // Client subscribe to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
 
-            cm.Run();
+            //cm.Run();
         }
 
         public override string ToString()

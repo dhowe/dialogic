@@ -182,7 +182,7 @@ namespace Dialogic
 
         public override string ToString()
         {
-            string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "(";
+            string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
             Options().ForEach(o => s += o.Text + ",");
             return s.Substring(0,s.Length-1)+ ")";
         }

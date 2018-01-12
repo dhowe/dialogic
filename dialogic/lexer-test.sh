@@ -131,6 +131,6 @@ javac -cp "$antlr_jar:." *.java
 java -cp "$antlr_jar:." "$main_class_name"
 
 # Cleanup
-cat $main_class_name.java
+#cat $main_class_name.java
 rmfiles="$prefix*.java $prefix*.class $prefix*.interp $prefix*.tokens $main_class_name.java $main_class_name.class"
 rm $rmfiles
