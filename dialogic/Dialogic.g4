@@ -13,5 +13,5 @@ arg: WORD (SPACE WORD)*;
 COMMAND: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'CALL');
 SPACE: (' ' | '\t');
 NEWLINE: ('\r'? '\n' | '\r')+;
-WORD: ([a-zA-Z0-9;:?.,!'"-])+;
+WORD: [a-zA-Z0-9"'] ([a-zA-Z0-9;:?.,!'"-])*;
 DELIM: SPACE* '#' SPACE*;
