@@ -1,7 +1,7 @@
 SAY Welcome to my $emotion World
 WAIT 0.2
 DO Twirl
-SAY Thanks for Visiting $place!
+Thanks for Visiting $place!
 GO Prompt
 
 CHAT Prompt

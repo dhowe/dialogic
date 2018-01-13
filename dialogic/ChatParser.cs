@@ -6,17 +6,15 @@ using System.Collections.Generic;
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
+using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
     /* TODO: 
-        If/thens
+        PACE/EMPH/IF
         Meta-tagging and chat-search (linq)
-
         Update documentation in readme
-
         Verify chat-name uniqueness on parse
-        Allow decimals like .4
     */
 
     public class ChatParser : DialogicBaseVisitor<Chat>
@@ -32,7 +30,7 @@ namespace Dialogic
 
         public static void Main(string[] args)
         {
-            //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nSAY RESULT=$var3\nEOF");
+            //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nRESULT=$var3\nEOF");
             List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
             ChatRuntime cm = new ChatRuntime(chats);
 
@@ -47,7 +45,7 @@ namespace Dialogic
         public override string ToString()
         {
             string s = "\n";
-            chats.ForEach(cmd => s += ((cmd is Chat c 
+            chats.ForEach(cmd => s += ((cmd is Chat c
                 ? c.ToTree() : cmd.ToString()) + "\n"));
             return s;
         }
@@ -63,21 +61,48 @@ namespace Dialogic
             return null;
         }
 
-        public static List<Chat> ParseFile(string fname)
-        {
-            return ParseText(File.ReadAllText(fname, Encoding.UTF8));
-        }
+        //public static List<Chat> ParseFileOrig(string fname)
+        //    return ParseText(File.ReadAllText(fname, Encoding.UTF8));
 
         public static List<Chat> ParseText(string text)
         {
-            Console.WriteLine($"ParseText:\n{text}\n");
-            ChatParser cp = new ChatParser();
-            DialogicParser parser = CreateParser(new AntlrInputStream(text));
+            return Parse(text.Split('\n'));
+        }
+
+        public static List<Chat> ParseFile(string fname)
+        {
+
+            return Parse(File.ReadLines(fname).ToArray());
+        }
+
+        protected static List<Chat> Parse(string[] lines)
+        {
+            HandleDefaultCommand(lines, "SAY");
+            var ais = new AntlrInputStream(String.Join("\n", lines));
+            DialogicParser parser = CreateParser(ais);
             ParserRuleContext prc = parser.script();
+            ChatParser cp = new ChatParser();
             cp.Visit(prc);
             PrintLispTree(parser, prc);
             Console.WriteLine(cp);
             return cp.chats;
+        }
+
+        // a temporary hack to handle appending the default command
+        private static void HandleDefaultCommand(string[] lines, string cmd)
+        {
+            for (int i = 0; i < lines.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(lines[i]))
+                {
+                    System.Console.WriteLine($"Checking: '{lines[i]}'");
+                    if (!Regex.IsMatch(lines[i], @"(^[A-Z][A-Z][A-Z]?[A-Z]?[^A-Z])"))
+                    {
+                        //System.Console.WriteLine($"+SAY: {lines[i]}");
+                        lines[i] = cmd + " " + lines[i];
+                    }
+                }
+            }
         }
 
         private static DialogicParser CreateParser(ICharStream txt)
