@@ -5,7 +5,7 @@ SAY Thanks for Visiting $place!
 GO Prompt
 
 CHAT Prompt
-ASK Do you want to $v a game? # 10
+ASK Do you want to $verb a game? # 10
 OPT Sure # Game
 OPT Nah #RePrompt
 

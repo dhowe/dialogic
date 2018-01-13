@@ -17,19 +17,19 @@ namespace Dialogic
             t.Start();
         }
 
-        public void Subscribe(ChatManager cs)
+        public void Subscribe(ChatRuntime cs)
         {
-            cs.ChatEvents += new ChatManager.ChatEventHandler(OnChatEvent);
+            cs.ChatEvents += new ChatRuntime.ChatEventHandler(OnChatEvent);
         }
 
-        private void OnChatEvent(ChatManager cm, ChatEvent e)
+        private void OnChatEvent(ChatRuntime cm, ChatEvent e)
         {
             HandleCommand(cm, e);
         }
 
         // =================== Implementations below =====================
 
-        private void HandleCommand(ChatManager cm, ChatEvent e)
+        private void HandleCommand(ChatRuntime cm, ChatEvent e)
         {
             Command c = e.Command;
 
@@ -44,9 +44,8 @@ namespace Dialogic
                 suffix = "";
                 cm.Do(Prompt(a));
             }
-            else if (!(c is Wait || c is Opt || c is Go))
+            else if (!(c is Wait || c is Opt || c is Go || c is Set))
             {
-                
                 Out.WriteLine(c.Text + suffix);
                 suffix = "";
             }

@@ -5,23 +5,24 @@ using System.Threading;
 
 namespace Dialogic
 {
-    public class ChatManager
+    public class ChatRuntime
     {
-        public delegate void ChatEventHandler(ChatManager c, ChatEvent e);
+        public delegate void ChatEventHandler(ChatRuntime c, ChatEvent e);
         public event ChatEventHandler ChatEvents; // event-stream
 
-        protected Dictionary<string, object> globals;
         protected List<Chat> chats;
         public bool logEvents = true;
         public string LogFileName = "dia.log";
 
-        public ChatManager(List<Chat> chats)
+        public Dictionary<string, object> globals;
+
+        public ChatRuntime(List<Chat> chats)
         {
             this.chats = chats;
-            this.globals = new Dictionary<string, object>() { 
+            this.globals = new Dictionary<string, object>() {
                 { "emotion", "groovy" },
                 { "place", "Istanbul" },
-                { "v", "play" },
+                { "verb", "play" },
                 { "var3", 2 }
             };
             if (logEvents) InitLog();
@@ -37,19 +38,25 @@ namespace Dialogic
             Console.WriteLine($"<{e.Message}>");
         }
 
+        internal void PrintGlobals()
+        {
+            System.Console.WriteLine("GLOBALS:");
+            foreach (var k in globals.Keys)
+            {
+                System.Console.WriteLine($"{k}: {globals[k]}");
+            }
+        }
+
         public void Do(Command cmd)
         {
-            HandleVars(cmd);
-            RaiseEvent(cmd);
+            cmd.Fire(this);
+            RaiseEvent(cmd); 
+            if (cmd is Wait w) Thread.Sleep(w.Millis()); // yuck
+        }
 
-            if (cmd is Wait w)
-            {
-                Thread.Sleep(w.Millis()); // better solution?
-            }
-            else if (cmd is Go)
-            {
-                Run(FindByName(cmd.Text));
-            }
+        public Dictionary<string, object> Globals()
+        {
+            return this.globals;
         }
 
         private void HandleVars(Command cmd)
@@ -79,7 +86,7 @@ namespace Dialogic
             Run(chats[0]);
         }
 
-        public Chat FindByName(string chatName)
+        public Chat FindChat(string chatName)
         {
             for (int i = 0; i < chats.Count; i++)
             {

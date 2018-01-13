@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
@@ -12,16 +13,14 @@ namespace Dialogic
 
         protected static readonly Command NOP = new NoOp();
 
-        public static void Out(object s) => Console.WriteLine(s);
-
         public string Id { get; protected set; }
 
         public string Text { get; protected set; }
 
         protected Command() => this.Id = (++IDGEN).ToString();
 
-        private static string ToMixedCase(string s) => (s[0] + "").ToUpper()
-            + s.Substring(1).ToLower();
+        private static string ToMixedCase(string s) => 
+            (s[0] + "").ToUpper() + s.Substring(1).ToLower();
 
         public static Command Create(string type, params string[] args)
         {
@@ -45,14 +44,17 @@ namespace Dialogic
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
 
-        public void HandleVars(Dictionary<string, object> globals)
-        {
-            if (Text == null || Text.Length < 1) return;
+        public virtual void Fire(ChatRuntime cr) { this.HandleVars(cr.globals); }
 
-            foreach (string s in SortByLength(globals.Keys))
+        public virtual void HandleVars(Dictionary<string, object> globals)
+        {
+            if (!string.IsNullOrEmpty(Text))
             {
-                //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
-                Text = Text.Replace("$" + s, globals[s].ToString());
+                foreach (string s in SortByLength(globals.Keys))
+                {
+                    //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
+                    Text = Text.Replace("$" + s, globals[s].ToString());
+                }
             }
         }
 
@@ -66,9 +68,12 @@ namespace Dialogic
     {
         public Go() : base() { }
 
-        public Go(string text) : base()
+        public Go(string text) : base() => this.Text = text;
+
+        public override void Fire(ChatRuntime cr) 
         {
-            this.Text = text;
+            Chat chat = cr.FindChat(Text);
+            cr.Run(chat);
         }
     }
 
@@ -77,6 +82,41 @@ namespace Dialogic
     public class Say : Command
     {
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + QQ(Text);
+    }
+
+    public class Set : Command
+    {
+        public object Value { get; protected set; }
+
+        public override void Init(params string[] args)
+        {
+            if (args.Length != 1)
+            {
+                throw new TypeLoadException("Bad args(" + args.Length + "): " + String.Join(",", args));
+            }
+
+            var pair = Regex.Split(args[0], @"\s*=\s*");
+            if (pair.Length != 2) pair = Regex.Split(args[0], @"\s+");
+
+            if (pair.Length != 2)
+            {
+                throw new TypeLoadException("Bad args(" + args.Length + "): " + String.Join(",", args));
+            }
+
+            if (pair[0].StartsWith("$", StringComparison.Ordinal)) 
+            {
+                pair[0] = pair[0].Substring(1); // tmp: leading $ is optional
+            }
+
+            base.Init(pair[0]);
+            this.Value = pair[1];
+        }
+
+        public override string ToString() => "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
+
+        public override void HandleVars(Dictionary<string, object> globals) { } // no-op
+
+        public override void Fire(ChatRuntime cr) => cr.Globals()[Text] = Value;
     }
 
     public class Do : Command { }
@@ -199,7 +239,7 @@ namespace Dialogic
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
             Options().ForEach(o => s += o.Text + ",");
-            return s.Substring(0,s.Length-1)+ ")";
+            return s.Substring(0, s.Length - 1) + ")";
         }
 
         public string ToTree()

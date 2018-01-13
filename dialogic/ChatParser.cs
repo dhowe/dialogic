@@ -9,11 +9,7 @@ using Antlr4.Runtime.Misc;
 
 namespace Dialogic
 {
-
-    // NEXT: lexing variables
-
     /* TODO: 
-        Variables
         If/thens
         Meta-tagging and chat-search (linq)
 
@@ -36,9 +32,9 @@ namespace Dialogic
 
         public static void Main(string[] args)
         {
-            //List<Chat> chats = ChatParser.ParseText("SAY Welcome to my $var1 world\n");
+            //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nSAY RESULT=$var3\nEOF");
             List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
-            ChatManager cm = new ChatManager(chats);
+            ChatRuntime cm = new ChatRuntime(chats);
 
             ConsoleClient cl = new ConsoleClient(); // Example client
 
@@ -51,7 +47,8 @@ namespace Dialogic
         public override string ToString()
         {
             string s = "\n";
-            chats.ForEach(cmd => s += ((cmd is Chat c ? c.ToTree() : cmd.ToString()) + "\n"));
+            chats.ForEach(cmd => s += ((cmd is Chat c 
+                ? c.ToTree() : cmd.ToString()) + "\n"));
             return s;
         }
 
@@ -73,6 +70,7 @@ namespace Dialogic
 
         public static List<Chat> ParseText(string text)
         {
+            Console.WriteLine($"ParseText:\n{text}\n");
             ChatParser cp = new ChatParser();
             DialogicParser parser = CreateParser(new AntlrInputStream(text));
             ParserRuleContext prc = parser.script();
@@ -119,9 +117,9 @@ namespace Dialogic
             var cmd = context.GetChild<DialogicParser.CommandContext>(0).GetText();
             var actx = context.GetChild<DialogicParser.ArgsContext>(0);
             var xargs = actx.children.Where(arg => arg is DialogicParser.ArgContext).ToArray();
-            var args = Array.ConvertAll(xargs, arg => arg.GetText());
+            var args = Array.ConvertAll(xargs, arg => arg.GetText().Trim());
 
-            //Console.WriteLine("cmd: " + cmd + " args: " + String.Join(",",args));
+            //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",",args)    + "'");
 
             Command c = Command.Create(cmd, args);
             if (c is Chat)
