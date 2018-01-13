@@ -15,4 +15,3 @@ SPACE: (' ' | '\t');
 DELIM: SPACE* '#' SPACE*;
 NEWLINE: ('\r'? '\n' | '\r')+;
 WORD: [a-zA-Z0-9"'$] ([a-zA-Z0-9=;:?.,!"'$-])*;
-ERROR: .;

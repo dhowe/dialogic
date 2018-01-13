@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Dialogic
 {
@@ -14,12 +15,12 @@ namespace Dialogic
         protected static readonly Command NOP = new NoOp();
 
         public string Id { get; protected set; }
-
-        public string Text { get; protected set; }
+        public string Text { get; set; }
+        internal float WaitSecs = 0;
 
         protected Command() => this.Id = (++IDGEN).ToString();
 
-        private static string ToMixedCase(string s) => 
+        private static string ToMixedCase(string s) =>
             (s[0] + "").ToUpper() + s.Substring(1).ToLower();
 
         public static Command Create(string type, params string[] args)
@@ -36,13 +37,11 @@ namespace Dialogic
             return cmd;
         }
 
-        protected static string QQ(string text) => "'" + text + "'";
+        public virtual int WaitTime() => (int)(WaitSecs * 1000); // no wait
 
         public virtual void Init(params string[] args) => this.Text = String.Join("", args);
 
         public virtual string TypeName() => this.GetType().ToString().Replace(PACKAGE, "");
-
-        public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
 
         public virtual void Fire(ChatRuntime cr) { this.HandleVars(cr.globals); }
 
@@ -58,7 +57,11 @@ namespace Dialogic
             }
         }
 
-        static IEnumerable<string> SortByLength(IEnumerable<string> e)
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
+
+        protected static string QQ(string text) => "'" + text + "'";
+
+        protected static IEnumerable<string> SortByLength(IEnumerable<string> e)
         {
             return from s in e orderby s.Length descending select s;
         }
@@ -70,7 +73,7 @@ namespace Dialogic
 
         public Go(string text) : base() => this.Text = text;
 
-        public override void Fire(ChatRuntime cr) 
+        public override void Fire(ChatRuntime cr)
         {
             Chat chat = cr.FindChat(Text);
             cr.Run(chat);
@@ -90,6 +93,13 @@ namespace Dialogic
 
         public override void Init(params string[] args)
         {
+            string[] pair = DoSetArgs(args);
+            base.Init(pair[0]);
+            this.Value = pair[1];
+        }
+
+        private static string[] DoSetArgs(string[] args)
+        {
             if (args.Length != 1)
             {
                 throw new TypeLoadException("Bad args(" + args.Length + "): " + String.Join(",", args));
@@ -103,13 +113,12 @@ namespace Dialogic
                 throw new TypeLoadException("Bad args(" + args.Length + "): " + String.Join(",", args));
             }
 
-            if (pair[0].StartsWith("$", StringComparison.Ordinal)) 
+            if (pair[0].StartsWith("$", StringComparison.Ordinal))
             {
                 pair[0] = pair[0].Substring(1); // tmp: leading $ is optional
             }
 
-            base.Init(pair[0]);
-            this.Value = pair[1];
+            return pair;
         }
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
@@ -141,14 +150,15 @@ namespace Dialogic
 
     public class Wait : Command
     {
-        public float Seconds { get; protected set; }
-
         public override void Init(params string[] args) =>
-            Seconds = args.Length == 1 ? float.Parse(args[0]) : float.MaxValue;
+            WaitSecs = args.Length == 1 ? float.Parse(args[0]) : 0;
 
-        public override string ToString() => "[" + TypeName().ToUpper() + "] " + Seconds;
+        public override string ToString() => "[" + TypeName().ToUpper() + "] " + WaitSecs;
 
-        public int Millis() => (int)(Seconds * 1000);
+        public override void HandleVars(Dictionary<string, object> globals) { }
+
+        public override int WaitTime() => WaitSecs > 0
+            ? (int)(WaitSecs * 1000) : Timeout.Infinite;
     }
 
     public class Opt : Command
@@ -179,6 +189,20 @@ namespace Dialogic
             + QQ(Text) + (action is NoOp ? "" : " (-> " + action.Text + ")");
 
         public string ActionText() => action != null ? action.Text : "";
+
+        public override void HandleVars(Dictionary<string, object> globals)
+        {
+            base.HandleVars(globals);
+
+            if (action != null && !string.IsNullOrEmpty(action.Text))
+            {
+                foreach (string s in SortByLength(globals.Keys))
+                {
+                    //System.Console.WriteLine($"Global.${s} -> {globals[s]}");
+                    action.Text = action.Text.Replace("$" + s, globals[s].ToString());
+                }
+            }
+        }
     }
 
     public class Ask : Command
@@ -186,8 +210,6 @@ namespace Dialogic
         public int SelectedIdx { get; protected set; }
 
         public int attempts = 0;
-
-        public float seconds = -1; // default=15?
 
         private readonly List<Opt> options = new List<Opt>();
 
@@ -198,7 +220,7 @@ namespace Dialogic
                 throw new TypeLoadException("Bad args: " + args.Length);
             }
             base.Init(args[0]);
-            if (args.Length > 1) this.seconds = float.Parse(args[1]);
+            if (args.Length > 1) WaitSecs = float.Parse(args[1]);
         }
 
         public List<Opt> Options()
@@ -211,15 +233,12 @@ namespace Dialogic
             return options;
         }
 
-        public int Millis() => seconds > -1 ? (int)(seconds * 1000) : Int32.MaxValue;
+        public override int WaitTime() => WaitSecs > 0 
+            ?  (int)(WaitSecs * 1000) : Timeout.Infinite;
 
         public Opt Selected() => options[SelectedIdx];
 
-        public Ask AddOption(Opt o)
-        {
-            options.Add(o);
-            return this;
-        }
+        public void AddOption(Opt o) => options.Add(o);
 
         public Command Choose(string input) // return next Command or null
         {
@@ -233,6 +252,12 @@ namespace Dialogic
                 }
             }
             throw new InvalidChoice(this);
+        }
+
+        public override void Fire(ChatRuntime cr)
+        {
+            Options().ForEach(o => o.Fire(cr)); // fire for child options
+            base.Fire(cr);
         }
 
         public override string ToString()

@@ -22,6 +22,7 @@ namespace Dialogic
             this.globals = new Dictionary<string, object>() {
                 { "emotion", "groovy" },
                 { "place", "Istanbul" },
+                { "Happy", "HappyFlip" },
                 { "verb", "play" },
                 { "var3", 2 }
             };
@@ -49,9 +50,11 @@ namespace Dialogic
 
         public void Do(Command cmd)
         {
-            cmd.Fire(this);
-            RaiseEvent(cmd); 
-            if (cmd is Wait w) Thread.Sleep(w.Millis()); // yuck
+            FireEvent(cmd); 
+            if (cmd is Wait) 
+            {
+                Thread.Sleep(cmd.WaitTime()); // yuck   
+            }
         }
 
         public Dictionary<string, object> Globals()
@@ -59,21 +62,19 @@ namespace Dialogic
             return this.globals;
         }
 
-        private void HandleVars(Command cmd)
+        private void FireEvent(Command c)
         {
-            cmd.HandleVars(globals);
-        }
-
-        private void RaiseEvent(Command c)
-        {
-            if (c is NoOp) return;
-            if (logEvents) Util.Log(LogFileName, c);
-            ChatEvents?.Invoke(this, new ChatEvent(c));
+            if (!(c is NoOp))
+            {
+                c.Fire(this);
+                if (logEvents) Util.Log(LogFileName, c);
+                ChatEvents?.Invoke(this, new ChatEvent(c));
+            }
         }
 
         public void Run(Chat chat)
         {
-            RaiseEvent(chat);
+            FireEvent(chat);
             chat.commands.ForEach(Do);
         }
 
@@ -93,7 +94,7 @@ namespace Dialogic
                 if (chats[i].Text == chatName)
                     return chats[i];
             }
-            throw new KeyNotFoundException("No Chat: " + chatName);
+            throw new KeyNotFoundException("No Chat: '"+chatName+"'");
         }
 
         private void InitLog()

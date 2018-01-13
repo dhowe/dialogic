@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 namespace Dialogic
 {
     /* TODO: 
+        Subs -> ()
         PACE/EMPH/IF
         Meta-tagging and chat-search (linq)
         Update documentation in readme
@@ -80,6 +81,7 @@ namespace Dialogic
             HandleDefaultCommand(lines, "SAY");
             var ais = new AntlrInputStream(String.Join("\n", lines));
             DialogicParser parser = CreateParser(ais);
+            parser.ErrorHandler = new StrictErrorStrategy();
             ParserRuleContext prc = parser.script();
             ChatParser cp = new ChatParser();
             cp.Visit(prc);
@@ -88,7 +90,7 @@ namespace Dialogic
             return cp.chats;
         }
 
-        // a temporary hack to handle appending the default command
+        // tmp_hack to handle appending the default command
         private static void HandleDefaultCommand(string[] lines, string cmd)
         {
             for (int i = 0; i < lines.Count(); i++)
@@ -107,9 +109,40 @@ namespace Dialogic
 
         private static DialogicParser CreateParser(ICharStream txt)
         {
-            ITokenSource lexer = new DialogicLexer(txt);
+            //ITokenSource lexer = new DialogicLexer(txt);
+            ITokenSource lexer = new StrictDialogicLexer(txt);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             return new DialogicParser(tokens);
+        }
+
+        internal class StrictDialogicLexer : DialogicLexer
+        {
+            public StrictDialogicLexer(ICharStream input) : base(input) { }
+
+            public override void Recover(LexerNoViableAltException e)
+            {
+                throw new ParseCanceledException("LEX-ERROR1\n", e);
+            }
+
+            public override void Recover(RecognitionException re)
+            {
+                throw new ParseCanceledException("LEX-ERROR2\n", re);
+            }
+        }
+
+        internal class StrictErrorStrategy : DefaultErrorStrategy
+        {
+            public override void Recover(Parser recognizer, RecognitionException e)
+            {
+                throw new ParseCanceledException("PARSE-ERROR1\n" + recognizer.ParseInfo, e);
+            }
+
+            public override IToken RecoverInline(Parser recognizer)
+            {
+                throw new Exception("PARSE-ERROR2\n", new InputMismatchException(recognizer));
+            }
+
+            public override void Sync(Parser recognizer) { }
         }
 
         static void PrintLispTree(DialogicParser parser, ParserRuleContext prc)

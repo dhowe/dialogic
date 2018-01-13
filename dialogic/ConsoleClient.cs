@@ -39,7 +39,7 @@ namespace Dialogic
             }
             else if (c is Ask a)
             {
-                string sec = a.seconds > -1 ? " #" + a.seconds + "s" : "";
+                string sec = a.WaitSecs > 0 ? " #" + a.WaitSecs + "s" : "";
                 Out.WriteLine(c.Text + sec + suffix);
                 suffix = "";
                 cm.Do(Prompt(a));
@@ -67,7 +67,7 @@ namespace Dialogic
             {
                 try
                 {
-                    next = a.Choose(ConsoleReader.ReadLine(a, a.Millis()));
+                    next = a.Choose(ConsoleReader.ReadLine(a, a.WaitTime()));
                 }
                 catch (PromptTimeout)
                 {
@@ -81,7 +81,7 @@ namespace Dialogic
 
             // Print the selected option
             Out.WriteLine("    (selected Opt#" + (a.SelectedIdx + 1)
-                + " => [" + a.Selected().ActionText() + "]\n");
+                + " => [" + a.Selected().ActionText() + "])\n");
 
             return next;
         }
