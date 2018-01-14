@@ -4,9 +4,9 @@ Introducing Dialogic
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how the users will choose their responses. These tasks are left to game designers and programmers, using tools like Unity3D and C#.
 
-Each section of text in a Dialogic script is known as a _Chat_. Each _Chat_ has a unique name and contains one or more _Commands_. When a _Chat_ is run, each command is executed in order, until all have been run, or it branchs to a new _Chat_. 
+Each section of text in a Dialogic script is known as a CHAT. Each CHAT has a unique name and contains one or more COMMANDS. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the script jumps to a new CHAT. 
 
-The simplest command is _SAY_ which simply prints the output to the screen. 
+The simplest command is SAY which simply echoes the given output:
 
 ````
 SAY Welcome to your first Dialogic script!
