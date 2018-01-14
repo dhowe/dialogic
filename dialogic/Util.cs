@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Dialogic
 {
@@ -11,6 +13,11 @@ namespace Dialogic
                 w.WriteLine(DateTime.Now.ToLongTimeString() + "\t"
                     + Environment.TickCount + "\t" + msg);
             }
+        }
+
+        public static IEnumerable<string> SortByLength(IEnumerable<string> e)
+        {
+            return from s in e orderby s.Length descending select s;
         }
     }
 }

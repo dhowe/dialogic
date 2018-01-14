@@ -22,7 +22,6 @@ namespace Dialogic
             while (true)
             {
                 getInput.WaitOne();
-                //input = Console.ReadLine();
                 input = Console.ReadKey(true).KeyChar.ToString();
                 gotInput.Set();
             }

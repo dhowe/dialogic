@@ -11,8 +11,10 @@ using Antlr4.Runtime.Tree;
 
 namespace Dialogic
 {
+    // NEXT: BUG: need commands to vary when reinvoked ****
+    //            see error in current 'RePrompt' Chat
+
     /* TODO: 
-        Subs -> (a|b)
         PACE/EMPH/IF
         Interrupt->Branch vs Interrupt->Resume
         ASK: Specify action for prompt-timeout
@@ -32,7 +34,7 @@ namespace Dialogic
             parsed = new Stack<Command>();
         }
 
-        public static void Mainx(string[] args)
+        public static void Main(string[] args)
         {
             //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nRESULT=$var3\nEOF");
             List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -43,21 +42,23 @@ namespace Dialogic
 
         public virtual string TypeName() => this.GetType().ToString().Replace(PACKAGE, "");
 
-        public virtual void Fire(ChatRuntime cr) { this.HandleVars(cr.globals); }
-
-        public virtual void HandleVars(Dictionary<string, object> globals)
-        {
-            if (!string.IsNullOrEmpty(Text))
-            {
-                foreach (string s in SortByLength(globals.Keys))
-                {
-                    //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
-                    Text = Text.Replace("$" + s, globals[s].ToString());
-                }
-
-
-            }
+        public virtual void Fire(ChatRuntime cr) {
+            Text = Substitutor.ReplaceGroups(Text);
+            Text = Substitutor.ReplaceVars(Text, cr.globals);
+//            this.HandleVars(cr.globals); 
         }
+
+        //public virtual void HandleVars(Dictionary<string, object> globals)
+        //{
+        //    if (!string.IsNullOrEmpty(Text))
+        //    {
+        //        foreach (string s in SortByLength(globals.Keys))
+        //        {
+        //            //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
+        //            Text = Text.Replace("$" + s, globals[s].ToString());
+        //        }
+        //    }
+        //}
 
         protected Exception BadArg(string msg) => throw new ArgumentException(msg);
 
@@ -71,10 +72,10 @@ namespace Dialogic
 
         protected static string QQ(string text) => "'" + text + "'";
 
-        protected static IEnumerable<string> SortByLength(IEnumerable<string> e)
-        {
-            return from s in e orderby s.Length descending select s;
-        }
+        //protected static IEnumerable<string> SortByLength(IEnumerable<string> e)
+        //{
+        //    return from s in e orderby s.Length descending select s;
+        //}
     }
 
     public class NoOp : Command { }
@@ -94,8 +95,8 @@ namespace Dialogic
 
         public override void Fire(ChatRuntime cr)
         {
-            Chat chat = cr.FindChat(Text);
-            cr.Run(chat);
+            base.Fire(cr);
+            cr.Run(cr.FindChat(Text));
         }
     }
 
@@ -135,9 +136,16 @@ namespace Dialogic
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
 
-        public override void HandleVars(Dictionary<string, object> globals) { } // no-op
+        //public override void HandleVars(Dictionary<string, object> globals) { } // no-op
 
-        public override void Fire(ChatRuntime cr) => cr.Globals()[Text] = Value;
+        public override void Fire(ChatRuntime cr)
+        {
+            if (Value is string s)
+            {
+                Value = Substitutor.ReplaceVars(s, cr.globals);
+            }
+            cr.Globals()[Text] = Value; // set the global var
+        }
     }
 
     public class Chat : Command
@@ -178,7 +186,12 @@ namespace Dialogic
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + WaitSecs;
 
-        public override void HandleVars(Dictionary<string, object> globals) { }
+        //public override void HandleVars(Dictionary<string, object> globals) { }
+
+        public override void Fire(ChatRuntime cr)
+        {
+            Text = Substitutor.ReplaceVars(Text, cr.globals); // needed ?
+        }
 
         public override int WaitTime() => WaitSecs > 0
             ? (int)(WaitSecs * 1000) : Timeout.Infinite;
@@ -210,18 +223,11 @@ namespace Dialogic
 
         public string ActionText() => action != null ? action.Text : "";
 
-        public override void HandleVars(Dictionary<string, object> globals)
+        public override void Fire(ChatRuntime cr)
         {
-            base.HandleVars(globals);
-
-            if (action != null && !string.IsNullOrEmpty(action.Text))
-            {
-                foreach (string s in SortByLength(globals.Keys))
-                {
-                    //System.Console.WriteLine($"Global.${s} -> {globals[s]}");
-                    action.Text = action.Text.Replace("$" + s, globals[s].ToString());
-                }
-            }
+            Text = Substitutor.ReplaceGroups(Text);
+            Text = Substitutor.ReplaceVars(Text, cr.globals);
+            action.Text = Substitutor.ReplaceVars(action.Text, cr.globals); // also labels
         }
     }
 
@@ -276,8 +282,10 @@ namespace Dialogic
 
         public override void Fire(ChatRuntime cr)
         {
+            //base.Fire(cr);
+            Text = Substitutor.ReplaceGroups(Text, this);
+            Text = Substitutor.ReplaceVars(Text, cr.globals);
             Options().ForEach(o => o.Fire(cr)); // fire for child options
-            base.Fire(cr);
         }
 
         public override string ToString()
