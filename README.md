@@ -2,7 +2,7 @@
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
 
-Each section of text in a Dialogic script is known as a CHAT. Each CHAT has a unique name and contains one or more COMMANDS. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the script jumps to a new CHAT. 
+Each section of text in a Dialogic script is known as a CHAT. Each CHAT has a unique name and contains one or more COMMANDS. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system jumps to a new CHAT. 
 
 The simplest command is SAY which simply echoes the given output:
 
@@ -36,23 +36,28 @@ OPT Sure
 OPT No Thanks
 ````
 
-This script is called "Start" and performs a few simple functions; welcoming a visitor, then prompting for a response. Of course in most cases we would want to do something with this response. In the code below we jump to two other CHAT, based on the users response:
+This script is called "Start" and performs a few simple functions; welcoming a visitor, then prompting for a response. Of course in most cases we would want to _do something_ with this response. In the code below we _branch_, based on the users response:
 
 ````
 ASK Do you want to play a game?
 OPT Sure # Game1
-OPT No Thanks # Goodbye
+OPT No Thanks
 ````
 
-If the user selects the first option, Dialogic jumps to the CHAT named "Game1". If the 2nd, it jumps to the "Goodbye" CHAT.
+If the user selects the first option, Dialogic jumps to the CHAT named "Game1". If not, the CHAT continues.
+
+
+&nbsp;
 
 ### Variables
 
+&nbsp;
 
 ### Advanced Commands
 
+&nbsp;
 
 ### Integrating Dialogic
 
-
+&nbsp;
 
