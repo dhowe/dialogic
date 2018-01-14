@@ -1,4 +1,4 @@
-## Dialogic
+# Dialogic
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how the users will choose their responses. These tasks are left to game designers and programmers, using tools like Unity3D and C#.
 
