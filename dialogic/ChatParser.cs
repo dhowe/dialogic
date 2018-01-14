@@ -7,15 +7,18 @@ using System.Collections.Generic;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using System.Text.RegularExpressions;
+using Antlr4.Runtime.Tree;
 
 namespace Dialogic
 {
     /* TODO: 
-        Subs -> ()
+        Subs -> (a|b)
         PACE/EMPH/IF
+        Interrupt->Branch vs Interrupt->Resume
+        ASK: Specify action for prompt-timeout
         Meta-tagging and chat-search (linq)
-        Update documentation in readme
-        Verify chat-name uniqueness on parse
+        Verify chat-name uniqueness on parse ? variables?
+        Variables: inputStack (set of inputs from user, opts or interrupts)
     */
 
     public class ChatParser : DialogicBaseVisitor<Chat>
@@ -29,7 +32,7 @@ namespace Dialogic
             parsed = new Stack<Command>();
         }
 
-        public static void Main(string[] args)
+        public static void Mainx(string[] args)
         {
             //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nRESULT=$var3\nEOF");
             List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
@@ -81,7 +84,7 @@ namespace Dialogic
             HandleDefaultCommand(lines, "SAY");
             var ais = new AntlrInputStream(String.Join("\n", lines));
             DialogicParser parser = CreateParser(ais);
-            parser.ErrorHandler = new StrictErrorStrategy();
+            parser.ErrorHandler = new BailErrorStrategy();
             ParserRuleContext prc = parser.script();
             ChatParser cp = new ChatParser();
             cp.Visit(prc);
@@ -97,7 +100,7 @@ namespace Dialogic
             {
                 if (!string.IsNullOrEmpty(lines[i]))
                 {
-                    System.Console.WriteLine($"Checking: '{lines[i]}'");
+                    //System.Console.WriteLine($"Checking: '{lines[i]}'");
                     if (!Regex.IsMatch(lines[i], @"(^[A-Z][A-Z][A-Z]?[A-Z]?[^A-Z])"))
                     {
                         //System.Console.WriteLine($"+SAY: {lines[i]}");
@@ -109,41 +112,26 @@ namespace Dialogic
 
         private static DialogicParser CreateParser(ICharStream txt)
         {
-            //ITokenSource lexer = new DialogicLexer(txt);
-            ITokenSource lexer = new StrictDialogicLexer(txt);
+            ITokenSource lexer = new DialogicLexer(txt);
+            //ITokenSource lexer = new StrictDialogicLexer(txt);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             return new DialogicParser(tokens);
         }
 
-        internal class StrictDialogicLexer : DialogicLexer
-        {
-            public StrictDialogicLexer(ICharStream input) : base(input) { }
+        //internal class StrictDialogicLexer : DialogicLexer
+        //{
+        //    public StrictDialogicLexer(ICharStream input) : base(input) { }
 
-            public override void Recover(LexerNoViableAltException e)
-            {
-                throw new ParseCanceledException("LEX-ERROR1\n", e);
-            }
+        //    public override void Recover(LexerNoViableAltException e)
+        //    {
+        //        throw new ParseCanceledException("LEX-ERROR1\n", e);
+        //    }
 
-            public override void Recover(RecognitionException re)
-            {
-                throw new ParseCanceledException("LEX-ERROR2\n", re);
-            }
-        }
-
-        internal class StrictErrorStrategy : DefaultErrorStrategy
-        {
-            public override void Recover(Parser recognizer, RecognitionException e)
-            {
-                throw new ParseCanceledException("PARSE-ERROR1\n" + recognizer.ParseInfo, e);
-            }
-
-            public override IToken RecoverInline(Parser recognizer)
-            {
-                throw new Exception("PARSE-ERROR2\n", new InputMismatchException(recognizer));
-            }
-
-            public override void Sync(Parser recognizer) { }
-        }
+        //    public override void Recover(RecognitionException re)
+        //    {
+        //        throw new ParseCanceledException("LEX-ERROR2\n", re);
+        //    }
+        //}
 
         static void PrintLispTree(DialogicParser parser, ParserRuleContext prc)
         {
@@ -170,6 +158,11 @@ namespace Dialogic
             Console.WriteLine("\n");
         }
 
+        /*public override Chat VisitCommand([NotNull] DialogicParser.CommandContext context)
+        {
+            return VisitChildren(context);
+        }*/
+
         public override Chat VisitLine([NotNull] DialogicParser.LineContext context)
         {
             var cmd = context.GetChild<DialogicParser.CommandContext>(0).GetText();
@@ -177,7 +170,7 @@ namespace Dialogic
             var xargs = actx.children.Where(arg => arg is DialogicParser.ArgContext).ToArray();
             var args = Array.ConvertAll(xargs, arg => arg.GetText().Trim());
 
-            //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",",args)    + "'");
+            Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",",args)    + "'");
 
             Command c = Command.Create(cmd, args);
             if (c is Chat)

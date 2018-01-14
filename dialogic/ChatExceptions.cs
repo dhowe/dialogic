@@ -17,6 +17,12 @@ namespace Dialogic
         public Command Command { get => command; }
     }
 
+    public class ChatNotFound : ChatException 
+    {
+        public ChatNotFound(string label)
+            : base(null, "No CHAT exists with name '" + label + "'") { }
+    }
+
     public class PromptTimeout : ChatException
     {
         public PromptTimeout(Command ask) : this(ask, "Ask timeout expired") { }

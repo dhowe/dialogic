@@ -52,12 +52,9 @@ function check_antlr_jar
 function write_main_class
 {
   cat >"$1" <<EOL
-  import org.antlr.v4.runtime.CharStreams;
-  import org.antlr.v4.runtime.CommonTokenStream;
-  import org.antlr.v4.runtime.ParserRuleContext;
-  import org.antlr.v4.runtime.Token;
-  import java.io.File;
-  import java.io.IOException;
+  import org.antlr.v4.runtime.*;
+  import org.antlr.v4.runtime.atn.*;
+  import java.io.*;
   public class __Antlr4Test__ {
       private static void printPrettyLispTree(String tree) {
           int indentation = 1;
@@ -95,6 +92,10 @@ function write_main_class
           }
           System.out.println("\n[PARSE-TREE]");
           ${2}Parser parser = new ${2}Parser(tokens);
+          parser.removeErrorListeners();
+          //parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+          //parser.setErrorHandler(new BailErrorStrategy());
+          parser.setErrorHandler(new DefaultErrorStrategy());
           ParserRuleContext context = parser.${4}();
           String tree = context.toStringTree(parser);
           printPrettyLispTree(tree);

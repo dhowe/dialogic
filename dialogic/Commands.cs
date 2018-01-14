@@ -54,7 +54,17 @@ namespace Dialogic
                     //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
                     Text = Text.Replace("$" + s, globals[s].ToString());
                 }
+
+
             }
+        }
+
+        protected Exception BadArg(string msg) => throw new ArgumentException(msg);
+
+        protected Exception BadArgs(string[] args, int expected)
+        {
+            return BadArg($"{TypeName().ToUpper()} expects {expected} args,"
+                + $" got {args.Length}: '{string.Join(" # ", args)}'\n");
         }
 
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
@@ -65,6 +75,15 @@ namespace Dialogic
         {
             return from s in e orderby s.Length descending select s;
         }
+    }
+
+    public class NoOp : Command { }
+    public class Do : Command { }
+
+    public class Say : Command
+    {
+        public override string ToString() => "["
+            + TypeName().ToUpper() + "] " + QQ(Text);
     }
 
     public class Go : Command
@@ -80,29 +99,22 @@ namespace Dialogic
         }
     }
 
-    public class NoOp : Command { }
-
-    public class Say : Command
-    {
-        public override string ToString() => "[" + TypeName().ToUpper() + "] " + QQ(Text);
-    }
-
     public class Set : Command
     {
         public object Value { get; protected set; }
 
         public override void Init(params string[] args)
         {
-            string[] pair = DoSetArgs(args);
+            string[] pair = ParseSetArgs(args);
             base.Init(pair[0]);
             this.Value = pair[1];
         }
 
-        private static string[] DoSetArgs(string[] args)
+        private string[] ParseSetArgs(string[] args)
         {
             if (args.Length != 1)
             {
-                throw new TypeLoadException("Bad args(" + args.Length + "): " + String.Join(",", args));
+                throw BadArgs(args, 1);
             }
 
             var pair = Regex.Split(args[0], @"\s*=\s*");
@@ -110,7 +122,7 @@ namespace Dialogic
 
             if (pair.Length != 2)
             {
-                throw new TypeLoadException("Bad args(" + args.Length + "): " + String.Join(",", args));
+                throw BadArgs(pair, 2);
             }
 
             if (pair[0].StartsWith("$", StringComparison.Ordinal))
@@ -128,15 +140,28 @@ namespace Dialogic
         public override void Fire(ChatRuntime cr) => cr.Globals()[Text] = Value;
     }
 
-    public class Do : Command { }
-
     public class Chat : Command
     {
         public List<Command> commands = new List<Command>();
 
-        public Chat() : this("C" + Environment.TickCount) { }
+        public Chat() => this.Text = "C" + Environment.TickCount;
 
-        public Chat(string name) : base() => this.Text = name;
+        public void AddCommand(Command c) => this.commands.Add(c);
+
+        public override void Init(params string[] args) {
+
+            if (args.Length < 1)
+            {
+                throw BadArgs(args, 1);
+            }
+            
+            this.Text = args[0];
+
+            if (Regex.IsMatch(Text, @"\s+"))
+            {
+                throw BadArg("CHAT name '" + Text + "' contains spaces!");
+            }
+        }
 
         public string ToTree()
         {
@@ -144,8 +169,6 @@ namespace Dialogic
             commands.ForEach(c => s += "  " + c + "\n");
             return s;
         }
-
-        public void AddCommand(Command c) => this.commands.Add(c);
     }
 
     public class Wait : Command
@@ -177,10 +200,7 @@ namespace Dialogic
 
         public override void Init(params string[] args)
         {
-            if (args.Length < 1)
-            {
-                throw new TypeLoadException("Bad args: " + args);
-            }
+            if (args.Length < 1) throw BadArgs(args, 1);
             this.Text = args[0];
             this.action = (args.Length > 1) ? Command.Create(typeof(Go), args[1]) : null;
         }
@@ -217,7 +237,7 @@ namespace Dialogic
         {
             if (args.Length < 0 || args.Length > 2)
             {
-                throw new TypeLoadException("Bad args: " + args.Length);
+                throw BadArg("Bad args: " + args.Length);
             }
             base.Init(args[0]);
             if (args.Length > 1) WaitSecs = float.Parse(args[1]);

@@ -94,14 +94,13 @@ namespace Dialogic
                 if (chats[i].Text == chatName)
                     return chats[i];
             }
-            throw new KeyNotFoundException("No Chat: '"+chatName+"'");
+            throw new ChatNotFound(chatName);
         }
 
         private void InitLog()
         {
             File.WriteAllText(LogFileName, "==========================\n");
         }
-
 
         public void LogCommand(Command c)
         {
