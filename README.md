@@ -21,7 +21,9 @@ Welcome to your first Dialogic script!
 ### Basic Commands
 
 A COMMAND must begin a line and must be ALL CAPS.
+
 A COMMAND can be followed by zero or more ARGUMENTS
+
 COMMANDS include SAY, DO, ASK, OPT, META, WAIT, GO, and others
 
 ### Variables
