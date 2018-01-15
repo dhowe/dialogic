@@ -11,18 +11,6 @@ using Antlr4.Runtime.Tree;
 
 namespace Dialogic
 {
-    // NEXT: BUG: need commands to vary when reinvoked ****
-    //            see error in current 'RePrompt' Chat
-
-    /* TODO: 
-        PACE/EMPH/IF
-        Interrupt->Branch vs Interrupt->Resume
-        ASK: Specify action for prompt-timeout
-        Meta-tagging and chat-search (linq)
-        Verify chat-name uniqueness on parse ? variables?
-        Variables: inputStack (set of inputs from user, opts or interrupts)
-    */
-
     public class ChatParser : DialogicBaseVisitor<Chat>
     {
         protected List<Chat> chats;
@@ -32,20 +20,6 @@ namespace Dialogic
         {
             chats = new List<Chat>();
             parsed = new Stack<Command>();
-        }
-
-        public static void Main(string[] args)
-        {
-            //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nRESULT=$var3\nEOF");
-            List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
-            ChatRuntime cm = new ChatRuntime(chats);
-
-            ConsoleClient cl = new ConsoleClient(); // Example client
-
-            cl.Subscribe(cm); // Client subscribe to chat events
-            cm.Subscribe(cl); // Dialogic subscribes to Unity events
-
-            cm.Run();
         }
 
         public override string ToString()

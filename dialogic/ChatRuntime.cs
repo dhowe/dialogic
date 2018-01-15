@@ -5,8 +5,32 @@ using System.Threading;
 
 namespace Dialogic
 {
+    /* TODO: 
+        PACE/EMPH/IF
+        redo SET: needs to handle numbers, strings, +=, -=, % etc.
+        Interrupt->Branch vs Interrupt->Resume
+        ASK: Specify action for prompt-timeout
+        Meta-tagging and chat-search (linq)
+        Verify chat-name uniqueness on parse ? variables?
+        Variables: inputStack (set of inputs from user, opts or interrupts)
+    */
+
     public class ChatRuntime
     {
+        public static void Main(string[] args)
+        {
+            //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nRESULT=$var3\nEOF");
+            List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
+            ChatRuntime cm = new ChatRuntime(chats);
+
+            ConsoleClient cl = new ConsoleClient(); // Example client
+
+            cl.Subscribe(cm); // Client subscribe to chat events
+            cm.Subscribe(cl); // Dialogic subscribes to Unity events
+
+            cm.Run();/**/
+        }
+
         public delegate void ChatEventHandler(ChatRuntime c, ChatEvent e);
         public event ChatEventHandler ChatEvents; // event-stream
 
@@ -50,11 +74,8 @@ namespace Dialogic
 
         public void Do(Command cmd)
         {
-            FireEvent(cmd); 
-            if (cmd is Wait) 
-            {
-                Thread.Sleep(cmd.WaitTime()); // yuck   
-            }
+            FireEvent(cmd); // TODO: need to rethink this sleep
+            if (cmd is Wait) Thread.Sleep(cmd.WaitTime()); 
         }
 
         public Dictionary<string, object> Globals()
@@ -66,9 +87,9 @@ namespace Dialogic
         {
             if (!(c is NoOp))
             {
-                c.Fire(this);
+                ChatEvent ce = c.Fire(this);
                 if (logEvents) Util.Log(LogFileName, c);
-                ChatEvents?.Invoke(this, new ChatEvent(c));
+                ChatEvents?.Invoke(this, ce);
             }
         }
 

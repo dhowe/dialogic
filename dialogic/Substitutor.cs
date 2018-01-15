@@ -8,8 +8,9 @@ namespace Dialogic
     {
         const string MATCH_PARENS = @"\(([^()]+|(?<Level>\()|(?<-Level>\)))+(?(Level)(?!))\)";
 
-        public static string ReplaceGroups(string input, Command c = null) {
-            while (Regex.IsMatch(input, @"[\(\)]"))
+        public static void ReplaceGroups(ref string input, Command c = null)
+        {
+            while (input != null && Regex.IsMatch(input, @"[\(\)]"))
             {
                 List<string> result = new List<string>();
                 ParseGroups(input, result);
@@ -18,13 +19,17 @@ namespace Dialogic
                     var pick = DoReplace(opt);
                     input = input.Replace(opt, pick);
                     if (c != null)
-                        System.Console.WriteLine($"-> {opt} -> {pick}\n{input}"); 
+                        System.Console.WriteLine($"-> {opt} -> {pick}\n{input}");
                 }
             }
-            return input;
         }
 
-        public static string ReplaceVars(string text, Dictionary<string, object> globals)
+        public static void Replace(ref string text, Dictionary<string, object> globals) {
+            ReplaceGroups(ref text);
+            ReplaceVars(ref text, globals);
+        }
+    
+        public static void ReplaceVars(ref string text, Dictionary<string, object> globals)
         {
             if (!string.IsNullOrEmpty(text))
             {
@@ -34,8 +39,6 @@ namespace Dialogic
                     text = text.Replace("$" + s, globals[s].ToString());
                 }
             }
-
-            return text;
         }
 
         private static string DoReplace(string sub)
@@ -80,12 +83,14 @@ namespace Dialogic
                 { "Happy", "HappyFlip" },
                 { "prep", "then" },
             };
-            var input = @"SAY The $animal (walked | (ran | (talked|fell))) and $prep (ate|slept)";
-            for (int i = 0; i < 5; i++)
+            // Handle subs, variable subs, and nested subs
+            var input = @"SAY The ($animal | $Happy) (walked | (ran | (talked|fell))) and $prep (ate|slept)";
+            for (int i = 0; i < 15; i++)
             {
-                var p1 = Substitutor.ReplaceGroups(input);
-                var p2 = Substitutor.ReplaceVars(p1, globals);
-                System.Console.WriteLine(i + ") " +p2);
+                string s = String.Copy(input);
+                Substitutor.ReplaceGroups(ref s);
+                Substitutor.ReplaceVars(ref s, globals);
+                System.Console.WriteLine(i + ") " +s);
             }
         }
     }

@@ -14,7 +14,7 @@ namespace Dialogic
         protected static readonly Command NOP = new NoOp();
 
         public string Id { get; protected set; }
-        public string Text { get; set; }
+        public string Text;
         internal float WaitSecs = 0;
 
         protected Command() => this.Id = (++IDGEN).ToString();
@@ -42,11 +42,20 @@ namespace Dialogic
 
         public virtual string TypeName() => this.GetType().ToString().Replace(PACKAGE, "");
 
-        public virtual void Fire(ChatRuntime cr) {
-            Text = Substitutor.ReplaceGroups(Text);
-            Text = Substitutor.ReplaceVars(Text, cr.globals);
+        public virtual ChatEvent Fire(ChatRuntime cr)
+        {
+            Command clone = this.Copy();
+            Substitutor.ReplaceGroups(ref clone.Text);
+            Substitutor.ReplaceVars(ref clone.Text, cr.globals);
+            return new ChatEvent(clone);
 //            this.HandleVars(cr.globals); 
         }
+
+        public virtual Command Copy()
+        {
+            return (Command)this.MemberwiseClone();
+        }
+
 
         //public virtual void HandleVars(Dictionary<string, object> globals)
         //{
@@ -93,16 +102,17 @@ namespace Dialogic
 
         public Go(string text) : base() => this.Text = text;
 
-        public override void Fire(ChatRuntime cr)
+        public override ChatEvent Fire(ChatRuntime cr)
         {
-            base.Fire(cr);
+            ChatEvent ce = base.Fire(cr);
             cr.Run(cr.FindChat(Text));
+            return ce;
         }
     }
 
-    public class Set : Command
+    public class Set : Command // TODO: need to rethink this
     {
-        public object Value { get; protected set; }
+        public string Value;
 
         public override void Init(params string[] args)
         {
@@ -134,23 +144,27 @@ namespace Dialogic
             return pair;
         }
 
+        public override Command Copy()
+        {
+            return (Set)this.MemberwiseClone();
+        }
+
         public override string ToString() => "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
 
         //public override void HandleVars(Dictionary<string, object> globals) { } // no-op
 
-        public override void Fire(ChatRuntime cr)
+        public override ChatEvent Fire(ChatRuntime cr)
         {
-            if (Value is string s)
-            {
-                Value = Substitutor.ReplaceVars(s, cr.globals);
-            }
+            Set clone = (Set)this.Copy();
+            Substitutor.ReplaceVars(ref clone.Value, cr.globals);
             cr.Globals()[Text] = Value; // set the global var
+            return new ChatEvent(clone);
         }
     }
 
     public class Chat : Command
     {
-        public List<Command> commands = new List<Command>();
+        public List<Command> commands = new List<Command>(); // not copied
 
         public Chat() => this.Text = "C" + Environment.TickCount;
 
@@ -171,6 +185,8 @@ namespace Dialogic
             }
         }
 
+        // public override Command Copy() // ignore 'commands'
+
         public string ToTree()
         {
             string s = base.ToString() + "\n";
@@ -187,11 +203,6 @@ namespace Dialogic
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + WaitSecs;
 
         //public override void HandleVars(Dictionary<string, object> globals) { }
-
-        public override void Fire(ChatRuntime cr)
-        {
-            Text = Substitutor.ReplaceVars(Text, cr.globals); // needed ?
-        }
 
         public override int WaitTime() => WaitSecs > 0
             ? (int)(WaitSecs * 1000) : Timeout.Infinite;
@@ -223,11 +234,18 @@ namespace Dialogic
 
         public string ActionText() => action != null ? action.Text : "";
 
-        public override void Fire(ChatRuntime cr)
+        public override ChatEvent Fire(ChatRuntime cr)
         {
-            Text = Substitutor.ReplaceGroups(Text);
-            Text = Substitutor.ReplaceVars(Text, cr.globals);
-            action.Text = Substitutor.ReplaceVars(action.Text, cr.globals); // also labels
+            ChatEvent ce = base.Fire(cr);
+            Substitutor.ReplaceVars(ref action.Text, cr.globals); // also labels
+            return ce;
+        }
+
+        public override Command Copy()
+        {
+            Opt o = (Opt)this.MemberwiseClone();
+            o.action = (Command)action.Copy();
+            return o;
         }
     }
 
@@ -235,9 +253,9 @@ namespace Dialogic
     {
         public int SelectedIdx { get; protected set; }
 
-        public int attempts = 0;
+        protected int attempts = 0;
 
-        private readonly List<Opt> options = new List<Opt>();
+        protected List<Opt> options = new List<Opt>();
 
         public override void Init(params string[] args)
         {
@@ -280,26 +298,41 @@ namespace Dialogic
             throw new InvalidChoice(this);
         }
 
-        public override void Fire(ChatRuntime cr)
+        public override ChatEvent Fire(ChatRuntime cr)
         {
-            //base.Fire(cr);
-            Text = Substitutor.ReplaceGroups(Text, this);
-            Text = Substitutor.ReplaceVars(Text, cr.globals);
-            Options().ForEach(o => o.Fire(cr)); // fire for child options
+            Ask clone = (Ask)this.Copy();
+            Substitutor.ReplaceGroups(ref clone.Text);
+            Substitutor.ReplaceVars(ref clone.Text, cr.globals);
+            this.options.ForEach(o => o.Fire(cr)); // fire for child options
+            return new ChatEvent(clone);
         }
 
         public override string ToString()
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
-            Options().ForEach(o => s += o.Text + ",");
+            this.options.ForEach(o => s += o.Text + ",");
             return s.Substring(0, s.Length - 1) + ")";
         }
 
         public string ToTree()
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "\n";
-            Options().ForEach(o => s += "    " + o + "\n");
+            this.options.ForEach(o => s += "    " + o + "\n");
             return s.Substring(0, s.Length - 1);
+        }
+
+        public override Command Copy()
+        {
+            Ask clone = (Ask)this.MemberwiseClone();
+            clone.options = new List<Opt>();
+            //for (int i = 0; i < options.Count; i++)
+            //{
+            //    clone.AddOption((Opt)options[i].Copy());
+            //}
+            this.options.ForEach(delegate(Opt o) {
+                clone.AddOption((Opt)o.Copy());  
+            });
+            return clone;
         }
     }
 }
