@@ -6,29 +6,32 @@ using System.Threading;
 namespace Dialogic
 {
     /* TODO: 
-        PACE/EMPH/IF
+        EMPH/IF
+        Interpret/Run code chunk ``
         redo SET: needs to handle numbers, strings, +=, -=, % etc.
         Interrupt->Branch vs Interrupt->Resume
         ASK: Specify action for prompt-timeout
-        Meta-tagging and chat-search (linq)
+        Meta-tagging (Chat objects have Meta stack) 
+        Chat-search by meta (linq)
         Verify chat-name uniqueness on parse ? variables?
         Variables: inputStack (set of inputs from user, opts or interrupts)
+        Timing:  msThinking(ASK,SAY), msBetweenCommands(ASK,SAY)
     */
 
     public class ChatRuntime
     {
         public static void Main(string[] args)
         {
-            //List<Chat> chats = ChatParser.ParseText("SET $var4=4\nRESULT=$var3\nEOF");
-            List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
+            List<Chat> chats = ChatParser.ParseText("PACE 13\nSAY Hello\n");
+            //List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
             ChatRuntime cm = new ChatRuntime(chats);
 
             ConsoleClient cl = new ConsoleClient(); // Example client
 
-            cl.Subscribe(cm); // Client subscribe to chat events
+            cl.Subscribe(cm); // Client subscribes to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
 
-            cm.Run();/**/
+            cm.Run();
         }
 
         public delegate void ChatEventHandler(ChatRuntime c, ChatEvent e);
@@ -75,7 +78,8 @@ namespace Dialogic
         public void Do(Command cmd)
         {
             FireEvent(cmd); // TODO: need to rethink this sleep
-            if (cmd is Wait) Thread.Sleep(cmd.WaitTime()); 
+            //if (cmd is Wait t) Thread.Sleep(t.WaitTime());
+            if (cmd is Timed t) Thread.Sleep(t.WaitTime()); 
         }
 
         public Dictionary<string, object> Globals()

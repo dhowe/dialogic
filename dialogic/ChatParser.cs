@@ -1,13 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using System.Text.RegularExpressions;
-using Antlr4.Runtime.Tree;
 
 namespace Dialogic
 {
@@ -89,31 +87,15 @@ namespace Dialogic
         private static DialogicParser CreateParser(ICharStream txt)
         {
             ITokenSource lexer = new DialogicLexer(txt);
-            //ITokenSource lexer = new StrictDialogicLexer(txt);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             return new DialogicParser(tokens);
         }
-
-        //internal class StrictDialogicLexer : DialogicLexer
-        //{
-        //    public StrictDialogicLexer(ICharStream input) : base(input) { }
-
-        //    public override void Recover(LexerNoViableAltException e)
-        //    {
-        //        throw new ParseCanceledException("LEX-ERROR1\n", e);
-        //    }
-
-        //    public override void Recover(RecognitionException re)
-        //    {
-        //        throw new ParseCanceledException("LEX-ERROR2\n", re);
-        //    }
-        //}
 
         static void PrintLispTree(DialogicParser parser, ParserRuleContext prc)
         {
             string tree = prc.ToStringTree(parser);
             int indentation = 1;
-            Console.WriteLine("PARSE-TREE");
+            Console.WriteLine("\nPARSE-TREE");
             foreach (char c in tree)
             {
                 if (c == '(')
@@ -134,11 +116,6 @@ namespace Dialogic
             Console.WriteLine("\n");
         }
 
-        /*public override Chat VisitCommand([NotNull] DialogicParser.CommandContext context)
-        {
-            return VisitChildren(context);
-        }*/
-
         public override Chat VisitLine([NotNull] DialogicParser.LineContext context)
         {
             var cmd = context.GetChild<DialogicParser.CommandContext>(0).GetText();
@@ -146,7 +123,7 @@ namespace Dialogic
             var xargs = actx.children.Where(arg => arg is DialogicParser.ArgContext).ToArray();
             var args = Array.ConvertAll(xargs, arg => arg.GetText().Trim());
 
-            Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",",args)    + "'");
+            //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",",args)    + "'");
 
             Command c = Command.Create(cmd, args);
             if (c is Chat)
@@ -156,7 +133,7 @@ namespace Dialogic
             else if (c is Opt o)
             {
                 Command last = LastOfType(parsed, typeof(Ask));
-                if (!(last is Ask a)) throw new Exception("Opt must follow by Ask");
+                if (!(last is Ask a)) throw new Exception("Opt must follow Ask");
                 a.AddOption(o);
             }
             else

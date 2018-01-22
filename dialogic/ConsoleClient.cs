@@ -33,7 +33,7 @@ namespace Dialogic
         {
             Command c = e.Command;
 
-            if (c is Do || c is Chat) // just info in this context
+            if (c is Do || c is Chat || c is Meta) // just info in this context
             {
                 suffix += "  [" + c.TypeName() + ": " + c.Text + "]";
             }

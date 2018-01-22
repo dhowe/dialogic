@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -15,7 +16,6 @@ namespace Dialogic
 
         public string Id { get; protected set; }
         public string Text;
-        internal float WaitSecs = 0;
 
         protected Command() => this.Id = (++IDGEN).ToString();
 
@@ -36,7 +36,6 @@ namespace Dialogic
             return cmd;
         }
 
-        public virtual int WaitTime() => (int)(WaitSecs * 1000); // no wait
 
         public virtual void Init(params string[] args) => this.Text = String.Join("", args);
 
@@ -48,14 +47,13 @@ namespace Dialogic
             Substitutor.ReplaceGroups(ref clone.Text);
             Substitutor.ReplaceVars(ref clone.Text, cr.globals);
             return new ChatEvent(clone);
-//            this.HandleVars(cr.globals); 
+//          this.HandleVars(cr.globals); 
         }
 
         public virtual Command Copy()
         {
             return (Command)this.MemberwiseClone();
         }
-
 
         //public virtual void HandleVars(Dictionary<string, object> globals)
         //{
@@ -80,17 +78,57 @@ namespace Dialogic
         public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
 
         protected static string QQ(string text) => "'" + text + "'";
+    }
 
-        //protected static IEnumerable<string> SortByLength(IEnumerable<string> e)
-        //{
-        //    return from s in e orderby s.Length descending select s;
-        //}
+    public abstract class Timed : Command
+    {
+        internal float WaitSecs = 0;
+        public virtual int WaitTime() => (int)(WaitSecs * 1000); // no wait
+    }
+
+    public abstract class Meta : Command
+    {
     }
 
     public class NoOp : Command { }
     public class Do : Command { }
 
-    public class Say : Command
+    /*enum Pacing
+    {
+        Fast = 150,
+        Slow = 75,
+        Default = 100,
+        VerySlow = 50,
+        VeryFast = 200
+    };*/
+
+    /*enum Pacing
+    {
+        Fast = 150,
+        Slow = 75,
+        Default = 100,
+        VerySlow = 50,
+        VeryFast = 200
+    };*/
+
+    public class Disp : Meta { }
+
+    public class Pace : Meta
+    {
+        public double pace = 1.0;
+
+        public override void Init(params string[] args)
+        {
+            if (!(Regex.IsMatch(args[0], @"^\d+%?$"))) 
+            {
+                throw BadArg("PACE requires INT%, found '"+args[0]+"'");  
+            }
+            this.pace = (int.Parse(args[0].TrimEnd('%')) / 100.0);
+            this.Text = ((int)(pace*100)) + "%";
+        }
+    }
+
+    public class Say : Timed
     {
         public override string ToString() => "["
             + TypeName().ToUpper() + "] " + QQ(Text);
@@ -149,7 +187,8 @@ namespace Dialogic
             return (Set)this.MemberwiseClone();
         }
 
-        public override string ToString() => "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
+        public override string ToString() => "[" + TypeName().ToUpper() 
+            + "] $" + Text + '=' + Value;
 
         //public override void HandleVars(Dictionary<string, object> globals) { } // no-op
 
@@ -195,7 +234,7 @@ namespace Dialogic
         }
     }
 
-    public class Wait : Command
+    public class Wait : Timed
     {
         public override void Init(params string[] args) =>
             WaitSecs = args.Length == 1 ? float.Parse(args[0]) : 0;
@@ -249,7 +288,7 @@ namespace Dialogic
         }
     }
 
-    public class Ask : Command
+    public class Ask : Timed
     {
         public int SelectedIdx { get; protected set; }
 
