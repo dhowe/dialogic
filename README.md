@@ -18,11 +18,11 @@ Welcome to your first Dialogic script!
 
 ### Basic Commands
 
-A COMMAND must begin a line and must be ALL CAPS.
+A COMMAND must begin a line
 
 A COMMAND can be followed by zero or more ARGUMENTS
 
-COMMANDS include SAY, DO, ASK, OPT, META, WAIT, GO, and others
+COMMANDS include SAY, DO, ASK, SET, META, WAIT, GO, and others
 
 Here is a short example:
 
@@ -52,15 +52,47 @@ If the user selects the first option, Dialogic jumps to the CHAT named "Game1". 
 
 &nbsp;
 
-### Variables
+### Generative Elements
+
+Dialogic is designed to smoothly blend scripted and generated text to create natural feeling dialog, with variation, and to avoid repetition. The simplest way to blend generative elements into a response is via the | OR operator, grouped with parentheses as follow:s
+
+````
+SAY You look (sad | gloomy | depressed).
+````
+
+Elements between the | OR operator above are randomly selected. Writers may specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions.
+
+````
+SAY I'm (very | super | really) glad to ((meet | know) you | make your acquantance)
+````
+
+OR constructions can be arbitrarily nested to create further variation.
+
+### Interruption / Smoothing
+
+Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be easily added in order to make transitions more natural, i.e., 'so as I was saying'.
+
+### Integrating Dialogic (C#)
 
 &nbsp;
+
+A <ChatParser> reads in one or more CHAT descriptions from plain-text files and compiles them into CHAT objects to be managed by a <ChatRuntime>., as the following example (in C#) demonstrates:
+
+````C#
+List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
+ChatRuntime cm = new ChatRuntime(chats);
+````
+
+### Global / Local Variables
+
+&nbsp;
+
+[pending]
 
 ### Advanced Commands
 
 &nbsp;
 
-### Integrating Dialogic
+[pending]
 
-&nbsp;
 
