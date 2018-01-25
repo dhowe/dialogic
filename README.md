@@ -103,7 +103,7 @@ ChatRuntime cm = new ChatRuntime(chats);
 ConsoleClient cl = new ConsoleClient(); // An example client
 
 cl.Subscribe(cm); // Client subscribes to chat events
-cm.Subscribe(cl); // Dialogic subscribes to Unity events
+cm.Subscribe(cl); // Dialogic subscribes to client events
 
 cm.Run();
 ````
