@@ -76,7 +76,7 @@ Dialogic is also designed to respond naturally to user interaction and/or interr
 
 &nbsp;
 
-A <ChatParser> reads in one or more CHAT descriptions from plain-text files and compiles them into CHAT objects to be managed by a <ChatRuntime>., as the following example (in C#) demonstrates:
+A _ChatParser_ reads in one or more CHAT descriptions from plain-text files (usually with the .gs extension) and compiles them into CHAT objects to be managed by a _ChatRuntime_, as the following example (in C#) demonstrates:
 
 ````C#
 List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
