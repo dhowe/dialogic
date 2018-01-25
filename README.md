@@ -60,10 +60,22 @@ Dialogic is designed to smoothly blend scripted and generated text to create the
 SAY You look (sad | gloomy | depressed).
 ````
 
-Elements between the | OR operator above are randomly selected. Writers may specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
+Elements between the | OR operator above are randomly selected so that the line above will generate each of the 3 outputs below, with equal probability:
 
 ````
-SAY I'm (very | super | really) glad to ((meet | know) you | make your acquantance)
+You look sad.
+````
+````
+You look gloomy.
+````
+````
+You look depressed.
+````
+
+Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
+
+````
+SAY I'm (very | super | really) glad to ((meet | know) you | make your acquantance).
 ````
 
 [pending]
@@ -76,9 +88,9 @@ Dialogic is also designed to respond naturally to user interaction and/or interr
 
 [pending]
 
-### Integrating Dialogic (C#)
-
 &nbsp;
+
+### Integrating Dialogic (C#)
 
 Dialogic can be run alone (via the included _ConsoleClient_) or with a game engine, such as Unity3D. The system includes two main components: the domain-specific language (DSL) described above, and a runtime environment, which is responsible for passing events between the runtime and the set of registered clients. _ChatEvents_ are sent from Dialogic to the client (e.g. the Unity Engine) telling it perform a specific action, such as triggering a speech act, initiating an animation, or playing audio from a file. _UIEvents_ are sent from the client (e.g. the Unity Engine) to the runtime, notifying it that some event has occurred, usually a speech act, UI interaction, or gesture from the user. 
 
