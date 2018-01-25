@@ -108,7 +108,7 @@ cm.Subscribe(cl); // Dialogic subscribes to client events
 cm.Run();
 ````
 
-### Global / Local Variables
+### Event Scheduling
 
 &nbsp;
 
@@ -116,7 +116,7 @@ cm.Run();
 
 &nbsp;
 
-### Event Timing
+### Global / Local Variables
 
 &nbsp;
 
