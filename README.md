@@ -60,23 +60,27 @@ Dialogic is designed to smoothly blend scripted and generated text to create the
 SAY You look (sad | gloomy | depressed).
 ````
 
-Elements between the | OR operator above are randomly selected. Writers may specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions.
+Elements between the | OR operator above are randomly selected. Writers may specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
 
 ````
 SAY I'm (very | super | really) glad to ((meet | know) you | make your acquantance)
 ````
 
-OR constructions can be arbitrarily nested to create further variation.
+[pending]
+
+&nbsp;
 
 ### Interruption / Smoothing
 
-Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be easily added in order to make transitions more natural, i.e., 'so as I was saying'.
+Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be added in order to make transitions more natural, i.e., 'so as I was saying'.
+
+[pending]
 
 ### Integrating Dialogic (C#)
 
 &nbsp;
 
-Dialogic can be used alone (via the included _ConsoleClient_) or with a game engine, such as Unity3D. The sustem includes two main components: the domain-specific language (DSL) described above, and a runtime environment, responsible for passing events between the runtime and the set of registered clients. _ChatEvents_ are sent from Dialogic to the client (e.g. the Unity Engine) telling it perform a specific action, such as triggering a speech act, initiating an animation, or playing audio from a file. _UIEvents_ are sent from the client (e.g. the Unity Engine) to the runtime, notifying it that some event has occurred, generally a speech act, UI interaction, or gesture from the user. 
+Dialogic can be run alone (via the included _ConsoleClient_) or with a game engine, such as Unity3D. The system includes two main components: the domain-specific language (DSL) described above, and a runtime environment, which is responsible for passing events between the runtime and the set of registered clients. _ChatEvents_ are sent from Dialogic to the client (e.g. the Unity Engine) telling it perform a specific action, such as triggering a speech act, initiating an animation, or playing audio from a file. _UIEvents_ are sent from the client (e.g. the Unity Engine) to the runtime, notifying it that some event has occurred, usually a speech act, UI interaction, or gesture from the user. 
 
 In the example below (in C#), a _ChatParser_ reads in a number of chat descriptions from a plain-text file and compiles them into a list of _Chat_ objects, which are passed to the _ChatRuntime_. An example client (outputting only to the console) is created, which then subscribes with the runtime for chat events. The runtime then subscribes back to events issued by the client. Chats begin to execute as when run is called on the _ChatRuntime_.
 
