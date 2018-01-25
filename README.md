@@ -54,7 +54,7 @@ If the user selects the first option, Dialogic jumps to the CHAT named "Game1". 
 
 ### Generative Elements
 
-Dialogic is designed to smoothly blend scripted and generated text to create natural feeling dialog, with variation, and to avoid repetition. The simplest way to blend generative elements into a response is via the | OR operator, grouped with parentheses as follow:s
+Dialogic is designed to smoothly blend scripted and generated text to create the type of variation found in natural-sounding dialog. The simplest way to blend generative elements into a response is via the | OR operator, grouped with parentheses as follows:
 
 ````
 SAY You look (sad | gloomy | depressed).
