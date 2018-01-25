@@ -22,7 +22,7 @@ A COMMAND must begin a line
 
 A COMMAND can be followed by zero or more ARGUMENTS
 
-COMMANDS include SAY, DO, ASK, SET, META, WAIT, GO, and others
+COMMANDS include SAY, DO, ASK, OPT, META, WAIT, GO, and others
 
 Here is a short example:
 
