@@ -60,7 +60,7 @@ Dialogic is designed to smoothly blend scripted and generated text to create the
 SAY You look (sad | gloomy | depressed).
 ````
 
-Elements between the | OR operator above are randomly selected so that the line above will generate each of the 3 outputs below, with equal probability:
+Elements between the | operators are randomly selected, so the line above will generate each of the following 3 outputs with equal probability:
 
 ````
 You look sad.
