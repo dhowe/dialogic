@@ -6,10 +6,15 @@ namespace Dialogic
 {
     public class ScriptingEngine
     {
+        private ScriptState<object> scriptState = null;
+
         public ScriptingEngine() {
             
-        }
-        private static ScriptState<object> scriptState = null;
+        } 
+
+        public ScriptingEngine(ScriptState<object> o) {
+            scriptState = o;
+        } 
 
         public string Execute(string code)
         {
