@@ -20,4 +20,8 @@ Global
 		{8E37F80C-BF9A-4678-92C3-6BD2BDB9C6DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E37F80C-BF9A-4678-92C3-6BD2BDB9C6DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		description = @\nDialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers...
+		version = 0.2
+	EndGlobalSection
 EndGlobal
