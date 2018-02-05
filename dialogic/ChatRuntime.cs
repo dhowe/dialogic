@@ -22,8 +22,8 @@ namespace Dialogic
     {
         public static void Main(string[] args)
         {
-            List<Chat> chats = ChatParser.ParseText("PACE 13\nSAY Hello\n");
-            //List<Chat> chats = ChatParser.ParseFile("gscript.gs");//"gscript.gs" 
+            //List<Chat> chats = ChatParser.ParseText("PACE 13\nSAY Hello\n");
+            List<Chat> chats = ChatParser.ParseFile("gscript.gs");
             ChatRuntime cm = new ChatRuntime(chats);
 
             ConsoleClient cl = new ConsoleClient(); // Example client
@@ -63,7 +63,7 @@ namespace Dialogic
 
         private void OnUnityEvent(MockUnityEvent e)
         {
-            Console.WriteLine($"<{e.Message}>");
+            Console.WriteLine("<"+e.Message+">");
         }
 
         internal void PrintGlobals()
@@ -71,7 +71,7 @@ namespace Dialogic
             System.Console.WriteLine("GLOBALS:");
             foreach (var k in globals.Keys)
             {
-                System.Console.WriteLine($"{k}: {globals[k]}");
+                System.Console.WriteLine(k+": "+globals[k]);
             }
         }
 
@@ -79,12 +79,7 @@ namespace Dialogic
         {
             FireEvent(cmd); // TODO: need to rethink this sleep
             //if (cmd is Wait t) Thread.Sleep(t.WaitTime());
-            if (cmd is Timed t) Thread.Sleep(t.WaitTime()); 
-        }
-
-        public Dictionary<string, object> Globals()
-        {
-            return this.globals;
+            if (cmd is Timed) Thread.Sleep(((Timed)cmd).WaitTime()); 
         }
 
         private void FireEvent(Command c)
@@ -93,14 +88,20 @@ namespace Dialogic
             {
                 ChatEvent ce = c.Fire(this);
                 if (logEvents) Util.Log(LogFileName, c);
-                ChatEvents?.Invoke(this, ce);
+                if (ChatEvents != null) ChatEvents.Invoke(this, ce);
             }
+        }
+
+        public Dictionary<string, object> Globals()
+        {
+            return this.globals;
         }
 
         public void Run(Chat chat)
         {
             FireEvent(chat);
             chat.commands.ForEach(Do);
+            Console.WriteLine("CHAT DONE: "+chat.Id);
         }
 
         public void Run()

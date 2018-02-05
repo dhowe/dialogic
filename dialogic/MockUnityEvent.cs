@@ -15,7 +15,10 @@ namespace Dialogic
 
         public string Message
         {
-            get => message;
+            get
+            {
+                return message;
+            }
         }
     }
 }

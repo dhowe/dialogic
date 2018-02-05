@@ -23,12 +23,15 @@ namespace Dialogic
         public override string ToString()
         {
             string s = "\n";
-            chats.ForEach(cmd => s += ((cmd is Chat c
-                ? c.ToTree() : cmd.ToString()) + "\n"));
+            chats.ForEach(cmd => s += ((cmd is Chat ? 
+                ((Chat)cmd).ToTree() : cmd.ToString()) + "\n"));
             return s;
         }
 
-        private void AddChat(Chat c) => chats.Add(c);
+        private void AddChat(Chat c)
+        {
+            chats.Add(c);
+        }
 
         private Command LastOfType(Stack<Command> s, Type typeToFind)
         {
@@ -130,11 +133,15 @@ namespace Dialogic
             {
                 chats.Add((Chat)c);
             }
-            else if (c is Opt o)
+            else if (c is Opt)
             {
+                Opt o = (Opt)c;
                 Command last = LastOfType(parsed, typeof(Ask));
-                if (!(last is Ask a)) throw new Exception("Opt must follow Ask");
-                a.AddOption(o);
+                if (!(last is Ask))
+                {
+                    throw new Exception("Opt must follow Ask");
+                }
+                ((Ask)last).AddOption(o);
             }
             else
             {
@@ -147,10 +154,19 @@ namespace Dialogic
             return VisitChildren(context);
         }
 
-        public static void Out(object s) => Console.WriteLine(s);
+        public static void Out(object s)
+        {
+            Console.WriteLine(s);
+        }
 
-        public static void Err(object s) => Console.WriteLine("\n[ERROR] " + s + "\n");
+        public static void Err(object s)
+        {
+            Console.WriteLine("\n[ERROR] " + s + "\n");
+        }
 
-        public List<Chat> Chats() => chats;
+        public List<Chat> Chats()
+        {
+            return chats;
+        }
     }
 }

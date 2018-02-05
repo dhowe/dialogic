@@ -13,7 +13,10 @@ namespace Dialogic
 
         public Command Command
         {
-            get => command;
+            get
+            {
+                return command;
+            }
         }
     }
 }

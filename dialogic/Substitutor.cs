@@ -18,8 +18,7 @@ namespace Dialogic
                 {
                     var pick = DoReplace(opt);
                     input = input.Replace(opt, pick);
-                    if (c != null)
-                        System.Console.WriteLine($"-> {opt} -> {pick}\n{input}");
+                    if (c != null) Console.WriteLine("-> "+opt+" -> "+pick+"\n"+input);
                 }
             }
         }

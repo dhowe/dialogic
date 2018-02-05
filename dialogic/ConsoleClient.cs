@@ -37,8 +37,9 @@ namespace Dialogic
             {
                 suffix += "  [" + c.TypeName() + ": " + c.Text + "]";
             }
-            else if (c is Ask a)
+            else if (c is Ask)
             {
+                Ask a = ((Ask)c);
                 string sec = a.WaitSecs > 0 ? " #" + a.WaitSecs + "s" : "";
                 Out.WriteLine(c.Text + sec + suffix);
                 suffix = "";
@@ -92,7 +93,10 @@ namespace Dialogic
             {
                 int ms = new Random().Next(20000, 50000);
                 Thread.Sleep(ms);
-                UnityEvents?.Invoke(new MockUnityEvent());
+                if (UnityEvents != null)
+                {
+                    UnityEvents.Invoke(new MockUnityEvent());
+                }
             }
         }
     }

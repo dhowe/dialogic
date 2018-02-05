@@ -3,6 +3,8 @@ using System.Threading;
 
 namespace Dialogic
 {
+    // Utility class for reading input from console
+
     public static class ConsoleReader
     {
         private static Thread inputThread;
@@ -32,10 +34,8 @@ namespace Dialogic
         {
             getInput.Set();
             bool success = gotInput.WaitOne(timeOutMillisecs);
-            if (success)
-                return input;
-            else
-                throw new PromptTimeout(source);
+            if (success) return input;
+            throw new PromptTimeout(source);
         }
     }
 }

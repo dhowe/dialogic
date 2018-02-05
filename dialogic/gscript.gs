@@ -13,7 +13,7 @@ OPT Nah #RePrompt
 
 CHAT RePrompt
 DO SadSpin
-ASK (Really|Whaaaa), don't you want to play a game?
+ASK ((Really|Whaaaa), don't you want to play a game? | Come on, one game?)
 OPT Sure # $lastPrompt
 OPT Nah # RePrompt
 

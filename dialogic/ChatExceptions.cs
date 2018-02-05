@@ -14,7 +14,12 @@ namespace Dialogic
             this.command = ask;
         }
 
-        public Command Command { get => command; }
+        public Command Command {
+            get
+            {
+                return command;
+            }
+        }
     }
 
     public class ChatNotFound : ChatException 

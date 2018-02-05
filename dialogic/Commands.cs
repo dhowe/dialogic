@@ -17,16 +17,25 @@ namespace Dialogic
         public string Id { get; protected set; }
         public string Text;
 
-        protected Command() => this.Id = (++IDGEN).ToString();
+        protected Command()
+        {
+            this.Id = (++IDGEN).ToString();
+        }
 
-        private static string ToMixedCase(string s) =>
-            (s[0] + "").ToUpper() + s.Substring(1).ToLower();
+        private static string ToMixedCase(string s)
+        {
+            return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
+        }
 
         public static Command Create(string type, params string[] args)
         {
             type = ToMixedCase(type);
-            return Create(Type.GetType(PACKAGE + type) ??
-                throw new TypeLoadException("No type: " + PACKAGE + type), args);
+            var cmd = Create(Type.GetType(PACKAGE + type), args);
+            if (cmd == null)
+            {
+                throw new TypeLoadException("No type: " + PACKAGE + type);
+            }
+            return cmd;
         }
 
         public static Command Create(Type type, params string[] args)
@@ -37,9 +46,15 @@ namespace Dialogic
         }
 
 
-        public virtual void Init(params string[] args) => this.Text = String.Join("", args);
+        public virtual void Init(params string[] args)
+        {
+            this.Text = String.Join("", args);
+        }
 
-        public virtual string TypeName() => this.GetType().ToString().Replace(PACKAGE, "");
+        public virtual string TypeName()
+        {
+            return this.GetType().ToString().Replace(PACKAGE, "");
+        }
 
         public virtual ChatEvent Fire(ChatRuntime cr)
         {
@@ -67,23 +82,35 @@ namespace Dialogic
         //    }
         //}
 
-        protected Exception BadArg(string msg) => throw new ArgumentException(msg);
+        protected Exception BadArg(string msg)
+        {
+            throw new ArgumentException(msg);
+        }
 
         protected Exception BadArgs(string[] args, int expected)
         {
-            return BadArg($"{TypeName().ToUpper()} expects {expected} args,"
-                + $" got {args.Length}: '{string.Join(" # ", args)}'\n");
+            return BadArg(TypeName().ToUpper() + " expects " + expected + " args,"
+                + " got " + args.Length + "'" + string.Join(" # ", args) + "'\n");
         }
 
-        public override string ToString() => "[" + TypeName().ToUpper() + "] " + Text;
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + Text;
+        }
 
-        protected static string QQ(string text) => "'" + text + "'";
+        protected static string QQ(string text)
+        {
+            return "'" + text + "'";
+        }
     }
 
     public abstract class Timed : Command
     {
         internal float WaitSecs = 0;
-        public virtual int WaitTime() => (int)(WaitSecs * 1000); // no wait
+        public virtual int WaitTime()
+        {
+            return (int)(WaitSecs * 1000); // no wait
+        }
     }
 
     public abstract class Meta : Command
@@ -130,15 +157,20 @@ namespace Dialogic
 
     public class Say : Timed
     {
-        public override string ToString() => "["
-            + TypeName().ToUpper() + "] " + QQ(Text);
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + QQ(Text);
+        }
     }
 
     public class Go : Command
     {
         public Go() : base() { }
 
-        public Go(string text) : base() => this.Text = text;
+        public Go(string text) : base()
+        {
+            this.Text = text;
+        }
 
         public override ChatEvent Fire(ChatRuntime cr)
         {
@@ -187,8 +219,11 @@ namespace Dialogic
             return (Set)this.MemberwiseClone();
         }
 
-        public override string ToString() => "[" + TypeName().ToUpper() 
-            + "] $" + Text + '=' + Value;
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper()
+                + "] $" + Text + '=' + Value;
+        }
 
         //public override void HandleVars(Dictionary<string, object> globals) { } // no-op
 
@@ -205,9 +240,15 @@ namespace Dialogic
     {
         public List<Command> commands = new List<Command>(); // not copied
 
-        public Chat() => this.Text = "C" + Environment.TickCount;
+        public Chat()
+        {
+            this.Text = "C" + Environment.TickCount;
+        }
 
-        public void AddCommand(Command c) => this.commands.Add(c);
+        public void AddCommand(Command c)
+        {
+            this.commands.Add(c);
+        }
 
         public override void Init(params string[] args) {
 
@@ -236,15 +277,22 @@ namespace Dialogic
 
     public class Wait : Timed
     {
-        public override void Init(params string[] args) =>
+        public override void Init(params string[] args)
+        {
             WaitSecs = args.Length == 1 ? float.Parse(args[0]) : 0;
+        }
 
-        public override string ToString() => "[" + TypeName().ToUpper() + "] " + WaitSecs;
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + WaitSecs;
+        }
 
         //public override void HandleVars(Dictionary<string, object> globals) { }
 
-        public override int WaitTime() => WaitSecs > 0
-            ? (int)(WaitSecs * 1000) : Timeout.Infinite;
+        public override int WaitTime()
+        {
+            return WaitSecs > 0 ? (int)(WaitSecs * 1000) : Timeout.Infinite;
+        }
     }
 
     public class Opt : Command
@@ -268,10 +316,16 @@ namespace Dialogic
             this.action = (args.Length > 1) ? Command.Create(typeof(Go), args[1]) : null;
         }
 
-        public override string ToString() => "[" + TypeName().ToUpper() + "] "
-            + QQ(Text) + (action is NoOp ? "" : " (-> " + action.Text + ")");
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + QQ(Text) 
+                + (action is NoOp ? "" : " (-> " + action.Text + ")");
+        }
 
-        public string ActionText() => action != null ? action.Text : "";
+        public string ActionText()
+        {
+            return action != null ? action.Text : "";
+        }
 
         public override ChatEvent Fire(ChatRuntime cr)
         {
@@ -316,23 +370,34 @@ namespace Dialogic
             return options;
         }
 
-        public override int WaitTime() => WaitSecs > 0 
-            ?  (int)(WaitSecs * 1000) : Timeout.Infinite;
+        public override int WaitTime()
+        {
+            return WaitSecs > 0 ? (int)(WaitSecs * 1000) : Timeout.Infinite;
+        }
 
-        public Opt Selected() => options[SelectedIdx];
+        public Opt Selected()
+        {
+            return options[SelectedIdx];
+        }
 
-        public void AddOption(Opt o) => options.Add(o);
+        public void AddOption(Opt o)
+        {
+            options.Add(o);
+        }
 
         public Command Choose(string input) // return next Command or null
         {
             attempts++;
-            if (int.TryParse(input, out int i))
+            /*if (int.TryParse(input, out int i)){
+            if (i > 0 && i <= options.Count) {
+                SelectedIdx = --i;
+                return this.options[SelectedIdx].action;
+            }}*/
+            int i = Convert.ToInt32(input);
+            if (i > 0 && i <= options.Count)
             {
-                if (i > 0 && i <= options.Count)
-                {
-                    SelectedIdx = --i;
-                    return this.options[SelectedIdx].action;
-                }
+                SelectedIdx = --i;
+                return this.options[SelectedIdx].action;
             }
             throw new InvalidChoice(this);
         }
