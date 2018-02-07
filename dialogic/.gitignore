@@ -1,8 +1,4 @@
 misc
 lib
-GuppyScript*.cs
-GuppyScript*.tokens
-Dialogic*.cs
-Dialogic*.tokens
 *.zip
 backup.sh
