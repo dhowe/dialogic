@@ -5,19 +5,6 @@ using System.Threading;
 
 namespace Dialogic
 {
-    /* TODO: 
-        EMPH/IF
-        Interpret/Run code chunk ``
-        redo SET: needs to handle numbers, strings, +=, -=, % etc.
-        Interrupt->Branch vs Interrupt->Resume
-        ASK: Specify action for prompt-timeout
-        Meta-tagging (Chat objects have Meta stack) 
-        Chat-search by meta (linq)
-        Verify chat-name uniqueness on parse ? variables?
-        Variables: inputStack (set of inputs from user, opts or interrupts)
-        Timing:  msThinking(ASK,SAY), msBetweenCommands(ASK,SAY)
-    */
-
     public class ChatRuntime
     {
         public static void Main(string[] args)
@@ -140,3 +127,16 @@ namespace Dialogic
         }
     }
 }
+
+/* TODO: 
+    EMPH/IF
+    Interpret/Run code chunk ``
+    redo SET: needs to handle numbers, strings, +=, -=, % etc.
+    Interrupt->Branch vs Interrupt->Resume
+    ASK: Specify action for prompt-timeout
+    Meta-tagging (Chat objects have Meta stack) 
+    Chat-search by meta (linq)
+    Verify chat-name uniqueness on parse ? variables?
+    Variables: inputStack (set of inputs from user, opts or interrupts)
+    Timing:  msThinking(ASK,SAY), msBetweenCommands(ASK,SAY)
+*/
