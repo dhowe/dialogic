@@ -136,12 +136,13 @@ cm.Run();
 
 ## Building Dialogic with Visual Studio (OS X)
 
-1. Clone this respository to your local file system
-```` $ git clone https://github.com/dhowe/dialogic.git````
+1. Clone this respository to your local file system ```` $ git clone https://github.com/dhowe/dialogic.git````
 
+1. From Visual Studio(7.3.3) do Menu->File->Open, then select dialogic.sln from the top-level of the cloned dir
 
-1. Clone this respository to your local file system
-```` $ git clone https://github.com/dhowe/dialogic.git````
+1. The project should open as in the image below. Then do Menu->Run->'Start without debugging'
+
+![](res/vsloaded.png?raw=true)
 
 
 &nbsp;
