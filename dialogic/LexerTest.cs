@@ -34,7 +34,7 @@ namespace Dialogic
             Console.WriteLine();
         }
 
-        public static void Mainx(String[] args)
+        public static void MainOff(String[] args)
         {
             new LexerTest().Test();
         }

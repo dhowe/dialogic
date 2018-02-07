@@ -74,7 +74,7 @@ namespace Dialogic
             }
         }
 
-        public static void MainX(string[] args)
+        public static void MainOff(string[] args)
         {
             var globals = new Dictionary<string, object>() {
                 { "animal", "dog" },
