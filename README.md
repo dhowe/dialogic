@@ -132,3 +132,16 @@ cm.Run();
 
 &nbsp;
 
+
+
+## Building Dialogic with Visual Studio (OS X)
+
+1. Clone this respository to your local file system
+```` $ git clone https://github.com/dhowe/dialogic.git````
+
+
+1. Clone this respository to your local file system
+```` $ git clone https://github.com/dhowe/dialogic.git````
+
+
+&nbsp;
