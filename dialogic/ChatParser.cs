@@ -52,8 +52,7 @@ namespace Dialogic
 
         public static List<Chat> ParseFile(string fname)
         {
-
-            return Parse(File.ReadLines(fname).ToArray());
+            return Parse(File.ReadAllLines(fname));
         }
 
         protected static List<Chat> Parse(string[] lines)
