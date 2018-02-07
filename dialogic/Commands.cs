@@ -70,17 +70,11 @@ namespace Dialogic
             return (Command)this.MemberwiseClone();
         }
 
-        //public virtual void HandleVars(Dictionary<string, object> globals)
-        //{
-        //    if (!string.IsNullOrEmpty(Text))
-        //    {
+        //public virtual void HandleVars(Dictionary<string, object> globals) {
+        //    if (!string.IsNullOrEmpty(Text)) {
         //        foreach (string s in SortByLength(globals.Keys))
-        //        {
-        //            //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
         //            Text = Text.Replace("$" + s, globals[s].ToString());
-        //        }
-        //    }
-        //}
+        //    }}
 
         protected Exception BadArg(string msg)
         {
@@ -236,45 +230,6 @@ namespace Dialogic
         }
     }
 
-    public class Chat : Command
-    {
-        public List<Command> commands = new List<Command>(); // not copied
-
-        public Chat()
-        {
-            this.Text = "C" + Environment.TickCount;
-        }
-
-        public void AddCommand(Command c)
-        {
-            this.commands.Add(c);
-        }
-
-        public override void Init(params string[] args) {
-
-            if (args.Length < 1)
-            {
-                throw BadArgs(args, 1);
-            }
-            
-            this.Text = args[0];
-
-            if (Regex.IsMatch(Text, @"\s+"))
-            {
-                throw BadArg("CHAT name '" + Text + "' contains spaces!");
-            }
-        }
-
-        // public override Command Copy() // ignore 'commands'
-
-        public string ToTree()
-        {
-            string s = base.ToString() + "\n";
-            commands.ForEach(c => s += "  " + c + "\n");
-            return s;
-        }
-    }
-
     public class Wait : Timed
     {
         public override void Init(params string[] args)
@@ -388,17 +343,19 @@ namespace Dialogic
         public Command Choose(string input) // return next Command or null
         {
             attempts++;
-            /*if (int.TryParse(input, out int i)){
-            if (i > 0 && i <= options.Count) {
-                SelectedIdx = --i;
-                return this.options[SelectedIdx].action;
-            }}*/
-            int i = Convert.ToInt32(input);
+            int i = -1;
+            try
+            {
+                i = Convert.ToInt32(input);
+            }
+            catch { /* ignore */ }
+
             if (i > 0 && i <= options.Count)
             {
                 SelectedIdx = --i;
                 return this.options[SelectedIdx].action;
             }
+
             throw new InvalidChoice(this);
         }
 
@@ -429,10 +386,6 @@ namespace Dialogic
         {
             Ask clone = (Ask)this.MemberwiseClone();
             clone.options = new List<Opt>();
-            //for (int i = 0; i < options.Count; i++)
-            //{
-            //    clone.AddOption((Opt)options[i].Copy());
-            //}
             this.options.ForEach(delegate(Opt o) {
                 clone.AddOption((Opt)o.Copy());  
             });

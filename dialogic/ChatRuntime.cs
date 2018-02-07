@@ -34,7 +34,7 @@ namespace Dialogic
         {
             this.chats = chats;
             this.globals = new Dictionary<string, object>() {
-                { "emotion", "groovy" },
+                { "emotion", "special" },
                 { "place", "Istanbul" },
                 { "Happy", "HappyFlip" },
                 { "verb", "play" },
@@ -98,6 +98,13 @@ namespace Dialogic
                 throw new Exception("No chats found!");
             }
             Run(chats[0]);
+        }
+
+        public List<Chat> Find(Func<Boolean> condition)
+        {
+            List<Chat> l = new List<Chat>();
+            //condition
+            return l;
         }
 
         public Chat FindChat(string chatName)
