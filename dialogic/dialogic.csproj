@@ -16,7 +16,10 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4" Version="4.6.4" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.6.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="scripting\ScriptingEngine.cs" />
+    <Compile Remove="scripting\ScriptingTests.cs" />
+  </ItemGroup>
 </Project>

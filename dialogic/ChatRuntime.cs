@@ -100,10 +100,12 @@ namespace Dialogic
             Run(chats[0]);
         }
 
-        public List<Chat> Find(Func<Boolean> condition)
+        public List<Chat> Find(params Func<Boolean>[] conditions)
         {
             List<Chat> l = new List<Chat>();
-            //condition
+            l.ForEach((obj) => {
+                
+            });
             return l;
         }
 

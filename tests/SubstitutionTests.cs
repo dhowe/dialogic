@@ -33,27 +33,5 @@ namespace tests
             Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
             Assert.Equal("SAY The dog woke 4 times", s);
         }
-
-        //[Fact]
-        public void Test3() // FAILS
-        {
-            var s = @"SAY The $animal woke $count times";
-            new ScriptingEngine(globals).Exec("count++;");
-            Console.WriteLine("globals="+globals);
-            Substitutor.ReplaceVars(ref s, globals);
-            Console.WriteLine("Running SubstitutionTests.Test3 :: " + s);
-            Assert.Equal("SAY The dog woke 4 times", s);
-        }
-
-        //[Fact]
-        public void Test4() // FAILS
-        {
-            var s = @"SAY The $animal woke $count times";
-            new ScriptingEngine(globals).Exec("count++;");
-            Console.WriteLine("globals=" + globals);
-            Substitutor.ReplaceVars(ref s, globals);
-            Console.WriteLine("Running SubstitutionTests.Test3 :: " + s);
-            Assert.Equal("SAY The dog woke 4 times", s);
-        }
     }
 }
