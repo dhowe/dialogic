@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 mandatory_binaries=( "java" "javac" )
 
@@ -114,7 +114,7 @@ grammar_name=${grammar_file%.*}
 antlr_version="4.7.1"
 lib_path=$(get_lib_path)
 #antlr_jar="/Users/dhowe/.nuget/packages/antlr4.codegenerator/4.6.4/build/../tools/antlr4-csharp-4.6.4-complete.jar"
-antlr_jar="lib/antlr-4.7.1-complete.jar"
+antlr_jar="lib/antlr-$antlr_version-complete.jar"
 prefix=$(echo $grammar_file | cut -f 1 -d '.')
 
 

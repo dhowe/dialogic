@@ -7,7 +7,7 @@ namespace Dialogic
 {
     public class ChatRuntime
     {
-        public static void Main(string[] args)
+        public static void Mainx(string[] args)
         {
             //List<Chat> chats = ChatParser.ParseText("PACE 13\nSAY Hello\n");
             List<Chat> chats = ChatParser.ParseFile("gscript.gs");

@@ -1,7 +1,9 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dialogic", "dialogic\dialogic.csproj", "{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dialogic", "dialogic\dialogic.csproj", "{B3C8B750-DC86-42FD-8FC1-5A81761E698D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{D173C974-F716-4B90-8EF1-0086E3EA6CA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,5 +15,36 @@ Global
 		{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$0.TextStylePolicy = $2
+		$2.inheritsSet = null
+		$2.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $3
+		$3.scope = text/x-csharp
+		$0.TextStylePolicy = $4
+		$4.FileWidth = 80
+		$4.TabsToSpaces = True
+		$4.scope = text/plain
+		$0.TextStylePolicy = $5
+		$5.inheritsSet = null
+		$5.scope = application/x-sh
+		$0.StandardHeader = $6
+		$0.VersionControlPolicy = $7
+		version = 0.2
 	EndGlobalSection
 EndGlobal
