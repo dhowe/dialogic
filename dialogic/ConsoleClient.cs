@@ -4,11 +4,8 @@ using Out = System.Console;
 
 namespace Dialogic
 {
-    public class ConsoleClient // An example client
+    public class ConsoleClient : ChatClient // An example client
     {
-        public delegate void UnityEventHandler(MockUnityEvent e);
-        public event UnityEventHandler UnityEvents; // event-stream
-
         protected string suffix = "";
 
         public ConsoleClient()
@@ -17,12 +14,8 @@ namespace Dialogic
             t.Start();
         }
 
-        public void Subscribe(ChatRuntime cs)
-        {
-            cs.ChatEvents += new ChatRuntime.ChatEventHandler(OnChatEvent);
-        }
 
-        private void OnChatEvent(ChatRuntime cm, ChatEvent e)
+        protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
         {
             HandleCommand(cm, e);
         }
@@ -89,7 +82,7 @@ namespace Dialogic
 
         private void MockEvents()
         {
-            while (true)
+            /*while (true)
             {
                 int ms = new Random().Next(20000, 50000);
                 Thread.Sleep(ms);
@@ -97,7 +90,7 @@ namespace Dialogic
                 {
                     UnityEvents.Invoke(new MockUnityEvent());
                 }
-            }
+            }*/
         }
     }
 }

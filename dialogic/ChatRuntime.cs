@@ -29,14 +29,20 @@ namespace Dialogic
             if (logEvents) InitLog();
         }
 
-        public void Subscribe(ConsoleClient cc)
+        public void Subscribe(ChatClient cc) // tmp
         {
-            cc.UnityEvents += new ConsoleClient.UnityEventHandler(OnUnityEvent);
+            cc.UnityEvents += new ChatClient.UnityEventHandler(OnUnityEvent);
         }
 
-        private void OnUnityEvent(MockUnityEvent e)
+        private void OnUnityEvent(EventArgs e)
         {
-            Console.WriteLine("<"+e.Message+">");
+            if (e is MockUnityEvent)
+            {
+                Console.WriteLine("<" + ((MockUnityEvent)e).Message + ">");
+            }
+            else {
+                Console.WriteLine("<" + e + ">");
+            }
         }
 
         internal void PrintGlobals()
@@ -74,7 +80,6 @@ namespace Dialogic
         {
             FireEvent(chat);
             chat.commands.ForEach(Do);
-            Console.WriteLine("CHAT DONE: "+chat.Id);
         }
 
         public void Run()

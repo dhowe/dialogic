@@ -52,6 +52,7 @@
     <Compile Include="MockUnityEvent.cs" />
     <Compile Include="Substitutor.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="ChatClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
