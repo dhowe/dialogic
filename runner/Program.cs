@@ -11,7 +11,7 @@ namespace runner
             List<Chat> chats = ChatParser.ParseFile("../../../dialogic/gscript.gs");
             ChatRuntime cm = new ChatRuntime(chats);
 
-            ChatClient cl = new TestClient(); // Test client
+            ChatClient cl = new SimpleClient(); // Test client
 
             cl.Subscribe(cm); // Client subscribes to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
@@ -20,7 +20,7 @@ namespace runner
         }
     }
 
-    class TestClient : ChatClient
+    class SimpleClient : ChatClient
     {
         protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
         {

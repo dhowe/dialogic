@@ -129,14 +129,23 @@ namespace Dialogic
 }
 
 /* TODO: 
-    EMPH/IF
-    Interpret/Run code chunk ``
-    redo SET: needs to handle numbers, strings, +=, -=, % etc.
-    Interrupt->Branch vs Interrupt->Resume
-    ASK: Specify action for prompt-timeout
-    Meta-tagging (Chat objects have Meta stack) 
-    Chat-search by meta (linq)
-    Verify chat-name uniqueness on parse ? variables?
-    Variables: inputStack (set of inputs from user, opts or interrupts)
-    Timing:  msThinking(ASK,SAY), msBetweenCommands(ASK,SAY)
+
+    # Migrate tests from xunit
+    # Handle reprompting on timeout in ChatRuntime instead of client
+    # Implement ChatRuntime.Find(Conditions)
+    # Add COND tag to specify matches for chat
+    # Add FIND || PICK || SELECT, tag to specify next chat search
+    # Add META tag [] for display control (bold, wavy, etc.)
+
+    OTHER:
+        EMPH/IF
+        Interpret/Run code chunk ``
+        rethink SET: needs to handle numbers, strings, +=, -=, % etc.
+        Interrupt->Branch vs Interrupt->Resume
+        ASK: Specify action for prompt-timeout
+        Meta-tagging (Chat objects have Meta stack) 
+        Chat-search by meta (linq)
+        Verify chat-name uniqueness on parse ? variables?
+        Variables: inputStack (set of inputs from user, opts or interrupts)
+        Timing:  msThinking(ASK,SAY), msBetweenCommands(ASK,SAY)
 */

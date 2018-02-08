@@ -14,7 +14,6 @@ namespace Dialogic
             t.Start();
         }
 
-
         protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
         {
             HandleCommand(cm, e);
