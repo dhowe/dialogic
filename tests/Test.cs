@@ -1,7 +1,8 @@
 ﻿using NUnit.Framework;
 using Dialogic;
 using System;
-
+using System.Collections.Generic;
+using System.IO;
 
 namespace tests
 {
@@ -12,7 +13,6 @@ namespace tests
         public void TestCase()
         {
             Assert.That(15, Is.EqualTo(15));
-            ConsoleClient c = new ConsoleClient();
         }
     }
 }

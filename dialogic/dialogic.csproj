@@ -55,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="dia.log" />
     <None Include="Dialogic.g4" />
     <None Include="generate.sh" />
     <None Include="gscript.gs" />

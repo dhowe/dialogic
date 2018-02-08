@@ -7,20 +7,6 @@ namespace Dialogic
 {
     public class ChatRuntime
     {
-        public static void Mainx(string[] args)
-        {
-            //List<Chat> chats = ChatParser.ParseText("PACE 13\nSAY Hello\n");
-            List<Chat> chats = ChatParser.ParseFile("gscript.gs");
-            ChatRuntime cm = new ChatRuntime(chats);
-
-            ConsoleClient cl = new ConsoleClient(); // Example client
-
-            cl.Subscribe(cm); // Client subscribes to chat events
-            cm.Subscribe(cl); // Dialogic subscribes to Unity events
-
-            cm.Run();
-        }
-
         public delegate void ChatEventHandler(ChatRuntime c, ChatEvent e);
         public event ChatEventHandler ChatEvents; // event-stream
 
