@@ -110,23 +110,13 @@ cm.Run();
 
 ### Event Scheduling
 
-&nbsp;
-
 [tbd]
-
-&nbsp;
 
 ### Global / Local Variables
 
-&nbsp;
-
 [tbd]
 
-&nbsp;
-
 ### Advanced Commands
-
-&nbsp;
 
 [tbd]
 
