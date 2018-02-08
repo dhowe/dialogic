@@ -140,7 +140,7 @@ cm.Run();
 
 1. From Visual Studio(7.3.3) do Menu->File->Open, then select dialogic.sln from the top-level of the cloned dir
 
-1. The project should open as in the image below. Then do Menu->Run->'Start without debugging'
+1. The solution should open with 3 sub-projects, as in the image below. Then right-click 'runner' and do 'Run Item'
 
 ![](res/vsloaded.png?raw=true)
 
