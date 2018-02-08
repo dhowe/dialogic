@@ -11,7 +11,8 @@ namespace runner
             List<Chat> chats = ChatParser.ParseFile("../../../dialogic/gscript.gs");
             ChatRuntime cm = new ChatRuntime(chats);
 
-            ChatClient cl = new SimpleClient(); // Test client
+            //ChatClient cl = new SimpleClient(); // Simple client
+            ChatClient cl = new ConsoleClient(); // Console client
 
             cl.Subscribe(cm); // Client subscribes to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
