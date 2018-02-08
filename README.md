@@ -130,9 +130,13 @@ cm.Run();
 
 1. From Visual Studio(7.3.3) do Menu->File->Open, then select dialogic.sln from the top-level of the cloned dir
 
-1. The solution should open with 3 sub-projects, as in the image below. Right-click 'runner' and do 'Run Item'
+1. The solution should open with 3 sub-projects, as in the image below. 
 
 ![](res/vsloaded.png?raw=true)
+
+1. To run the tests, right-click 'tests' and select 'Run Item'
+
+1. To run the console demo, right-click 'runner' and select 'Run Item'
 
 
 &nbsp;
