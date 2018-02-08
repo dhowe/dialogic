@@ -132,11 +132,12 @@ cm.Run();
 
 1. The solution should open with 3 sub-projects, as in the image below. 
 
+1. To run tests, right-click 'tests' and select 'Run Item'
+
+1. To run a console demo, right-click 'runner' and select 'Run Item'
+
 ![](res/vsloaded.png?raw=true)
 
-1. To run the tests, right-click 'tests' and select 'Run Item'
-
-1. To run the console demo, right-click 'runner' and select 'Run Item'
 
 
 &nbsp;
