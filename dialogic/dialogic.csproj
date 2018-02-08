@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B3C8B750-DC86-42FD-8FC1-5A81761E698D}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>dialogic</RootNamespace>
-    <AssemblyName>dialogic</AssemblyName>
+    <RootNamespace>Dialogic</RootNamespace>
+    <AssemblyName>Dialogic</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <ReleaseVersion>0.2</ReleaseVersion>
   </PropertyGroup>
@@ -35,24 +35,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Chat.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="ChatEvent.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="ChatExceptions.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="ChatParser.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="ChatRuntime.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="Commands.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="ConsoleClient.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="ConsoleReader.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="DialogicBaseVisitor.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="DialogicLexer.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="DialogicParser.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="DialogicVisitor.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="LexerTest.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="MockUnityEvent.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="Substitutor.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <Compile Include="Util.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <Compile Include="Chat.cs" />
+    <Compile Include="ChatEvent.cs" />
+    <Compile Include="ChatExceptions.cs" />
+    <Compile Include="ChatParser.cs" />
+    <Compile Include="ChatRuntime.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="ConsoleClient.cs" />
+    <Compile Include="ConsoleReader.cs" />
+    <Compile Include="DialogicBaseVisitor.cs" />
+    <Compile Include="DialogicLexer.cs" />
+    <Compile Include="DialogicParser.cs" />
+    <Compile Include="DialogicVisitor.cs" />
+    <Compile Include="LexerTest.cs" />
+    <Compile Include="MockUnityEvent.cs" />
+    <Compile Include="Substitutor.cs" />
+    <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

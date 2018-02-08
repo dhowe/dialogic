@@ -7,6 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>tests</RootNamespace>
     <AssemblyName>tests</AssemblyName>
+    <TargetFramework>net35</TargetFramework>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <ReleaseVersion>0.2</ReleaseVersion>
   </PropertyGroup>
@@ -28,7 +29,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.3.9.0\lib\net35\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
