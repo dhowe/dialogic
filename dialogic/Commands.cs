@@ -100,7 +100,7 @@ namespace Dialogic
 
     public abstract class Timed : Command
     {
-        internal float WaitSecs = 0;
+        public float WaitSecs = 0;
         public virtual int WaitTime()
         {
             return (int)(WaitSecs * 1000); // no wait
