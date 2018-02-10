@@ -67,7 +67,11 @@ namespace Dialogic
         public void Do(Command cmd)
         {
             FireEvent(cmd); // TODO: need to rethink this sleep
-            if (cmd is Timed) Thread.Sleep(((Timed)cmd).WaitTime()); 
+            if (cmd is Timed)
+            {
+                int waitMs = ((Timed)cmd).WaitTime();
+                Thread.Sleep(waitMs);
+            }
         }
 
         private void FireEvent(Command c)
