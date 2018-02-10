@@ -29,8 +29,7 @@ namespace Dialogic
             }
         }
 
-        // omit the parameter to read a line without a timeout
-        public static string ReadLine(Command source, int timeOutMillisecs = Timeout.Infinite)
+        public static string ReadLine(Command source, int timeOutMillisecs = System.Threading.Timeout.Infinite)
         {
             getInput.Set();
             bool success = gotInput.WaitOne(timeOutMillisecs);

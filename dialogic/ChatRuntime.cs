@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 
@@ -10,12 +11,12 @@ namespace Dialogic
         public delegate void ChatEventHandler(ChatRuntime c, ChatEvent e);
         public event ChatEventHandler ChatEvents; // event-stream
 
-        protected List<Chat> chats;
-        public bool LogEvents = false;
-        protected bool waiting = false;
-        public string LogFileName = "dia.log";
-
         public Dictionary<string, object> globals;
+        public bool ShowWaits = false;
+        public string LogFileName;
+
+        protected List<Chat> chats;
+        protected bool logInitd, waiting = false;
 
         public ChatRuntime(List<Chat> chats)
         {
@@ -25,9 +26,14 @@ namespace Dialogic
                 { "place", "Istanbul" },
                 { "Happy", "HappyFlip" },
                 { "verb", "play" },
+                { "neg", "nah" },
                 { "var3", 2 }
             };
-            if (LogEvents) InitLog();
+        }
+
+        private bool Logging()
+        { 
+            return LogFileName != null;
         }
 
         public void Subscribe(ChatClient cc) // tmp
@@ -37,15 +43,12 @@ namespace Dialogic
 
         private void OnClientEvent(EventArgs e)
         {
-            Console.WriteLine("<" + e + ">");
             if (e is ResponseEvent)
             {
-                Opt response = ((ResponseEvent)e).Selected;
                 waiting = false;
-                if (!(response.action is NoOp)) 
-                {
-                    response.action.Fire(this);
-                }
+                Opt opt = (Opt)((ResponseEvent)e).Selected;
+                FireEvent(opt); // Send Opt event to clients - needed ? 
+                ((Opt)opt).action.Fire(this); // execute GO event
             }
         }
 
@@ -54,7 +57,7 @@ namespace Dialogic
             Console.WriteLine("GLOBALS:");
             foreach (var k in globals.Keys)
             {
-                System.Console.WriteLine(k+": "+globals[k]);
+                System.Console.WriteLine(k + ": " + globals[k]);
             }
         }
 
@@ -62,10 +65,11 @@ namespace Dialogic
         {
             FireEvent(chat);
             //chat.commands.ForEach(Do);
-            for (int i = 0; i < chat.commands.Count; )
+            for (int i = 0; i < chat.commands.Count;)
             {
-                if (waiting) {
-                    //Console.Write(".");
+                if (waiting)
+                {
+                    if (ShowWaits)Console.Write(".");
                     Thread.Sleep(10);
                     continue;
                 }
@@ -84,14 +88,17 @@ namespace Dialogic
 
         public void Do(Command cmd)
         {
+            //Console.WriteLine("CMD: "+cmd.TypeName());
             if (cmd is Timed)
             {
                 int waitMs = ((Timed)cmd).WaitTime();
                 if (waitMs != 0) {
                     waiting = true;
                     if (waitMs > 0) {
+                        //Console.WriteLine("TIME: " + waitMs);
                         Timers.SetTimeout(waitMs, () => {
                             //Console.WriteLine("TIMER("+waitMs+") FIRED");
+                            //if (cmd is Ask) NotifyListeners(new ChatEvent(new Timeout((Ask)cmd)));
                             waiting = false;
                         });
                     }
@@ -100,13 +107,21 @@ namespace Dialogic
             FireEvent(cmd);
         }
 
+        private void NotifyListeners(ChatEvent ce)
+        {
+            LogCommand(ce.Command);
+            if (ChatEvents != null) ChatEvents.Invoke(this, ce);
+        }
+
         private void FireEvent(Command c)
         {
-            if (!(c is NoOp))
+            if (!(c is NoOp)) 
             {
                 ChatEvent ce = c.Fire(this);
-                if (LogEvents) Util.Log(LogFileName, c);
-                if (ChatEvents != null) ChatEvents.Invoke(this, ce);
+                if (!(c is Go)) // Opt, Chat ?
+                {
+                    NotifyListeners(ce);
+                }
             }
         }
 
@@ -125,19 +140,20 @@ namespace Dialogic
             throw new ChatNotFound(chatName);
         }
 
-        private void InitLog()
-        {
-            File.WriteAllText(LogFileName, "==========================\n");
-        }
-
         public void LogCommand(Command c)
         {
-            if (!LogEvents) return;
+            if (!Logging()) return;
+
+            if (!logInitd) {
+                
+                logInitd = true;
+                File.WriteAllText(LogFileName, "============\n");
+            }
 
             using (StreamWriter w = File.AppendText(LogFileName))
             {
-                w.WriteLine(DateTime.Now.ToLongTimeString() + "\t"
-                    + Environment.TickCount + "\t" + c);
+                var now = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                w.WriteLine(now + "\t" + c);
             }
         }
     }
@@ -145,13 +161,16 @@ namespace Dialogic
 
 /* TODO: 
 
-
+    # Rethink timing (Timeout obj, callbacks from client, threading, etc.)
+    
     # Implement ChatRuntime.Find(Conditions)
     # Add COND tag to specify matches for chat
     # Add FIND || PICK || SELECT, tag to specify next chat search
     # Add META tag [] for display control (bold, wavy, etc.)
     # Handle reprompting on timeout in ChatRuntime instead of client
 
+    CONS: Should parser add WAIT after each ASK? No, determine dynamically
+    
     OTHER:
         EMPH/IF
         Interpret/Run code chunk ``

@@ -18,32 +18,34 @@ namespace Dialogic
                 {
                     var pick = DoReplace(opt);
                     input = input.Replace(opt, pick);
-                    if (c != null) Console.WriteLine("-> "+opt+" -> "+pick+"\n"+input);
+                    if (c != null) Console.WriteLine("-> " + opt + " -> " + pick + "\n" + input);
                 }
             }
         }
 
-        public static void Replace(ref string text, Dictionary<string, object> globals) {
+        public static void Replace(ref string text, Dictionary<string, object> globals)
+        {
             ReplaceGroups(ref text);
             ReplaceVars(ref text, globals);
         }
-    
+
         public static void ReplaceVars(ref string text, Dictionary<string, object> globals)
         {
+            var otext = text;
             if (!string.IsNullOrEmpty(text))
             {
                 foreach (string s in Util.SortByLength(globals.Keys))
                 {
-                    //System.Console.WriteLine($"s=${s} -> {globals[s]}"); 
                     text = text.Replace("$" + s, globals[s].ToString());
                 }
             }
+            //Console.WriteLine("Subs.checking: " + otext + " -> "+text);
         }
 
         private static string DoReplace(string sub)
         {
-            if (!Regex.IsMatch(sub,@"\([^)]+|[^)]+\)")) throw InvalidState(sub);
-  
+            if (!Regex.IsMatch(sub, @"\([^)]+|[^)]+\)")) throw InvalidState(sub);
+
             sub = sub.Substring(1, sub.Length - 2);
             string[] opts = Regex.Split(sub, @"\s*\|\s*");
 
@@ -87,9 +89,8 @@ namespace Dialogic
             for (int i = 0; i < 15; i++)
             {
                 string s = String.Copy(input);
-                Substitutor.ReplaceGroups(ref s);
-                Substitutor.ReplaceVars(ref s, globals);
-                System.Console.WriteLine(i + ") " +s);
+                Substitutor.Replace(ref s, globals);
+                System.Console.WriteLine(i + ") " + s);
             }
         }
     }

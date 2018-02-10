@@ -7,25 +7,27 @@ namespace Dialogic
     //   https://codereview.stackexchange.com/questions/113596/writing-cs-analog-of-settimeout-setinterval-and-clearinterval
     public static class Timers
     {
+        static IInterruptable timer;
+
         public static IInterruptable SetInterval(int interval, Action function)
         {
-            return StartTimer(interval, function, true);
+            return timer = StartTimer(interval, function, true);
         }
 
         public static IInterruptable SetTimeout(int interval, Action function)
         {
             //Console.WriteLine("SetTimeout: "+interval+" "+function);
-            return StartTimer(interval, function, false);
+            return timer = StartTimer(interval, function, false);
         }
 
         private static IInterruptable StartTimer(int interval, Action function, bool autoReset)
         {
             Action functionCopy = (Action)function.Clone();
-            Timer timer = new Timer { Interval = interval, AutoReset = autoReset };
-            timer.Elapsed += (sender, e) => functionCopy();
-            timer.Start();
+            Timer t = new Timer { Interval = interval, AutoReset = autoReset };
+            t.Elapsed += (sender, e) => functionCopy();
+            t.Start();
 
-            return new TimerInterrupter(timer);
+            return new TimerInterrupter(t);
         }
     }
 

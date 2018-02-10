@@ -1,7 +1,7 @@
 ﻿SET lastPrompt Game
 
 Welcome to my $emotion World
-WAIT 2.2
+WAIT .5
 DO Twirl
 Thanks for visiting $place!
 GO Prompt
@@ -9,7 +9,7 @@ GO Prompt
 CHAT Prompt 
 ASK Do you want to $verb a game? #10
 OPT Sure # Game
-OPT Nah #RePrompt
+OPT $neg #RePrompt
 
 CHAT RePrompt
 DO SadSpin

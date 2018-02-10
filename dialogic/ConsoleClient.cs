@@ -23,6 +23,7 @@ namespace Dialogic.Client
 
         private void HandleCommand(ChatRuntime cm, ChatEvent e)
         {
+            //Out.WriteLine("Client<="+e.Command.Text);
             Command c = e.Command;
 
             if (c is Do || c is Chat || c is Meta) // just print info
@@ -65,6 +66,7 @@ namespace Dialogic.Client
                 }
                 catch (Exception e)
                 {
+                    // TODO: remove PromptTimout
                     if (e is PromptTimeout) Out.WriteLine("\nHey! Anyone home?");
                     Out.WriteLine("Choose an option from 1-" + opts.Count + "\n");
                 }

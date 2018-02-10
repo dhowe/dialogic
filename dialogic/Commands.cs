@@ -42,7 +42,6 @@ namespace Dialogic
             return cmd;
         }
 
-
         public virtual void Init(params string[] args)
         {
             this.Text = String.Join("", args);
@@ -56,22 +55,14 @@ namespace Dialogic
         public virtual ChatEvent Fire(ChatRuntime cr)
         {
             Command clone = this.Copy();
-            Substitutor.ReplaceGroups(ref clone.Text);
-            Substitutor.ReplaceVars(ref clone.Text, cr.globals);
+            Substitutor.Replace(ref clone.Text, cr.globals);
             return new ChatEvent(clone);
-//          this.HandleVars(cr.globals); 
         }
 
         public virtual Command Copy()
         {
             return (Command)this.MemberwiseClone();
         }
-
-        //public virtual void HandleVars(Dictionary<string, object> globals) {
-        //    if (!string.IsNullOrEmpty(Text)) {
-        //        foreach (string s in SortByLength(globals.Keys))
-        //            Text = Text.Replace("$" + s, globals[s].ToString());
-        //    }}
 
         protected Exception BadArg(string msg)
         {
@@ -97,28 +88,39 @@ namespace Dialogic
 
     public abstract class Timed : Command
     {
-        public float WaitSecs = 0;
+        public float WaitSecs = 0; // no delay by default
+
         public virtual int WaitTime()
         {
             return (int)(WaitSecs * 1000); // no wait
         }
     }
 
-    public abstract class Meta : Command
+    public class NoOp : Command
     {
+        public override ChatEvent Fire(ChatRuntime cr)
+        {
+            return null;
+        }
     }
 
-    public class NoOp : Command { }
+    public class Timeout : Command
+    {
+        public readonly Timed timed;
+
+        public Timeout(Timed a) {
+            timed = a;
+        }
+
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + Text + " " + timed.WaitSecs;
+        }
+    }
+
+    public class Meta : Command {}
     public class Do : Command { }
 
-    /*enum Pacing
-    {
-        Fast = 150,
-        Slow = 75,
-        Default = 100,
-        VerySlow = 50,
-        VeryFast = 200
-    };*/
 
     /*enum Pacing
     {
@@ -128,8 +130,6 @@ namespace Dialogic
         VerySlow = 50,
         VeryFast = 200
     };*/
-
-    public class Disp : Meta { }
 
     public class Pace : Meta
     {
@@ -148,6 +148,11 @@ namespace Dialogic
 
     public class Say : Timed
     {
+        public Say() : base() {
+            
+            this.WaitSecs = 1;
+        }
+
         public override string ToString()
         {
             return "[" + TypeName().ToUpper() + "] " + QQ(Text);
@@ -165,8 +170,10 @@ namespace Dialogic
 
         public override ChatEvent Fire(ChatRuntime cr)
         {
+            //Console.WriteLine("Go.FIRE1: "+Text);
             ChatEvent ce = base.Fire(cr);
-            cr.Run(cr.FindChat(Text));
+            //Console.WriteLine("Go.FIRE2: " + Text);
+            cr.Run(cr.FindChat(ce.Command.Text));
             return ce;
         }
     }
@@ -221,7 +228,7 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Set clone = (Set)this.Copy();
-            Substitutor.ReplaceVars(ref clone.Value, cr.globals);
+            Substitutor.Replace(ref clone.Value, cr.globals);
             cr.Globals()[Text] = Value; // set the global var
             return new ChatEvent(clone);
         }
@@ -243,7 +250,7 @@ namespace Dialogic
 
         public override int WaitTime()
         {
-            return WaitSecs > 0 ? (int)(WaitSecs * 1000) : Timeout.Infinite;
+            return WaitSecs > 0 ? (int)(WaitSecs * 1000) : System.Threading.Timeout.Infinite;
         }
     }
 
@@ -279,15 +286,14 @@ namespace Dialogic
             return action != null ? action.Text : "";
         }
 
-        public override ChatEvent Fire(ChatRuntime cr)
-        {
-            ChatEvent ce = base.Fire(cr);
-            if (action != null)
-            {
-                Substitutor.ReplaceVars(ref action.Text, cr.globals); // also labels
-            }
-            return ce;
-        }
+        //public override ChatEvent Fire(ChatRuntime cr)
+        //{
+        //    Console.WriteLine("Opt1:"+Text+" '"+action.Text+"'");
+        //    ChatEvent ce = base.Fire(cr);
+        //    Substitutor.Replace(ref Text, cr.globals); // also labels
+        //    Console.WriteLine("Opt2:" + Text + " '" + action.Text + "'");
+        //    return ce;
+        //}
 
         public override Command Copy()
         {
@@ -327,12 +333,12 @@ namespace Dialogic
 
         public override int WaitTime()
         {
-            return WaitSecs > 0 ? (int)(WaitSecs * 1000) : Timeout.Infinite;
+            return WaitSecs > 0 ? (int)(WaitSecs * 1000) : System.Threading.Timeout.Infinite;
         }
 
         public Opt Selected()
         {
-            return options[SelectedIdx];
+            return Options()[SelectedIdx];
         }
 
         public void AddOption(Opt o)
@@ -353,7 +359,7 @@ namespace Dialogic
             if (i > 0 && i <= options.Count)
             {
                 SelectedIdx = --i;
-                return this.options[SelectedIdx].action;
+                return Options()[SelectedIdx].action;
             }
 
             throw new InvalidChoice(this);
@@ -362,9 +368,10 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Ask clone = (Ask)this.Copy();
-            Substitutor.ReplaceGroups(ref clone.Text);
-            Substitutor.ReplaceVars(ref clone.Text, cr.globals);
-            this.options.ForEach(o => o.Fire(cr)); // fire for child options
+            Substitutor.Replace(ref clone.Text, cr.globals);
+            clone.options.ForEach(delegate (Opt o) {
+                Substitutor.Replace(ref o.Text, cr.globals);
+            });
             return new ChatEvent(clone);
         }
 
@@ -378,7 +385,7 @@ namespace Dialogic
         public string ToTree()
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "\n";
-            this.options.ForEach(o => s += "    " + o + "\n");
+            Options().ForEach(o => s += "    " + o + "\n");
             return s.Substring(0, s.Length - 1);
         }
 
@@ -386,7 +393,7 @@ namespace Dialogic
         {
             Ask clone = (Ask)this.MemberwiseClone();
             clone.options = new List<Opt>();
-            this.options.ForEach(delegate(Opt o) {
+            Options().ForEach(delegate(Opt o) {
                 clone.AddOption((Opt)o.Copy());  
             });
             return clone;

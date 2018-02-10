@@ -9,18 +9,14 @@ namespace runner
 {
     class MainClass
     {
-        public static void TestTimers(string[] args) {
-            Util.Init();
-            Timers.SetInterval(500, () => Console.WriteLine(Util.Elapsed()));
-            Console.WriteLine("done: "+Util.Elapsed());
-            System.Threading.Thread.Sleep(10000);
-        }
-
         public static void Main(string[] args)
         {
-            List<Chat> chats = ChatParser.ParseFile("../../../dialogic/gscript.gs");
-            //List<Chat> chats = ChatParser.ParseText("ASK Ready to play? #5\nSAY Done");
+            string srcpath = "../../../dialogic";
+
+            List<Chat> chats = ChatParser.ParseFile(srcpath + "/test.gs");
+            //List<Chat> chats = ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
             ChatRuntime cm = new ChatRuntime(chats);
+            cm.LogFileName = srcpath + "/dia.log";
 
             //ChatClient cl = new SimpleClient(); // Simple client
             ChatClient cl = new ConsoleClient(); // Console client
@@ -37,7 +33,7 @@ namespace runner
         protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
         {
             Command cmd = e.Command;
-            if (!(cmd is Go)) Console.WriteLine(cmd);
+            Console.WriteLine(cmd);
         }
     }
 }
