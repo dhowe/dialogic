@@ -20,6 +20,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -27,6 +28,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <LangVersion>4</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -36,32 +38,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Chat.cs" />
-    <Compile Include="ChatEvent.cs" />
-    <Compile Include="ChatExceptions.cs" />
-    <Compile Include="ChatParser.cs" />
-    <Compile Include="ChatRuntime.cs" />
-    <Compile Include="Commands.cs" />
-    <Compile Include="ConsoleClient.cs" />
-    <Compile Include="ConsoleReader.cs" />
-    <Compile Include="DialogicBaseVisitor.cs" />
-    <Compile Include="DialogicLexer.cs" />
-    <Compile Include="DialogicParser.cs" />
-    <Compile Include="DialogicVisitor.cs" />
-    <Compile Include="LexerTest.cs" />
-    <Compile Include="MockUnityEvent.cs" />
-    <Compile Include="Substitutor.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="ChatClient.cs" />
+    <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="Dialogic.g4" />
+    <None Include="*.g4" />
     <None Include="generate.sh" />
     <None Include="gscript.gs" />
     <None Include="lexer-test.sh" />
-    <None Include="Test.g4" />
-    <None Include="test.gs" />
     <None Include="packages.config" />
     <None Include="bin\Debug\dialogic.pdb" />
     <None Include="bin\Debug\dialogic.dll" />

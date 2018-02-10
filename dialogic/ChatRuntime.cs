@@ -11,7 +11,7 @@ namespace Dialogic
         public event ChatEventHandler ChatEvents; // event-stream
 
         protected List<Chat> chats;
-        public bool logEvents = true;
+        public bool LogEvents = false;
         public string LogFileName = "dia.log";
 
         public Dictionary<string, object> globals;
@@ -26,7 +26,7 @@ namespace Dialogic
                 { "verb", "play" },
                 { "var3", 2 }
             };
-            if (logEvents) InitLog();
+            if (LogEvents) InitLog();
         }
 
         public void Subscribe(ChatClient cc) // tmp
@@ -36,13 +36,8 @@ namespace Dialogic
 
         private void OnUnityEvent(EventArgs e)
         {
-            if (e is MockUnityEvent)
-            {
-                Console.WriteLine("<" + ((MockUnityEvent)e).Message + ">");
-            }
-            else {
-                Console.WriteLine("<" + e + ">");
-            }
+            var msg = (e is MockUnityEvent) ? ((MockUnityEvent)e).Message : e+"";
+            Console.WriteLine("<" + msg + ">");
         }
 
         internal void PrintGlobals()
@@ -52,28 +47,6 @@ namespace Dialogic
             {
                 System.Console.WriteLine(k+": "+globals[k]);
             }
-        }
-
-        public void Do(Command cmd)
-        {
-            FireEvent(cmd); // TODO: need to rethink this sleep
-            //if (cmd is Wait t) Thread.Sleep(t.WaitTime());
-            if (cmd is Timed) Thread.Sleep(((Timed)cmd).WaitTime()); 
-        }
-
-        private void FireEvent(Command c)
-        {
-            if (!(c is NoOp))
-            {
-                ChatEvent ce = c.Fire(this);
-                if (logEvents) Util.Log(LogFileName, c);
-                if (ChatEvents != null) ChatEvents.Invoke(this, ce);
-            }
-        }
-
-        public Dictionary<string, object> Globals()
-        {
-            return this.globals;
         }
 
         public void Run(Chat chat)
@@ -91,13 +64,25 @@ namespace Dialogic
             Run(chats[0]);
         }
 
-        public List<Chat> Find(params Func<Boolean>[] conditions)
+        public void Do(Command cmd)
         {
-            List<Chat> l = new List<Chat>();
-            l.ForEach((obj) => {
-                
-            });
-            return l;
+            FireEvent(cmd); // TODO: need to rethink this sleep
+            if (cmd is Timed) Thread.Sleep(((Timed)cmd).WaitTime()); 
+        }
+
+        private void FireEvent(Command c)
+        {
+            if (!(c is NoOp))
+            {
+                ChatEvent ce = c.Fire(this);
+                if (LogEvents) Util.Log(LogFileName, c);
+                if (ChatEvents != null) ChatEvents.Invoke(this, ce);
+            }
+        }
+
+        public Dictionary<string, object> Globals()
+        {
+            return this.globals;
         }
 
         public Chat FindChat(string chatName)
@@ -117,7 +102,7 @@ namespace Dialogic
 
         public void LogCommand(Command c)
         {
-            if (!logEvents) return;
+            if (!LogEvents) return;
 
             using (StreamWriter w = File.AppendText(LogFileName))
             {
@@ -130,7 +115,6 @@ namespace Dialogic
 
 /* TODO: 
 
-    # Migrate tests from xunit
     # Handle reprompting on timeout in ChatRuntime instead of client
     # Implement ChatRuntime.Find(Conditions)
     # Add COND tag to specify matches for chat

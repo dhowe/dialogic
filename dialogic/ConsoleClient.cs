@@ -25,11 +25,11 @@ namespace Dialogic
         {
             Command c = e.Command;
 
-            if (c is Do || c is Chat || c is Meta) // just info in this context
+            if (c is Do || c is Chat || c is Meta) // just print info
             {
                 suffix += "  [" + c.TypeName() + ": " + c.Text + "]";
             }
-            else if (c is Ask)
+            else if (c is Ask) //  prompt the user
             {
                 Ask a = ((Ask)c);
                 string sec = a.WaitSecs > 0 ? " #" + a.WaitSecs + "s" : "";
@@ -79,17 +79,14 @@ namespace Dialogic
             return next;
         }
 
-        private void MockEvents()
+        protected void MockEvents()
         {
-            /*while (true)
+            while (true)
             {
                 int ms = new Random().Next(20000, 50000);
                 Thread.Sleep(ms);
-                if (UnityEvents != null)
-                {
-                    UnityEvents.Invoke(new MockUnityEvent());
-                }
-            }*/
+                Fire(new MockUnityEvent());
+            }
         }
     }
 }

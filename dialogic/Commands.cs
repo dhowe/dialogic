@@ -285,14 +285,17 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             ChatEvent ce = base.Fire(cr);
-            Substitutor.ReplaceVars(ref action.Text, cr.globals); // also labels
+            if (action != null)
+            {
+                Substitutor.ReplaceVars(ref action.Text, cr.globals); // also labels
+            }
             return ce;
         }
 
         public override Command Copy()
         {
             Opt o = (Opt)this.MemberwiseClone();
-            o.action = (Command)action.Copy();
+            if (o.action != null) o.action = (Command)action.Copy();
             return o;
         }
     }

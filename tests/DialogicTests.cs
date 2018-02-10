@@ -7,7 +7,7 @@ using System.IO;
 namespace tests
 {
     [TestFixture()]
-    public class Test
+    public class DialogicTests
     {
         [Test()]
         public void TestCase()

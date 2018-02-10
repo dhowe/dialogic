@@ -1,3 +1,3 @@
-﻿ASK Do you want?
-OPT Yes # Game
-OPT No # Redo
+﻿ASK Do you want to play a game? #10
+OPT Sure
+OPT Nah 

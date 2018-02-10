@@ -8,11 +8,11 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            List<Chat> chats = ChatParser.ParseFile("../../../dialogic/gscript.gs");
+            List<Chat> chats = ChatParser.ParseFile("../../../dialogic/test.gs");
             ChatRuntime cm = new ChatRuntime(chats);
 
-            //ChatClient cl = new SimpleClient(); // Simple client
-            ChatClient cl = new ConsoleClient(); // Console client
+            ChatClient cl = new SimpleClient(); // Simple client
+            //ChatClient cl = new ConsoleClient(); // Console client
 
             cl.Subscribe(cm); // Client subscribes to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
