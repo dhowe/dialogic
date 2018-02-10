@@ -7,8 +7,21 @@ using System.ComponentModel;
 
 namespace Dialogic
 {
-    static class Util
+    public static class Util
     {
+        private static int start = Environment.TickCount;
+
+        public static int Elapsed()
+        {
+            return Environment.TickCount - start;
+        }
+
+        public static void Init()
+        {
+            start = Environment.TickCount;
+        }
+
+
         public static void Log(string logFileName, object msg)
         {
             using (StreamWriter w = File.AppendText(logFileName))

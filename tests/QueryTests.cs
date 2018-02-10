@@ -13,6 +13,7 @@ namespace tests
 
         private QueryTests() {
             Chat c1 = new Chat();
+
         }
 
         public List<Chat> Find(params Func<Boolean>[] conditions)

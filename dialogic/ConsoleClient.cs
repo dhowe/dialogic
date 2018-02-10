@@ -2,7 +2,7 @@
 using System.Threading;
 using Out = System.Console;
 
-namespace Dialogic
+namespace Dialogic.Client
 {
     public class ConsoleClient : ChatClient // An example client
     {
@@ -11,7 +11,7 @@ namespace Dialogic
         public ConsoleClient()
         {
             Thread t = new Thread(MockEvents) { IsBackground = true };
-            t.Start();
+            //t.Start();
         }
 
         protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
@@ -35,7 +35,8 @@ namespace Dialogic
                 string sec = a.WaitSecs > 0 ? " #" + a.WaitSecs + "s" : "";
                 Out.WriteLine(c.Text + sec + suffix);
                 suffix = "";
-                cm.Do(Prompt(a));
+                Prompt(a);
+                //cm.Do(Prompt(a));
             }
             else if (!(c is Wait || c is Opt || c is Go || c is Set))
             {
@@ -62,19 +63,19 @@ namespace Dialogic
                 {
                     next = a.Choose(ConsoleReader.ReadLine(a, a.WaitTime()));
                 }
-                catch (PromptTimeout)
+                catch (Exception e)
                 {
-                    Out.WriteLine("\nHey! Anyone home?");
+                    if (e is PromptTimeout) Out.WriteLine("\nHey! Anyone home?");
+                    Out.WriteLine("Choose an option from 1-" + opts.Count + "\n");
                 }
-                catch (InvalidChoice) { }
-
-                Out.WriteLine("Choose an option from 1-" + opts.Count + "\n");
 
             } while (next == null);
 
             // Print the selected option
-            Out.WriteLine("    (selected Opt#" + (a.SelectedIdx + 1)
+            Out.WriteLine("    (Opt#" + (a.SelectedIdx + 1+" selected")
                 + " => [" + a.Selected().ActionText() + "])\n");
+
+            Fire(new ResponseEvent(a.Selected()));
 
             return next;
         }
@@ -83,9 +84,9 @@ namespace Dialogic
         {
             while (true)
             {
-                int ms = new Random().Next(20000, 50000);
+                int ms = new Random().Next(2000, 5000);
                 Thread.Sleep(ms);
-                Fire(new MockUnityEvent());
+                Fire(new ClientEvent());
             }
         }
     }

@@ -12,6 +12,7 @@ namespace Dialogic
 
         protected List<Chat> chats;
         public bool LogEvents = false;
+        protected bool waiting = false;
         public string LogFileName = "dia.log";
 
         public Dictionary<string, object> globals;
@@ -31,18 +32,26 @@ namespace Dialogic
 
         public void Subscribe(ChatClient cc) // tmp
         {
-            cc.UnityEvents += new ChatClient.UnityEventHandler(OnUnityEvent);
+            cc.UnityEvents += new ChatClient.UnityEventHandler(OnClientEvent);
         }
 
-        private void OnUnityEvent(EventArgs e)
+        private void OnClientEvent(EventArgs e)
         {
-            var msg = (e is MockUnityEvent) ? ((MockUnityEvent)e).Message : e+"";
-            Console.WriteLine("<" + msg + ">");
+            Console.WriteLine("<" + e + ">");
+            if (e is ResponseEvent)
+            {
+                Opt response = ((ResponseEvent)e).Selected;
+                waiting = false;
+                if (!(response.action is NoOp)) 
+                {
+                    response.action.Fire(this);
+                }
+            }
         }
 
         internal void PrintGlobals()
         {
-            System.Console.WriteLine("GLOBALS:");
+            Console.WriteLine("GLOBALS:");
             foreach (var k in globals.Keys)
             {
                 System.Console.WriteLine(k+": "+globals[k]);
@@ -52,7 +61,16 @@ namespace Dialogic
         public void Run(Chat chat)
         {
             FireEvent(chat);
-            chat.commands.ForEach(Do);
+            //chat.commands.ForEach(Do);
+            for (int i = 0; i < chat.commands.Count; )
+            {
+                if (waiting) {
+                    //Console.Write(".");
+                    Thread.Sleep(10);
+                    continue;
+                }
+                Do(chat.commands[i++]);
+            }
         }
 
         public void Run()
@@ -66,12 +84,20 @@ namespace Dialogic
 
         public void Do(Command cmd)
         {
-            FireEvent(cmd); // TODO: need to rethink this sleep
             if (cmd is Timed)
             {
                 int waitMs = ((Timed)cmd).WaitTime();
-                Thread.Sleep(waitMs);
+                if (waitMs != 0) {
+                    waiting = true;
+                    if (waitMs > 0) {
+                        Timers.SetTimeout(waitMs, () => {
+                            //Console.WriteLine("TIMER("+waitMs+") FIRED");
+                            waiting = false;
+                        });
+                    }
+                }
             }
+            FireEvent(cmd);
         }
 
         private void FireEvent(Command c)
@@ -119,11 +145,12 @@ namespace Dialogic
 
 /* TODO: 
 
-    # Handle reprompting on timeout in ChatRuntime instead of client
+
     # Implement ChatRuntime.Find(Conditions)
     # Add COND tag to specify matches for chat
     # Add FIND || PICK || SELECT, tag to specify next chat search
     # Add META tag [] for display control (bold, wavy, etc.)
+    # Handle reprompting on timeout in ChatRuntime instead of client
 
     OTHER:
         EMPH/IF

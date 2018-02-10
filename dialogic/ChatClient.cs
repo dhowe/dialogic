@@ -17,7 +17,7 @@ namespace Dialogic
 
         protected void Fire(EventArgs e)
         {
-            //if (UnityEvents != null) UnityEvents.Invoke(e);
+            if (UnityEvents != null) UnityEvents.Invoke(e);
         }
     }
 }

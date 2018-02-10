@@ -43,8 +43,8 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="*.g4" />
+    <None Include="*.gs" />
     <None Include="generate.sh" />
-    <None Include="gscript.gs" />
     <None Include="lexer-test.sh" />
     <None Include="packages.config" />
     <None Include="bin\Debug\dialogic.pdb" />

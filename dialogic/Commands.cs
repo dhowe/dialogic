@@ -12,7 +12,7 @@ namespace Dialogic
 
         protected static int IDGEN = 0;
 
-        protected static readonly Command NOP = new NoOp();
+        public static readonly Command NOP = new NoOp();
 
         public string Id { get; protected set; }
         public string Text;
@@ -31,11 +31,8 @@ namespace Dialogic
         {
             type = ToMixedCase(type);
             var cmd = Create(Type.GetType(PACKAGE + type), args);
-            if (cmd == null)
-            {
-                throw new TypeLoadException("No type: " + PACKAGE + type);
-            }
-            return cmd;
+            if (cmd != null) return cmd;
+            throw new TypeLoadException("No type: "+PACKAGE + type);
         }
 
         public static Command Create(Type type, params string[] args)
@@ -268,7 +265,7 @@ namespace Dialogic
         {
             if (args.Length < 1) throw BadArgs(args, 1);
             this.Text = args[0];
-            this.action = (args.Length > 1) ? Command.Create(typeof(Go), args[1]) : null;
+            this.action = (args.Length > 1) ? Command.Create(typeof(Go), args[1]) : NOP;
         }
 
         public override string ToString()
@@ -374,7 +371,7 @@ namespace Dialogic
         public override string ToString()
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
-            this.options.ForEach(o => s += o.Text + ",");
+            Options().ForEach(o => s += o.Text + ",");
             return s.Substring(0, s.Length - 1) + ")";
         }
 
