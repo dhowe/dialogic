@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+﻿#!/bin/bash > /dev/null 2>&1
 
 mandatory_binaries=( "java" "javac" )
 
@@ -41,6 +41,7 @@ function get_lib_path
 
 function check_antlr_jar
 {
+  #echo Checking for $1
   if [ ! -f "$1" ]; then
     echo "No ANTLR JAR found!"
     echo Try: curl -o "$1" "http://www.antlr.org/download/antlr-$antlr_version-complete.jar"

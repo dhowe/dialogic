@@ -4,11 +4,26 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    public static class Substitutor
+    public static class Substitutions
     {
         const string MATCH_PARENS = @"\(([^()]+|(?<Level>\()|(?<-Level>\)))+(?(Level)(?!))\)";
 
-        public static void ReplaceGroups(ref string input, Command c = null)
+        public static void Do(ref string text, Dictionary<string, object> globals)
+        {
+            if (String.IsNullOrEmpty(text)) return;
+
+            int tries = 0;
+            while (text.Contains("$") || text.Contains("|"))
+            {
+                DoVars(ref text, globals);
+                DoGroups(ref text);
+
+                // bail on infinite loops
+                if (++tries > 1000) throw new Exception("Illegal Subs: '" + text + "'");
+            }
+        }
+
+        public static void DoGroups(ref string input, Command c = null)
         {
             while (input != null && Regex.IsMatch(input, @"[\(\)]"))
             {
@@ -23,13 +38,7 @@ namespace Dialogic
             }
         }
 
-        public static void Replace(ref string text, Dictionary<string, object> globals)
-        {
-            ReplaceGroups(ref text);
-            ReplaceVars(ref text, globals);
-        }
-
-        public static void ReplaceVars(ref string text, Dictionary<string, object> globals)
+        public static void DoVars(ref string text, Dictionary<string, object> globals)
         {
             var otext = text;
             if (!string.IsNullOrEmpty(text))
@@ -49,9 +58,9 @@ namespace Dialogic
             sub = sub.Substring(1, sub.Length - 2);
             string[] opts = Regex.Split(sub, @"\s*\|\s*");
 
-            if (opts.Length != 2) throw InvalidState(sub);
+            if (opts.Length < 2) throw InvalidState(sub);
 
-            return (new Random().Next(0, 2) == 0) ? opts[0] : opts[1];
+            return (string)Util.RandItem(opts);
         }
 
         private static Exception InvalidState(string sub)
@@ -89,7 +98,7 @@ namespace Dialogic
             for (int i = 0; i < 15; i++)
             {
                 string s = String.Copy(input);
-                Substitutor.Replace(ref s, globals);
+                Substitutions.Do(ref s, globals);
                 System.Console.WriteLine(i + ") " + s);
             }
         }

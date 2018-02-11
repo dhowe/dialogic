@@ -55,7 +55,7 @@ namespace Dialogic
         public virtual ChatEvent Fire(ChatRuntime cr)
         {
             Command clone = this.Copy();
-            Substitutor.Replace(ref clone.Text, cr.globals);
+            Substitutions.Do(ref clone.Text, cr.globals);
             return new ChatEvent(clone);
         }
 
@@ -108,7 +108,7 @@ namespace Dialogic
     {
         public readonly Timed timed;
 
-        public Timeout(Timed a) {
+        public Timeout(Timed a) : base() {
             timed = a;
         }
 
@@ -129,8 +129,7 @@ namespace Dialogic
         Default = 100,
         VerySlow = 50,
         VeryFast = 200
-    };*/
-
+    };
     public class Pace : Meta
     {
         public double pace = 1.0;
@@ -144,7 +143,7 @@ namespace Dialogic
             this.pace = (int.Parse(args[0].TrimEnd('%')) / 100.0);
             this.Text = ((int)(pace*100)) + "%";
         }
-    }
+    }*/
 
     public class Say : Timed
     {
@@ -170,9 +169,7 @@ namespace Dialogic
 
         public override ChatEvent Fire(ChatRuntime cr)
         {
-            //Console.WriteLine("Go.FIRE1: "+Text);
             ChatEvent ce = base.Fire(cr);
-            //Console.WriteLine("Go.FIRE2: " + Text);
             cr.Run(cr.FindChat(ce.Command.Text));
             return ce;
         }
@@ -228,7 +225,7 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Set clone = (Set)this.Copy();
-            Substitutor.Replace(ref clone.Value, cr.globals);
+            Substitutions.Do(ref clone.Value, cr.globals);
             cr.Globals()[Text] = Value; // set the global var
             return new ChatEvent(clone);
         }
@@ -368,9 +365,9 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Ask clone = (Ask)this.Copy();
-            Substitutor.Replace(ref clone.Text, cr.globals);
+            Substitutions.Do(ref clone.Text, cr.globals);
             clone.options.ForEach(delegate (Opt o) {
-                Substitutor.Replace(ref o.Text, cr.globals);
+                Substitutions.Do(ref o.Text, cr.globals);
             });
             return new ChatEvent(clone);
         }

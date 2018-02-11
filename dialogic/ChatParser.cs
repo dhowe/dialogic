@@ -66,6 +66,11 @@ namespace Dialogic
             cp.Visit(prc);
             PrintLispTree(parser, prc);
             Console.WriteLine(cp);
+            //foreach (var c in cp.chats)
+            //{
+            //    Console.WriteLine(c);
+            //    //c.conditions.ForEach();
+            //}
             return cp.chats;
         }
 
@@ -122,35 +127,60 @@ namespace Dialogic
         {
             var cmd = context.GetChild<DialogicParser.CommandContext>(0).GetText();
             var actx = context.GetChild<DialogicParser.ArgsContext>(0);
+            if (actx == null) return VisitChildren(context); // shouldn't happen
             var xargs = actx.children.Where(arg => arg is DialogicParser.ArgContext).ToArray();
             var args = Array.ConvertAll(xargs, arg => arg.GetText().Trim());
 
-            //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",",args)    + "'");
+            //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",", args) + "'");
 
             Command c = Command.Create(cmd, args);
             if (c is Chat)
             {
                 chats.Add((Chat)c);
             }
-            else if (c is Opt)
-            {
-                Opt o = (Opt)c;
-                Command last = LastOfType(parsed, typeof(Ask));
-                if (!(last is Ask))
-                {
-                    throw new Exception("Opt must follow Ask");
-                }
-                ((Ask)last).AddOption(o);
-            }
             else
             {
-                if (chats.Count == 0) chats.Add(new Chat());
-                chats.Last().AddCommand(c);
+                if (chats.Count == 0) CreateDefaultChat();
+
+                if (c is Opt)
+                {
+                    Opt o = (Opt)c;
+                    Command last = LastOfType(parsed, typeof(Ask));
+                    if (!(last is Ask))
+                    {
+                        throw new Exception("Opt must follow Ask");
+                    }
+                    ((Ask)last).AddOption(o);
+                }
+                else if (c is Cond && !(c is Find))
+                {
+                    Cond cd = (Cond)c;
+                    foreach (Command x in parsed) Console.WriteLine("STACK: " + x.TypeName() + " " + x.Text);
+
+                    Command last = LastOfType(parsed, typeof(Chat));
+                    if (!(last is Chat))
+                    {
+                        throw new Exception("Cond must follow Chat");
+                    }
+                    ((Chat)last).AddConditions(cd);
+                }
+                else
+                {
+
+                    chats.Last().AddCommand(c);
+                }
             }
 
             parsed.Push(c);
 
             return VisitChildren(context);
+        }
+
+        private void CreateDefaultChat()
+        {
+            Chat def = new Chat();
+            chats.Add(def);
+            parsed.Push(def);
         }
 
         public static void Out(object s)

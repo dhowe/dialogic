@@ -10,6 +10,7 @@ namespace Dialogic
     public static class Util
     {
         private static int start = Environment.TickCount;
+        private static Random random;
 
         public static int Elapsed()
         {
@@ -21,6 +22,38 @@ namespace Dialogic
             start = Environment.TickCount;
         }
 
+        public static double Rand()
+        {
+            if (random == null) random = new Random();
+            return random.NextDouble();
+        }
+
+        public static int Rand(int min, int max)
+        {
+            if (random == null) random = new Random();
+            return random.Next(min, max);
+        }
+
+        public static object RandItem(object[] arr)
+        {
+            return arr[Rand(arr.Length)];
+        }
+
+        public static int Rand(int max)
+        {
+            return Rand(0, max);
+        }
+
+        public static double Rand(double min, double max)
+        {
+            if (random == null) random = new Random();
+            return min + Rand() * max;
+        }
+
+        public static double Rand(double max)
+        {
+            return Rand(0, max);
+        }
 
         public static void Log(string logFileName, object msg)
         {

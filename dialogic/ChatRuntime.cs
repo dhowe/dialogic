@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Dialogic
@@ -12,7 +13,7 @@ namespace Dialogic
         public event ChatEventHandler ChatEvents; // event-stream
 
         public Dictionary<string, object> globals;
-        public bool ShowWaits = false;
+        //public bool ShowWaits = false;
         public string LogFileName;
 
         protected List<Chat> chats;
@@ -26,9 +27,26 @@ namespace Dialogic
                 { "place", "Istanbul" },
                 { "Happy", "HappyFlip" },
                 { "verb", "play" },
-                { "neg", "nah" },
+                { "neg", "(nah|no|nope)" },
                 { "var3", 2 }
             };
+        }
+
+
+        public Chat Find(Dictionary<string, string> conditions)
+        {
+            return ChatQuery.Find(chats, conditions);
+        }
+
+
+        public List<Chat> FindAll(Dictionary<string, string> conditions)
+        {
+            return ChatQuery.FindAll(chats, conditions);
+        }
+
+        public Chat FindChat(string name)
+        {
+            return ChatQuery.FindChat(chats, name);
         }
 
         private bool Logging()
@@ -69,7 +87,7 @@ namespace Dialogic
             {
                 if (waiting)
                 {
-                    if (ShowWaits)Console.Write(".");
+                    //if (ShowWaits)Console.Write(".");
                     Thread.Sleep(10);
                     continue;
                 }
@@ -89,7 +107,7 @@ namespace Dialogic
         public void Do(Command cmd)
         {
             //Console.WriteLine("CMD: "+cmd.TypeName());
-            if (cmd is Timed)
+            /*if (cmd is Timed)
             {
                 int waitMs = ((Timed)cmd).WaitTime();
                 if (waitMs != 0) {
@@ -103,24 +121,19 @@ namespace Dialogic
                         });
                     }
                 }
-            }
+            }*/
             FireEvent(cmd);
-        }
-
-        private void NotifyListeners(ChatEvent ce)
-        {
-            LogCommand(ce.Command);
-            if (ChatEvents != null) ChatEvents.Invoke(this, ce);
         }
 
         private void FireEvent(Command c)
         {
             if (!(c is NoOp)) 
             {
+                LogCommand(c); // log before replacements
                 ChatEvent ce = c.Fire(this);
                 if (!(c is Go)) // Opt, Chat ?
                 {
-                    NotifyListeners(ce);
+                    if (ChatEvents != null) ChatEvents.Invoke(this, ce);
                 }
             }
         }
@@ -128,16 +141,6 @@ namespace Dialogic
         public Dictionary<string, object> Globals()
         {
             return this.globals;
-        }
-
-        public Chat FindChat(string chatName)
-        {
-            for (int i = 0; i < chats.Count; i++)
-            {
-                if (chats[i].Text == chatName)
-                    return chats[i];
-            }
-            throw new ChatNotFound(chatName);
         }
 
         public void LogCommand(Command c)
@@ -169,7 +172,10 @@ namespace Dialogic
     # Add META tag [] for display control (bold, wavy, etc.)
     # Handle reprompting on timeout in ChatRuntime instead of client
 
-    CONS: Should parser add WAIT after each ASK? No, determine dynamically
+    CONS: 
+        Should parser add WAIT after each ASK? No, determine dynamically
+        Multiple chats with same name ? throw
+        ASK with only 1 opt ? should be ok
     
     OTHER:
         EMPH/IF

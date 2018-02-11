@@ -7,15 +7,15 @@ Thanks for visiting $place!
 GO Prompt
 
 CHAT Prompt 
-ASK Do you want to $verb a game? #10
+ASK Do you want to $verb a game? # 8
 OPT Sure # Game
-OPT $neg #RePrompt
+OPT Nope #RePrompt
 
 CHAT RePrompt
 DO SadSpin
-ASK (Really|Whaaaa), don't you want to play a game?
+ASK (Really|Awww), don't you want to play a game?
 OPT Sure # $lastPrompt
-OPT Nah # RePrompt
+OPT $neg # RePrompt
 
 CHAT Game
 DO $Happy

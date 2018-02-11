@@ -10,9 +10,23 @@ namespace tests
     public class DialogicTests
     {
         [Test()]
-        public void TestCase()
+        public void TestRandItem()
         {
-            Assert.That(15, Is.EqualTo(15));
+            string[] arr = { "0", "1", "2" };
+            Dictionary<string, int> hits;
+            hits = new Dictionary<string, int>();
+            foreach (var s in arr) hits.Add(s, 0);
+            for (int i = 0; i < 100; i++)
+            {
+                var s = Util.RandItem(arr);
+                hits[((string)s)]++;
+                CollectionAssert.Contains(arr, s);
+            }
+            foreach (var kv in hits)
+            {
+                //Console.WriteLine(kv.Key +"-> " + kv.Value);
+                Assert.That(kv.Value, Is.GreaterThan(0));
+            }
         }
     }
 }
