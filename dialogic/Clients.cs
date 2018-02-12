@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Out = System.Console;
 
@@ -72,40 +73,47 @@ namespace Dialogic
             }
         }
 
-        private Command Prompt(Ask a)
+        private void Prompt(Ask a)
         {
             var opts = a.Options();
 
-            // Print the possible options
+            // Display the possible options
             for (int i = 0; i < opts.Count; i++)
             {
                 Out.WriteLine("(" + (i + 1) + ") " + opts[i].Text
                     + " => [" + opts[i].ActionText() + "]");
             }
 
-            Command next = null;
+            Opt chosen = null;
             do
             {
                 // And prompt the user for their choice
                 try
                 {
-                    next = a.Choose(ConsoleReader.ReadLine(a, a.WaitTime()));
+                    string res = ConsoleReader.ReadLine(a, a.WaitTime());
+                    int i = -1;
+                    try
+                    {
+                        i = Convert.ToInt32(res);
+                    }
+                    catch { /* ignore */ }
+
+                    chosen = a.Selected(--i);
                 }
                 catch (Exception e)
                 {
+                    Out.WriteLine("WAITSEC: ");
                     if (e is PromptTimeout) Out.WriteLine("\nHey! Anyone home?");
                     Out.WriteLine("Choose an option from 1-" + opts.Count + "\n");
                 }
 
-            } while (next == null);
+            } while (chosen == null);
 
             // Print the selected option
             Out.WriteLine("    (Opt#" + (a.SelectedIdx + 1 + " selected")
                 + " => [" + a.Selected().ActionText() + "])\n");
 
-            Fire(new ChosenEvent(a.Selected()));
-
-            return next;
+            Fire(new ChoiceEvent(chosen));
         }
 
         protected void MockEvents()

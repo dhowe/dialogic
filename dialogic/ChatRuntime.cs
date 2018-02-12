@@ -32,12 +32,10 @@ namespace Dialogic
             };
         }
 
-
         public Chat Find(Dictionary<string, string> conditions)
         {
             return ChatSearch.Find(chats, conditions);
         }
-
 
         public List<Chat> FindAll(Dictionary<string, string> conditions)
         {
@@ -61,11 +59,11 @@ namespace Dialogic
 
         private void OnClientEvent(EventArgs e)
         {
-            if (e is IChosen)
+            if (e is IChoice)
             {
                 waiting = false;
-                Opt opt = ((IChosen)e).GetChosen();
-                FireEvent(opt); // Send Opt event to clients - needed? 
+                Opt opt = ((IChoice)e).GetChoice();
+                //FireEvent(opt); // Send Opt event to clients - needed? 
                 ((Opt)opt).action.Fire(this); // execute GO event
             }
         }

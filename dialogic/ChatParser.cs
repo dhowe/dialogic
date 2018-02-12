@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using System.Text.RegularExpressions;
+using Dialogic.Antlr;
 
 namespace Dialogic
 {
@@ -158,7 +159,7 @@ namespace Dialogic
                     {
                         throw new Exception("Cond must follow Chat");
                     }
-                    ((Chat)last).AddConditions(cd);
+                    ((Chat)last).AddPairs(cd);
                 }
                 else
                 {

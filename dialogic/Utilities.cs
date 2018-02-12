@@ -122,7 +122,7 @@ namespace Dialogic
             }
         }
 
-        public static string ReadLine(Command source, int timeOutMillisecs = System.Threading.Timeout.Infinite)
+        public static string ReadLine(Command source, int timeOutMillisecs = -1)
         {
             getInput.Set();
             bool success = gotInput.WaitOne(timeOutMillisecs);

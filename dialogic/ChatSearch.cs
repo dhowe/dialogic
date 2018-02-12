@@ -46,9 +46,10 @@ namespace Dialogic
                 int hits = 0;
                 foreach (var con in constraints)
                 {
-                    if (chat.conditions.ContainsKey(con.Key))
+                    var conditions = chat.AsDict();
+                    if (conditions.ContainsKey(con.Key))
                     {
-                        if (chat.conditions[con.Key] != con.Value)
+                        if (conditions[con.Key] != con.Value)
                         {
                             hits = -1;
                             break;

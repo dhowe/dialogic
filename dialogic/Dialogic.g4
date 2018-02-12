@@ -13,19 +13,16 @@ arg: WORD (SPACE+ WORD)*;
 
 ////////////////////////////////////////////////////////////////////////
 
-COMMAND: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'META' | 'COND' | 'FIND');
+COMMAND: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'META' | 'COND' | 'FIND' | 'SET');
 
 SPACE: (' ' | '\t');
 DELIM: SPACE* '#' SPACE*;
 NEWLINE: ('\r'? '\n' | '\r')+;
 WORD: ([|a-zA-Z0-9%=;:?.,!"'$()-])+;
 
-
-
 COMMENT : '/*' (COMMENT|.)*? '*/' -> skip ;
 LINE_COMMENT  : '//' .*? '\n' -> skip ;
 ERROR: .;
-
 
 //WORD: [a-zA-Z0-9"'$] ([a-zA-Z0-9=;:?.,!"'$-])*;
 //OBR: '(';//CBR: ')';

@@ -45,16 +45,16 @@ namespace Dialogic
         }
     }
 
-    public interface IChosen
+    public interface IChoice
     {
-        Opt GetChosen();
+        Opt GetChoice();
     }
 
-    public class ChosenEvent : EventArgs, IChosen
+    public class ChoiceEvent : EventArgs, IChoice
     {
         protected Opt option;
 
-        public ChosenEvent(Opt option)
+        public ChoiceEvent(Opt option)
         {
             this.option = option;
         }
@@ -64,7 +64,7 @@ namespace Dialogic
             return "Response: " + option.Text;
         }
 
-        public Opt GetChosen()
+        public Opt GetChoice()
         {
             return option;
         }

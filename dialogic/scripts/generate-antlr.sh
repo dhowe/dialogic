@@ -12,7 +12,7 @@ ANTLR_JAR=${NUGET_DIR}/packages/antlr4.codegenerator/4.6.4/tools/antlr4-csharp-4
 mv Dialogic*.cs /tmp
 #mv Dialogic*.tokens /tmp
 
-"$JAVA" -cp $ANTLR_JAR org.antlr.v4.CSharpTool -encoding UTF-8 -no-listener -visitor -Dlanguage=CSharp -package Dialogic Dialogic.g4
+"$JAVA" -cp $ANTLR_JAR org.antlr.v4.CSharpTool -encoding UTF-8 -no-listener -visitor -Dlanguage=CSharp -package Dialogic.Antlr Dialogic.g4
 
 sed -i '' '/\[System.CLSCompliant(false)\]/d' Dialogic*.cs
 

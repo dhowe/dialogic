@@ -19,7 +19,7 @@
 // Ambiguous reference in cref attribute
 #pragma warning disable 419
 
-namespace Dialogic {
+namespace Dialogic.Antlr {
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using IToken = Antlr4.Runtime.IToken;
@@ -66,4 +66,4 @@ public interface IDialogicVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitArg([NotNull] DialogicParser.ArgContext context);
 }
-} // namespace Dialogic
+} // namespace Dialogic.Antlr
