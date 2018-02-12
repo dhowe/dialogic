@@ -1,12 +1,30 @@
 ﻿using System;
 
-namespace Dialogic.Client
+namespace Dialogic
 {
+    public class ChatEvent : EventArgs
+    {
+        protected Command command;
+
+        public ChatEvent(Command c)
+        {
+            this.command = c;
+        }
+
+        public Command Command
+        {
+            get
+            {
+                return command;
+            }
+        }
+    }
+
     public class ClientEvent : EventArgs
     {
         protected string message;
 
-        public ClientEvent() : this("User-Taps-Glass") { }
+        internal ClientEvent() : this("User-Taps-Glass") { }
 
         public ClientEvent(string s)
         {

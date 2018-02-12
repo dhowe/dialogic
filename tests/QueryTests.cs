@@ -37,7 +37,7 @@ namespace tests
                 { "dev", "1" }
             };
             chats = cr.FindAll(q);
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(chats.Count));
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
@@ -59,7 +59,7 @@ namespace tests
                 { "dev", "1" }
             };
             chats = cr.FindAll(q);
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
             Assert.That(chats[0].Text, Is.EqualTo("c2"));

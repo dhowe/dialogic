@@ -22,6 +22,10 @@ namespace Dialogic
             start = Environment.TickCount;
         }
 
+        public static int Millis() {
+            return Environment.TickCount & Int32.MaxValue;
+        }
+
         public static double Rand()
         {
             if (random == null) random = new Random();
@@ -59,8 +63,8 @@ namespace Dialogic
         {
             using (StreamWriter w = File.AppendText(logFileName))
             {
-                w.WriteLine(DateTime.Now.ToLongTimeString() + "\t"
-                    + Environment.TickCount + "\t" + msg);
+                w.WriteLine(DateTime.Now.ToLongTimeString() + "\t" 
+                    + Util.Millis() + "\t" + msg);
             }
         }
 

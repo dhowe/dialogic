@@ -49,7 +49,7 @@ namespace tests
             {
                 var s = txt;
                 Substitutions.Do(ref s, globals);
-                Console.WriteLine(i + ") " + s);
+                //Console.WriteLine(i + ") " + s);
                 res[i] = s;
             }
             for (int i = 0; i < res.Length; i++)
@@ -88,7 +88,7 @@ namespace tests
             {
                 string s = txt;
                 Substitutions.DoGroups(ref s);
-                Console.WriteLine(i + ") " + s);
+                //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
         }

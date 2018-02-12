@@ -2,21 +2,18 @@
 
 namespace Dialogic
 {
-    public class ResponseEvent : EventArgs
+    public interface IChosen
+    {
+        Opt GetChosen();
+    }
+
+    public class ChosenEvent :EventArgs, IChosen
     {
         protected Opt option;
 
-        public ResponseEvent(Opt option)
+        public ChosenEvent(Opt option)
         {
             this.option = option;
-        }
-
-        public Opt Selected
-        {
-            get
-            {
-                return option;
-            }
         }
 
         public override string ToString()
@@ -24,5 +21,9 @@ namespace Dialogic
             return "Response: "+option.Text;
         }
 
+        public Opt GetChosen()
+        {
+            return option;
+        }
     }
 }

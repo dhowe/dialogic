@@ -19,21 +19,12 @@ namespace runner
             cm.LogFileName = srcpath + "/dia.log";
 
             //ChatClient cl = new SimpleClient(); // Simple client
-            ChatClient cl = new ConsoleClient(); // Console client
+            AbstractClient cl = new ConsoleClient(); // Console client
 
             cl.Subscribe(cm); // Client subscribes to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
 
             cm.Run();
-        }
-    }
-
-    class SimpleClient : ChatClient
-    {
-        protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
-        {
-            Command cmd = e.Command;
-            Console.WriteLine(cmd);
         }
     }
 }
