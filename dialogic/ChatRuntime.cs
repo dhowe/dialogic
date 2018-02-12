@@ -35,18 +35,18 @@ namespace Dialogic
 
         public Chat Find(Dictionary<string, string> conditions)
         {
-            return ChatQuery.Find(chats, conditions);
+            return ChatSearch.Find(chats, conditions);
         }
 
 
         public List<Chat> FindAll(Dictionary<string, string> conditions)
         {
-            return ChatQuery.FindAll(chats, conditions);
+            return ChatSearch.FindAll(chats, conditions);
         }
 
         public Chat FindChat(string name)
         {
-            return ChatQuery.FindChat(chats, name);
+            return ChatSearch.ByName(chats, name);
         }
 
         private bool Logging()
@@ -54,18 +54,18 @@ namespace Dialogic
             return LogFileName != null;
         }
 
-        public void Subscribe(ChatClient cc) // tmp
+        public void Subscribe(AbstractClient cc) // tmp
         {
-            cc.UnityEvents += new ChatClient.UnityEventHandler(OnClientEvent);
+            cc.UnityEvents += new AbstractClient.UnityEventHandler(OnClientEvent);
         }
 
         private void OnClientEvent(EventArgs e)
         {
-            if (e is ResponseEvent)
+            if (e is IChosen)
             {
                 waiting = false;
-                Opt opt = (Opt)((ResponseEvent)e).Selected;
-                FireEvent(opt); // Send Opt event to clients - needed ? 
+                Opt opt = ((IChosen)e).GetChosen();
+                FireEvent(opt); // Send Opt event to clients - needed? 
                 ((Opt)opt).action.Fire(this); // execute GO event
             }
         }
@@ -161,31 +161,3 @@ namespace Dialogic
         }
     }
 }
-
-/* TODO: 
-
-    # Rethink timing (Timeout obj, callbacks from client, threading, etc.)
-    
-    # Implement ChatRuntime.Find(Conditions)
-    # Add COND tag to specify matches for chat
-    # Add FIND || PICK || SELECT, tag to specify next chat search
-    # Add META tag [] for display control (bold, wavy, etc.)
-    # Handle reprompting on timeout in ChatRuntime instead of client
-
-    CONS: 
-        Should parser add WAIT after each ASK? No, determine dynamically
-        Multiple chats with same name ? throw
-        ASK with only 1 opt ? should be ok
-    
-    OTHER:
-        EMPH/IF
-        Interpret/Run code chunk ``
-        rethink SET: needs to handle numbers, strings, +=, -=, % etc.
-        Interrupt->Branch vs Interrupt->Resume
-        ASK: Specify action for prompt-timeout
-        Meta-tagging (Chat objects have Meta stack) 
-        Chat-search by meta (linq)
-        Verify chat-name uniqueness on parse ? variables?
-        Variables: inputStack (set of inputs from user, opts or interrupts)
-        Timing:  msThinking(ASK,SAY), msBetweenCommands(ASK,SAY)
-*/

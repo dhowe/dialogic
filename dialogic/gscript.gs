@@ -20,4 +20,4 @@ OPT $neg # RePrompt
 CHAT Game
 DO $Happy
 ASK Great, let's play!
-Done
+Bye!
