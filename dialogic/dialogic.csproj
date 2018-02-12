@@ -44,9 +44,9 @@
     <None Include=".gitignore" />
     <None Include="*.g4" />
     <None Include="*.gs" />
-    <None Include="generate.sh" />
     <None Include="lexer-test.sh" />
     <None Include="packages.config" />
+    <None Include="generate-antlr.sh" />
     <None Include="bin\Debug\dialogic.pdb" />
     <None Include="bin\Debug\dialogic.dll" />
     <None Include="bin\Debug\Antlr4.Runtime.dll" />
