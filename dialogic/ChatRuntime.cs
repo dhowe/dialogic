@@ -80,7 +80,6 @@ namespace Dialogic
         public void Run(Chat chat)
         {
             FireEvent(chat);
-            //chat.commands.ForEach(Do);
             for (int i = 0; i < chat.commands.Count;)
             {
                 if (waiting)
@@ -89,7 +88,7 @@ namespace Dialogic
                     Thread.Sleep(10);
                     continue;
                 }
-                Do(chat.commands[i++]);
+                FireEvent(chat.commands[i++]);
             }
         }
 
@@ -102,10 +101,10 @@ namespace Dialogic
             Run(chats[0]);
         }
 
-        public void Do(Command cmd)
+        /*public void Do(Command cmd)
         {
             //Console.WriteLine("CMD: "+cmd.TypeName());
-            /*if (cmd is Timed)
+            if (cmd is Timed)
             {
                 int waitMs = ((Timed)cmd).WaitTime();
                 if (waitMs != 0) {
@@ -119,9 +118,9 @@ namespace Dialogic
                         });
                     }
                 }
-            }*/
+            }
             FireEvent(cmd);
-        }
+        }*/
 
         private void FireEvent(Command c)
         {

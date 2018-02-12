@@ -14,6 +14,7 @@ namespace Dialogic
     {
         protected List<Chat> chats;
         protected Stack<Command> parsed;
+        protected Meta meta;
 
         public ChatParser()
         {
@@ -24,7 +25,7 @@ namespace Dialogic
         public override string ToString()
         {
             string s = "\n";
-            chats.ForEach(cmd => s += ((cmd is Chat ? 
+            chats.ForEach(cmd => s += ((cmd is Chat ?
                 ((Chat)cmd).ToTree() : cmd.ToString()) + "\n"));
             return s;
         }
@@ -43,8 +44,8 @@ namespace Dialogic
             return null;
         }
 
-        //public static List<Chat> ParseFileOrig(string fname)
-        //    return ParseText(File.ReadAllText(fname, Encoding.UTF8));
+        /*public static List<Chat> ParseFileOrig(string fname)
+          return ParseText(File.ReadAllText(fname, Encoding.UTF8));*/
 
         public static List<Chat> ParseText(string text)
         {
@@ -65,12 +66,14 @@ namespace Dialogic
             ParserRuleContext prc = parser.script();
             ChatParser cp = new ChatParser();
             cp.Visit(prc);
+
             PrintLispTree(parser, prc);
             Console.WriteLine(cp);
+
             return cp.chats;
         }
 
-        // tmp_hack to handle appending the default command
+        // tmp_hack to handle appending the default (say) command
         private static void HandleDefaultCommand(string[] lines, string cmd)
         {
             for (int i = 0; i < lines.Count(); i++)
@@ -137,40 +140,53 @@ namespace Dialogic
             else
             {
                 if (chats.Count == 0) CreateDefaultChat();
-
-                if (c is Opt)
-                {
-                    Opt o = (Opt)c;
-                    Command last = LastOfType(parsed, typeof(Ask));
-                    if (!(last is Ask))
-                    {
-                        throw new Exception("Opt must follow Ask");
-                    }
-                    ((Ask)last).AddOption(o);
-                }
-                else if (c is Cond && !(c is Find))
-                {
-                    Cond cd = (Cond)c;
-                    //foreach (Command x in parsed) 
-                    //Console.WriteLine("STACK: " + x.TypeName() + " " + x.Text);
-
-                    Command last = LastOfType(parsed, typeof(Chat));
-                    if (!(last is Chat))
-                    {
-                        throw new Exception("Cond must follow Chat");
-                    }
-                    ((Chat)last).AddPairs(cd);
-                }
-                else
-                {
-
-                    chats.Last().AddCommand(c);
-                }
+                HandleCommandTypes(c);
             }
 
             parsed.Push(c);
 
             return VisitChildren(context);
+        }
+
+        private void HandleCommandTypes(Command c) // cleanup
+        {
+            if (c is Opt)
+            {
+                Opt o = (Opt)c;
+                // add option data to last Ask
+                Command last = LastOfType(parsed, typeof(Ask));
+                if (!(last is Ask)) throw new Exception("Opt must follow Ask");
+                ((Ask)last).AddOption(o);
+            }
+            else if (c is Meta)
+            {
+                // store meta key-values for subsequent line
+                this.meta = (Meta)c;
+            }
+            else if (c.GetType() == typeof(Cond))
+            {
+                Cond cd = (Cond)c;
+
+                // add cond criteria to last Chat
+                Command last = LastOfType(parsed, typeof(Chat));
+                if (!(last is Chat))
+                {
+                    throw new Exception("Cond must follow Chat");
+                }
+                ((Chat)last).AddPairs(cd.ToDict());
+            }
+            else
+            {
+                // add command to last Chat
+                chats.Last().AddCommand(c);
+            }
+
+            // add meta key-values to subsequent line
+            if (this.meta != null && c is Say || c is Chat)
+            {
+                c.AddPairs(this.meta.ToDict());
+                this.meta = null;
+            }
         }
 
         private void CreateDefaultChat()

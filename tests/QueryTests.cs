@@ -9,17 +9,6 @@ namespace tests
     [TestFixture()]
     public class QueryTests
     {
-
-        public List<Chat> Find(params Func<Boolean>[] conditions)
-        {
-            List<Chat> l = new List<Chat>();
-            l.ForEach((obj) =>
-            {
-                // WORKING HERE
-            });
-            return l;
-        }
-
         /// ////////////////////////////////////////////////////
 
         [Test()]
@@ -29,8 +18,8 @@ namespace tests
             List<Chat> chats = new List<Chat>();
             chats.Add(c = new Chat("c1"));
             chats.Add(c = new Chat("c2"));
-            c.AddCondition("dev", "1");
-            c.AddCondition("day", "hello");
+            c.AddPair("dev", "1");
+            c.AddPair("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             Dictionary<string, string> q = new Dictionary<string, string> {
@@ -49,10 +38,10 @@ namespace tests
             Chat c;
             List<Chat> chats = new List<Chat>();
             chats.Add(c = new Chat("c1"));
-            c.AddCondition("dev", "2");
+            c.AddPair("dev", "2");
             chats.Add(c = new Chat("c2"));
-            c.AddCondition("dev", "1");
-            c.AddCondition("day", "hello");
+            c.AddPair("dev", "1");
+            c.AddPair("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             Dictionary<string, string> q = new Dictionary<string, string> {
@@ -73,8 +62,8 @@ namespace tests
             List<Chat> chats = new List<Chat>();
             chats.Add(c = new Chat("c1"));
             chats.Add(c = new Chat("c2"));
-            c.AddCondition("dev", "1");
-            c.AddCondition("day", "hello");
+            c.AddPair("dev", "1");
+            c.AddPair("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             Dictionary<string, string> q = new Dictionary<string, string> {

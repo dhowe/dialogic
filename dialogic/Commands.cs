@@ -1,64 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Dialogic
 {
-    public abstract class Timed : Command
-    {
-        public float WaitSecs = 0; // default: no delay
-
-        public virtual int WaitTime()
-        {
-            return WaitSecs < 0 ? -1 : (int)(WaitSecs * 1000);
-        }
-    }
-
     public class NoOp : Command
     {
         public override ChatEvent Fire(ChatRuntime cr)
         {
             return null;
-        }
-    }
-
-    public class Timeout : Command // not-used
-    {
-        public readonly Timed timed;
-
-        public Timeout(Timed a) : base()
-        {
-            timed = a;
-        }
-
-        public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] " + timed.WaitSecs;
-        }
-    }
-
-    public class Do : Command { }
-
-    /*enum Pacing {
-        Fast = 150,
-        Slow = 75,
-        Default = 100,
-        VerySlow = 50,
-        VeryFast = 200
-    };*/
-
-    public class Say : Timed
-    {
-        public Say() : base()
-        {
-
-            this.WaitSecs = 1;
-        }
-
-        public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] " + QQ(Text);
         }
     }
 
@@ -79,7 +30,33 @@ namespace Dialogic
         }
     }
 
-    public class Set : Command // TODO: need to rethink this
+    public abstract class Timed : Command
+    {
+        public float WaitSecs = 0; // default: no delay
+
+        public virtual int WaitMs()
+        {
+            return WaitSecs < 0 ? -1 : (int)(WaitSecs * 1000);
+        }
+    }
+
+    public class Say : Timed
+    {
+        public Say() : base()
+        {
+            // this.WaitSecs = 1; // default wait time
+        }
+
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " 
+                + QQ(Text) + " " + PairsToString();
+        }
+    }
+
+    public class Do : Command { }
+
+    public class Set : Command // TODO: rethink this
     {
         public string Value;
 
@@ -150,14 +127,14 @@ namespace Dialogic
             return "[" + TypeName().ToUpper() + "] " + WaitSecs;
         }
 
-        public override int WaitTime()
+        public override int WaitMs()
         {
             return WaitSecs > 0 ? (int)(WaitSecs * 1000)
                 : System.Threading.Timeout.Infinite;
         }
     }
 
-    public class Ask : Timed
+    public class Ask : Say // extend Say?
     {
         public int SelectedIdx { get; protected set; }
 
@@ -219,15 +196,15 @@ namespace Dialogic
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
             Options().ForEach(o => s += o.Text + ",");
-            return s.Substring(0, s.Length - 1) + ")";
+            return s.Substring(0, s.Length - 1) + ") " + PairsToString();
         }
 
-        public string ToTree()
+        /*public string ToTree()
         {
-            string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + "\n";
+            string s = base.ToString() + "\n";
             Options().ForEach(o => s += "    " + o + "\n");
             return s.Substring(0, s.Length - 1);
-        }
+        }*/
 
         public override Command Copy()
         {
@@ -244,6 +221,7 @@ namespace Dialogic
     public class Opt : Command
     {
         public Command action;
+
         public Ask parent;
 
         public Opt() : this("") { }
@@ -282,7 +260,22 @@ namespace Dialogic
         }
     }
 
-    public class Find : Cond
+    /** Command that takes only a set of # separated key-value pairs */
+    public abstract class KeyVal : Command
+    {
+        public override void Init(params string[] args)
+        {
+            if (args.Length < 1) throw BadArgs(args, 1);
+            PairsFromArgs(args);
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + " " + PairsToString();
+        }
+    }
+
+    public class Find : KeyVal
     {
         public override ChatEvent Fire(ChatRuntime cr)
         {
@@ -292,38 +285,11 @@ namespace Dialogic
         }
     }
 
-    public class Meta : Command
-    {
-        public override void Init(params string[] args)
-        {
-            if (args.Length < 1) throw BadArgs(args, 1);
-            PairsFromArgs(args);
-        }
-    }
+    public class Meta : KeyVal {}
 
-    public class Cond : Command
-    {
-        public override void Init(params string[] args)
-        {
-            if (args.Length < 1) throw BadArgs(args, 1);
-            PairsFromArgs(args);
-        }
+    public class Cond : KeyVal {}
 
-        public void AddPairs(Cond cd)
-        {
-            foreach (var key in cd.lookup.Keys)
-            {
-                AddPair(key, cd.lookup[key]);
-            }
-        }
-
-        public override string ToString()
-        {
-            return base.ToString() + PairsToString();
-        }
-    }
-
-    public class Chat : Cond
+    public class Chat : Command
     {
         public List<Command> commands = new List<Command>(); // not copied
 
@@ -352,6 +318,11 @@ namespace Dialogic
             {
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
+        }
+
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + Text + " " + PairsToString();
         }
 
         public string ToTree()
@@ -458,9 +429,25 @@ namespace Dialogic
             lookup[key] = val;
         }
 
-        public Dictionary<string, string> AsDict()
+        public void AddPairs(Dictionary<string, string> pairs)
+        {
+            if (pairs != null)
+            {
+                foreach (var key in pairs.Keys)
+                {
+                    AddPair(key, pairs[key]);
+                }
+            }
+        }
+
+        public Dictionary<string, string> ToDict()
         {
             return lookup;
+        }
+
+        public List<KeyValuePair<string, string>> ToList()
+        {
+            return lookup != null ? lookup.ToList() : null;
         }
 
         public int PairsCount()
@@ -473,12 +460,12 @@ namespace Dialogic
             string s = "";
             if (PairsCount() > 0)
             {
-                s += "(";
+                s += "{";
                 foreach (var key in lookup.Keys)
                 {
                     s += key + ":" + lookup[key] + ",";
                 }
-                s = s.Substring(0, s.Length - 1) + ")";
+                s = s.Substring(0, s.Length - 1) + "}";
             }
             return s;
         }

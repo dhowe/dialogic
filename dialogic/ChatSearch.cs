@@ -38,6 +38,8 @@ namespace Dialogic
          */
         public static List<Chat> FindAll(List<Chat> chats, Dictionary<string, string> constraints)
         {
+            if (constraints == null) return chats;
+
             Dictionary<Chat, int> matches = new Dictionary<Chat, int>();
 
             for (int i = 0; i < chats.Count; i++)
@@ -46,8 +48,8 @@ namespace Dialogic
                 int hits = 0;
                 foreach (var con in constraints)
                 {
-                    var conditions = chat.AsDict();
-                    if (conditions.ContainsKey(con.Key))
+                    var conditions = chat.ToDict();
+                    if (conditions != null && conditions.ContainsKey(con.Key))
                     {
                         if (conditions[con.Key] != con.Value)
                         {

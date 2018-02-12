@@ -50,26 +50,24 @@ namespace Dialogic
             HandleCommand(cm, e);
         }
 
-        // =================== Implementations below =====================
-
         private void HandleCommand(ChatRuntime cm, ChatEvent e)
         {
             Command c = e.Command;
 
-            if (c is Say)
+            if (c is Ask) //  prompt the user
+            {
+                Ask a = ((Ask)c);
+                string sec = a.WaitSecs > 0 ? " (" + a.WaitSecs + "s)" : "";
+                Out.WriteLine(c.Text + sec);
+                Prompt(a);
+            }
+            else if (c is Say)
             {
                 Out.WriteLine(c.Text);
             }
             else if (c is Do)
             {
                 Out.WriteLine("(DO: " + c.Text + ")");
-            }
-            else if (c is Ask) //  prompt the user
-            {
-                Ask a = ((Ask)c);
-                string sec = a.WaitSecs > 0 ? " (" + a.WaitSecs + "s)" : "";
-                Out.WriteLine(c.Text + sec);
-                Prompt(a);
             }
         }
 
@@ -90,7 +88,7 @@ namespace Dialogic
                 // And prompt the user for their choice
                 try
                 {
-                    string res = ConsoleReader.ReadLine(a, a.WaitTime());
+                    string res = ConsoleReader.ReadLine(a, a.WaitMs());
                     int i = -1;
                     try
                     {
@@ -102,7 +100,6 @@ namespace Dialogic
                 }
                 catch (Exception e)
                 {
-                    Out.WriteLine("WAITSEC: ");
                     if (e is PromptTimeout) Out.WriteLine("\nHey! Anyone home?");
                     Out.WriteLine("Choose an option from 1-" + opts.Count + "\n");
                 }
