@@ -9,7 +9,7 @@ namespace runner
         {
             string srcpath = "../../../dialogic";
 
-            List<Chat> chats = ChatParser.ParseFile(srcpath + "/gscript.gs");
+            List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/gscript.gs");
             // ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
             ChatRuntime cm = new ChatRuntime(chats);
             cm.LogFileName = srcpath + "/dia.log";

@@ -15,6 +15,7 @@ namespace Dialogic
         public static readonly Command NOP = new NoOp();
 
         public string Id { get; protected set; }
+
         public string Text;
 
         protected Command()
@@ -118,9 +119,7 @@ namespace Dialogic
         }
     }
 
-    public class Meta : Command {}
     public class Do : Command { }
-
 
     /*enum Pacing
     {
@@ -391,7 +390,7 @@ namespace Dialogic
             Ask clone = (Ask)this.MemberwiseClone();
             clone.options = new List<Opt>();
             Options().ForEach(delegate(Opt o) {
-                clone.AddOption((Opt)o.Copy());  
+                clone.AddOption((Opt)o.Copy());
             });
             return clone;
         }
@@ -404,6 +403,33 @@ namespace Dialogic
             ChatEvent ce = base.Fire(cr);
             cr.Run(cr.Find(((Find)ce.Command).conditions));
             return ce;
+        }
+    }
+
+    public class Meta : Command
+    {
+        public Dictionary<string, string> tags;
+
+        public Meta() {}
+
+        public override void Init(params string[] args)
+        {
+            if (args.Length < 1) throw BadArgs(args, 1);
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                string[] parts = args[i].Split('=');
+                if (parts.Length != 2) throw new Exception
+                    ("Expected 2 parts, found " + parts.Length + ": " + parts);
+                AddTag(parts[0].Trim(), parts[1].Trim());
+            }
+        }
+
+        /* Note: new keys will overwrite old keys with same name */
+        public void AddTag(string key, string val)
+        {
+            if (tags == null) tags = new Dictionary<string, string>();
+            tags[key] = val;
         }
     }
 

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from /Users/dhowe/git/dialogic/dialogic/Dialogic.g4 by ANTLR 4.6.4
+// Generated from Dialogic.g4 by ANTLR 4.6.4
 
 // Unreachable code detected
 #pragma warning disable 0162

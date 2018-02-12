@@ -66,11 +66,6 @@ namespace Dialogic
             cp.Visit(prc);
             PrintLispTree(parser, prc);
             Console.WriteLine(cp);
-            //foreach (var c in cp.chats)
-            //{
-            //    Console.WriteLine(c);
-            //    //c.conditions.ForEach();
-            //}
             return cp.chats;
         }
 
@@ -155,7 +150,8 @@ namespace Dialogic
                 else if (c is Cond && !(c is Find))
                 {
                     Cond cd = (Cond)c;
-                    foreach (Command x in parsed) Console.WriteLine("STACK: " + x.TypeName() + " " + x.Text);
+                    //foreach (Command x in parsed) 
+                    //Console.WriteLine("STACK: " + x.TypeName() + " " + x.Text);
 
                     Command last = LastOfType(parsed, typeof(Chat));
                     if (!(last is Chat))

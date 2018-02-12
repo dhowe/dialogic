@@ -13,7 +13,7 @@ arg: WORD (SPACE+ WORD)*;
 
 ////////////////////////////////////////////////////////////////////////
 
-COMMAND: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'SET' | 'COND' | 'FIND');
+COMMAND: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'META' | 'COND' | 'FIND');
 
 SPACE: (' ' | '\t');
 DELIM: SPACE* '#' SPACE*;
