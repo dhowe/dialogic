@@ -10,7 +10,7 @@ GO Prompt
 
 CHAT Prompt 
 COND NotPlayed=true
-ASK Do you want to $verb a game? # 8
+ASK Do you want to $verb a game? # 5
 OPT Sure # Game
 OPT Nope #RePrompt
 

@@ -12,14 +12,23 @@ namespace Dialogic
         {
             if (String.IsNullOrEmpty(text)) return;
 
-            int tries = 0;
-            while (text.Contains("$") || text.Contains("|"))
+            if (1==1 || globals != null)
             {
-                DoVars(ref text, globals);
-                DoGroups(ref text);
+                int tries = 0;
+                string orig = text;
+                while (text.Contains("$") || text.Contains("|"))
+                {
+                    DoVars(ref text, globals);
+                    DoGroups(ref text);
 
-                // bail on infinite loops
-                if (++tries > 1000) throw new Exception("Illegal Subs: '" + text + "'");
+                    // bail on infinite loops:
+                    if (++tries > 1000) throw new Exception("Invalid-Sub: '"
+                        + orig + "' " + Util.Stringify(globals));
+                }
+            }
+            else
+            {
+                DoGroups(ref text);
             }
         }
 
@@ -40,15 +49,18 @@ namespace Dialogic
 
         public static void DoVars(ref string text, Dictionary<string, object> globals)
         {
-            var otext = text;
-            if (!string.IsNullOrEmpty(text))
+            if (globals != null)
             {
-                foreach (string s in Util.SortByLength(globals.Keys))
+                var otext = text;
+                if (!string.IsNullOrEmpty(text))
                 {
-                    text = text.Replace("$" + s, globals[s].ToString());
+                    foreach (string s in Util.SortByLength(globals.Keys))
+                    {
+                        text = text.Replace("$" + s, globals[s].ToString());
+                    }
                 }
+                //Console.WriteLine("Subs.checking: " + otext + " -> "+text);
             }
-            //Console.WriteLine("Subs.checking: " + otext + " -> "+text);
         }
 
         private static string DoReplace(string sub)

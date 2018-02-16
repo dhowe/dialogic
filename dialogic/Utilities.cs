@@ -4,38 +4,45 @@ using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Timers;
+using System.Collections;
 
 namespace Dialogic
 {
     /** Static utility functions */
+
     public static class Util
     {
-        private static int start = Environment.TickCount;
+        private static int start;
         private static Random random;
+
+        static Util()
+        {
+            start = Environment.TickCount;
+            random = new Random();
+        }
 
         public static int Elapsed()
         {
             return Environment.TickCount - start;
         }
 
-        public static void Init()
+        public static string ElapsedSec()
         {
-            start = Environment.TickCount;
+            return (Elapsed() / 1000.0).ToString("0.##") + "s";
         }
 
-        public static int Millis() {
+        public static int EpochMs()
+        {
             return Environment.TickCount & Int32.MaxValue;
         }
 
         public static double Rand()
         {
-            if (random == null) random = new Random();
             return random.NextDouble();
         }
 
         public static int Rand(int min, int max)
         {
-            if (random == null) random = new Random();
             return random.Next(min, max);
         }
 
@@ -51,7 +58,6 @@ namespace Dialogic
 
         public static double Rand(double min, double max)
         {
-            if (random == null) random = new Random();
             return min + Rand() * max;
         }
 
@@ -64,10 +70,54 @@ namespace Dialogic
         {
             using (StreamWriter w = File.AppendText(logFileName))
             {
-                w.WriteLine(DateTime.Now.ToLongTimeString() + "\t" 
-                    + Util.Millis() + "\t" + msg);
+                w.WriteLine(DateTime.Now.ToLongTimeString() + "\t"
+                    + Util.EpochMs() + "\t" + msg);
             }
         }
+
+        public static string Stringify(object o)
+        {
+            if (o == null) return "NULL";
+
+            string s = "";
+            if (o is IDictionary)
+            {
+                IDictionary id = (System.Collections.IDictionary)o;
+                if (id.Count > 0)
+                {
+                    s += "{";
+                    foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
+                    s = s.Substring(0, s.Length - 1) + "}";
+                }
+            }
+            else if (o is object[])
+            {
+                var arr = ((object[])o);
+                s = "[";
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    s += arr[i];
+                    if (i < arr.Length - 1) s += ",";
+                }
+            }
+            else if (o is List<object>)
+            {
+
+                var list = ((List<object>)o);
+                s = "[";
+                for (int i = 0; i < list.Count; i++)
+                {
+                    s += list.ElementAt(i).ToString(); 
+                    if (i < list.Count - 1) s += ",";
+                }
+            }
+            else 
+            {
+                s = o.ToString();
+            }
+            return s;
+        }
+
 
         public static IEnumerable<string> SortByLength(IEnumerable<string> e)
         {
@@ -82,7 +132,7 @@ namespace Dialogic
                 if (!string.IsNullOrEmpty(s) && s.Trim().Length > 0)
                 {
                     TypeConverter conv = TypeDescriptor.GetConverter(typeof(T));
-                    result = (T)conv.ConvertFrom(s);    
+                    result = (T)conv.ConvertFrom(s);
                 }
             }
             catch { }
@@ -94,6 +144,16 @@ namespace Dialogic
             if (string.IsNullOrEmpty(valueAsString))
                 return null;
             return (T)Convert.ChangeType(valueAsString, typeof(T));
+        }
+
+        public static int ToMillis(double seconds)
+        {
+            return (int)(seconds * 1000);
+        }
+
+        public static double ToSec(int millis)
+        {
+            return millis/1000.0;
         }
     }
 

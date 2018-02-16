@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Out = System.Console;
 
@@ -8,7 +9,7 @@ namespace Dialogic
     /** A very simple client: receives events but doesn't respond */
     class SimpleClient : AbstractClient
     {
-        protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
+        protected override void OnChatEvent(ChatEvent e)
         {
             Command cmd = e.Command;
             Console.WriteLine(cmd);
@@ -21,7 +22,7 @@ namespace Dialogic
         public delegate void UnityEventHandler(EventArgs e);
         public event UnityEventHandler UnityEvents;
 
-        protected abstract void OnChatEvent(ChatRuntime cm, ChatEvent e);
+        protected abstract void OnChatEvent(ChatEvent e);
 
         public void Subscribe(ChatRuntime cs)
         {
@@ -45,29 +46,14 @@ namespace Dialogic
             //t.Start(); // to add some mock random client events
         }
 
-        protected override void OnChatEvent(ChatRuntime cm, ChatEvent e)
-        {
-            HandleCommand(cm, e);
-        }
-
-        private void HandleCommand(ChatRuntime cm, ChatEvent e)
+        protected override void OnChatEvent(ChatEvent e)
         {
             Command c = e.Command;
 
-            if (c is Ask) //  prompt the user
+            if (c is IEmittable)
             {
-                Ask a = ((Ask)c);
-                string sec = a.WaitSecs > 0 ? " (" + a.WaitSecs + "s)" : "";
-                Out.WriteLine(c.Text + sec);
-                Prompt(a);
-            }
-            else if (c is Say)
-            {
-                Out.WriteLine(c.Text);
-            }
-            else if (c is Do)
-            {
-                Out.WriteLine("(DO: " + c.Text + ")");
+                Out.WriteLine(c is Do ? "(Do:" + c.Text + ") "+c.PauseAfterMs : c.Text);
+                if (c is Ask) Prompt((Dialogic.Ask)c);
             }
         }
 
@@ -88,7 +74,7 @@ namespace Dialogic
                 // And prompt the user for their choice
                 try
                 {
-                    string res = ConsoleReader.ReadLine(a, a.WaitMs());
+                    string res = ConsoleReader.ReadLine(a, a.PauseAfterMs);
                     int i = -1;
                     try
                     {
@@ -110,7 +96,7 @@ namespace Dialogic
             Out.WriteLine("    (Opt#" + (a.SelectedIdx + 1 + " selected")
                 + " => [" + a.Selected().ActionText() + "])\n");
 
-            Fire(new ChoiceEvent(chosen));
+            Fire(new ChoiceEvent(a.SelectedIdx));
         }
 
         protected void MockEvents()

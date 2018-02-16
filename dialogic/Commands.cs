@@ -30,39 +30,30 @@ namespace Dialogic
         }
     }
 
-    public abstract class Timed : Command
-    {
-        public float WaitSecs = 0; // default: no delay
-
-        public virtual int WaitMs()
-        {
-            return WaitSecs < 0 ? -1 : (int)(WaitSecs * 1000);
-        }
-    }
-
-    public class Say : Timed
+    public class Say : Command, IEmittable
     {
         public Say() : base()
         {
-            // this.WaitSecs = 1; // default wait time
-        }
-
-        public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] " 
-                + QQ(Text) + " " + PairsToString();
+            this.PauseAfterMs = 1000;
         }
     }
 
-    public class Do : Command { }
+    public class Do : Command, IEmittable
+    {
+
+        public Do() : base()
+        {
+            this.PauseAfterMs = 1000;
+        }
+    }
 
     public class Set : Command // TODO: rethink this
     {
         public string Value;
 
-        public Set() { }
+        public Set() : base() { }
 
-        public Set(string name, string value) // not used (add tests)
+        public Set(string name, string value) : base() // not used (add tests)
         {
             this.Text = name;
             this.Value = value;
@@ -102,52 +93,45 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return base.ToString() + '=' + Value;
+            return "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
         }
 
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Set clone = (Set)this.Copy();
-            Substitutions.Do(ref clone.Value, cr.globals);
-            cr.Globals()[Text] = Value; // set the global var
+            var globals = cr.Globals();
+            if (globals != null)
+            {
+                Substitutions.Do(ref clone.Value, globals);
+                globals[Text] = Value; // set the global var
+            }
             return new ChatEvent(clone);
         }
     }
 
-    public class Wait : Timed
+    public class Wait : Command
     {
+        public Wait() : base()
+        {
+            PauseAfterMs = -1;
+        }
+
         public override void Init(params string[] args)
         {
-            if (args.Length != 1) throw BadArgs(args, 1);
-            WaitSecs = float.Parse(args[0]);
-        }
-
-        public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] " + WaitSecs;
-        }
-
-        public override int WaitMs()
-        {
-            return WaitSecs > 0 ? (int)(WaitSecs * 1000)
-                : System.Threading.Timeout.Infinite;
+            if (args.Length > 0) PauseAfterMs =
+                Util.ToMillis(double.Parse(args[0]));
         }
     }
 
-    public class Ask : Say // extend Say?
+    public class Ask : Command, IEmittable
     {
         public int SelectedIdx { get; protected set; }
 
         protected List<Opt> options = new List<Opt>();
 
-        public override void Init(params string[] args)
+        public Ask()
         {
-            if (args.Length < 0 || args.Length > 2)
-            {
-                throw BadArg("Args(" + args.Length + ")=" + String.Join("#", args));
-            }
-            this.Text = args[0];
-            WaitSecs = (args.Length > 1) ? float.Parse(args[1]) : -1;
+            this.PauseAfterMs = Infinite;
         }
 
         public List<Opt> Options()
@@ -158,6 +142,14 @@ namespace Dialogic
                 options.Add(new Opt("No"));
             }
             return options;
+        }
+
+        public string OptionsJoined(string delim=",")
+        {
+            var opts = Options();
+            var s = "";
+            opts.ForEach((o) => s += o.Text+" ");
+            return s.Trim().Replace(" ", delim);
         }
 
         public Opt Selected()
@@ -184,10 +176,10 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Ask clone = (Ask)this.Copy();
-            Substitutions.Do(ref clone.Text, cr.globals);
+            Substitutions.Do(ref clone.Text, cr.Globals());
             clone.options.ForEach(delegate (Opt o)
             {
-                Substitutions.Do(ref o.Text, cr.globals);
+                Substitutions.Do(ref o.Text, cr.Globals());
             });
             return new ChatEvent(clone);
         }
@@ -196,7 +188,7 @@ namespace Dialogic
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
             Options().ForEach(o => s += o.Text + ",");
-            return s.Substring(0, s.Length - 1) + ") " + PairsToString();
+            return s.Substring(0, s.Length - 1) + ") " + MetaStr();
         }
 
         /*public string ToTree()
@@ -216,6 +208,7 @@ namespace Dialogic
             });
             return clone;
         }
+
     }
 
     public class Opt : Command
@@ -266,12 +259,12 @@ namespace Dialogic
         public override void Init(params string[] args)
         {
             if (args.Length < 1) throw BadArgs(args, 1);
-            PairsFromArgs(args);
+            MetaFromArgs(args);
         }
 
         public override string ToString()
         {
-            return base.ToString() + " " + PairsToString();
+            return base.ToString() + " " + MetaStr();
         }
     }
 
@@ -280,20 +273,22 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             ChatEvent ce = base.Fire(cr);
-            cr.Run(cr.Find(((Find)ce.Command).lookup));
+            cr.Run(cr.Find(((Find)ce.Command).meta));
             return ce;
         }
     }
 
-    public class Meta : KeyVal {}
+    public class Meta : KeyVal { }
 
-    public class Cond : KeyVal {}
+    public class Cond : KeyVal { }
+
+    public interface IEmittable { }
 
     public class Chat : Command
     {
         public List<Command> commands = new List<Command>(); // not copied
 
-        public Chat() : this("C" + Util.Millis()) { }
+        public Chat() : this("C" + Util.EpochMs()) { }
 
         public Chat(string name)
         {
@@ -322,21 +317,22 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return "[" + TypeName().ToUpper() + "] " + Text + " " + PairsToString();
+            return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
         }
 
         public string ToTree()
         {
             string s = "[" + TypeName().ToUpper() + "] " + Text + "\n";
-            if (PairsCount() > 0) s += "  [COND] " + PairsToString() + "\n";
+            if (HasMeta()) s += "  [COND] " + MetaStr() + "\n";
             commands.ForEach(c => s += "  " + c + "\n");
             return s;
         }
     }
 
-    public abstract class Command : KeysAndValues
+    public abstract class Command : MetaData
     {
-        const string PACKAGE = "Dialogic.";
+        public const string PACKAGE = "Dialogic.";
+        public const int Infinite = -1;
 
         protected static int IDGEN = 0;
 
@@ -344,11 +340,14 @@ namespace Dialogic
 
         public string Id { get; protected set; }
 
+        public int PauseAfterMs { get; protected set; }
+
         public string Text;
 
         protected Command()
         {
             this.Id = (++IDGEN).ToString();
+            this.PauseAfterMs = 0;
         }
 
         private static string ToMixedCase(string s)
@@ -373,7 +372,9 @@ namespace Dialogic
 
         public virtual void Init(params string[] args)
         {
-            this.Text = String.Join("", args);
+            this.Text = args[0];
+            if (args.Length > 1) PauseAfterMs =
+                Util.ToMillis(double.Parse(args[1]));
         }
 
         public virtual string TypeName()
@@ -384,7 +385,7 @@ namespace Dialogic
         public virtual ChatEvent Fire(ChatRuntime cr)
         {
             Command clone = this.Copy();
-            Substitutions.Do(ref clone.Text, cr.globals);
+            Substitutions.Do(ref clone.Text, cr.Globals());
             return new ChatEvent(clone);
         }
 
@@ -406,7 +407,23 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return "[" + TypeName().ToUpper() + "] " + Text;
+            return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
+        }
+
+        public string TimeStr()
+        {
+            return PauseAfterMs > 0 ? "wait:" + Util.ToSec(PauseAfterMs) : "";
+        }
+
+        protected override string MetaStr()
+        {
+            var s = base.MetaStr();
+            if (PauseAfterMs > 0)
+            {
+                var t = TimeStr() + "}";
+                s = (s.Length < 1) ? "{" + t : s.Replace("}", "," + t);
+            }
+            return s;
         }
 
         protected static string QQ(string text)
@@ -415,62 +432,62 @@ namespace Dialogic
         }
     }
 
-    public class KeysAndValues
+    public class MetaData
     {
-        protected Dictionary<string, string> lookup;
+        protected Dictionary<string, string> meta;
 
-        /* Note: new keys will overwrite old keys with same name */
-        public void AddPair(string key, string val)
+        public bool HasMeta()
         {
-            if (lookup == null)
-            {
-                lookup = new Dictionary<string, string>();
-            }
-            lookup[key] = val;
+            return meta != null && meta.Count > 0;
         }
 
-        public void AddPairs(Dictionary<string, string> pairs)
+        /* Note: new keys will overwrite old keys with same name */
+        public void SetMeta(string key, string val)
+        {
+            if (meta == null)
+            {
+                meta = new Dictionary<string, string>();
+            }
+            meta[key] = val;
+        }
+
+        public void AddMeta(Dictionary<string, string> pairs)
         {
             if (pairs != null)
             {
                 foreach (var key in pairs.Keys)
                 {
-                    AddPair(key, pairs[key]);
+                    SetMeta(key, pairs[key]);
                 }
             }
         }
 
         public Dictionary<string, string> ToDict()
         {
-            return lookup;
+            return meta;
         }
 
         public List<KeyValuePair<string, string>> ToList()
         {
-            return lookup != null ? lookup.ToList() : null;
+            return meta != null ? meta.ToList() : null;
         }
 
-        public int PairsCount()
-        {
-            return lookup == null ? 0 : lookup.Count;
-        }
-
-        protected virtual string PairsToString()
+        protected virtual string MetaStr()
         {
             string s = "";
-            if (PairsCount() > 0)
+            if (HasMeta())
             {
                 s += "{";
-                foreach (var key in lookup.Keys)
+                foreach (var key in meta.Keys)
                 {
-                    s += key + ":" + lookup[key] + ",";
+                    s += key + ":" + meta[key] + ",";
                 }
                 s = s.Substring(0, s.Length - 1) + "}";
             }
             return s;
         }
 
-        protected void PairsFromArgs(string[] args)
+        protected void MetaFromArgs(string[] args)
         {
             for (int i = 0; i < args.Length; i++)
             {
@@ -479,7 +496,7 @@ namespace Dialogic
                 if (parts.Length != 2) throw new Exception
                     ("Expected 2 parts, found " + parts.Length + ": " + parts);
 
-                AddPair(parts[0].Trim(), parts[1].Trim());
+                SetMeta(parts[0].Trim(), parts[1].Trim());
             }
         }
     }

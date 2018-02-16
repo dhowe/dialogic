@@ -57,6 +57,17 @@ namespace Dialogic
             return Parse(File.ReadAllLines(fname));
         }
 
+        public static void ParseFiles(string[] files, List<Chat> chats)
+        {
+            foreach (var f in files) ParseFile(f, chats);
+        }
+
+        public static void ParseFile(string fname, List<Chat> chats)
+        {
+            var result = Parse(File.ReadAllLines(fname));
+            result.ForEach((f) => chats.Add(f));
+        }
+
         protected static List<Chat> Parse(string[] lines)
         {
             HandleDefaultCommand(lines, "SAY");
@@ -173,7 +184,7 @@ namespace Dialogic
                 {
                     throw new Exception("Cond must follow Chat");
                 }
-                ((Chat)last).AddPairs(cd.ToDict());
+                ((Chat)last).AddMeta(cd.ToDict());
             }
             else
             {
@@ -184,7 +195,7 @@ namespace Dialogic
             // add meta key-values to subsequent line
             if (this.meta != null && c is Say || c is Chat)
             {
-                c.AddPairs(this.meta.ToDict());
+                c.AddMeta(this.meta.ToDict());
                 this.meta = null;
             }
         }

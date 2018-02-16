@@ -9,27 +9,26 @@ namespace Dialogic
 {
     public class ChatRuntime
     {
-        public delegate void ChatEventHandler(ChatRuntime c, ChatEvent e);
+        public delegate void ChatEventHandler(ChatEvent e);
         public event ChatEventHandler ChatEvents; // event-stream
 
-        public Dictionary<string, object> globals;
-        //public bool ShowWaits = false;
+        //public delegate void ChatEventCompletedHandler(object src, ChatEvent e);
+        //public event ChatEventCompletedHandler ChatEventCompleted;  
+
+        protected Dictionary<string, object> globals;
         public string LogFileName;
 
         protected List<Chat> chats;
-        protected bool logInitd, waiting = false;
+        protected Ask lastPrompt;
+        protected bool logInitd, waitingOnPrompt = false;
+        protected int nextEventTime;
 
-        public ChatRuntime(List<Chat> chats)
+        public ChatRuntime(List<Chat> chats) : this(chats, null) { }
+
+        public ChatRuntime(List<Chat> chats, Dictionary<string, object> globals)
         {
             this.chats = chats;
-            this.globals = new Dictionary<string, object>() {
-                { "emotion", "special" },
-                { "place", "Istanbul" },
-                { "Happy", "HappyFlip" },
-                { "verb", "play" },
-                { "neg", "(nah|no|nope)" },
-                { "var3", 2 }
-            };
+            this.globals = globals;
         }
 
         public Chat Find(Dictionary<string, string> conditions)
@@ -59,36 +58,35 @@ namespace Dialogic
 
         private void OnClientEvent(EventArgs e)
         {
-            if (e is IChoice)
-            {
-                waiting = false;
-                Opt opt = ((IChoice)e).GetChoice();
-                //FireEvent(opt); // Send Opt event to clients - needed? 
-                ((Opt)opt).action.Fire(this); // execute GO event
-            }
-        }
+            if (!(e is IChoice)) throw new Exception("Invalid event type");
 
-        internal void PrintGlobals()
-        {
-            Console.WriteLine("GLOBALS:");
-            foreach (var k in globals.Keys)
-            {
-                System.Console.WriteLine(k + ": " + globals[k]);
-            }
-        }
+            var opt = lastPrompt.Selected(((IChoice)e).GetChoiceIndex());
 
+            //FireEvent(opt); // Send Opt event to clients
+            // NOTE: needed for the multi-client case
+
+            opt.action.Fire(this); // execute GO event
+        }
+       
         public void Run(Chat chat)
         {
             FireEvent(chat);
             for (int i = 0; i < chat.commands.Count;)
             {
-                if (waiting)
+                if (Util.Elapsed() < nextEventTime)
                 {
-                    //if (ShowWaits)Console.Write(".");
-                    Thread.Sleep(10);
+                    //Console.Write(".");
+                    Thread.Sleep(1);
                     continue;
                 }
-                FireEvent(chat.commands[i++]);
+                Command c = chat.commands[i];
+                if (c is Ask)
+                {
+                    lastPrompt = (Ask)c;
+                }
+                FireEvent(c);
+                nextEventTime = Util.Elapsed() + c.PauseAfterMs;
+                i++;
             }
         }
 
@@ -98,7 +96,8 @@ namespace Dialogic
             {
                 throw new Exception("No chats found!");
             }
-            Run(chats[0]);
+            Thread t = new Thread(new ThreadStart(() => Run(chats[0])));
+            t.Start();                             
         }
 
         /*public void Do(Command cmd)
@@ -128,16 +127,21 @@ namespace Dialogic
             {
                 LogCommand(c); // log before replacements
                 ChatEvent ce = c.Fire(this);
-                if (!(c is Go)) // Opt, Chat ?
+                if (!(c is Go)) 
                 {
-                    if (ChatEvents != null) ChatEvents.Invoke(this, ce);
+                    if (ChatEvents != null) ChatEvents.Invoke(ce);
                 }
             }
         }
 
+        public void Globals(Dictionary<string, object> globals)
+        {
+            this.globals = globals;
+        }
+
         public Dictionary<string, object> Globals()
         {
-            return this.globals;
+            return globals;
         }
 
         public void LogCommand(Command c)

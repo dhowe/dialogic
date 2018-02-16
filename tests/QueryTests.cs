@@ -1,8 +1,6 @@
 ﻿using NUnit.Framework;
 using Dialogic;
-using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace tests
 {
@@ -18,8 +16,8 @@ namespace tests
             List<Chat> chats = new List<Chat>();
             chats.Add(c = new Chat("c1"));
             chats.Add(c = new Chat("c2"));
-            c.AddPair("dev", "1");
-            c.AddPair("day", "hello");
+            c.SetMeta("dev", "1");
+            c.SetMeta("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             Dictionary<string, string> q = new Dictionary<string, string> {
@@ -38,10 +36,10 @@ namespace tests
             Chat c;
             List<Chat> chats = new List<Chat>();
             chats.Add(c = new Chat("c1"));
-            c.AddPair("dev", "2");
+            c.SetMeta("dev", "2");
             chats.Add(c = new Chat("c2"));
-            c.AddPair("dev", "1");
-            c.AddPair("day", "hello");
+            c.SetMeta("dev", "1");
+            c.SetMeta("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             Dictionary<string, string> q = new Dictionary<string, string> {
@@ -62,8 +60,8 @@ namespace tests
             List<Chat> chats = new List<Chat>();
             chats.Add(c = new Chat("c1"));
             chats.Add(c = new Chat("c2"));
-            c.AddPair("dev", "1");
-            c.AddPair("day", "hello");
+            c.SetMeta("dev", "1");
+            c.SetMeta("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             Dictionary<string, string> q = new Dictionary<string, string> {

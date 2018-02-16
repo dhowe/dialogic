@@ -47,26 +47,26 @@ namespace Dialogic
 
     public interface IChoice
     {
-        Opt GetChoice();
+        int GetChoiceIndex();
     }
 
     public class ChoiceEvent : EventArgs, IChoice
     {
-        protected Opt option;
+        protected int choiceIndex;
 
-        public ChoiceEvent(Opt option)
+        public ChoiceEvent(int option)
         {
-            this.option = option;
+            this.choiceIndex = option;
         }
 
         public override string ToString()
         {
-            return "Response: " + option.Text;
+            return "Choice: " +choiceIndex;
         }
 
-        public Opt GetChoice()
+        public int GetChoiceIndex()
         {
-            return option;
+            return choiceIndex;
         }
     }
 }
