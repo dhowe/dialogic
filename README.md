@@ -44,7 +44,7 @@ In the code below we _branch_, based on the users response:
 
 ````
 ASK Do you want to play a game?
-OPT Sure # Game1
+OPT Sure #Game1
 OPT No Thanks
 ````
 
