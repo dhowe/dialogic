@@ -2,7 +2,7 @@
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
 
-Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Commands#chat). Each CHAT has a unique name and contains one or more [COMMANDS](https://github.com/dhowe/dialogic/wiki/Commands). When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system jumps to a new CHAT. 
+Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each CHAT has a unique name and contains one or more [COMMANDS](https://github.com/dhowe/dialogic/wiki/Command-Reference). When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system jumps to a new CHAT. 
 
 The simplest command is [SAY](https://github.com/dhowe/dialogic/wiki/Commands#say) which simply echoes the given output:
 
@@ -22,7 +22,7 @@ A COMMAND must begin a line
 
 A COMMAND can be followed by zero or more ARGUMENTS
 
-COMMANDS include [SAY](https://github.com/dhowe/dialogic/wiki/Commands#say), [DO](https://github.com/dhowe/dialogic/wiki/Commands#do), [ASK](https://github.com/dhowe/dialogic/wiki/Commands#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Commands#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Commands#find), [GO](https://github.com/dhowe/dialogic/wiki/Commands#go), and [others](https://github.com/dhowe/dialogic/wiki/Commands)
+COMMANDS include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [GO](https://github.com/dhowe/dialogic/wiki/Command-Reference#go), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
 
 Here is a short example:
 
