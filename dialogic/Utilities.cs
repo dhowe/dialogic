@@ -240,7 +240,35 @@ namespace Dialogic
         }
     }
 
-    /*public class ObjectPool<T>
+    public class ObjectPool<T>
+    {
+        private Func<T> generator;
+        private Action<T> recycler;
+
+        private T[] pool;
+        private int cursor = 0;
+
+        public ObjectPool(int size, Func<T> generator, Action<T> recycler = null)
+        {
+            this.pool = new T[size];
+            this.recycler = recycler;
+            this.generator = generator;
+            for (int i = 0; i < size; i++)
+            {
+                pool[i] = generator();
+            }
+        }
+
+        public T Get()
+        {
+            T next = pool[cursor];
+            if (recycler != null) recycler(next);
+            cursor = ++cursor < pool.Length ? cursor : 0;
+            return next;
+        }
+    }
+
+    /*public class ObjectPool<T> // .NET >= 4.6 
     {
         private ConcurrentBag<T> pool;
         private Func<T> generator;
