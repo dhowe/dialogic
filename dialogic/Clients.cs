@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Out = System.Console;
@@ -107,6 +109,99 @@ namespace Dialogic
                 Thread.Sleep(ms);
                 Fire(new ClientEvent());
             }
+        }
+    }
+
+    public class GuppyAdapter : AbstractClient
+    {
+        static string FILE_EXT = ".gs";
+
+        ObjectPool<GuppyEvent> pool;
+        GuppyEvent nextEvent;
+        ChatRuntime runtime;
+
+        bool modified = false;
+
+        public GuppyAdapter(string fileOrFolder) : this(fileOrFolder, null) { }
+
+        public GuppyAdapter(string fileOrFolder, Dictionary<string, object> globals)
+        {
+            pool = new ObjectPool<GuppyEvent>(10, () => new GuppyEvent(), (g => g.Clear()));
+
+            runtime = new ChatRuntime(Parse(fileOrFolder), globals);
+            this.Subscribe(runtime);
+            runtime.Run();
+        }
+
+        private static List<Chat> Parse(string fileOrFolder)
+        {
+            string[] files = !fileOrFolder.EndsWith(FILE_EXT, StringComparison.InvariantCulture) ?
+                files = Directory.GetFiles(fileOrFolder, '*' + FILE_EXT) :
+                files = new string[] { fileOrFolder };
+            List<Chat> chats = new List<Chat>();
+            ChatParser.ParseFiles(files, chats);
+
+            return chats;
+        }
+
+        public GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent)
+        {
+            //Console.WriteLine("#" + (++frameCount) + ": " + nextEvent);
+            runtime.Globals(worldState);
+            var result = modified ? nextEvent : null;
+            modified = false;
+            return result;
+        }
+
+        protected override void OnChatEvent(ChatEvent e)
+        {
+            if (e.Command is IEmittable)
+            {
+                GuppyEvent ge = pool.Get();
+                Command cmd = e.Command;
+                ge.Set("text", cmd.Text);
+                ge.Set("type", cmd.TypeName());
+                if (cmd is Ask)
+                {
+                    Ask a = (Dialogic.Ask)cmd;
+                    ge.Set("opts", a.OptionsJoined());
+                    if (a.PauseAfterMs > -1)
+                    {
+                        ge.Set("timeout", a.PauseAfterMs);
+                    }
+                }
+                if (cmd.HasMeta()) cmd.ToDict().ToList()
+                    .ForEach(x => ge.data[x.Key] = x.Value);
+                modified = true;
+                nextEvent = ge;
+            }
+        }
+    }
+
+    public class ObjectPool<T>
+    {
+        //private Func<T> generator;
+        private Action<T> recycler;
+
+        private T[] pool;
+        private int cursor = 0;
+
+        public ObjectPool(int size, Func<T> generator, Action<T> recycler = null)
+        {
+            this.pool = new T[size];
+            this.recycler = recycler;
+            for (int i = 0; i < size; i++)
+            {
+                pool[i] = generator();
+            }
+        }
+
+        public T Get()
+        {
+            T next = pool[cursor];
+            if (recycler != null) recycler(next);
+            cursor = ++cursor < pool.Length ? cursor : 0;
+            return next;
         }
     }
 }

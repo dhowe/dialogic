@@ -239,22 +239,34 @@ namespace Dialogic
             t.Stop();
         }
     }
-    /*#region Methods
-    public static T Copy<T>(this T source)
+
+    /*public class ObjectPool<T>
     {
-        var isNotSerializable = !typeof(T).IsSerializable;
-        if (isNotSerializable)
-            throw new ArgumentException("The type must be serializable.", "source");
+        private ConcurrentBag<T> pool;
+        private Func<T> generator;
+        private Action<T> recycler;
 
-        if (object.ReferenceEquals(source, null)) return default(T);
+        public ObjectPool(Func<T> generator) : this(generator, null) { }
 
-        var formatter = new BinaryFormatter();
-        using (var stream = new MemoryStream())
+        public ObjectPool(Func<T> generator, Action<T> recycler)
         {
-            formatter.Serialize(stream, source);
-            stream.Seek(0, SeekOrigin.Begin);
-            return (T)formatter.Deserialize(stream);
+            this.pool = new ConcurrentBag<T>();
+            this.generator = generator;
+            this.recycler = recycler;
         }
-    }
-    #endregion*/
+
+        public T Get()
+        {
+            T item;
+            if (pool.TryTake(out item)) return item;
+            return generator();
+        }
+
+        public void Recycle(T item)
+        {
+            recycler(item);
+            pool.Add(item);
+            Console.WriteLine("Recyled: Count=" + pool.Count);
+        }
+    }*/
 }
