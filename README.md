@@ -2,9 +2,9 @@
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
 
-Each section of text in a Dialogic script is known as a CHAT. Each CHAT has a unique name and contains one or more COMMANDS. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system jumps to a new CHAT. 
+Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Commands#Chat). Each CHAT has a unique name and contains one or more [COMMANDS](https://github.com/dhowe/dialogic/wiki/Commands). When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system jumps to a new CHAT. 
 
-The simplest command is SAY which simply echoes the given output:
+The simplest command is [SAY](https://github.com/dhowe/dialogic/wiki/Commands#Say) which simply echoes the given output:
 
 ````
 SAY Welcome to your first Dialogic script!
