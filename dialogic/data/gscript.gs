@@ -3,13 +3,11 @@
 Welcome to my $emotion World
 WAIT .5
 DO Twirl
-META pace=fast # display=strong
-Thanks for visiting $place!
+Thanks for visiting $place! {pace=fast,display=strong}
 
 GO Prompt
 
-CHAT Prompt 
-COND NotPlayed=true
+CHAT Prompt {NotPlayed=true}
 ASK Do you want to $verb a game? # 5
 OPT Sure # Game
 OPT Nope #RePrompt
@@ -22,6 +20,5 @@ OPT $neg # RePrompt
 
 CHAT Game
 DO $Happy
-META pace=slow # display=light
-ASK Great, let's play!
+ASK Great, let's play! {pace=slow,display=light}
 Bye!

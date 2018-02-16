@@ -59,7 +59,7 @@ namespace Dialogic
             this.Value = value;
         }
 
-        public override void Init(params string[] args)
+        public override void Init(string[] args, string[] meta)
         {
             string[] parts = ParseSetArgs(args);
             this.Text = parts[0];
@@ -116,7 +116,7 @@ namespace Dialogic
             PauseAfterMs = -1;
         }
 
-        public override void Init(params string[] args)
+        public override void Init(string[] args, string[] meta)
         {
             if (args.Length > 0) PauseAfterMs =
                 Util.ToMillis(double.Parse(args[0]));
@@ -227,11 +227,11 @@ namespace Dialogic
             this.action = action;
         }
 
-        public override void Init(params string[] args)
+        public override void Init(string[] args, string[] meta)
         {
             if (args.Length < 1) throw BadArgs(args, 1);
             this.Text = args[0];
-            this.action = (args.Length > 1) ? Command.Create(typeof(Go), args[1]) : NOP;
+            this.action = (args.Length > 1) ? Command.Create(typeof(Go), new string[] { args[1] }, meta) : NOP;
         }
 
         public override string ToString()
@@ -256,7 +256,7 @@ namespace Dialogic
     /** Command that takes only a set of # separated key-value pairs */
     public abstract class KeyVal : Command
     {
-        public override void Init(params string[] args)
+        public override void Init(string[] args, string[] meta)
         {
             if (args.Length < 1) throw BadArgs(args, 1);
             MetaFromArgs(args);
@@ -300,7 +300,7 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        public override void Init(params string[] args)
+        public override void Init(string[] args, string[] meta)
         {
             if (args.Length < 1)
             {
@@ -342,7 +342,7 @@ namespace Dialogic
 
         public int PauseAfterMs { get; protected set; }
 
-        public string Text;
+        public string Text, Actor;
 
         protected Command()
         {
@@ -355,26 +355,30 @@ namespace Dialogic
             return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
         }
 
-        public static Command Create(string type, params string[] args)
+        public static Command Create(string type, string[] args, string[] meta)
         {
             type = ToMixedCase(type);
-            var cmd = Create(Type.GetType(PACKAGE + type), args);
+            var cmd = Create(Type.GetType(PACKAGE + type), args, meta);
             if (cmd != null) return cmd;
             throw new TypeLoadException("No type: " + PACKAGE + type);
         }
 
-        public static Command Create(Type type, params string[] args)
+        public static Command Create(Type type, string[] args, string[] meta)
         {
             Command cmd = (Command)Activator.CreateInstance(type);
-            cmd.Init(args);
+            cmd.Init(args, meta);
             return cmd;
         }
 
-        public virtual void Init(params string[] args)
+        public virtual void Init(string[] args, string[] meta)
         {
-            this.Text = args[0];
-            if (args.Length > 1) PauseAfterMs =
-                Util.ToMillis(double.Parse(args[1]));
+            if (args != null)
+            {
+                this.Text = args[0];
+                if (args.Length > 1) PauseAfterMs =
+                    Util.ToMillis(double.Parse(args[1]));
+            }
+            MetaFromArgs(meta);
         }
 
         public virtual string TypeName()
@@ -489,16 +493,19 @@ namespace Dialogic
 
         protected void MetaFromArgs(string[] args)
         {
-            for (int i = 0; i < args.Length; i++)
+            if (args != null)
             {
-                string[] parts = args[i].Split('=');
+                for (int i = 0; i < args.Length; i++)
+                {
+                    Console.WriteLine(i+") "+args[i]);
+                    string[] parts = args[i].Split('=');
 
-                if (parts.Length != 2) throw new Exception
-                    ("Expected 2 parts, found " + parts.Length + ": " + parts);
+                    if (parts.Length != 2) throw new Exception
+                        ("Expected 2 parts, found " + parts.Length + ": " + parts);
 
-                SetMeta(parts[0].Trim(), parts[1].Trim());
+                    SetMeta(parts[0].Trim(), parts[1].Trim());
+                }
             }
         }
     }
-
 }

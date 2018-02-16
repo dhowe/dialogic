@@ -65,5 +65,12 @@ public interface IDialogicVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitArg([NotNull] DialogicParser.ArgContext context);
+
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="DialogicParser.meta"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMeta([NotNull] DialogicParser.MetaContext context);
 }
 } // namespace Dialogic.Antlr

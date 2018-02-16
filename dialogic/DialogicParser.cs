@@ -30,19 +30,21 @@ using DFA = Antlr4.Runtime.Dfa.DFA;
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.6.4")]
 public partial class DialogicParser : Parser {
 	public const int
-		COMMAND=1, SPACE=2, DELIM=3, NEWLINE=4, WORD=5, COMMENT=6, LINE_COMMENT=7, 
-		ERROR=8;
+		T__0=1, T__1=2, T__2=3, COMMAND=4, DELIM=5, SP=6, NEWLINE=7, WORD=8, COMMENT=9, 
+		LINE_COMMENT=10, ERROR=11;
 	public const int
-		RULE_script = 0, RULE_line = 1, RULE_command = 2, RULE_args = 3, RULE_arg = 4;
+		RULE_script = 0, RULE_line = 1, RULE_command = 2, RULE_args = 3, RULE_arg = 4, 
+		RULE_meta = 5;
 	public static readonly string[] ruleNames = {
-		"script", "line", "command", "args", "arg"
+		"script", "line", "command", "args", "arg", "meta"
 	};
 
 	private static readonly string[] _LiteralNames = {
+		null, "'{'", "'}'", "'='"
 	};
 	private static readonly string[] _SymbolicNames = {
-		null, "COMMAND", "SPACE", "DELIM", "NEWLINE", "WORD", "COMMENT", "LINE_COMMENT", 
-		"ERROR"
+		null, null, null, null, "COMMAND", "DELIM", "SP", "NEWLINE", "WORD", "COMMENT", 
+		"LINE_COMMENT", "ERROR"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -121,16 +123,16 @@ public partial class DialogicParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 11;
+			State = 13;
 			_errHandler.Sync(this);
 			_la = _input.La(1);
 			do {
 				{
 				{
-				State = 10; line();
+				State = 12; line();
 				}
 				}
-				State = 13;
+				State = 15;
 				_errHandler.Sync(this);
 				_la = _input.La(1);
 			} while ( _la==COMMAND );
@@ -156,9 +158,9 @@ public partial class DialogicParser : Parser {
 		public ArgsContext args() {
 			return GetRuleContext<ArgsContext>(0);
 		}
-		public ITerminalNode[] SPACE() { return GetTokens(DialogicParser.SPACE); }
-		public ITerminalNode SPACE(int i) {
-			return GetToken(DialogicParser.SPACE, i);
+		public ITerminalNode[] SP() { return GetTokens(DialogicParser.SP); }
+		public ITerminalNode SP(int i) {
+			return GetToken(DialogicParser.SP, i);
 		}
 		public LineContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -181,24 +183,24 @@ public partial class DialogicParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 30;
+			State = 32;
 			_errHandler.Sync(this);
 			switch ( Interpreter.AdaptivePredict(_input,3,_ctx) ) {
 			case 1:
 				{
-				State = 15; command();
-				State = 19;
+				State = 17; command();
+				State = 21;
 				_errHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(_input,1,_ctx);
 				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.InvalidAltNumber ) {
 					if ( _alt==1 ) {
 						{
 						{
-						State = 16; Match(SPACE);
+						State = 18; Match(SP);
 						}
 						} 
 					}
-					State = 21;
+					State = 23;
 					_errHandler.Sync(this);
 					_alt = Interpreter.AdaptivePredict(_input,1,_ctx);
 				}
@@ -207,38 +209,44 @@ public partial class DialogicParser : Parser {
 
 			case 2:
 				{
-				State = 22; command();
-				State = 24;
+				State = 24; command();
+				State = 26;
 				_errHandler.Sync(this);
-				_la = _input.La(1);
+				_alt = 1;
 				do {
-					{
-					{
-					State = 23; Match(SPACE);
+					switch (_alt) {
+					case 1:
+						{
+						{
+						State = 25; Match(SP);
+						}
+						}
+						break;
+					default:
+						throw new NoViableAltException(this);
 					}
-					}
-					State = 26;
+					State = 28;
 					_errHandler.Sync(this);
-					_la = _input.La(1);
-				} while ( _la==SPACE );
-				State = 28; args();
+					_alt = Interpreter.AdaptivePredict(_input,2,_ctx);
+				} while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.InvalidAltNumber );
+				State = 30; args();
 				}
 				break;
 			}
-			State = 35;
+			State = 37;
 			_errHandler.Sync(this);
 			_la = _input.La(1);
-			while (_la==SPACE) {
+			while (_la==SP) {
 				{
 				{
-				State = 32; Match(SPACE);
+				State = 34; Match(SP);
 				}
 				}
-				State = 37;
+				State = 39;
 				_errHandler.Sync(this);
 				_la = _input.La(1);
 			}
-			State = 38;
+			State = 40;
 			_la = _input.La(1);
 			if ( !(_la==Eof || _la==NEWLINE) ) {
 			_errHandler.RecoverInline(this);
@@ -284,7 +292,7 @@ public partial class DialogicParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 40; Match(COMMAND);
+			State = 42; Match(COMMAND);
 			}
 		}
 		catch (RecognitionException re) {
@@ -309,6 +317,13 @@ public partial class DialogicParser : Parser {
 		public ITerminalNode DELIM(int i) {
 			return GetToken(DialogicParser.DELIM, i);
 		}
+		public ITerminalNode[] SP() { return GetTokens(DialogicParser.SP); }
+		public ITerminalNode SP(int i) {
+			return GetToken(DialogicParser.SP, i);
+		}
+		public MetaContext meta() {
+			return GetRuleContext<MetaContext>(0);
+		}
 		public ArgsContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -327,23 +342,147 @@ public partial class DialogicParser : Parser {
 		EnterRule(_localctx, 6, RULE_args);
 		int _la;
 		try {
-			EnterOuterAlt(_localctx, 1);
-			{
-			State = 42; arg();
-			State = 47;
+			int _alt;
+			State = 96;
 			_errHandler.Sync(this);
-			_la = _input.La(1);
-			while (_la==DELIM) {
+			switch ( Interpreter.AdaptivePredict(_input,13,_ctx) ) {
+			case 1:
+				EnterOuterAlt(_localctx, 1);
 				{
 				{
-				State = 43; Match(DELIM);
 				State = 44; arg();
-				}
-				}
 				State = 49;
 				_errHandler.Sync(this);
 				_la = _input.La(1);
-			}
+				while (_la==DELIM) {
+					{
+					{
+					State = 45; Match(DELIM);
+					State = 46; arg();
+					}
+					}
+					State = 51;
+					_errHandler.Sync(this);
+					_la = _input.La(1);
+				}
+				}
+				}
+				break;
+
+			case 2:
+				EnterOuterAlt(_localctx, 2);
+				{
+				{
+				State = 55;
+				_errHandler.Sync(this);
+				_alt = Interpreter.AdaptivePredict(_input,6,_ctx);
+				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.InvalidAltNumber ) {
+					if ( _alt==1 ) {
+						{
+						{
+						State = 52; Match(SP);
+						}
+						} 
+					}
+					State = 57;
+					_errHandler.Sync(this);
+					_alt = Interpreter.AdaptivePredict(_input,6,_ctx);
+				}
+				State = 62;
+				_errHandler.Sync(this);
+				_la = _input.La(1);
+				if (_la==T__0) {
+					{
+					State = 58; Match(T__0);
+					State = 59; meta();
+					State = 60; Match(T__1);
+					}
+				}
+
+				State = 67;
+				_errHandler.Sync(this);
+				_alt = Interpreter.AdaptivePredict(_input,8,_ctx);
+				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.InvalidAltNumber ) {
+					if ( _alt==1 ) {
+						{
+						{
+						State = 64; Match(SP);
+						}
+						} 
+					}
+					State = 69;
+					_errHandler.Sync(this);
+					_alt = Interpreter.AdaptivePredict(_input,8,_ctx);
+				}
+				}
+				}
+				break;
+
+			case 3:
+				EnterOuterAlt(_localctx, 3);
+				{
+				{
+				State = 70; arg();
+				State = 75;
+				_errHandler.Sync(this);
+				_la = _input.La(1);
+				while (_la==DELIM) {
+					{
+					{
+					State = 71; Match(DELIM);
+					State = 72; arg();
+					}
+					}
+					State = 77;
+					_errHandler.Sync(this);
+					_la = _input.La(1);
+				}
+				}
+				{
+				State = 81;
+				_errHandler.Sync(this);
+				_alt = Interpreter.AdaptivePredict(_input,10,_ctx);
+				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.InvalidAltNumber ) {
+					if ( _alt==1 ) {
+						{
+						{
+						State = 78; Match(SP);
+						}
+						} 
+					}
+					State = 83;
+					_errHandler.Sync(this);
+					_alt = Interpreter.AdaptivePredict(_input,10,_ctx);
+				}
+				State = 88;
+				_errHandler.Sync(this);
+				_la = _input.La(1);
+				if (_la==T__0) {
+					{
+					State = 84; Match(T__0);
+					State = 85; meta();
+					State = 86; Match(T__1);
+					}
+				}
+
+				State = 93;
+				_errHandler.Sync(this);
+				_alt = Interpreter.AdaptivePredict(_input,12,_ctx);
+				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.InvalidAltNumber ) {
+					if ( _alt==1 ) {
+						{
+						{
+						State = 90; Match(SP);
+						}
+						} 
+					}
+					State = 95;
+					_errHandler.Sync(this);
+					_alt = Interpreter.AdaptivePredict(_input,12,_ctx);
+				}
+				}
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -362,9 +501,9 @@ public partial class DialogicParser : Parser {
 		public ITerminalNode WORD(int i) {
 			return GetToken(DialogicParser.WORD, i);
 		}
-		public ITerminalNode[] SPACE() { return GetTokens(DialogicParser.SPACE); }
-		public ITerminalNode SPACE(int i) {
-			return GetToken(DialogicParser.SPACE, i);
+		public ITerminalNode[] SP() { return GetTokens(DialogicParser.SP); }
+		public ITerminalNode SP(int i) {
+			return GetToken(DialogicParser.SP, i);
 		}
 		public ArgContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -387,34 +526,102 @@ public partial class DialogicParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 50; Match(WORD);
-			State = 59;
+			{
+			State = 98; Match(WORD);
+			State = 107;
 			_errHandler.Sync(this);
-			_alt = Interpreter.AdaptivePredict(_input,7,_ctx);
+			_alt = Interpreter.AdaptivePredict(_input,15,_ctx);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.InvalidAltNumber ) {
 				if ( _alt==1 ) {
 					{
 					{
-					State = 52;
+					State = 100;
 					_errHandler.Sync(this);
 					_la = _input.La(1);
 					do {
 						{
 						{
-						State = 51; Match(SPACE);
+						State = 99; Match(SP);
 						}
 						}
-						State = 54;
+						State = 102;
 						_errHandler.Sync(this);
 						_la = _input.La(1);
-					} while ( _la==SPACE );
-					State = 56; Match(WORD);
+					} while ( _la==SP );
+					State = 104; Match(WORD);
 					}
 					} 
 				}
-				State = 61;
+				State = 109;
 				_errHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(_input,7,_ctx);
+				_alt = Interpreter.AdaptivePredict(_input,15,_ctx);
+			}
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.ReportError(this, re);
+			_errHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class MetaContext : ParserRuleContext {
+		public ITerminalNode[] SP() { return GetTokens(DialogicParser.SP); }
+		public ITerminalNode SP(int i) {
+			return GetToken(DialogicParser.SP, i);
+		}
+		public ITerminalNode[] WORD() { return GetTokens(DialogicParser.WORD); }
+		public ITerminalNode WORD(int i) {
+			return GetToken(DialogicParser.WORD, i);
+		}
+		public MetaContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_meta; } }
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IDialogicVisitor<TResult> typedVisitor = visitor as IDialogicVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitMeta(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public MetaContext meta() {
+		MetaContext _localctx = new MetaContext(_ctx, State);
+		EnterRule(_localctx, 10, RULE_meta);
+		int _la;
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 113;
+			_errHandler.Sync(this);
+			_la = _input.La(1);
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << SP) | (1L << WORD))) != 0)) {
+				{
+				{
+				State = 110;
+				_la = _input.La(1);
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << SP) | (1L << WORD))) != 0)) ) {
+				_errHandler.RecoverInline(this);
+				} else {
+					if (_input.La(1) == TokenConstants.Eof) {
+						matchedEOF = true;
+					}
+
+					_errHandler.ReportMatch(this);
+					Consume();
+				}
+				}
+				}
+				State = 115;
+				_errHandler.Sync(this);
+				_la = _input.La(1);
 			}
 			}
 		}
@@ -430,30 +637,49 @@ public partial class DialogicParser : Parser {
 	}
 
 	public static readonly string _serializedATN =
-		"\x3\xAF6F\x8320\x479D\xB75C\x4880\x1605\x191C\xAB37\x3\n\x41\x4\x2\t\x2"+
-		"\x4\x3\t\x3\x4\x4\t\x4\x4\x5\t\x5\x4\x6\t\x6\x3\x2\x6\x2\xE\n\x2\r\x2"+
-		"\xE\x2\xF\x3\x3\x3\x3\a\x3\x14\n\x3\f\x3\xE\x3\x17\v\x3\x3\x3\x3\x3\x6"+
-		"\x3\x1B\n\x3\r\x3\xE\x3\x1C\x3\x3\x3\x3\x5\x3!\n\x3\x3\x3\a\x3$\n\x3\f"+
-		"\x3\xE\x3\'\v\x3\x3\x3\x3\x3\x3\x4\x3\x4\x3\x5\x3\x5\x3\x5\a\x5\x30\n"+
-		"\x5\f\x5\xE\x5\x33\v\x5\x3\x6\x3\x6\x6\x6\x37\n\x6\r\x6\xE\x6\x38\x3\x6"+
-		"\a\x6<\n\x6\f\x6\xE\x6?\v\x6\x3\x6\x2\x2\x2\a\x2\x2\x4\x2\x6\x2\b\x2\n"+
-		"\x2\x2\x3\x3\x3\x6\x6\x43\x2\r\x3\x2\x2\x2\x4 \x3\x2\x2\x2\x6*\x3\x2\x2"+
-		"\x2\b,\x3\x2\x2\x2\n\x34\x3\x2\x2\x2\f\xE\x5\x4\x3\x2\r\f\x3\x2\x2\x2"+
-		"\xE\xF\x3\x2\x2\x2\xF\r\x3\x2\x2\x2\xF\x10\x3\x2\x2\x2\x10\x3\x3\x2\x2"+
-		"\x2\x11\x15\x5\x6\x4\x2\x12\x14\a\x4\x2\x2\x13\x12\x3\x2\x2\x2\x14\x17"+
-		"\x3\x2\x2\x2\x15\x13\x3\x2\x2\x2\x15\x16\x3\x2\x2\x2\x16!\x3\x2\x2\x2"+
-		"\x17\x15\x3\x2\x2\x2\x18\x1A\x5\x6\x4\x2\x19\x1B\a\x4\x2\x2\x1A\x19\x3"+
-		"\x2\x2\x2\x1B\x1C\x3\x2\x2\x2\x1C\x1A\x3\x2\x2\x2\x1C\x1D\x3\x2\x2\x2"+
-		"\x1D\x1E\x3\x2\x2\x2\x1E\x1F\x5\b\x5\x2\x1F!\x3\x2\x2\x2 \x11\x3\x2\x2"+
-		"\x2 \x18\x3\x2\x2\x2!%\x3\x2\x2\x2\"$\a\x4\x2\x2#\"\x3\x2\x2\x2$\'\x3"+
-		"\x2\x2\x2%#\x3\x2\x2\x2%&\x3\x2\x2\x2&(\x3\x2\x2\x2\'%\x3\x2\x2\x2()\t"+
-		"\x2\x2\x2)\x5\x3\x2\x2\x2*+\a\x3\x2\x2+\a\x3\x2\x2\x2,\x31\x5\n\x6\x2"+
-		"-.\a\x5\x2\x2.\x30\x5\n\x6\x2/-\x3\x2\x2\x2\x30\x33\x3\x2\x2\x2\x31/\x3"+
-		"\x2\x2\x2\x31\x32\x3\x2\x2\x2\x32\t\x3\x2\x2\x2\x33\x31\x3\x2\x2\x2\x34"+
-		"=\a\a\x2\x2\x35\x37\a\x4\x2\x2\x36\x35\x3\x2\x2\x2\x37\x38\x3\x2\x2\x2"+
-		"\x38\x36\x3\x2\x2\x2\x38\x39\x3\x2\x2\x2\x39:\x3\x2\x2\x2:<\a\a\x2\x2"+
-		";\x36\x3\x2\x2\x2<?\x3\x2\x2\x2=;\x3\x2\x2\x2=>\x3\x2\x2\x2>\v\x3\x2\x2"+
-		"\x2?=\x3\x2\x2\x2\n\xF\x15\x1C %\x31\x38=";
+		"\x3\xAF6F\x8320\x479D\xB75C\x4880\x1605\x191C\xAB37\x3\rw\x4\x2\t\x2\x4"+
+		"\x3\t\x3\x4\x4\t\x4\x4\x5\t\x5\x4\x6\t\x6\x4\a\t\a\x3\x2\x6\x2\x10\n\x2"+
+		"\r\x2\xE\x2\x11\x3\x3\x3\x3\a\x3\x16\n\x3\f\x3\xE\x3\x19\v\x3\x3\x3\x3"+
+		"\x3\x6\x3\x1D\n\x3\r\x3\xE\x3\x1E\x3\x3\x3\x3\x5\x3#\n\x3\x3\x3\a\x3&"+
+		"\n\x3\f\x3\xE\x3)\v\x3\x3\x3\x3\x3\x3\x4\x3\x4\x3\x5\x3\x5\x3\x5\a\x5"+
+		"\x32\n\x5\f\x5\xE\x5\x35\v\x5\x3\x5\a\x5\x38\n\x5\f\x5\xE\x5;\v\x5\x3"+
+		"\x5\x3\x5\x3\x5\x3\x5\x5\x5\x41\n\x5\x3\x5\a\x5\x44\n\x5\f\x5\xE\x5G\v"+
+		"\x5\x3\x5\x3\x5\x3\x5\a\x5L\n\x5\f\x5\xE\x5O\v\x5\x3\x5\a\x5R\n\x5\f\x5"+
+		"\xE\x5U\v\x5\x3\x5\x3\x5\x3\x5\x3\x5\x5\x5[\n\x5\x3\x5\a\x5^\n\x5\f\x5"+
+		"\xE\x5\x61\v\x5\x5\x5\x63\n\x5\x3\x6\x3\x6\x6\x6g\n\x6\r\x6\xE\x6h\x3"+
+		"\x6\a\x6l\n\x6\f\x6\xE\x6o\v\x6\x3\a\a\ar\n\a\f\a\xE\au\v\a\x3\a\x2\x2"+
+		"\x2\b\x2\x2\x4\x2\x6\x2\b\x2\n\x2\f\x2\x2\x4\x3\x3\t\t\x5\x2\x5\x5\b\b"+
+		"\n\n\x82\x2\xF\x3\x2\x2\x2\x4\"\x3\x2\x2\x2\x6,\x3\x2\x2\x2\b\x62\x3\x2"+
+		"\x2\x2\n\x64\x3\x2\x2\x2\fs\x3\x2\x2\x2\xE\x10\x5\x4\x3\x2\xF\xE\x3\x2"+
+		"\x2\x2\x10\x11\x3\x2\x2\x2\x11\xF\x3\x2\x2\x2\x11\x12\x3\x2\x2\x2\x12"+
+		"\x3\x3\x2\x2\x2\x13\x17\x5\x6\x4\x2\x14\x16\a\b\x2\x2\x15\x14\x3\x2\x2"+
+		"\x2\x16\x19\x3\x2\x2\x2\x17\x15\x3\x2\x2\x2\x17\x18\x3\x2\x2\x2\x18#\x3"+
+		"\x2\x2\x2\x19\x17\x3\x2\x2\x2\x1A\x1C\x5\x6\x4\x2\x1B\x1D\a\b\x2\x2\x1C"+
+		"\x1B\x3\x2\x2\x2\x1D\x1E\x3\x2\x2\x2\x1E\x1C\x3\x2\x2\x2\x1E\x1F\x3\x2"+
+		"\x2\x2\x1F \x3\x2\x2\x2 !\x5\b\x5\x2!#\x3\x2\x2\x2\"\x13\x3\x2\x2\x2\""+
+		"\x1A\x3\x2\x2\x2#\'\x3\x2\x2\x2$&\a\b\x2\x2%$\x3\x2\x2\x2&)\x3\x2\x2\x2"+
+		"\'%\x3\x2\x2\x2\'(\x3\x2\x2\x2(*\x3\x2\x2\x2)\'\x3\x2\x2\x2*+\t\x2\x2"+
+		"\x2+\x5\x3\x2\x2\x2,-\a\x6\x2\x2-\a\x3\x2\x2\x2.\x33\x5\n\x6\x2/\x30\a"+
+		"\a\x2\x2\x30\x32\x5\n\x6\x2\x31/\x3\x2\x2\x2\x32\x35\x3\x2\x2\x2\x33\x31"+
+		"\x3\x2\x2\x2\x33\x34\x3\x2\x2\x2\x34\x63\x3\x2\x2\x2\x35\x33\x3\x2\x2"+
+		"\x2\x36\x38\a\b\x2\x2\x37\x36\x3\x2\x2\x2\x38;\x3\x2\x2\x2\x39\x37\x3"+
+		"\x2\x2\x2\x39:\x3\x2\x2\x2:@\x3\x2\x2\x2;\x39\x3\x2\x2\x2<=\a\x3\x2\x2"+
+		"=>\x5\f\a\x2>?\a\x4\x2\x2?\x41\x3\x2\x2\x2@<\x3\x2\x2\x2@\x41\x3\x2\x2"+
+		"\x2\x41\x45\x3\x2\x2\x2\x42\x44\a\b\x2\x2\x43\x42\x3\x2\x2\x2\x44G\x3"+
+		"\x2\x2\x2\x45\x43\x3\x2\x2\x2\x45\x46\x3\x2\x2\x2\x46\x63\x3\x2\x2\x2"+
+		"G\x45\x3\x2\x2\x2HM\x5\n\x6\x2IJ\a\a\x2\x2JL\x5\n\x6\x2KI\x3\x2\x2\x2"+
+		"LO\x3\x2\x2\x2MK\x3\x2\x2\x2MN\x3\x2\x2\x2NS\x3\x2\x2\x2OM\x3\x2\x2\x2"+
+		"PR\a\b\x2\x2QP\x3\x2\x2\x2RU\x3\x2\x2\x2SQ\x3\x2\x2\x2ST\x3\x2\x2\x2T"+
+		"Z\x3\x2\x2\x2US\x3\x2\x2\x2VW\a\x3\x2\x2WX\x5\f\a\x2XY\a\x4\x2\x2Y[\x3"+
+		"\x2\x2\x2ZV\x3\x2\x2\x2Z[\x3\x2\x2\x2[_\x3\x2\x2\x2\\^\a\b\x2\x2]\\\x3"+
+		"\x2\x2\x2^\x61\x3\x2\x2\x2_]\x3\x2\x2\x2_`\x3\x2\x2\x2`\x63\x3\x2\x2\x2"+
+		"\x61_\x3\x2\x2\x2\x62.\x3\x2\x2\x2\x62\x39\x3\x2\x2\x2\x62H\x3\x2\x2\x2"+
+		"\x63\t\x3\x2\x2\x2\x64m\a\n\x2\x2\x65g\a\b\x2\x2\x66\x65\x3\x2\x2\x2g"+
+		"h\x3\x2\x2\x2h\x66\x3\x2\x2\x2hi\x3\x2\x2\x2ij\x3\x2\x2\x2jl\a\n\x2\x2"+
+		"k\x66\x3\x2\x2\x2lo\x3\x2\x2\x2mk\x3\x2\x2\x2mn\x3\x2\x2\x2n\v\x3\x2\x2"+
+		"\x2om\x3\x2\x2\x2pr\t\x3\x2\x2qp\x3\x2\x2\x2ru\x3\x2\x2\x2sq\x3\x2\x2"+
+		"\x2st\x3\x2\x2\x2t\r\x3\x2\x2\x2us\x3\x2\x2\x2\x13\x11\x17\x1E\"\'\x33"+
+		"\x39@\x45MSZ_\x62hms";
 	public static readonly ATN _ATN =
 		new ATNDeserializer().Deserialize(_serializedATN.ToCharArray());
 }

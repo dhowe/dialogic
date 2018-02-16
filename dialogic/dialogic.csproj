@@ -49,7 +49,6 @@
     <Compile Include="DialogicVisitor.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="LexerTest.cs" />
     <Compile Include="Substitutions.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
@@ -63,7 +62,7 @@
     <None Include="bin\Debug\Antlr4.Runtime.dll" />
     <None Include="data\gscript.gs" />
     <None Include="data\queries.gs" />
-    <None Include="data\timers.gs" />
+    <None Include="data\meta.gs" />
     <None Include="data\threads.gs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

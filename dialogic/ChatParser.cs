@@ -14,7 +14,7 @@ namespace Dialogic
     {
         protected List<Chat> chats;
         protected Stack<Command> parsed;
-        protected Meta meta;
+        protected Meta lastMeta; // remove
 
         public ChatParser()
         {
@@ -78,7 +78,7 @@ namespace Dialogic
             ChatParser cp = new ChatParser();
             cp.Visit(prc);
 
-            PrintLispTree(parser, prc);
+            PrintLispTree(prc.ToStringTree(parser));
             Console.WriteLine(cp);
 
             return cp.chats;
@@ -94,7 +94,7 @@ namespace Dialogic
                     //System.Console.WriteLine($"Checking: '{lines[i]}'");
                     if (!Regex.IsMatch(lines[i], @"(^[A-Z][A-Z][A-Z]?[A-Z]?[^A-Z])"))
                     {
-                        //System.Console.WriteLine($"+SAY: {lines[i]}");
+                        System.Console.WriteLine("SAY: "+lines[i]);
                         lines[i] = cmd + " " + lines[i];
                     }
                 }
@@ -108,9 +108,9 @@ namespace Dialogic
             return new DialogicParser(tokens);
         }
 
-        static void PrintLispTree(DialogicParser parser, ParserRuleContext prc)
+        public static void PrintLispTree(string tree)
         {
-            string tree = prc.ToStringTree(parser);
+            //string tree = prc.ToStringTree(parser);
             int indentation = 1;
             Console.WriteLine("\nPARSE-TREE");
             foreach (char c in tree)
@@ -138,12 +138,16 @@ namespace Dialogic
             var cmd = context.GetChild<DialogicParser.CommandContext>(0).GetText();
             var actx = context.GetChild<DialogicParser.ArgsContext>(0);
             if (actx == null) return VisitChildren(context); // shouldn't happen
+
             var xargs = actx.children.Where(arg => arg is DialogicParser.ArgContext).ToArray();
-            var args = Array.ConvertAll(xargs, arg => arg.GetText().Trim());
+            string[] args = Array.ConvertAll(xargs, arg => arg.GetText().Trim());
 
-            //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",", args) + "'");
+            var xmeta = actx.children.Where(md => md is DialogicParser.MetaContext).ToArray();
+            string[] meta = xmeta.Length > 0 ? xmeta[0].GetText().Split(','): null;
 
-            Command c = Command.Create(cmd, args);
+            Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",", args) + "' " + meta);
+
+            Command c = Command.Create(cmd, args, meta);
             if (c is Chat)
             {
                 chats.Add((Chat)c);
@@ -172,7 +176,7 @@ namespace Dialogic
             else if (c is Meta)
             {
                 // store meta key-values for subsequent line
-                this.meta = (Meta)c;
+                this.lastMeta = (Meta)c;
             }
             else if (c.GetType() == typeof(Cond))
             {
@@ -193,10 +197,10 @@ namespace Dialogic
             }
 
             // add meta key-values to subsequent line
-            if (this.meta != null && c is Say || c is Chat)
+            if (this.lastMeta != null && c is Say || c is Chat)
             {
-                c.AddMeta(this.meta.ToDict());
-                this.meta = null;
+                c.AddMeta(this.lastMeta.ToDict());
+                this.lastMeta = null;
             }
         }
 
@@ -220,6 +224,49 @@ namespace Dialogic
         public List<Chat> Chats()
         {
             return chats;
+        }
+    }
+
+    public class LexerTest : DialogicBaseVisitor<Chat>
+    {
+        /*private static void printPrettyLispTree(String tree)
+        {
+            Console.WriteLine("[PARSE-TREE]");
+            int indentation = 1;
+            foreach (char c in tree)
+            {
+                if (c == '(')
+                {
+                    if (indentation > 1)
+                    {
+                        Console.WriteLine();
+                    }
+                    for (int i = 0; i < indentation; i++)
+                    {
+                        Console.Write("  ");
+                    }
+                    indentation++;
+                }
+                else if (c == ')')
+                {
+                    indentation--;
+                }
+                Console.Write(c);
+            }
+            Console.WriteLine();
+        }*/
+
+        public void TestParse(string source)
+        {
+            string[] lines = File.ReadAllLines(source);
+            ITokenSource lexer = new DialogicLexer(new AntlrInputStream(String.Join("\n", lines)));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            DialogicParser parser = new DialogicParser(tokens);
+            ParserRuleContext context = parser.script();
+            Visit(context);
+
+            String tree = context.ToStringTree(parser);
+            ChatParser.PrintLispTree(tree);
         }
     }
 }

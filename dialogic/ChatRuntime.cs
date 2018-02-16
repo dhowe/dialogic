@@ -16,7 +16,7 @@ namespace Dialogic
         //public event ChatEventCompletedHandler ChatEventCompleted;  
 
         protected Dictionary<string, object> globals;
-        public string LogFileName;
+        public string LogFile;
 
         protected List<Chat> chats;
         protected Ask lastPrompt;
@@ -48,7 +48,7 @@ namespace Dialogic
 
         private bool Logging()
         { 
-            return LogFileName != null;
+            return LogFile != null;
         }
 
         public void Subscribe(AbstractClient cc) // tmp
@@ -151,10 +151,10 @@ namespace Dialogic
             if (!logInitd) {
                 
                 logInitd = true;
-                File.WriteAllText(LogFileName, "============\n");
+                File.WriteAllText(LogFile, "============\n");
             }
 
-            using (StreamWriter w = File.AppendText(LogFileName))
+            using (StreamWriter w = File.AppendText(LogFile))
             {
                 var now = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
                 w.WriteLine(now + "\t" + c);

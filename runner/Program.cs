@@ -3,8 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
 using Dialogic;
 
 namespace runner
@@ -29,10 +27,12 @@ namespace runner
 
         public static void MainOff(string[] args)
         {
-            List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/gscripts.gs");
-            // ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
+            //new LexerTest().TestParse(srcpath + "/data/meta.gs");
+            //ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
+
+            List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/gscript.gs");
             ChatRuntime cm = new ChatRuntime(chats, globals);
-            cm.LogFileName = srcpath + "/dia.log";
+            cm.LogFile = srcpath + "/dia.log";
 
             //ChatClient cl = new SimpleClient(); // Simple client
             AbstractClient cl = new ConsoleClient(); // Console client
@@ -44,7 +44,7 @@ namespace runner
         }
     }
 
-    public class GuppyTalk : AbstractClient
+    public class GuppyAdapter : AbstractClient
     {
         static string FILE_EXT = ".gs";
 
@@ -54,9 +54,9 @@ namespace runner
 
         bool modified = false;
 
-        public GuppyTalk(string fileOrFolder) : this(fileOrFolder, null) { }
+        public GuppyAdapter(string fileOrFolder) : this(fileOrFolder, null) { }
 
-        public GuppyTalk(string fileOrFolder, Dictionary<string, object> globals)
+        public GuppyAdapter(string fileOrFolder, Dictionary<string, object> globals)
         {
             pool = new ObjectPool<GuppyEvent>(() => new GuppyEvent(), (g => g.Clear()));
 
@@ -76,7 +76,7 @@ namespace runner
             return chats;
         }
 
-        public GuppyEvent Update(Dictionary<string, object> worldState)
+        public GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent)
         {
             //Console.WriteLine("#" + (++frameCount) + ": " + nextEvent);
             runtime.Globals(worldState);
@@ -97,7 +97,8 @@ namespace runner
                 {
                     Ask a = (Dialogic.Ask)cmd;
                     ge.Set("opts", a.OptionsJoined());
-                    if (a.PauseAfterMs > -1) {
+                    if (a.PauseAfterMs > -1)
+                    {
                         ge.Set("timeout", a.PauseAfterMs);
                     }
                 }
@@ -105,86 +106,6 @@ namespace runner
                     .ForEach(x => ge.data[x.Key] = x.Value);
                 modified = true;
                 nextEvent = ge;
-            }
-        }
-    }
-
-    public class GuppyEvent
-    {
-        public Dictionary<string, object> data;
-
-        public GuppyEvent()
-        {
-            data = new Dictionary<string, object>();
-        }
-
-        public override string ToString()
-        {
-            return "[" + data["Type"] + "] " + data["Text"];
-        }
-
-        public void Set(string key, object val)
-        {
-            data[key] = val;
-        }
-
-        public object Get(string key)
-        {
-            return data.ContainsKey(key) ? data[key] : null;
-        }
-
-        public object Remove(string key)
-        {
-            if (data.ContainsKey(key))
-            {
-                object o = data[key];
-                data.Remove(key);
-                return o;
-            }
-            return null;
-        }
-
-        public int GetInt(string key)
-        {
-            object o = Get(key);
-            return (o != null && o is int) ? (int)o : -1;
-        }
-
-        public bool GetBool(string key)
-        {
-            object o = Get(key);
-            return (o != null && o is bool) && (bool)o;
-        }
-
-        public double GetDouble(string key)
-        {
-            object o = Get(key);
-            return (o != null && o is double) ? (double)o : -1;
-        }
-
-        public int RemoveInt(string key)
-        {
-            object o = Remove(key);
-            return (o != null && o is int) ? (int)o : -1;
-        }
-
-        public bool RemoveBool(string key)
-        {
-            object o = Remove(key);
-            return (o != null && o is bool) && (bool)o;
-        }
-
-        public double RemoveDouble(string key)
-        {
-            object o = Remove(key);
-            return (o != null && o is double) ? (double)o : -1;
-        }
-
-        public void Clear()
-        {
-            foreach (var k in data.Keys)
-            {
-                data.Remove(k);
             }
         }
     }
