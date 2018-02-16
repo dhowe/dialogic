@@ -106,21 +106,6 @@ cm.Subscribe(cl); // Dialogic subscribes to client events
 cm.Run();
 ````
 
-### Event Scheduling
-
-[tbd]
-
-### Global / Local Variables
-
-[tbd]
-
-### Advanced Commands
-
-[tbd]
-
-&nbsp;
-
-
 
 ## Building Dialogic with Visual Studio (OS X)
 
