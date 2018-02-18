@@ -24,7 +24,6 @@ namespace tests
             }
             foreach (var kv in hits)
             {
-                //Console.WriteLine(kv.Key +"-> " + kv.Value);
                 Assert.That(kv.Value, Is.GreaterThan(0));
             }
         }

@@ -144,11 +144,11 @@ namespace Dialogic
             return options;
         }
 
-        public string OptionsJoined(string delim=",")
+        public string OptionsJoined(string delim = ",")
         {
             var opts = Options();
             var s = "";
-            opts.ForEach((o) => s += o.Text+" ");
+            opts.ForEach((o) => s += o.Text + " ");
             return s.Trim().Replace(" ", delim);
         }
 
@@ -258,7 +258,7 @@ namespace Dialogic
     {
         public override void Init(string[] args, string[] meta)
         {
-            if (args.Length < 1) throw BadArgs(args, 1);
+            if (args.Length > 0) throw BadArgs(args, 1);
             MetaFromArgs(args);
         }
 
@@ -278,10 +278,6 @@ namespace Dialogic
         }
     }
 
-    public class Meta : KeyVal { }
-
-    public class Cond : KeyVal { }
-
     public interface IEmittable { }
 
     public class Chat : Command
@@ -293,6 +289,11 @@ namespace Dialogic
         public Chat(string name)
         {
             this.Text = name;
+        }
+
+        public int Count()
+        {
+            return commands.Count();
         }
 
         public void AddCommand(Command c)
@@ -308,11 +309,12 @@ namespace Dialogic
             }
 
             this.Text = args[0];
-
             if (Regex.IsMatch(Text, @"\s+"))
             {
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
+
+            MetaFromArgs(meta);
         }
 
         public override string ToString()
@@ -322,8 +324,7 @@ namespace Dialogic
 
         public string ToTree()
         {
-            string s = "[" + TypeName().ToUpper() + "] " + Text + "\n";
-            if (HasMeta()) s += "  [COND] " + MetaStr() + "\n";
+            string s = ToString();
             commands.ForEach(c => s += "  " + c + "\n");
             return s;
         }
@@ -438,40 +439,74 @@ namespace Dialogic
 
     public class MetaData
     {
-        protected Dictionary<string, string> meta;
+        protected Dictionary<string, object> meta;
 
         public bool HasMeta()
         {
             return meta != null && meta.Count > 0;
         }
 
-        /* Note: new keys will overwrite old keys with same name */
-        public void SetMeta(string key, string val)
+        public object GetMeta(string key, object defaultVal = null)
         {
-            if (meta == null)
+            return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+        }
+
+        public string GetMetaString(string key, string defaultVal = null)
+        {
+            object o = meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+            return (string)(o is string ? o : defaultVal);
+        }
+
+        public int GetMetaInt(string key, int defaultVal = 0)
+        {
+            object o = meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+            //Console.WriteLine(o.GetType()+" "+o);
+            if (o is double)
             {
-                meta = new Dictionary<string, string>();
+                double d = Math.Round((double)o, 0);
+                int i = (int)d;
+                return i;
             }
+            return ((int)(o is int ? o : defaultVal));
+        }
+
+        public double GetMetaDouble(string key, double defaultVal = 0.0)
+        {
+            object o = meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+            if (o is int) o = System.Convert.ToDouble(o);
+            return (double)(o is double ? o : defaultVal);
+        }
+
+        public bool GetMetaBool(string key, bool defaultVal = false)
+        {
+            object o = meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+            return (bool)(o is bool ? o : defaultVal);
+        }
+
+        /* Note: new keys will overwrite old keys with same name */
+        public void SetMeta(string key, object val)
+        {
+            if (meta == null) meta = new Dictionary<string, object>();
             meta[key] = val;
         }
 
-        public void AddMeta(Dictionary<string, string> pairs)
+        public void AddMeta(Dictionary<string, object> pairs)
         {
             if (pairs != null)
             {
                 foreach (var key in pairs.Keys)
                 {
-                    SetMeta(key, pairs[key]);
+                    meta[key] = pairs[key];
                 }
             }
         }
 
-        public Dictionary<string, string> ToDict()
+        public Dictionary<string, object> ToDict()
         {
             return meta;
         }
 
-        public List<KeyValuePair<string, string>> ToList()
+        public List<KeyValuePair<string, object>> ToList()
         {
             return meta != null ? meta.ToList() : null;
         }
@@ -491,19 +526,50 @@ namespace Dialogic
             return s;
         }
 
+        protected void SetMetaDynamic(string key, string val)
+        {
+            if (meta == null) meta = new Dictionary<string, object>();
+
+            bool result = false;
+            object valObj = val;
+            if (!result)
+            {
+                bool b;
+                result = Boolean.TryParse(val, out b);
+                if (result) valObj = b;
+            }
+            if (!result)
+            {
+                int i;
+                result = int.TryParse(val, out i);
+                if (result) valObj = i;
+            }
+            if (!result)
+            {
+                double d;
+                result = Double.TryParse(val, out d);
+                if (result) valObj = d;
+            }
+
+            SetMeta(key, valObj);
+        }
+
         protected void MetaFromArgs(string[] args)
         {
             if (args != null)
             {
                 for (int i = 0; i < args.Length; i++)
                 {
-                    Console.WriteLine(i+") "+args[i]);
-                    string[] parts = args[i].Split('=');
+                    //Console.WriteLine(i+") "+args[i]);
+                    if (!string.IsNullOrEmpty(args[i]))
+                    {
+                        string[] parts = args[i].Split('=');
 
-                    if (parts.Length != 2) throw new Exception
-                        ("Expected 2 parts, found " + parts.Length + ": " + parts);
+                        if (parts.Length != 2) throw new Exception
+                            ("Expected 2 parts, found " + parts.Length + ": " + parts);
 
-                    SetMeta(parts[0].Trim(), parts[1].Trim());
+                        SetMetaDynamic(parts[0].Trim(), parts[1].Trim());
+                    }
                 }
             }
         }

@@ -31,12 +31,12 @@ namespace Dialogic
             this.globals = globals;
         }
 
-        public Chat Find(Dictionary<string, string> conditions)
+        public Chat Find(Dictionary<string, object> conditions)
         {
             return ChatSearch.Find(chats, conditions);
         }
 
-        public List<Chat> FindAll(Dictionary<string, string> conditions)
+        public List<Chat> FindAll(Dictionary<string, object> conditions)
         {
             return ChatSearch.FindAll(chats, conditions);
         }

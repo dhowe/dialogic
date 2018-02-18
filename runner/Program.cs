@@ -23,7 +23,8 @@ namespace runner
 
         public static void Main(string[] args)
         {
-            new MockGameEngine().Run();
+            new LexerTest().TestParse(srcpath + "/data/find.gs");
+            //new MockGameEngine().Run();
         }
 
         public static void MainOff(string[] args)

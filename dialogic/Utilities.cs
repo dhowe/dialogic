@@ -267,34 +267,4 @@ namespace Dialogic
             return next;
         }
     }
-
-    /*public class ObjectPool<T> // .NET >= 4.6 
-    {
-        private ConcurrentBag<T> pool;
-        private Func<T> generator;
-        private Action<T> recycler;
-
-        public ObjectPool(Func<T> generator) : this(generator, null) { }
-
-        public ObjectPool(Func<T> generator, Action<T> recycler)
-        {
-            this.pool = new ConcurrentBag<T>();
-            this.generator = generator;
-            this.recycler = recycler;
-        }
-
-        public T Get()
-        {
-            T item;
-            if (pool.TryTake(out item)) return item;
-            return generator();
-        }
-
-        public void Recycle(T item)
-        {
-            recycler(item);
-            pool.Add(item);
-            Console.WriteLine("Recyled: Count=" + pool.Count);
-        }
-    }*/
 }

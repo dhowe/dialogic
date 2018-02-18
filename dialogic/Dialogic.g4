@@ -5,7 +5,7 @@
 script: line+;
 line: (command SP* | command SP+ args) SP* (NEWLINE | EOF);
 command: COMMAND;
-args: (arg (DELIM arg)*) | (LB meta RB)? | (arg (DELIM arg)*) (LB meta RB)?;
+args: (LB meta RB) | (arg (DELIM arg)*) | (arg (DELIM arg)*) (LB meta RB);
 arg: (WORD (SP+ WORD)*);
 meta: (SP | WORD | '=')*;
  
@@ -13,7 +13,7 @@ meta: (SP | WORD | '=')*;
 ////////////////////////////////////////////////////////////////////////
 
 
-COMMAND: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'META' | 'COND' | 'FIND' | 'SET');
+COMMAND: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'FIND' | 'SET');
 
 DELIM: SP* '#' SP*;
 LB: SP* '{' SP*;

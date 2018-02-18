@@ -38,7 +38,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="*.cs" />
+    <Compile Include="DialogicTests.cs" />
+    <Compile Include="QueryTests.cs" />
+    <Compile Include="SubstTests.cs" />
+    <Compile Include="ParserTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

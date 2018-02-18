@@ -10,7 +10,7 @@ namespace Dialogic
          * Find highest scoring chat which does not match any constraint key without also 
          * matching its value, or null if none match 
          */
-        public static Chat Find(List<Chat> chats, Dictionary<string, string> constraints)
+        public static Chat Find(List<Chat> chats, Dictionary<string, object> constraints)
         {
             return FindAll(chats, constraints).FirstOrDefault();
         }
@@ -36,7 +36,7 @@ namespace Dialogic
          *   2. has key, doesn't match ->   disallow
          *   3. doesn't have key ->         allow
          */
-        public static List<Chat> FindAll(List<Chat> chats, Dictionary<string, string> constraints)
+        public static List<Chat> FindAll(List<Chat> chats, Dictionary<string, object> constraints)
         {
             if (constraints == null) return chats;
 
