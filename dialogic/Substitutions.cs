@@ -8,11 +8,16 @@ namespace Dialogic
     {
         const string MATCH_PARENS = @"\(([^()]+|(?<Level>\()|(?<-Level>\)))+(?(Level)(?!))\)";
 
+        public static void DoMeta(Dictionary<string, object> meta, Dictionary<string, object> globals)
+        {
+            // TODO
+        }
+
         public static void Do(ref string text, Dictionary<string, object> globals)
         {
             if (String.IsNullOrEmpty(text)) return;
 
-            if (1==1 || globals != null)
+            if (globals != null)
             {
                 int tries = 0;
                 string orig = text;

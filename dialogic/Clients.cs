@@ -8,7 +8,9 @@ using Out = System.Console;
 
 namespace Dialogic
 {
-    /** A very simple client: receives events but doesn't respond */
+    /** 
+     * A very dumb client: receives events but doesn't respond 
+     */
     class SimpleClient : AbstractClient
     {
         protected override void OnChatEvent(ChatEvent e)
@@ -18,7 +20,9 @@ namespace Dialogic
         }
     }
 
-    /** A basic parent class for clients */
+    /** 
+     * A basic parent class for clients 
+     */
     public abstract class AbstractClient
     {
         public delegate void UnityEventHandler(EventArgs e);
@@ -37,7 +41,9 @@ namespace Dialogic
         }
     }
 
-    /** An example client that uses the console */
+    /** 
+     * An example client providing IO via a terminal console
+     */
     public class ConsoleClient : AbstractClient
     {
         protected string suffix = "";
@@ -112,6 +118,11 @@ namespace Dialogic
         }
     }
 
+    /**
+     * Adapts Dialogic's publish/subscribe event model to work with a frame-by-frame Update() callback
+     * 
+     * Callback: public GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent);
+     */
     public class GuppyAdapter : AbstractClient
     {
         static string FILE_EXT = ".gs";
@@ -138,13 +149,14 @@ namespace Dialogic
             string[] files = !fileOrFolder.EndsWith(FILE_EXT, StringComparison.InvariantCulture) ?
                 files = Directory.GetFiles(fileOrFolder, '*' + FILE_EXT) :
                 files = new string[] { fileOrFolder };
+            
             List<Chat> chats = new List<Chat>();
             ChatParser.ParseFiles(files, chats);
 
             return chats;
         }
 
-        public GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent)
+        public virtual GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent)
         {
             //Console.WriteLine("#" + (++frameCount) + ": " + nextEvent);
             runtime.Globals(worldState);
@@ -158,10 +170,12 @@ namespace Dialogic
             if (e.Command is IEmittable)
             {
                 GuppyEvent ge = pool.Get();
+
                 Command cmd = e.Command;
                 ge.Set("text", cmd.Text);
                 ge.Set("type", cmd.TypeName());
-                if (cmd is Ask)
+
+                if (cmd is Ask) // Need to prompt user here
                 {
                     Ask a = (Dialogic.Ask)cmd;
                     ge.Set("opts", a.OptionsJoined());
@@ -170,8 +184,9 @@ namespace Dialogic
                         ge.Set("timeout", a.PauseAfterMs);
                     }
                 }
-                if (cmd.HasMeta()) cmd.ToDict().ToList()
+                if (cmd.HasMeta()) cmd.AsDict().ToList()
                     .ForEach(x => ge.data[x.Key] = x.Value);
+                
                 modified = true;
                 nextEvent = ge;
             }
