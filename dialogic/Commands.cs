@@ -15,7 +15,9 @@ namespace Dialogic
 
     public class Go : Command
     {
-        public Go(string text=null) : base()
+        public Go() : base() { }
+
+        public Go(string text) : base()
         {
             this.Text = text;
         }
@@ -215,7 +217,9 @@ namespace Dialogic
 
         public Ask parent;
 
-        public Opt(string text="") : this(text, NOP) { }
+        public Opt() : this("", NOP) { }
+
+        public Opt(string text) : this(text, NOP) { }
 
         public Opt(string text, Command action) : base()
         {
@@ -249,8 +253,7 @@ namespace Dialogic
         }
     }
 
-    /** Command that takes only a set of # separated key-value pairs */
-    public abstract class KeyVal : Command
+    public class Find : Command
     {
         public override void Init(string[] args, string[] meta)
         {
@@ -258,21 +261,16 @@ namespace Dialogic
             ConstructMeta(meta);
         }
 
-        //public override string ToString()
-        //{
-        //    return base.ToString() + " " + MetaStr();
-        //}
-    }
-
-    public class Find : KeyVal
-    {
+        /**
+         * Do the fuzzy search, then call Run() on the selected Chat
+         */
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Command clone = this.Copy();
-            ChatEvent ce = new ChatEvent(clone);      
+            ChatEvent ce = new ChatEvent(clone);
             Find find = (Find)ce.Command;
             Chat c = cr.Find(find.meta);
-            cr.Run(c);
+            if (c != null) cr.Run(c);
             return ce;
         }
     }

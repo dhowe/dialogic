@@ -12,6 +12,8 @@ namespace Dialogic
 {
     public class ChatParser : DialogicBaseVisitor<Chat>
     {
+        public static string CHAT_FILE_EXT = ".gs";
+
         protected List<Chat> chats;
         protected Stack<Command> parsed;
 
@@ -51,23 +53,37 @@ namespace Dialogic
             return Parse(text.Split('\n'));
         }
 
-        public static List<Chat> ParseFile(string fname)
+        public static List<Chat> ParseFile(string fileOrFolder)
         {
-            return Parse(File.ReadAllLines(fname));
+            string[] files = !fileOrFolder.EndsWith(CHAT_FILE_EXT, StringComparison.InvariantCulture) ?
+                files = Directory.GetFiles(fileOrFolder, '*' + CHAT_FILE_EXT) :
+                files = new string[] { fileOrFolder };
+
+            List<Chat> chats = new List<Chat>();
+            ChatParser.ParseFiles(files, chats);
+
+            return chats;
         }
 
-        public static void ParseFiles(string[] files, List<Chat> chats)
+        public static List<Chat> ParseFiles(string[] files)
+        {
+            List<Chat> chats = new List<Chat>();
+            foreach (var f in files) ParseFile(f, chats);
+            return chats;
+        }
+
+        internal static void ParseFiles(string[] files, List<Chat> chats)
         {
             foreach (var f in files) ParseFile(f, chats);
         }
 
-        public static void ParseFile(string fname, List<Chat> chats)
+        internal static void ParseFile(string fname, List<Chat> chats)
         {
             var result = Parse(File.ReadAllLines(fname));
             result.ForEach((f) => chats.Add(f));
         }
 
-        protected static List<Chat> Parse(string[] lines, bool printTree = false)
+        internal static List<Chat> Parse(string[] lines, bool printTree = false)
         {
             HandleDefaultCommand(lines, "SAY");
             var ais = new AntlrInputStream(String.Join("\n", lines));

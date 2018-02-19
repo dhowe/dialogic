@@ -124,36 +124,22 @@ namespace Dialogic
      */
     public class UpdateAdapter : AbstractClient
     {
-        static string FILE_EXT = ".gs";
-
-        ObjectPool<DataEvent> pool;
-        DataEvent nextEvent;
+        ObjectPool<UpdateEvent> pool;
+        UpdateEvent nextEvent;
         ChatRuntime runtime;
 
         bool modified = false;
 
-        public UpdateAdapter(string fileOrFolder, Dictionary<string, object> globals=null)
+        public UpdateAdapter(List<Chat> chats, Dictionary<string, object> globals=null)
         {
-            pool = new ObjectPool<DataEvent>(10, () => new DataEvent(), (g => g.Clear()));
+            pool = new ObjectPool<UpdateEvent>(10, () => new UpdateEvent(), (g => g.Clear()));
 
-            runtime = new ChatRuntime(Parse(fileOrFolder), globals);
+            runtime = new ChatRuntime(chats, globals);
             this.Subscribe(runtime);
             runtime.Run();
         }
 
-        private static List<Chat> Parse(string fileOrFolder)
-        {
-            string[] files = !fileOrFolder.EndsWith(FILE_EXT, StringComparison.InvariantCulture) ?
-                files = Directory.GetFiles(fileOrFolder, '*' + FILE_EXT) :
-                files = new string[] { fileOrFolder };
-            
-            List<Chat> chats = new List<Chat>();
-            ChatParser.ParseFiles(files, chats);
-
-            return chats;
-        }
-
-        public virtual DataEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent=null)
+        public virtual UpdateEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent=null)
         {
             //Console.WriteLine("#" + (++frameCount) + ": " + nextEvent);
             runtime.Globals(worldState);
@@ -166,7 +152,7 @@ namespace Dialogic
         {
             if (e.Command is IEmittable)
             {
-                DataEvent ge = pool.Get();
+                UpdateEvent ge = pool.Get();
 
                 Command cmd = e.Command;
                 ge.Set("text", cmd.Text);

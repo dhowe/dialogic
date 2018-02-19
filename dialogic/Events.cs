@@ -51,11 +51,11 @@ namespace Dialogic
         int GetChoiceIndex();
     }
 
-    public class GuppyEvent
+    public class UpdateEvent
     {
         public Dictionary<string, object> data;
 
-        public GuppyEvent()
+        public UpdateEvent()
         {
             data = new Dictionary<string, object>();
         }

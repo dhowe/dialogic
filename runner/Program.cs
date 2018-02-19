@@ -49,13 +49,15 @@ namespace runner
         int lastFrameMs = 0, frameCount = 0;
         string diaText, diaType;
         string[] diaOpts;
-        GuppyAdapter guppy;
+        UpdateAdapter dialogic;
 
         public MockGameEngine()
         {
             lastFrameMs = Util.Elapsed();
             millisPerFrame = 1000 / targetFPS;
-            guppy = new GuppyAdapter(Program.srcpath + "/data/gscript.gs", Program.globals);
+
+            var chats = ChatParser.ParseFile(Program.srcpath + "/data/gscript.gs");
+            dialogic = new UpdateAdapter(chats, Program.globals);
         }
 
         public void Run()
@@ -67,7 +69,7 @@ namespace runner
                     frameCount++;
 
                     // Call the dialogic interface
-                    GuppyEvent ge = guppy.Update(Program.globals, null);
+                    UpdateEvent ge = dialogic.Update(Program.globals, null);
 
                     // Handle the returned event
                     if (ge != null) HandleEvent(ge);
@@ -78,7 +80,7 @@ namespace runner
             }
         }
 
-        private void HandleEvent(GuppyEvent ge)
+        private void HandleEvent(UpdateEvent ge)
         {
             diaText = (string)ge.Remove("text");
             diaType = (string)ge.Remove("type");
