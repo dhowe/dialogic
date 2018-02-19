@@ -106,6 +106,25 @@ cm.Subscribe(cl); // Dialogic subscribes to client events
 cm.Run();
 ````
 
+Alternatively, for game-style environments, you can use the _UpdateAdapter_ client to provide a once-per-frame Update() callback, as follows:
+````C#
+
+ public RealtimeGame() 
+ {
+     dialogic = new UpdateAdapter(scriptFiles);
+ }
+
+ public void Update() // Game Loop
+ {
+     // Call the dialogic interface
+     DataEvent ge = dialogic.Update(globalsVars);
+
+     // Handle the event received
+     if (ge != null) HandleEvent(ge);
+     
+     ...
+ }
+````
 
 ## Building Dialogic with Visual Studio (OS X)
 
