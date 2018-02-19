@@ -95,15 +95,15 @@ Dialogic can be run alone (via the included _ConsoleClient_) or with a game engi
 In the C# example below, a _ChatParser_ reads in a number of chat descriptions from a plain-text file and compiles them into a list of _Chat_ objects, which are passed to the _ChatRuntime_. An example client (outputting only to the console) is created, which then subscribes with the runtime for chat events. The runtime then subscribes back to events issued by the client. Chats begin to execute  when run is called on the _ChatRuntime_.
 
 ````C#
-var chats = ChatParser.ParseFile("gscript.gs"); 
-ChatRuntime cm = new ChatRuntime(chats);
+var chats = ChatParser.ParseFiles(scriptFiles); 
+var runtime = new ChatRuntime(chats);
 
-ConsoleClient cl = new ConsoleClient(); // An example client
+var client = new ConsoleClient(); // An example client
 
-cl.Subscribe(cm); // Client subscribes to chat events
-cm.Subscribe(cl); // Dialogic subscribes to client events
+client.Subscribe(runtime); // Client subscribes to chat events
+runtime.Subscribe(client); // Dialogic subscribes to client events
 
-cm.Run();
+runtime.Run("Opening");    // Start the first Chat
 ````
 
 Alternatively, for game-style environments, you can use the _UpdateAdapter_ client to provide a once-per-frame Update() callback, as follows:
@@ -117,10 +117,10 @@ Alternatively, for game-style environments, you can use the _UpdateAdapter_ clie
  public void Update() // Game Loop
  {
      // Call the dialogic interface
-     DataEvent ge = dialogic.Update(globalsVars);
+     UpdateEvent evt = dialogic.Update(globalsVars);
 
      // Handle the event received
-     if (ge != null) HandleEvent(ge);
+     if (evt != null) HandleEvent(evt);
      
      ...
  }
