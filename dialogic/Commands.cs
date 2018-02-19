@@ -15,9 +15,7 @@ namespace Dialogic
 
     public class Go : Command
     {
-        public Go() : base() { }
-
-        public Go(string text) : base()
+        public Go(string text=null) : base()
         {
             this.Text = text;
         }
@@ -53,7 +51,7 @@ namespace Dialogic
 
         public Set() : base() { }
 
-        public Set(string name, string value) : base() // not used (add tests)
+        public Set(string name, string value) : base() // not used outside tests
         {
             this.Text = name;
             this.Value = value;
@@ -217,9 +215,7 @@ namespace Dialogic
 
         public Ask parent;
 
-        public Opt() : this("") { }
-
-        public Opt(string text) : this(text, NOP) { }
+        public Opt(string text="") : this(text, NOP) { }
 
         public Opt(string text, Command action) : base()
         {
@@ -529,6 +525,10 @@ namespace Dialogic
             return s;
         }
 
+        /**
+         * Set the value for the key as a primitive int, double, or bool, 
+         * if such conversion is possible, otherwise as a string object.
+         */
         protected void SetMetaDynamic(string key, string val)
         {
             if (meta == null) meta = new Dictionary<string, object>();

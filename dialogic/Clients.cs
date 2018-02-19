@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Out = System.Console;
 
@@ -123,21 +122,19 @@ namespace Dialogic
      * 
      * Callback: public GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent);
      */
-    public class GuppyAdapter : AbstractClient
+    public class UpdateAdapter : AbstractClient
     {
         static string FILE_EXT = ".gs";
 
-        ObjectPool<GuppyEvent> pool;
-        GuppyEvent nextEvent;
+        ObjectPool<DataEvent> pool;
+        DataEvent nextEvent;
         ChatRuntime runtime;
 
         bool modified = false;
 
-        public GuppyAdapter(string fileOrFolder) : this(fileOrFolder, null) { }
-
-        public GuppyAdapter(string fileOrFolder, Dictionary<string, object> globals)
+        public UpdateAdapter(string fileOrFolder, Dictionary<string, object> globals=null)
         {
-            pool = new ObjectPool<GuppyEvent>(10, () => new GuppyEvent(), (g => g.Clear()));
+            pool = new ObjectPool<DataEvent>(10, () => new DataEvent(), (g => g.Clear()));
 
             runtime = new ChatRuntime(Parse(fileOrFolder), globals);
             this.Subscribe(runtime);
@@ -156,7 +153,7 @@ namespace Dialogic
             return chats;
         }
 
-        public virtual GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent)
+        public virtual DataEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent=null)
         {
             //Console.WriteLine("#" + (++frameCount) + ": " + nextEvent);
             runtime.Globals(worldState);
@@ -169,7 +166,7 @@ namespace Dialogic
         {
             if (e.Command is IEmittable)
             {
-                GuppyEvent ge = pool.Get();
+                DataEvent ge = pool.Get();
 
                 Command cmd = e.Command;
                 ge.Set("text", cmd.Text);
