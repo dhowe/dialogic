@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 
 namespace Dialogic
@@ -11,9 +10,6 @@ namespace Dialogic
     {
         public delegate void ChatEventHandler(ChatEvent e);
         public event ChatEventHandler ChatEvents; // event-stream
-
-        //public delegate void ChatEventCompletedHandler(object src, ChatEvent e);
-        //public event ChatEventCompletedHandler ChatEventCompleted;  
 
         protected Dictionary<string, object> globals;
         public string LogFile;
@@ -90,36 +86,12 @@ namespace Dialogic
             }
         }
 
-        public void Run()
+        public void Run(string chatLabel=null)
         {
-            if (chats == null || chats.Count < 1)
-            {
-                throw new Exception("No chats found!");
-            }
-            Thread t = new Thread(new ThreadStart(() => Run(chats[0])));
-            t.Start();                             
+            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
+            Chat c = (chatLabel != null) ? FindChat(chatLabel) : chats[0];
+            new Thread(() => Run(c)).Start();     
         }
-
-        /*public void Do(Command cmd)
-        {
-            //Console.WriteLine("CMD: "+cmd.TypeName());
-            if (cmd is Timed)
-            {
-                int waitMs = ((Timed)cmd).WaitTime();
-                if (waitMs != 0) {
-                    waiting = true;
-                    if (waitMs > 0) {
-                        //Console.WriteLine("TIME: " + waitMs);
-                        Timers.SetTimeout(waitMs, () => {
-                            //Console.WriteLine("TIMER("+waitMs+") FIRED");
-                            //if (cmd is Ask) NotifyListeners(new ChatEvent(new Timeout((Ask)cmd)));
-                            waiting = false;
-                        });
-                    }
-                }
-            }
-            FireEvent(cmd);
-        }*/
 
         private void FireEvent(Command c)
         {

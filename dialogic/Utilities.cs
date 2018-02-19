@@ -21,6 +21,13 @@ namespace Dialogic
             random = new Random();
         }
 
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
+        {
+            if (ie == null) return true;
+            var coll = ie as ICollection<T>;
+            return (coll != null) ? coll.Count < 1 : !ie.Any();
+        }
+
         public static int Elapsed()
         {
             return Environment.TickCount - start;

@@ -170,7 +170,7 @@ namespace Dialogic
                         ge.Set("timeout", a.PauseAfterMs);
                     }
                 }
-                if (cmd.HasMeta()) cmd.ToDict().ToList()
+                if (cmd.HasMeta()) cmd.AsDict().ToList()
                     .ForEach(x => ge.data[x.Key] = x.Value);
                 modified = true;
                 nextEvent = ge;

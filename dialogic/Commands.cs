@@ -504,7 +504,7 @@ namespace Dialogic
             }
         }
 
-        public Dictionary<string, object> ToDict()
+        public Dictionary<string, object> AsDict()
         {
             return meta;
         }

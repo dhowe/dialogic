@@ -14,7 +14,6 @@ namespace Dialogic
     {
         protected List<Chat> chats;
         protected Stack<Command> parsed;
-        //protected Meta lastMeta; // remove
 
         public ChatParser()
         {
@@ -87,7 +86,7 @@ namespace Dialogic
             return cp.chats;
         }
 
-        // tmp_hack to handle appending the default (say) command
+        // tmp_hack to handle appending the default (SAY) command
         private static void HandleDefaultCommand(string[] lines, string cmd)
         {
             for (int i = 0; i < lines.Count(); i++)
@@ -97,7 +96,6 @@ namespace Dialogic
                     //System.Console.WriteLine($"Checking: '{lines[i]}'");
                     if (!Regex.IsMatch(lines[i], @"(^[A-Z][A-Z][A-Z]?[A-Z]?[^A-Z])"))
                     {
-                        System.Console.WriteLine("SAY: " + lines[i]);
                         lines[i] = cmd + " " + lines[i];
                     }
                 }
