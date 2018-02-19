@@ -95,7 +95,7 @@ Dialogic can be run alone (via the included _ConsoleClient_) or with a game engi
 In the C# example below, a _ChatParser_ reads in a number of chat descriptions from a plain-text file and compiles them into a list of _Chat_ objects, which are passed to the _ChatRuntime_. An example client (outputting only to the console) is created, which then subscribes with the runtime for chat events. The runtime then subscribes back to events issued by the client. Chats begin to execute  when run is called on the _ChatRuntime_.
 
 ````C#
-var chats = ChatParser.ParseFiles(scriptFiles); 
+var chats = ChatParser.ParseFile(scriptDir); 
 var runtime = new ChatRuntime(chats);
 
 var client = new ConsoleClient(); // An example client
@@ -111,7 +111,8 @@ Alternatively, for game-style environments, you can use the _UpdateAdapter_ clie
 
  public RealtimeGame() 
  {
-     dialogic = new UpdateAdapter(scriptFiles);
+     var chats = ChatParser.ParseFile(scriptDir); 
+     dialogic = new UpdateAdapter(chats);
  }
 
  public void Update() // Game Loop
