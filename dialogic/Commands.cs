@@ -176,6 +176,7 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Ask clone = (Ask)this.Copy();
+            Substitutions.DoMeta(clone.meta, cr.Globals());
             Substitutions.Do(ref clone.Text, cr.Globals());
             clone.options.ForEach(delegate (Opt o)
             {
@@ -253,12 +254,54 @@ namespace Dialogic
         }
     }
 
+    public class Constraint
+    {
+        public readonly string name;
+        public readonly string value;
+        public readonly Operator op;
+
+        public Constraint(string key, string ops, string val)
+        {
+            this.name = key;
+            this.value = val;
+            this.op = Operator.FromString(ops);
+        }
+
+        public bool Do()
+        {
+            return op.Invoke(name, value);
+        }
+    }
+
     public class Find : Command
     {
+        const string PATT = @"($?[a-zA-Z_][a-zA-Z0-9_]+) *([!<=>*^$]+) *([^ ]+)";
+        protected static Regex QUERY = new Regex(PATT);
+
+        protected Dictionary<string, Constraint> query;
+
         public override void Init(string[] args, string[] meta)
         {
             if (args.Length > 0) throw BadArgs(args, 1);
-            ConstructMeta(meta);
+            //query = new Dictionary<string, Comparison>();
+            ParseMeta(meta);
+        }
+
+        protected /*override*/ void ParseMetaQuery(string[] pairs)
+        {
+            for (int i = 0; pairs != null && i < pairs.Length; i++)
+            {
+                Match match = QUERY.Match(pairs[i]);
+                if (match.Groups.Count != 4)
+                {
+                    throw new Exception("Invalid query term: " + pairs[i]);
+                }
+                string key = match.Groups[1].Value;
+                string op = match.Groups[2].Value;
+                string val = match.Groups[3].Value;
+                if (query == null) query = new Dictionary<string, Constraint>();
+                query.Add(key, new Constraint(key, op, val));
+            }
         }
 
         /**
@@ -267,6 +310,7 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             Command clone = this.Copy();
+            Substitutions.DoMeta(clone.Meta(), cr.Globals());
             ChatEvent ce = new ChatEvent(clone);
             Find find = (Find)ce.Command;
             Chat c = cr.Find(find.meta);
@@ -311,7 +355,7 @@ namespace Dialogic
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
 
-            ConstructMeta(meta);
+            ParseMeta(meta);
         }
 
         public override string ToString()
@@ -330,6 +374,7 @@ namespace Dialogic
     public abstract class Command : MetaData
     {
         public const string PACKAGE = "Dialogic.";
+
         public const int Infinite = -1;
 
         protected static int IDGEN = 0;
@@ -376,7 +421,7 @@ namespace Dialogic
                 if (args.Length > 1) PauseAfterMs =
                     Util.ToMillis(double.Parse(args[1]));
             }
-            ConstructMeta(meta);
+            ParseMeta(meta);
         }
 
         public virtual string TypeName()
@@ -386,8 +431,10 @@ namespace Dialogic
 
         public virtual ChatEvent Fire(ChatRuntime cr)
         {
-            Command clone = this.Copy();
-            Substitutions.Do(ref clone.Text, cr.Globals());
+            var clone = this.Copy();
+            var globals = cr.Globals();
+            Substitutions.DoMeta(clone.meta, globals);
+            Substitutions.Do(ref clone.Text, globals);
             return new ChatEvent(clone);
         }
 
@@ -436,7 +483,7 @@ namespace Dialogic
 
     public class MetaData
     {
-        protected Dictionary<string, object> meta;
+        protected Dictionary<string, string> meta;
 
         public bool HasMeta()
         {
@@ -448,7 +495,7 @@ namespace Dialogic
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
         }
 
-        public string GetMetaString(string key, string defaultVal = null)
+        /*public string GetMetaString(string key, string defaultVal = null)
         {
             object o = meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
             return (string)(o is string ? o : defaultVal);
@@ -478,16 +525,16 @@ namespace Dialogic
         {
             object o = meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
             return (bool)(o is bool ? o : defaultVal);
-        }
+        }*/
 
         /* Note: new keys will overwrite old keys with same name */
-        public void SetMeta(string key, object val)
+        public void SetMeta(string key, string val)
         {
-            if (meta == null) meta = new Dictionary<string, object>();
+            if (meta == null) meta = new Dictionary<string, string>();
             meta[key] = val;
         }
 
-        public void AddMeta(Dictionary<string, object> pairs)
+        public void AddMeta(Dictionary<string, string> pairs)
         {
             if (pairs != null)
             {
@@ -498,12 +545,12 @@ namespace Dialogic
             }
         }
 
-        public Dictionary<string, object> AsDict()
+        public Dictionary<string, string> Meta()
         {
             return meta;
         }
 
-        public List<KeyValuePair<string, object>> ToList()
+        public List<KeyValuePair<string, string>> ToList()
         {
             return meta != null ? meta.ToList() : null;
         }
@@ -526,51 +573,25 @@ namespace Dialogic
         /**
          * Set the value for the key as a primitive int, double, or bool, 
          * if such conversion is possible, otherwise as a string object.
-         */
         protected void SetMetaDynamic(string key, string val)
         {
             if (meta == null) meta = new Dictionary<string, object>();
+            SetMeta(key, Util.ToType(val));
+        }*/
 
-            bool result = false;
-            object valObj = val;
-            if (!result)
-            {
-                bool b;
-                result = Boolean.TryParse(val, out b);
-                if (result) valObj = b;
-            }
-            if (!result)
-            {
-                int i;
-                result = int.TryParse(val, out i);
-                if (result) valObj = i;
-            }
-            if (!result)
-            {
-                double d;
-                result = Double.TryParse(val, out d);
-                if (result) valObj = d;
-            }
-
-            SetMeta(key, valObj);
-        }
-
-        protected void ConstructMeta(string[] args)
+        protected virtual void ParseMeta(string[] pairs)
         {
-            if (args != null)
+            for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
-                for (int i = 0; i < args.Length; i++)
+                //Console.WriteLine(i+") "+args[i]);
+                if (!string.IsNullOrEmpty(pairs[i]))
                 {
-                    //Console.WriteLine(i+") "+args[i]);
-                    if (!string.IsNullOrEmpty(args[i]))
-                    {
-                        string[] parts = Regex.Split(args[i], " *[<=>]+ *");
+                    string[] parts = pairs[i].Split('=');
 
-                        if (parts.Length != 2) throw new Exception
-                            ("Expected 2 parts, found " + parts.Length + ": " + parts);
+                    if (parts.Length != 2) throw new Exception
+                        ("Expected 2 parts, found " + parts.Length + ": " + parts);
 
-                        SetMetaDynamic(parts[0].Trim(), parts[1].Trim());
-                    }
+                    SetMeta(parts[0].Trim(), parts[1].Trim());
                 }
             }
         }

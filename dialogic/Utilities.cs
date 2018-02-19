@@ -125,31 +125,14 @@ namespace Dialogic
             return s;
         }
 
-
         public static IEnumerable<string> SortByLength(IEnumerable<string> e)
         {
             return from s in e orderby s.Length descending select s;
         }
 
-        public static Nullable<T> ToNullable<T>(this string s) where T : struct
+        public static T? StringToType<T>(this string valueAsString) where T : struct
         {
-            Nullable<T> result = new Nullable<T>();
-            try
-            {
-                if (!string.IsNullOrEmpty(s) && s.Trim().Length > 0)
-                {
-                    TypeConverter conv = TypeDescriptor.GetConverter(typeof(T));
-                    result = (T)conv.ConvertFrom(s);
-                }
-            }
-            catch { }
-            return result;
-        }
-
-        public static T? GetValueOrNull<T>(this string valueAsString) where T : struct
-        {
-            if (string.IsNullOrEmpty(valueAsString))
-                return null;
+            if (string.IsNullOrEmpty(valueAsString)) return null;
             return (T)Convert.ChangeType(valueAsString, typeof(T));
         }
 
@@ -161,6 +144,123 @@ namespace Dialogic
         public static double ToSec(int millis)
         {
             return millis/1000.0;
+        }
+
+        /**
+         * Attempts to parse the string as primitive double, int, or bool, 
+         * if such conversion is possible, else returns the input
+         */
+        public static object ToType(string val)
+        {
+            bool result = false;
+            object valObj = val;
+            if (!result)
+            {
+                bool b;
+                result = Boolean.TryParse(val, out b);
+                if (result) valObj = b;
+            }
+            if (!result)
+            {
+                int i;
+                result = int.TryParse(val, out i);
+                if (result) valObj = i;
+            }
+            if (!result)
+            {
+                double d;
+                result = Double.TryParse(val, out d);
+                if (result) valObj = d;
+            }
+
+            return valObj;
+        }
+    }
+
+    public class Operator
+    {
+        private enum OpType { EQUALITY, COMPARISON, MATCHING }
+
+        public static Operator EQ = new Operator("==", OpType.EQUALITY);
+        public static Operator NEQ = new Operator("!=", OpType.EQUALITY);
+        public static Operator SW = new Operator("^=", OpType.MATCHING);
+        public static Operator EW = new Operator("$=", OpType.MATCHING);
+        public static Operator RE = new Operator("*=", OpType.MATCHING);
+        public static Operator GT = new Operator(">", OpType.COMPARISON);
+        public static Operator LT = new Operator("<", OpType.COMPARISON);
+        public static Operator LTE = new Operator("<=", OpType.COMPARISON);
+        public static Operator GTE = new Operator(">=", OpType.COMPARISON);
+
+        public static Operator[] ALL = new Operator[] {
+            GT, LT, EQ, NEQ, LTE, GTE, SW, EQ, RE
+        };
+
+        private readonly string value;
+        private readonly OpType type;
+
+        private Operator(string v, OpType o)
+        {
+            this.value = v;
+            this.type = o;
+        }
+
+        public static string FromOperator(Operator op)
+        {
+            for (int i = 0; i < ALL.Length; i++)
+            {
+                if (op == ALL[i]) return op.ToString();
+            }
+            throw new Exception("Invalid Operator: " + op);
+        }
+
+        public static Operator FromString(string op)
+        {
+            switch (op)
+            {
+                case ">": return Operator.GT;
+                case "<": return Operator.LT;
+                case ">=": return Operator.GTE;
+                case "<=": return Operator.LTE;
+                case "!=": return Operator.NEQ;
+                case "==": return Operator.EQ;
+                case "=": return Operator.EQ;
+            }
+            throw new Exception("Invalid Operator: " + op);
+        }
+
+        public override string ToString()
+        {
+            return this.value;
+        }
+
+        public bool Invoke(string name, string value)
+        {
+
+            // WORKING HERE --  DO TESTS FIRST
+            Substitutions.DoGroups(ref name);
+            Substitutions.DoGroups(ref value);
+            object o1 = Util.ToType(name);
+            object o2 = Util.ToType(value);
+
+            bool result = false;
+            switch (this.type)
+            {
+                case OpType.COMPARISON:
+                    break;
+                case OpType.EQUALITY:
+                    if (o1 is string && o2 is string)
+                    {
+                        return Equals(name, value);
+                    }
+                    else
+                    {
+                        return name == value;
+                    }
+                case OpType.MATCHING:
+                    break;
+            }
+
+            return result;
         }
     }
 

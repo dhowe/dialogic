@@ -42,6 +42,7 @@
     <Compile Include="QueryTests.cs" />
     <Compile Include="SubstTests.cs" />
     <Compile Include="ParserTests.cs" />
+    <Compile Include="OperatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

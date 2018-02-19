@@ -120,7 +120,7 @@ namespace Dialogic
     /**
      * Adapts Dialogic's publish/subscribe event model to work with a frame-by-frame Update() callback
      * 
-     * Callback: public GuppyEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent);
+     * Callback: public UpdateEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent);
      */
     public class UpdateAdapter : AbstractClient
     {
@@ -167,7 +167,7 @@ namespace Dialogic
                         ge.Set("timeout", a.PauseAfterMs);
                     }
                 }
-                if (cmd.HasMeta()) cmd.AsDict().ToList()
+                if (cmd.HasMeta()) cmd.Meta().ToList()
                     .ForEach(x => ge.data[x.Key] = x.Value);
                 
                 modified = true;

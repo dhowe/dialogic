@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -8,63 +9,79 @@ namespace Dialogic
     {
         const string MATCH_PARENS = @"\(([^()]+|(?<Level>\()|(?<-Level>\)))+(?(Level)(?!))\)";
 
-        public static void DoMeta(Dictionary<string, object> meta, Dictionary<string, object> globals)
+        public static void DoMeta(Dictionary<string, string> meta, Dictionary<string, object> globals)
         {
-            // TODO
+            if (Util.IsNullOrEmpty(meta) || Util.IsNullOrEmpty(globals)) return;
+
+            IEnumerable sorted = null;
+
+            var keys = new List<string>(meta.Keys);
+
+            for (int i = 0; i < keys.Count; i++)
+            {
+                if (meta[keys[i]].IndexOf('$') > -1)
+                {
+                    if (sorted == null) sorted = Util.SortByLength(globals.Keys);
+                    foreach (string s in sorted)
+                    {
+                        meta[keys[i]] = meta[keys[i]].Replace("$" + s, globals[s].ToString());
+                    }
+                }
+            }
         }
 
         public static void Do(ref string text, Dictionary<string, object> globals)
         {
             if (String.IsNullOrEmpty(text)) return;
 
-            if (globals != null)
-            {
-                int tries = 0;
-                string orig = text;
-                while (text.Contains("$") || text.Contains("|"))
-                {
-                    DoVars(ref text, globals);
-                    DoGroups(ref text);
-
-                    // bail on infinite loops:
-                    if (++tries > 1000) throw new Exception("Invalid-Sub: '"
-                        + orig + "' " + Util.Stringify(globals));
-                }
-            }
-            else
-            {
+            if (Util.IsNullOrEmpty(globals)) {
                 DoGroups(ref text);
+                return;
+            }
+
+            int tries = 0;
+            string orig = text;
+            while (text.IndexOf('$') > -1 || text.IndexOf('|') > -1) // rethink
+            {
+                DoVars(ref text, globals);
+                DoGroups(ref text);
+
+                // bail on infinite loops:
+                if (++tries > 1000) throw new Exception("Invalid-Sub: '"
+                    + orig + "' " + Util.Stringify(globals));
             }
         }
 
-        public static void DoGroups(ref string input, Command c = null)
+        public static void DoGroups(ref string text, Command c = null)
         {
-            while (input != null && Regex.IsMatch(input, @"[\(\)]"))
+            if (String.IsNullOrEmpty(text)) return;
+
+            while (text.IndexOf('|') > -1)
             {
                 List<string> result = new List<string>();
-                ParseGroups(input, result);
+                ParseGroups(text, result);
                 foreach (var opt in result)
                 {
                     var pick = DoReplace(opt);
-                    input = input.Replace(opt, pick);
-                    if (c != null) Console.WriteLine("-> " + opt + " -> " + pick + "\n" + input);
+                    text = text.Replace(opt, pick);
+                    //if (c != null) Console.WriteLine("-> " + opt + " -> " + pick + "\n" + text);
                 }
             }
         }
 
         public static void DoVars(ref string text, Dictionary<string, object> globals)
         {
-            if (globals != null)
+            if (String.IsNullOrEmpty(text)) return;
+
+            IEnumerable sorted = null;
+
+            if (text.IndexOf('$') > -1)
             {
-                var otext = text;
-                if (!string.IsNullOrEmpty(text))
+                if (sorted == null) sorted = Util.SortByLength(globals.Keys);
+                foreach (string s in sorted)
                 {
-                    foreach (string s in Util.SortByLength(globals.Keys))
-                    {
-                        text = text.Replace("$" + s, globals[s].ToString());
-                    }
+                    text = text.Replace("$" + s, globals[s].ToString());
                 }
-                //Console.WriteLine("Subs.checking: " + otext + " -> "+text);
             }
         }
 

@@ -18,6 +18,54 @@ namespace tests
         };
 
         [Test()]
+        public void TestReplaceMeta()
+        {
+            var s = @"SAY The $animal yawned {animal=$animal}";
+            Command c = ChatParser.ParseText(s)[0].commands[0];
+            Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
+            Console.WriteLine("PRE: "+Util.Stringify(c.Meta()));
+            Substitutions.DoMeta(c.Meta(), globals);
+            Console.WriteLine("POST: "+Util.Stringify(c.Meta()));
+            Assert.That(c.GetMeta("animal"), Is.EqualTo("dog"));
+            //Console.WriteLine("Running SubstitutionTests.TestReplaceMeta :: " + s);
+        }
+
+        [Test()]
+        public void TestReplaceVars()
+        {
+            var s = @"SAY The $animal woke $count times";
+            Substitutions.DoVars(ref s, globals);
+            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
+            Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
+        }
+
+        [Test()]
+        public void TestReplaceGroups()
+        {
+            var txt = "The boy was (sad | happy)";
+            string[] ok = { "The boy was sad", "The boy was happy" };
+            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
+            for (int i = 0; i < 10; i++)
+            {
+                string s = txt;
+                Substitutions.DoGroups(ref s);
+                //Console.WriteLine(i + ") " + s);
+                CollectionAssert.Contains(ok, s);
+            }
+
+            txt = "The boy was (sad | happy | dead)";
+            ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
+            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
+            for (int i = 0; i < 10; i++)
+            {
+                string s = txt;
+                Substitutions.DoGroups(ref s);
+                //Console.WriteLine(i + ") " + s);
+                CollectionAssert.Contains(ok, s);
+            }
+        }
+
+        [Test()]
         public void TestReplace1()
         {
             var s = @"SAY The $animal woke and $prep (ate|ate)";
@@ -58,39 +106,5 @@ namespace tests
             }
         }
 
-        [Test()]
-        public void TestReplaceVars()
-        {
-            var s = @"SAY The $animal woke $count times";
-            Substitutions.DoVars(ref s, globals);
-            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
-            Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
-        }
-
-        [Test()]
-        public void TestReplaceGroups()
-        {
-            var txt = "The boy was (sad | happy)";
-            string[] ok = { "The boy was sad", "The boy was happy" };
-            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
-            for (int i = 0; i < 10; i++)
-            {
-                string s = txt;
-                Substitutions.DoGroups(ref s);
-                //Console.WriteLine(i + ") " + s);
-                CollectionAssert.Contains(ok, s);
-            }
-
-            txt = "The boy was (sad | happy | dead)";
-            ok = new string[]{ "The boy was sad", "The boy was happy", "The boy was dead"};
-            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
-            for (int i = 0; i < 10; i++)
-            {
-                string s = txt;
-                Substitutions.DoGroups(ref s);
-                //Console.WriteLine(i + ") " + s);
-                CollectionAssert.Contains(ok, s);
-            }
-        }
     }
 }
