@@ -68,7 +68,7 @@ namespace Dialogic
             result.ForEach((f) => chats.Add(f));
         }
 
-        protected static List<Chat> Parse(string[] lines, bool printTree=false)
+        protected static List<Chat> Parse(string[] lines, bool printTree = false)
         {
             HandleDefaultCommand(lines, "SAY");
             var ais = new AntlrInputStream(String.Join("\n", lines));
@@ -97,7 +97,7 @@ namespace Dialogic
                     //System.Console.WriteLine($"Checking: '{lines[i]}'");
                     if (!Regex.IsMatch(lines[i], @"(^[A-Z][A-Z][A-Z]?[A-Z]?[^A-Z])"))
                     {
-                        System.Console.WriteLine("SAY: "+lines[i]);
+                        System.Console.WriteLine("SAY: " + lines[i]);
                         lines[i] = cmd + " " + lines[i];
                     }
                 }
@@ -146,7 +146,7 @@ namespace Dialogic
             string[] args = Array.ConvertAll(xargs, arg => arg.GetText().Trim());
 
             var xmeta = actx.children.Where(md => md is DialogicParser.MetaContext).ToArray();
-            string[] meta = xmeta.Length > 0 ? xmeta[0].GetText().Split(','): null;
+            string[] meta = xmeta.Length > 0 ? xmeta[0].GetText().Split(',') : null;
 
             //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",", args) + "' " + meta);
 
@@ -168,13 +168,16 @@ namespace Dialogic
 
         private void HandleCommandTypes(Command c) // cleanup
         {
-            if (c is Opt)
+            if (c is Opt) // add option data to last Ask
             {
-                Opt o = (Opt)c;
-                // add option data to last Ask
                 Command last = LastOfType(parsed, typeof(Ask));
                 if (!(last is Ask)) throw new Exception("Opt must follow Ask");
-                ((Ask)last).AddOption(o);
+                ((Ask)last).AddOption((Opt)c);
+            }
+            else  // add command to last Chat
+            {
+               
+                chats.Last().AddCommand(c);
             }
             /*else if (c is Meta)
             {
@@ -193,12 +196,7 @@ namespace Dialogic
                 }
                 ((Chat)last).AddMeta(cd.ToDict());
             }*/
-            else
-            {
-                // add command to last Chat
-                chats.Last().AddCommand(c);
-            }
-
+   
             // add meta key-values to subsequent line
             /*if (this.lastMeta != null && c is Say || c is Chat)
             {

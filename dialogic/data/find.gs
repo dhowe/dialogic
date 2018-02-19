@@ -1,1 +1,1 @@
-FIND {dev=hello}
+FIND {dev = 1}

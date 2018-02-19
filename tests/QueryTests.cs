@@ -27,10 +27,11 @@ namespace tests
             chats = cr.FindAll(q);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
-            Assert.That(chats.Count, Is.EqualTo(chats.Count));
+            Assert.That(chats.Count, Is.EqualTo(3));
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
 
+        [Test()]
         public void TestFindAll2()
         {
             Chat c;
@@ -45,9 +46,9 @@ namespace tests
                 { "dev", 1 }
             };
             chats = cr.FindAll(q);
-            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
-            Assert.That(chats.Count, Is.EqualTo(chats.Count));
+            Assert.That(chats.Count, Is.EqualTo(3));
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
 
@@ -93,36 +94,64 @@ namespace tests
         }
 
         [Test()]
+        public void TestFindAllOpsAPI()
+        {
+            // WORKING HERE: FAILS...
+
+            string[] lines = {
+                "CHAT c1 {day=fri}",
+                "CHAT c2 {dev=2,day=fri}",
+                "CHAT c3 {}"
+            };
+            string contents = String.Join("\n", lines);
+            //Console.WriteLine(contents);
+            List<Chat> chats = ChatParser.ParseText(contents);
+            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+
+            List<Chat> result = new ChatRuntime(chats).FindAll(new Dictionary<string, object> {
+                { "dev", 1 },
+                { "day", "fri" }
+            });
+
+            result.ForEach((c) => Console.WriteLine(c.Text));
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0].Text, Is.EqualTo("c1"));
+        }
+
+        [Test()]
         public void TestFindAllOps()
         {
             string[] lines = {
-                "FIND {dev=1}",
-                //"CHAT c1",
-                //"CHAT c2 {dev=2,day=fri}",
-                //"CHAT c3 {}"
+                "FIND {dev=1,data=fri}",
+                "CHAT c1 {day=fri}",
+                "CHAT c2 {dev=2,day=fri}",
+                "CHAT c3 {}"
             };
             string contents = String.Join("\n", lines);
-            Console.WriteLine(contents);
-
+            //Console.WriteLine(contents);
             List<Chat> chats = ChatParser.ParseText(contents);
+            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command c = chats[0].commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Find)));
-
             ChatRuntime cr = new ChatRuntime(chats);
-            ChatEvent ce = c.Fire(cr);
-            Console.WriteLine(ce);
+
+            //ChatEvent ce = c.Fire(cr);
+            //Console.WriteLine(ce);
             //chats.Add(new Chat("c1"));
             //chats.Add(new Chat("c3"));
             //ChatRuntime cr = new ChatRuntime(chats);
 
-            //Dictionary<string, object> q = new Dictionary<string, object> {
-            //    { "dev", 1 }
-            //};
-            //chats = cr.FindAll(q);
-            ////chats.ForEach((obj) => Console.WriteLine(obj.Text));
-            //Assert.That(chats, Is.Not.Null);
-            //Assert.That(chats.Count, Is.EqualTo(chats.Count));
-            //Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Dictionary<string, object> q = new Dictionary<string, object> {
+                { "dev", 1 },
+                { "day", "fri" }
+            };
+            List<Chat> result = cr.FindAll(q);
+            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(chats.Count));
+            Assert.That(result[0].Text, Is.EqualTo("c1"));
         }
     }
 }

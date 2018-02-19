@@ -259,21 +259,24 @@ namespace Dialogic
         public override void Init(string[] args, string[] meta)
         {
             if (args.Length > 0) throw BadArgs(args, 1);
-            MetaFromArgs(args);
+            ConstructMeta(meta);
         }
 
-        public override string ToString()
-        {
-            return base.ToString() + " " + MetaStr();
-        }
+        //public override string ToString()
+        //{
+        //    return base.ToString() + " " + MetaStr();
+        //}
     }
 
     public class Find : KeyVal
     {
         public override ChatEvent Fire(ChatRuntime cr)
         {
-            ChatEvent ce = base.Fire(cr);
-            cr.Run(cr.Find(((Find)ce.Command).meta));
+            Command clone = this.Copy();
+            ChatEvent ce = new ChatEvent(clone);      
+            Find find = (Find)ce.Command;
+            Chat c = cr.Find(find.meta);
+            cr.Run(c);
             return ce;
         }
     }
@@ -314,7 +317,7 @@ namespace Dialogic
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
 
-            MetaFromArgs(meta);
+            ConstructMeta(meta);
         }
 
         public override string ToString()
@@ -324,7 +327,7 @@ namespace Dialogic
 
         public string ToTree()
         {
-            string s = ToString();
+            string s = ToString() + "\n";
             commands.ForEach(c => s += "  " + c + "\n");
             return s;
         }
@@ -379,7 +382,7 @@ namespace Dialogic
                 if (args.Length > 1) PauseAfterMs =
                     Util.ToMillis(double.Parse(args[1]));
             }
-            MetaFromArgs(meta);
+            ConstructMeta(meta);
         }
 
         public virtual string TypeName()
@@ -417,7 +420,7 @@ namespace Dialogic
 
         public string TimeStr()
         {
-            return PauseAfterMs > 0 ? "wait:" + Util.ToSec(PauseAfterMs) : "";
+            return PauseAfterMs > 0 ? "wait=" + Util.ToSec(PauseAfterMs) : "";
         }
 
         protected override string MetaStr()
@@ -519,7 +522,7 @@ namespace Dialogic
                 s += "{";
                 foreach (var key in meta.Keys)
                 {
-                    s += key + ":" + meta[key] + ",";
+                    s += key + "=" + meta[key] + ",";
                 }
                 s = s.Substring(0, s.Length - 1) + "}";
             }
@@ -554,7 +557,7 @@ namespace Dialogic
             SetMeta(key, valObj);
         }
 
-        protected void MetaFromArgs(string[] args)
+        protected void ConstructMeta(string[] args)
         {
             if (args != null)
             {
@@ -563,7 +566,7 @@ namespace Dialogic
                     //Console.WriteLine(i+") "+args[i]);
                     if (!string.IsNullOrEmpty(args[i]))
                     {
-                        string[] parts = args[i].Split('=');
+                        string[] parts = Regex.Split(args[i], " *[<=>]+ *");
 
                         if (parts.Length != 2) throw new Exception
                             ("Expected 2 parts, found " + parts.Length + ": " + parts);
