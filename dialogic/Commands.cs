@@ -253,12 +253,53 @@ namespace Dialogic
         }
     }
 
+    public class Comparison
+    {
+        public readonly string name;
+        public readonly string value;
+        public readonly Operator op;
+
+        public Comparison(string key, string ops, string val)
+        {
+            this.name = key;
+            this.value = val;
+            this.op = Operator.FromString(ops);
+        }
+
+        public bool Do()
+        {
+            return op.Invoke(name, value);
+        }
+    }
+
     public class Find : Command
     {
+        const string PATT = @"($?[a-zA-Z_][a-zA-Z0-9_]+) *([!<=>*^$]+) *([^ ]+)";
+        protected static Regex QUERY = new Regex(PATT);
+
+        protected Dictionary<string, Comparison> query;
+
         public override void Init(string[] args, string[] meta)
         {
             if (args.Length > 0) throw BadArgs(args, 1);
-            ConstructMeta(meta);
+            query = new Dictionary<string, Comparison>();
+            ParseMeta(meta);
+        }
+
+        protected override void ParseMeta(string[] pairs)
+        {
+            for (int i = 0; pairs != null && i < pairs.Length; i++)
+            {
+                Match match = QUERY.Match(pairs[i]);
+                if (match.Groups.Count != 4)
+                {
+                    throw new Exception("Invalid query term: " + pairs[i]);
+                }
+                string key = match.Groups[1].Value;
+                string op = match.Groups[2].Value;
+                string val = match.Groups[3].Value;
+                query.Add(key, new Comparison(key, op, val));
+            }
         }
 
         /**
@@ -311,7 +352,7 @@ namespace Dialogic
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
 
-            ConstructMeta(meta);
+            ParseMeta(meta);
         }
 
         public override string ToString()
@@ -330,6 +371,7 @@ namespace Dialogic
     public abstract class Command : MetaData
     {
         public const string PACKAGE = "Dialogic.";
+
         public const int Infinite = -1;
 
         protected static int IDGEN = 0;
@@ -376,7 +418,7 @@ namespace Dialogic
                 if (args.Length > 1) PauseAfterMs =
                     Util.ToMillis(double.Parse(args[1]));
             }
-            ConstructMeta(meta);
+            ParseMeta(meta);
         }
 
         public virtual string TypeName()
@@ -526,51 +568,25 @@ namespace Dialogic
         /**
          * Set the value for the key as a primitive int, double, or bool, 
          * if such conversion is possible, otherwise as a string object.
-         */
         protected void SetMetaDynamic(string key, string val)
         {
             if (meta == null) meta = new Dictionary<string, object>();
+            SetMeta(key, Util.ToType(val));
+        }*/
 
-            bool result = false;
-            object valObj = val;
-            if (!result)
-            {
-                bool b;
-                result = Boolean.TryParse(val, out b);
-                if (result) valObj = b;
-            }
-            if (!result)
-            {
-                int i;
-                result = int.TryParse(val, out i);
-                if (result) valObj = i;
-            }
-            if (!result)
-            {
-                double d;
-                result = Double.TryParse(val, out d);
-                if (result) valObj = d;
-            }
-
-            SetMeta(key, valObj);
-        }
-
-        protected void ConstructMeta(string[] args)
+        protected virtual void ParseMeta(string[] pairs)
         {
-            if (args != null)
+            for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
-                for (int i = 0; i < args.Length; i++)
+                //Console.WriteLine(i+") "+args[i]);
+                if (!string.IsNullOrEmpty(pairs[i]))
                 {
-                    //Console.WriteLine(i+") "+args[i]);
-                    if (!string.IsNullOrEmpty(args[i]))
-                    {
-                        string[] parts = Regex.Split(args[i], " *[<=>]+ *");
+                    string[] parts = pairs[i].Split('=');
 
-                        if (parts.Length != 2) throw new Exception
-                            ("Expected 2 parts, found " + parts.Length + ": " + parts);
+                    if (parts.Length != 2) throw new Exception
+                        ("Expected 2 parts, found " + parts.Length + ": " + parts);
 
-                        SetMetaDynamic(parts[0].Trim(), parts[1].Trim());
-                    }
+                    SetMeta(parts[0].Trim(), parts[1].Trim());
                 }
             }
         }
