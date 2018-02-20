@@ -279,7 +279,12 @@ namespace Dialogic
 
         public bool Check(string toCheck)
         {
-            return op.Invoke(value, toCheck);
+            return op.Invoke(toCheck, value);
+        }
+
+        public override string ToString()
+        {
+            return name + op + value;
         }
     }
 
@@ -309,6 +314,18 @@ namespace Dialogic
                 if (meta == null) meta = new Dictionary<string, object>();
                 meta.Add(key, new Constraint(op, key, val));
             }
+        }
+
+        protected override string MetaStr()
+        {
+            string s = "";
+            if (HasMeta())
+            {
+                s += "{";
+                foreach (var ct in meta.Values) s += ct + ",";
+                s = s.Substring(0, s.Length - 1) + "}";
+            }
+            return s;
         }
 
         /**

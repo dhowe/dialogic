@@ -24,9 +24,9 @@ namespace runner
         public static void Main(string[] args)
         {
             new MockGameEngine().Run();
-            //new LexerTest().TestParse(srcpath + "/data/find.gs");
-
+            //new LexerTest().TestParse(srcpath + "/data/gscript.gs");
             //ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
+
             //List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/queries.gs");
             //Console.WriteLine(chats[0].ToTree());
             //ChatRuntime cm = new ChatRuntime(chats, globals);
@@ -49,6 +49,8 @@ namespace runner
         string[] diaOpts;
         UpdateAdapter dialogic;
 
+        IChoice choiceEvt;
+
         public MockGameEngine()
         {
             lastFrameMs = Util.Elapsed();
@@ -67,12 +69,14 @@ namespace runner
                     frameCount++;
 
                     // Call the dialogic interface
-                    UpdateEvent ge = dialogic.Update(Program.globals, null);
+                    UpdateEvent ge = dialogic.Update(Program.globals, choiceEvt);
 
                     // Handle the returned event
                     if (ge != null) HandleEvent(ge);
 
                     lastFrameMs = Util.Elapsed();
+
+                    choiceEvt = null;
                 }
                 Thread.Sleep(1);
             }
@@ -109,7 +113,8 @@ namespace runner
                     {
                         Timers.SetTimeout(timeout, () =>
                         {
-                            Console.WriteLine("<empty-choice-event>");
+                            //Console.WriteLine("<empty-choice-event>");
+                            choiceEvt = new ChoiceEvent(0);
                         });
                     }
                     break;

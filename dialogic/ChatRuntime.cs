@@ -60,7 +60,7 @@ namespace Dialogic
             var opt = lastPrompt.Selected(((IChoice)e).GetChoiceIndex());
 
             //FireEvent(opt); // Send Opt event to clients
-            // NOTE: needed for the multi-client case
+            // NOTE: needed for the multi-client case?
 
             opt.action.Fire(this); // execute GO event
         }
@@ -72,7 +72,6 @@ namespace Dialogic
             {
                 if (Util.Elapsed() < nextEventTime)
                 {
-                    //Console.Write(".");
                     Thread.Sleep(1);
                     continue;
                 }
@@ -82,7 +81,6 @@ namespace Dialogic
                     lastPrompt = (Ask)c;
                 }
                 FireEvent(c);
-                nextEventTime = Util.Elapsed() + c.PauseAfterMs;
                 i++;
             }
         }
@@ -91,7 +89,7 @@ namespace Dialogic
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
             Chat c = (chatLabel != null) ? FindChat(chatLabel) : chats[0];
-            new Thread(() => Run(c)).Start();     
+            new Thread(() => Run(c)).Start();
         }
 
         private void FireEvent(Command c)
@@ -105,6 +103,7 @@ namespace Dialogic
                     if (ChatEvents != null) ChatEvents.Invoke(ce);
                 }
             }
+            nextEventTime = Util.Elapsed() + c.PauseAfterMs;
         }
 
         public void Globals(Dictionary<string, object> globals)

@@ -48,24 +48,27 @@ namespace Dialogic
             {
                 int hits = 0;
                 var chat = chats[i];
+                var chatMeta = chat.Meta();
+
                 foreach (var constraint in constraints.Keys)
                 {
-                    var conditions = chat.Meta();
+                    //Console.WriteLine("CHECK: find."+constraint+ " in "+chat.Text+" "+Util.Stringify(chatMeta));
 
-                    //Console.WriteLine("CHECK: find."+con.Key+ " in "+chat.Text+" "+Util.Stringify(conditions));
-                    if (conditions != null && conditions.ContainsKey(constraint))
+                    if (chatMeta != null && chatMeta.ContainsKey(constraint))
                     {
-                        var chatMetaVal = (string)conditions[constraint];
+                        var chatMetaVal = (string)chatMeta[constraint];
 
                         if (!((Constraint)constraints[constraint]).Check(chatMetaVal))
                         {
-                            //Console.WriteLine("  FAIL:" + conditions[con.Key] + " != "+con.Value);
+                            //Console.WriteLine("  FAIL:" + constraints[constraint]);
                             hits = -1;
                             break;
                         }
-
-                        hits++;
-                        //Console.WriteLine("  HIT" +hits);
+                        else 
+                        {
+                            hits++;
+                            //Console.WriteLine("  HIT" + hits);
+                        }
                     }
                 }
                 if (hits > -1) matches.Add(chat, hits);
@@ -73,7 +76,7 @@ namespace Dialogic
 
             List<KeyValuePair<Chat, int>> list = DescendingRandomSort(matches);
 
-            list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
+            //list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
         }

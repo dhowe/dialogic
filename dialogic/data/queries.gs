@@ -1,4 +1,4 @@
-﻿FIND {day=hello,dev=2}
+﻿FIND {day=hello,dev>=1}
 
 CHAT C1
 SAY Running C1

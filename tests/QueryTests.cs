@@ -110,7 +110,7 @@ namespace tests
         }
 
         [Test()]
-        public void TestFindAllOps()
+        public void TestFindAll4()
         {
             string[] lines = {
                 "CHAT c0",
@@ -134,9 +134,63 @@ namespace tests
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(3));
 
-            Chat result = chats[0];
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result.Text, Is.EqualTo("c1"));
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c1"));
+        }
+
+        [Test()]
+        public void TestFindAllOp1()
+        {
+            string[] lines = {
+                "CHAT c0 {dev=1}",
+                "FIND {dev>2,day=fri}",
+                //"CHAT c1 {dev=3}",
+                //"CHAT c2 {dev=0}",
+            };
+
+            string contents = String.Join("\n", lines);
+
+            List<Chat> chats = ChatParser.ParseText(contents);
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            Command finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            ChatRuntime cr = new ChatRuntime(chats);
+
+            chats = cr.FindAll(finder.Meta());
+            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(0));
+        }
+
+
+        [Test()]
+        public void TestFindAllOp2()
+        {
+            string[] lines = {
+                "CHAT c0",
+                "FIND {dev>1,day=fri}",
+                "CHAT c1 {dev=2,day=fri}",
+                "CHAT c2 {dev=1,day=fri}",
+                "CHAT c3 {}"
+            };
+
+            string contents = String.Join("\n", lines);
+
+            List<Chat> chats = ChatParser.ParseText(contents);
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            Command finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            ChatRuntime cr = new ChatRuntime(chats);
+
+            chats = cr.FindAll(finder.Meta());
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(3));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c1"));
         }
     }
 }

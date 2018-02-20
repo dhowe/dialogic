@@ -139,9 +139,13 @@ namespace Dialogic
             runtime.Run(startChat);
         }
 
-        public virtual UpdateEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent=null)
+        public virtual UpdateEvent Update(Dictionary<string, object> worldState, IChoice choice=null)
         {
-            //Console.WriteLine("#" + (++frameCount) + ": " + nextEvent);
+            if (choice != null) {
+                Console.WriteLine("Dialogic: Got Choice#" +(choice.GetChoiceIndex()+1));
+                choice = null;
+            }
+
             runtime.Globals(worldState);
             var result = modified ? nextEvent : null;
             modified = false;
