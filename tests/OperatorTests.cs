@@ -26,7 +26,8 @@ namespace tests
 
             Assert.That(Operator.NEQ.Invoke("hello", ""), Is.True);
             Assert.That(Operator.NEQ.Invoke("hello", "false"), Is.True);
-            Assert.That(Operator.NEQ.Invoke(null, null), Is.False);
+
+            Assert.Throws<OperatorException>(() => Operator.NEQ.Invoke(null, null));
         }
 
         [Test()]

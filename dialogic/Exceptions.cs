@@ -44,8 +44,8 @@ namespace Dialogic
 
     public class OperatorException : Exception
     {
-        public OperatorException(Operator o) : this(o, "Invalid Operands: ") { }
+        public OperatorException(Operator o) : this(o, "Invalid Operator") { }
 
-        public OperatorException(Operator o, string message) : base(message+" "+o) { }
+        public OperatorException(Operator o, string message) : base(message+": "+o) { }
     }
 }
