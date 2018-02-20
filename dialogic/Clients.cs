@@ -130,13 +130,13 @@ namespace Dialogic
 
         bool modified = false;
 
-        public UpdateAdapter(List<Chat> chats, Dictionary<string, object> globals=null)
+        public UpdateAdapter(List<Chat> chats, Dictionary<string, object> globals=null, string startChat=null)
         {
             pool = new ObjectPool<UpdateEvent>(10, () => new UpdateEvent(), (g => g.Clear()));
 
             runtime = new ChatRuntime(chats, globals);
             this.Subscribe(runtime);
-            runtime.Run();
+            runtime.Run(startChat);
         }
 
         public virtual UpdateEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent=null)
