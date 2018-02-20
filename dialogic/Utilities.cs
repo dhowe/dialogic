@@ -107,14 +107,13 @@ namespace Dialogic
                     if (i < arr.Length - 1) s += ",";
                 }
             }
-            else if (o is List<object>)
+            else if (o is IList)
             {
-
-                var list = ((List<object>)o);
+                var list = (IList)o;
                 s = "[";
                 for (int i = 0; i < list.Count; i++)
                 {
-                    s += list.ElementAt(i).ToString(); 
+                    s += list[i].ToString(); 
                     if (i < list.Count - 1) s += ",";
                 }
             }

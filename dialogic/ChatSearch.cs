@@ -15,7 +15,9 @@ namespace Dialogic
             return FindAll(chats, constraints).FirstOrDefault();
         }
 
-        /** Find chat  by Name */
+        /** 
+         * Find chat by Name 
+         */
         public static Chat ByName(List<Chat> chats, string chatName)
         {
             for (int i = 0; i < chats.Count; i++)
@@ -27,15 +29,15 @@ namespace Dialogic
         }
 
         /**
-      * Find all chats which do not match any constraint key without also matching its value,
-      * ordered by score (number of matching constraints).
-      * 
-      * If none match, an empty list will be returned
-      * Cases: 
-      *   1. has key, matches ->         allow, score++
-      *   2. has key, doesn't match ->   disallow
-      *   3. doesn't have key ->         allow
-      */
+         * Find all chats which do not match any constraint key without also matching its value,
+         * ordered by score (number of matching constraints).
+         * 
+         * If none match, an empty list will be returned
+         * Cases: 
+         *   1. has key, matches ->         allow, score++
+         *   2. has key, doesn't match ->   disallow
+         *   3. doesn't have key ->         allow
+         */
         public static List<Chat> FindAll(List<Chat> chats, IDictionary<string, object> constraints)
         {
             if (constraints == null) return chats;
@@ -54,10 +56,8 @@ namespace Dialogic
                     if (conditions != null && conditions.ContainsKey(constraint))
                     {
                         var chatMetaVal = (string)conditions[constraint];
-                        // double-check required here for strings as objects
-                        if (!(constraints[constraint] is Constraint)) throw 
-                            new Exception("Invalid constraints: "+Util.Stringify(constraints));
-                        if (!((Constraint)constraints[constraint]).Check(chatMetaVal))// != constraint.Value && !Equals(conditions[constraint.Key], constraint.Value))
+
+                        if (!((Constraint)constraints[constraint]).Check(chatMetaVal))
                         {
                             //Console.WriteLine("  FAIL:" + conditions[con.Key] + " != "+con.Value);
                             hits = -1;
@@ -71,12 +71,24 @@ namespace Dialogic
                 if (hits > -1) matches.Add(chat, hits);
             }
 
-            List<KeyValuePair<Chat, int>> list = matches.ToList();
-            list.Sort((p1, p2) => p2.Value.CompareTo(p1.Value));
+            List<KeyValuePair<Chat, int>> list = DescendingRandomSort(matches);
 
-            //list.ForEach((kvp)=>Console.WriteLine(kvp.Key+" -> "+kvp.Value));
+            list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
+        }
+
+        static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
+        {
+            List<KeyValuePair<Chat, int>> list = d.ToList();
+            list.Sort((p1, p2) => CompareToWithRandomTies(p1.Value, p2.Value));
+            return list;
+        }
+
+        // sort descending with random ties
+        static int CompareToWithRandomTies(int i, int j)
+        {
+            return i == j ? (Util.Rand() < .5 ? 1 : -1) : j.CompareTo(i);
         }
     }
 }

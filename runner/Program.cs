@@ -26,18 +26,18 @@ namespace runner
             new MockGameEngine().Run();
             //new LexerTest().TestParse(srcpath + "/data/find.gs");
 
-            /*ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
-            List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/gscript.gs");
-            Console.WriteLine(chats[0].ToTree());
-            ChatRuntime cm = new ChatRuntime(chats, globals);
-            cm.LogFile = srcpath + "/dia.log";
+            //ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
+            //List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/queries.gs");
+            //Console.WriteLine(chats[0].ToTree());
+            //ChatRuntime cm = new ChatRuntime(chats, globals);
+            //cm.LogFile = srcpath + "/dia.log";
 
-            AbstractClient cl = new ConsoleClient(); // Console client
+            //AbstractClient cl = new ConsoleClient(); // Console client
 
-            cl.Subscribe(cm); // Client subscribes to chat events
-            cm.Subscribe(cl); // Dialogic subscribes to Unity events
+            //cl.Subscribe(cm); // Client subscribes to chat events
+            //cm.Subscribe(cl); // Dialogic subscribes to Unity events
 
-            cm.Run();*/
+            //cm.Run();
         }
     }
 
