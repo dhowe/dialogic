@@ -259,16 +259,21 @@ namespace Dialogic
         public readonly string value;
         public readonly Operator op;
 
-        public Constraint(string key, string ops, string val)
-        {
+        public Constraint(string key, string val) : 
+            this("=", key, val) {}
+
+        public Constraint(string opstr, string key, string val) : 
+            this(Operator.FromString(opstr), key, val) {}
+
+        public Constraint(Operator op, string key, string val) {
             this.name = key;
             this.value = val;
-            this.op = Operator.FromString(ops);
+            this.op = op;
         }
 
-        public bool Do()
+        public bool Check(string toCheck)
         {
-            return op.Invoke(name, value);
+            return op.Invoke(value, toCheck);
         }
     }
 
@@ -277,16 +282,13 @@ namespace Dialogic
         const string PATT = @"($?[a-zA-Z_][a-zA-Z0-9_]+) *([!<=>*^$]+) *([^ ]+)";
         protected static Regex QUERY = new Regex(PATT);
 
-        protected Dictionary<string, Constraint> query;
-
         public override void Init(string[] args, string[] meta)
         {
             if (args.Length > 0) throw BadArgs(args, 1);
-            //query = new Dictionary<string, Comparison>();
             ParseMeta(meta);
         }
 
-        protected /*override*/ void ParseMetaQuery(string[] pairs)
+        protected override void ParseMeta(string[] pairs)
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
@@ -298,8 +300,8 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
                 string op = match.Groups[2].Value;
                 string val = match.Groups[3].Value;
-                if (query == null) query = new Dictionary<string, Constraint>();
-                query.Add(key, new Constraint(key, op, val));
+                if (meta == null) meta = new Dictionary<string, object>();
+                meta.Add(key, new Constraint(op, key, val));
             }
         }
 
@@ -312,7 +314,7 @@ namespace Dialogic
             Substitutions.DoMeta(clone.Meta(), cr.Globals());
             ChatEvent ce = new ChatEvent(clone);
             Find find = (Find)ce.Command;
-            Chat c = cr.Find(find.meta);
+            Chat c = cr.Find(find.Meta());
             if (c != null) cr.Run(c);
             return ce;
         }
@@ -482,7 +484,7 @@ namespace Dialogic
 
     public class MetaData
     {
-        protected Dictionary<string, string> meta;
+        protected IDictionary<string, object> meta;
 
         public bool HasMeta()
         {
@@ -529,7 +531,7 @@ namespace Dialogic
         /* Note: new keys will overwrite old keys with same name */
         public void SetMeta(string key, string val)
         {
-            if (meta == null) meta = new Dictionary<string, string>();
+            if (meta == null) meta = new Dictionary<string, object>();
             meta[key] = val;
         }
 
@@ -544,12 +546,12 @@ namespace Dialogic
             }
         }
 
-        public Dictionary<string, string> Meta()
+        public IDictionary<string, object> Meta()
         {
             return meta;
         }
 
-        public List<KeyValuePair<string, string>> ToList()
+        public List<KeyValuePair<string, object>> ToList()
         {
             return meta != null ? meta.ToList() : null;
         }

@@ -233,35 +233,37 @@ namespace Dialogic
             return this.value;
         }
 
-        public bool Invoke(string name, string value)
+
+        public bool Invoke(string s1, string s2)
         {
-
-            // WORKING HERE --  DO TESTS FIRST
-            Substitutions.DoGroups(ref name);
-            Substitutions.DoGroups(ref value);
-            object o1 = Util.ToType(name);
-            object o2 = Util.ToType(value);
-
-            bool result = false;
-            switch (this.type)
-            {
-                case OpType.COMPARISON:
-                    break;
-                case OpType.EQUALITY:
-                    if (o1 is string && o2 is string)
-                    {
-                        return Equals(name, value);
-                    }
-                    else
-                    {
-                        return name == value;
-                    }
-                case OpType.MATCHING:
-                    break;
-            }
-
-            return result;
+            if (this == EQ) return Equals(s1, s2);
+            throw new Exception("Unexpected Op type: " + this);
         }
+        /*
+        // WORKING HERE --  DO TESTS FIRST
+        Substitutions.DoGroups(ref name);
+        Substitutions.DoGroups(ref value);
+        object o1 = Util.ToType(name);
+        object o2 = Util.ToType(value);
+
+        bool result = false;
+        switch (this.type)
+        {
+            case OpType.COMPARISON:
+                break;
+            case OpType.EQUALITY:
+                if (o1 is string && o2 is string)
+                {
+                    return Equals(name, value);
+                }
+                else
+                {
+                    return name == value;
+                }
+            case OpType.MATCHING:
+                break;
+        }
+        return result;*/
     }
 
     /** Reads input from console */

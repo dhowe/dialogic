@@ -9,7 +9,7 @@ namespace Dialogic
     {
         const string MATCH_PARENS = @"\(([^()]+|(?<Level>\()|(?<-Level>\)))+(?(Level)(?!))\)";
 
-        public static void DoMeta(Dictionary<string, string> meta, Dictionary<string, object> globals)
+        public static void DoMeta(IDictionary<string, object> meta, IDictionary<string, object> globals)
         {
             if (Util.IsNullOrEmpty(meta) || Util.IsNullOrEmpty(globals)) return;
 
@@ -19,12 +19,14 @@ namespace Dialogic
 
             for (int i = 0; i < keys.Count; i++)
             {
-                if (meta[keys[i]].IndexOf('$') > -1)
+                string val = meta[keys[i]].ToString();
+                if (val.IndexOf('$') > -1)
                 {
                     if (sorted == null) sorted = Util.SortByLength(globals.Keys);
                     foreach (string s in sorted)
                     {
-                        meta[keys[i]] = meta[keys[i]].Replace("$" + s, globals[s].ToString());
+                        val = val.Replace("$" + s, globals[s].ToString());  
+                        meta[keys[i]] = val;
                     }
                 }
             }
