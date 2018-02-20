@@ -5,7 +5,7 @@ namespace Dialogic
 {
     public class ChatException : Exception
     {
-        Command command;
+        readonly Command command;
 
         public ChatException(Command ask) : this(ask, "") {}
 
@@ -40,5 +40,12 @@ namespace Dialogic
         public InvalidChoice(Command ask) : this(ask, "Invalid selection") { }
 
         public InvalidChoice(Command ask, string message) : base(ask, message) { }
+    }
+
+    public class OperatorException : Exception
+    {
+        public OperatorException(Operator o) : this(o, "Invalid Operands: ") { }
+
+        public OperatorException(Operator o, string message) : base(message+" "+o) { }
     }
 }

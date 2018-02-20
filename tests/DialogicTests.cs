@@ -37,8 +37,6 @@ namespace tests
             Say orig = (Say)chat.commands[0];
             Say clone = (Say)orig.Copy();
             clone.SetMeta("pace", "slow");
-            Console.WriteLine(orig);
-            Console.WriteLine(clone);
             Assert.That(clone.GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(clone.Text, Is.EqualTo("Thank you"));
             Assert.That(clone.GetMeta("pace"), Is.EqualTo("slow"));

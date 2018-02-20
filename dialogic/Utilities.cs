@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Timers;
+using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
@@ -232,38 +233,40 @@ namespace Dialogic
             return this.value;
         }
 
-
         public bool Invoke(string s1, string s2)
         {
-            if (this == EQ) return Equals(s1, s2);
-            //if (this == NEQ) return !Equals(s1, s2);
-            throw new Exception("Unexpected Op type: " + this);
-        }
-        /*
-        // WORKING HERE --  DO TESTS FIRST
-        Substitutions.DoGroups(ref name);
-        Substitutions.DoGroups(ref value);
-        object o1 = Util.ToType(name);
-        object o2 = Util.ToType(value);
+            if (s1 == null) throw new OperatorException(this);
 
-        bool result = false;
-        switch (this.type)
-        {
-            case OpType.COMPARISON:
-                break;
-            case OpType.EQUALITY:
-                if (o1 is string && o2 is string)
+            if (this.type == OpType.EQUALITY)
+            {
+                if (this == EQ) return Equals(s1, s2);
+                if (this == NEQ) return !Equals(s1, s2);
+            }
+            else if (this.type == OpType.MATCHING)
+            {
+                if (s2 == null) return false;
+                if (this == SW) return s1.StartsWith(s2, StringComparison.CurrentCulture);
+                if (this == EW) return s1.EndsWith(s2, StringComparison.CurrentCulture);
+                if (this == RE) return new Regex(s2).IsMatch(s1);
+            }
+            else if (this.type == OpType.COMPARISON)
+            {
+                try
                 {
-                    return Equals(name, value);
+                    double o1 = (double)Convert.ChangeType(s1, typeof(double));
+                    double o2 = (double)Convert.ChangeType(s2, typeof(double));
+                    if (this == GT) return o1 > o2;
+                    if (this == LT) return o1 < o2;
+                    if (this == GTE) return o1 >= o2;
+                    if (this == LTE) return o1 <= o2;
                 }
-                else
+                catch (Exception)
                 {
-                    return name == value;
+                    throw new OperatorException(this);
                 }
-            case OpType.MATCHING:
-                break;
+            }
+            throw new OperatorException(this, "Unexpected Op type: ");
         }
-        return result;*/
     }
 
     /** Reads input from console */

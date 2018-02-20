@@ -123,17 +123,16 @@ namespace tests
             string contents = String.Join("\n", lines);
 
             List<Chat> chats = ChatParser.ParseText(contents);
-            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             ChatRuntime cr = new ChatRuntime(chats);
 
             chats = cr.FindAll(finder.Meta());
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(3));
-
 
             Chat result = chats[0];
             Assert.That(result, Is.Not.Null);

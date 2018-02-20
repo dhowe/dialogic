@@ -23,11 +23,8 @@ namespace tests
             var s = @"SAY The $animal yawned {animal=$animal}";
             Command c = ChatParser.ParseText(s)[0].commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            Console.WriteLine("PRE: "+Util.Stringify(c.Meta()));
             Substitutions.DoMeta(c.Meta(), globals);
-            Console.WriteLine("POST: "+Util.Stringify(c.Meta()));
             Assert.That(c.GetMeta("animal"), Is.EqualTo("dog"));
-            //Console.WriteLine("Running SubstitutionTests.TestReplaceMeta :: " + s);
         }
 
         [Test()]

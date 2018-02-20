@@ -14,7 +14,7 @@ namespace tests
             List<Chat> chats;
 
             chats = ChatParser.ParseText("FIND {num=1}");
-            Console.WriteLine(chats[0].ToTree());
+            //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
