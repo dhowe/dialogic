@@ -142,7 +142,7 @@ namespace Dialogic
         public virtual UpdateEvent Update(Dictionary<string, object> worldState, IChoice choice=null)
         {
             if (choice != null) {
-                Console.WriteLine("Dialogic: Got Choice#" +(choice.GetChoiceIndex()+1));
+                Console.WriteLine("Dialogic: Got Choice#" +(choice.GetChoiceIndex()));
                 choice = null;
             }
 
