@@ -120,7 +120,7 @@ namespace Dialogic
     /**
      * Adapts Dialogic's publish/subscribe event model to work with a frame-by-frame Update() callback
      * 
-     * Callback: public UpdateEvent Update(Dictionary<string, object> worldState, EventArgs gameEvent);
+     * Callback: public UpdateEvent Update(Dictionary<string, object> worldState, ICHoice choiceEvent);
      */
     public class UpdateAdapter : AbstractClient
     {
