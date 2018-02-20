@@ -5,14 +5,14 @@ namespace Dialogic
 {
     public class ChatEvent : EventArgs
     {
-        protected Command command;
+        protected ICommand command;
 
-        public ChatEvent(Command c)
+        public ChatEvent(ICommand c)
         {
             this.command = c;
         }
 
-        public Command Command
+        public ICommand Command
         {
             get
             {

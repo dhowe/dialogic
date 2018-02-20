@@ -23,8 +23,9 @@ namespace runner
 
         public static void Main(string[] args)
         {
-            new MockGameEngine().Run();
-            /*new LexerTest().TestParse(srcpath + "/data/find.gs");
+            //new LexerTest().TestParse(srcpath + "/data/gscript.gs");
+            //new MockGameEngine().Run();
+
 
             ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
             List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/gscript.gs");
@@ -37,7 +38,7 @@ namespace runner
             cl.Subscribe(cm); // Client subscribes to chat events
             cm.Subscribe(cl); // Dialogic subscribes to Unity events
 
-            cm.Run();*/
+            cm.Run();
 
         }
     }
@@ -120,7 +121,7 @@ namespace runner
             }
 
             Print(diaText);
-            ge = null;  // disose event 
+            ge = null;  // dispose event 
         }
 
         private void Print(string s, bool addInfo = false)

@@ -27,12 +27,12 @@ namespace Dialogic
             this.globals = globals;
         }
 
-        public Chat Find(Dictionary<string, string> conditions)
+        public Chat Find(Dictionary<string, Constraint> conditions)
         {
             return ChatSearch.Find(chats, conditions);
         }
 
-        public List<Chat> FindAll(Dictionary<string, string> conditions)
+        public List<Chat> FindAll(Dictionary<string, Constraint> conditions)
         {
             return ChatSearch.FindAll(chats, conditions);
         }
@@ -75,13 +75,13 @@ namespace Dialogic
                     Thread.Sleep(1);
                     continue;
                 }
-                Command c = chat.commands[i];
+                ICommand c = chat.commands[i];
                 if (c is Ask)
                 {
                     lastPrompt = (Ask)c;
                 }
                 FireEvent(c);
-                nextEventTime = Util.Elapsed() + c.PauseAfterMs;
+                nextEventTime = Util.Elapsed() + c.GetPauseAfterMs();
                 i++;
             }
         }
@@ -93,7 +93,7 @@ namespace Dialogic
             new Thread(() => Run(c)).Start();     
         }
 
-        private void FireEvent(Command c)
+        private void FireEvent(ICommand c)
         {
             if (!(c is NoOp)) 
             {
@@ -116,7 +116,7 @@ namespace Dialogic
             return globals;
         }
 
-        public void LogCommand(Command c)
+        public void LogCommand(ICommand c)
         {
             if (!Logging()) return;
 

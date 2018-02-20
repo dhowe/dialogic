@@ -15,12 +15,12 @@ namespace Dialogic
         public static string CHAT_FILE_EXT = ".gs";
 
         protected List<Chat> chats;
-        protected Stack<Command> parsed;
+        protected Stack<ICommand> parsed;
 
         public ChatParser()
         {
             chats = new List<Chat>();
-            parsed = new Stack<Command>();
+            parsed = new Stack<ICommand>();
         }
 
         public override string ToString()
@@ -36,9 +36,9 @@ namespace Dialogic
             chats.Add(c);
         }
 
-        private Command LastOfType(Stack<Command> s, Type typeToFind)
+        private ICommand LastOfType(Stack<ICommand> s, Type typeToFind)
         {
-            foreach (Command c in s)
+            foreach (ICommand c in s)
             {
                 if (c.GetType() == typeToFind) return c;
             }
@@ -164,7 +164,7 @@ namespace Dialogic
 
             //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",", args) + "' " + meta);
 
-            Command c = Command.Create(cmd, args, meta);
+            ICommand c = Command.Create(cmd, args, meta);
             if (c is Chat)
             {
                 chats.Add((Chat)c);
@@ -180,11 +180,11 @@ namespace Dialogic
             return VisitChildren(context);
         }
 
-        private void HandleCommandTypes(Command c) // cleanup
+        private void HandleCommandTypes(ICommand c) // cleanup
         {
             if (c is Opt) // add option data to last Ask
             {
-                Command last = LastOfType(parsed, typeof(Ask));
+                ICommand last = LastOfType(parsed, typeof(Ask));
                 if (!(last is Ask)) throw new Exception("Opt must follow Ask");
                 ((Ask)last).AddOption((Opt)c);
             }

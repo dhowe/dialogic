@@ -14,7 +14,7 @@ namespace Dialogic
     {
         protected override void OnChatEvent(ChatEvent e)
         {
-            Command cmd = e.Command;
+            var cmd = e.Command;
             Console.WriteLine(cmd);
         }
     }
@@ -55,11 +55,11 @@ namespace Dialogic
 
         protected override void OnChatEvent(ChatEvent e)
         {
-            Command c = e.Command;
+            var c = e.Command;
 
             if (c is IEmittable)
             {
-                Out.WriteLine(c is Do ? "(Do:" + c.Text + ") "+c.PauseAfterMs : c.Text);
+                Out.WriteLine(c is Do ? "(Do:" + c.GetText() + ") "+c.GetPauseAfterMs() : c.GetText());
                 if (c is Ask) Prompt((Dialogic.Ask)c);
             }
         }
@@ -154,8 +154,8 @@ namespace Dialogic
             {
                 UpdateEvent ge = pool.Get();
 
-                Command cmd = e.Command;
-                ge.Set("text", cmd.Text);
+                var cmd = e.Command;
+                ge.Set("text", cmd.GetText());
                 ge.Set("type", cmd.TypeName());
 
                 if (cmd is Ask) // Need to prompt user here

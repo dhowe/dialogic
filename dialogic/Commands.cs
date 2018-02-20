@@ -25,7 +25,7 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             ChatEvent ce = base.Fire(cr);
-            cr.Run(cr.FindChat(ce.Command.Text));
+            cr.Run(cr.FindChat(ce.Command.GetText()));
             return ce;
         }
     }
@@ -213,7 +213,7 @@ namespace Dialogic
 
     public class Opt : Command
     {
-        public Command action;
+        public ICommand action;
 
         public Ask parent;
 
@@ -237,12 +237,12 @@ namespace Dialogic
         public override string ToString()
         {
             return "[" + TypeName().ToUpper() + "] " + QQ(Text)
-                + (action is NoOp ? "" : " (-> " + action.Text + ")");
+                 + (action is NoOp ? "" : " (-> " + action.GetText() + ")");
         }
 
         public string ActionText()
         {
-            return action != null ? action.Text : "";
+            return action != null ? action.GetText() : "";
         }
 
         public override Command Copy()
@@ -255,7 +255,7 @@ namespace Dialogic
 
     public class Constraint
     {
-        public readonly string name;
+        public readonly string name; // needed?
         public readonly string value;
         public readonly Operator op;
 
@@ -266,27 +266,43 @@ namespace Dialogic
             this.op = Operator.FromString(ops);
         }
 
-        public bool Do()
+        public bool Check(string toCheck)
         {
-            return op.Invoke(name, value);
+            return op.Invoke(value, toCheck);
         }
     }
 
-    public class Find : Command
+    public class Find : ICommand
     {
         const string PATT = @"($?[a-zA-Z_][a-zA-Z0-9_]+) *([!<=>*^$]+) *([^ ]+)";
         protected static Regex QUERY = new Regex(PATT);
 
         protected Dictionary<string, Constraint> query;
 
-        public override void Init(string[] args, string[] meta)
+        public Dictionary<string, Constraint> Query()
+        {
+            return query;
+        }
+
+        protected Exception BadArg(string msg)
+        {
+            throw new ArgumentException(msg);
+        }
+
+        protected Exception BadArgs(string[] args, int expected)
+        {
+            return BadArg(TypeName().ToUpper() + " expects " + expected + " args,"
+                + " got " + args.Length + "'" + string.Join(" # ", args) + "'\n");
+        }
+
+        public void Init(string[] args, string[] meta)
         {
             if (args.Length > 0) throw BadArgs(args, 1);
-            //query = new Dictionary<string, Comparison>();
+            query = new Dictionary<string, Constraint>();
             ParseMeta(meta);
         }
 
-        protected /*override*/ void ParseMetaQuery(string[] pairs)
+        protected void ParseMeta(string[] pairs)
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
@@ -306,15 +322,50 @@ namespace Dialogic
         /**
          * Do the fuzzy search, then call Run() on the selected Chat
          */
-        public override ChatEvent Fire(ChatRuntime cr)
+        public ChatEvent Fire(ChatRuntime cr)
         {
             Command clone = this.Copy();
             Substitutions.DoMeta(clone.Meta(), cr.Globals());
             ChatEvent ce = new ChatEvent(clone);
             Find find = (Find)ce.Command;
-            Chat c = cr.Find(find.meta);
+            Chat c = cr.Find(find.query);
             if (c != null) cr.Run(c);
             return ce;
+        }
+
+        public Command Copy()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetText()
+        {
+            return null;
+        }
+
+        public int GetPauseAfterMs()
+        {
+            return 0;
+        }
+
+        public Dictionary<string, string> Meta()
+        {
+            throw new NotImplementedException("Not for Find");
+        }
+
+        public string GetMeta(string key)
+        {
+            throw new NotImplementedException("Not for Find");
+        }
+
+        public bool HasMeta()
+        {
+            return false;
+        }
+
+        public string TypeName()
+        {
+            return this.GetType().ToString().Replace(Command.PACKAGE, "");
         }
     }
 
@@ -322,7 +373,7 @@ namespace Dialogic
 
     public class Chat : Command
     {
-        public List<Command> commands = new List<Command>(); // not copied
+        public List<ICommand> commands = new List<ICommand>(); // not copied
 
         public Chat() : this("C" + Util.EpochMs()) { }
 
@@ -336,7 +387,7 @@ namespace Dialogic
             return commands.Count();
         }
 
-        public void AddCommand(Command c)
+        public void AddCommand(ICommand c)
         {
             this.commands.Add(c);
         }
@@ -370,7 +421,20 @@ namespace Dialogic
         }
     }
 
-    public abstract class Command : MetaData
+    public interface ICommand
+    {
+        void Init(string[] args, string[] meta);
+        Command Copy();
+        string GetText();
+        ChatEvent Fire(ChatRuntime cr);
+        int GetPauseAfterMs();
+        Dictionary<string, string> Meta();
+        string GetMeta(string key);
+        bool HasMeta();
+        string TypeName();
+    }
+
+    public abstract class Command : MetaData, ICommand
     {
         public const string PACKAGE = "Dialogic.";
 
@@ -392,12 +456,18 @@ namespace Dialogic
             this.PauseAfterMs = 0;
         }
 
+        public int GetPauseAfterMs()
+        {
+            return PauseAfterMs;
+        }
+        public string GetText() { return Text; }
+
         private static string ToMixedCase(string s)
         {
             return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
         }
 
-        public static Command Create(string type, string[] args, string[] meta)
+        public static ICommand Create(string type, string[] args, string[] meta)
         {
             type = ToMixedCase(type);
             var cmd = Create(Type.GetType(PACKAGE + type), args, meta);
@@ -405,9 +475,9 @@ namespace Dialogic
             throw new TypeLoadException("No type: " + PACKAGE + type);
         }
 
-        public static Command Create(Type type, string[] args, string[] meta)
+        public static ICommand Create(Type type, string[] args, string[] meta)
         {
-            Command cmd = (Command)Activator.CreateInstance(type);
+            ICommand cmd = (ICommand)Activator.CreateInstance(type);
             cmd.Init(args, meta);
             return cmd;
         }
@@ -489,9 +559,9 @@ namespace Dialogic
             return meta != null && meta.Count > 0;
         }
 
-        public object GetMeta(string key, object defaultVal = null)
+        public string GetMeta(string key)
         {
-            return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+            return meta != null && meta.ContainsKey(key) ? meta[key] : null;
         }
 
         /*public string GetMetaString(string key, string defaultVal = null)
