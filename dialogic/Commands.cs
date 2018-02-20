@@ -40,7 +40,6 @@ namespace Dialogic
 
     public class Do : Command, IEmittable
     {
-
         public Do() : base()
         {
             this.PauseAfterMs = 1000;
@@ -53,7 +52,7 @@ namespace Dialogic
 
         public Set() : base() { }
 
-        public Set(string name, string value) : base() // not used outside tests
+        public Set(string name, string value) : base() // tests only
         {
             this.Text = name;
             this.Value = value;

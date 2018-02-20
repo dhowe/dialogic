@@ -62,7 +62,6 @@
     <None Include="bin\Debug\Antlr4.Runtime.dll" />
     <None Include="data\gscript.gs" />
     <None Include="data\queries.gs" />
-    <None Include="data\find.gs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.targets" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.targets')" />

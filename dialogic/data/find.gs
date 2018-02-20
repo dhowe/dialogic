@@ -1,1 +1,0 @@
-﻿FIND {day=hello,dev=1}
