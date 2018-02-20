@@ -20,8 +20,6 @@ Welcome to your first Dialogic script!
 
 A COMMAND must begin a line
 
-A COMMAND can be followed by zero or more ARGUMENTS
-
 COMMANDS include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [GO](https://github.com/dhowe/dialogic/wiki/Command-Reference#go), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
 
 Here is a short example:
