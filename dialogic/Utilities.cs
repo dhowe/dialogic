@@ -236,6 +236,7 @@ namespace Dialogic
         public bool Invoke(string s1, string s2)
         {
             if (this == EQ) return Equals(s1, s2);
+            //if (this == NEQ) return !Equals(s1, s2);
             throw new Exception("Unexpected Op type: " + this);
         }
         /*

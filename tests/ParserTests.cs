@@ -43,8 +43,6 @@ namespace tests
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
-            //Assert.That(chats[0].commands[0].GetMetaString("pace"), Is.EqualTo("fast"));
-            Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
             chats = ChatParser.ParseText("SAY Thank you {pace=fast,count=2}");
             Assert.That(chats.Count, Is.EqualTo(1));

@@ -18,6 +18,7 @@ namespace Dialogic
         protected Ask lastPrompt;
         protected bool logInitd, waitingOnPrompt = false;
         protected int nextEventTime;
+        internal static string DefaultSpeaker;
 
         public ChatRuntime(List<Chat> chats) : this(chats, null) { }
 

@@ -14,7 +14,7 @@ namespace Dialogic
     {
         protected override void OnChatEvent(ChatEvent e)
         {
-            Command cmd = e.Command;
+            Command cmd = e.Command();
             Console.WriteLine(cmd);
         }
     }
@@ -55,7 +55,7 @@ namespace Dialogic
 
         protected override void OnChatEvent(ChatEvent e)
         {
-            Command c = e.Command;
+            Command c = e.Command();
 
             if (c is IEmittable)
             {
@@ -150,11 +150,11 @@ namespace Dialogic
 
         protected override void OnChatEvent(ChatEvent e)
         {
-            if (e.Command is IEmittable)
+            if (e.Command() is IEmittable)
             {
                 UpdateEvent ge = pool.Get();
 
-                Command cmd = e.Command;
+                Command cmd = e.Command();
                 ge.Set("text", cmd.Text);
                 ge.Set("type", cmd.TypeName());
 

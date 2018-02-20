@@ -25,7 +25,7 @@ namespace Dialogic
         public override ChatEvent Fire(ChatRuntime cr)
         {
             ChatEvent ce = base.Fire(cr);
-            cr.Run(cr.FindChat(ce.Command.Text));
+            cr.Run(cr.FindChat(ce.Command().Text));
             return ce;
         }
     }
@@ -43,6 +43,12 @@ namespace Dialogic
         public Do() : base()
         {
             this.PauseAfterMs = 1000;
+        }
+
+        public override void Init(string[] args, string[] meta)
+        {
+            base.Init(args, meta);
+            if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
         }
     }
 
@@ -313,7 +319,7 @@ namespace Dialogic
             Command clone = this.Copy();
             Substitutions.DoMeta(clone.Meta(), cr.Globals());
             ChatEvent ce = new ChatEvent(clone);
-            Find find = (Find)ce.Command;
+            Find find = (Find)ce.Command();
             Chat c = cr.Find(find.Meta());
             if (c != null) cr.Run(c);
             return ce;
@@ -386,7 +392,7 @@ namespace Dialogic
 
         public int PauseAfterMs { get; protected set; }
 
-        public string Text, Actor;
+        public string Text, Actor = ChatRuntime.DefaultSpeaker;
 
         protected Command()
         {
@@ -430,18 +436,23 @@ namespace Dialogic
             return this.GetType().ToString().Replace(PACKAGE, "");
         }
 
+        public virtual Command Realize(ChatRuntime cr) {
+            Substitutions.DoMeta(meta, cr.Globals());
+            Substitutions.Do(ref Text, cr.Globals());
+            return this;
+        }
+
         public virtual ChatEvent Fire(ChatRuntime cr)
         {
-            var clone = this.Copy();
-            var globals = cr.Globals();
-            Substitutions.DoMeta(clone.meta, globals);
-            Substitutions.Do(ref clone.Text, globals);
-            return new ChatEvent(clone);
+            return new ChatEvent(this.Copy().Realize(cr));
         }
 
         public virtual Command Copy()
         {
-            return (Command)this.MemberwiseClone();
+            Command c = (Command)this.MemberwiseClone();
+            if (meta != null) c.meta = meta.ToDictionary
+                    (kv => kv.Key, kv => kv.Value);
+            return c;
         }
 
         protected Exception BadArg(string msg)
@@ -529,21 +540,10 @@ namespace Dialogic
         }*/
 
         /* Note: new keys will overwrite old keys with same name */
-        public void SetMeta(string key, string val)
+        public void SetMeta(string key, object val)
         {
             if (meta == null) meta = new Dictionary<string, object>();
             meta[key] = val;
-        }
-
-        public void AddMeta(Dictionary<string, string> pairs)
-        {
-            if (pairs != null)
-            {
-                foreach (var key in pairs.Keys)
-                {
-                    meta[key] = pairs[key];
-                }
-            }
         }
 
         public IDictionary<string, object> Meta()

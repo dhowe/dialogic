@@ -12,12 +12,9 @@ namespace Dialogic
             this.command = c;
         }
 
-        public Command Command
+        public Command Command()
         {
-            get
-            {
-                return command;
-            }
+            return command;
         }
     }
 
