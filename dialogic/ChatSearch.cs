@@ -81,6 +81,16 @@ namespace Dialogic
             return (from kvp in list select kvp.Key).ToList();
         }
 
+        public static Chat Find(List<Chat> chats, Constraints constraints)
+        {
+            return Find(chats, constraints.AsDict());
+        }
+
+        public static List<Chat> FindAll(List<Chat> chats, Constraints constraints)
+        {
+            return FindAll(chats, constraints.AsDict());
+        }
+
         static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
         {
             List<KeyValuePair<Chat, int>> list = d.ToList();

@@ -177,6 +177,47 @@ namespace Dialogic
         }
     }
 
+    public class Constraints
+    {
+        IDictionary<string, object> pairs;
+
+        public Constraints()
+        {
+            pairs = new Dictionary<string, object>();
+        }
+
+        public Constraints(string key, string value) : this()
+        {
+            this.Add(key, value);
+        }
+
+        public Constraints(string op, string key, string value) : this()
+        {
+            this.Add(op, key, value);
+        }
+
+        public Constraints Add(Constraint c)
+        {
+            pairs.Add(c.name, c);
+            return this;
+        }
+
+        public Constraints Add(string key, string value) 
+        {
+            return Add(new Constraint(key, value));
+        }
+
+        public Constraints Add(string op, string key, string value)
+        {
+            return Add(new Constraint(op, key, value));
+        }
+
+        public IDictionary<string, object> AsDict()
+        {
+            return pairs;
+        }
+    }
+
     public class Operator
     {
         private enum OpType { EQUALITY, COMPARISON, MATCHING }

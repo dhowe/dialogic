@@ -128,7 +128,6 @@ namespace Dialogic
         }
     }
 
-
     public class ChoiceEvent : EventArgs, IChoice
     {
         protected int choiceIndex;

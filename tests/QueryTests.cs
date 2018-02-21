@@ -21,10 +21,7 @@ namespace tests
             c.SetMeta("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Dictionary<string, object> q = new Dictionary<string, object> {
-                { "dev", new Constraint("dev","1") }
-            };
-            chats = cr.FindAll(q);
+            chats = cr.FindAll(new Constraints("dev", "1").AsDict());
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(3));
@@ -42,10 +39,7 @@ namespace tests
             c.SetMeta("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Dictionary<string, object> q = new Dictionary<string, object> {
-                { "dev", new Constraint("dev","1") }
-            };
-            chats = cr.FindAll(q);
+            chats = cr.FindAll(new Constraints("dev", "1").AsDict());
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(3));
@@ -65,7 +59,7 @@ namespace tests
             chats.Add(c = new Chat("c3"));
 
             ChatRuntime cr = new ChatRuntime(chats);
-            chats = cr.FindAll(new Dictionary<string, object> { { "dev", new Constraint("dev","1") } });
+            chats = cr.FindAll(new Constraints("dev", "1").AsDict());
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
@@ -84,7 +78,7 @@ namespace tests
             c.SetMeta("day", "hello");
             chats.Add(c = new Chat("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Chat res = cr.Find(new Dictionary<string, object> { { "dev", new Constraint("dev","1") } });
+            Chat res = new ChatRuntime(chats).Find(new Constraints("dev", "1").AsDict());
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 
@@ -99,10 +93,7 @@ namespace tests
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents);
             List<Chat> result = new ChatRuntime(chats).FindAll
-                (new Dictionary<string, object> {
-                    { "dev", new Constraint("dev","1") },
-                    { "day", new Constraint("day","fri") }}
-            );
+                (new Constraints("dev", "1").Add("day", "fri").AsDict());
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].Text, Is.EqualTo("c1"));
@@ -141,12 +132,7 @@ namespace tests
         [Test()]
         public void TestFindAllOp1()
         {
-            string[] lines = {
-                "CHAT c0 {dev=1}",
-                "FIND {dev>2,day=fri}",
-                //"CHAT c1 {dev=3}",
-                //"CHAT c2 {dev=0}",
-            };
+            string[] lines = { "CHAT c0 {dev=1}", "FIND {dev>2,day=fri}" };
 
             string contents = String.Join("\n", lines);
 
@@ -157,7 +143,7 @@ namespace tests
             ChatRuntime cr = new ChatRuntime(chats);
 
             chats = cr.FindAll(finder.Meta());
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(0));
