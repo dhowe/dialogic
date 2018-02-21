@@ -23,80 +23,55 @@ namespace Dialogic.Antlr {
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using IToken = Antlr4.Runtime.IToken;
-using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 
 /// <summary>
-/// This class provides an empty implementation of <see cref="IDialogicVisitor{Result}"/>,
-/// which can be extended to create a visitor which only needs to handle a subset
-/// of the available methods.
+/// This interface defines a complete generic visitor for a parse tree produced
+/// by <see cref="DialogicParser"/>.
 /// </summary>
 /// <typeparam name="Result">The return type of the visit operation.</typeparam>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.6.4")]
-public partial class DialogicBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, IDialogicVisitor<Result> {
+[System.CLSCompliant(false)]
+public interface IDialogicVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="DialogicParser.script"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitScript([NotNull] DialogicParser.ScriptContext context) { return VisitChildren(context); }
+	Result VisitScript([NotNull] DialogicParser.ScriptContext context);
 
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="DialogicParser.line"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitLine([NotNull] DialogicParser.LineContext context) { return VisitChildren(context); }
+	Result VisitLine([NotNull] DialogicParser.LineContext context);
 
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="DialogicParser.command"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitCommand([NotNull] DialogicParser.CommandContext context) { return VisitChildren(context); }
+	Result VisitCommand([NotNull] DialogicParser.CommandContext context);
 
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="DialogicParser.args"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitArgs([NotNull] DialogicParser.ArgsContext context) { return VisitChildren(context); }
+	Result VisitArgs([NotNull] DialogicParser.ArgsContext context);
 
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="DialogicParser.arg"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitArg([NotNull] DialogicParser.ArgContext context) { return VisitChildren(context); }
+	Result VisitArg([NotNull] DialogicParser.ArgContext context);
 
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="DialogicParser.meta"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitMeta([NotNull] DialogicParser.MetaContext context) { return VisitChildren(context); }
+	Result VisitMeta([NotNull] DialogicParser.MetaContext context);
 }
 } // namespace Dialogic.Antlr

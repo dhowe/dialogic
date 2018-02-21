@@ -43,14 +43,11 @@
     <Compile Include="ChatSearch.cs" />
     <Compile Include="Clients.cs" />
     <Compile Include="Commands.cs" />
-    <Compile Include="DialogicBaseVisitor.cs" />
-    <Compile Include="DialogicLexer.cs" />
-    <Compile Include="DialogicParser.cs" />
-    <Compile Include="DialogicVisitor.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Substitutions.cs" />
     <Compile Include="Utilities.cs" />
+    <Compile Include="antlr/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -62,6 +59,9 @@
     <None Include="bin\Debug\Antlr4.Runtime.dll" />
     <None Include="data\gscript.gs" />
     <None Include="data\queries.gs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="antlr\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.targets" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.targets')" />
