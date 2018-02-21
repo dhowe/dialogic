@@ -32,7 +32,6 @@ using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 /// </summary>
 /// <typeparam name="Result">The return type of the visit operation.</typeparam>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.6.4")]
-[System.CLSCompliant(false)]
 public partial class DialogicBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, IDialogicVisitor<Result> {
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="DialogicParser.script"/>.

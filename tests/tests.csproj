@@ -43,6 +43,10 @@
     <Compile Include="SubstTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="OperatorTests.cs" />
+    <Compile Include="tracery\CustomModifierTests.cs" />
+    <Compile Include="tracery\ExpansionRegexTests.cs" />
+    <Compile Include="tracery\FlattenTests.cs" />
+    <Compile Include="tracery\SaveSymbolTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -52,6 +56,9 @@
       <Project>{B3C8B750-DC86-42FD-8FC1-5A81761E698D}</Project>
       <Name>dialogic</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="tracery\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
