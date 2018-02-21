@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using dialogic.tracery;
 
-namespace Tests.Unit_Tests
+namespace dialogic.tracery
 {
     [TestFixture]
     public class CustomModifiersTest

@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace tests
+namespace dialogic
 {
-    [TestFixture()]
+    [TestFixture]
     public class OperatorTests
     {
-        [Test()]
+        [Test]
         public void TestEquality()
         {
             Assert.That(Operator.EQ.Invoke("hello", "hello"), Is.True);
@@ -30,7 +30,7 @@ namespace tests
             Assert.Throws<OperatorException>(() => Operator.NEQ.Invoke(null, null));
         }
 
-        [Test()]
+        [Test]
         public void TestComparison()
         {
             Assert.That(Operator.GT.Invoke("2", "1"), Is.True);
@@ -69,7 +69,7 @@ namespace tests
             Assert.Throws<OperatorException>(() => Operator.GTE.Invoke("", ""));
         }
 
-        [Test()]
+        [Test]
         public void TestMatching()
         {
             Assert.That(Operator.SW.Invoke("Hello", "He"), Is.True);

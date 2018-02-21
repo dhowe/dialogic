@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using dialogic.tracery;
 
-namespace Tests
+namespace dialogic.tracery
 {
     [TestFixture]
     public class SaveSymbolTests

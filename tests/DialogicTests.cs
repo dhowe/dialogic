@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace tests
+namespace dialogic
 {
-    [TestFixture()]
+    [TestFixture]
     public class DialogicTests
     {
-        [Test()]
+        [Test]
         public void TestRandItem()
         {
             string[] arr = { "0", "1", "2" };
@@ -29,7 +29,7 @@ namespace tests
             }
         }
 
-        [Test()]
+        [Test]
         public void TestCommandCopy()
         {
             Chat chat = ChatParser.ParseText("SAY Thank you { pace = fast}")[0];

@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace tests
+namespace dialogic
 {
-    [TestFixture()]
+    [TestFixture]
     public class SubstTests
     {
         Dictionary<string, object> globals = new Dictionary<string, object>() {
@@ -17,7 +17,7 @@ namespace tests
                 { "count", 4 }
         };
 
-        [Test()]
+        [Test]
         public void TestReplaceMeta()
         {
             var s = @"SAY The $animal yawned {animal=$animal}";
@@ -27,7 +27,7 @@ namespace tests
             Assert.That(c.GetMeta("animal"), Is.EqualTo("dog"));
         }
 
-        [Test()]
+        [Test]
         public void TestReplaceVars()
         {
             var s = @"SAY The $animal woke $count times";
@@ -36,7 +36,7 @@ namespace tests
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
         }
 
-        [Test()]
+        [Test]
         public void TestReplaceGroups()
         {
             var txt = "The boy was (sad | happy)";
@@ -62,7 +62,7 @@ namespace tests
             }
         }
 
-        [Test()]
+        [Test]
         public void TestReplace1()
         {
             var s = @"SAY The $animal woke and $prep (ate|ate)";
@@ -70,7 +70,7 @@ namespace tests
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
         }
 
-        [Test()]
+        [Test]
         public void TestReplace2()
         {
             var txt = "letter $group";
@@ -84,7 +84,7 @@ namespace tests
             }
         }
 
-        [Test()]
+        [Test]
         public void TestReplace3()
         {
             var txt = "letter $cmplx";

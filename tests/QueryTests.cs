@@ -3,14 +3,14 @@ using Dialogic;
 using System.Collections.Generic;
 using System;
 
-namespace tests
+namespace dialogic
 {
-    [TestFixture()]
+    [TestFixture]
     public class QueryTests
     {
         /// ////////////////////////////////////////////////////
 
-        [Test()]
+        [Test]
         public void TestFindAll()
         {
             Chat c;
@@ -28,7 +28,7 @@ namespace tests
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
 
-        [Test()]
+        [Test]
         public void TestFindAll2()
         {
             Chat c;
@@ -46,7 +46,7 @@ namespace tests
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
 
-        [Test()]
+        [Test]
         public void TestFindAll3()
         {
             Chat c;
@@ -67,7 +67,7 @@ namespace tests
             Assert.That(chats[1].Text, Is.EqualTo("c3"));
         }
 
-        [Test()]
+        [Test]
         public void TestFind()
         {
             Chat c;
@@ -82,7 +82,7 @@ namespace tests
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 
-        [Test()]
+        [Test]
         public void TestFindAllOpsAPI()
         {
             string[] lines = {
@@ -100,7 +100,7 @@ namespace tests
             Assert.That(result.Count, Is.EqualTo(2));
         }
 
-        [Test()]
+        [Test]
         public void TestFindAll4()
         {
             string[] lines = {
@@ -129,7 +129,7 @@ namespace tests
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
         }
 
-        [Test()]
+        [Test]
         public void TestFindAllOp1()
         {
             string[] lines = { "CHAT c0 {dev=1}", "FIND {dev>2,day=fri}" };
@@ -150,7 +150,7 @@ namespace tests
         }
 
 
-        [Test()]
+        [Test]
         public void TestFindAllOp2()
         {
             string[] lines = {

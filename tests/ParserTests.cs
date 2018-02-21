@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using Dialogic;
 using NUnit.Framework;
 
-namespace tests
+namespace dialogic
 {
-    [TestFixture()]
+    [TestFixture]
     public class ParserTests
     {
-        [Test()]
+        [Test]
         public void TestCommandParsing()
         {
             List<Chat> chats;
@@ -65,7 +65,7 @@ namespace tests
             Assert.That(chats[0].commands[0].HasMeta(), Is.EqualTo(false));
         }
 
-        [Test()]
+        [Test]
         public void TestOpsParsing()
         {
             var chat = ChatParser.ParseText("FIND {do=1}")[0];
@@ -77,7 +77,7 @@ namespace tests
             Assert.That(finder.Meta(), Is.Not.Null);
         }
 
-        /*[Test()]
+        /*[Test]
         public void TestMetaTypes()
         {
             var s = "CHAT C1 {int=1,double=2.3,string=hello,bool=true,intd=1.0}";
