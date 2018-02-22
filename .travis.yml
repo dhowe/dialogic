@@ -1,2 +1,9 @@
 language: csharp
+mono: none
+dotnet: 2.0.0
 solution: dialogic.sln
+install:
+- dotnet restore dialogic.sln
+script:
+ - dotnet build
+ - dotnet test tests/tests.csproj
