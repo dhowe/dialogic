@@ -4,6 +4,8 @@ dotnet: 2.1.4
 solution: dialogic.sln
 install:
 - dotnet restore dialogic.sln
+- nuget install NUnit.Runners -Version 3.2.0 -OutputDirectory testrunner
 script:
- - dotnet build
- - dotnet test tests/tests.csproj
+ - xbuild /p:Configuration=Release dialogic.sln 
+after_script: 
+ - nunit-console tests/bin/Release/tests.dll
