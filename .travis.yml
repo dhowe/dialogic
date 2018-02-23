@@ -1,11 +1,8 @@
 language: csharp
-mono: none
-dotnet: 2.1.4
 solution: dialogic.sln
-install:
-- dotnet restore dialogic.sln
-- nuget install NUnit.Runners -Version 3.2.0 -OutputDirectory testrunner
-script:
- - xbuild /p:Configuration=Release dialogic.sln 
-after_script: 
- - nunit-console tests/bin/Release/tests.dll
+before_install:
+  - sudo apt-get install nunit-console
+before_script:
+  - nuget restore dialogic.sln
+after_script:
+  - nunit-console tests/bin/Release/tests.dll
