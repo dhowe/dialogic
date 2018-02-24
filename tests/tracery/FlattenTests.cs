@@ -1,8 +1,48 @@
-﻿using NUnit.Framework;
-using dialogic.tracery;
+﻿using System.Text.RegularExpressions;
+using NUnit.Framework;
 
 namespace dialogic.tracery
 {
+    [TestFixture]
+    class YamlTests
+    {
+
+        [Test]
+        public void TestNewExp()
+        {
+            // @"(?<!\[|:)(?!\])#.+?(?<!\[|:)#(?!\])");
+            Grammar.ExpansionRegex = new Regex(@"(?<!\[|:)(?!\])#[^ ]+?(?<!\[|:)\b(?!\])");
+            //Grammar.ExpansionRegex = new Regex(@"(?<!\[|:)(?!\])#\w+");
+            var yaml = "---\norigin: '#sentence!'\nsentence: 'Hello world'";
+            var em = Grammar.ExpansionRegex.Matches("#origin");
+            System.Console.WriteLine("GOT "+em.Count);
+            Assert.That(em.Count,Is.GreaterThan(0));
+            var output = new Grammar(yaml).Flatten("#origin");
+            System.Console.WriteLine(output);
+            Assert.AreEqual(output, "Hello world!");
+            Grammar.ExpansionRegex = new Regex(@"(?<!\[|:)(?!\])#.+?(?<!\[|:)#(?!\])");
+        }
+
+        [Test]
+        public void YamlTests_HelloWorld_HelloWorld()
+        {
+            var yaml = "---\norigin: '#sentence#'\nsentence: 'Hello world'";
+            var output = new Grammar(yaml).Flatten("#origin#");
+            System.Console.WriteLine(output);
+            Assert.AreEqual(output, "Hello world");
+        }
+
+        [Test]
+        public void YamlTests_IncreasedExpansionDepth_HelloWorld()
+        {
+            // Arrange
+            var yaml = "---\norigin: '#sentence#'\nsentence: '#greeting# ";
+            yaml += "#place#'\nplace:\n - 'world'\ngreeting:\n - 'Hello'\n";
+            var output = new Grammar(yaml.ToString()).Flatten("#origin#");
+            Assert.AreEqual(output, "Hello world");
+        }
+    }
+
     [TestFixture]
     public class FlattenTests
     {

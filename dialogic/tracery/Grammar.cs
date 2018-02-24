@@ -76,7 +76,7 @@ namespace dialogic.tracery
                 { "ed",            Modifiers.Ed },
                 { "capitalizeAll", Modifiers.CapitalizeAll }
             };
-            
+
             // Initialize the save storage
             SaveData = new Dictionary<string, string>();
         }
@@ -89,13 +89,13 @@ namespace dialogic.tracery
         private void PopulateRules(string source)
         {
             // Is it valid json?
-            if (InputValidators.IsValidJson(source))
+            if (IsValidJson(source))
             {
                 // Deserialize directly
                 Rules = JsonConvert.DeserializeObject<JObject>(source);
             }
             // Is it valid yaml?
-            else if (InputValidators.IsValidYaml(source))
+            else if (IsValidYaml(source))
             {
                 // Deserialize yaml
                 var deserializer = new Deserializer();
@@ -107,7 +107,7 @@ namespace dialogic.tracery
             }
             else
             {
-                throw new Exception("Grammar file doesn't seem to be valid JSON");// or YAML!");
+                throw new Exception("Grammar file doesn't seem to be valid JSON or YAML!");
             }
         }
 
@@ -142,8 +142,9 @@ namespace dialogic.tracery
             // Iterate expansion symbols
             foreach (Match match in expansionMatches)
             {
+                Console.WriteLine("Match: "+match.Value);
                 ResolveSaveSymbols(match.Value);
-                
+
                 // Remove the # surrounding the symbol name
                 var matchName = match.Value.Replace("#", "");
 
@@ -160,14 +161,14 @@ namespace dialogic.tracery
                 modifiers = GetModifiers(match.Value);
 
                 // If there's no modifier with that name then skip
-                if(modifiers == null)
+                if (modifiers == null)
                 {
                     continue;
                 }
 
                 // Get the selected rule
                 var selectedRule = Rules[matchName] ?? SaveData[matchName] ?? matchName;
-            
+
                 // If the rule has any children then pick one at random
                 if (selectedRule.Type == JTokenType.Array)
                 {
@@ -179,7 +180,7 @@ namespace dialogic.tracery
 
                     rule = rule.Replace(match.Value, resolved);
                 }
-                else 
+                else
                 {
                     // Otherwise flatten it
                     var resolved = Flatten(selectedRule.ToString());
@@ -203,12 +204,12 @@ namespace dialogic.tracery
             foreach (Match saveMatch in SaveSymbolRegex.Matches(rule))
             {
                 // [hero:#name#]
-                var save = saveMatch.Value.Replace("[", "").Replace("]",  "");
+                var save = saveMatch.Value.Replace("[", "").Replace("]", "");
 
                 // If it's just [hero], then flatten #hero#
-                if(!save.Contains(":"))
+                if (!save.Contains(":"))
                 {
-                    Flatten("#"+save+"#");
+                    Flatten("#" + save + "#");
                     continue;
                 }
 
@@ -261,7 +262,7 @@ namespace dialogic.tracery
             foreach (var modifier in modifiers)
             {
                 // If there's no modifier by this name in the list, skip it
-                if(!ModifierLookup.ContainsKey(modifier))
+                if (!ModifierLookup.ContainsKey(modifier))
                     continue;
 
                 // Otherwise execute the function and take the output
@@ -271,6 +272,61 @@ namespace dialogic.tracery
             // Give back the string
             return resolved;
         }
+        /// <summary>
+        /// Returns true if the given string is valid JSON.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>True if valid, false if not</returns>
+        public static bool IsValidJson(string input)
+        {
+            // Get the first character
+            var firstChar = input.TrimStart().First();
+
+            // If it's not { or [ then it can't be valid JSON
+            if (firstChar != '{' && firstChar != '[')
+            {
+                return false;
+            }
+
+            // Attempt to parse it
+            try
+            {
+                var obj = JToken.Parse(input);
+
+                // If parsing was successful then it is valid
+                return true;
+            }
+            catch (JsonReaderException)
+            {
+                // If there was an error reading it then it can't be valid JSON
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the given string is valid YAML.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>True if valid, false if not</returns>
+        public static bool IsValidYaml(string input)
+        {
+            try
+            {
+                // Create a StringReader from the source
+                var r = new StringReader(input);
+
+                // Attempt to deserialize the StringReader
+                var deserializer = new Deserializer();
+                var yamlObject = deserializer.Deserialize(r);
+
+                // If parsing was successful then it is valid
+                return true;
+            }
+            catch (Exception)
+            {
+                // If there was an error deserialzing then it can't be valid
+                return false;
+            }
+        }
     }
 }
- 

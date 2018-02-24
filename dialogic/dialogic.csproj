@@ -54,7 +54,8 @@
     <Compile Include="Substitutions.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="antlr/*.cs" />
-    <Compile Include="tracery/*.cs" />
+    <Compile Include="tracery\Grammar.cs" />
+    <Compile Include="tracery\Modifiers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
