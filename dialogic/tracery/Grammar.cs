@@ -15,6 +15,8 @@ namespace dialogic.tracery
     /// </summary>
     public class Grammar
     {
+        public static char OPEN_TAG = '#', CLOSE_TAG = '#';
+
         /// <summary>
         /// Object containing all of the deserialized json rules.
         /// </summary>
@@ -29,7 +31,8 @@ namespace dialogic.tracery
         /// Regex for matching expansion symbols.
         /// #animal# etc.
         /// </summary>
-        public static Regex ExpansionRegex = new Regex(@"(?<!\[|:)(?!\])#.+?(?<!\[|:)#(?!\])");
+        public static Regex ExpansionRegex = new Regex(@"(?<!\[|:)(?!\])"
+            + OPEN_TAG + @".+?(?<!\[|:)" + CLOSE_TAG + @"(?!\])");
 
         /// <summary>
         /// Regex for matching save symbols.
@@ -142,7 +145,7 @@ namespace dialogic.tracery
             // Iterate expansion symbols
             foreach (Match match in expansionMatches)
             {
-                Console.WriteLine("Match: "+match.Value);
+                Console.WriteLine("Match: " + match.Value);
                 ResolveSaveSymbols(match.Value);
 
                 // Remove the # surrounding the symbol name

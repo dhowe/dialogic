@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Text.RegularExpressions;
+using NUnit.Framework;
 
 namespace dialogic.tracery
 {
