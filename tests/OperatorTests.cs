@@ -90,9 +90,13 @@ namespace dialogic
             Assert.That(Operator.RE.Invoke("Hello", null), Is.False);
             Assert.That(Operator.RE.Invoke("Hello", ""), Is.True);
 
+
             Assert.That(Operator.SW.Invoke("$Hello", "$"), Is.True);
             Assert.That(Operator.EW.Invoke("$Hello", "$"), Is.False);
             Assert.That(Operator.RE.Invoke("$Hello", "$"), Is.True);
+            Assert.That(Operator.RE.Invoke("hello", "(hello|bye)"), Is.True);
+            Assert.That(Operator.RE.Invoke("bye", "(hello|bye)"), Is.True);
+            Assert.That(Operator.RE.Invoke("by", "(hello|bye)"), Is.False);
 
             Assert.Throws<OperatorException>(() => Operator.SW.Invoke(null, "hello"));
             Assert.Throws<OperatorException>(() => Operator.SW.Invoke(null, null));

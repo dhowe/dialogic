@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using YamlDotNet.Serialization;
 
 namespace dialogic.tracery
 {
@@ -45,7 +48,7 @@ namespace dialogic.tracery
         /// </summary>
         /// <param name="input"></param>
         /// <returns>True if valid, false if not</returns>
-        /*public static bool IsValidYaml(string input)
+        public static bool IsValidYaml(string input)
         {
             try
             {
@@ -59,11 +62,11 @@ namespace dialogic.tracery
                 // If parsing was successful then it is valid
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // If there was an error deserialzing then it can't be valid
                 return false;
             }
-        }*/
+        }
     }
 }

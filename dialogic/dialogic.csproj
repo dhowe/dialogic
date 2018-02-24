@@ -38,6 +38,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet">
+      <HintPath>..\packages\YamlDotNet.4.3.1\lib\net35\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +66,7 @@
     <None Include="bin\Debug\Antlr4.Runtime.dll" />
     <None Include="data\gscript.gs" />
     <None Include="data\queries.gs" />
+    <None Include="data\tmp.gs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="antlr\" />

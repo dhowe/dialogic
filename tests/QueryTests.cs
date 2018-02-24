@@ -178,5 +178,106 @@ namespace dialogic
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
         }
+
+        [Test]
+        public void TestFindAllOp3()
+        {
+            string[] lines = {
+                "CHAT c0 {day=sunday}",
+                "FIND {emotion*=(hot|cool),day=fri}",
+                "CHAT c1 {emotion=wet}",
+                "CHAT c2 {emotion=hot,day=fri}",
+                "CHAT c3 {emotion=dry}",
+                "CHAT c4 {emotion=cool,day=fri}",
+            };
+
+            string contents = String.Join("\n", lines);
+
+            List<Chat> chats = ChatParser.ParseText(contents);
+            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            Command finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            ChatRuntime cr = new ChatRuntime(chats);
+
+            chats = cr.FindAll(finder.Meta());
+            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(2));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c2").Or.EqualTo("c4"));
+   
+            lines = new string[]{
+                "CHAT c1 {emotion=cold}",
+                "FIND {emotion*=ho}",
+                "CHAT c2 {emotion=hot}"
+            };
+
+            contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+             finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            cr = new ChatRuntime(chats);
+
+            chats = cr.FindAll(finder.Meta());
+            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+
+            lines = new string[]{
+                "CHAT c1 {emotion=cold}",
+                "FIND {emotion^=h}",
+                "CHAT c2 {emotion=hot}",
+                "CHAT c3 {emotion=that}"
+            };
+
+            contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            cr = new ChatRuntime(chats);
+
+            chats = cr.FindAll(finder.Meta());
+            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+
+            lines = new string[]{
+                "CHAT c1 {emotion=hot}",
+                "FIND {emotion$=ld}",
+                "CHAT c2 {emotion=hot}",
+                "CHAT c3 {emotion=cold}"
+            };
+
+            contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            cr = new ChatRuntime(chats);
+
+            chats = cr.FindAll(finder.Meta());
+            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c3"));
+        }
     }
 }

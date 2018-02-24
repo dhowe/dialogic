@@ -262,7 +262,9 @@ namespace Dialogic
                 case ">=": return Operator.GTE;
                 case "<=": return Operator.LTE;
                 case "!=": return Operator.NEQ;
-                case "==": return Operator.EQ;
+                case "^=": return Operator.SW;
+                case "$=": return Operator.EW;
+                case "*=": return Operator.RE;
                 case "=": return Operator.EQ;
             }
             throw new Exception("Invalid Operator: " + op);

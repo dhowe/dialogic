@@ -47,6 +47,7 @@
     <Compile Include="tracery\ExpansionRegexTests.cs" />
     <Compile Include="tracery\FlattenTests.cs" />
     <Compile Include="tracery\SaveSymbolTests.cs" />
+    <Compile Include="tracery\YamlTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -279,7 +279,9 @@ namespace Dialogic
 
         public bool Check(string toCheck)
         {
-            return op.Invoke(toCheck, value);
+            var passed = op.Invoke(toCheck, value);
+            //Console.WriteLine(toCheck+" "+op+" "+ value + " -> "+passed);
+            return passed;
         }
 
         public override string ToString()

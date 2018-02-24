@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections.Generic;
-//using YamlDotNet.Serialization;
+using YamlDotNet.Serialization;
 
 namespace dialogic.tracery
 {
@@ -94,7 +94,7 @@ namespace dialogic.tracery
                 // Deserialize directly
                 Rules = JsonConvert.DeserializeObject<JObject>(source);
             }
-            /* Is it valid yaml?
+            // Is it valid yaml?
             else if (InputValidators.IsValidYaml(source))
             {
                 // Deserialize yaml
@@ -103,8 +103,8 @@ namespace dialogic.tracery
 
                 // Reserialize the yaml as json into the Rules object
                 var rules = JsonConvert.SerializeObject(yamlObject);
-                Rules = JsonConvert.DeserializeObject<dynamic>(rules);
-            }*/
+                Rules = JsonConvert.DeserializeObject<JObject>(rules);
+            }
             else
             {
                 throw new Exception("Grammar file doesn't seem to be valid JSON");// or YAML!");
