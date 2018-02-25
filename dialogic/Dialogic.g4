@@ -4,7 +4,7 @@
 
 script: line+;
 line: (command SP* | command SP+ args) SP* (NEWLINE | EOF);
-command: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'FIND' | 'SET');
+command: ('CHAT' | 'SAY' | 'WAIT'| 'DO' | 'ASK' | 'OPT' | 'GO' | 'FIND' | 'SET' | 'GRAM');
 args: (arg (DELIM arg)*) | (LB meta RB) | (arg (DELIM arg)*) SP* (LB meta RB);
 arg: (WORD (SP+ WORD)*);
 meta: (SP | WORD | OPS)*;

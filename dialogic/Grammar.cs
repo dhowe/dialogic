@@ -6,16 +6,16 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections.Generic;
 using YamlDotNet.Serialization;
+using System.Text;
 
-namespace dialogic.tracery
+namespace dialogic
 {
-    /// <summary>
-    /// A set of rules that can be "flattened" to produce a single random string.
-    /// Often a single json object.
-    /// </summary>
     public class Grammar
     {
-        public static char OPEN_TAG = '#', CLOSE_TAG = '#';
+        public static string OPEN_TAG = "<", CLOSE_TAG = ">";
+        public static string OPEN_SAVE = "[", CLOSE_SAVE = "]";
+        public static char ASSIGN = '=';
+        public static bool DBUG = false;
 
         /// <summary>
         /// Object containing all of the deserialized json rules.
@@ -32,7 +32,7 @@ namespace dialogic.tracery
         /// #animal# etc.
         /// </summary>
         public static Regex ExpansionRegex = new Regex(@"(?<!\[|:)(?!\])"
-            + OPEN_TAG + @".+?(?<!\[|:)" + CLOSE_TAG + @"(?!\])");
+            + OPEN_TAG + @".+?(?<!\[|" + ASSIGN + ")" + CLOSE_TAG + @"(?!\])");
 
         /// <summary>
         /// Regex for matching save symbols.
@@ -53,10 +53,8 @@ namespace dialogic.tracery
         /// <summary>
         /// Read all text from a file and pass it to the other constructor.
         /// </summary>
-        /// <param name="source"></param>
-        public Grammar(FileInfo source) : this(File.ReadAllText(source.FullName))
-        {
-        }
+        /// <param name="f"></param>
+        public Grammar(FileInfo f) : this(File.ReadAllText(f.FullName)) { }
 
         /// <summary>
         /// Load the rules list by deserializing the source as a json object.
@@ -64,7 +62,6 @@ namespace dialogic.tracery
         /// <param name="source"></param>
         public Grammar(string source)
         {
-            // Populate the rules list
             PopulateRules(source);
 
             // Set up the function table
@@ -86,7 +83,6 @@ namespace dialogic.tracery
 
         /// <summary>
         /// Deserialize the source string from either json or yaml and populate the rules
-        /// object.
         /// </summary>
         /// <param name="source"></param>
         private void PopulateRules(string source)
@@ -100,18 +96,22 @@ namespace dialogic.tracery
             // Is it valid yaml?
             else if (IsValidYaml(source))
             {
-                // Deserialize yaml
-                var deserializer = new Deserializer();
-                var yamlObject = deserializer.Deserialize(new StringReader(source));
-
-                // Reserialize the yaml as json into the Rules object
-                var rules = JsonConvert.SerializeObject(yamlObject);
-                Rules = JsonConvert.DeserializeObject<JObject>(rules);
+                Rules = DeserializeYaml(source);
             }
             else
             {
-                throw new Exception("Grammar file doesn't seem to be valid JSON or YAML!");
+                throw new Exception("Grammar file not valid JSON or YAML!");
             }
+        }
+
+        private JObject DeserializeYaml(string source)
+        {
+            var deserializer = new Deserializer();
+            var yamlObject = deserializer.Deserialize(new StringReader(source));
+
+            // Reserialize the yaml as json into the Rules object
+            var rules = JsonConvert.SerializeObject(yamlObject);
+            return JsonConvert.DeserializeObject<JObject>(rules);
         }
 
         /// <summary>
@@ -136,6 +136,11 @@ namespace dialogic.tracery
             // Get expansion symbols
             var expansionMatches = ExpansionRegex.Matches(rule);
 
+            if (DBUG && expansionMatches.Count < 1 && (rule.Contains(OPEN_TAG) || rule.Contains(CLOSE_TAG)))
+            {
+                throw new Exception("No matches for '" + rule + "' (" + ExpansionRegex + ") in\n" + Rules);
+            }
+
             // If there are no expansion symbols then attempt to resolve any save symbols
             if (expansionMatches.Count == 0)
             {
@@ -145,18 +150,20 @@ namespace dialogic.tracery
             // Iterate expansion symbols
             foreach (Match match in expansionMatches)
             {
-                Console.WriteLine("Match: " + match.Value);
+                if (DBUG) Console.WriteLine("Match: " + match.Value);
                 ResolveSaveSymbols(match.Value);
 
                 // Remove the # surrounding the symbol name
-                var matchName = match.Value.Replace("#", "");
+                var matchName = match.Value.Replace(OPEN_TAG, "").Replace(CLOSE_TAG, "");
+
+                if (DBUG) Console.WriteLine("MatchName: " + match.Value);
 
                 // Remove the save symbols
                 matchName = SaveSymbolRegex.Replace(matchName, "");
 
                 if (matchName.Contains("."))
                 {
-                    matchName = matchName.Substring(0, matchName.IndexOf("."));
+                    matchName = matchName.Substring(0, matchName.IndexOf(".", StringComparison.Ordinal));
                 }
 
                 // Get modifiers
@@ -164,13 +171,19 @@ namespace dialogic.tracery
                 modifiers = GetModifiers(match.Value);
 
                 // If there's no modifier with that name then skip
-                if (modifiers == null)
-                {
-                    continue;
-                }
+                if (modifiers == null) continue;
+
+                JToken selectedRule = null;
 
                 // Get the selected rule
-                var selectedRule = Rules[matchName] ?? SaveData[matchName] ?? matchName;
+                try
+                {
+                    selectedRule = Rules[matchName] ?? SaveData[matchName] ?? matchName;
+                }
+                catch (Exception)
+                {
+                    throw new Exception("KEY NOT FOUND: " + matchName);
+                }
 
                 // If the rule has any children then pick one at random
                 if (selectedRule.Type == JTokenType.Array)
@@ -197,6 +210,16 @@ namespace dialogic.tracery
             return rule;
         }
 
+        public override string ToString()
+        {
+            var s = "";
+            foreach (var kv in Rules)
+            {
+                s += "  "+kv.Key + ": " + kv.Value + "\n";
+            }
+            return s;
+        }
+
         /// <summary>
         /// Resolves and saves any data marked by save symbols.
         /// </summary>
@@ -207,17 +230,17 @@ namespace dialogic.tracery
             foreach (Match saveMatch in SaveSymbolRegex.Matches(rule))
             {
                 // [hero:#name#]
-                var save = saveMatch.Value.Replace("[", "").Replace("]", "");
+                var save = saveMatch.Value.Replace(OPEN_SAVE, "").Replace(CLOSE_SAVE, "");
 
                 // If it's just [hero], then flatten #hero#
-                if (!save.Contains(":"))
+                if (!save.Contains(ASSIGN))
                 {
-                    Flatten("#" + save + "#");
+                    Flatten(OPEN_TAG + save + CLOSE_TAG);
                     continue;
                 }
 
                 // hero:#name#
-                var saveSplit = save.Split(':');
+                var saveSplit = save.Split(ASSIGN);
 
                 // hero
                 var name = saveSplit[0];
@@ -247,7 +270,7 @@ namespace dialogic.tracery
         /// <returns></returns>
         private List<string> GetModifiers(string symbol)
         {
-            var modifiers = symbol.Replace("#", "").Split('.').ToList();
+            var modifiers = symbol.Replace(OPEN_TAG, "").Replace(CLOSE_TAG, "").Split('.').ToList();
             modifiers.RemoveAt(0);
 
             return modifiers;

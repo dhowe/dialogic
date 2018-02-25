@@ -8,6 +8,24 @@ namespace dialogic
     [TestFixture]
     public class ParserTests
     {
+
+        [Test]
+        public void TestGrammarParsing()
+        {
+            List<Chat> chats = ChatParser.ParseText("GRAM { start: 'The <item>', item: cat }");
+            Command gram = chats[0].commands[0];
+            Console.WriteLine(gram);
+            //Assert.That(chats.Count, Is.EqualTo(11111));
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(gram.Text, Is.Null);
+            Assert.That(gram.GetType(), Is.EqualTo(typeof(Gram)));
+
+            var cr = new ChatRuntime(chats);
+            cr.Run();
+        }
+            
         [Test]
         public void TestCommandParsing()
         {

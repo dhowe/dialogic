@@ -1,15 +1,27 @@
-﻿using NUnit.Framework;
-using Dialogic;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using Dialogic;
+using NUnit.Framework;
+using System;
 
 namespace dialogic
 {
     [TestFixture]
     public class DialogicTests
     {
+        [Test]
+        public void TestSimpleGrammar()
+        {
+            string f = TestContext.CurrentContext.TestDirectory + "/data/grammar.yaml";
+            string exp = "You look juicy. I see big things in your future. "+
+                "But also small ones. The judges agree, 3.5 of 10. Try again, " +
+                "this time with feeling.";
+            var gram = ChatParser.ParseGrammar(new FileInfo(f));
+            var outp = gram.Flatten("<grammar1>");
+            Console.WriteLine(outp);
+            Assert.That(outp, Is.EqualTo(exp));
+        }
+
         [Test]
         public void TestRandItem()
         {

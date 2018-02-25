@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 
-namespace dialogic.tracery
+namespace dialogic
 {
-    /// <summary>
-    /// A static class containing all of the built-in ("universal") modifiers that can be applied.
-    /// </summary>
     static class Modifiers
     {
         /// <summary>
@@ -154,7 +151,7 @@ namespace dialogic.tracery
         public static string A(string str)
         {
             var lastChar = str[0];
-            
+
             if (!_isConsonant(lastChar))
             {
                 return "an " + str;
@@ -171,11 +168,11 @@ namespace dialogic.tracery
         private static bool _isConsonant(char c)
         {
             // If the character is in the vowel list then it's not a consonant
-            if(vowels.Contains(c))
+            if (vowels.Contains(c))
             {
                 return false;
             }
-            
+
             return true;
         }
     }

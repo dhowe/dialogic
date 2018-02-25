@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using dialogic;
 
 namespace Dialogic
 {
@@ -38,12 +39,35 @@ namespace Dialogic
         }
     }
 
+    public class Gram : Command
+    {
+
+        public Grammar grammar;
+
+        public override void Init(string[] args, string[] meta)
+        {
+            Console.WriteLine("Gram.init: " + Util.Stringify(meta));
+            grammar = new Grammar(String.Join("\n", meta));
+        }
+
+        public override ChatEvent Fire(ChatRuntime cr)
+        {
+            Set clone = (Set)this.Copy();
+            clone.Text = grammar.Flatten("<start>");
+            Substitutions.Do(ref clone.Text, cr.Globals());
+            Console.WriteLine("FLATTEN: " + clone.Text);
+            return new ChatEvent(clone);
+        }
+
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] >\n" + grammar;
+        }
+    }
+
     public class Do : Command, IEmittable
     {
-        public Do() : base()
-        {
-            this.PauseAfterMs = 1000;
-        }
+        public Do() : base() { }
 
         public override void Init(string[] args, string[] meta)
         {
@@ -265,13 +289,16 @@ namespace Dialogic
         public readonly string value;
         public readonly Operator op;
 
-        public Constraint(string key, string val) : 
-            this("=", key, val) {}
+        public Constraint(string key, string val) :
+            this("=", key, val)
+        { }
 
-        public Constraint(string opstr, string key, string val) : 
-            this(Operator.FromString(opstr), key, val) {}
+        public Constraint(string opstr, string key, string val) :
+            this(Operator.FromString(opstr), key, val)
+        { }
 
-        public Constraint(Operator op, string key, string val) {
+        public Constraint(Operator op, string key, string val)
+        {
             this.name = key;
             this.value = val;
             this.op = op;
@@ -455,7 +482,8 @@ namespace Dialogic
             return this.GetType().ToString().Replace(PACKAGE, "");
         }
 
-        public virtual Command Realize(ChatRuntime cr) {
+        public virtual Command Realize(ChatRuntime cr)
+        {
             Substitutions.DoMeta(meta, cr.Globals());
             Substitutions.Do(ref Text, cr.Globals());
             return this;

@@ -7,6 +7,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using System.Text.RegularExpressions;
 using Dialogic.Antlr;
+using dialogic;
 
 namespace Dialogic
 {
@@ -63,6 +64,16 @@ namespace Dialogic
             ChatParser.ParseFiles(files, chats);
 
             return chats;
+        }
+
+        public static Grammar ParseGrammar(FileInfo file)
+        {
+            return new Grammar(file);
+        }
+
+        public static Grammar ParseGrammar(string path)
+        {
+            return ParseGrammar(new FileInfo(path));
         }
 
         public static List<Chat> ParseFiles(string[] files)
