@@ -162,14 +162,13 @@ namespace Dialogic
                 ge.Set("text", cmd.Text);
                 ge.Set("type", cmd.TypeName());
 
+                //Out.WriteLine("UpdateHandler: got "+cmd);
+
                 if (cmd is Ask) // Need to prompt user here
                 {
                     Ask a = (Dialogic.Ask)cmd;
                     ge.Set("opts", a.OptionsJoined());
-                    if (a.PauseAfterMs > -1)
-                    {
-                        ge.Set("timeout", a.PauseAfterMs);
-                    }
+                    ge.Set("timeout", cmd.GetMeta("timeout", -1));
                 }
                 if (cmd.HasMeta()) cmd.Meta().ToList()
                     .ForEach(x => ge.data[x.Key] = x.Value);

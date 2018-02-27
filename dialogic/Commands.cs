@@ -67,7 +67,9 @@ namespace Dialogic
 
     public class Do : Command, IEmittable
     {
-        public Do() : base() { }
+        public Do() : base() {
+            PauseAfterMs = 100;
+        }
 
         public override void Init(string[] args, string[] meta)
         {
