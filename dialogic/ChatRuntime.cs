@@ -11,14 +11,15 @@ namespace Dialogic
         public delegate void ChatEventHandler(ChatEvent e);
         public event ChatEventHandler ChatEvents; // event-stream
 
+        internal static string DefaultSpeaker = "";
+
         protected Dictionary<string, object> globals;
         public string LogFile;
 
         protected List<Chat> chats;
         protected Ask lastPrompt;
-        protected bool logInitd, waitingOnPrompt = false;
+        protected bool logInitd;
         protected int nextEventTime;
-        internal static string DefaultSpeaker;
 
         public ChatRuntime(List<Chat> chats) : this(chats, null) { }
 
@@ -56,6 +57,9 @@ namespace Dialogic
         private void OnClientEvent(EventArgs e)
         {
             if (!(e is IChoice)) throw new Exception("Invalid event type");
+
+            Console.WriteLine("ChatRuntime: Got Choice#" + ((IChoice)e).GetChoiceIndex());
+
 
             var opt = lastPrompt.Selected(((IChoice)e).GetChoiceIndex());
 

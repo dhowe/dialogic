@@ -185,7 +185,7 @@ namespace Dialogic
             return options;
         }
 
-        public string OptionsJoined(string delim = ",")
+        public string OptionsJoined(string delim = "\n")
         {
             var opts = Options();
             var s = "";
@@ -229,7 +229,7 @@ namespace Dialogic
         public override string ToString()
         {
             string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
-            Options().ForEach(o => s += o.Text + ",");
+            if (options != null) options.ForEach(o => s += o.Text + ",");
             return s.Substring(0, s.Length - 1) + ") " + MetaStr();
         }
 
