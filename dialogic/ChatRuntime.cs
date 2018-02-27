@@ -66,7 +66,7 @@ namespace Dialogic
             //FireEvent(opt); // Send Opt event to clients
             // NOTE: needed for the multi-client case?
 
-            opt.action.Fire(this); // execute GO event
+            opt.action.ToChatEvent(this); // execute GO event
         }
        
         public void Run(Chat chat)
@@ -101,7 +101,7 @@ namespace Dialogic
             if (!(c is NoOp)) 
             {
                 LogCommand(c); // log before replacements
-                ChatEvent ce = c.Fire(this);
+                ChatEvent ce = c.ToChatEvent(this);
                 if (!(c is Go)) 
                 {
                     if (ChatEvents != null) ChatEvents.Invoke(ce);

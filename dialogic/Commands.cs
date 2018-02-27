@@ -8,7 +8,7 @@ namespace Dialogic
 {
     public class NoOp : Command
     {
-        public override ChatEvent Fire(ChatRuntime cr)
+        public override ChatEvent ToChatEvent(ChatRuntime cr)
         {
             return null;
         }
@@ -23,9 +23,9 @@ namespace Dialogic
             this.Text = text;
         }
 
-        public override ChatEvent Fire(ChatRuntime cr)
+        public override ChatEvent ToChatEvent(ChatRuntime cr)
         {
-            ChatEvent ce = base.Fire(cr);
+            ChatEvent ce = base.ToChatEvent(cr);
             cr.Run(cr.FindChat(ce.Command().Text));
             return ce;
         }
@@ -50,7 +50,7 @@ namespace Dialogic
             grammar = new Grammar(String.Join("\n", meta));
         }
 
-        public override ChatEvent Fire(ChatRuntime cr)
+        public override ChatEvent ToChatEvent(ChatRuntime cr)
         {
             Set clone = (Set)this.Copy();
             clone.Text = grammar.Flatten("<start>");
@@ -127,7 +127,7 @@ namespace Dialogic
             return "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
         }
 
-        public override ChatEvent Fire(ChatRuntime cr)
+        public override ChatEvent ToChatEvent(ChatRuntime cr)
         {
             Set clone = (Set)this.Copy();
             var globals = cr.Globals();
@@ -214,7 +214,7 @@ namespace Dialogic
             options.Add(o);
         }
 
-        public override ChatEvent Fire(ChatRuntime cr)
+        public override ChatEvent ToChatEvent(ChatRuntime cr)
         {
             Ask clone = (Ask)this.Copy();
             Substitutions.DoMeta(clone.meta, cr.Globals());
@@ -372,7 +372,7 @@ namespace Dialogic
         /**
          * Do the fuzzy search, then call Run() on the selected Chat
          */
-        public override ChatEvent Fire(ChatRuntime cr)
+        public override ChatEvent ToChatEvent(ChatRuntime cr)
         {
             Command clone = this.Copy();
             Substitutions.DoMeta(clone.Meta(), cr.Globals());
@@ -511,7 +511,7 @@ namespace Dialogic
             return this;
         }
 
-        public virtual ChatEvent Fire(ChatRuntime cr)
+        public virtual ChatEvent ToChatEvent(ChatRuntime cr)
         {
             return new ChatEvent(this.Copy().Realize(cr));
         }
