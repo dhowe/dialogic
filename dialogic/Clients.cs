@@ -36,7 +36,7 @@ namespace Dialogic
 
         protected void Fire(EventArgs e)
         {
-            if (UnityEvents != null) UnityEvents.Invoke(e);
+            if (UnityEvents != null) UnityEvents.Invoke(e); else Out.WriteLine("NO UNITY EVENTS!!!!");
         }
     }
 
@@ -136,13 +136,16 @@ namespace Dialogic
 
             runtime = new ChatRuntime(chats, globals);
             this.Subscribe(runtime);
+            runtime.Subscribe(this);
+
             runtime.Run(startChat);
         }
 
         public virtual UpdateEvent Update(Dictionary<string, object> worldState, IChoice choice=null)
         {
             if (choice != null) {
-                Console.WriteLine("Dialogic: Got Choice#" +(choice.GetChoiceIndex()));
+                Console.WriteLine("UpdateAdapter: Got Choice#" +(choice.GetChoiceIndex()));
+                Fire(new ChoiceEvent(choice.GetChoiceIndex()));
                 choice = null;
             }
 

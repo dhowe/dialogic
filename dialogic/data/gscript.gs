@@ -8,7 +8,7 @@ Thanks for visiting $place! {pace=fast,display=strong}
 GO Prompt
 
 CHAT Prompt {NotPlayed=true}
-ASK Do you want to $verb a game? {timeout=5}
+ASK Do you want to $verb a game? {timeout=2}
 OPT Sure #Game
 OPT Nope #RePrompt
 
