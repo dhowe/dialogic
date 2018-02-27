@@ -394,15 +394,14 @@ namespace Dialogic
     {
         static IInterruptable timer;
 
-        public static IInterruptable SetInterval(int interval, Action function)
+        public static IInterruptable SetInterval(int ms, Action function)
         {
-            return timer = StartTimer(interval, function, true);
+            return timer = ms > -1 ? StartTimer(ms, function, true) : null;
         }
 
-        public static IInterruptable SetTimeout(int interval, Action function)
+        public static IInterruptable SetTimeout(int ms, Action function)
         {
-            //Console.WriteLine("SetTimeout: "+interval+" "+function);
-            return timer = StartTimer(interval, function, false);
+            return timer = ms > -1 ? StartTimer(ms, function, false) : null;
         }
 
         private static IInterruptable StartTimer(int interval, Action function, bool autoReset)

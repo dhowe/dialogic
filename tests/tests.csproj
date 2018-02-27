@@ -44,6 +44,7 @@
     <Compile Include="ParserTests.cs" />
     <Compile Include="OperatorTests.cs" />
     <Compile Include="GrammarTests.cs" />
+    <Compile Include="RealizationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

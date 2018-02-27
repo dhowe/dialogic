@@ -3,7 +3,7 @@ using Dialogic;
 using System.Collections.Generic;
 using System;
 
-namespace dialogic
+namespace Dialogic
 {
     [TestFixture]
     public class QueryTests

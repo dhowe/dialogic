@@ -2,31 +2,106 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Threading;
 
 namespace Dialogic
 {
     public class ChatRuntime
     {
-        public delegate void ChatEventHandler(ChatEvent e);
-        public event ChatEventHandler ChatEvents; // event-stream
-
-        internal static string DefaultSpeaker = "";
-
-        protected Dictionary<string, object> globals;
-        public string LogFile;
+        public static string DefaultSpeaker = "";
 
         protected List<Chat> chats;
-        protected Ask lastPrompt;
+        protected Chat current;
+        protected Ask prompt;
+
+        public string LogFile;
         protected bool logInitd;
         protected int nextEventTime;
 
-        public ChatRuntime(List<Chat> chats) : this(chats, null) { }
-
-        public ChatRuntime(List<Chat> chats, Dictionary<string, object> globals)
+        public ChatRuntime(List<Chat> chats)
         {
             this.chats = chats;
-            this.globals = globals;
+        }
+
+        public void Run(string chatLabel = null)
+        {
+            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
+            current = (chatLabel != null) ? FindChat(chatLabel) : chats[0];
+        }
+
+        public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
+        {
+            return (choice != null) ? HandleChoiceEvent(ref choice, globals) : HandleChatEvent(globals);
+        }
+
+
+        private IUpdateEvent HandleChoiceEvent(ref IChoice choice, IDictionary<string, object> globals)
+        {
+            var idx = choice.GetChoiceIndex();
+            choice = null;
+
+            if (idx < 0 || idx >= prompt.Options().Count)
+            {
+                // bad index, so reprompt for now
+                Console.WriteLine("Invalid index " + idx + ", reprompting\n");
+                return new UpdateEvent(prompt.Realize(globals));
+            }
+            else
+            {
+                Opt opt = prompt.Selected(idx);
+                current = prompt.parent;
+
+                if (opt.action != Command.NOP)
+                {
+                    var action = opt.ActionText();
+                    Substitutions.Do(ref action, globals);
+                    current = FindChat(action);
+                }
+            }
+            return null;
+        }
+
+        private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
+        {
+            Command cmd = null;
+
+            if (current != null && Util.Elapsed() >= nextEventTime)
+            {
+                cmd = current.Next();
+                if (cmd != null)
+                {
+                    //Console.WriteLine(Util.ElapsedSec()+": CR has -> " + cmd);
+                    cmd.Realize(globals);
+                    if (cmd is IEmittable)
+                    {
+                        cmd.Realize(globals);
+                        if (cmd is Ask)
+                        {
+                            prompt = (Dialogic.Ask)cmd;
+                            current = null;
+                        }
+                        return new UpdateEvent(cmd.data);
+                    }
+                    else
+                    {
+                        cmd.Realize(globals);
+                        if (cmd is Find)
+                        {
+                            current = Find(((Find)cmd).Meta());
+                        }
+                        else if (cmd is Go)
+                        {
+                            current = FindChat(cmd.Text);
+                        }
+                    }
+
+                    nextEventTime = Util.Elapsed() + cmd.PauseAfterMs;
+                }
+                else {
+                    // Nothing left to do
+                }
+            }
+
+            return null;
         }
 
         public Chat Find(IDictionary<string, object> constraints)
@@ -45,87 +120,16 @@ namespace Dialogic
         }
 
         private bool Logging()
-        { 
+        {
             return LogFile != null;
-        }
-
-        public void Subscribe(AbstractClient cc) // tmp
-        {
-            cc.UnityEvents += new AbstractClient.UnityEventHandler(OnClientEvent);
-        }
-
-        private void OnClientEvent(EventArgs e)
-        {
-            if (!(e is IChoice)) throw new Exception("Invalid event type");
-
-            Console.WriteLine("ChatRuntime: Got Choice#" + ((IChoice)e).GetChoiceIndex());
-
-
-            var opt = lastPrompt.Selected(((IChoice)e).GetChoiceIndex());
-
-            //FireEvent(opt); // Send Opt event to clients
-            // NOTE: needed for the multi-client case?
-
-            opt.action.ToChatEvent(this); // execute GO event
-        }
-       
-        public void Run(Chat chat)
-        {
-            FireEvent(chat);
-            for (int i = 0; i < chat.commands.Count;)
-            {
-                if (Util.Elapsed() < nextEventTime)
-                {
-                    Thread.Sleep(1);
-                    continue;
-                }
-                Command c = chat.commands[i];
-                if (c is Ask)
-                {
-                    lastPrompt = (Ask)c;
-                }
-                FireEvent(c);
-                i++;
-            }
-        }
-
-        public void Run(string chatLabel=null)
-        {
-            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
-            Chat c = (chatLabel != null) ? FindChat(chatLabel) : chats[0];
-            new Thread(() => Run(c)).Start();
-        }
-
-        private void FireEvent(Command c)
-        {
-            if (!(c is NoOp)) 
-            {
-                LogCommand(c); // log before replacements
-                ChatEvent ce = c.ToChatEvent(this);
-                if (!(c is Go)) 
-                {
-                    if (ChatEvents != null) ChatEvents.Invoke(ce);
-                }
-            }
-            nextEventTime = Util.Elapsed() + c.PauseAfterMs;
-        }
-
-        public void Globals(Dictionary<string, object> globals)
-        {
-            this.globals = globals;
-        }
-
-        public Dictionary<string, object> Globals()
-        {
-            return globals;
         }
 
         public void LogCommand(Command c)
         {
             if (!Logging()) return;
 
-            if (!logInitd) {
-                
+            if (!logInitd)
+            {
                 logInitd = true;
                 File.WriteAllText(LogFile, "============\n");
             }
@@ -137,4 +141,5 @@ namespace Dialogic
             }
         }
     }
+
 }

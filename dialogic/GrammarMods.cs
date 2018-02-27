@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 
-namespace dialogic
+namespace Dialogic
 {
     static class Modifiers
     {

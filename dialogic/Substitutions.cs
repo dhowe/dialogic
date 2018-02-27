@@ -32,7 +32,7 @@ namespace Dialogic
             }
         }
 
-        public static void Do(ref string text, Dictionary<string, object> globals)
+        public static void Do(ref string text, IDictionary<string, object> globals)
         {
             if (String.IsNullOrEmpty(text)) return;
 
@@ -71,7 +71,7 @@ namespace Dialogic
             }
         }
 
-        public static void DoVars(ref string text, Dictionary<string, object> globals)
+        public static void DoVars(ref string text, IDictionary<string, object> globals)
         {
             if (String.IsNullOrEmpty(text)) return;
 

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using Dialogic;
 
@@ -11,7 +8,8 @@ namespace runner
     class Program
     {
         public static string srcpath = "../../../dialogic";
-        public static Dictionary<string, object> globals = 
+
+        public static Dictionary<string, object> globals =
             new Dictionary<string, object>() {
                 { "emotion", "special" },
                 { "place", "My Tank" },
@@ -23,73 +21,54 @@ namespace runner
 
         public static void Main(string[] args)
         {
-            new MockGameEngine().Run();
-
-            //ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
-            /*List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/queries.gs");
-            Console.WriteLine(chats[0].ToTree());
-            ChatRuntime cm = new ChatRuntime(chats, globals);
-            cm.LogFile = srcpath + "/dia.log";
-
-            AbstractClient cl = new ConsoleClient(); // Console client
-
-            cl.Subscribe(cm); // Client subscribes to chat events
-            cm.Subscribe(cl); // Dialogic subscribes to Unity events
-
-            cm.Run();*/
+            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
         }
     }
 
     public class MockGameEngine
     {
-        double millisPerFrame, targetFPS = 60;
-        int lastFrameMs = 0, frameCount = 0;
+        public static Dictionary<string, object> globals =
+            new Dictionary<string, object>() {
+                { "emotion", "special" },
+                { "place", "My Tank" },
+                { "Happy", "HappyFlip" },
+                { "verb", "play" },
+                { "neg", "(nah|no|nope)" },
+                { "var3", 2 }
+            };
+
+        private readonly ChatRuntime runtime;
+        private IChoice choiceEvent = null;
         string diaText, diaType;
         string[] diaOpts;
-        UpdateAdapter dialogic;
 
-        IChoice choiceEvt;
-
-        public MockGameEngine()
+        public MockGameEngine(string fileOrFolder)
         {
-            lastFrameMs = Util.Elapsed();
-            millisPerFrame = 1000 / targetFPS;
-
-            var chats = ChatParser.ParseFile(Program.srcpath + "/data/gscript.gs");
-            dialogic = new UpdateAdapter(chats, Program.globals);
+            List<Chat> chats = ChatParser.ParseFile(fileOrFolder);
+            runtime = new ChatRuntime(chats);
+            runtime.Run();
         }
 
         public void Run()
         {
             while (true)
             {
-                if (Util.Elapsed() - lastFrameMs > millisPerFrame)
-                {
-                    frameCount++;
-
-                    // Call the dialogic interface
-                    UpdateEvent ge = dialogic.Update(Program.globals, choiceEvt);
-
-                    // Handle the returned event
-                    if (ge != null) HandleEvent(ge);
-
-                    lastFrameMs = Util.Elapsed();
-
-                    choiceEvt = null;
-                }
-                Thread.Sleep(1);
+                Thread.Sleep(30);
+                IUpdateEvent ue = runtime.Update(globals, ref choiceEvent);
+                if (ue != null) HandleEvent(ref ue);
             }
         }
 
-        private void HandleEvent(UpdateEvent ge)
+        private void HandleEvent(ref IUpdateEvent ge)
         {
-            diaText = (string)ge.Remove("text");
-            diaType = (string)ge.Remove("type");
+            diaText = ge.Text();
+            diaType = ge.Type();
 
             switch (diaType)
             {
                 case "Say":
-                    diaText += " " + Util.Stringify(ge.data);
+                    ge.RemoveKeys("text", "type");
+                    diaText += " " + Util.Stringify(ge.Data());
                     break;
 
                 case "Do":
@@ -97,40 +76,42 @@ namespace runner
                     break;
 
                 case "Ask":
-                    var opts = ge.Remove("opts");
-
-                    diaText += " " + Util.Stringify(ge.data);
-                    diaOpts = ((string)opts).Split('\n');
-
-                    for (int i = 0; i < diaOpts.Length; i++)
-                    {
-                        diaText += "\n  (" + i + ") " + diaOpts[i];
-                    }
-
-                    int timeout = ge.RemoveInt("timeout");
-                    if (timeout > -1)
-                    {
-                        Timers.SetTimeout(timeout, () =>
-                        {
-                            //Console.WriteLine("<empty-choice-event>");
-                            choiceEvt = new ChoiceEvent(0);
-                        });
-                    }
+                    DoPrompt(ge);
+                    SendRandomResponse(ge);
                     break;
-
-                default:
-                    throw new Exception("Bad event: " + ge);
             }
 
-            Print(diaText);
-            ge = null;  // disose event 
+            Console.WriteLine(diaText);
+            ge = null;  // dispose event 
         }
 
-        private void Print(string s, bool addInfo = false)
+        private void DoPrompt(IUpdateEvent ge)
         {
-            if (addInfo) s = "#" + frameCount + "@" + Util.ElapsedSec() + "\t" + s;
-            Console.WriteLine(s);
-        }
-    }
+            diaOpts = ge.Get("opts").Split('\n');
 
+            ge.RemoveKeys("text", "type", "opts");
+            diaText += " " + Util.Stringify(ge.Data());
+
+            for (int i = 0; i < diaOpts.Length; i++)
+            {
+                diaText += "\n  (" + i + ") " + diaOpts[i];
+            }
+        }
+
+        private void SendRandomResponse(IUpdateEvent ge)
+        {
+            int timeout = ge.GetInt("timeout", -1);
+            if (timeout > -1)
+            {
+                Timers.SetTimeout(Util.Rand(timeout / 3, timeout), () =>
+                {
+                    // choice a valid response, or -1 for no response
+                    int choice = Util.Rand(diaOpts.Length + 1) - 1;
+                    Console.WriteLine("\n<choice-index#" + choice + ">\n");
+                    choiceEvent = new ChoiceEvent(choice);
+                });
+            }
+        }
+
+    }
 }

@@ -7,7 +7,6 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using System.Text.RegularExpressions;
 using Dialogic.Antlr;
-using dialogic;
 
 namespace Dialogic
 {
