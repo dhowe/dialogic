@@ -1,42 +1,27 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using Out = System.Console;
 
 namespace Dialogic
 {
     /** 
-     * A very dumb client: receives events but doesn't respond 
-     */
-    class SimpleClient : AbstractClient
-    {
-        protected override void OnChatEvent(ChatEvent e)
-        {
-            Command cmd = e.Command();
-            Console.WriteLine(cmd);
-        }
-    }
-
-    /** 
      * A basic parent class for clients 
      */
     public abstract class AbstractClient
     {
-        public delegate void UnityEventHandler(EventArgs e);
-        public event UnityEventHandler UnityEvents;
+        //public delegate void UnityEventHandler(EventArgs e);
+        //public event UnityEventHandler UnityEvents;
 
         protected abstract void OnChatEvent(ChatEvent e);
 
         public void Subscribe(ChatRuntime cs)
         {
-            cs.ChatEvents += new ChatRuntime.ChatEventHandler(OnChatEvent);
+            //cs.ChatEvents += new ChatRuntime.ChatEventHandler(OnChatEvent);
         }
 
         protected void Fire(EventArgs e)
         {
-            if (UnityEvents != null) UnityEvents.Invoke(e); else Out.WriteLine("NO UNITY EVENTS!!!!");
+           // if (UnityEvents != null) UnityEvents.Invoke(e); else Out.WriteLine("NO UNITY EVENTS!!!!");
         }
     }
 
@@ -117,68 +102,4 @@ namespace Dialogic
         }
     }
 
-    /**
-     * Adapts Dialogic's publish/subscribe event model to work with a frame-by-frame Update() callback
-     * 
-     * Callback: public UpdateEvent Update(Dictionary<string, object> worldState, ICHoice choiceEvent);
-     */
-    public class UpdateAdapter : AbstractClient
-    {
-        ObjectPool<UpdateEvent> pool;
-        UpdateEvent nextEvent;
-        ChatRuntime runtime;
-
-        bool modified = false;
-
-        public UpdateAdapter(List<Chat> chats, Dictionary<string, object> globals=null, string startChat=null)
-        {
-            pool = new ObjectPool<UpdateEvent>(10, () => new UpdateEvent(), (g => g.Clear()));
-
-            runtime = new ChatRuntime(chats, globals);
-            this.Subscribe(runtime);
-            runtime.Subscribe(this);
-
-            runtime.Run(startChat);
-        }
-
-        public virtual UpdateEvent Update(Dictionary<string, object> worldState, IChoice choice=null)
-        {
-            if (choice != null) {
-                Console.WriteLine("UpdateAdapter: Got Choice#" +(choice.GetChoiceIndex()));
-                Fire(new ChoiceEvent(choice.GetChoiceIndex()));
-                choice = null;
-            }
-
-            runtime.Globals(worldState);
-            var result = modified ? nextEvent : null;
-            modified = false;
-            return result;
-        }
-
-        protected override void OnChatEvent(ChatEvent e)
-        {
-            if (e.Command() is IEmittable)
-            {
-                UpdateEvent ge = pool.Get();
-
-                Command cmd = e.Command();
-                ge.Set("text", cmd.Text);
-                ge.Set("type", cmd.TypeName());
-
-                //Out.WriteLine("UpdateHandler: got "+cmd);
-
-                if (cmd is Ask) // Need to prompt user here
-                {
-                    Ask a = (Dialogic.Ask)cmd;
-                    ge.Set("opts", a.OptionsJoined());
-                    ge.Set("timeout", cmd.GetMeta("timeout", -1));
-                }
-                if (cmd.HasMeta()) cmd.Meta().ToList()
-                    .ForEach(x => ge.data[x.Key] = x.Value);
-                
-                modified = true;
-                nextEvent = ge;
-            }
-        }
-    }
 }

@@ -1,6 +1,4 @@
-﻿SET lastPrompt Game
-
-Welcome to my $emotion World
+﻿Welcome to my $emotion World
 WAIT .5
 DO Twirl
 Thanks for visiting $place! {pace=fast,display=strong}
@@ -15,7 +13,7 @@ OPT Nope #RePrompt
 CHAT RePrompt
 DO SadSpin
 ASK (Really|Awww), don't you want to play a game?
-OPT Sure #$lastPrompt
+OPT Sure #Game
 OPT $neg #RePrompt
 
 CHAT Game

@@ -3,6 +3,64 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
+    public interface IUpdateEvent
+    {
+        string Text();
+        string Type();
+        string Get(string name, string def = null);
+        int GetInt(string name, int def = -1);
+        IDictionary<string, object> Data();
+        void RemoveKeys(params string[] keys);
+    }
+
+    public interface IChoice
+    {
+        int GetChoiceIndex();
+    }
+
+    public class UpdateEvent : IUpdateEvent
+    {
+        private IDictionary<string, object> data;
+
+        public UpdateEvent(IDictionary<string, object> data)
+        {
+            this.data = data;
+        }
+
+        public IDictionary<string, object> Data()
+        {
+            return data;
+        }
+
+        public string Get(string key, string def = null)
+        {
+            return (string)(data.ContainsKey(key) ? data[key] : def);
+        }
+
+        public int GetInt(string key, int def = -1)
+        {
+            string s = Get(key, def + "");
+            return (int)Convert.ChangeType(key, typeof(int));
+        }
+
+        public void RemoveKeys(params string[] keys)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Text()
+        {
+            return (string)data["text"];
+        }
+
+        public string Type()
+        {
+            return (string)data["type"];
+        }
+    }
+
+    /// /////////////////////////////////////////////////////////
+
     public class ChatEvent : EventArgs
     {
         protected Command command;
@@ -43,16 +101,12 @@ namespace Dialogic
         }
     }
 
-    public interface IChoice
-    {
-        int GetChoiceIndex();
-    }
 
-    public class UpdateEvent
+    public class UpdateEventOld
     {
         public Dictionary<string, object> data;
 
-        public UpdateEvent()
+        public UpdateEventOld()
         {
             data = new Dictionary<string, object>();
         }

@@ -25,7 +25,7 @@ namespace Dialogic
                 if (chats[i].Text == chatName)
                     return chats[i];
             }
-            throw new ChatNotFound(chatName);
+            return null;
         }
 
         /**

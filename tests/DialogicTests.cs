@@ -41,18 +41,17 @@ namespace dialogic
             }
         }
 
-        [Test]
-        public void TestCommandCopy()
-        {
-            Chat chat = ChatParser.ParseText("SAY Thank you { pace = fast}")[0];
-            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Say orig = (Say)chat.commands[0];
-            Say clone = (Say)orig.Copy();
-            clone.SetMeta("pace", "slow");
-            Assert.That(clone.GetType(), Is.EqualTo(typeof(Say)));
-            Assert.That(clone.Text, Is.EqualTo("Thank you"));
-            Assert.That(clone.GetMeta("pace"), Is.EqualTo("slow"));
-            Assert.That(clone.GetMeta("pace"), Is.Not.EqualTo(orig.GetMeta("pace")));
-        }
+        //public void TestCommandCopy()
+        //{
+        //    Chat chat = ChatParser.ParseText("SAY Thank you { pace = fast}")[0];
+        //    Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+        //    Say orig = (Say)chat.commands[0];
+        //    Say clone = (Say)orig.Copy();
+        //    clone.SetMeta("pace", "slow");
+        //    Assert.That(clone.GetType(), Is.EqualTo(typeof(Say)));
+        //    Assert.That(clone.Text, Is.EqualTo("Thank you"));
+        //    Assert.That(clone.GetMeta("pace"), Is.EqualTo("slow"));
+        //    Assert.That(clone.GetMeta("pace"), Is.Not.EqualTo(orig.GetMeta("pace")));
+        //}
     }
 }
