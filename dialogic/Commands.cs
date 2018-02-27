@@ -163,6 +163,16 @@ namespace Dialogic
             this.PauseAfterMs = Infinite;
         }
 
+        protected override void HandleMetaTiming()
+        {
+            base.HandleMetaTiming();
+            if (meta != null && meta.ContainsKey("timeout"))
+            {
+                meta["timeout"] = Util.ToMillis((double)
+                    Convert.ChangeType(meta["timeout"], typeof(double)));
+            }
+        }
+
         public List<Opt> Options()
         {
             if (options.Count < 1)
@@ -475,6 +485,16 @@ namespace Dialogic
                     Util.ToMillis(double.Parse(args[1]));
             }
             ParseMeta(meta);
+            HandleMetaTiming();
+        }
+
+        protected virtual void HandleMetaTiming()
+        {
+            if (meta != null && meta.ContainsKey("PauseAfterMs"))
+            {
+                double d = (double)Convert.ChangeType(meta["PauseAfterMs"], typeof(double));
+                PauseAfterMs = Util.ToMillis(d);
+            }
         }
 
         public virtual string TypeName()

@@ -59,7 +59,7 @@ namespace Dialogic
 
             if (c is IEmittable)
             {
-                Out.WriteLine(c is Do ? "(Do:" + c.Text + ") "+c.PauseAfterMs : c.Text);
+                Out.WriteLine(c is Do ? "(Do:" + c.Text + ") " : c.Text);
                 if (c is Ask) Prompt((Dialogic.Ask)c);
             }
         }
