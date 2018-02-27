@@ -24,20 +24,19 @@ namespace runner
         public static void Main(string[] args)
         {
             new MockGameEngine().Run();
-            //new LexerTest().TestParse(srcpath + "/data/gscript.gs");
+
             //ChatParser.ParseText("ASK Game?\nOPT Sure\nOPT $neg\n");
+            /*List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/queries.gs");
+            Console.WriteLine(chats[0].ToTree());
+            ChatRuntime cm = new ChatRuntime(chats, globals);
+            cm.LogFile = srcpath + "/dia.log";
 
-            //List<Chat> chats = ChatParser.ParseFile(srcpath + "/data/queries.gs");
-            //Console.WriteLine(chats[0].ToTree());
-            //ChatRuntime cm = new ChatRuntime(chats, globals);
-            //cm.LogFile = srcpath + "/dia.log";
+            AbstractClient cl = new ConsoleClient(); // Console client
 
-            //AbstractClient cl = new ConsoleClient(); // Console client
+            cl.Subscribe(cm); // Client subscribes to chat events
+            cm.Subscribe(cl); // Dialogic subscribes to Unity events
 
-            //cl.Subscribe(cm); // Client subscribes to chat events
-            //cm.Subscribe(cl); // Dialogic subscribes to Unity events
-
-            //cm.Run();
+            cm.Run();*/
         }
     }
 
@@ -101,7 +100,7 @@ namespace runner
                     var opts = ge.Remove("opts");
 
                     diaText += " " + Util.Stringify(ge.data);
-                    diaOpts = ((string)opts).Split(',');
+                    diaOpts = ((string)opts).Split('\n');
 
                     for (int i = 0; i < diaOpts.Length; i++)
                     {
