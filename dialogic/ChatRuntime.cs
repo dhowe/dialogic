@@ -32,42 +32,46 @@ namespace Dialogic
         {
             IUpdateEvent dia = HandleChatEvent(globals);
 
-            if (choice != null) // HandleChoiceEvent
+            if (dia == null && choice != null)
             {
-                var idx = choice.GetChoiceIndex();
-                choice = null;
-                Console.WriteLine("RT: GOT CHOICE: " + idx);
-
-                if (idx < 0 || idx >= prompt.Options().Count)
-                {
-                    // reprompt here
-                    Console.WriteLine("Invalid response: " + idx + " Reprompting");
-                    return new UpdateEvent(prompt.Realize(globals));
-                }
-                else
-                {
-                    Opt opt = prompt.Selected(idx);
-                    if (opt.action != Command.NOP)
-                    {
-                        var action = opt.ActionText();
-                        Substitutions.Do(ref action, globals);
-                        current = FindChat(action);
-                    }
-                    else
-                    {
-                        Console.WriteLine("GOT NO-OP: " + opt);
-                        current = prompt.parent;
-                    }
-                }
+                dia = HandleChoiceEvent(ref choice, globals);
             }
 
             return dia;
+        }
+
+
+        private IUpdateEvent HandleChoiceEvent(ref IChoice choice, IDictionary<string, object> globals)
+        {
+            var idx = choice.GetChoiceIndex();
+            choice = null;
+
+            if (idx < 0 || idx >= prompt.Options().Count)
+            {
+                // bad index, so reprompt for now
+                Console.WriteLine("Invalid index " + idx + ", reprompting\n");
+                return new UpdateEvent(prompt.Realize(globals));
+            }
+            else
+            {
+                Opt opt = prompt.Selected(idx);
+                current = prompt.parent;
+
+                if (opt.action != Command.NOP)
+                {
+                    var action = opt.ActionText();
+                    Substitutions.Do(ref action, globals);
+                    current = FindChat(action);
+                }
+            }
+            return null;
         }
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
         {
             IUpdateEvent dia = null;
             Command cmd = null;
+
             if (current != null && Util.Elapsed() >= nextEventTime)
             {
                 cmd = current.Next();
@@ -96,20 +100,17 @@ namespace Dialogic
                         {
                             current = FindChat(cmd.Text);
                         }
-                        else if (cmd is Set) { }
-                        else if (cmd is Wait) { }
                     }
 
                     nextEventTime = Util.Elapsed() + cmd.PauseAfterMs;
+                }
+                else {
+                    // Nothing left to do
                 }
             }
             return dia;
         }
 
-        private IUpdateEvent HandleChoiceEvent(IDictionary<string, object> globals, ref IChoice choice)
-        {
-            return null;
-        }
 
         public Chat Find(IDictionary<string, object> constraints)
         {

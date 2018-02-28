@@ -107,7 +107,7 @@ namespace runner
                 {
                     // choice a valid response, or -1 for no response
                     int choice = Util.Rand(diaOpts.Length + 1) - 1;
-                    Console.WriteLine("<choice-index#" + choice + ">\n");
+                    Console.WriteLine("\n<choice-index#" + choice + ">\n");
                     choiceEvent = new ChoiceEvent(choice);
                 });
             }
