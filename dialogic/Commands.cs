@@ -166,7 +166,7 @@ namespace Dialogic
 
         public void AddOption(Opt o)
         {
-            o.parent = this;
+            o.prompt = this;
             options.Add(o);
         }
 
@@ -201,7 +201,7 @@ namespace Dialogic
     {
         public Command action;
 
-        public Ask parent;
+        public Ask prompt; // not used
 
         public Opt() : this("", NOP) { }
 

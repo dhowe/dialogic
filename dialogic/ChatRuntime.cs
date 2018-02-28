@@ -30,14 +30,7 @@ namespace Dialogic
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
         {
-            IUpdateEvent dia = HandleChatEvent(globals);
-
-            if (dia == null && choice != null)
-            {
-                dia = HandleChoiceEvent(ref choice, globals);
-            }
-
-            return dia;
+            return (choice != null) ? HandleChoiceEvent(ref choice, globals) : HandleChatEvent(globals);
         }
 
 
@@ -69,7 +62,6 @@ namespace Dialogic
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
         {
-            IUpdateEvent dia = null;
             Command cmd = null;
 
             if (current != null && Util.Elapsed() >= nextEventTime)
@@ -87,7 +79,7 @@ namespace Dialogic
                             prompt = (Dialogic.Ask)cmd;
                             current = null;
                         }
-                        dia = new UpdateEvent(cmd.data);
+                        return new UpdateEvent(cmd.data);
                     }
                     else
                     {
@@ -108,9 +100,9 @@ namespace Dialogic
                     // Nothing left to do
                 }
             }
-            return dia;
-        }
 
+            return null;
+        }
 
         public Chat Find(IDictionary<string, object> constraints)
         {
