@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Threading;
 
 namespace Dialogic
 {
@@ -23,24 +22,43 @@ namespace Dialogic
             this.chats = chats;
         }
 
+        public void Run(string chatLabel = null)
+        {
+            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
+            current = (chatLabel != null) ? FindChat(chatLabel) : chats[0];
+        }
+
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
         {
             IUpdateEvent dia = HandleChatEvent(globals);
 
-            if (choice != null) // HAndleChoiceEvent
+            if (choice != null) // HandleChoiceEvent
             {
                 var idx = choice.GetChoiceIndex();
+                choice = null;
+                Console.WriteLine("RT: GOT CHOICE: " + idx);
+
                 if (idx < 0 || idx >= prompt.Options().Count)
                 {
                     // reprompt here
-                    Console.WriteLine("Invalid response: "+idx+" Reprompting");
+                    Console.WriteLine("Invalid response: " + idx + " Reprompting");
                     return new UpdateEvent(prompt.Realize(globals));
                 }
-                Opt opt = prompt.Selected(idx);
-                var action = opt.ActionText();
-                Substitutions.Do(ref action, globals);
-                current = FindChat(action);
-                choice = null;
+                else
+                {
+                    Opt opt = prompt.Selected(idx);
+                    if (opt.action != Command.NOP)
+                    {
+                        var action = opt.ActionText();
+                        Substitutions.Do(ref action, globals);
+                        current = FindChat(action);
+                    }
+                    else
+                    {
+                        Console.WriteLine("GOT NO-OP: " + opt);
+                        current = prompt.parent;
+                    }
+                }
             }
 
             return dia;
@@ -50,34 +68,39 @@ namespace Dialogic
         {
             IUpdateEvent dia = null;
             Command cmd = null;
-            if (current != null && Util.Elapsed() < nextEventTime)
+            if (current != null && Util.Elapsed() >= nextEventTime)
             {
                 cmd = current.Next();
                 if (cmd != null)
                 {
+                    //Console.WriteLine(Util.ElapsedSec()+": CR has -> " + cmd);
                     cmd.Realize(globals);
-
-                    if (cmd is IEmittable) {
+                    if (cmd is IEmittable)
+                    {
                         cmd.Realize(globals);
-                        if (cmd is Ask) prompt = (Dialogic.Ask)cmd;
-                        nextEventTime = Util.Elapsed() + cmd.PauseAfterMs;
+                        if (cmd is Ask)
+                        {
+                            prompt = (Dialogic.Ask)cmd;
+                            current = null;
+                        }
                         dia = new UpdateEvent(cmd.data);
-                        current = null;
                     }
-                    else {
+                    else
+                    {
                         cmd.Realize(globals);
                         if (cmd is Find)
                         {
                             current = Find(((Find)cmd).Meta());
                         }
-                        else if (cmd is Go) 
+                        else if (cmd is Go)
                         {
                             current = FindChat(cmd.Text);
                         }
-                        else if (cmd is Set){}
-                        else if (cmd is Wait){}
+                        else if (cmd is Set) { }
+                        else if (cmd is Wait) { }
                     }
 
+                    nextEventTime = Util.Elapsed() + cmd.PauseAfterMs;
                 }
             }
             return dia;
@@ -85,7 +108,7 @@ namespace Dialogic
 
         private IUpdateEvent HandleChoiceEvent(IDictionary<string, object> globals, ref IChoice choice)
         {
-
+            return null;
         }
 
         public Chat Find(IDictionary<string, object> constraints)
@@ -106,12 +129,6 @@ namespace Dialogic
         private bool Logging()
         {
             return LogFile != null;
-        }
-
-        public void Run(string chatLabel = null)
-        {
-            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
-            Chat c = (chatLabel != null) ? FindChat(chatLabel) : chats[0];
         }
 
         public void LogCommand(Command c)

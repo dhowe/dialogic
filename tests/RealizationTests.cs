@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Dialogic;
 using System.Collections.Generic;
 
-namespace dialogic
+namespace Dialogic
 {
     [TestFixture]
     public class RealizationTests

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Dialogic;
 using NUnit.Framework;
 using System;
 
-namespace dialogic
+namespace Dialogic
 {
     [TestFixture]
     public class DialogicTests
@@ -40,18 +39,5 @@ namespace dialogic
                 Assert.That(kv.Value, Is.GreaterThan(0));
             }
         }
-
-        //public void TestCommandCopy()
-        //{
-        //    Chat chat = ChatParser.ParseText("SAY Thank you { pace = fast}")[0];
-        //    Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
-        //    Say orig = (Say)chat.commands[0];
-        //    Say clone = (Say)orig.Copy();
-        //    clone.SetMeta("pace", "slow");
-        //    Assert.That(clone.GetType(), Is.EqualTo(typeof(Say)));
-        //    Assert.That(clone.Text, Is.EqualTo("Thank you"));
-        //    Assert.That(clone.GetMeta("pace"), Is.EqualTo("slow"));
-        //    Assert.That(clone.GetMeta("pace"), Is.Not.EqualTo(orig.GetMeta("pace")));
-        //}
     }
 }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using dialogic;
 
 namespace Dialogic
 {
@@ -328,7 +327,8 @@ namespace Dialogic
 
         public void AddCommand(Command c)
         {
-            c.IndexInChat = commands.Count;
+            c.parent = this;
+            c.IndexInChat = commands.Count; // ?
             this.commands.Add(c);
         }
 
@@ -383,7 +383,8 @@ namespace Dialogic
 
         public string Text, Actor = ChatRuntime.DefaultSpeaker;
 
-        public int IndexInChat = -1;
+        public int IndexInChat = -1; // needed?
+        public Chat parent = null;
 
         protected Command()
         {

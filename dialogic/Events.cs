@@ -40,12 +40,12 @@ namespace Dialogic
         public int GetInt(string key, int def = -1)
         {
             string s = Get(key, def + "");
-            return (int)Convert.ChangeType(key, typeof(int));
+            return (int)Convert.ChangeType(s, typeof(int));
         }
 
         public void RemoveKeys(params string[] keys)
         {
-            throw new NotImplementedException();
+            foreach (var k in keys) data.Remove(k);
         }
 
         public string Text()

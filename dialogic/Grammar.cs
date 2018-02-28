@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using YamlDotNet.Serialization;
 using System.Text;
 
-namespace dialogic
+namespace Dialogic
 {
     public class Grammar
     {
