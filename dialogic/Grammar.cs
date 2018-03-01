@@ -11,7 +11,7 @@ using System.Text;
 namespace Dialogic
 {
     // adapted from https://github.com/josh-perry/Tracery.Net
-    public class Grammar 
+    public class Grammar
     {
         public static string OPEN_TAG = "<", CLOSE_TAG = ">";
         public static string OPEN_SAVE = "[", CLOSE_SAVE = "]";
@@ -42,34 +42,29 @@ namespace Dialogic
         public Grammar(FileInfo f) : this(File.ReadAllText(f.FullName, Encoding.UTF8)) { }
 
         /// <summary>
-        /// Load  rules by deserializing the source as a json object
+        /// Load rules by deserializing the source as a json object
         /// </summary>
         /// <param name="source"></param>
         public Grammar(string source)
         {
             PopulateRules(source);
 
-            // Set up the function table
+            // Set up the function table TODO: replace w' rita versions
             ModifierLookup = new Dictionary<string, Func<string, string>>
             {
                 { "a",             Modifiers.A },
-                { "beeSpeak",      Modifiers.BeeSpeak },
                 { "capitalize",    Modifiers.Capitalize },
                 { "comma",         Modifiers.Comma },
-                { "inQuotes",      Modifiers.InQuotes },
+                { "quotify",       Modifiers.Quotify },
                 { "s",             Modifiers.S },
                 { "ed",            Modifiers.Ed },
-                { "capitalizeAll", Modifiers.CapitalizeAll }
+                { "allCaps",       Modifiers.AllCaps }
             };
 
             // Initialize the save storage
             SaveData = new Dictionary<string, string>();
         }
 
-        /// <summary>
-        /// Deserialize the source string from either json or yaml and populate the rules
-        /// </summary>
-        /// <param name="source"></param>
         private void PopulateRules(string source)
         {
             if (IsValidJson(source))
@@ -198,7 +193,7 @@ namespace Dialogic
             var s = "";
             foreach (var kv in Rules)
             {
-                s += "  "+kv.Key + ": " + kv.Value + "\n";
+                s += "  " + kv.Key + ": " + kv.Value + "\n";
             }
             return s;
         }

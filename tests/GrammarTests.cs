@@ -167,24 +167,6 @@ namespace Dialogic
         }
 
         [Test]
-        public void Expand_BeeSpeak_Beezz()
-        {
-            // Arrange
-            var json = "{" +
-                       "    'origin': '<animal.beeSpeak> are very important'," +
-                       "    'animal': 'bees'" +
-                       "}";
-
-            var grammar = new Grammar(json);
-
-            // Act
-            var output = grammar.Expand("<origin>");
-
-            // Assert
-            Assert.AreEqual(output, "beezzz are very important");
-        }
-
-        [Test]
         public void Expand_Comma_HelloCommaWorld()
         {
             // Arrange
@@ -204,11 +186,11 @@ namespace Dialogic
         }
 
         [Test]
-        public void Expand_InQuotes_HelloQuoteWorldQuote()
+        public void Expand_Quotify_HelloQuoteWorldQuote()
         {
             // Arrange
             var json = "{" +
-                       "    'origin': '<greeting> <place.inQuotes>'," +
+                       "    'origin': '<greeting> <place.quotify>'," +
                        "    'greeting': 'Hello'," +
                        "    'place': 'world'" +
                        "}";
@@ -296,7 +278,7 @@ namespace Dialogic
         {
             // Arrange
             var json = "{" +
-                       "    'origin': 'you are a <animal.capitalizeAll>'," +
+                       "    'origin': 'you are a <animal.allCaps>'," +
                        "    'animal': 'cute cat'" +
                        "}";
 

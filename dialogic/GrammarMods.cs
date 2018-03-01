@@ -16,7 +16,7 @@ namespace Dialogic
         private static List<char> vowels = new List<char> { 'a', 'e', 'i', 'o', 'u' };
 
         /// <summary>
-        /// Capitalizes the given string.
+        /// Capitalize the first character.
         /// </summary>
         /// <param name="str"></param>
         /// <returns>The modified string</returns>
@@ -26,11 +26,11 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Title cases the given string.
+        /// Capitalizes every character.
         /// </summary>
         /// <param name="arg"></param>
         /// <returns>The modified string</returns>
-        public static string CapitalizeAll(string str)
+        public static string AllCaps(string str)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str);
         }
@@ -55,19 +55,9 @@ namespace Dialogic
         /// </summary>
         /// <param name="str"></param>
         /// <returns>The modified string</returns>
-        public static string InQuotes(string str)
+        public static string Quotify(string str)
         {
             return "\"" + str + "\""; ;
-        }
-
-        /// <summary>
-        /// Replaces all s with zzz, like how bees speak.
-        /// </summary>
-        /// <param name="str"></param>
-        /// <returns>The modified string</returns>
-        public static string BeeSpeak(string str)
-        {
-            return str.Replace("s", "zzz");
         }
 
         /// <summary>
@@ -168,12 +158,7 @@ namespace Dialogic
         private static bool _isConsonant(char c)
         {
             // If the character is in the vowel list then it's not a consonant
-            if (vowels.Contains(c))
-            {
-                return false;
-            }
-
-            return true;
+            return !vowels.Contains(c);
         }
     }
 }
