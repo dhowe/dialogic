@@ -87,7 +87,7 @@ namespace Dialogic
         public void YamlTestNew()
         {
             var yaml = "---\norigin: '<sentence>'\nsentence: 'Hello world'";
-            var output = new Grammar(yaml).Flatten("<origin>");
+            var output = new Grammar(yaml).Expand("<origin>");
             System.Console.WriteLine(output);
             Assert.That(output, Is.EqualTo("Hello world"));
         }
@@ -97,7 +97,7 @@ namespace Dialogic
         public void YamlTests_HelloWorld_HelloWorld()
         {
             var yaml = "---\norigin: '<sentence>'\nsentence: 'Hello world'";
-            var output = new Grammar(yaml).Flatten("<origin>");
+            var output = new Grammar(yaml).Expand("<origin>");
             System.Console.WriteLine(output);
             Assert.That(output, Is.EqualTo("Hello world"));
         }
@@ -109,12 +109,12 @@ namespace Dialogic
             var yaml = "---\norigin: '<sentence>'\nsentence: '<greeting> ";
             yaml += "<place>'\nplace:\n - 'world'\ngreeting:\n - 'Hello'\n";
             var g = new Grammar(yaml);
-            var output = g.Flatten("<origin>");
+            var output = g.Expand("<origin>");
             Assert.That(output, Is.EqualTo("Hello world"));
         }
 
         [Test]
-        public void Flatten_HelloWorld_Success()
+        public void Expand_HelloWorld_Success()
         {
             // Arrange
             var json = "{" +
@@ -124,14 +124,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "hello world");
         }
 
         [Test]
-        public void Flatten_ExpandSymbol_Animal()
+        public void Expand_ExpandSymbol_Animal()
         {
             // Arrange
             var json = "{" +
@@ -142,14 +142,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "hello cat");
         }
 
         [Test]
-        public void Flatten_Capitalize_FirstLetterCapitalized()
+        public void Expand_Capitalize_FirstLetterCapitalized()
         {
             // Arrange
             var json = "{" +
@@ -160,14 +160,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "hello Cat");
         }
 
         [Test]
-        public void Flatten_BeeSpeak_Beezz()
+        public void Expand_BeeSpeak_Beezz()
         {
             // Arrange
             var json = "{" +
@@ -178,14 +178,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "beezzz are very important");
         }
 
         [Test]
-        public void Flatten_Comma_HelloCommaWorld()
+        public void Expand_Comma_HelloCommaWorld()
         {
             // Arrange
             var json = "{" +
@@ -197,14 +197,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "Hello, world");
         }
 
         [Test]
-        public void Flatten_InQuotes_HelloQuoteWorldQuote()
+        public void Expand_InQuotes_HelloQuoteWorldQuote()
         {
             // Arrange
             var json = "{" +
@@ -216,14 +216,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "Hello \"world\"");
         }
 
         [Test]
-        public void Flatten_A_ACat()
+        public void Expand_A_ACat()
         {
             var json = "{" +
                        "    'origin': 'you are <animal.a>'," +
@@ -232,13 +232,13 @@ namespace Dialogic
 
             var grammar = new Grammar(json);
 
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             Assert.That(output, Is.EqualTo("you are a cat"));
         }
 
         [Test]
-        public void Flatten_A_AnElephant()
+        public void Expand_A_AnElephant()
         {
             // Arrange
             var json = "{" +
@@ -249,14 +249,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "you are an elephant");
         }
 
         [Test]
-        public void Flatten_CaptitalizeA_ACat()
+        public void Expand_CaptitalizeA_ACat()
         {
             // Arrange
             var json = "{" +
@@ -267,14 +267,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "you are a Cat");
         }
 
         [Test]
-        public void Flatten_ACaptitalize_ACat()
+        public void Expand_ACaptitalize_ACat()
         {
             // Arrange
             var json = "{" +
@@ -285,14 +285,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "you are A cat");
         }
 
         [Test]
-        public void Flatten_CaptitalizeAllCuteCat_CuteCat()
+        public void Expand_CaptitalizeAllCuteCat_CuteCat()
         {
             // Arrange
             var json = "{" +
@@ -303,14 +303,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "you are a Cute Cat");
         }
 
         [Test]
-        public void Flatten_PastTensifyBully_Bullied()
+        public void Expand_PastTensifyBully_Bullied()
         {
             // Arrange
             var json = "{" +
@@ -321,14 +321,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "you bullied");
         }
 
         [Test]
-        public void Flatten_PastTensifyQuack_Quacked()
+        public void Expand_PastTensifyQuack_Quacked()
         {
             // Arrange
             var json = "{" +
@@ -339,14 +339,14 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "you quacked");
         }
 
         [Test]
-        public void Flatten_PastTensifyCall_Called()
+        public void Expand_PastTensifyCall_Called()
         {
             // Arrange
             var json = "{" +
@@ -357,7 +357,7 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "you called?");
@@ -381,7 +381,7 @@ namespace Dialogic
             grammar.AddModifier("helloWorld", f);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "hello world");
@@ -418,7 +418,7 @@ namespace Dialogic
             grammar.AddModifier("slur", f);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "thiis iis aa loong seenteencee reeaady foor sluurriing");
@@ -442,7 +442,7 @@ namespace Dialogic
             grammar.AddModifier("toUpper", f);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.AreEqual(output, "HELLO CAT");
@@ -460,7 +460,7 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.IsTrue(output == "His name was Alfred.");
@@ -479,7 +479,7 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.IsTrue(output == "His name was Alfred.");
@@ -497,7 +497,7 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.IsTrue(output == "His name was Alfred.");
@@ -515,7 +515,7 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.IsTrue(output == "Luigi");
@@ -534,7 +534,7 @@ namespace Dialogic
             var grammar = new Grammar(json);
 
             // Act
-            var output = grammar.Flatten("<origin>");
+            var output = grammar.Expand("<origin>");
 
             // Assert
             Assert.IsTrue(output == "Mario");

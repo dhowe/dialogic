@@ -10,54 +10,39 @@ using System.Text;
 
 namespace Dialogic
 {
-    public class Grammar
+    // adapted from https://github.com/josh-perry/Tracery.Net
+    public class Grammar 
     {
         public static string OPEN_TAG = "<", CLOSE_TAG = ">";
         public static string OPEN_SAVE = "[", CLOSE_SAVE = "]";
         public static char ASSIGN = '=';
         public static bool DBUG = false;
 
-        /// <summary>
-        /// Object containing all of the deserialized json rules.
-        /// </summary>
         public JObject Rules;
 
-        /// <summary>
-        /// RNG to pick from multiple rules.
-        /// </summary>
         private Random Random = new Random();
 
         /// <summary>
         /// Regex for matching expansion symbols.
-        /// #animal# etc.
+        /// <animal> etc.
         /// </summary>
         public static Regex ExpansionRegex = new Regex(@"(?<!\[|:)(?!\])"
             + OPEN_TAG + @".+?(?<!\[|" + ASSIGN + ")" + CLOSE_TAG + @"(?!\])");
 
         /// <summary>
         /// Regex for matching save symbols.
-        /// [hero:#name#], [heroPet:#animal#] etc.
+        /// [hero:<name>], [heroPet:<animal>] etc.
         /// </summary>
         public static Regex SaveSymbolRegex = new Regex(@"\[.+?\]");
 
-        /// <summary>
-        /// Modifier function table.
-        /// </summary>
         public Dictionary<string, Func<string, string>> ModifierLookup;
 
-        /// <summary>
-        /// Key/value store for savable data.
-        /// </summary>
         public Dictionary<string, string> SaveData;
 
-        /// <summary>
-        /// Read all text from a file and pass it to the other constructor.
-        /// </summary>
-        /// <param name="f"></param>
-        public Grammar(FileInfo f) : this(File.ReadAllText(f.FullName)) { }
+        public Grammar(FileInfo f) : this(File.ReadAllText(f.FullName, Encoding.UTF8)) { }
 
         /// <summary>
-        /// Load the rules list by deserializing the source as a json object.
+        /// Load  rules by deserializing the source as a json object
         /// </summary>
         /// <param name="source"></param>
         public Grammar(string source)
@@ -87,20 +72,18 @@ namespace Dialogic
         /// <param name="source"></param>
         private void PopulateRules(string source)
         {
-            // Is it valid json?
             if (IsValidJson(source))
             {
                 // Deserialize directly
                 Rules = JsonConvert.DeserializeObject<JObject>(source);
             }
-            // Is it valid yaml?
             else if (IsValidYaml(source))
             {
                 Rules = DeserializeYaml(source);
             }
             else
             {
-                throw new Exception("Grammar file not valid JSON or YAML!");
+                throw new Exception("Invalid JSON or YAML!");
             }
         }
 
@@ -131,7 +114,7 @@ namespace Dialogic
         /// </summary>
         /// <param name="rule">The rule to start on. Often #origin#.</param>
         /// <returns>The resultant string, flattened from the rules.</returns>
-        public string Flatten(string rule)
+        public string Expand(string rule)
         {
             // Get expansion symbols
             var expansionMatches = ExpansionRegex.Matches(rule);
@@ -190,7 +173,7 @@ namespace Dialogic
                 {
                     var index = Random.Next(0, ((JArray)selectedRule).Count);
                     var chosen = selectedRule[index].ToString();
-                    var resolved = Flatten(chosen);
+                    var resolved = Expand(chosen);
 
                     resolved = ApplyModifiers(resolved, modifiers);
 
@@ -199,7 +182,7 @@ namespace Dialogic
                 else
                 {
                     // Otherwise flatten it
-                    var resolved = Flatten(selectedRule.ToString());
+                    var resolved = Expand(selectedRule.ToString());
 
                     resolved = ApplyModifiers(resolved, modifiers);
 
@@ -235,7 +218,7 @@ namespace Dialogic
                 // If it's just [hero], then flatten #hero#
                 if (!save.Contains(ASSIGN))
                 {
-                    Flatten(OPEN_TAG + save + CLOSE_TAG);
+                    Expand(OPEN_TAG + save + CLOSE_TAG);
                     continue;
                 }
 
@@ -246,7 +229,7 @@ namespace Dialogic
                 var name = saveSplit[0];
 
                 // Flatten: #name#
-                var data = Flatten(saveSplit[1]);
+                var data = Expand(saveSplit[1]);
 
                 SaveData[name] = data;
             }

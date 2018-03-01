@@ -16,8 +16,8 @@ namespace Dialogic
                 "But also small ones. The judges agree, 3.5 of 10. Try again, " +
                 "this time with feeling.";
             var gram = ChatParser.ParseGrammar(new FileInfo(f));
-            var outp = gram.Flatten("<grammar1>");
-            Console.WriteLine(outp);
+            var outp = gram.Expand("<grammar1>");
+            //Console.WriteLine(outp);
             Assert.That(outp, Is.EqualTo(exp));
         }
 

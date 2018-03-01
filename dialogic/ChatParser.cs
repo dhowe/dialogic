@@ -7,6 +7,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using System.Text.RegularExpressions;
 using Dialogic.Antlr;
+using System.Text;
 
 namespace Dialogic
 {
@@ -89,7 +90,7 @@ namespace Dialogic
 
         internal static void ParseFile(string fname, List<Chat> chats)
         {
-            var result = Parse(File.ReadAllLines(fname));
+            var result = Parse(File.ReadAllLines(fname, Encoding.UTF8));
             result.ForEach((f) => chats.Add(f));
         }
 
