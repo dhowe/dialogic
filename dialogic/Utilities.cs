@@ -58,42 +58,49 @@ namespace Dialogic
             int i = 0;
             foreach (Match match in matches)
             {
-                Console.WriteLine("\nMatch {0} has {1} groups:\n", i++, match.Groups.Count);
-
-                int groupNo = 0;
-                foreach (Group mm in match.Groups)
-                {
-                    Console.WriteLine("  Group {0} has {1} capture(s) '{2}'",
-                        groupNo, mm.Captures.Count, mm.Value);
-
-                    int captureNo = 0;
-                    foreach (Capture cc in mm.Captures)
-                    {
-                        Console.WriteLine("       Capture {0} '{1}'", captureNo++, cc);
-                    }
-                    groupNo++;
-                }
-
-                groupNo = 0;
-                Console.WriteLine("\n  match.Value == \"{0}\"", match.Value);
-                foreach (Group mm in match.Groups)
-                {
-                    Console.WriteLine("  match.Groups[{0}].Value == \"{1}\"",
-                        groupNo, match.Groups[groupNo++].Value);
-                }
-
-                groupNo = 0;
-                foreach (Group mm in match.Groups)
-                {
-                    int captureNo = 0;
-                    foreach (Capture cc in mm.Captures)
-                    {
-                        Console.WriteLine("  match.Groups[{0}].Captures[{1}].Value == \"{2}\"",
-                            groupNo, captureNo, match.Groups[groupNo].Captures[captureNo++].Value); //**
-                    }
-                    groupNo++;
-                }
+               ShowMatch(match, i++);
             }
+        }
+
+        public static int ShowMatch(Match match, int i = 0)
+        {
+            Console.WriteLine("\nMatch {0} has {1} groups:\n", i, match.Groups.Count);
+
+            int groupNo = 0;
+            foreach (Group mm in match.Groups)
+            {
+                Console.WriteLine("  Group {0} has {1} capture(s) '{2}'",
+                    groupNo, mm.Captures.Count, mm.Value);
+
+                int captureNo = 0;
+                foreach (Capture cc in mm.Captures)
+                {
+                    Console.WriteLine("       Capture {0} '{1}'", captureNo++, cc);
+                }
+                groupNo++;
+            }
+
+            groupNo = 0;
+            Console.WriteLine("\n  match.Value == \"{0}\"", match.Value);
+            foreach (Group mm in match.Groups)
+            {
+                Console.WriteLine("  match.Groups[{0}].Value == \"{1}\"",
+                    groupNo, match.Groups[groupNo++].Value);
+            }
+
+            groupNo = 0;
+            foreach (Group mm in match.Groups)
+            {
+                int captureNo = 0;
+                foreach (Capture cc in mm.Captures)
+                {
+                    Console.WriteLine("  match.Groups[{0}].Captures[{1}].Value == \"{2}\"",
+                        groupNo, captureNo, match.Groups[groupNo].Captures[captureNo++].Value); //**
+                }
+                groupNo++;
+            }
+
+            return i;
         }
 
         public static object RandItem(object[] arr)

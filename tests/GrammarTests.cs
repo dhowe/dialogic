@@ -201,7 +201,7 @@ namespace Dialogic
             var output = grammar.Expand("<origin>");
 
             // Assert
-            Assert.AreEqual(output, "Hello \"world\"");
+            Assert.AreEqual(output, "Hello \"world\""); 
         }
 
         [Test]

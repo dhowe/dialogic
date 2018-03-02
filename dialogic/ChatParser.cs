@@ -116,7 +116,7 @@ namespace Dialogic
         // tmp_hack to handle appending the default (SAY) command
         private static void HandleDefaultCommand(string[] lines, string cmd)
         {
-            for (int i = 0; i < lines.Count(); i++)
+            for (int i = 0; i < lines.Length; i++)
             {
                 if (!string.IsNullOrEmpty(lines[i]))
                 {
@@ -255,33 +255,6 @@ namespace Dialogic
 
     public class LexerTest : DialogicBaseVisitor<Chat>
     {
-        /*private static void printPrettyLispTree(String tree)
-        {
-            Console.WriteLine("[PARSE-TREE]");
-            int indentation = 1;
-            foreach (char c in tree)
-            {
-                if (c == '(')
-                {
-                    if (indentation > 1)
-                    {
-                        Console.WriteLine();
-                    }
-                    for (int i = 0; i < indentation; i++)
-                    {
-                        Console.Write("  ");
-                    }
-                    indentation++;
-                }
-                else if (c == ')')
-                {
-                    indentation--;
-                }
-                Console.Write(c);
-            }
-            Console.WriteLine();
-        }*/
-
         public void TestParse(string source)
         {
             string[] lines = File.ReadAllLines(source);

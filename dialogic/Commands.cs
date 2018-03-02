@@ -306,7 +306,7 @@ namespace Dialogic
         }
     }
 
-    public interface IEmittable { }
+    public interface IEmittable {}
 
     public class Chat : Command
     {
@@ -383,7 +383,8 @@ namespace Dialogic
 
         public string Text, Actor = ChatRuntime.DefaultSpeaker;
 
-        public int IndexInChat = -1; // needed?
+        public int LastSentMs, IndexInChat = -1; // needed?
+
         public Chat parent = null;
 
         protected Command()
@@ -395,6 +396,7 @@ namespace Dialogic
 
         private static string ToMixedCase(string s)
         {
+            if (string.IsNullOrEmpty(s)) return s;
             return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
         }
 
@@ -464,6 +466,8 @@ namespace Dialogic
 
             data["text"] = text;
             data["type"] = TypeName();
+
+            LastSentMs = Util.EpochMs();
 
             return data;
         }
