@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.props" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -32,9 +31,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Antlr4.Runtime">
-      <HintPath>..\packages\Antlr4.Runtime.4.6.4\lib\net35-client\Antlr4.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -44,7 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ChatParser.cs" />
     <Compile Include="ChatSearch.cs" />
     <Compile Include="Clients.cs" />
     <Compile Include="Commands.cs" />
@@ -52,10 +47,10 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="Substitutions.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="antlr/*.cs" />
     <Compile Include="Grammar.cs" />
     <Compile Include="GrammarMods.cs" />
     <Compile Include="ChatRuntime.cs" />
+    <Compile Include="ChatParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -69,9 +64,5 @@
     <None Include="data\queries.gs" />
     <None Include="data\tmp.gs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="antlr\" />
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.targets" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.4\build\Antlr4.CodeGenerator.targets')" />
 </Project>

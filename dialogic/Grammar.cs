@@ -87,7 +87,7 @@ namespace Dialogic
             var deserializer = new Deserializer();
             var yamlObject = deserializer.Deserialize(new StringReader(source));
 
-            // Reserialize the yaml as json into the Rules object
+            // convert rules to json
             var rules = JsonConvert.SerializeObject(yamlObject);
             return JsonConvert.DeserializeObject<JObject>(rules);
         }

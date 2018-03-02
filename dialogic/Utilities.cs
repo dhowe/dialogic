@@ -8,7 +8,27 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    /** Static utility functions */
+    /** Utility classes */
+
+    public static class RE 
+    {
+        internal const string OP1 = @"($?[a-zA-Z_][a-zA-Z0-9_]+)";
+        internal const string OP2 = @" *([!<=>*^$]+) *([^ ]+)";
+        public static Regex FindMeta = new Regex(OP1 + OP2);
+
+        internal const string CMD = @"(^[A-Z][A-Z]+)?\s*";
+        internal const string TXT = @"([^#}{]+)?\s*";
+        internal const string LBL = @"(#[A-Za-z][\S]*)?\s*";
+        internal const string MTA = @"(?:\{(.+?)\})?\s*";
+        public static Regex ParseLine = new Regex(CMD + TXT + LBL + MTA);
+
+        internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
+        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
+        public static Regex MatchParens = new Regex(MP1+MP2);
+
+        internal const string MSP = @"\s*,\s*";
+        public static Regex MetaSplit = new Regex(MSP);
+    }
 
     public static class Util
     {
@@ -19,6 +39,20 @@ namespace Dialogic
         {
             start = Environment.TickCount;
             random = new Random();
+        }
+
+        public static int SecStrToMs(string s, int defaultMs=-1)
+        {
+            double d;
+            try
+            {
+                d = (double)Convert.ChangeType(s, typeof(double));
+            }
+            catch (FormatException)
+            {
+                return defaultMs;
+            }
+            return (int)(d * 1000);
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
@@ -58,42 +92,49 @@ namespace Dialogic
             int i = 0;
             foreach (Match match in matches)
             {
-                Console.WriteLine("\nMatch {0} has {1} groups:\n", i++, match.Groups.Count);
-
-                int groupNo = 0;
-                foreach (Group mm in match.Groups)
-                {
-                    Console.WriteLine("  Group {0} has {1} capture(s) '{2}'",
-                        groupNo, mm.Captures.Count, mm.Value);
-
-                    int captureNo = 0;
-                    foreach (Capture cc in mm.Captures)
-                    {
-                        Console.WriteLine("       Capture {0} '{1}'", captureNo++, cc);
-                    }
-                    groupNo++;
-                }
-
-                groupNo = 0;
-                Console.WriteLine("\n  match.Value == \"{0}\"", match.Value);
-                foreach (Group mm in match.Groups)
-                {
-                    Console.WriteLine("  match.Groups[{0}].Value == \"{1}\"",
-                        groupNo, match.Groups[groupNo++].Value);
-                }
-
-                groupNo = 0;
-                foreach (Group mm in match.Groups)
-                {
-                    int captureNo = 0;
-                    foreach (Capture cc in mm.Captures)
-                    {
-                        Console.WriteLine("  match.Groups[{0}].Captures[{1}].Value == \"{2}\"",
-                            groupNo, captureNo, match.Groups[groupNo].Captures[captureNo++].Value); //**
-                    }
-                    groupNo++;
-                }
+                ShowMatch(match, i++);
             }
+        }
+
+        public static int ShowMatch(Match match, int i = 0)
+        {
+            Console.WriteLine("\nMatch {0} has {1} groups:\n", i, match.Groups.Count);
+
+            int groupNo = 0;
+            foreach (Group mm in match.Groups)
+            {
+                Console.WriteLine("  Group {0} has {1} capture(s) '{2}'",
+                    groupNo, mm.Captures.Count, mm.Value);
+
+                int captureNo = 0;
+                foreach (Capture cc in mm.Captures)
+                {
+                    Console.WriteLine("       Capture {0} '{1}'", captureNo++, cc);
+                }
+                groupNo++;
+            }
+
+            groupNo = 0;
+            Console.WriteLine("\n  match.Value == \"{0}\"", match.Value);
+            foreach (Group mm in match.Groups)
+            {
+                Console.WriteLine("  match.Groups[{0}].Value == \"{1}\"",
+                    groupNo, match.Groups[groupNo++].Value);
+            }
+
+            groupNo = 0;
+            foreach (Group mm in match.Groups)
+            {
+                int captureNo = 0;
+                foreach (Capture cc in mm.Captures)
+                {
+                    Console.WriteLine("  match.Groups[{0}].Captures[{1}].Value == \"{2}\"",
+                        groupNo, captureNo, match.Groups[groupNo].Captures[captureNo++].Value); //**
+                }
+                groupNo++;
+            }
+
+            return i;
         }
 
         public static object RandItem(object[] arr)
@@ -135,32 +176,34 @@ namespace Dialogic
                 IDictionary id = (System.Collections.IDictionary)o;
                 if (id.Count > 0)
                 {
-                    s += "{";
+                    s += "{ ";
                     foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
-                    s = s.Substring(0, s.Length - 1) + "}";
+                    s = s.Substring(0, s.Length - 1) + " }";
                 }
             }
             else if (o is object[])
             {
                 var arr = ((object[])o);
-                s = "[";
+                s = "[ ";
                 for (int i = 0; i < arr.Length; i++)
                 {
                     s += arr[i];
                     if (i < arr.Length - 1) s += ",";
                 }
+                s += " ]";
             }
             else if (o is IList)
             {
                 var list = (IList)o;
-                s = "[";
+                s = "[ ";
                 for (int i = 0; i < list.Count; i++)
                 {
-                    s += list[i].ToString(); 
+                    s += list[i].ToString();
                     if (i < list.Count - 1) s += ",";
                 }
+                s += " ]";
             }
-            else 
+            else
             {
                 s = o.ToString();
             }
@@ -185,7 +228,7 @@ namespace Dialogic
 
         public static double ToSec(int millis)
         {
-            return millis/1000.0;
+            return millis / 1000.0;
         }
 
         /**
@@ -244,7 +287,7 @@ namespace Dialogic
             return this;
         }
 
-        public Constraints Add(string key, string value) 
+        public Constraints Add(string key, string value)
         {
             return Add(new Constraint(key, value));
         }
@@ -461,6 +504,17 @@ namespace Dialogic
             if (recycler != null) recycler(next);
             cursor = ++cursor < pool.Length ? cursor : 0;
             return next;
+        }
+    }
+}
+
+namespace ExtensionMethods
+{
+    public static class Exts
+    {
+        public static void Match<T>(this IList<T> il, Action<T,T,T,T> block)
+        {
+            block(il[0], il[1], il[2], il[3]);
         }
     }
 }

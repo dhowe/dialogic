@@ -30,7 +30,7 @@ namespace runner
         public static Dictionary<string, object> globals =
             new Dictionary<string, object>() {
                 { "emotion", "special" },
-                { "place", "My Tank" },
+                { "place", "my tank" },
                 { "Happy", "HappyFlip" },
                 { "verb", "play" },
                 { "neg", "(nah|no|nope)" },
@@ -44,13 +44,14 @@ namespace runner
 
         public MockGameEngine(string fileOrFolder)
         {
-            List<Chat> chats = ChatParser.ParseFile(fileOrFolder);
+            List<Chat> chats = ChatReader.ParseFile(fileOrFolder);
             runtime = new ChatRuntime(chats);
             runtime.Run();
         }
 
         public void Run()
         {
+            Console.WriteLine();
             while (true)
             {
                 Thread.Sleep(30);
@@ -82,6 +83,7 @@ namespace runner
             }
 
             Console.WriteLine(diaText);
+
             ge = null;  // dispose event 
         }
 

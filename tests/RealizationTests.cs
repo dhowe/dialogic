@@ -19,7 +19,7 @@ namespace Dialogic
         [Test]
         public void TestMeta()
         {
-            Chat chat = ChatParser.ParseText("SAY Thank you { pace = fast}")[0];
+            Chat chat = ChatReader.ParseText("SAY Thank you { pace = fast}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
@@ -36,7 +36,7 @@ namespace Dialogic
         [Test]
         public void TestMetaVar()
         {
-            Chat chat = ChatParser.ParseText("SAY Thank you { pace=$animal}")[0];
+            Chat chat = ChatReader.ParseText("SAY Thank you { pace=$animal}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
@@ -53,7 +53,7 @@ namespace Dialogic
         [Test]
         public void TestTextVar()
         {
-            Chat chat = ChatParser.ParseText("SAY Thank $count { pace=$animal}")[0];
+            Chat chat = ChatReader.ParseText("SAY Thank $count { pace=$animal}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
@@ -69,7 +69,7 @@ namespace Dialogic
         public void TestTextGroup()
         {
             var ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
-            Chat chat = ChatParser.ParseText("SAY The boy was (sad | happy | dead)")[0];
+            Chat chat = ChatReader.ParseText("SAY The boy was (sad | happy | dead)")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
@@ -82,7 +82,7 @@ namespace Dialogic
         public void TestComplex()
         {
             string[] ok = { "letter a", "letter b", "letter then" };
-            Chat chat = ChatParser.ParseText("SAY letter $cmplx")[0];
+            Chat chat = ChatReader.ParseText("SAY letter $cmplx")[0];
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             for (int i = 0; i < 10; i++)

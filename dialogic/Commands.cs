@@ -6,15 +6,21 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    public class NoOp : Command {}
+    public class NoOp : Command { }
 
     public class Go : Command
     {
         public Go() : base() { }
 
-        public Go(string text) : base()
+        public override void Init(string text, string label, string[] meta)
         {
-            this.Text = text;
+            // TODO: extract method
+            if (label.Length < 1) throw BadArg
+                ("GO requires a label, e.g. #Ch1, got '" + label + "'");
+
+            base.Init(text, label, meta);
+
+            if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
         }
     }
 
@@ -28,12 +34,11 @@ namespace Dialogic
 
     public class Gram : Command
     {
-
         public Grammar grammar;
 
-        public override void Init(string[] args, string[] meta)
+        public override void Init(string text, string label, string[] meta)
         {
-            Console.WriteLine("Gram.init: " + Util.Stringify(meta));
+            //Console.WriteLine("Gram.init: " + Util.Stringify(meta)+"\n"+String.Join("\n", meta));
             grammar = new Grammar(String.Join("\n", meta));
         }
 
@@ -45,13 +50,17 @@ namespace Dialogic
 
     public class Do : Command, IEmittable
     {
-        public Do() : base() {
-            PauseAfterMs = 100;
+        public Do() : base()
+        {
+            PauseAfterMs = 50;
         }
 
-        public override void Init(string[] args, string[] meta)
+        public override void Init(string text, string label, string[] meta)
         {
-            base.Init(args, meta);
+            if (label.Length < 1) throw BadArg("DO requires a literal label, e.g. #C2, got '" + label + "'");
+
+            base.Init(text, label, meta);
+
             if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
         }
     }
@@ -68,24 +77,21 @@ namespace Dialogic
             this.Value = value;
         }
 
-        public override void Init(string[] args, string[] meta)
+        public override void Init(string text, string label, string[] meta)
         {
-            string[] parts = ParseSetArgs(args);
+            string[] parts = ParseSetArgs(text);
             this.Text = parts[0];
             this.Value = parts[1];
         }
 
-        private string[] ParseSetArgs(string[] args)
+        private string[] ParseSetArgs(string args)
         {
-            if (args.Length != 1)
-            {
-                throw BadArgs(args, 1);
-            }
+            if (args.Length < 1) throw BadArg("ParseSetArgs");
 
-            var pair = Regex.Split(args[0], @"\s*=\s*");
-            if (pair.Length != 2) pair = Regex.Split(args[0], @"\s+");
+            var pair = Regex.Split(args, @"\s*=\s*");
+            if (pair.Length != 2) pair = Regex.Split(args, @"\s+");
 
-            if (pair.Length != 2) throw BadArgs(pair, 2);
+            if (pair.Length != 2) throw BadArg("bad pair");
 
             if (pair[0].StartsWith("$", StringComparison.Ordinal))
             {
@@ -99,7 +105,6 @@ namespace Dialogic
         {
             return "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
         }
-
     }
 
     public class Wait : Command
@@ -109,10 +114,10 @@ namespace Dialogic
             PauseAfterMs = -1;
         }
 
-        public override void Init(string[] args, string[] meta)
+        public override void Init(string text, string label, string[] meta)
         {
-            if (args.Length > 0) PauseAfterMs =
-                Util.ToMillis(double.Parse(args[0]));
+            base.Init(text, label, meta);
+            PauseAfterMs = Util.SecStrToMs(text, -1);
         }
     }
 
@@ -127,8 +132,14 @@ namespace Dialogic
         public Ask()
         {
             this.PauseAfterMs = Infinite;
-            this.Timeout = 10000; // default
+            this.Timeout = 5000; // default
         }
+
+        //public override void Init(string text, string label, string[] meta)
+        //{
+        //    base.Init(text, label, meta);
+        //    // HERE
+        //}
 
         public List<Opt> Options()
         {
@@ -184,8 +195,7 @@ namespace Dialogic
         {
             if (meta != null && meta.ContainsKey("timeout"))
             {
-                double d = (double)Convert.ChangeType(meta["timeout"], typeof(double));
-                Timeout = Util.ToMillis(d);
+                Timeout = Util.SecStrToMs((string)meta["timeout"]);
             }
         }
 
@@ -213,11 +223,17 @@ namespace Dialogic
             this.action = action;
         }
 
-        public override void Init(string[] args, string[] meta)
+        public override void Init(string text, string label, string[] meta)
         {
-            if (args.Length < 1) throw BadArgs(args, 1);
-            this.Text = args[0];
-            this.action = (args.Length > 1) ? Command.Create(typeof(Go), new string[] { args[1] }, meta) : NOP;
+            this.Text = text;
+
+            if (label.Length == 0 || !label.StartsWith("#", StringComparison.InvariantCulture))
+            {
+                throw BadArg("OPT requires a label, e.g. #Chat27, got '"+label+"'");
+            }
+
+            this.action = label.Length > 0 ?
+                Command.Create(typeof(Go), "", label, meta) : NOP;
         }
 
         public override string ToString()
@@ -267,20 +283,17 @@ namespace Dialogic
 
     public class Find : Command
     {
-        const string PATT = @"($?[a-zA-Z_][a-zA-Z0-9_]+) *([!<=>*^$]+) *([^ ]+)";
-        protected static Regex QUERY = new Regex(PATT);
-
-        public override void Init(string[] args, string[] meta)
+        public override void Init(string text, string label, string[] meta)
         {
-            if (args.Length > 0) throw BadArgs(args, 1);
             ParseMeta(meta);
         }
 
         protected override void ParseMeta(string[] pairs)
         {
+            //Console.WriteLine("Find.ParseMeta:" + Util.Stringify(pairs));
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
-                Match match = QUERY.Match(pairs[i]);
+                Match match = RE.FindMeta.Match(pairs[i]);
                 if (match.Groups.Count != 4)
                 {
                     throw new Exception("Invalid query term: " + pairs[i]);
@@ -288,6 +301,7 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
                 string op = match.Groups[2].Value;
                 string val = match.Groups[3].Value;
+                //Console.WriteLine(key + " :: " + op + " :: " + val);
                 if (meta == null) meta = new Dictionary<string, object>();
                 meta.Add(key, new Constraint(op, key, val));
             }
@@ -310,7 +324,7 @@ namespace Dialogic
 
     public class Chat : Command
     {
-        public List<Command> commands = new List<Command>(); // not copied
+        public List<Command> commands; // not copied
         public int cursor = 0;
 
         public Chat() : this("C" + Util.EpochMs()) { }
@@ -318,6 +332,7 @@ namespace Dialogic
         public Chat(string name)
         {
             this.Text = name;
+            this.commands = new List<Command>();
         }
 
         public int Count()
@@ -332,14 +347,11 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        public override void Init(string[] args, string[] meta)
+        public override void Init(string text, string label, string[] meta)
         {
-            if (args.Length < 1)
-            {
-                throw BadArgs(args, 1);
-            }
+            if (string.IsNullOrEmpty(text)) throw BadArg("Missing label");
 
-            this.Text = args[0];
+            this.Text = text;
             if (Regex.IsMatch(Text, @"\s+"))
             {
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
@@ -365,144 +377,10 @@ namespace Dialogic
             bool hasNext = cursor > -1 && cursor < commands.Count;
             return hasNext ? commands[cursor++] : null;
         }
-    }
 
-    public abstract class Command : MetaData
-    {
-        public const string PACKAGE = "Dialogic.";
-
-        public const int Infinite = -1;
-
-        protected static int IDGEN = 0;
-
-        public static readonly Command NOP = new NoOp();
-
-        public string Id { get; protected set; }
-
-        public int PauseAfterMs { get; protected set; }
-
-        public string Text, Actor = ChatRuntime.DefaultSpeaker;
-
-        public int IndexInChat = -1; // needed?
-        public Chat parent = null;
-
-        protected Command()
+        public void Reset()
         {
-            this.Id = (++IDGEN).ToString();
-            this.PauseAfterMs = 0;
-            this.data = new Dictionary<string, object>();
-        }
-
-        private static string ToMixedCase(string s)
-        {
-            return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
-        }
-
-        public static Command Create(string type, string[] args, string[] meta)
-        {
-            type = ToMixedCase(type);
-            var cmd = Create(Type.GetType(PACKAGE + type), args, meta);
-            if (cmd != null) return cmd;
-            throw new TypeLoadException("No type: " + PACKAGE + type);
-        }
-
-        public static Command Create(Type type, string[] args, string[] meta)
-        {
-            Command cmd = (Command)Activator.CreateInstance(type);
-            cmd.Init(args, meta);
-            return cmd;
-        }
-
-        public virtual void Init(string[] args, string[] meta)
-        {
-            if (args != null)
-            {
-                this.Text = args[0];
-                if (args.Length > 1) PauseAfterMs =
-                    Util.ToMillis(double.Parse(args[1]));
-            }
-            ParseMeta(meta);
-            HandleMetaTiming();
-        }
-
-        protected virtual void HandleMetaTiming()
-        {
-            if (meta != null && meta.ContainsKey("PauseAfterMs"))
-            {
-                double d = (double)Convert.ChangeType(meta["PauseAfterMs"], typeof(double));
-                PauseAfterMs = Util.ToMillis(d);
-            }
-        }
-
-        public virtual string TypeName()
-        {
-            return this.GetType().ToString().Replace(PACKAGE, "");
-        }
-
-        public virtual IDictionary<string, object> Realize(IDictionary<string, object> globals)
-        {
-            data.Clear();
-            if (HasMeta())
-            {
-                IEnumerable sorted = null;
-                foreach (KeyValuePair<string, object> kv in meta)
-                {
-                    string val = kv.Value.ToString();
-                    if (val.IndexOf('$') > -1) {
-                        if (sorted == null) sorted = Util.SortByLength(globals.Keys);
-                        foreach (string s in sorted)
-                        {
-                            val = val.Replace("$" + s, globals[s].ToString());
-                        }
-                    }
-                    data[kv.Key] = val;
-                }
-            }
-
-            var text = Text + ""; // tmp
-            Substitutions.Do(ref text, globals);
-
-            data["text"] = text;
-            data["type"] = TypeName();
-
-            return data;
-        }
-
-        protected Exception BadArg(string msg)
-        {
-            throw new ArgumentException(msg);
-        }
-
-        protected Exception BadArgs(string[] args, int expected)
-        {
-            return BadArg(TypeName().ToUpper() + " expects " + expected + " args,"
-                + " got " + args.Length + "'" + string.Join(" # ", args) + "'\n");
-        }
-
-        public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
-        }
-
-        public string TimeStr()
-        {
-            return PauseAfterMs > 0 ? "wait=" + Util.ToSec(PauseAfterMs) : "";
-        }
-
-        protected override string MetaStr()
-        {
-            var s = base.MetaStr();
-            if (PauseAfterMs > 0)
-            {
-                var t = TimeStr() + "}";
-                s = (s.Length < 1) ? "{" + t : s.Replace("}", "," + t);
-            }
-            return s;
-        }
-
-        protected static string QQ(string text)
-        {
-            return "'" + text + "'";
+            this.cursor = 0;
         }
     }
 
@@ -519,7 +397,7 @@ namespace Dialogic
         {
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
         }
-       
+
         /* Note: new keys will overwrite old keys with same name */
         public void SetMeta(string key, object val)
         {
@@ -567,6 +445,147 @@ namespace Dialogic
                     SetMeta(parts[0].Trim(), parts[1].Trim());
                 }
             }
+        }
+    }
+    public abstract class Command : MetaData
+    {
+        public const string PACKAGE = "Dialogic.";
+
+        public const int Infinite = -1;
+
+        protected static int IDGEN = 0;
+
+        public static readonly Command NOP = new NoOp();
+
+        public string Id { get; protected set; }
+
+        public int PauseAfterMs { get; protected set; }
+
+        public string Text, Actor = ChatRuntime.DefaultSpeaker;
+
+        public int LastSentMs, IndexInChat = -1; // needed?
+
+        public Chat parent = null;
+
+        protected Command()
+        {
+            this.Id = (++IDGEN).ToString();
+            this.PauseAfterMs = 0;
+            this.data = new Dictionary<string, object>();
+        }
+
+        private static string ToMixedCase(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+            return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
+        }
+
+        public static Command Create(string type, string text, string label, string[] meta)
+        {
+            type = ToMixedCase(type);
+            //Console.WriteLine(type + "' '"+ text + "' '"+ label + "' '"+ Util.Stringify(meta) + "'");
+            var cmd = Create(Type.GetType(PACKAGE + type), label, text, meta);
+            if (cmd != null) return cmd;
+            throw new TypeLoadException("No type: " + PACKAGE + type);
+        }
+
+        public static Command Create(Type type, string text, string label, string[] meta)
+        {
+            Command cmd = (Command)Activator.CreateInstance(type);
+            cmd.Init(text, label, meta);
+            return cmd;
+        }
+
+        public virtual void Init(string text, string label, string[] meta)
+        {
+            //Console.WriteLine("Command.Init: " + text + " :: " + label + " :: " + String.Join("|", meta));
+            Text = text.Length > 0 ? text : label;
+            ParseMeta(meta);
+            HandleMetaTiming();
+        }
+
+        protected virtual void HandleMetaTiming()
+        {
+            if (meta != null && meta.ContainsKey("PauseAfterMs"))
+            {
+                PauseAfterMs = Util.SecStrToMs((string)meta["PauseAfterMs"]);
+            }
+        }
+
+        public virtual string TypeName()
+        {
+            return this.GetType().ToString().Replace(PACKAGE, "");
+        }
+
+        public virtual IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        {
+            data.Clear();
+
+            if (HasMeta())
+            {
+                IEnumerable sorted = null;
+                foreach (KeyValuePair<string, object> kv in meta)
+                {
+                    string val = kv.Value.ToString();
+
+                    if (val.IndexOf('$') > -1)
+                    {
+                        if (sorted == null) sorted = Util.SortByLength(globals.Keys);
+                        foreach (string s in sorted)
+                        {
+                            val = val.Replace("$" + s, globals[s].ToString());
+                        }
+                    }
+
+                    data[kv.Key] = val;
+                }
+            }
+
+            RealizeFields(globals);
+
+            data["type"] = TypeName();
+
+            LastSentMs = Util.EpochMs();
+
+            return data;
+        }
+
+        private void RealizeFields(IDictionary<string, object> globals)
+        {
+            var text = Text + ""; // tmp
+            Substitutions.Do(ref text, globals);
+            data["text"] = text;
+        }
+
+        protected Exception BadArg(string msg)
+        {
+            throw new ParseException(msg);
+        }
+
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
+        }
+
+        public string TimeStr()
+        {
+            return PauseAfterMs > 0 ? "wait=" + Util.ToSec(PauseAfterMs) : "";
+        }
+
+        protected override string MetaStr()
+        {
+            var s = base.MetaStr();
+            //if (PauseAfterMs > 0)
+            //{
+            //    var t = TimeStr() + "}";
+            //    s = (s.Length < 1) ? "{" + t : s.Replace("}", "," + t);
+            //}
+            return s;
+        }
+
+        protected static string QQ(string text)
+        {
+            return "'" + text + "'";
         }
     }
 }

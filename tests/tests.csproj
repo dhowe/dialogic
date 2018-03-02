@@ -9,7 +9,7 @@
     <AssemblyName>tests</AssemblyName>
     <TargetFramework>net35</TargetFramework>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ReleaseVersion>0.2</ReleaseVersion>
+    <ReleaseVersion>0.3</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,9 +33,6 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.3.9.0\lib\net35\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Antlr4.Runtime">
-      <HintPath>..\packages\Antlr4.Runtime.4.6.4\lib\net35-client\Antlr4.Runtime.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DialogicTests.cs" />
@@ -45,6 +42,7 @@
     <Compile Include="OperatorTests.cs" />
     <Compile Include="GrammarTests.cs" />
     <Compile Include="RealizationTests.cs" />
+    <Compile Include="ReaderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
