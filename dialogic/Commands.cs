@@ -31,7 +31,8 @@ namespace Dialogic
 
         public Grammar grammar;
 
-        public override void Init(string text, string label, string[] meta)        {
+        public override void Init(string text, string label, string[] meta)
+        {
             Console.WriteLine("Gram.init: " + Util.Stringify(meta));
             grammar = new Grammar(String.Join("\n", meta));
         }
@@ -49,7 +50,9 @@ namespace Dialogic
             PauseAfterMs = 50;
         }
 
-        public override void Init(string text, string label, string[] meta)        {
+        public override void Init(string text, string label, string[] meta)
+        {
+            if (label.Length < 1) throw BadArg("DO requires a label, e.g. #C2");
 
             base.Init(text, label, meta);
 
@@ -69,7 +72,8 @@ namespace Dialogic
             this.Value = value;
         }
 
-        public override void Init(string text, string label, string[] meta)        {
+        public override void Init(string text, string label, string[] meta)
+        {
             string[] parts = ParseSetArgs(text);
             this.Text = parts[0];
             this.Value = parts[1];
@@ -78,7 +82,7 @@ namespace Dialogic
         private string[] ParseSetArgs(string args)
         {
             if (args.Length < 1) throw BadArg("ParseSetArgs");
-                
+
             var pair = Regex.Split(args, @"\s*=\s*");
             if (pair.Length != 2) pair = Regex.Split(args, @"\s+");
 
@@ -107,8 +111,8 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            Console.WriteLine("Wait.init: "+text+" "+label);
-            base.Init(text,label,meta);
+            Console.WriteLine("Wait.init: " + text + " " + label);
+            base.Init(text, label, meta);
             PauseAfterMs = Util.SecStrToMs(text, -1);
         }
     }
@@ -212,7 +216,14 @@ namespace Dialogic
         public override void Init(string text, string label, string[] meta)
         {
             this.Text = text;
-            this.action = label.Length > 0 ? 
+
+            if (label.Length > 0 && !label.StartsWith("#",
+                StringComparison.InvariantCulture))
+            {
+                throw BadArg("OPT requires a label, e.g. #Chat27");
+            }
+
+            this.action = label.Length > 0 ?
                 Command.Create(typeof(Go), label, "", meta) : NOP;
         }
 
@@ -270,7 +281,7 @@ namespace Dialogic
 
         protected override void ParseMeta(string[] pairs)
         {
-            Console.WriteLine("Find.ParseMeta:"+Util.Stringify(pairs));
+            Console.WriteLine("Find.ParseMeta:" + Util.Stringify(pairs));
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
                 Match match = RE.FindMeta.Match(pairs[i]);
@@ -281,7 +292,7 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
                 string op = match.Groups[2].Value;
                 string val = match.Groups[3].Value;
-                Console.WriteLine(key+" :: "+op+" :: "+val);
+                Console.WriteLine(key + " :: " + op + " :: " + val);
                 if (meta == null) meta = new Dictionary<string, object>();
                 meta.Add(key, new Constraint(op, key, val));
             }
@@ -528,7 +539,7 @@ namespace Dialogic
 
         protected Exception BadArg(string msg)
         {
-            throw new ArgumentException(msg);
+            throw new ParseException(msg);
         }
 
         public override string ToString()

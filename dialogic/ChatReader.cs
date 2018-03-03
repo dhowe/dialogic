@@ -69,21 +69,6 @@ namespace Dialogic
             return c;
         }
 
-        private static void HandleDefaultCommand(string[] lines, string cmd)
-        {
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (!string.IsNullOrEmpty(lines[i]))
-                {
-                    //System.Console.WriteLine($"Checking: '{lines[i]}'");
-                    if (!Regex.IsMatch(lines[i], @"(^[A-Z][A-Z][A-Z]?[A-Z]?[^A-Z])"))
-                    {
-                        lines[i] = cmd + " " + lines[i];
-                    }
-                }
-            }
-        }
-
         private static Command LastOfType(Stack<Command> s, Type typeToFind)
         {
             foreach (Command c in s)
@@ -98,7 +83,7 @@ namespace Dialogic
             if (c is Opt) // add option data to last Ask
             {
                 Command last = LastOfType(parsed, typeof(Ask));
-                if (!(last is Ask)) throw new Exception("Opt must follow Ask");
+                if (!(last is Ask)) throw new ParseException("Opt must follow Ask");
                 ((Ask)last).AddOption((Opt)c);
             }
             else  // add command to last Chat
