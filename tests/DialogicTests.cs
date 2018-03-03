@@ -9,6 +9,17 @@ namespace Dialogic
     public class DialogicTests
     {
         [Test]
+        public void TestSecStrToMs()
+        {
+            Assert.That(Util.SecStrToMs("1"),Is.EqualTo(1000));
+            Assert.That(Util.SecStrToMs("1.5"), Is.EqualTo(1500));
+            Assert.That(Util.SecStrToMs(".5"), Is.EqualTo(500));
+            Assert.That(Util.SecStrToMs("0.5"), Is.EqualTo(500));
+            Assert.That(Util.SecStrToMs("1x"), Is.EqualTo(-1));
+            Assert.That(Util.SecStrToMs("1x",1000), Is.EqualTo(1000));
+        }
+
+        [Test]
         public void TestSimpleGrammar()
         {
             string f = TestContext.CurrentContext.TestDirectory + "/data/grammar.yaml";

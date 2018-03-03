@@ -175,7 +175,7 @@ namespace Dialogic
 
             //Console.WriteLine("cmd: " + cmd + " args: '" + String.Join(",", args) + "' " + meta);
 
-            Command c = Command.Create(cmd, args, meta);
+            Command c = Command.Create(cmd, "tmp", "tmp", meta);
             if (c is Chat)
             {
                 chats.Add((Chat)c);

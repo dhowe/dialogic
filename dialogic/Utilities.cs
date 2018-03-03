@@ -8,7 +8,20 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    /** Static utility functions */
+    /** Utility classes */
+
+    public static class RE 
+    {
+        internal const string OP1 = @"($?[a-zA-Z_][a-zA-Z0-9_]+)";
+        internal const string OP2 = @" *([!<=>*^$]+) *([^ ]+)";
+        public static Regex FindMeta = new Regex(OP1 + OP2);
+
+        internal const string CMD = @"(^[A-Z][A-Z]+)?\s*";
+        internal const string LBL = @"(#[A-Za-z][\S]*)?\s*";
+        internal const string TXT = @"([^#}{]+)?\s*";
+        internal const string MTA = @"(?:\{(.+?)\})?\s*";
+        public static Regex ParseLine = new Regex(CMD + LBL + TXT + MTA);
+    }
 
     public static class Util
     {
@@ -19,6 +32,20 @@ namespace Dialogic
         {
             start = Environment.TickCount;
             random = new Random();
+        }
+
+        public static int SecStrToMs(string s, int defaultMs=-1)
+        {
+            double d;
+            try
+            {
+                d = (double)Convert.ChangeType(s, typeof(double));
+            }
+            catch (FormatException)
+            {
+                return defaultMs;
+            }
+            return (int)(d * 1000);
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
@@ -58,7 +85,7 @@ namespace Dialogic
             int i = 0;
             foreach (Match match in matches)
             {
-               ShowMatch(match, i++);
+                ShowMatch(match, i++);
             }
         }
 
@@ -156,6 +183,7 @@ namespace Dialogic
                     s += arr[i];
                     if (i < arr.Length - 1) s += ",";
                 }
+                s += "]";
             }
             else if (o is IList)
             {
@@ -163,11 +191,11 @@ namespace Dialogic
                 s = "[";
                 for (int i = 0; i < list.Count; i++)
                 {
-                    s += list[i].ToString(); 
+                    s += list[i].ToString();
                     if (i < list.Count - 1) s += ",";
                 }
             }
-            else 
+            else
             {
                 s = o.ToString();
             }
@@ -192,7 +220,7 @@ namespace Dialogic
 
         public static double ToSec(int millis)
         {
-            return millis/1000.0;
+            return millis / 1000.0;
         }
 
         /**
@@ -251,7 +279,7 @@ namespace Dialogic
             return this;
         }
 
-        public Constraints Add(string key, string value) 
+        public Constraints Add(string key, string value)
         {
             return Add(new Constraint(key, value));
         }
@@ -468,6 +496,17 @@ namespace Dialogic
             if (recycler != null) recycler(next);
             cursor = ++cursor < pool.Length ? cursor : 0;
             return next;
+        }
+    }
+}
+
+namespace ExtensionMethods
+{
+    public static class Exts
+    {
+        public static void Match<T>(this IList<T> il, Action<T,T,T,T> block)
+        {
+            block(il[0], il[1], il[2], il[3]);
         }
     }
 }

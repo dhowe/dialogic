@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using ExtensionMethods;
 
 namespace Dialogic
 {
     public class ChatReader
     {
         public static string CHAT_FILE_EXT = ".gs";
-        public static string COMMAND = @"(^[A-Z][A-Z][A-Z]?[A-Z]?[^A-Z])";
 
         protected static Stack<Command> parsed;
+        protected static List<Chat> chats;
 
-        public ChatReader()
+        static ChatReader()
         {
             parsed = new Stack<Command>();
+            chats = new List<Chat>();
         }
-
 
         public static List<Chat> ParseText(string text)
         {
@@ -24,24 +26,47 @@ namespace Dialogic
 
         internal static List<Chat> Parse(string[] lines, bool printTree = false)
         {
-            string cmd = null;
-            string[] args = null, meta = null;
-            List<Chat> chats = new List<Chat>();
+            int i = 0;
+            foreach (var line in lines) ParseLine(lines[i], i++);
+            return chats;
+        }
 
-            Command c = Command.Create(cmd, args, meta);
-            if (c is Chat)
+        public static Command ParseLine(string line, int lineNo)
+        {
+            Match match = RE.ParseLine.Match(line);
+            if (match.Length < 4) throw new ParseException(line, lineNo);
+            var parts = new List<string>();
+            for (int j = 0; j < 4; j++)
             {
-                chats.Add((Chat)c);
+                parts.Add(match.Groups[j + 1].Value.Trim());
             }
-            else
+            return ParseCommand(parts);
+        }
+
+
+        public static Command ParseCommand(List<string> parts)
+        {
+            Command c = null;
+            parts.Match((cmd, label, text, meta) =>
             {
-                if (chats.Count == 0) CreateDefaultChat();
-                HandleCommandTypes(c);
-            }
+                //Console.WriteLine("*COMMAND: '"+cmd+"'");
+                cmd = cmd.Length > 0 ? cmd : "SAY";
+                c = Command.Create(cmd, label, text, meta.Split(','));
 
-            parsed.Push(c);
+                if (c is Chat)
+                {
+                    chats.Add((Chat)c);
+                }
+                else
+                {
+                    if (chats.Count == 0) CreateDefaultChat();
+                    HandleCommandTypes(c);
+                }
 
-            return null;
+                parsed.Push(c);
+            });
+
+            return c;
         }
 
         private static void HandleDefaultCommand(string[] lines, string cmd)
@@ -59,24 +84,7 @@ namespace Dialogic
             }
         }
 
-        private void CreateDefaultChat(List<Chat> chats)
-        {
-            Chat def = new Chat();
-            chats.Add(def);
-            parsed.Push(def);
-        }
-
-        private static void CreateDefaultChat()
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void HandleCommandTypes(Command c)
-        {
-            throw new NotImplementedException();
-        }
-
-        private Command LastOfType(Stack<Command> s, Type typeToFind)
+        private static Command LastOfType(Stack<Command> s, Type typeToFind)
         {
             foreach (Command c in s)
             {
@@ -84,5 +92,27 @@ namespace Dialogic
             }
             return null;
         }
+
+        private static void HandleCommandTypes(Command c) // cleanup
+        {
+            if (c is Opt) // add option data to last Ask
+            {
+                Command last = LastOfType(parsed, typeof(Ask));
+                if (!(last is Ask)) throw new Exception("Opt must follow Ask");
+                ((Ask)last).AddOption((Opt)c);
+            }
+            else  // add command to last Chat
+            {
+                chats.Last().AddCommand(c);
+            }
+        }
+
+        private static void CreateDefaultChat()
+        {
+            Chat def = new Chat();
+            chats.Add(def);
+            parsed.Push(def);
+        }
+
     }
 }

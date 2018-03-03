@@ -7,14 +7,15 @@ namespace Dialogic
     {
         readonly Command command;
 
-        public ChatException(Command ask) : this(ask, "") {}
+        public ChatException(Command ask) : this(ask, "") { }
 
         public ChatException(Command ask, string message) : base(message)
         {
             this.command = ask;
         }
 
-        public Command Command {
+        public Command Command
+        {
             get
             {
                 return command;
@@ -22,7 +23,7 @@ namespace Dialogic
         }
     }
 
-    public class ChatNotFound : ChatException 
+    public class ChatNotFound : ChatException
     {
         public ChatNotFound(string label)
             : base(null, "No CHAT exists with name '" + label + "'") { }
@@ -31,8 +32,8 @@ namespace Dialogic
     public class PromptTimeout : ChatException
     {
         public PromptTimeout(Command ask) : this(ask, "Ask timeout expired") { }
-       
-        public PromptTimeout(Command ask, string message) : base(ask, message) {}
+
+        public PromptTimeout(Command ask, string message) : base(ask, message) { }
     }
 
     public class InvalidChoice : ChatException
@@ -46,6 +47,12 @@ namespace Dialogic
     {
         public OperatorException(Operator o) : this(o, "Invalid Operator") { }
 
-        public OperatorException(Operator o, string message) : base(message+": "+o) { }
+        public OperatorException(Operator o, string message) : base(message + ": " + o) { }
+    }
+
+    public class ParseException : Exception
+    {
+        public ParseException(string line, int lineNo, string msg = "ParseException: ") 
+            : base(msg + "@ line" + lineNo + "\n  : " + line) { }
     }
 }
