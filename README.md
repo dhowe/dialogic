@@ -90,11 +90,11 @@ Dialogic is also designed to respond naturally to user interaction and/or interr
 
 ### Integrating Dialogic
 
-Dialogic can be run alone or with a game engine, such as Unity3D (see example below). The system includes two main components: the domain-specific language (DSL) described above, and a runtime environment, which is responsible for passing events between the runtime and the application set of registered clients. 
+Dialogic can be run alone or with a game engine, such as Unity3D (see example below). The system includes two main components: the domain-specific language (DSL) described above, and a runtime environment, which is responsible for passing events between the runtime and the application. 
 
 In the C# example below, a _ChatParser_ reads in a number of chat descriptions from a plain-text file and compiles them into a list of _Chat_ objects, which are passed to the _ChatRuntime_. 
 
-The application calls the runtime's Update() function each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occured during that frame. If an Dialogic event occurs during the frame it is returned from the Update function:
+The application calls the runtime's Update() function each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occurred during that frame. If an Dialogic event occurs during the frame it is returned from the Update function:
 ````C#
 
  public RealtimeGame() 
