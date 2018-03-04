@@ -90,35 +90,23 @@ Dialogic is also designed to respond naturally to user interaction and/or interr
 
 ### Integrating Dialogic
 
-Dialogic can be run alone (via the included _ConsoleClient_) or with a game engine, such as Unity3D. The system includes two main components: the domain-specific language (DSL) described above, and a runtime environment, which is responsible for passing events between the runtime and the set of registered clients. _ChatEvents_ are sent from Dialogic to the client (e.g. the Unity Engine) telling it perform a specific action, such as triggering a speech act, initiating an animation, or playing audio from a file. _UIEvents_ are sent from the client (e.g. the Unity Engine) to the runtime, notifying it that some event has occurred, usually a speech act, UI interaction, or gesture from the user. 
+Dialogic can be run alone or with a game engine, such as Unity3D (see example below). The system includes two main components: the domain-specific language (DSL) described above, and a runtime environment, which is responsible for passing events between the runtime and the application set of registered clients. 
 
-In the C# example below, a _ChatParser_ reads in a number of chat descriptions from a plain-text file and compiles them into a list of _Chat_ objects, which are passed to the _ChatRuntime_. An example client (outputting only to the console) is created, which then subscribes with the runtime for chat events. The runtime then subscribes back to events issued by the client. Chats begin to execute  when run is called on the _ChatRuntime_.
+In the C# example below, a _ChatParser_ reads in a number of chat descriptions from a plain-text file and compiles them into a list of _Chat_ objects, which are passed to the _ChatRuntime_. 
 
-````C#
-var chats = ChatParser.ParseFile(scriptDir); 
-var runtime = new ChatRuntime(chats);
-
-var client = new ConsoleClient(); // An example client
-
-client.Subscribe(runtime); // Client subscribes to chat events
-runtime.Subscribe(client); // Dialogic subscribes to client events
-
-runtime.Run("Opening");    // Start the first Chat
-````
-
-Alternatively, for game-style environments, you can use the _UpdateAdapter_ client to provide a once-per-frame Update() callback, as follows:
+The application calls the runtime's Update() function each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occured during that frame. If an Dialogic event occurs during the frame it is returned from the Update function:
 ````C#
 
  public RealtimeGame() 
  {
      var chats = ChatParser.ParseFile(scriptDir); 
-     dialogic = new UpdateAdapter(chats);
+     dialogic = new ChatRuntime(chats);
  }
 
- public void Update() // Game Loop
+ public IUpdateEvent Update() // Game Loop
  {
      // Call the dialogic interface
-     UpdateEvent evt = dialogic.Update(globalsVars);
+     IUpdateEvent evt = dialogic.Update(globals, ref gameEvent);
 
      // Handle the event received
      if (evt != null) HandleEvent(evt);
