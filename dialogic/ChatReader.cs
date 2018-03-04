@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using ExtensionMethods;
 
@@ -10,13 +12,40 @@ namespace Dialogic
     {
         public static string CHAT_FILE_EXT = ".gs";
 
-        protected static Stack<Command> parsed;
-        protected static List<Chat> chats;
+        protected Stack<Command> parsed;
+        protected List<Chat> chats;
 
-        static ChatReader()
+        public ChatReader()
         {
             parsed = new Stack<Command>();
             chats = new List<Chat>();
+        }
+
+        public static Grammar ParseGrammar(FileInfo file)
+        {
+            return new Grammar(file);
+        }
+
+        public static Grammar ParseGrammar(string path)
+        {
+            return ParseGrammar(new FileInfo(path));
+        }
+
+        public static List<Chat> ParseFile(string fileOrFolder)
+        {
+            string[] files = !fileOrFolder.EndsWith(CHAT_FILE_EXT, StringComparison.InvariantCulture) ?
+                files = Directory.GetFiles(fileOrFolder, '*' + CHAT_FILE_EXT) :
+                files = new string[] { fileOrFolder };
+
+            List<Chat> chats = new List<Chat>();
+            ChatReader.ParseFiles(files, chats);
+
+            return chats;
+        }
+
+        internal static void ParseFiles(string[] files, List<Chat> chats)
+        {
+            foreach (var f in files) ParseFile(f, chats);
         }
 
         public static List<Chat> ParseText(string text)
@@ -27,11 +56,18 @@ namespace Dialogic
         internal static List<Chat> Parse(string[] lines, bool printTree = false)
         {
             int i = 0;
-            foreach (var line in lines) ParseLine(lines[i], i++);
-            return chats;
+            ChatReader parser = new ChatReader();
+            foreach (var line in lines) parser.ParseLine(lines[i], i++);
+            return parser.chats;
         }
 
-        public static Command ParseLine(string line, int lineNo)
+        internal static void ParseFile(string fname, List<Chat> chats)
+        {
+            var result = Parse(File.ReadAllLines(fname, Encoding.UTF8));
+            result.ForEach((f) => chats.Add(f));
+        }
+
+        public Command ParseLine(string line, int lineNo)
         {
             Match match = RE.ParseLine.Match(line);
             if (match.Length < 4) throw new ParseException(line, lineNo);
@@ -43,15 +79,15 @@ namespace Dialogic
             return ParseCommand(parts);
         }
 
-
-        public static Command ParseCommand(List<string> parts)
+        public Command ParseCommand(List<string> parts)
         {
             Command c = null;
             parts.Match((cmd, label, text, meta) =>
             {
                 //Console.WriteLine("*COMMAND: '"+cmd+"'");
                 cmd = cmd.Length > 0 ? cmd : "SAY";
-                c = Command.Create(cmd, label, text, meta.Split(','));
+                var pairs = RE.MetaSplit.Split(meta);
+                c = Command.Create(cmd, label, text, pairs);
 
                 if (c is Chat)
                 {
@@ -78,7 +114,7 @@ namespace Dialogic
             return null;
         }
 
-        private static void HandleCommandTypes(Command c) // cleanup
+        private void HandleCommandTypes(Command c) // cleanup
         {
             if (c is Opt) // add option data to last Ask
             {
@@ -92,7 +128,7 @@ namespace Dialogic
             }
         }
 
-        private static void CreateDefaultChat()
+        private void CreateDefaultChat()
         {
             Chat def = new Chat();
             chats.Add(def);

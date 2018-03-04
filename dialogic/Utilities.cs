@@ -21,6 +21,9 @@ namespace Dialogic
         internal const string TXT = @"([^#}{]+)?\s*";
         internal const string MTA = @"(?:\{(.+?)\})?\s*";
         public static Regex ParseLine = new Regex(CMD + LBL + TXT + MTA);
+
+        internal const string MSP = @"\s*,\s*";
+        public static Regex MetaSplit = new Regex(MSP);
     }
 
     public static class Util

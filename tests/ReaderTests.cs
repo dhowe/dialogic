@@ -17,9 +17,10 @@ namespace Dialogic
                 "SAY Thank you {pace=fast,count=2}", "SAY Thank you", "FIND { num > 1, an != 4 }",
                 "SAY Thank you { pace = fast}", "SAY Thank you {}", "Thank you"
             };
+            var reader = new ChatReader();
             for (int i = 0; i < lines.Length; i++)
             {
-                Command c = ChatReader.ParseLine(lines[i], i);
+                Command c = reader.ParseLine(lines[i], i);
                 Console.WriteLine(c);
                 Assert.That(c is Command);
             }

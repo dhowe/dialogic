@@ -26,7 +26,7 @@ namespace Dialogic
             string exp = "You look juicy. I see big things in your future. "+
                 "But also small ones. The judges agree, 3.5 of 10. Try again, " +
                 "this time with feeling.";
-            var gram = ChatParser.ParseGrammar(new FileInfo(f));
+            var gram = ChatReader.ParseGrammar(new FileInfo(f));
             var outp = gram.Expand("<grammar1>");
             //Console.WriteLine(outp);
             Assert.That(outp, Is.EqualTo(exp));

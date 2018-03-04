@@ -32,7 +32,6 @@ namespace Dialogic
             List<Chat> chats;
 
             chats = ChatReader.ParseText("FIND {num=1}");
-
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -47,13 +46,6 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
-
-            //chats = ChatReader.ParseText("DO #Twirl"); // TODO: FAILING
-            //Assert.That(chats.Count, Is.EqualTo(1));
-            //Assert.That(chats[0].Count, Is.EqualTo(1));
-            //Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            //Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
-            //Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
 
             chats = ChatReader.ParseText("SAY Thank you");
             Assert.That(chats.Count, Is.EqualTo(1));

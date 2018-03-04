@@ -44,7 +44,7 @@ namespace runner
 
         public MockGameEngine(string fileOrFolder)
         {
-            List<Chat> chats = ChatParser.ParseFile(fileOrFolder);
+            List<Chat> chats = ChatReader.ParseFile(fileOrFolder);
             runtime = new ChatRuntime(chats);
             runtime.Run();
         }

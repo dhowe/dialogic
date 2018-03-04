@@ -28,12 +28,11 @@ namespace Dialogic
 
     public class Gram : Command
     {
-
         public Grammar grammar;
 
         public override void Init(string text, string label, string[] meta)
         {
-            Console.WriteLine("Gram.init: " + Util.Stringify(meta));
+            Console.WriteLine("Gram.init: " + Util.Stringify(meta)+"\n"+String.Join("\n", meta));
             grammar = new Grammar(String.Join("\n", meta));
         }
 
@@ -52,11 +51,15 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
+            Console.WriteLine("DO.Init: '"+text+"' '"+label+"' '"+Util.Stringify(meta));
+
             if (label.Length < 1) throw BadArg("DO requires a label, e.g. #C2");
 
             base.Init(text, label, meta);
 
             if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
+
+            Console.WriteLine("DO.Text: '" + Text+"'");
         }
     }
 
@@ -484,11 +487,10 @@ namespace Dialogic
         public virtual void Init(string text, string label, string[] meta)
         {
             Console.WriteLine("Command.Init: " + text + " :: " + label + " :: " + String.Join("|", meta));
-            Text = text != null ? text : label;
+            Text = text.Length > 0 ? text : label;
             ParseMeta(meta);
             HandleMetaTiming();
         }
-
         protected virtual void HandleMetaTiming()
         {
             if (meta != null && meta.ContainsKey("PauseAfterMs"))
