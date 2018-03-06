@@ -7,9 +7,7 @@ namespace Dialogic
 {
     public static class Substitutions
     {
-        const string MATCH_PARENS = @"\(([^()]+|(?<Level>\()|(?<-Level>\)))+(?(Level)(?!))\)";
-
-        public static void DoMeta(IDictionary<string, object> meta, IDictionary<string, object> globals)
+public static void DoMeta(IDictionary<string, object> meta, IDictionary<string, object> globals)
         {
             if (Util.IsNullOrEmpty(meta) || Util.IsNullOrEmpty(globals)) return;
 
@@ -106,11 +104,11 @@ namespace Dialogic
 
         private static void ParseGroups(string input, List<string> results)
         {
-            foreach (Match m in new Regex(MATCH_PARENS).Matches(input))
+            foreach (Match m in RE.MatchParens.Matches(input))
             {
                 var expr = m.Value.Substring(1, m.Value.Length - 2);
 
-                if (Regex.IsMatch(expr, @"[\(\)]"))
+                if (Regex.IsMatch(expr, @"[\(\)]")) // TODO: compile
                 {
                     ParseGroups(expr, results);
                 }

@@ -17,10 +17,14 @@ namespace Dialogic
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
         internal const string CMD = @"(^[A-Z][A-Z]+)?\s*";
-        internal const string LBL = @"(#[A-Za-z][\S]*)?\s*";
         internal const string TXT = @"([^#}{]+)?\s*";
+        internal const string LBL = @"(#[A-Za-z][\S]*)?\s*";
         internal const string MTA = @"(?:\{(.+?)\})?\s*";
-        public static Regex ParseLine = new Regex(CMD + LBL + TXT + MTA);
+        public static Regex ParseLine = new Regex(CMD + TXT + LBL + MTA);
+
+        internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
+        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
+        public static Regex MatchParens = new Regex(MP1+MP2);
 
         internal const string MSP = @"\s*,\s*";
         public static Regex MetaSplit = new Regex(MSP);
@@ -172,31 +176,32 @@ namespace Dialogic
                 IDictionary id = (System.Collections.IDictionary)o;
                 if (id.Count > 0)
                 {
-                    s += "{";
+                    s += "{ ";
                     foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
-                    s = s.Substring(0, s.Length - 1) + "}";
+                    s = s.Substring(0, s.Length - 1) + " }";
                 }
             }
             else if (o is object[])
             {
                 var arr = ((object[])o);
-                s = "[";
+                s = "[ ";
                 for (int i = 0; i < arr.Length; i++)
                 {
                     s += arr[i];
                     if (i < arr.Length - 1) s += ",";
                 }
-                s += "]";
+                s += " ]";
             }
             else if (o is IList)
             {
                 var list = (IList)o;
-                s = "[";
+                s = "[ ";
                 for (int i = 0; i < list.Count; i++)
                 {
                     s += list[i].ToString();
                     if (i < list.Count - 1) s += ",";
                 }
+                s += " ]";
             }
             else
             {

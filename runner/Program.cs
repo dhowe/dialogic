@@ -30,7 +30,7 @@ namespace runner
         public static Dictionary<string, object> globals =
             new Dictionary<string, object>() {
                 { "emotion", "special" },
-                { "place", "My Tank" },
+                { "place", "my tank" },
                 { "Happy", "HappyFlip" },
                 { "verb", "play" },
                 { "neg", "(nah|no|nope)" },

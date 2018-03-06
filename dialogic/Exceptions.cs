@@ -54,7 +54,7 @@ namespace Dialogic
     {
         public ParseException(string msg = "ParseException") : base(msg) {}
         
-        public ParseException(string line, int lineNo, string msg = "ParseException: ") 
-            : base(msg + "@ line" + lineNo + "\n  : " + line) { }
+        public ParseException(string line, int lineNo, string msg = "ParseException") 
+            : base(msg + "(line " + lineNo + "): " + line) { }
     }
 }

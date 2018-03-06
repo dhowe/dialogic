@@ -54,10 +54,16 @@ namespace Dialogic
                 {
                     var action = opt.ActionText();
                     Substitutions.Do(ref action, globals);
-                    current = FindChat(action);
+                    SetCurrentChat(FindChat(action));
                 }
             }
             return null;
+        }
+
+        private void SetCurrentChat(Chat next)
+        {
+            current = next;
+            current.Reset();
         }
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
@@ -86,17 +92,19 @@ namespace Dialogic
                         cmd.Realize(globals);
                         if (cmd is Find)
                         {
-                            current = Find(((Find)cmd).Meta());
+                            SetCurrentChat(Find(((Find)cmd).Meta()));
                         }
                         else if (cmd is Go)
                         {
-                            current = FindChat(cmd.Text);
+                            // refactor to generic Find() ?
+                            SetCurrentChat(FindChat(cmd.Text));
                         }
                     }
 
                     nextEventTime = Util.Elapsed() + cmd.PauseAfterMs;
                 }
-                else {
+                else
+                {
                     // Nothing left to do
                 }
             }

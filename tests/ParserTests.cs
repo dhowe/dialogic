@@ -8,7 +8,6 @@ namespace Dialogic
     [TestFixture]
     public class ParserTests
     {
-
         [Test]
         public void TestGrammarParsing()
         {
@@ -30,6 +29,35 @@ namespace Dialogic
         public void TestCommandParsing()
         {
             List<Chat> chats;
+
+            chats = ChatReader.ParseText("GO #Twirl");
+            Console.WriteLine(chats[0].ToTree());
+
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+
+            chats = ChatReader.ParseText("ASK Want a game?\nOPT Y #Game\nOPT N #End");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
+
+            Ask ask = (Dialogic.Ask)chats[0].commands[0];
+            Assert.That(ask.Text, Is.EqualTo("Want a game?"));
+
+            Assert.That(ask.Options().Count, Is.EqualTo(2));
+
+            var options = ask.Options();
+            Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
+            Assert.That(options[0].Text, Is.EqualTo("Y"));
+            Assert.That(options[0].action.GetType(), Is.EqualTo(typeof(Go)));
+
+            Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
+            Assert.That(options[1].Text, Is.EqualTo("N"));
+            Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
 
             chats = ChatReader.ParseText("FIND {num=1}");
             Assert.That(chats.Count, Is.EqualTo(1));

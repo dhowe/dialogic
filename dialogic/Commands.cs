@@ -12,9 +12,15 @@ namespace Dialogic
     {
         public Go() : base() { }
 
-        public Go(string text) : base()
+        public override void Init(string text, string label, string[] meta)
         {
-            this.Text = text;
+            // TODO: extract method
+            if (label.Length < 1) throw BadArg
+                ("GO requires a label, e.g. #Ch1, got '" + label + "'");
+
+            base.Init(text, label, meta);
+
+            if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
         }
     }
 
@@ -32,7 +38,7 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            Console.WriteLine("Gram.init: " + Util.Stringify(meta)+"\n"+String.Join("\n", meta));
+            //Console.WriteLine("Gram.init: " + Util.Stringify(meta)+"\n"+String.Join("\n", meta));
             grammar = new Grammar(String.Join("\n", meta));
         }
 
@@ -51,15 +57,11 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            Console.WriteLine("DO.Init: '"+text+"' '"+label+"' '"+Util.Stringify(meta));
-
-            if (label.Length < 1) throw BadArg("DO requires a label, e.g. #C2");
+            if (label.Length < 1) throw BadArg("DO requires a literal label, e.g. #C2, got '" + label + "'");
 
             base.Init(text, label, meta);
 
             if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
-
-            Console.WriteLine("DO.Text: '" + Text+"'");
         }
     }
 
@@ -114,7 +116,6 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            Console.WriteLine("Wait.init: " + text + " " + label);
             base.Init(text, label, meta);
             PauseAfterMs = Util.SecStrToMs(text, -1);
         }
@@ -220,14 +221,13 @@ namespace Dialogic
         {
             this.Text = text;
 
-            if (label.Length > 0 && !label.StartsWith("#",
-                StringComparison.InvariantCulture))
+            if (label.Length == 0 || !label.StartsWith("#", StringComparison.InvariantCulture))
             {
-                throw BadArg("OPT requires a label, e.g. #Chat27");
+                throw BadArg("OPT requires a label, e.g. #Chat27, got '"+label+"'");
             }
 
             this.action = label.Length > 0 ?
-                Command.Create(typeof(Go), label, "", meta) : NOP;
+                Command.Create(typeof(Go), "", label, meta) : NOP;
         }
 
         public override string ToString()
@@ -284,7 +284,7 @@ namespace Dialogic
 
         protected override void ParseMeta(string[] pairs)
         {
-            Console.WriteLine("Find.ParseMeta:" + Util.Stringify(pairs));
+            //Console.WriteLine("Find.ParseMeta:" + Util.Stringify(pairs));
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
                 Match match = RE.FindMeta.Match(pairs[i]);
@@ -295,7 +295,7 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
                 string op = match.Groups[2].Value;
                 string val = match.Groups[3].Value;
-                Console.WriteLine(key + " :: " + op + " :: " + val);
+                //Console.WriteLine(key + " :: " + op + " :: " + val);
                 if (meta == null) meta = new Dictionary<string, object>();
                 meta.Add(key, new Constraint(op, key, val));
             }
@@ -370,6 +370,11 @@ namespace Dialogic
         {
             bool hasNext = cursor > -1 && cursor < commands.Count;
             return hasNext ? commands[cursor++] : null;
+        }
+
+        public void Reset()
+        {
+            this.cursor = 0;
         }
     }
 
@@ -472,6 +477,7 @@ namespace Dialogic
         public static Command Create(string type, string text, string label, string[] meta)
         {
             type = ToMixedCase(type);
+            //Console.WriteLine(type + "' '"+ text + "' '"+ label + "' '"+ Util.Stringify(meta) + "'");
             var cmd = Create(Type.GetType(PACKAGE + type), label, text, meta);
             if (cmd != null) return cmd;
             throw new TypeLoadException("No type: " + PACKAGE + type);
@@ -486,7 +492,7 @@ namespace Dialogic
 
         public virtual void Init(string text, string label, string[] meta)
         {
-            Console.WriteLine("Command.Init: " + text + " :: " + label + " :: " + String.Join("|", meta));
+            //Console.WriteLine("Command.Init: " + text + " :: " + label + " :: " + String.Join("|", meta));
             Text = text.Length > 0 ? text : label;
             ParseMeta(meta);
             HandleMetaTiming();
@@ -528,15 +534,20 @@ namespace Dialogic
                 }
             }
 
-            var text = Text + ""; // tmp
-            Substitutions.Do(ref text, globals);
+            RealizeFields(globals);
 
-            data["text"] = text;
             data["type"] = TypeName();
 
             LastSentMs = Util.EpochMs();
 
             return data;
+        }
+
+        private void RealizeFields(IDictionary<string, object> globals)
+        {
+            var text = Text + ""; // tmp
+            Substitutions.Do(ref text, globals);
+            data["text"] = text;
         }
 
         protected Exception BadArg(string msg)

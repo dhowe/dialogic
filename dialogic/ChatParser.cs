@@ -55,36 +55,52 @@ namespace Dialogic
 
         internal static List<Chat> Parse(string[] lines, bool printTree = false)
         {
-            int i = 0;
             ChatReader parser = new ChatReader();
-            foreach (var line in lines) parser.ParseLine(lines[i], i++);
+
+            int i = 0;
+            foreach (var line in lines)
+            {
+                if (!String.IsNullOrEmpty(line))
+                {
+                    parser.ParseLine(lines[i], i+1);
+                }
+                i++;
+            }
+
             return parser.chats;
         }
 
         internal static void ParseFile(string fname, List<Chat> chats)
         {
-            var result = Parse(File.ReadAllLines(fname, Encoding.UTF8));
-            result.ForEach((f) => chats.Add(f));
+            var commands = Parse(File.ReadAllLines(fname, Encoding.UTF8));
+            commands.ForEach((f) => chats.Add(f));
         }
 
         public Command ParseLine(string line, int lineNo)
         {
+            //Console.WriteLine("LINE " + lineNo + ": " + line);
+            if (String.IsNullOrEmpty(line)) return null;
+
             Match match = RE.ParseLine.Match(line);
+
             if (match.Length < 4) throw new ParseException(line, lineNo);
+
             var parts = new List<string>();
             for (int j = 0; j < 4; j++)
             {
+                //Console.WriteLine((j+1)+": "+match.Groups[j + 1].Value.Trim());
                 parts.Add(match.Groups[j + 1].Value.Trim());
             }
+
             return ParseCommand(parts);
         }
 
         public Command ParseCommand(List<string> parts)
         {
             Command c = null;
-            parts.Match((cmd, label, text, meta) =>
+            parts.Match((cmd, text, label, meta) =>
             {
-                //Console.WriteLine("*COMMAND: '"+cmd+"'");
+                //Console.WriteLine("P: "+cmd+"' '" +label+ "' '" + text + "' " + Util.Stringify(meta));
                 cmd = cmd.Length > 0 ? cmd : "SAY";
                 var pairs = RE.MetaSplit.Split(meta);
                 c = Command.Create(cmd, label, text, pairs);

@@ -32,7 +32,6 @@ namespace Dialogic
         {
             var s = @"SAY The $animal woke $count times";
             Substitutions.DoVars(ref s, globals);
-            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
         }
 
@@ -41,18 +40,15 @@ namespace Dialogic
         {
             var txt = "The boy was (sad | happy)";
             string[] ok = { "The boy was sad", "The boy was happy" };
-            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
             for (int i = 0; i < 10; i++)
             {
                 string s = txt;
                 Substitutions.DoGroups(ref s);
-                //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
 
             txt = "The boy was (sad | happy | dead)";
             ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
-            //Console.WriteLine("Running SubstitutionTests.Test2 :: " + s);
             for (int i = 0; i < 10; i++)
             {
                 string s = txt;
@@ -79,7 +75,6 @@ namespace Dialogic
             {
                 var s = txt;
                 Substitutions.Do(ref s, globals);
-                //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
         }
@@ -94,7 +89,6 @@ namespace Dialogic
             {
                 var s = txt;
                 Substitutions.Do(ref s, globals);
-                //Console.WriteLine(i + ") " + s);
                 res[i] = s;
             }
             for (int i = 0; i < res.Length; i++)
