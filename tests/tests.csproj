@@ -43,6 +43,7 @@
     <Compile Include="GrammarTests.cs" />
     <Compile Include="RealizationTests.cs" />
     <Compile Include="ReaderTests.cs" />
+    <Compile Include="ConstraintTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

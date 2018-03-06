@@ -10,7 +10,7 @@ namespace Dialogic
 {
     /** Utility classes */
 
-    public static class RE 
+    public static class RE
     {
         internal const string OP1 = @"($?[a-zA-Z_][a-zA-Z0-9_]+)";
         internal const string OP2 = @" *([!<=>*^$]+) *([^ ]+)";
@@ -26,6 +26,48 @@ namespace Dialogic
         public static Regex MetaSplit = new Regex(MSP);
     }
 
+    public class Constraint
+    {
+        public readonly string key, value;
+        public readonly string[] values;
+        public readonly Operator op;
+
+        public Constraint(string key, string val) :
+            this("=", key, val)
+        { }
+
+        public Constraint(string opstr, string key, string val) :
+            this(Operator.FromString(opstr), key, val)
+        { }
+
+        public Constraint(Operator op, string key, string val)
+        {
+            this.op = op;
+            this.key = key;
+            this.value = val;
+            if (op == null || val == null) throw new OperatorException(op);
+        }
+
+        public Constraint(Operator op, string key, string[] vals)
+        {
+            this.op = op;
+            this.key = key;
+            this.values = vals;
+            if (op == null || vals == null) throw new OperatorException(op);
+        }
+
+        public bool Check(string toCheck)
+        {
+            return values != null ? op.Invoke(toCheck, values) : op.Invoke(toCheck, value);
+            //Console.WriteLine(toCheck+" "+op+" "+ value + " -> "+passed);
+        }
+
+        public override string ToString()
+        {
+            return key + op + value;
+        }
+    }
+
     public static class Util
     {
         private static int start;
@@ -37,7 +79,7 @@ namespace Dialogic
             random = new Random();
         }
 
-        public static int SecStrToMs(string s, int defaultMs=-1)
+        public static int SecStrToMs(string s, int defaultMs = -1)
         {
             double d;
             try
@@ -278,7 +320,7 @@ namespace Dialogic
 
         public Constraints Add(Constraint c)
         {
-            pairs.Add(c.name, c);
+            pairs.Add(c.key, c);
             return this;
         }
 
@@ -302,15 +344,16 @@ namespace Dialogic
     {
         private enum OpType { EQUALITY, COMPARISON, MATCHING }
 
-        public static Operator EQ = new Operator("==", OpType.EQUALITY);
-        public static Operator NEQ = new Operator("!=", OpType.EQUALITY);
-        public static Operator SW = new Operator("^=", OpType.MATCHING);
-        public static Operator EW = new Operator("$=", OpType.MATCHING);
-        public static Operator RE = new Operator("*=", OpType.MATCHING);
-        public static Operator GT = new Operator(">", OpType.COMPARISON);
-        public static Operator LT = new Operator("<", OpType.COMPARISON);
-        public static Operator LTE = new Operator("<=", OpType.COMPARISON);
-        public static Operator GTE = new Operator(">=", OpType.COMPARISON);
+        public static Operator EQ = new Operator("==",   OpType.EQUALITY);
+        public static Operator NEQ = new Operator("!=",  OpType.EQUALITY);
+        public static Operator SW = new Operator("^=",   OpType.MATCHING);
+        public static Operator EW = new Operator("$=",   OpType.MATCHING);
+        public static Operator RE = new Operator("*=",   OpType.MATCHING);
+        //public static Operator RE = new Operator("~=", OpType.MATCHING);
+        public static Operator GT = new Operator(">",    OpType.COMPARISON);
+        public static Operator LT = new Operator("<",    OpType.COMPARISON);
+        public static Operator LTE = new Operator("<=",  OpType.COMPARISON);
+        public static Operator GTE = new Operator(">=",  OpType.COMPARISON);
 
         public static Operator[] ALL = new Operator[] {
             GT, LT, EQ, NEQ, LTE, GTE, SW, EQ, RE
@@ -358,8 +401,6 @@ namespace Dialogic
 
         public bool Invoke(string s1, string s2)
         {
-            if (s1 == null) throw new OperatorException(this);
-
             if (this.type == OpType.EQUALITY)
             {
                 if (this == EQ) return Equals(s1, s2);
@@ -387,6 +428,19 @@ namespace Dialogic
                 {
                     throw new OperatorException(this);
                 }
+            }
+            throw new OperatorException(this, "Unexpected Op type: ");
+        }
+
+        public bool Invoke(string s1, string[] options)
+        {
+            if (this == EQ)
+            {
+                for (int i = 0; i < options.Length; i++)
+                {
+                    if (Equals(s1, options[i])) return true;
+                }
+                return false;
             }
             throw new OperatorException(this, "Unexpected Op type: ");
         }
@@ -507,7 +561,7 @@ namespace ExtensionMethods
 {
     public static class Exts
     {
-        public static void Match<T>(this IList<T> il, Action<T,T,T,T> block)
+        public static void Match<T>(this IList<T> il, Action<T, T, T, T> block)
         {
             block(il[0], il[1], il[2], il[3]);
         }
