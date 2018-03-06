@@ -11,6 +11,21 @@ namespace Dialogic
         /// ////////////////////////////////////////////////////
 
         [Test]
+        public void TestFindMulti()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = new Chat("c1"));
+            chats.Add(c = new Chat("c2"));
+            c.SetMeta("dev", "1");
+            c.SetMeta("day", "hello");
+            chats.Add(c = new Chat("c3"));
+            ChatRuntime cr = new ChatRuntime(chats);
+            Chat res = new ChatRuntime(chats).Find(new Constraints("day", new string[]{"hello", "goodbye"}).AsDict());
+            Assert.That(res.Text, Is.EqualTo("c2"));
+        }
+
+        [Test]
         public void TestFind()
         {
             Chat c;

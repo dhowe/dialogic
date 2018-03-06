@@ -28,19 +28,19 @@ namespace Dialogic
 
     public class Constraint
     {
-        public readonly string key, value;
-        public readonly string[] values;
+        public readonly string key;
+        public readonly object value;
         public readonly Operator op;
 
-        public Constraint(string key, string val) :
+        public Constraint(string key, object val) :
             this("=", key, val)
         { }
 
-        public Constraint(string opstr, string key, string val) :
+        public Constraint(string opstr, string key, object val) :
             this(Operator.FromString(opstr), key, val)
         { }
 
-        public Constraint(Operator op, string key, string val)
+        public Constraint(Operator op, string key, object val)
         {
             this.op = op;
             this.key = key;
@@ -48,18 +48,9 @@ namespace Dialogic
             if (op == null || val == null) throw new OperatorException(op);
         }
 
-        public Constraint(Operator op, string key, string[] vals)
-        {
-            this.op = op;
-            this.key = key;
-            this.values = vals;
-            if (op == null || vals == null) throw new OperatorException(op);
-        }
-
         public bool Check(string toCheck)
         {
-            return values != null ? op.Invoke(toCheck, values) : op.Invoke(toCheck, value);
-            //Console.WriteLine(toCheck+" "+op+" "+ value + " -> "+passed);
+            return op.Invoke(toCheck, value);
         }
 
         public override string ToString()
@@ -308,12 +299,12 @@ namespace Dialogic
             pairs = new Dictionary<string, object>();
         }
 
-        public Constraints(string key, string value) : this()
+        public Constraints(string key, object value) : this()
         {
             this.Add(key, value);
         }
 
-        public Constraints(string op, string key, string value) : this()
+        public Constraints(string op, string key, object value) : this()
         {
             this.Add(op, key, value);
         }
@@ -324,12 +315,12 @@ namespace Dialogic
             return this;
         }
 
-        public Constraints Add(string key, string value)
+        public Constraints Add(string key, object value)
         {
             return Add(new Constraint(key, value));
         }
 
-        public Constraints Add(string op, string key, string value)
+        public Constraints Add(string op, string key, object value)
         {
             return Add(new Constraint(op, key, value));
         }
@@ -344,16 +335,16 @@ namespace Dialogic
     {
         private enum OpType { EQUALITY, COMPARISON, MATCHING }
 
-        public static Operator EQ = new Operator("==",   OpType.EQUALITY);
-        public static Operator NEQ = new Operator("!=",  OpType.EQUALITY);
-        public static Operator SW = new Operator("^=",   OpType.MATCHING);
-        public static Operator EW = new Operator("$=",   OpType.MATCHING);
-        public static Operator RE = new Operator("*=",   OpType.MATCHING);
+        public static Operator EQ = new Operator("==", OpType.EQUALITY);
+        public static Operator NEQ = new Operator("!=", OpType.EQUALITY);
+        public static Operator SW = new Operator("^=", OpType.MATCHING);
+        public static Operator EW = new Operator("$=", OpType.MATCHING);
+        public static Operator RE = new Operator("*=", OpType.MATCHING);
         //public static Operator RE = new Operator("~=", OpType.MATCHING);
-        public static Operator GT = new Operator(">",    OpType.COMPARISON);
-        public static Operator LT = new Operator("<",    OpType.COMPARISON);
-        public static Operator LTE = new Operator("<=",  OpType.COMPARISON);
-        public static Operator GTE = new Operator(">=",  OpType.COMPARISON);
+        public static Operator GT = new Operator(">", OpType.COMPARISON);
+        public static Operator LT = new Operator("<", OpType.COMPARISON);
+        public static Operator LTE = new Operator("<=", OpType.COMPARISON);
+        public static Operator GTE = new Operator(">=", OpType.COMPARISON);
 
         public static Operator[] ALL = new Operator[] {
             GT, LT, EQ, NEQ, LTE, GTE, SW, EQ, RE
@@ -399,8 +390,25 @@ namespace Dialogic
             return this.value;
         }
 
-        public bool Invoke(string s1, string s2)
+        public bool Invoke(string s1, object opts)
         {
+            if (opts is string[]) // multi-key case
+            {
+                if (this != EQ)
+                {
+                    throw new OperatorException(this, "Unexpected Op type");
+                }
+
+                string[] options = (string[])opts;
+                for (int i = 0; i < options.Length; i++)
+                {
+                    if (Equals(s1, options[i])) return true;
+                }
+                return false;
+            }
+
+            string s2 = opts is string ? (string)opts : opts.ToString();
+
             if (this.type == OpType.EQUALITY)
             {
                 if (this == EQ) return Equals(s1, s2);
@@ -428,19 +436,6 @@ namespace Dialogic
                 {
                     throw new OperatorException(this);
                 }
-            }
-            throw new OperatorException(this, "Unexpected Op type: ");
-        }
-
-        public bool Invoke(string s1, string[] options)
-        {
-            if (this == EQ)
-            {
-                for (int i = 0; i < options.Length; i++)
-                {
-                    if (Equals(s1, options[i])) return true;
-                }
-                return false;
             }
             throw new OperatorException(this, "Unexpected Op type: ");
         }
