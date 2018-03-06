@@ -132,8 +132,14 @@ namespace Dialogic
         public Ask()
         {
             this.PauseAfterMs = Infinite;
-            this.Timeout = 10000; // default
+            this.Timeout = 5000; // default
         }
+
+        //public override void Init(string text, string label, string[] meta)
+        //{
+        //    base.Init(text, label, meta);
+        //    // HERE
+        //}
 
         public List<Opt> Options()
         {
@@ -189,7 +195,7 @@ namespace Dialogic
         {
             if (meta != null && meta.ContainsKey("timeout"))
             {
-                Util.SecStrToMs((string)meta["timeout"]);
+                Timeout = Util.SecStrToMs((string)meta["timeout"]);
             }
         }
 
@@ -497,6 +503,7 @@ namespace Dialogic
             ParseMeta(meta);
             HandleMetaTiming();
         }
+
         protected virtual void HandleMetaTiming()
         {
             if (meta != null && meta.ContainsKey("PauseAfterMs"))

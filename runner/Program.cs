@@ -51,6 +51,7 @@ namespace runner
 
         public void Run()
         {
+            Console.WriteLine();
             while (true)
             {
                 Thread.Sleep(30);
@@ -82,6 +83,7 @@ namespace runner
             }
 
             Console.WriteLine(diaText);
+
             ge = null;  // dispose event 
         }
 
