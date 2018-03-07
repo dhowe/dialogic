@@ -30,6 +30,27 @@ namespace Dialogic
         {
             this.PauseAfterMs = 1000;
         }
+
+        public override int ComputeDuration()
+        {
+            // 1. Line-length
+            // 2. Meta-data
+            // 3. Mood (pending)
+            var lengthScale = Util.Map(Text.Length, 1, 100, .5, 2);
+            var metaScale = GetMetaSpeed();
+            return (int)(lengthScale * metaScale * PauseAfterMs);
+        }
+
+        private double GetMetaSpeed()
+        {
+            double val = 1.0;
+            if (meta.ContainsKey("speed"))
+            {
+                if (((string)meta["speed"]) == "fast") val *= 2;
+                if (((string)meta["speed"]) == "slow") val /= 2;
+            }
+            return val;
+        }
     }
 
     public class Gram : Command
@@ -567,25 +588,14 @@ namespace Dialogic
             return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
         }
 
-        public string TimeStr()
-        {
-            return PauseAfterMs > 0 ? "wait=" + Util.ToSec(PauseAfterMs) : "";
-        }
-
-        protected override string MetaStr()
-        {
-            var s = base.MetaStr();
-            //if (PauseAfterMs > 0)
-            //{
-            //    var t = TimeStr() + "}";
-            //    s = (s.Length < 1) ? "{" + t : s.Replace("}", "," + t);
-            //}
-            return s;
-        }
-
         protected static string QQ(string text)
         {
             return "'" + text + "'";
+        }
+
+        public virtual int ComputeDuration()
+        {
+            return PauseAfterMs;
         }
     }
 }

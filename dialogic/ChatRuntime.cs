@@ -101,7 +101,7 @@ namespace Dialogic
                         }
                     }
 
-                    nextEventTime = Util.Elapsed() + cmd.PauseAfterMs;
+                    nextEventTime = Util.Elapsed() + cmd.ComputeDuration();
                 }
                 else
                 {
