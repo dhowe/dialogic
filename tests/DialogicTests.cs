@@ -50,5 +50,19 @@ namespace Dialogic
                 Assert.That(kv.Value, Is.GreaterThan(0));
             }
         }
+
+        [Test]
+        public void TestCommandTiming()
+        {
+            Say fast = (Say)ChatReader.ParseText("SAY Thank you { speed=fast}")[0].commands[0];
+            Say defa = (Say)ChatReader.ParseText("SAY Thank you")[0].commands[0];
+            Say slow = (Say)ChatReader.ParseText("SAY Thank you{speed=slow }")[0].commands[0];
+            Assert.That(defa.ComputeDuration(), Is.EqualTo(fast.ComputeDuration() * 2).Within(1));
+            Assert.That(slow.ComputeDuration(), Is.EqualTo(defa.ComputeDuration() * 2).Within(1));
+            Say longer = (Say)ChatReader.ParseText("SAY Thank you very much")[0].commands[0];
+            Assert.That(longer.ComputeDuration(), Is.GreaterThan(defa.ComputeDuration()));
+            Assert.That(fast.Text, Is.EqualTo(defa.Text));
+            Assert.That(slow.Text, Is.EqualTo(defa.Text));
+        }
     }
 }

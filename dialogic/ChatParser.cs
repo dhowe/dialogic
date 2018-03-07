@@ -33,7 +33,7 @@ namespace Dialogic
 
         public static List<Chat> ParseFile(string fileOrFolder)
         {
-            string[] files = !fileOrFolder.EndsWith(CHAT_FILE_EXT, StringComparison.InvariantCulture) ?
+            string[] files = !fileOrFolder.EndsWith(CHAT_FILE_EXT, Util.IC) ?
                 files = Directory.GetFiles(fileOrFolder, '*' + CHAT_FILE_EXT) :
                 files = new string[] { fileOrFolder };
 

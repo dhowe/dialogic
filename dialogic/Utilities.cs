@@ -8,7 +8,18 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    /** Utility classes */
+    public static class Defaults
+    {
+        public static double SAY_DURATION  = 1.0;
+        public static double SAY_FAST_MULT = 0.5;
+        public static double SAY_SLOW_MULT = 2.0;
+        public static double SAY_MAX_LEN_MULT = 2.0;
+        public static double SAY_MIN_LEN_MULT = 0.5;
+        public static int    SAY_MAX_LEN = 100;
+        public static int    SAY_MIN_LEN = 2;
+
+        public static double ASK_TIMEOUT = 5.0;
+    }
 
     public static class RE 
     {
@@ -34,6 +45,7 @@ namespace Dialogic
     {
         private static int start;
         private static Random random;
+        public static StringComparison IC = StringComparison.InvariantCulture;
 
         static Util()
         {
