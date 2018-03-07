@@ -14,13 +14,8 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            // TODO: extract method
-            if (label.Length < 1) throw BadArg
-                ("GO requires a label, e.g. #Ch1, got '" + label + "'");
-
+            label = ValidateLabel(label);
             base.Init(text, label, meta);
-
-            if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
         }
     }
 
@@ -28,7 +23,46 @@ namespace Dialogic
     {
         public Say() : base()
         {
-            this.PauseAfterMs = 1000;
+            this.PauseAfterMs = (int)(Defaults.SAY_DURATION * 1000);
+        }
+
+        /**
+         * Determine milliseconds to wait after sending the event, using:
+         * a. Line-length
+         * b. Meta-data modifiers
+         * c. Character mood (pending)
+         */
+        public override int ComputeDuration()
+        {
+            return (int)Math.Round
+                (GetTextLenScale() * GetMetaSpeedScale() * PauseAfterMs);
+        }
+
+        private double GetTextLenScale()
+        {
+            return Util.Map(Text.Length,
+                Defaults.SAY_MIN_LEN, Defaults.SAY_MAX_LEN,
+                Defaults.SAY_MIN_LEN_MULT, Defaults.SAY_MAX_LEN_MULT);
+        }
+
+        private double GetMetaSpeedScale()
+        {
+            double val = 1.0;
+            if (meta != null && meta.ContainsKey("speed"))
+            {
+                switch ((string)meta["speed"])
+                {
+                    case "fast":
+                        val *= Defaults.SAY_FAST_MULT;
+                        break;
+                    case "slow":
+                        val *= Defaults.SAY_SLOW_MULT;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return val;
         }
     }
 
@@ -57,11 +91,8 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            if (label.Length < 1) throw BadArg("DO requires a literal label, e.g. #C2, got '" + label + "'");
-
+            label = ValidateLabel(label);
             base.Init(text, label, meta);
-
-            if (Text.IndexOf('#') == 0) Text = Text.Substring(1);
         }
     }
 
@@ -71,7 +102,7 @@ namespace Dialogic
 
         public Set() : base() { }
 
-        public Set(string name, string value) : base() // tests only
+        internal Set(string name, string value) : base() // tests only
         {
             this.Text = name;
             this.Value = value;
@@ -84,14 +115,14 @@ namespace Dialogic
             this.Value = parts[1];
         }
 
-        private string[] ParseSetArgs(string args)
+        private string[] ParseSetArgs(string s)
         {
-            if (args.Length < 1) throw BadArg("ParseSetArgs");
+            if (s.Length < 1) throw BadArg("ParseSetArgs");
 
-            var pair = Regex.Split(args, @"\s*=\s*");
-            if (pair.Length != 2) pair = Regex.Split(args, @"\s+");
+            var pair = Regex.Split(s, @"\s*=\s*"); // TODO: compile
+            if (pair.Length != 2) pair = Regex.Split(s, @"\s+");
 
-            if (pair.Length != 2) throw BadArg("bad pair");
+            if (pair.Length != 2) throw BadArg("SET requires NAME VALUE, got "+s);
 
             if (pair[0].StartsWith("$", StringComparison.Ordinal))
             {
@@ -132,14 +163,8 @@ namespace Dialogic
         public Ask()
         {
             this.PauseAfterMs = Infinite;
-            this.Timeout = 5000; // default
+            this.Timeout = (int)(Defaults.ASK_TIMEOUT * 1000);
         }
-
-        //public override void Init(string text, string label, string[] meta)
-        //{
-        //    base.Init(text, label, meta);
-        //    // HERE
-        //}
 
         public List<Opt> Options()
         {
@@ -193,10 +218,7 @@ namespace Dialogic
 
         protected override void HandleMetaTiming()
         {
-            if (meta != null && meta.ContainsKey("timeout"))
-            {
-                Timeout = Util.SecStrToMs((string)meta["timeout"]);
-            }
+            if (HasMeta("timeout")) Timeout = Util.SecStrToMs((string)meta["timeout"]);
         }
 
         public override string ToString()
@@ -227,9 +249,9 @@ namespace Dialogic
         {
             this.Text = text;
 
-            if (label.Length == 0 || !label.StartsWith("#", StringComparison.InvariantCulture))
+            if (label.Length > 0 && !label.StartsWith("#", Util.IC))
             {
-                throw BadArg("OPT requires a label, e.g. #Chat27, got '"+label+"'");
+                throw BadArg("OPT requires a #Label, got '" + label + "'");
             }
 
             this.action = label.Length > 0 ?
@@ -245,39 +267,6 @@ namespace Dialogic
         public string ActionText()
         {
             return action != null ? action.Text : "";
-        }
-    }
-
-    public class Constraint
-    {
-        public readonly string name, value;
-        public readonly Operator op;
-
-        public Constraint(string key, string val) :
-            this("=", key, val)
-        { }
-
-        public Constraint(string opstr, string key, string val) :
-            this(Operator.FromString(opstr), key, val)
-        { }
-
-        public Constraint(Operator op, string key, string val)
-        {
-            this.name = key;
-            this.value = val;
-            this.op = op;
-        }
-
-        public bool Check(string toCheck)
-        {
-            var passed = op.Invoke(toCheck, value);
-            //Console.WriteLine(toCheck+" "+op+" "+ value + " -> "+passed);
-            return passed;
-        }
-
-        public override string ToString()
-        {
-            return name + op + value;
         }
     }
 
@@ -393,6 +382,11 @@ namespace Dialogic
             return meta != null && meta.Count > 0;
         }
 
+        public bool HasMeta(string key)
+        {
+            return meta != null && meta.ContainsKey(key);
+        }
+
         public object GetMeta(string key, object defaultVal = null)
         {
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
@@ -474,6 +468,13 @@ namespace Dialogic
             this.data = new Dictionary<string, object>();
         }
 
+        protected string ValidateLabel(string lbl)
+        {
+            if (lbl.Length < 2 || !lbl.StartsWith("#", Util.IC)) throw BadArg
+                (TypeName() + " requires a #Label, got '" + lbl + "'");
+            return lbl.Substring(1);
+        }
+
         private static string ToMixedCase(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
@@ -506,10 +507,7 @@ namespace Dialogic
 
         protected virtual void HandleMetaTiming()
         {
-            if (meta != null && meta.ContainsKey("PauseAfterMs"))
-            {
-                PauseAfterMs = Util.SecStrToMs((string)meta["PauseAfterMs"]);
-            }
+            if (HasMeta("pauseAfter")) PauseAfterMs = Util.SecStrToMs((string)meta["pauseAfter"]);
         }
 
         public virtual string TypeName()
@@ -567,25 +565,14 @@ namespace Dialogic
             return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
         }
 
-        public string TimeStr()
-        {
-            return PauseAfterMs > 0 ? "wait=" + Util.ToSec(PauseAfterMs) : "";
-        }
-
-        protected override string MetaStr()
-        {
-            var s = base.MetaStr();
-            //if (PauseAfterMs > 0)
-            //{
-            //    var t = TimeStr() + "}";
-            //    s = (s.Length < 1) ? "{" + t : s.Replace("}", "," + t);
-            //}
-            return s;
-        }
-
         protected static string QQ(string text)
         {
             return "'" + text + "'";
+        }
+
+        public virtual int ComputeDuration()
+        {
+            return PauseAfterMs;
         }
     }
 }
