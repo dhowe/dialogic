@@ -269,39 +269,6 @@ namespace Dialogic
         }
     }
 
-    public class Constraint
-    {
-        public readonly string name, value;
-        public readonly Operator op;
-
-        public Constraint(string key, string val) :
-            this("=", key, val)
-        { }
-
-        public Constraint(string opstr, string key, string val) :
-            this(Operator.FromString(opstr), key, val)
-        { }
-
-        public Constraint(Operator op, string key, string val)
-        {
-            this.name = key;
-            this.value = val;
-            this.op = op;
-        }
-
-        public bool Check(string toCheck)
-        {
-            var passed = op.Invoke(toCheck, value);
-            //Console.WriteLine(toCheck+" "+op+" "+ value + " -> "+passed);
-            return passed;
-        }
-
-        public override string ToString()
-        {
-            return name + op + value;
-        }
-    }
-
     public class Find : Command
     {
         public override void Init(string text, string label, string[] meta)

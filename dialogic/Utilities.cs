@@ -41,6 +41,7 @@ namespace Dialogic
             random = new Random();
         }
 
+
         public static int SecStrToMs(string s, int defaultMs=-1)
         {
             double d;
@@ -65,6 +66,16 @@ namespace Dialogic
         public static int Elapsed()
         {
             return Environment.TickCount - start;
+        }
+
+        public static double Map(double n, double start1, double stop1, double start2, double stop2)
+        {
+            return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+        }
+
+        public static double Constrain(double n, double low, double high)
+        {
+            return Math.Max(Math.Min(n, high), low);
         }
 
         public static string ElapsedSec()
@@ -215,12 +226,6 @@ namespace Dialogic
             return from s in e orderby s.Length descending select s;
         }
 
-        public static T? StringToType<T>(this string valueAsString) where T : struct
-        {
-            if (string.IsNullOrEmpty(valueAsString)) return null;
-            return (T)Convert.ChangeType(valueAsString, typeof(T));
-        }
-
         public static int ToMillis(double seconds)
         {
             return (int)(seconds * 1000);
@@ -230,35 +235,38 @@ namespace Dialogic
         {
             return millis / 1000.0;
         }
+    }
 
-        /**
-         * Attempts to parse the string as primitive double, int, or bool, 
-         * if such conversion is possible, else returns the input
-         */
-        public static object ToType(string val)
+    public class Constraint
+    {
+        public readonly string name, value;
+        public readonly Operator op;
+
+        public Constraint(string key, string val) :
+            this("=", key, val)
+        { }
+
+        public Constraint(string opstr, string key, string val) :
+            this(Operator.FromString(opstr), key, val)
+        { }
+
+        public Constraint(Operator op, string key, string val)
         {
-            bool result = false;
-            object valObj = val;
-            if (!result)
-            {
-                bool b;
-                result = Boolean.TryParse(val, out b);
-                if (result) valObj = b;
-            }
-            if (!result)
-            {
-                int i;
-                result = int.TryParse(val, out i);
-                if (result) valObj = i;
-            }
-            if (!result)
-            {
-                double d;
-                result = Double.TryParse(val, out d);
-                if (result) valObj = d;
-            }
+            this.name = key;
+            this.value = val;
+            this.op = op;
+        }
 
-            return valObj;
+        public bool Check(string toCheck)
+        {
+            var passed = op.Invoke(toCheck, value);
+            //Console.WriteLine(toCheck+" "+op+" "+ value + " -> "+passed);
+            return passed;
+        }
+
+        public override string ToString()
+        {
+            return name + op + value;
         }
     }
 
