@@ -25,7 +25,7 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             var data = c.data;
-            Console.WriteLine(Util.Stringify(data));
+            //Console.WriteLine(Util.Stringify(data));
             c.SetMeta("pace", "slow");
             Assert.That(data["text"], Is.EqualTo("Thank you"));
             Assert.That(data["type"], Is.EqualTo("Say"));
@@ -42,7 +42,7 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             var data = c.data;
-            Console.WriteLine(Util.Stringify(data));
+            //Console.WriteLine(Util.Stringify(data));
             c.SetMeta("pace", "slow");
             Assert.That(data["text"], Is.EqualTo("Thank you"));
             Assert.That(data["type"], Is.EqualTo("Say"));

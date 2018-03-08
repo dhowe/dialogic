@@ -13,14 +13,13 @@ namespace Dialogic
         {
             List<Chat> chats = ChatParser.ParseText("GRAM { start: 'The <item>', item: cat }");
             Command gram = chats[0].commands[0];
-            Console.WriteLine(gram);
+            //Console.WriteLine(gram);
             //Assert.That(chats.Count, Is.EqualTo(11111));
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(gram.Text, Is.Null);
             Assert.That(gram.GetType(), Is.EqualTo(typeof(Gram)));
-
             //new ChatRuntime(chats).Run();
         }
 
@@ -84,7 +83,7 @@ namespace Dialogic
             List<Chat> chats;
 
             chats = ChatParser.ParseText("GO #Twirl");
-            Console.WriteLine(chats[0].ToTree());
+            //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -100,7 +99,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
 
             chats = ChatParser.ParseText("DO #Twirl");
-            Console.WriteLine(chats[0].ToTree());
+            //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));

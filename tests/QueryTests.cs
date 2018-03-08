@@ -114,7 +114,7 @@ namespace Dialogic
             string contents = String.Join("\n", lines);
 
             List<Chat> chats = ChatParser.ParseText(contents);
-            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             ChatRuntime cr = new ChatRuntime(chats);
@@ -194,13 +194,13 @@ namespace Dialogic
             string contents = String.Join("\n", lines);
 
             List<Chat> chats = ChatParser.ParseText(contents);
-            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             ChatRuntime cr = new ChatRuntime(chats);
 
             chats = cr.FindAll(finder.Meta());
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
@@ -220,13 +220,13 @@ namespace Dialogic
             contents = String.Join("\n", lines);
 
             chats = ChatParser.ParseText(contents);
-            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             cr = new ChatRuntime(chats);
 
             chats = cr.FindAll(finder.Meta());
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
@@ -247,13 +247,13 @@ namespace Dialogic
             var contents = String.Join("\n", lines);
 
             var chats = ChatParser.ParseText(contents);
-            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             var finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             var cr = new ChatRuntime(chats);
 
             chats = cr.FindAll(finder.Meta());
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -271,13 +271,13 @@ namespace Dialogic
             contents = String.Join("\n", lines);
 
             chats = ChatParser.ParseText(contents);
-            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             cr = new ChatRuntime(chats);
 
             chats = cr.FindAll(finder.Meta());
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -295,13 +295,13 @@ namespace Dialogic
             contents = String.Join("\n", lines);
 
             chats = ChatParser.ParseText(contents);
-            chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             cr = new ChatRuntime(chats);
 
             chats = cr.FindAll(finder.Meta());
-            chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));

@@ -88,7 +88,7 @@ namespace Dialogic
         {
             var yaml = "---\norigin: '<sentence>'\nsentence: 'Hello world'";
             var output = new Grammar(yaml).Expand("<origin>");
-            System.Console.WriteLine(output);
+            //Console.WriteLine(output);
             Assert.That(output, Is.EqualTo("Hello world"));
         }
 
@@ -98,7 +98,7 @@ namespace Dialogic
         {
             var yaml = "---\norigin: '<sentence>'\nsentence: 'Hello world'";
             var output = new Grammar(yaml).Expand("<origin>");
-            System.Console.WriteLine(output);
+            //Console.WriteLine(output);
             Assert.That(output, Is.EqualTo("Hello world"));
         }
 
