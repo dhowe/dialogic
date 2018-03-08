@@ -5,4 +5,4 @@ before_install:
 before_script:
   - nuget restore dialogic.sln
 after_script:
-  - nunit-console tests/bin/Release/tests.dll
+  - nunit-console tests/tests.dll
