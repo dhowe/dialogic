@@ -85,7 +85,8 @@ namespace Dialogic
 
             Match match = RE.ParseLine.Match(line);
 
-            if (match.Length < 4) throw new ParseException(line, lineNo);
+            if (match.Length < 4) throw new ParseException
+                (line, lineNo, "'" + line + "' cannot be parsed");
 
             var parts = new List<string>();
             for (int j = 0; j < 4; j++)
@@ -101,7 +102,8 @@ namespace Dialogic
             Command c = null;
             parts.Match((cmd, text, label, meta) =>
             {
-                //Console.WriteLine("P: "+cmd+"' '" +label+ "' '" + text + "' " + Util.Stringify(meta));
+                //Console.WriteLine("P: "+cmd+"' '" +label+ "' '" 
+                // + text + "' " + Util.Stringify(meta));
 
                 cmd = cmd.Length > 0 ? cmd : "SAY"; // default command
 
@@ -116,23 +118,33 @@ namespace Dialogic
                     throw new ParseException(line, lineNo, ex.Message);
                 }
 
-                if (c is Chat)
-                {
-                    chats.Add((Chat)c);
-                }
-                else
-                {
-                    if (chats.Count == 0)
-                    {
-                        CreateDefaultChat();
-                    }
-                    HandleCommand(c);
-                }
-
+                HandleCommand(c);
                 parsed.Push(c);
             });
 
             return c;
+        }
+
+        private void HandleCommand(Command c) // cleanup
+        {
+            if (c is Chat)
+            {
+                chats.Add((Chat)c);
+                return;
+            }
+
+            if (chats.Count == 0) CreateDefaultChat();
+
+            if (c is Opt) // add option data to last Ask
+            {
+                Command last = LastOfType(parsed, typeof(Ask));
+                if (!(last is Ask)) throw new ParseException("Opt must follow Ask");
+                ((Ask)last).AddOption((Opt)c);
+            }
+            else  // add command to last Chat
+            {
+                chats.Last().AddCommand(c);
+            }
         }
 
         private static void ParseFile(string fname, List<Chat> chats)
@@ -148,20 +160,6 @@ namespace Dialogic
                 if (c.GetType() == typeToFind) return c;
             }
             return null;
-        }
-
-        private void HandleCommand(Command c) // cleanup
-        {
-            if (c is Opt) // add option data to last Ask
-            {
-                Command last = LastOfType(parsed, typeof(Ask));
-                if (!(last is Ask)) throw new ParseException("Opt must follow Ask");
-                ((Ask)last).AddOption((Opt)c);
-            }
-            else  // add command to last Chat
-            {
-                chats.Last().AddCommand(c);
-            }
         }
 
         private void CreateDefaultChat()
