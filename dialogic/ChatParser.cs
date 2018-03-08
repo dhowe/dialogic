@@ -38,7 +38,7 @@ namespace Dialogic
                 files = new string[] { fileOrFolder };
 
             List<Chat> chats = new List<Chat>();
-            ChatParser.ParseFiles(files, chats);
+            ParseFiles(files, chats);
 
             return chats;
         }
