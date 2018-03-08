@@ -11,22 +11,27 @@ namespace Dialogic
         [Test]
         public void TestSecStrToMs()
         {
-            Assert.That(Util.SecStrToMs("1"),Is.EqualTo(1000));
+            Assert.That(Util.SecStrToMs("1"), Is.EqualTo(1000));
             Assert.That(Util.SecStrToMs("1.5"), Is.EqualTo(1500));
             Assert.That(Util.SecStrToMs(".5"), Is.EqualTo(500));
             Assert.That(Util.SecStrToMs("0.5"), Is.EqualTo(500));
             Assert.That(Util.SecStrToMs("1x"), Is.EqualTo(-1));
-            Assert.That(Util.SecStrToMs("1x",1000), Is.EqualTo(1000));
+            Assert.That(Util.SecStrToMs("1x", 1000), Is.EqualTo(1000));
         }
 
         [Test]
         public void TestSimpleGrammar()
         {
-            string f = TestContext.CurrentContext.TestDirectory + "/data/grammar.yaml";
-            string exp = "You look juicy. I see big things in your future. "+
+            string[] lines = {
+                "grammar1: <sentence> <fortune> <ending>",
+                "sentence: You look <adj>.", "adj: juicy",
+                "fortune: I see big things in your future. But also small ones.",
+                "ending: The judges agree, 3.5 of 10. Try again, this time with feeling." 
+            };
+            string exp = "You look juicy. I see big things in your future. " +
                 "But also small ones. The judges agree, 3.5 of 10. Try again, " +
                 "this time with feeling.";
-            var gram = ChatParser.ParseGrammar(new FileInfo(f));
+            var gram = ChatParser.ParseGrammar(String.Join("\n", lines));
             var outp = gram.Expand("<grammar1>");
             //Console.WriteLine(outp);
             Assert.That(outp, Is.EqualTo(exp));

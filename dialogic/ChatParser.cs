@@ -26,9 +26,9 @@ namespace Dialogic
             return new Grammar(file);
         }
 
-        public static Grammar ParseGrammar(string path)
+        public static Grammar ParseGrammar(string src)
         {
-            return ParseGrammar(new FileInfo(path));
+            return new Grammar(src);
         }
 
         public static List<Chat> ParseFile(string fileOrFolder)
