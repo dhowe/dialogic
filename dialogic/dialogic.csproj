@@ -54,7 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="*.g4" />
     <None Include="*.gs" />
     <None Include="packages.config" />
     <None Include="bin\Debug\dialogic.pdb" />

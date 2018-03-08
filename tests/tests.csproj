@@ -45,19 +45,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="data\grammar.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="data\grammar.gs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj">
       <Project>{B3C8B750-DC86-42FD-8FC1-5A81761E698D}</Project>
       <Name>dialogic</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="data\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
