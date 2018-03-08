@@ -8,14 +8,14 @@ using ExtensionMethods;
 
 namespace Dialogic
 {
-    public class ChatReader
+    public class ChatParser
     {
         public static string CHAT_FILE_EXT = ".gs";
 
         protected Stack<Command> parsed;
         protected List<Chat> chats;
 
-        public ChatReader()
+        public ChatParser()
         {
             parsed = new Stack<Command>();
             chats = new List<Chat>();
@@ -38,12 +38,12 @@ namespace Dialogic
                 files = new string[] { fileOrFolder };
 
             List<Chat> chats = new List<Chat>();
-            ChatReader.ParseFiles(files, chats);
+            ChatParser.ParseFiles(files, chats);
 
             return chats;
         }
 
-        internal static void ParseFiles(string[] files, List<Chat> chats)
+        private static void ParseFiles(string[] files, List<Chat> chats)
         {
             foreach (var f in files) ParseFile(f, chats);
         }
@@ -53,16 +53,16 @@ namespace Dialogic
             return Parse(text.Split('\n'));
         }
 
-        internal static List<Chat> Parse(string[] lines, bool printTree = false)
+        private static List<Chat> Parse(string[] lines)
         {
-            ChatReader parser = new ChatReader();
+            ChatParser parser = new ChatParser();
 
             int i = 0;
             foreach (var line in lines)
             {
-                if (line != null && line.Trim().Length > 1)
+                if (ValidateLine(ref lines[i]))
                 {
-                    parser.ParseLine(lines[i], i+1);
+                    parser.ParseLine(lines[i], i + 1);
                 }
                 i++;
             }
@@ -70,16 +70,18 @@ namespace Dialogic
             return parser.chats;
         }
 
-        internal static void ParseFile(string fname, List<Chat> chats)
+        private static bool ValidateLine(ref string line)
         {
-            var commands = Parse(File.ReadAllLines(fname, Encoding.UTF8));
-            commands.ForEach((f) => chats.Add(f));
+            if (line == null) return false;
+            line = line.Trim();
+            if (line.Length < 1) return false;
+            if (line.StartsWith("//", Util.IC)) return false;
+            return true;
         }
 
-        public Command ParseLine(string line, int lineNo)
+        private Command ParseLine(string line, int lineNo)
         {
             //Console.WriteLine("LINE " + lineNo + ": " + line);
-            if (String.IsNullOrEmpty(line)) return null;
 
             Match match = RE.ParseLine.Match(line);
 
@@ -88,22 +90,31 @@ namespace Dialogic
             var parts = new List<string>();
             for (int j = 0; j < 4; j++)
             {
-                //Console.WriteLine((j+1)+": "+match.Groups[j + 1].Value.Trim());
                 parts.Add(match.Groups[j + 1].Value.Trim());
             }
 
-            return ParseCommand(parts);
+            return ParseCommand(parts, line, lineNo);
         }
 
-        public Command ParseCommand(List<string> parts)
+        public Command ParseCommand(List<string> parts, string line, int lineNo)
         {
             Command c = null;
             parts.Match((cmd, text, label, meta) =>
             {
                 //Console.WriteLine("P: "+cmd+"' '" +label+ "' '" + text + "' " + Util.Stringify(meta));
-                cmd = cmd.Length > 0 ? cmd : "SAY";
+
+                cmd = cmd.Length > 0 ? cmd : "SAY"; // default command
+
                 var pairs = RE.MetaSplit.Split(meta);
-                c = Command.Create(cmd, label, text, pairs);
+
+                try
+                {
+                    c = Command.Create(cmd, label, text, pairs);
+                }
+                catch (Exception ex)
+                {
+                    throw new ParseException(line, lineNo, ex.Message);
+                }
 
                 if (c is Chat)
                 {
@@ -111,14 +122,23 @@ namespace Dialogic
                 }
                 else
                 {
-                    if (chats.Count == 0) CreateDefaultChat();
-                    HandleCommandTypes(c);
+                    if (chats.Count == 0)
+                    {
+                        CreateDefaultChat();
+                    }
+                    HandleCommand(c);
                 }
 
                 parsed.Push(c);
             });
 
             return c;
+        }
+
+        private static void ParseFile(string fname, List<Chat> chats)
+        {
+            var commands = Parse(File.ReadAllLines(fname, Encoding.UTF8));
+            commands.ForEach((f) => chats.Add(f));
         }
 
         private static Command LastOfType(Stack<Command> s, Type typeToFind)
@@ -130,7 +150,7 @@ namespace Dialogic
             return null;
         }
 
-        private void HandleCommandTypes(Command c) // cleanup
+        private void HandleCommand(Command c) // cleanup
         {
             if (c is Opt) // add option data to last Ask
             {
@@ -152,4 +172,5 @@ namespace Dialogic
         }
 
     }
+
 }

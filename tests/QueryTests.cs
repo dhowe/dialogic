@@ -34,7 +34,7 @@ namespace Dialogic
                 "CHAT c3 {}"
             };
             string contents = String.Join("\n", lines);
-            List<Chat> chats = ChatReader.ParseText(contents);
+            List<Chat> chats = ChatParser.ParseText(contents);
             List<Chat> result = new ChatRuntime(chats).FindAll
                 (new Constraints("dev", "1").Add("day", "fri").AsDict());
             Assert.That(result, Is.Not.Null);
@@ -113,7 +113,7 @@ namespace Dialogic
 
             string contents = String.Join("\n", lines);
 
-            List<Chat> chats = ChatReader.ParseText(contents);
+            List<Chat> chats = ChatParser.ParseText(contents);
             chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -136,7 +136,7 @@ namespace Dialogic
 
             string contents = String.Join("\n", lines);
 
-            List<Chat> chats = ChatReader.ParseText(contents);
+            List<Chat> chats = ChatParser.ParseText(contents);
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -163,7 +163,7 @@ namespace Dialogic
 
             string contents = String.Join("\n", lines);
 
-            List<Chat> chats = ChatReader.ParseText(contents);
+            List<Chat> chats = ChatParser.ParseText(contents);
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -193,7 +193,7 @@ namespace Dialogic
 
             string contents = String.Join("\n", lines);
 
-            List<Chat> chats = ChatReader.ParseText(contents);
+            List<Chat> chats = ChatParser.ParseText(contents);
             chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -219,7 +219,7 @@ namespace Dialogic
 
             contents = String.Join("\n", lines);
 
-            chats = ChatReader.ParseText(contents);
+            chats = ChatParser.ParseText(contents);
             chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -246,7 +246,7 @@ namespace Dialogic
 
             var contents = String.Join("\n", lines);
 
-            var chats = ChatReader.ParseText(contents);
+            var chats = ChatParser.ParseText(contents);
             chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             var finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -270,7 +270,7 @@ namespace Dialogic
 
             contents = String.Join("\n", lines);
 
-            chats = ChatReader.ParseText(contents);
+            chats = ChatParser.ParseText(contents);
             chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -294,7 +294,7 @@ namespace Dialogic
 
             contents = String.Join("\n", lines);
 
-            chats = ChatReader.ParseText(contents);
+            chats = ChatParser.ParseText(contents);
             chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));

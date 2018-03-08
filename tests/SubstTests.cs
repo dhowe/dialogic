@@ -21,7 +21,7 @@ namespace Dialogic
         public void TestReplaceMeta()
         {
             var s = @"SAY The $animal yawned {animal=$animal}";
-            Command c = ChatReader.ParseText(s)[0].commands[0];
+            Command c = ChatParser.ParseText(s)[0].commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             Substitutions.DoMeta(c.Meta(), globals);
             Assert.That(c.GetMeta("animal"), Is.EqualTo("dog"));

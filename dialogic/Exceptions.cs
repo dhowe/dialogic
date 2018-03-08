@@ -36,13 +36,6 @@ namespace Dialogic
         public PromptTimeout(Command ask, string message) : base(ask, message) { }
     }
 
-    public class InvalidChoice : ChatException
-    {
-        public InvalidChoice(Command ask) : this(ask, "Invalid selection") { }
-
-        public InvalidChoice(Command ask, string message) : base(ask, message) { }
-    }
-
     public class OperatorException : Exception
     {
         public OperatorException(Operator o) : this(o, "Invalid Operator") { }
@@ -52,9 +45,10 @@ namespace Dialogic
 
     public class ParseException : Exception
     {
-        public ParseException(string msg = "ParseException") : base(msg) {}
-        
-        public ParseException(string line, int lineNo, string msg = "ParseException") 
-            : base(msg + "(line " + lineNo + "): " + line) { }
+        public ParseException(string msg = "") : base(msg) { }
+
+        public ParseException(string line, int lineNo, string msg = "")
+            : base("Line " + lineNo + " : " + line + 
+                   (msg.Length > 0 ? "\n\n" + msg : "")) { }
     }
 }

@@ -122,7 +122,7 @@ namespace Dialogic
             var pair = Regex.Split(s, @"\s*=\s*"); // TODO: compile
             if (pair.Length != 2) pair = Regex.Split(s, @"\s+");
 
-            if (pair.Length != 2) throw BadArg("SET requires NAME VALUE, got "+s);
+            if (pair.Length != 2) throw BadArg("SET requires NAME and VALUE");
 
             if (pair[0].StartsWith("$", StringComparison.Ordinal))
             {
@@ -251,7 +251,7 @@ namespace Dialogic
 
             if (label.Length > 0 && !label.StartsWith("#", Util.IC))
             {
-                throw BadArg("OPT requires a #Label, got '" + label + "'");
+                throw BadArg("OPT requires a #Label");
             }
 
             this.action = label.Length > 0 ?
@@ -471,7 +471,7 @@ namespace Dialogic
         protected string ValidateLabel(string lbl)
         {
             if (lbl.Length < 2 || !lbl.StartsWith("#", Util.IC)) throw BadArg
-                (TypeName() + " requires a #Label, got '" + lbl + "'");
+                (TypeName().ToUpper() + " requires a #Label");
             return lbl.Substring(1);
         }
 
@@ -483,11 +483,8 @@ namespace Dialogic
 
         public static Command Create(string type, string text, string label, string[] meta)
         {
-            type = ToMixedCase(type);
-            //Console.WriteLine(type + "' '"+ text + "' '"+ label + "' '"+ Util.Stringify(meta) + "'");
-            var cmd = Create(Type.GetType(PACKAGE + type), label, text, meta);
-            if (cmd != null) return cmd;
-            throw new TypeLoadException("No type: " + PACKAGE + type);
+            //Console.WriteLine(type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(meta));
+            return Create(Type.GetType(PACKAGE + ToMixedCase(type)), label, text, meta);
         }
 
         public static Command Create(Type type, string text, string label, string[] meta)

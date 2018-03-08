@@ -26,7 +26,7 @@ namespace Dialogic
             string exp = "You look juicy. I see big things in your future. "+
                 "But also small ones. The judges agree, 3.5 of 10. Try again, " +
                 "this time with feeling.";
-            var gram = ChatReader.ParseGrammar(new FileInfo(f));
+            var gram = ChatParser.ParseGrammar(new FileInfo(f));
             var outp = gram.Expand("<grammar1>");
             //Console.WriteLine(outp);
             Assert.That(outp, Is.EqualTo(exp));
@@ -54,12 +54,12 @@ namespace Dialogic
         [Test]
         public void TestCommandTiming()
         {
-            Say fast = (Say)ChatReader.ParseText("SAY Thank you { speed=fast}")[0].commands[0];
-            Say defa = (Say)ChatReader.ParseText("SAY Thank you")[0].commands[0];
-            Say slow = (Say)ChatReader.ParseText("SAY Thank you{speed=slow }")[0].commands[0];
+            Say fast = (Say)ChatParser.ParseText("SAY Thank you { speed=fast}")[0].commands[0];
+            Say defa = (Say)ChatParser.ParseText("SAY Thank you")[0].commands[0];
+            Say slow = (Say)ChatParser.ParseText("SAY Thank you{speed=slow }")[0].commands[0];
             Assert.That(defa.ComputeDuration(), Is.EqualTo(fast.ComputeDuration() * 2).Within(1));
             Assert.That(slow.ComputeDuration(), Is.EqualTo(defa.ComputeDuration() * 2).Within(1));
-            Say longer = (Say)ChatReader.ParseText("SAY Thank you very much")[0].commands[0];
+            Say longer = (Say)ChatParser.ParseText("SAY Thank you very much")[0].commands[0];
             Assert.That(longer.ComputeDuration(), Is.GreaterThan(defa.ComputeDuration()));
             Assert.That(fast.Text, Is.EqualTo(defa.Text));
             Assert.That(slow.Text, Is.EqualTo(defa.Text));
