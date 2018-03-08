@@ -10,6 +10,7 @@ find-examples.txt
 [Bb]in/
 packages/
 TestResults/
+.vs
 
 # globs
 *.tmp
