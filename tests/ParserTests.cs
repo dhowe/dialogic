@@ -34,19 +34,9 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestParseCommands()
+        public void TestParsePrompts()
         {
-            List<Chat> chats;
-
-            chats = ChatReader.ParseText("GO #Twirl");
-            Console.WriteLine(chats[0].ToTree());
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
-
-            chats = ChatReader.ParseText("ASK Want a game?\nOPT Y #Game\nOPT N #End");
+            List<Chat> chats = ChatReader.ParseText("ASK Want a game?\nOPT Y #Game\n \nOPT N #End");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -62,6 +52,20 @@ namespace Dialogic
             Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
             Assert.That(options[1].Text, Is.EqualTo("N"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
+        }
+
+        [Test]
+        public void TestParseCommands()
+        {
+            List<Chat> chats;
+
+            chats = ChatReader.ParseText("GO #Twirl");
+            Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
 
             chats = ChatReader.ParseText("FIND {num=1}");
             Assert.That(chats.Count, Is.EqualTo(1));

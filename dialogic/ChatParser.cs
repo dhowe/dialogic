@@ -60,7 +60,7 @@ namespace Dialogic
             int i = 0;
             foreach (var line in lines)
             {
-                if (!String.IsNullOrEmpty(line))
+                if (line != null && line.Trim().Length > 1)
                 {
                     parser.ParseLine(lines[i], i+1);
                 }
