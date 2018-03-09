@@ -14,8 +14,9 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            label = ValidateLabel(label);
             base.Init(text, label, meta);
+            if (String.IsNullOrEmpty(Text)) throw BadArg("GO requires a #Label");
+            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
     }
 
@@ -283,18 +284,19 @@ namespace Dialogic
             //Console.WriteLine("Find.ParseMeta:" + Util.Stringify(pairs));
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
+                if (String.IsNullOrEmpty(pairs[i]))
+                {
+                    throw new ParseException("Invalid Find query");
+                }
                 Match match = RE.FindMeta.Match(pairs[i]);
                 if (match.Groups.Count != 4)
                 {
-                    throw new Exception("Invalid query term: " + pairs[i]);
+                    throw new ParseException("Invalid Find query: '"+pairs[i]+"'");
                 }
                 string key = match.Groups[1].Value;
-                string op = match.Groups[2].Value;
-                string val = match.Groups[3].Value;
-                //Console.WriteLine(key + " :: " + op + " :: " + val);
+
                 if (meta == null) meta = new Dictionary<string, object>();
-                meta.Add(key, new Constraint(op, key, val));
-            }
+                meta.Add(key, new Constraint(match.Groups[2].Value, key, match.Groups[3].Value));            }
         }
 
         protected override string MetaStr()

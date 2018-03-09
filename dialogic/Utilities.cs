@@ -8,23 +8,23 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    public static class Defaults
+    public static class Defaults // TODO: make hash
     {
-        public static double SAY_DURATION  = 1.0;
+        public static double SAY_DURATION = 1.0;
         public static double SAY_FAST_MULT = 0.5;
         public static double SAY_SLOW_MULT = 2.0;
         public static double SAY_MAX_LEN_MULT = 2.0;
         public static double SAY_MIN_LEN_MULT = 0.5;
-        public static int    SAY_MAX_LEN = 100;
-        public static int    SAY_MIN_LEN = 2;
+        public static int SAY_MAX_LEN = 100;
+        public static int SAY_MIN_LEN = 2;
 
         public static double ASK_TIMEOUT = 5.0;
     }
 
-    public static class RE 
+    public static class RE
     {
-        internal const string OP1 = @"($?[a-zA-Z_][a-zA-Z0-9_]+)";
-        internal const string OP2 = @" *([!<=>*^$]+) *([^ ]+)";
+        internal const string OP1 = @"($?[a-zA-Z_][a-zA-Z0-9_]*)";
+        internal const string OP2 = @"\s*([!<=>*^$]+)\s*([^ ]+)";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
         internal const string CMD = @"(^[A-Z][A-Z]+)?\s*";
@@ -35,7 +35,7 @@ namespace Dialogic
 
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
-        public static Regex MatchParens = new Regex(MP1+MP2);
+        public static Regex MatchParens = new Regex(MP1 + MP2);
 
         internal const string MSP = @"\s*,\s*";
         public static Regex MetaSplit = new Regex(MSP);
@@ -54,7 +54,7 @@ namespace Dialogic
         }
 
 
-        public static int SecStrToMs(string s, int defaultMs=-1)
+        public static int SecStrToMs(string s, int defaultMs = -1)
         {
             double d;
             try
@@ -267,6 +267,11 @@ namespace Dialogic
             this.name = key;
             this.value = val;
             this.op = op;
+
+            if (val.Contains("|") && op != Operator.RE)
+            {
+                throw new ParseException("Regex operator (*=) expected with |");
+            }
         }
 
         public bool Check(string toCheck)
@@ -532,7 +537,7 @@ namespace ExtensionMethods
 {
     public static class Exts
     {
-        public static void Match<T>(this IList<T> il, Action<T,T,T,T> block)
+        public static void Match<T>(this IList<T> il, Action<T, T, T, T> block)
         {
             block(il[0], il[1], il[2], il[3]);
         }
