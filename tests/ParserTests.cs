@@ -28,7 +28,7 @@ namespace Dialogic
         {
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("GO Twirl"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("DO Flip"));
+            //Assert.Throws<ParseException>(() => ChatParser.ParseText("DO Flip"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT Two Words"));
         }
 
@@ -90,14 +90,6 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
 
-            chats = ChatParser.ParseText("FIND {num=1}");
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.Null);
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
-
             chats = ChatParser.ParseText("DO #Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -105,6 +97,22 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+
+            chats = ChatParser.ParseText("DO Twirl");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+
+            chats = ChatParser.ParseText("FIND {num=1}");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
 
             chats = ChatParser.ParseText("SAY Thank you");
             Assert.That(chats.Count, Is.EqualTo(1));

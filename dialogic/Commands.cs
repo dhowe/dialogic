@@ -91,8 +91,9 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] meta)
         {
-            label = ValidateLabel(label);
             base.Init(text, label, meta);
+            if (String.IsNullOrEmpty(Text)) throw BadArg("DO requires a #Label");
+            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
     }
 
