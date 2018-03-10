@@ -8,7 +8,7 @@
     <RootNamespace>Dialogic</RootNamespace>
     <AssemblyName>Dialogic</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ReleaseVersion>0.3</ReleaseVersion>
+    <ReleaseVersion>0.41</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
