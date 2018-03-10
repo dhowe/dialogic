@@ -34,9 +34,10 @@ namespace Dialogic
          * 
          * If none match, an empty list will be returned
          * Cases: 
-         *   1. has key, matches ->         allow, score++
-         *   2. has key, doesn't match ->   disallow
-         *   3. doesn't have key ->         allow
+         *   1. has key, matches ->             allow, score++
+         *   2. has key, doesn't match ->       disallow
+         *   3a. doesn't have key (normal) ->   allow
+         *    b. doesn't have key (strict) ->   disallow
          */
         public static List<Chat> FindAll(List<Chat> chats, IDictionary<string, object> constraints)
         {
@@ -47,18 +48,19 @@ namespace Dialogic
             for (int i = 0; i < chats.Count; i++)
             {
                 int hits = 0;
-                var chat = chats[i];
-                var chatMeta = chat.Meta();
+                var chatProps = chats[i].Meta();
 
-                foreach (var constraint in constraints.Keys)
+                foreach (var key in constraints.Keys)
                 {
                     //Console.WriteLine("CHECK: find."+constraint+ " in "+chat.Text+" "+Util.Stringify(chatMeta));
 
-                    if (chatMeta != null && chatMeta.ContainsKey(constraint))
-                    {
-                        var chatMetaVal = (string)chatMeta[constraint];
+                    Constraint constraint = (Constraint)constraints[key];
 
-                        if (!((Constraint)constraints[constraint]).Check(chatMetaVal))
+                    if (chatProps != null && chatProps.ContainsKey(key)) // has-key
+                    {
+                        var chatPropVal = (string)chatProps[key];
+
+                        if (!(constraint.Check(chatPropVal)))
                         {
                             //Console.WriteLine("  FAIL:" + constraints[constraint]);
                             hits = -1;
@@ -70,8 +72,14 @@ namespace Dialogic
                             //Console.WriteLine("  HIT" + hits);
                         }
                     }
+                    else if (constraint.IsStrict()) // doesn't have-key, fails strict
+                    {
+                        //Console.WriteLine("  FAIL-STRICT:" + constraints[constraint]);
+                        hits = -1;
+                        break;
+                    }
                 }
-                if (hits > -1) matches.Add(chat, hits);
+                if (hits > -1) matches.Add(chats[i], hits);
             }
 
             List<KeyValuePair<Chat, int>> list = DescendingRandomSort(matches);

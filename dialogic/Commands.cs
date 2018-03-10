@@ -291,12 +291,22 @@ namespace Dialogic
                 Match match = RE.FindMeta.Match(pairs[i]);
                 if (match.Groups.Count != 4)
                 {
-                    throw new ParseException("Invalid Find query: '"+pairs[i]+"'");
+                    throw new ParseException("Invalid Find query: '" + pairs[i] + "'");
                 }
+
                 string key = match.Groups[1].Value;
 
+                bool isStrict = false;
+                if (key.IndexOf('!') == 0) {
+                    isStrict = true;
+                    key = key.Substring(1);
+                }
+
                 if (meta == null) meta = new Dictionary<string, object>();
-                meta.Add(key, new Constraint(match.Groups[2].Value, key, match.Groups[3].Value));            }
+
+                meta.Add(key, new Constraint(match.Groups[2].Value, 
+                    key, match.Groups[3].Value, isStrict));
+            }
         }
 
         protected override string MetaStr()

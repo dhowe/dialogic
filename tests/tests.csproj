@@ -36,12 +36,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DialogicTests.cs" />
-    <Compile Include="QueryTests.cs" />
-    <Compile Include="SubstTests.cs" />
+    <Compile Include="SearchTests.cs" />
+    <Compile Include="ReplaceTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="OperatorTests.cs" />
     <Compile Include="GrammarTests.cs" />
-    <Compile Include="RealizationTests.cs" />
+    <Compile Include="RealizeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

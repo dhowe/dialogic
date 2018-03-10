@@ -23,7 +23,7 @@ namespace Dialogic
 
     public static class RE
     {
-        internal const string OP1 = @"($?[a-zA-Z_][a-zA-Z0-9_]*)";
+        internal const string OP1 = @"(!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
         internal const string OP2 = @"\s*([!<=>*^$]+)\s*([^ ]+)";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
@@ -43,9 +43,10 @@ namespace Dialogic
 
     public static class Util
     {
+        public static StringComparison IC = StringComparison.InvariantCulture;
+
         private static int start;
         private static Random random;
-        public static StringComparison IC = StringComparison.InvariantCulture;
 
         static Util()
         {
@@ -251,21 +252,26 @@ namespace Dialogic
 
     public class Constraint
     {
+        private enum ConstraintType { Soft, Hard };
+
         public readonly string name, value;
+        private readonly ConstraintType type;
         public readonly Operator op;
 
-        public Constraint(string key, string val) :
-            this("=", key, val)
+
+        public Constraint(string key, string val, bool isHard = false) :
+            this("=", key, val, isHard)
         { }
 
-        public Constraint(string opstr, string key, string val) :
-            this(Operator.FromString(opstr), key, val)
+        public Constraint(string opstr, string key, string val, bool isHard = false) :
+            this(Operator.FromString(opstr), key, val, isHard)
         { }
 
-        public Constraint(Operator op, string key, string val)
+        public Constraint(Operator op, string key, string val, bool isHard = false)
         {
-            this.name = key;
+            this.type = isHard ? ConstraintType.Hard : ConstraintType.Soft;
             this.value = val;
+            this.name = key;
             this.op = op;
 
             if (val.Contains("|") && op != Operator.RE)
@@ -285,6 +291,11 @@ namespace Dialogic
         {
             return name + op + value;
         }
+
+        public bool IsStrict()
+        {
+            return this.type == ConstraintType.Hard;
+        }
     }
 
     public class Constraints
@@ -296,14 +307,14 @@ namespace Dialogic
             pairs = new Dictionary<string, object>();
         }
 
-        public Constraints(string key, string value) : this()
+        public Constraints(string key, string value, bool isHard = false) : this()
         {
-            this.Add(key, value);
+            Add(new Constraint(key, value, isHard));
         }
 
-        public Constraints(string op, string key, string value) : this()
+        public Constraints(string op, string key, string value, bool isHard = false) : this()
         {
-            this.Add(op, key, value);
+            Add(new Constraint(op, key, value, isHard));
         }
 
         public Constraints Add(Constraint c)
@@ -312,14 +323,9 @@ namespace Dialogic
             return this;
         }
 
-        public Constraints Add(string key, string value)
+        public Constraints Add(string key, string value, bool isHard = false)
         {
-            return Add(new Constraint(key, value));
-        }
-
-        public Constraints Add(string op, string key, string value)
-        {
-            return Add(new Constraint(op, key, value));
+            return Add(new Constraint(key, value, isHard));
         }
 
         public IDictionary<string, object> AsDict()

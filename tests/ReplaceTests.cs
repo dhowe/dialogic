@@ -7,7 +7,7 @@ using System.IO;
 namespace Dialogic
 {
     [TestFixture]
-    public class SubstTests
+    public class ReplaceTests
     {
         Dictionary<string, object> globals = new Dictionary<string, object>() {
                 { "animal", "dog" },
