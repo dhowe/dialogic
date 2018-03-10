@@ -7,19 +7,16 @@ namespace Dialogic
     {
         readonly Command command;
 
-        public ChatException(Command ask) : this(ask, "") { }
+        public ChatException(Command c) : this(c, "") { }
 
-        public ChatException(Command ask, string message) : base(message)
+        public ChatException(Command c, string msg) : base(msg+" :: "+c)
         {
-            this.command = ask;
+            this.command = c;
         }
 
-        public Command Command
+        public Command Command()
         {
-            get
-            {
-                return command;
-            }
+            return command;
         }
     }
 

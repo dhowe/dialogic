@@ -164,7 +164,7 @@ namespace Dialogic
 
         private void CreateDefaultChat()
         {
-            Chat def = new Chat();
+            Chat def = Chat.Create("C" + Util.EpochMs());
             chats.Add(def);
             parsed.Push(def);
         }

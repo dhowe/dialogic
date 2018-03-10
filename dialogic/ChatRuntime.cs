@@ -22,17 +22,21 @@ namespace Dialogic
             this.chats = chats;
         }
 
+        public List<Chat> Chats()
+        {
+            return chats;
+        }
+
         public void Run(string chatLabel = null)
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
-            current = (chatLabel != null) ? FindChat(chatLabel) : chats[0];
+            current = (chatLabel != null) ? Find(new Constraints("name", chatLabel)) : chats[0];
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
         {
             return (choice != null) ? HandleChoiceEvent(ref choice, globals) : HandleChatEvent(globals);
         }
-
 
         private IUpdateEvent HandleChoiceEvent(ref IChoice choice, IDictionary<string, object> globals)
         {
@@ -54,7 +58,9 @@ namespace Dialogic
                 {
                     var action = opt.ActionText();
                     Substitutions.Do(ref action, globals);
-                    SetCurrentChat(FindChat(action));
+                    var chat = Find((Find)opt.action);
+                    if (chat == null) throw new ChatException(opt.action, "Null Chat");
+                    SetCurrentChat(chat);
                 }
             }
             return null;
@@ -92,12 +98,9 @@ namespace Dialogic
                         cmd.Realize(globals);
                         if (cmd is Find)
                         {
-                            SetCurrentChat(Find(((Find)cmd).Meta()));
-                        }
-                        else if (cmd is Go)
-                        {
-                            // refactor to generic Find() ?
-                            SetCurrentChat(FindChat(cmd.Text));
+                            var next = Find((Dialogic.Find)cmd);
+                            if (next == null) throw new ChatException(cmd, "Null Chat");
+                            SetCurrentChat(next);
                         }
                     }
 
@@ -112,19 +115,24 @@ namespace Dialogic
             return null;
         }
 
-        public Chat Find(IDictionary<string, object> constraints)
+        public Chat Find(Find finder)
         {
-            return ChatSearch.Find(chats, constraints);
+            return ChatSearch.Find(chats, finder.meta);
         }
 
-        public List<Chat> FindAll(IDictionary<string, object> constraints)
+        public List<Chat> FindAll(Find finder)
         {
-            return ChatSearch.FindAll(chats, constraints);
+            return ChatSearch.FindAll(chats, finder.meta);
         }
 
-        public Chat FindChat(string name)
+        public Chat Find(Constraints constraints) // testing
         {
-            return ChatSearch.ByName(chats, name);
+            return ChatSearch.Find(chats, constraints.AsDict());
+        }
+
+        public List<Chat> FindAll(Constraints constraints) // testing
+        {
+            return ChatSearch.FindAll(chats, constraints.AsDict());
         }
 
         private bool Logging()

@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    public static class Defaults // TODO: make hash
+    public static class Defaults
     {
         public static double SAY_DURATION = 1.0;
         public static double SAY_FAST_MULT = 0.5;
@@ -338,7 +338,7 @@ namespace Dialogic
     {
         private enum OpType { EQUALITY, COMPARISON, MATCHING }
 
-        public static Operator EQ = new Operator("==", OpType.EQUALITY);
+        public static Operator EQ = new Operator("=", OpType.EQUALITY);
         public static Operator NEQ = new Operator("!=", OpType.EQUALITY);
         public static Operator SW = new Operator("^=", OpType.MATCHING);
         public static Operator EW = new Operator("$=", OpType.MATCHING);
@@ -382,6 +382,7 @@ namespace Dialogic
                 case "^=": return Operator.SW;
                 case "$=": return Operator.EW;
                 case "*=": return Operator.RE;
+                case "==": return Operator.EQ;
                 case "=": return Operator.EQ;
             }
             throw new Exception("Invalid Operator: " + op);

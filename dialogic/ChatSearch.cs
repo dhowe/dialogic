@@ -15,22 +15,8 @@ namespace Dialogic
             return FindAll(chats, constraints).FirstOrDefault();
         }
 
-        /** 
-         * Find chat by Name 
-         */
-        public static Chat ByName(List<Chat> chats, string chatName)
-        {
-            for (int i = 0; i < chats.Count; i++)
-            {
-                if (chats[i].Text == chatName)
-                    return chats[i];
-            }
-            return null;
-        }
-
         /**
-         * Find all chats which do not match any constraint key without also matching its value,
-         * ordered by score (number of matching constraints).
+         * Find all chats according to specified constraints ordered by score.
          * 
          * If none match, an empty list will be returned
          * Cases: 
@@ -47,12 +33,16 @@ namespace Dialogic
 
             for (int i = 0; i < chats.Count; i++)
             {
-                int hits = 0;
+                var hits = 0;
+                var dbug = false; // tmp
                 var chatProps = chats[i].Meta();
+
+                if (dbug) Console.WriteLine("CHECK: CHAT."+chatProps["name"]);
 
                 foreach (var key in constraints.Keys)
                 {
-                    //Console.WriteLine("CHECK: find."+constraint+ " in "+chat.Text+" "+Util.Stringify(chatMeta));
+                    if (dbug) Console.WriteLine("  CHECK: find."+key+ " in "
+                        +chats[i].Text+" "+Util.Stringify(chatProps));
 
                     Constraint constraint = (Constraint)constraints[key];
 
@@ -62,19 +52,19 @@ namespace Dialogic
 
                         if (!(constraint.Check(chatPropVal)))
                         {
-                            //Console.WriteLine("  FAIL:" + constraints[constraint]);
+                            if (dbug) Console.WriteLine("    FAIL:" + constraints[key]);
                             hits = -1;
                             break;
                         }
                         else 
                         {
                             hits++;
-                            //Console.WriteLine("  HIT" + hits);
+                            if (dbug) Console.WriteLine("    HIT" + hits);
                         }
                     }
                     else if (constraint.IsStrict()) // doesn't have-key, fails strict
                     {
-                        //Console.WriteLine("  FAIL-STRICT:" + constraints[constraint]);
+                        if (dbug) Console.WriteLine("    FAIL-STRICT:" + constraints[key]);
                         hits = -1;
                         break;
                     }
@@ -89,25 +79,15 @@ namespace Dialogic
             return (from kvp in list select kvp.Key).ToList();
         }
 
-        public static Chat Find(List<Chat> chats, Constraints constraints)
-        {
-            return Find(chats, constraints.AsDict());
-        }
-
-        public static List<Chat> FindAll(List<Chat> chats, Constraints constraints)
-        {
-            return FindAll(chats, constraints.AsDict());
-        }
-
         static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
         {
             List<KeyValuePair<Chat, int>> list = d.ToList();
-            list.Sort((p1, p2) => CompareToWithRandomTies(p1.Value, p2.Value));
+            list.Sort((p1, p2) => CompareRandomizeTies(p1.Value, p2.Value));
             return list;
         }
 
         // sort descending with random ties
-        static int CompareToWithRandomTies(int i, int j)
+        static int CompareRandomizeTies(int i, int j)
         {
             return i == j ? (Util.Rand() < .5 ? 1 : -1) : j.CompareTo(i);
         }

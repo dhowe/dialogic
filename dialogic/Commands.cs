@@ -6,19 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
+    public interface IEmittable { }
+
     public class NoOp : Command { }
-
-    public class Go : Command
-    {
-        public Go() : base() { }
-
-        public override void Init(string text, string label, string[] meta)
-        {
-            base.Init(text, label, meta);
-            if (String.IsNullOrEmpty(Text)) throw BadArg("GO requires a #Label");
-            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
-        }
-    }
 
     public class Say : Command, IEmittable
     {
@@ -85,20 +75,20 @@ namespace Dialogic
 
     public class Do : Command, IEmittable
     {
-        public Do() : base()
+        public override void Init(string text, string label, string[] metas)
         {
             PauseAfterMs = 50;
+            base.Init(text, label, metas);
+            ValidateTextLabel();
         }
 
-        public override void Init(string text, string label, string[] meta)
+        public override string ToString()
         {
-            base.Init(text, label, meta);
-            if (String.IsNullOrEmpty(Text)) throw BadArg("DO requires a #Label");
-            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
+            return "[" + TypeName().ToUpper() + "] #" + Text;
         }
     }
 
-    public class Set : Command // TODO: rethink this
+    public class Set : Command // TODO: rethink
     {
         public string Value;
 
@@ -110,7 +100,7 @@ namespace Dialogic
             this.Value = value;
         }
 
-        public override void Init(string text, string label, string[] meta)
+        public override void Init(string text, string label, string[] metas)
         {
             string[] parts = ParseSetArgs(text);
             this.Text = parts[0];
@@ -142,13 +132,9 @@ namespace Dialogic
 
     public class Wait : Command
     {
-        public Wait() : base()
-        {
-            PauseAfterMs = -1;
-        }
-
         public override void Init(string text, string label, string[] meta)
         {
+            PauseAfterMs = -1;
             base.Init(text, label, meta);
             PauseAfterMs = Util.SecStrToMs(text, -1);
         }
@@ -204,7 +190,7 @@ namespace Dialogic
 
         public void AddOption(Opt o)
         {
-            o.prompt = this;
+            //o.prompt = this;
             options.Add(o);
         }
 
@@ -235,7 +221,7 @@ namespace Dialogic
     {
         public Command action;
 
-        public Ask prompt; // not used
+        //public Ask prompt;
 
         public Opt() : this("", NOP) { }
 
@@ -274,9 +260,9 @@ namespace Dialogic
 
     public class Find : Command
     {
-        public override void Init(string text, string label, string[] meta)
+        public override void Init(string text, string label, string[] metas)
         {
-            ParseMeta(meta);
+            ParseMeta(metas);
         }
 
         protected override void ParseMeta(string[] pairs)
@@ -297,14 +283,15 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
 
                 bool isStrict = false;
-                if (key.IndexOf('!') == 0) {
+                if (key.IndexOf('!') == 0)
+                {
                     isStrict = true;
                     key = key.Substring(1);
                 }
 
                 if (meta == null) meta = new Dictionary<string, object>();
 
-                meta.Add(key, new Constraint(match.Groups[2].Value, 
+                meta.Add(key, new Constraint(match.Groups[2].Value,
                     key, match.Groups[3].Value, isStrict));
             }
         }
@@ -320,21 +307,43 @@ namespace Dialogic
             }
             return s;
         }
+
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] " + MetaStr();
+        }
     }
 
-    public interface IEmittable { }
+    public class Go : Find
+    {
+        public override void Init(string text, string label, string[] metas)
+        {
+            Text = text.Length > 0 ? text : label;
+            ValidateTextLabel();
+            SetMeta("name", new Constraint("name", Text, true));
+        }
+
+        public override string ToString()
+        {
+            return "[" + TypeName().ToUpper() + "] #" + Text;
+        }
+    }
 
     public class Chat : Command
     {
-        public List<Command> commands; // not copied
+        public List<Command> commands;
         public int cursor = 0;
 
-        public Chat() : this("C" + Util.EpochMs()) { }
-
-        public Chat(string name)
+        public Chat()
         {
-            this.Text = name;
-            this.commands = new List<Command>();
+            commands = new List<Command>();
+        }
+
+        public static Chat Create(string name) // tests only
+        {
+            Chat c = new Chat();
+            c.Init(name, "", new string[0]);
+            return c;
         }
 
         public int Count()
@@ -349,7 +358,7 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        public override void Init(string text, string label, string[] meta)
+        public override void Init(string text, string label, string[] metas)
         {
             if (string.IsNullOrEmpty(text)) throw BadArg("Missing label");
 
@@ -359,12 +368,24 @@ namespace Dialogic
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
 
-            ParseMeta(meta);
+            ParseMeta(metas);
+            SetMeta("name", Text);
         }
 
-        public override string ToString()
+        protected override string MetaStr()
         {
-            return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
+            string s = "";
+            if (HasMeta())
+            {
+                s += "{";
+                foreach (var key in meta.Keys)
+                {
+                    if (key != "name")
+                        s += key + "=" + meta[key] + ",";
+                }
+                s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : "";
+            }
+            return s;
         }
 
         public string ToTree()
@@ -405,11 +426,18 @@ namespace Dialogic
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
         }
 
-        /* Note: new keys will overwrite old keys with same name */
-        public void SetMeta(string key, object val)
+        public void SetMeta(string key, object val, bool throwIfKeyExists = false)
         {
             if (meta == null) meta = new Dictionary<string, object>();
-            meta[key] = val;
+
+            if (throwIfKeyExists)
+            {
+                meta.Add(key, val);
+            }
+            else
+            {
+                meta[key] = val;
+            }
         }
 
         public IDictionary<string, object> Meta()
@@ -481,11 +509,11 @@ namespace Dialogic
             this.data = new Dictionary<string, object>();
         }
 
-        protected string ValidateLabel(string lbl)
+        protected void ValidateTextLabel()
         {
-            if (lbl.Length < 2 || !lbl.StartsWith("#", Util.IC)) throw BadArg
-                (TypeName().ToUpper() + " requires a #Label");
-            return lbl.Substring(1);
+            if (String.IsNullOrEmpty(Text)) throw BadArg
+                (TypeName().ToUpper()+" requires a #Label");
+            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
 
         private static string ToMixedCase(string s)
@@ -507,11 +535,11 @@ namespace Dialogic
             return cmd;
         }
 
-        public virtual void Init(string text, string label, string[] meta)
+        public virtual void Init(string text, string label, string[] metas)
         {
             //Console.WriteLine("Command.Init: " + text + " :: " + label + " :: " + String.Join("|", meta));
             Text = text.Length > 0 ? text : label;
-            ParseMeta(meta);
+            ParseMeta(metas);
             HandleMetaTiming();
         }
 
