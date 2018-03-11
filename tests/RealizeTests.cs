@@ -1,12 +1,10 @@
-﻿using System;
-using NUnit.Framework;
-using Dialogic;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
 
 namespace Dialogic
 {
     [TestFixture]
-    public class RealizationTests
+    public class RealizeTests
     {
         IDictionary<string, object> globals = new Dictionary<string, object>() {
                 { "animal", "dog" },
@@ -89,6 +87,69 @@ namespace Dialogic
             {
                 c.Realize(globals);
                 CollectionAssert.Contains(ok, c.data[Meta.TEXT]);
+            }
+        }
+
+        [Test]
+        public void TestReplaceGroups()
+        {
+            var txt = "The boy was (sad | happy)";
+            string[] ok = { "The boy was sad", "The boy was happy" };
+            for (int i = 0; i < 10; i++)
+            {
+                CollectionAssert.Contains(ok, Realizer.DoGroups(txt));
+            }
+
+            txt = "The boy was (sad | happy | dead)";
+            ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
+            for (int i = 0; i < 10; i++)
+            {
+                string s = Realizer.DoGroups(txt);
+                //Console.WriteLine(i + ") " + s);
+                CollectionAssert.Contains(ok, s);
+            }
+        }
+
+        [Test]
+        public void TestReplaceVars()
+        {
+            var s = @"SAY The $animal woke $count times";
+            s = Realizer.DoVars(s, globals);
+            Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
+        }
+
+        [Test]
+        public void TestReplace1()
+        {
+            var s = @"SAY The $animal woke and $prep (ate|ate)";
+            s = Realizer.Do(s, globals);
+            Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
+        }
+
+        [Test]
+        public void TestReplace2()
+        {
+            var txt = "letter $group";
+            string[] ok = { "letter a", "letter b" };
+            for (int i = 0; i < 10; i++)
+            {
+                CollectionAssert.Contains(ok, Realizer.Do(txt, globals));
+            }
+        }
+
+        [Test]
+        public void TestReplace3()
+        {
+            var txt = "letter $cmplx";
+            string[] ok = { "letter a", "letter b", "letter then" };
+            string[] res = new string[10];
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = Realizer.Do(txt, globals);
+            }
+            for (int i = 0; i < res.Length; i++)
+            {
+                CollectionAssert.Contains(ok, res[i]);
             }
         }
     }

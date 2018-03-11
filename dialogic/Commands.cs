@@ -21,7 +21,7 @@ namespace Dialogic
          * Determine milliseconds to wait after sending the event, using:
          *      a. Line-length
          *      b. Meta-data modifiers
-         *      c. Character mood (pending)
+         *      c. Character mood (TODO)
          */
         public override int ComputeDuration()
         {
@@ -48,8 +48,6 @@ namespace Dialogic
                         break;
                     case "slow":
                         val *= Defaults.SAY_SLOW_MULT;
-                        break;
-                    default:
                         break;
                 }
             }
@@ -140,7 +138,8 @@ namespace Dialogic
         }
     }
 
-    public class Nvm : Wait, ISendable {
+    public class Nvm : Wait, ISendable
+    {
 
         public override int ComputeDuration()
         {
@@ -205,16 +204,17 @@ namespace Dialogic
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
-            var opts = OptionsJoined();
-            Substitutions.Do(ref opts, globals);
-			data[Dialogic.Meta.OPTS] = opts;
-			data[Dialogic.Meta.TIMEOUT]= Timeout.ToString();
+            data[Meta.OPTS] = Realizer.Do(OptionsJoined(), globals);
+            data[Meta.TIMEOUT] = Timeout.ToString();
             return data;
         }
 
         protected override void HandleMetaTiming()
         {
-            if (HasMeta(Dialogic.Meta.TIMEOUT)) Timeout = Util.SecStrToMs((string)meta[Dialogic.Meta.TIMEOUT]);
+            if (HasMeta(Meta.TIMEOUT))
+            {
+                Timeout = Util.SecStrToMs((string)meta[Meta.TIMEOUT]);
+            }
         }
 
         public override string ToString()
@@ -239,7 +239,7 @@ namespace Dialogic
             this.action = action;
         }
 
-        public override void Init(string text, string label, string[] meta)
+        public override void Init(string text, string label, string[] metas)
         {
             this.Text = text;
 
@@ -249,7 +249,7 @@ namespace Dialogic
             }
 
             this.action = label.Length > 0 ?
-                Command.Create(typeof(Go), "", label, meta) : NOP;
+                Command.Create(typeof(Go), "", label, metas) : NOP;
         }
 
         public override string ToString()
@@ -273,26 +273,29 @@ namespace Dialogic
 
         protected override void ParseMeta(string[] pairs)
         {
-            //Console.WriteLine("Find.ParseMeta:" + Util.Stringify(pairs));
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
                 if (String.IsNullOrEmpty(pairs[i]))
                 {
-                    throw new ParseException("Invalid Find query");
+                    throw new ParseException("Invalid query");
                 }
+
                 Match match = RE.FindMeta.Match(pairs[i]);
                 if (match.Groups.Count != 4)
                 {
-                    throw new ParseException("Invalid Find query: '" + pairs[i] + "'");
+                    throw new ParseException("Invalid query: '" + pairs[i] + "'");
                 }
 
                 string key = match.Groups[1].Value;
+                ConstraintType ctype = ConstraintType.Soft;
 
-                var ctype = ConstraintType.Soft;
-                if (key.IndexOf('!') == 0)
+                if (Util.TrimFirst(ref key, '!'))
                 {
                     ctype = ConstraintType.Hard;
-                    key = key.Substring(1);
+                    if (Util.TrimFirst(ref key, '!'))
+                    {
+                        ctype = ConstraintType.Absolute;
+                    }
                 }
 
                 if (meta == null) meta = new Dictionary<string, object>();
@@ -326,8 +329,13 @@ namespace Dialogic
         {
             Text = text.Length > 0 ? text : label;
             ValidateTextLabel();
-            SetMeta(new LabelConstraint(Text));
+
         }
+
+        /*protected override void RealizeMeta(IDictionary<string, object> globals)
+        {
+            data[Meta.LABEL] = Text;
+        }*/
 
         public override string ToString()
         {
@@ -375,7 +383,7 @@ namespace Dialogic
             }
 
             ParseMeta(metas);
-			SetMeta(Dialogic.Meta.LABEL, Text);
+//            SetMeta(Meta.LABEL, Text); // !realized
         }
 
         protected override string MetaStr()
@@ -386,8 +394,8 @@ namespace Dialogic
                 s += "{";
                 foreach (var key in meta.Keys)
                 {
-                    if (key != Dialogic.Meta.LABEL)
-                        s += key + "=" + meta[key] + ",";
+                    //if (key != Meta.LABEL) 
+                    s += key + "=" + meta[key] + ",";
                 }
                 s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : "";
             }
@@ -418,7 +426,7 @@ namespace Dialogic
         public const string OPTS = "opts";
         public const string TYPE = "type";
         public const string TEXT = "text";
-        public const string LABEL = "label";
+        //public const string LABEL = "label";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
 
@@ -498,8 +506,10 @@ namespace Dialogic
                     SetMeta(parts[0].Trim(), parts[1].Trim());
                 }
             }
+
         }
     }
+
     public abstract class Command : Meta
     {
         public const string PACKAGE = "Dialogic.";
@@ -530,13 +540,15 @@ namespace Dialogic
         protected void ValidateTextLabel()
         {
             if (String.IsNullOrEmpty(Text)) throw BadArg
-                (TypeName().ToUpper()+" requires a #Label");
+                (TypeName().ToUpper() + " requires a #Label");
+
             if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
 
         private static string ToMixedCase(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
+
             return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
         }
 
@@ -562,9 +574,9 @@ namespace Dialogic
 
         protected virtual void HandleMetaTiming()
         {
-            if (HasMeta(Dialogic.Meta.DELAY))
+            if (HasMeta(Meta.DELAY))
             {
-				DelayMs = Util.SecStrToMs((string)meta[Dialogic.Meta.DELAY]);
+                DelayMs = Util.SecStrToMs((string)meta[Meta.DELAY]);
             }
         }
 
@@ -577,12 +589,24 @@ namespace Dialogic
         {
             data.Clear();
 
+            RealizeMeta(globals);
+
+            data[Meta.TEXT] = Realizer.Do(Text, globals);
+            data[Meta.TYPE] = TypeName();
+
+            LastSentMs = Util.EpochMs();
+
+            return data;
+        }
+
+        protected virtual void RealizeMeta(IDictionary<string, object> globals)
+        {
             if (HasMeta())
             {
                 IEnumerable sorted = null;
-                foreach (KeyValuePair<string, object> kv in meta)
+                foreach (KeyValuePair<string, object> pair in meta)
                 {
-                    string val = kv.Value.ToString();
+                    string val = pair.Value.ToString();
 
                     if (val.IndexOf('$') > -1)
                     {
@@ -593,19 +617,9 @@ namespace Dialogic
                         }
                     }
 
-                    data[kv.Key] = val;
+                    data[pair.Key] = val;
                 }
             }
-
-            var text = Text + ""; // tmp
-            Substitutions.Do(ref Text, globals);
-
-            data[Dialogic.Meta.TEXT] = text;
-			data[Dialogic.Meta.TYPE] = TypeName();
-
-            LastSentMs = Util.EpochMs();
-
-            return data;
         }
 
         protected Exception BadArg(string msg)

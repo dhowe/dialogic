@@ -36,7 +36,6 @@
   <ItemGroup>
     <Compile Include="DialogicTests.cs" />
     <Compile Include="SearchTests.cs" />
-    <Compile Include="ReplaceTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="OperatorTests.cs" />
     <Compile Include="GrammarTests.cs" />

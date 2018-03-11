@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace Dialogic
 {
-    public static class ChatSearch
+    public static class FuzzySearch
     {
         /**
          * Find highest scoring chat which does not match any constraint key without also 
@@ -35,15 +33,13 @@ namespace Dialogic
             for (int i = 0; i < chats.Count; i++)
             {
                 var hits = 0;
-                var dbug = false; // tmp
                 var chatProps = chats[i].GetMeta();
 
-                if (dbug) Console.WriteLine("CHECK: CHAT."+chatProps[Meta.LABEL]);
+                //Console.WriteLine("CHECK: CHAT."+chatProps[Meta.LABEL]);
 
                 foreach (var key in constraints.Keys)
                 {
-                    if (dbug) Console.WriteLine("  CHECK: find."+key+ " in "
-                        +chats[i].Text+" "+Util.Stringify(chatProps));
+                    //Console.WriteLine("  Find."+key+ " in "+chats[i].Text+" "+Util.Stringify(chatProps));
 
                     Constraint constraint = (Constraint)constraints[key];
 
@@ -53,19 +49,19 @@ namespace Dialogic
 
                         if (!(constraint.Check(chatPropVal)))
                         {
-                            if (dbug) Console.WriteLine("    FAIL:" + constraints[key]);
+                            //Console.WriteLine("    FAIL:" + constraints[key]);
                             hits = -1;
                             break;
                         }
                         else 
                         {
                             hits++;
-                            if (dbug) Console.WriteLine("    HIT" + hits);
+                            //Console.WriteLine("    HIT" + hits);
                         }
                     }
                     else if (constraint.IsStrict()) // doesn't have-key, fails strict
                     {
-                        if (dbug) Console.WriteLine("    FAIL-STRICT:" + constraints[key]);
+                        //Console.WriteLine("    FAIL-STRICT:" + constraints[key]);
                         hits = -1;
                         break;
                     }

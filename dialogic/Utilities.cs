@@ -24,7 +24,7 @@ namespace Dialogic
 
     public static class RE
     {
-        internal const string OP1 = @"(!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
+        internal const string OP1 = @"(!?!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
         internal const string OP2 = @"\s*([!<=>*^$]+)\s*([^ ]+)";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
@@ -102,7 +102,7 @@ namespace Dialogic
             return Millis() - since;
         }
 
-        public static string ElapsedSec(int since=0)
+        public static string ElapsedSec(int since = 0)
         {
             return (Millis(since) / 1000.0).ToString("0.##") + "s";
         }
@@ -259,16 +259,27 @@ namespace Dialogic
         {
             return millis / 1000.0;
         }
+
+        public static bool TrimFirst(ref string s, char c)
+        {
+            if (s.IndexOf(c) == 0)
+            {
+                s = s.Substring(1);
+                return true;
+            }
+            return false;
+        }
     }
 
     public enum ConstraintType { Soft = 0, Hard = 1, Absolute = 2 };
 
 
-    public class LabelConstraint : Constraint
+    /*public class LabelConstraint : Constraint
     {
-        public LabelConstraint(string label) : 
-            base(Operator.EQ, Meta.LABEL, label, ConstraintType.Absolute) {}
-    }
+        public LabelConstraint(string label) :
+            base(Operator.EQ, Meta.LABEL, label, ConstraintType.Absolute)
+        { }
+    }*/
 
     public class Constraint
     {
@@ -280,7 +291,7 @@ namespace Dialogic
             this("=", key, val, type)
         { }
 
-        public Constraint(string opstr, string key, string val, ConstraintType type=ConstraintType.Soft) :
+        public Constraint(string opstr, string key, string val, ConstraintType type = ConstraintType.Soft) :
             this(Operator.FromString(opstr), key, val, type)
         { }
 
@@ -306,12 +317,12 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return name + op + value;
+            return name + op + value + "("+type+")";
         }
 
         public bool IsStrict()
         {
-            return this.type == ConstraintType.Hard 
+            return this.type == ConstraintType.Hard
                 || this.type == ConstraintType.Absolute;
         }
 

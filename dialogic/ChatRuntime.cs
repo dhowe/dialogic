@@ -11,7 +11,7 @@ namespace Dialogic
         public static string logFile;// "../../../dialogic/dia.log";
 
         private List<Chat> chats;
-        private Chat current;
+        private Chat currentChat;
         private Ask prompt;
 
         private bool logInitd;
@@ -32,7 +32,7 @@ namespace Dialogic
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
 
-            current = chatLabel != null ? Find(new LabelConstraint(chatLabel)) : chats[0];            
+            currentChat = chatLabel != null ? FindByName(chatLabel) : chats[0];            
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
@@ -54,12 +54,11 @@ namespace Dialogic
             else
             {
                 Opt opt = prompt.Selected(idx);
-                current = prompt.parent;
+                currentChat = prompt.parent;
 
                 if (opt.action != Command.NOP)
                 {
-                    var action = opt.ActionText();
-                    //Substitutions.Do(ref action, globals);
+                    // opt.action.Realize(globals); #10
                     DoFind(opt.action);
                 }
             }
@@ -74,8 +73,8 @@ namespace Dialogic
 
         private void StartChat(Chat chat)
         {
-            current.Reset();
-            current = chat;
+            currentChat.Reset();
+            currentChat = chat;
         }
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
@@ -83,9 +82,9 @@ namespace Dialogic
             Command cmd = null;
             UpdateEvent ue = null;
 
-            if (current != null && Util.Millis() >= nextEventTime)
+            if (currentChat != null && Util.Millis() >= nextEventTime)
             {
-                cmd = current.Next();
+                cmd = currentChat.Next();
 
                 if (cmd != null)
                 {
@@ -96,7 +95,7 @@ namespace Dialogic
                         if (cmd is Ask)
                         {
                             prompt = (Dialogic.Ask)cmd;
-                            current = null;
+                            currentChat = null;
                         }
 
                         ue = new UpdateEvent(cmd.data);
@@ -114,48 +113,75 @@ namespace Dialogic
             return ue;
         }
 
+        public Chat FindByName(string label)
+        {
+            Chat result = null;
+
+            for (int i = 0; i < chats.Count; i++)
+            {
+                if (chats[i].Text == label)
+                {
+                    result = chats[i];
+                    break;
+                }
+            }
+            return result;
+        }
+
         public void FindAsync(Find finder)
         {
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
             {
                 Thread.CurrentThread.IsBackground = true;
-                var chat = ChatSearch.Find(chats, finder.meta);
+
+                Chat chat = null;
+
+                if (finder is Go)
+                {
+                    chat = FindByName(((Go)finder).Text);
+                }
+                else 
+                {
+                    chat = FuzzySearch.Find(chats, finder.meta);
+                    Console.WriteLine("Found " + chat.Text + " in " + Util.Millis(ts) + "ms");
+                }
+
                 if (chat == null) throw new FindException(finder);
-                Console.WriteLine("Found "+chat.Text+" in "+Util.Millis(ts)+"ms");
+
                 StartChat(chat);
 
             })).Start();
         }
 
-        public Chat Find(Find finder)
-        {
-            return ChatSearch.Find(chats, finder.meta);
-        }
+        //public Chat Find(Find finder)
+        //{
+        //    return FuzzySearch.Find(chats, finder.meta);
+        //}
 
-        public List<Chat> FindAll(Find finder)
+        public List<Chat> FindAll(Find finder)  // for tests
         {
-            return ChatSearch.FindAll(chats, finder.meta);
+            return FuzzySearch.FindAll(chats, finder.meta);
         }
 
         public Chat Find(Constraints constraints) // for tests
         {
-            return ChatSearch.Find(chats, constraints.AsDict());
+            return FuzzySearch.Find(chats, constraints.AsDict());
         }
 
         public List<Chat> FindAll(Constraints constraints) // for tests
         {
-            return ChatSearch.FindAll(chats, constraints.AsDict());
+            return FuzzySearch.FindAll(chats, constraints.AsDict());
         }
 
         public Chat Find(Constraint constraint) // for tests
         {
-            return ChatSearch.Find(chats, constraint.AsDict());
+            return FuzzySearch.Find(chats, constraint.AsDict());
         }
 
         public List<Chat> FindAll(Constraint constraint) // for tests
         {
-            return ChatSearch.FindAll(chats, constraint.AsDict());
+            return FuzzySearch.FindAll(chats, constraint.AsDict());
         }
 
         private bool Logging()

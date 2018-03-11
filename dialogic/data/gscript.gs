@@ -1,5 +1,6 @@
 ﻿Welcome to my $emotion world
-WAIT 0.5
+WAIT .5
+NVM 3.1
 DO #Twirl
 Thanks for visiting $place {speed=fast,style=whisper}
 
@@ -19,4 +20,4 @@ OPT Nope #RePrompt
 CHAT Game
 DO #HappyFlip
 ASK Great, let's play! {speed=slow,style=loud}
-Bye!
+Bye! {speed=fast}

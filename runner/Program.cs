@@ -77,7 +77,7 @@ namespace runner
                     break;
 
                 case "Nvm":
-                    diaText = "(Nvm)";
+                    diaText = "...";
                     break;
 
                 case "Ask":
