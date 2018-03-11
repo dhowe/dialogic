@@ -53,6 +53,5 @@ Global
 		$5.scope = application/x-sh
 		$0.StandardHeader = $6
 		$0.VersionControlPolicy = $7
-		version = 0.41
 	EndGlobalSection
 EndGlobal

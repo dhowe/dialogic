@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Timers;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace Dialogic
 {
@@ -58,6 +59,17 @@ namespace Dialogic
         {
             start = Environment.TickCount;
             random = new Random();
+        }
+
+        public static string Version()
+        {
+            Assembly currentAssembly = Assembly.GetEntryAssembly();
+            if (currentAssembly == null)
+                currentAssembly = Assembly.GetCallingAssembly();
+            var versionNumber = currentAssembly.GetName().Version;
+            return string.Format("{0}.{1}.{2}.{3}",
+              versionNumber.Major, versionNumber.Minor,
+              versionNumber.Revision, versionNumber.Build);
         }
 
         public static int SecStrToMs(string s, int defaultMs = -1)
@@ -139,7 +151,7 @@ namespace Dialogic
                 foreach (Capture cc in mm.Captures)
                 {
                     Console.WriteLine("       Capture {0} '{1}'", captureNo++, cc);
-                }   
+                }
                 groupNo++;
             }
 

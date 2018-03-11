@@ -7,7 +7,7 @@ namespace Dialogic
 {
     public class ChatRuntime
     {
-        public static string DefaultSpeaker = "";
+        public static string logFile;// "../../../dialogic/dia.log";
 
         protected List<Chat> chats;
         protected Chat current;
@@ -15,9 +15,6 @@ namespace Dialogic
 
         protected bool logInitd;
         protected int nextEventTime;
-
-        protected static string srcpath = "../../../dialogic";
-        public static string logFile = srcpath + "/dia.log";
 
         public ChatRuntime(List<Chat> chats)
         {
@@ -34,6 +31,8 @@ namespace Dialogic
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
             current = (chatLabel != null) ? Find(new Constraints
                 (Meta.LABEL, chatLabel)) : chats[0];
+            
+            Console.WriteLine("Dialogic v"+Util.Version());
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
@@ -103,17 +102,13 @@ namespace Dialogic
                         DoFind(cmd);
                     }
 
-                    Console.WriteLine(cmd.TypeName()+".time: "+ cmd.ComputeDuration());
                     nextEventTime = Util.Elapsed() + cmd.ComputeDuration();
                     LogCommand(cmd);
                 }
-
-                // Nothing left to do
             }
 
             return ue;
         }
-
 
         public Chat Find(Find finder)
         {
@@ -125,12 +120,12 @@ namespace Dialogic
             return ChatSearch.FindAll(chats, finder.meta);
         }
 
-        public Chat Find(Constraints constraints) // testing
+        public Chat Find(Constraints constraints) // for tests
         {
             return ChatSearch.Find(chats, constraints.AsDict());
         }
 
-        public List<Chat> FindAll(Constraints constraints) // testing
+        public List<Chat> FindAll(Constraints constraints) // for tests
         {
             return ChatSearch.FindAll(chats, constraints.AsDict());
         }

@@ -158,7 +158,7 @@ namespace Dialogic
 
         public Ask()
         {
-            this.DelayMs = Infinite;
+            this.DelayMs = -1; // infinite
             this.Timeout = (int)(Defaults.ASK_TIMEOUT * 1000);
         }
 
@@ -501,21 +501,23 @@ namespace Dialogic
     {
         public const string PACKAGE = "Dialogic.";
 
-        public const int Infinite = -1;
-
         protected static int IDGEN = 0;
 
         public static readonly Command NOP = new NoOp();
+
 
         public string Id { get; protected set; }
 
         public int DelayMs { get; protected set; }
 
-        public string Text, Actor = ChatRuntime.DefaultSpeaker;
+        public static string DefaultSpeaker = ""; // ?
+
+        public string Text, Actor = DefaultSpeaker;
 
         public int LastSentMs, IndexInChat = -1; // needed?
 
         public Chat parent;
+
 
         protected Command()
         {
