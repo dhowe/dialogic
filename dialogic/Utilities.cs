@@ -57,7 +57,7 @@ namespace Dialogic
 
         static Util()
         {
-            start = Environment.TickCount;
+            start = EpochMs();
             random = new Random();
         }
 
@@ -82,11 +82,6 @@ namespace Dialogic
             return (coll != null) ? coll.Count < 1 : !ie.Any();
         }
 
-        public static int Elapsed()
-        {
-            return Environment.TickCount - start;
-        }
-
         public static double Map(double n, double start1, double stop1, double start2, double stop2)
         {
             return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
@@ -97,9 +92,19 @@ namespace Dialogic
             return Math.Max(Math.Min(n, high), low);
         }
 
-        public static string ElapsedSec()
+        public static int Millis()
         {
-            return (Elapsed() / 1000.0).ToString("0.##") + "s";
+            return EpochMs() - start;
+        }
+
+        public static int Millis(int since)
+        {
+            return Millis() - since;
+        }
+
+        public static string ElapsedSec(int since=0)
+        {
+            return (Millis(since) / 1000.0).ToString("0.##") + "s";
         }
 
         public static int EpochMs()
@@ -258,7 +263,7 @@ namespace Dialogic
 
     public class Constraint
     {
-        private enum ConstraintType { Soft, Hard };
+        private enum ConstraintType { Soft=0, Hard=1, Absolute=2 };
 
         public readonly string name, value;
         private readonly ConstraintType type;
@@ -300,7 +305,13 @@ namespace Dialogic
 
         public bool IsStrict()
         {
-            return this.type == ConstraintType.Hard;
+            return this.type == ConstraintType.Hard 
+                || this.type == ConstraintType.Absolute;
+        }
+
+        public bool IsRelaxable()
+        {
+            return this.type != ConstraintType.Absolute;
         }
     }
 
@@ -432,40 +443,6 @@ namespace Dialogic
                 }
             }
             throw new OperatorException(this, "Unexpected Op type: ");
-        }
-    }
-
-    /** Reads input from console */
-    public static class ConsoleReader
-    {
-        private static System.Threading.Thread inputThread;
-        private static System.Threading.AutoResetEvent getInput, gotInput;
-        private static string input;
-
-        static ConsoleReader()
-        {
-            getInput = new System.Threading.AutoResetEvent(false);
-            gotInput = new System.Threading.AutoResetEvent(false);
-            inputThread = new System.Threading.Thread(Reader) { IsBackground = true };
-            inputThread.Start();
-        }
-
-        private static void Reader()
-        {
-            while (true)
-            {
-                getInput.WaitOne();
-                input = Console.ReadKey(true).KeyChar.ToString();
-                gotInput.Set();
-            }
-        }
-
-        public static string ReadLine(Command source, int timeOutMillisecs = -1)
-        {
-            getInput.Set();
-            bool success = gotInput.WaitOne(timeOutMillisecs);
-            if (success) return input;
-            throw new PromptTimeout(source);
         }
     }
 

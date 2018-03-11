@@ -1,46 +1,29 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace Dialogic
 {
-    public class ChatException : Exception
+    public class DialogicException : Exception
     {
-        readonly Command command;
-
-        public ChatException(Command c) : this(c, "") { }
-
-        public ChatException(Command c, string msg) : base(msg+" :: "+c)
-        {
-            this.command = c;
-        }
-
-        public Command Command()
-        {
-            return command;
-        }
+        public DialogicException(string msg = "") : base(msg) { }
     }
 
-    public class ChatNotFound : ChatException
+    public class FindException : DialogicException
     {
-        public ChatNotFound(string label)
-            : base(null, "No CHAT exists with name '" + label + "'") { }
+        public FindException(string msg) : base(msg) { }
+
+        public FindException(Command finder, string msg="Find failed") 
+            : base(msg + " "+finder.GetMeta()) { }
     }
 
-    public class PromptTimeout : ChatException
-    {
-        public PromptTimeout(Command ask) : this(ask, "Ask timeout expired") { }
-
-        public PromptTimeout(Command ask, string message) : base(ask, message) { }
-    }
-
-    public class OperatorException : Exception
+    public class OperatorException : DialogicException
     {
         public OperatorException(Operator o) : this(o, "Invalid Operator") { }
 
-        public OperatorException(Operator o, string message) : base(message + ": " + o) { }
+        public OperatorException(Operator o, string message)
+            : base(message + ": " + o) { }
     }
 
-    public class ParseException : Exception
+    public class ParseException : DialogicException
     {
         public ParseException(string msg = "") : base(msg) { }
 

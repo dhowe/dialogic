@@ -7,6 +7,11 @@ namespace runner
 {
     class Program
     {
+        public static void Main(string[] args)
+        {
+            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
+        }
+
         public static string srcpath = "../../../dialogic";
 
         public static Dictionary<string, object> globals =
@@ -18,11 +23,6 @@ namespace runner
                 { "neg", "(nah|no|nope)" },
                 { "var3", 2 }
             };
-
-        public static void Main(string[] args)
-        {
-            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
-        }
     }
 
     public class MockGameEngine

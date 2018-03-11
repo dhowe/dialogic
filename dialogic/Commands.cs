@@ -229,8 +229,6 @@ namespace Dialogic
     {
         public Command action;
 
-        //public Ask prompt;
-
         public Opt() : this("", NOP) { }
 
         public Opt(string text) : this(text, NOP) { }
@@ -505,7 +503,6 @@ namespace Dialogic
 
         public static readonly Command NOP = new NoOp();
 
-
         public string Id { get; protected set; }
 
         public int DelayMs { get; protected set; }
@@ -517,7 +514,6 @@ namespace Dialogic
         public int LastSentMs, IndexInChat = -1; // needed?
 
         public Chat parent;
-
 
         protected Command()
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 
 namespace Dialogic
 {
@@ -9,12 +10,13 @@ namespace Dialogic
     {
         public static string logFile;// "../../../dialogic/dia.log";
 
-        protected List<Chat> chats;
-        protected Chat current;
-        protected Ask prompt;
+        private List<Chat> chats;
+        private Chat current;
+        private Ask prompt;
 
-        protected bool logInitd;
-        protected int nextEventTime;
+        private bool logInitd;
+        private int nextEventTime;
+        private Thread searchThread;
 
         public ChatRuntime(List<Chat> chats)
         {
@@ -29,6 +31,7 @@ namespace Dialogic
         public void Run(string chatLabel = null)
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
+
             current = (chatLabel != null) ? Find(new Constraints
                 (Meta.LABEL, chatLabel)) : chats[0];            
         }
@@ -57,19 +60,23 @@ namespace Dialogic
                 if (opt.action != Command.NOP)
                 {
                     var action = opt.ActionText();
-                    Substitutions.Do(ref action, globals);
+                    //Substitutions.Do(ref action, globals);
                     DoFind(opt.action);
                 }
             }
+
             return null;
         }
 
         private void DoFind(Command finder)
         {
-            var chat = Find((Find)finder);
-            if (chat == null) throw new ChatException(finder, "Null Chat");
-            current = chat;
+            FindAsync((Find)finder);
+        }
+
+        private void StartChat(Chat chat)
+        {
             current.Reset();
+            current = chat;
         }
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
@@ -77,7 +84,7 @@ namespace Dialogic
             Command cmd = null;
             UpdateEvent ue = null;
 
-            if (current != null && Util.Elapsed() >= nextEventTime)
+            if (current != null && Util.Millis() >= nextEventTime)
             {
                 cmd = current.Next();
 
@@ -100,12 +107,26 @@ namespace Dialogic
                         DoFind(cmd);
                     }
 
-                    nextEventTime = Util.Elapsed() + cmd.ComputeDuration();
+                    nextEventTime = Util.Millis() + cmd.ComputeDuration();
                     LogCommand(cmd);
                 }
             }
 
             return ue;
+        }
+
+        public void FindAsync(Find finder)
+        {
+            int ts = Util.Millis();
+            (searchThread = new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                var chat = ChatSearch.Find(chats, finder.meta);
+                if (chat == null) throw new FindException(finder);
+                Console.WriteLine("Found "+chat.Text+" in "+Util.Millis(ts)+"ms");
+                StartChat(chat);
+
+            })).Start();
         }
 
         public Chat Find(Find finder)
