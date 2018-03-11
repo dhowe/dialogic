@@ -32,8 +32,7 @@ namespace Dialogic
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
 
-            current = (chatLabel != null) ? Find(new Constraints
-                (Meta.LABEL, chatLabel)) : chats[0];            
+            current = chatLabel != null ? Find(new LabelConstraint(chatLabel)) : chats[0];            
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
@@ -147,6 +146,16 @@ namespace Dialogic
         public List<Chat> FindAll(Constraints constraints) // for tests
         {
             return ChatSearch.FindAll(chats, constraints.AsDict());
+        }
+
+        public Chat Find(Constraint constraint) // for tests
+        {
+            return ChatSearch.Find(chats, constraint.AsDict());
+        }
+
+        public List<Chat> FindAll(Constraint constraint) // for tests
+        {
+            return ChatSearch.FindAll(chats, constraint.AsDict());
         }
 
         private bool Logging()

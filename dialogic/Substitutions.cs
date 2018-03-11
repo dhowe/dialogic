@@ -52,7 +52,7 @@ namespace Dialogic
             }
         }
 
-        public static void DoGroups(ref string text, Command c = null)
+        public static void DoGroups(ref string text)
         {
             if (String.IsNullOrEmpty(text)) return;
 
@@ -64,9 +64,27 @@ namespace Dialogic
                 {
                     var pick = DoReplace(opt);
                     text = text.Replace(opt, pick);
-                    //if (c != null) Console.WriteLine("-> " + opt + " -> " + pick + "\n" + text);
                 }
             }
+        }
+
+        public static string DoVarsNew(string text, IDictionary<string, object> globals)
+        {
+            if (!String.IsNullOrEmpty(text))
+            {
+                IEnumerable sorted = null;
+
+                if (text.IndexOf('$') > -1)
+                {
+                    if (sorted == null) sorted = Util.SortByLength(globals.Keys);
+                    foreach (string s in sorted)
+                    {
+                        text = text.Replace("$" + s, globals[s].ToString());
+                    }
+                }
+            }
+
+            return text;
         }
 
         public static void DoVars(ref string text, IDictionary<string, object> globals)

@@ -288,17 +288,17 @@ namespace Dialogic
 
                 string key = match.Groups[1].Value;
 
-                bool isStrict = false;
+                var ctype = ConstraintType.Soft;
                 if (key.IndexOf('!') == 0)
                 {
-                    isStrict = true;
+                    ctype = ConstraintType.Hard;
                     key = key.Substring(1);
                 }
 
                 if (meta == null) meta = new Dictionary<string, object>();
 
                 meta.Add(key, new Constraint(match.Groups[2].Value,
-                    key, match.Groups[3].Value, isStrict));
+                    key, match.Groups[3].Value, ctype));
             }
         }
 
@@ -326,7 +326,7 @@ namespace Dialogic
         {
             Text = text.Length > 0 ? text : label;
             ValidateTextLabel();
-			SetMeta(Dialogic.Meta.LABEL, new Constraint(Dialogic.Meta.LABEL, Text, true));
+            SetMeta(new LabelConstraint(Text));
         }
 
         public override string ToString()
@@ -437,6 +437,11 @@ namespace Dialogic
         public object GetMeta(string key, object defaultVal = null)
         {
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+        }
+
+        public void SetMeta(Constraint constraint)
+        {
+            this.SetMeta(constraint.name, constraint, true);
         }
 
         public void SetMeta(string key, object val, bool throwIfKeyExists = false)
@@ -592,20 +597,15 @@ namespace Dialogic
                 }
             }
 
-            RealizeFields(globals);
+            var text = Text + ""; // tmp
+            Substitutions.Do(ref Text, globals);
 
+            data[Dialogic.Meta.TEXT] = text;
 			data[Dialogic.Meta.TYPE] = TypeName();
 
             LastSentMs = Util.EpochMs();
 
             return data;
-        }
-
-        private void RealizeFields(IDictionary<string, object> globals)
-        {
-            var text = Text + ""; // tmp
-            Substitutions.Do(ref text, globals);
-			data[Dialogic.Meta.TEXT] = text;
         }
 
         protected Exception BadArg(string msg)

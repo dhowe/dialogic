@@ -25,8 +25,8 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Go)));
             Assert.That(chats[0].commands[2].GetType(), Is.EqualTo(typeof(Do)));
-            Assert.That(chats[0].commands[0].GetMeta(Meta.LABEL).GetType(), Is.EqualTo(typeof(Constraint)));
-            Assert.That(chats[0].commands[1].GetMeta(Meta.LABEL).GetType(), Is.EqualTo(typeof(Constraint)));
+            Assert.That((chats[0].commands[0].GetMeta(Meta.LABEL) is Constraint), Is.True);
+            Assert.That((chats[0].commands[1].GetMeta(Meta.LABEL) is Constraint), Is.True);
             Assert.That(chats[0].commands[2].GetMeta(Meta.LABEL), Is.Null);
             //Console.WriteLine(chats[0].ToTree());
         }
@@ -237,7 +237,7 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
-            Assert.That(chats[0].commands[0].GetMeta(Meta.LABEL).GetType(), Is.EqualTo(typeof(Constraint)));
+            Assert.That((chats[0].commands[0].GetMeta(Meta.LABEL) is Constraint), Is.True);
 
             chats = ChatParser.ParseText("GO Twirl");
             //Console.WriteLine(chats[0].ToTree());
@@ -245,7 +245,7 @@ namespace Dialogic
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
-            Assert.That(chats[0].commands[0].GetMeta(Meta.LABEL).GetType(), Is.EqualTo(typeof(Constraint)));
+            Assert.That((chats[0].commands[0].GetMeta(Meta.LABEL) is Constraint), Is.True);
 
             chats = ChatParser.ParseText("DO #Twirl");
             //Console.WriteLine(chats[0].ToTree());

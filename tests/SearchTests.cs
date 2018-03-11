@@ -17,8 +17,7 @@ namespace Dialogic
             };
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents);
-            List<Chat> result = new ChatRuntime(chats).FindAll
-                (new Constraints(Meta.LABEL, "c1", true));
+            List<Chat> result = new ChatRuntime(chats).FindAll(new LabelConstraint("c1"));
             //chats.ForEach(c=>Console.WriteLine(c));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(1));
@@ -34,7 +33,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c2"));
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Chat res = new ChatRuntime(chats).Find(new Constraints(Meta.LABEL, "c2"));
+            Chat res = new ChatRuntime(chats).Find(new LabelConstraint("c2"));
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 
@@ -115,7 +114,7 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            chats = cr.FindAll(new Constraints("dev", "1", true));
+            chats = cr.FindAll(new Constraints("dev", "1", ConstraintType.Hard));
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -157,7 +156,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c3"));
 
             ChatRuntime cr = new ChatRuntime(chats);
-            chats = cr.FindAll(new Constraints("dev", "1", true));
+            chats = cr.FindAll(new Constraints("dev", "1", ConstraintType.Hard));
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));

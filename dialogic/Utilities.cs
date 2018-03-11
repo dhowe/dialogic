@@ -261,26 +261,32 @@ namespace Dialogic
         }
     }
 
+    public enum ConstraintType { Soft = 0, Hard = 1, Absolute = 2 };
+
+
+    public class LabelConstraint : Constraint
+    {
+        public LabelConstraint(string label) : 
+            base(Operator.EQ, Meta.LABEL, label, ConstraintType.Absolute) {}
+    }
+
     public class Constraint
     {
-        private enum ConstraintType { Soft=0, Hard=1, Absolute=2 };
-
+        public readonly ConstraintType type;
         public readonly string name, value;
-        private readonly ConstraintType type;
         public readonly Operator op;
 
-
-        public Constraint(string key, string val, bool isHard = false) :
-            this("=", key, val, isHard)
+        public Constraint(string key, string val, ConstraintType type = ConstraintType.Soft) :
+            this("=", key, val, type)
         { }
 
-        public Constraint(string opstr, string key, string val, bool isHard = false) :
-            this(Operator.FromString(opstr), key, val, isHard)
+        public Constraint(string opstr, string key, string val, ConstraintType type=ConstraintType.Soft) :
+            this(Operator.FromString(opstr), key, val, type)
         { }
 
-        public Constraint(Operator op, string key, string val, bool isHard = false)
+        public Constraint(Operator op, string key, string val, ConstraintType type)
         {
-            this.type = isHard ? ConstraintType.Hard : ConstraintType.Soft;
+            this.type = type;
             this.value = val;
             this.name = key;
             this.op = op;
@@ -313,6 +319,13 @@ namespace Dialogic
         {
             return this.type != ConstraintType.Absolute;
         }
+
+        public IDictionary<string, object> AsDict()
+        {
+            var dict = new Dictionary<string, object>();
+            dict.Add(name, this);
+            return dict;
+        }
     }
 
     public class Constraints
@@ -324,14 +337,14 @@ namespace Dialogic
             pairs = new Dictionary<string, object>();
         }
 
-        public Constraints(string key, string value, bool isHard = false) : this()
+        public Constraints(string key, string value, ConstraintType type = ConstraintType.Soft) : this()
         {
-            Add(new Constraint(key, value, isHard));
+            Add(new Constraint(key, value, type));
         }
 
-        public Constraints(string op, string key, string value, bool isHard = false) : this()
+        public Constraints(string op, string key, string value, ConstraintType type = ConstraintType.Soft) : this()
         {
-            Add(new Constraint(op, key, value, isHard));
+            Add(new Constraint(op, key, value, type));
         }
 
         public Constraints Add(Constraint c)
@@ -340,9 +353,9 @@ namespace Dialogic
             return this;
         }
 
-        public Constraints Add(string key, string value, bool isHard = false)
+        public Constraints Add(string key, string value, ConstraintType type = ConstraintType.Soft)
         {
-            return Add(new Constraint(key, value, isHard));
+            return Add(new Constraint(key, value, type));
         }
 
         public IDictionary<string, object> AsDict()
