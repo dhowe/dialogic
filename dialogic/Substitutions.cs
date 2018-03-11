@@ -7,7 +7,7 @@ namespace Dialogic
 {
     public static class Substitutions
     {
-public static void DoMeta(IDictionary<string, object> meta, IDictionary<string, object> globals)
+        public static void DoMeta(IDictionary<string, object> meta, IDictionary<string, object> globals)
         {
             if (Util.IsNullOrEmpty(meta) || Util.IsNullOrEmpty(globals)) return;
 

@@ -42,7 +42,7 @@ namespace Dialogic
         {
             Command c = e.Command();
 
-            if (c is IEmittable)
+            if (c is ISendable)
             {
                 Out.WriteLine(c is Do ? "(Do:" + c.Text + ") " : c.Text);
                 if (c is Ask) Prompt((Dialogic.Ask)c);
@@ -66,7 +66,7 @@ namespace Dialogic
                 // And prompt the user for their choice
                 try
                 {
-                    string res = ConsoleReader.ReadLine(a, a.PauseAfterMs);
+                    string res = ConsoleReader.ReadLine(a, a.DelayMs);
                     int i = -1;
                     try
                     {

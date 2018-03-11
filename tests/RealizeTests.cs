@@ -27,8 +27,8 @@ namespace Dialogic
             var data = c.data;
             //Console.WriteLine(Util.Stringify(data));
             c.SetMeta("pace", "slow");
-            Assert.That(data["text"], Is.EqualTo("Thank you"));
-            Assert.That(data["type"], Is.EqualTo("Say"));
+            Assert.That(data[Meta.TEXT], Is.EqualTo("Thank you"));
+            Assert.That(data[Meta.TYPE], Is.EqualTo("Say"));
             Assert.That(data["pace"], Is.EqualTo("fast"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
         }
@@ -44,8 +44,8 @@ namespace Dialogic
             var data = c.data;
             //Console.WriteLine(Util.Stringify(data));
             c.SetMeta("pace", "slow");
-            Assert.That(data["text"], Is.EqualTo("Thank you"));
-            Assert.That(data["type"], Is.EqualTo("Say"));
+            Assert.That(data[Meta.TEXT], Is.EqualTo("Thank you"));
+            Assert.That(data[Meta.TYPE], Is.EqualTo("Say"));
             Assert.That(data["pace"], Is.EqualTo("dog"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
         }
@@ -59,9 +59,9 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             c.Text = "Thank you";
-            Assert.That(c.data["text"], Is.EqualTo("Thank 4"));
+            Assert.That(c.data[Meta.TEXT], Is.EqualTo("Thank 4"));
             Assert.That(c.Text, Is.EqualTo("Thank you"));
-            Assert.That(c.data["type"], Is.EqualTo("Say"));
+            Assert.That(c.data[Meta.TYPE], Is.EqualTo("Say"));
             Assert.That(c.data["pace"], Is.EqualTo("dog"));
         }
 
@@ -74,8 +74,8 @@ namespace Dialogic
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
-            Assert.That(c.data["type"], Is.EqualTo("Say"));
-            CollectionAssert.Contains(ok, c.data["text"]);
+            Assert.That(c.data[Meta.TYPE], Is.EqualTo("Say"));
+            CollectionAssert.Contains(ok, c.data[Meta.TEXT]);
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 c.Realize(globals);
-                CollectionAssert.Contains(ok, c.data["text"]);
+                CollectionAssert.Contains(ok, c.data[Meta.TEXT]);
             }
         }
     }

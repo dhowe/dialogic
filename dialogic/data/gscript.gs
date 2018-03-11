@@ -1,7 +1,8 @@
 ﻿Welcome to my $emotion world
-WAIT 25.5
+WAIT 0.5
 DO #Twirl
 Thanks for visiting $place! {speed=fast,style=whisper}
+
 GO #Prompt
 
 CHAT RePrompt

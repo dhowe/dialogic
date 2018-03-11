@@ -18,7 +18,7 @@ namespace Dialogic
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents);
             List<Chat> result = new ChatRuntime(chats).FindAll
-                (new Constraints("name", "c1", true));
+                (new Constraints(Meta.LABEL, "c1", true));
             //chats.ForEach(c=>Console.WriteLine(c));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(1));
@@ -34,7 +34,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c2"));
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Chat res = new ChatRuntime(chats).Find(new Constraints("name", "c2"));
+            Chat res = new ChatRuntime(chats).Find(new Constraints(Meta.LABEL, "c2"));
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 

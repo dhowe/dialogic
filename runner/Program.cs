@@ -68,12 +68,16 @@ namespace runner
             switch (diaType)
             {
                 case "Say":
-                    ge.RemoveKeys("text", "type");
+                    ge.RemoveKeys(Meta.TEXT, Meta.TYPE);
                     diaText += " " + Util.Stringify(ge.Data());
                     break;
 
                 case "Do":
                     diaText = "(Do: " + diaText.Trim() + ")";
+                    break;
+
+                case "Nvm":
+                    diaText = "(Nvm)";
                     break;
 
                 case "Ask":
@@ -89,9 +93,9 @@ namespace runner
 
         private void DoPrompt(IUpdateEvent ge)
         {
-            diaOpts = ge.Get("opts").Split('\n');
+            diaOpts = ge.Get(Meta.OPTS).Split('\n');
 
-            ge.RemoveKeys("text", "type", "opts");
+            ge.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
             diaText += " " + Util.Stringify(ge.Data());
 
             for (int i = 0; i < diaOpts.Length; i++)
@@ -102,7 +106,7 @@ namespace runner
 
         private void SendRandomResponse(IUpdateEvent ge)
         {
-            int timeout = ge.GetInt("timeout", -1);
+            int timeout = ge.GetInt(Meta.TIMEOUT, -1);
             if (timeout > -1)
             {
                 Timers.SetTimeout(Util.Rand(timeout / 3, timeout), () =>

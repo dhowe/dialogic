@@ -13,9 +13,11 @@ namespace Dialogic
         protected Chat current;
         protected Ask prompt;
 
-        public string LogFile;
         protected bool logInitd;
         protected int nextEventTime;
+
+        protected static string srcpath = "../../../dialogic";
+        public static string logFile = srcpath + "/dia.log";
 
         public ChatRuntime(List<Chat> chats)
         {
@@ -30,7 +32,8 @@ namespace Dialogic
         public void Run(string chatLabel = null)
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
-            current = (chatLabel != null) ? Find(new Constraints("name", chatLabel)) : chats[0];
+            current = (chatLabel != null) ? Find(new Constraints
+                (Meta.LABEL, chatLabel)) : chats[0];
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
@@ -58,62 +61,59 @@ namespace Dialogic
                 {
                     var action = opt.ActionText();
                     Substitutions.Do(ref action, globals);
-                    var chat = Find((Find)opt.action);
-                    if (chat == null) throw new ChatException(opt.action, "Null Chat");
-                    SetCurrentChat(chat);
+                    DoFind(opt.action);
                 }
             }
             return null;
         }
 
-        private void SetCurrentChat(Chat next)
+        private void DoFind(Command finder)
         {
-            current = next;
+            var chat = Find((Find)finder);
+            if (chat == null) throw new ChatException(finder, "Null Chat");
+            current = chat;
             current.Reset();
         }
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
         {
             Command cmd = null;
+            UpdateEvent ue = null;
 
             if (current != null && Util.Elapsed() >= nextEventTime)
             {
                 cmd = current.Next();
+
                 if (cmd != null)
                 {
-                    //Console.WriteLine(Util.ElapsedSec()+": CR has -> " + cmd);
                     cmd.Realize(globals);
-                    if (cmd is IEmittable)
+
+                    if (cmd is ISendable)
                     {
-                        cmd.Realize(globals);
                         if (cmd is Ask)
                         {
                             prompt = (Dialogic.Ask)cmd;
                             current = null;
                         }
-                        return new UpdateEvent(cmd.data);
+
+                        ue = new UpdateEvent(cmd.data);
                     }
-                    else
+                    else if (cmd is Find)
                     {
-                        cmd.Realize(globals);
-                        if (cmd is Find)
-                        {
-                            var next = Find((Dialogic.Find)cmd);
-                            if (next == null) throw new ChatException(cmd, "Null Chat");
-                            SetCurrentChat(next);
-                        }
+                        DoFind(cmd);
                     }
 
+                    Console.WriteLine(cmd.TypeName()+".time: "+ cmd.ComputeDuration());
                     nextEventTime = Util.Elapsed() + cmd.ComputeDuration();
+                    LogCommand(cmd);
                 }
-                else
-                {
-                    // Nothing left to do
-                }
+
+                // Nothing left to do
             }
 
-            return null;
+            return ue;
         }
+
 
         public Chat Find(Find finder)
         {
@@ -137,20 +137,20 @@ namespace Dialogic
 
         private bool Logging()
         {
-            return LogFile != null;
+            return logFile != null;
         }
 
         public void LogCommand(Command c)
         {
-            if (!Logging()) return;
+            if (logFile == null) return;
 
             if (!logInitd)
             {
                 logInitd = true;
-                File.WriteAllText(LogFile, "============\n");
+                File.WriteAllText(logFile, "============\n");
             }
 
-            using (StreamWriter w = File.AppendText(LogFile))
+            using (StreamWriter w = File.AppendText(logFile))
             {
                 var now = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
                 w.WriteLine(now + "\t" + c);

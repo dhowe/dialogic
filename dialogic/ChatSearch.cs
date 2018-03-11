@@ -35,9 +35,9 @@ namespace Dialogic
             {
                 var hits = 0;
                 var dbug = false; // tmp
-                var chatProps = chats[i].Meta();
+                var chatProps = chats[i].GetMeta();
 
-                if (dbug) Console.WriteLine("CHECK: CHAT."+chatProps["name"]);
+                if (dbug) Console.WriteLine("CHECK: CHAT."+chatProps[Meta.LABEL]);
 
                 foreach (var key in constraints.Keys)
                 {

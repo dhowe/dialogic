@@ -23,7 +23,7 @@ namespace Dialogic
             var s = @"SAY The $animal yawned {animal=$animal}";
             Command c = ChatParser.ParseText(s)[0].commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            Substitutions.DoMeta(c.Meta(), globals);
+            Substitutions.DoMeta(c.GetMeta(), globals);
             Assert.That(c.GetMeta("animal"), Is.EqualTo("dog"));
         }
 

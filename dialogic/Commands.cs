@@ -6,27 +6,27 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    public interface IEmittable { }
+    public interface ISendable { }
 
     public class NoOp : Command { }
 
-    public class Say : Command, IEmittable
+    public class Say : Command, ISendable
     {
         public Say() : base()
         {
-            this.PauseAfterMs = (int)(Defaults.SAY_DURATION * 1000);
+            this.DelayMs = (int)(Defaults.SAY_DURATION * 1000);
         }
 
         /**
          * Determine milliseconds to wait after sending the event, using:
-         * a. Line-length
-         * b. Meta-data modifiers
-         * c. Character mood (pending)
+         *      a. Line-length
+         *      b. Meta-data modifiers
+         *      c. Character mood (pending)
          */
         public override int ComputeDuration()
         {
             return (int)Math.Round
-                (GetTextLenScale() * GetMetaSpeedScale() * PauseAfterMs);
+                (GetTextLenScale() * GetMetaSpeedScale() * DelayMs);
         }
 
         private double GetTextLenScale()
@@ -73,11 +73,11 @@ namespace Dialogic
         }
     }
 
-    public class Do : Command, IEmittable
+    public class Do : Command, ISendable
     {
         public override void Init(string text, string label, string[] metas)
         {
-            PauseAfterMs = 50;
+            DelayMs = 20;
             base.Init(text, label, metas);
             ValidateTextLabel();
         }
@@ -132,15 +132,23 @@ namespace Dialogic
 
     public class Wait : Command
     {
-        public override void Init(string text, string label, string[] meta)
+        public override void Init(string text, string label, string[] metas)
         {
-            PauseAfterMs = -1;
-            base.Init(text, label, meta);
-            PauseAfterMs = Util.SecStrToMs(text, -1);
+            DelayMs = -1;
+            base.Init(text, label, metas);
+            DelayMs = Util.SecStrToMs(text, -1);
         }
     }
 
-    public class Ask : Command, IEmittable
+    public class Nvm : Wait, ISendable {
+
+        public override int ComputeDuration()
+        {
+            return DelayMs;
+        }
+    }
+
+    public class Ask : Command, ISendable
     {
         public int SelectedIdx { get; protected set; }
 
@@ -150,7 +158,7 @@ namespace Dialogic
 
         public Ask()
         {
-            this.PauseAfterMs = Infinite;
+            this.DelayMs = Infinite;
             this.Timeout = (int)(Defaults.ASK_TIMEOUT * 1000);
         }
 
@@ -199,14 +207,14 @@ namespace Dialogic
             base.Realize(globals);
             var opts = OptionsJoined();
             Substitutions.Do(ref opts, globals);
-            data["opts"] = opts;
-            data["timeout"] = Timeout.ToString();
+			data[Dialogic.Meta.OPTS] = opts;
+			data[Dialogic.Meta.TIMEOUT]= Timeout.ToString();
             return data;
         }
 
         protected override void HandleMetaTiming()
         {
-            if (HasMeta("timeout")) Timeout = Util.SecStrToMs((string)meta["timeout"]);
+            if (HasMeta(Dialogic.Meta.TIMEOUT)) Timeout = Util.SecStrToMs((string)meta[Dialogic.Meta.TIMEOUT]);
         }
 
         public override string ToString()
@@ -320,7 +328,7 @@ namespace Dialogic
         {
             Text = text.Length > 0 ? text : label;
             ValidateTextLabel();
-            SetMeta("name", new Constraint("name", Text, true));
+			SetMeta(Dialogic.Meta.LABEL, new Constraint(Dialogic.Meta.LABEL, Text, true));
         }
 
         public override string ToString()
@@ -363,13 +371,13 @@ namespace Dialogic
             if (string.IsNullOrEmpty(text)) throw BadArg("Missing label");
 
             this.Text = text;
-            if (Regex.IsMatch(Text, @"\s+"))
+            if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
             {
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
 
             ParseMeta(metas);
-            SetMeta("name", Text);
+			SetMeta(Dialogic.Meta.LABEL, Text);
         }
 
         protected override string MetaStr()
@@ -380,7 +388,7 @@ namespace Dialogic
                 s += "{";
                 foreach (var key in meta.Keys)
                 {
-                    if (key != "name")
+                    if (key != Dialogic.Meta.LABEL)
                         s += key + "=" + meta[key] + ",";
                 }
                 s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : "";
@@ -407,8 +415,15 @@ namespace Dialogic
         }
     }
 
-    public class MetaData
+    public class Meta
     {
+        public const string OPTS = "opts";
+        public const string TYPE = "type";
+        public const string TEXT = "text";
+        public const string LABEL = "label";
+        public const string DELAY = "delay";
+        public const string TIMEOUT = "timeout";
+
         public IDictionary<string, object> meta, data;
 
         public bool HasMeta()
@@ -440,7 +455,7 @@ namespace Dialogic
             }
         }
 
-        public IDictionary<string, object> Meta()
+        public IDictionary<string, object> GetMeta()
         {
             return meta;
         }
@@ -482,7 +497,7 @@ namespace Dialogic
             }
         }
     }
-    public abstract class Command : MetaData
+    public abstract class Command : Meta
     {
         public const string PACKAGE = "Dialogic.";
 
@@ -494,18 +509,18 @@ namespace Dialogic
 
         public string Id { get; protected set; }
 
-        public int PauseAfterMs { get; protected set; }
+        public int DelayMs { get; protected set; }
 
         public string Text, Actor = ChatRuntime.DefaultSpeaker;
 
         public int LastSentMs, IndexInChat = -1; // needed?
 
-        public Chat parent = null;
+        public Chat parent;
 
         protected Command()
         {
             this.Id = (++IDGEN).ToString();
-            this.PauseAfterMs = 0;
+            this.DelayMs = 0;
             this.data = new Dictionary<string, object>();
         }
 
@@ -522,22 +537,21 @@ namespace Dialogic
             return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
         }
 
-        public static Command Create(string type, string text, string label, string[] meta)
+        public static Command Create(string type, string text, string label, string[] metas)
         {
             //Console.WriteLine(type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(meta));
-            return Create(Type.GetType(PACKAGE + ToMixedCase(type)), label, text, meta);
+            return Create(Type.GetType(PACKAGE + ToMixedCase(type)), label, text, metas);
         }
 
-        public static Command Create(Type type, string text, string label, string[] meta)
+        public static Command Create(Type type, string text, string label, string[] metas)
         {
             Command cmd = (Command)Activator.CreateInstance(type);
-            cmd.Init(text, label, meta);
+            cmd.Init(text, label, metas);
             return cmd;
         }
 
         public virtual void Init(string text, string label, string[] metas)
         {
-            //Console.WriteLine("Command.Init: " + text + " :: " + label + " :: " + String.Join("|", meta));
             Text = text.Length > 0 ? text : label;
             ParseMeta(metas);
             HandleMetaTiming();
@@ -545,7 +559,10 @@ namespace Dialogic
 
         protected virtual void HandleMetaTiming()
         {
-            if (HasMeta("pauseAfter")) PauseAfterMs = Util.SecStrToMs((string)meta["pauseAfter"]);
+            if (HasMeta(Dialogic.Meta.DELAY))
+            {
+				DelayMs = Util.SecStrToMs((string)meta[Dialogic.Meta.DELAY]);
+            }
         }
 
         public virtual string TypeName()
@@ -579,7 +596,7 @@ namespace Dialogic
 
             RealizeFields(globals);
 
-            data["type"] = TypeName();
+			data[Dialogic.Meta.TYPE] = TypeName();
 
             LastSentMs = Util.EpochMs();
 
@@ -590,7 +607,7 @@ namespace Dialogic
         {
             var text = Text + ""; // tmp
             Substitutions.Do(ref text, globals);
-            data["text"] = text;
+			data[Dialogic.Meta.TEXT] = text;
         }
 
         protected Exception BadArg(string msg)
@@ -610,7 +627,7 @@ namespace Dialogic
 
         public virtual int ComputeDuration()
         {
-            return PauseAfterMs;
+            return DelayMs;
         }
     }
 }

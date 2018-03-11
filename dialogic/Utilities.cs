@@ -31,7 +31,7 @@ namespace Dialogic
         public static Regex MultiComment = new Regex(MLC);
 
         internal const string SLC = @"//(.*?)(?:$|\r?\n)";
-        public static Regex SingleComment = new Regex(SLC, RegexOptions.Singleline);
+        public static Regex SingleComment = new Regex(SLC);
 
         internal const string CMD = @"(^[A-Z][A-Z]+)?\s*";
         internal const string TXT = @"([^#}{]+)?\s*";
@@ -59,7 +59,6 @@ namespace Dialogic
             start = Environment.TickCount;
             random = new Random();
         }
-
 
         public static int SecStrToMs(string s, int defaultMs = -1)
         {
