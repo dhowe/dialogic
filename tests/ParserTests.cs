@@ -56,14 +56,15 @@ namespace Dialogic
         [Test]
         public void TestComments()
         {
-            List<Chat> chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\nAnd Goodbye");
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(2));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Goodbye"));
-            Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
+            List<Chat> chats;
+
+            Assert.That(ChatParser.ParseText("//\n//SAY Thank you\n//SAY Hello\n// And Goodbye").Count, Is.EqualTo(0));
+            Assert.That(ChatParser.ParseText("/*SAY Thank you\nSAY Hello\nAnd Goodbye*/").Count, Is.EqualTo(0));
+            Assert.That(ChatParser.ParseText("///").Count, Is.EqualTo(0));
+            Assert.That(ChatParser.ParseText("//").Count, Is.EqualTo(0));
+            Assert.That(ChatParser.ParseText(" //").Count, Is.EqualTo(0));
+            Assert.That(ChatParser.ParseText(" /* */").Count, Is.EqualTo(0));
+            Assert.That(ChatParser.ParseText("/* */").Count, Is.EqualTo(0));
 
             chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\n// And Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -72,8 +73,48 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("//\n//SAY Thank you\n//SAY Hello\n// And Goodbye");
-            Assert.That(chats.Count, Is.EqualTo(0));
+            chats = ChatParser.ParseText("SAY Thank you\nSAY Hello //And Goodbye");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Assert.That(chats[0].commands[1].Text, Is.EqualTo("Hello"));
+            Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chats = ChatParser.ParseText("SAY Thank you\nSAY Hello /*And Goodbye*/");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Assert.That(chats[0].commands[1].Text, Is.EqualTo("Hello"));
+            Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chats = ChatParser.ParseText("SAY Thank you/*\nSAY Hello //And Goodbye*/");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\nAnd Goodbye\n");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Goodbye"));
+            Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chats = ChatParser.ParseText("SAY Thank you\n//SAY Goodbye\nAnd Hello");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Hello"));
+            Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
         }
 
         [Test]
@@ -276,6 +317,7 @@ namespace Dialogic
                 Assert.That(c is Command);
             }
         }
+
 
         [Test]
         public void TestGrammars()

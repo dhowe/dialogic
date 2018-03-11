@@ -61,7 +61,6 @@
     <None Include="bin\Debug\Antlr4.Runtime.dll" />
     <None Include="data\gscript.gs" />
     <None Include="data\queries.gs" />
-    <None Include="data\tmp.gs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

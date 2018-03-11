@@ -27,6 +27,12 @@ namespace Dialogic
         internal const string OP2 = @"\s*([!<=>*^$]+)\s*([^ ]+)";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
+        internal const string MLC = @"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/";
+        public static Regex MultiComment = new Regex(MLC);
+
+        internal const string SLC = @"//(.*?)(?:$|\r?\n)";
+        public static Regex SingleComment = new Regex(SLC, RegexOptions.Singleline);
+
         internal const string CMD = @"(^[A-Z][A-Z]+)?\s*";
         internal const string TXT = @"([^#}{]+)?\s*";
         internal const string LBL = @"(#[A-Za-z][\S]*)?\s*";
