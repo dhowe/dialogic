@@ -75,7 +75,10 @@ namespace Dialogic
             if (line == null) return false;
             line = line.Trim();
             if (line.Length < 1) return false;
+
+            // TODO: HANDLE SINGLE/MULTILINE COMMENTS
             if (line.StartsWith("//", Util.IC)) return false;
+
             return true;
         }
 
@@ -85,8 +88,13 @@ namespace Dialogic
 
             Match match = RE.ParseLine.Match(line);
 
-            if (match.Length < 4) throw new ParseException
-                (line, lineNo, "'" + line + "' cannot be parsed");
+
+            if (match.Groups.Count < 5)
+            {
+                //Util.ShowMatch(match);
+                throw new ParseException(line, lineNo, "'" + line 
+                    + "' cannot be parsed ("+match.Length+")");
+            }
 
             var parts = new List<string>();
             for (int j = 0; j < 4; j++)

@@ -134,7 +134,7 @@ namespace Dialogic
                 foreach (Capture cc in mm.Captures)
                 {
                     Console.WriteLine("       Capture {0} '{1}'", captureNo++, cc);
-                }
+                }   
                 groupNo++;
             }
 

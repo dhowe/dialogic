@@ -157,6 +157,38 @@ namespace Dialogic
         {
             List<Chat> chats;
 
+            chats = ChatParser.ParseText("hello");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("hello"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            chats = ChatParser.ParseText("wei");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("wei"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            chats = ChatParser.ParseText("SAY ...");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("..."));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            chats = ChatParser.ParseText("...");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("..."));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
             chats = ChatParser.ParseText("GO #Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -263,7 +295,7 @@ namespace Dialogic
         [Test]
         public void TestExceptions()
         {
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY"));
+            //Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY"));
             //Assert.Throws<ParseException>(() => ChatParser.ParseText("GO Twirl")); // allowed
             //Assert.Throws<ParseException>(() => ChatParser.ParseText("DO Flip")); // allowed
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT Two Words"));
