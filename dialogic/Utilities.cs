@@ -61,17 +61,6 @@ namespace Dialogic
             random = new Random();
         }
 
-        public static string Version()
-        {
-            Assembly currentAssembly = Assembly.GetEntryAssembly();
-            if (currentAssembly == null)
-                currentAssembly = Assembly.GetCallingAssembly();
-            var versionNumber = currentAssembly.GetName().Version;
-            return string.Format("{0}.{1}.{2}.{3}",
-              versionNumber.Major, versionNumber.Minor,
-              versionNumber.Revision, versionNumber.Build);
-        }
-
         public static int SecStrToMs(string s, int defaultMs = -1)
         {
             double d;

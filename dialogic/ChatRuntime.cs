@@ -30,9 +30,7 @@ namespace Dialogic
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
             current = (chatLabel != null) ? Find(new Constraints
-                (Meta.LABEL, chatLabel)) : chats[0];
-            
-            Console.WriteLine("Dialogic v"+Util.Version());
+                (Meta.LABEL, chatLabel)) : chats[0];            
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
