@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace Dialogic
@@ -6,7 +7,7 @@ namespace Dialogic
     [TestFixture]
     public class RealizeTests
     {
-        IDictionary<string, object> globals = new Dictionary<string, object>() {
+        public static IDictionary<string, object> globals = new Dictionary<string, object>() {
                 { "animal", "dog" },
                 { "prep", "then" },
                 { "group", "(a|b)" },
@@ -22,12 +23,11 @@ namespace Dialogic
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
-            var data = c.data;
-            //Console.WriteLine(Util.Stringify(data));
             c.SetMeta("pace", "slow");
-            Assert.That(data[Meta.TEXT], Is.EqualTo("Thank you"));
-            Assert.That(data[Meta.TYPE], Is.EqualTo("Say"));
-            Assert.That(data["pace"], Is.EqualTo("fast"));
+
+            Assert.That(c.GetText(true), Is.EqualTo("Thank you"));
+            Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
+            Assert.That(c.realized["pace"], Is.EqualTo("fast"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
         }
 
@@ -39,7 +39,7 @@ namespace Dialogic
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
-            var data = c.data;
+            var data = c.realized;
             //Console.WriteLine(Util.Stringify(data));
             c.SetMeta("pace", "slow");
             Assert.That(data[Meta.TEXT], Is.EqualTo("Thank you"));
@@ -53,14 +53,14 @@ namespace Dialogic
         {
             Chat chat = ChatParser.ParseText("SAY Thank $count { pace=$animal}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Command c = (Say)chat.commands[0];
-            Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            c.Realize(globals);
-            c.Text = "Thank you";
-            Assert.That(c.data[Meta.TEXT], Is.EqualTo("Thank 4"));
-            Assert.That(c.Text, Is.EqualTo("Thank you"));
-            Assert.That(c.data[Meta.TYPE], Is.EqualTo("Say"));
-            Assert.That(c.data["pace"], Is.EqualTo("dog"));
+            Command say = chat.commands[0];
+            Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
+            say.Realize(globals);
+            Assert.That(say.GetText(true), Is.EqualTo("Thank 4"));
+            say.Text = "Thank you";
+            Assert.That(say.Text, Is.EqualTo("Thank you"));
+            Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
+            Assert.That(say.realized["pace"], Is.EqualTo("dog"));
         }
 
         [Test]
@@ -72,8 +72,8 @@ namespace Dialogic
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
-            Assert.That(c.data[Meta.TYPE], Is.EqualTo("Say"));
-            CollectionAssert.Contains(ok, c.data[Meta.TEXT]);
+            Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
+            CollectionAssert.Contains(ok, c.GetText(true));
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 c.Realize(globals);
-                CollectionAssert.Contains(ok, c.data[Meta.TEXT]);
+                CollectionAssert.Contains(ok, c.GetText(true));
             }
         }
 
@@ -116,32 +116,20 @@ namespace Dialogic
             var s = @"SAY The $animal woke $count times";
             s = Realizer.DoVars(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
-        }
-
-        [Test]
-        public void TestReplace1()
-        {
-            var s = @"SAY The $animal woke and $prep (ate|ate)";
+       
+            s = @"SAY The $animal woke and $prep (ate|ate)";
             s = Realizer.Do(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
-        }
-
-        [Test]
-        public void TestReplace2()
-        {
+  
             var txt = "letter $group";
             string[] ok = { "letter a", "letter b" };
             for (int i = 0; i < 10; i++)
             {
                 CollectionAssert.Contains(ok, Realizer.Do(txt, globals));
             }
-        }
-
-        [Test]
-        public void TestReplace3()
-        {
-            var txt = "letter $cmplx";
-            string[] ok = { "letter a", "letter b", "letter then" };
+  
+            txt = "letter $cmplx";
+            ok = new string[]{ "letter a", "letter b", "letter then" };
             string[] res = new string[10];
             for (int i = 0; i < res.Length; i++)
             {
@@ -151,6 +139,74 @@ namespace Dialogic
             {
                 CollectionAssert.Contains(ok, res[i]);
             }
+        }
+
+        [Test]
+        public void TestSayNonRepeatingRecombination()
+        {
+            List<Chat> chats = ChatParser.ParseText("SAY (a|b)");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Say say = (Say)chats[0].commands[0];
+            string last = "";
+            for (int i = 0; i < 10; i++)
+            {
+                say.Realize(globals);
+                string said = say.GetText(true);
+                Assert.That(said, Is.Not.EqualTo(last));
+                last = said;
+            }
+        }
+
+        [Test]
+        public void TestAskNonRepeatingRecombination()
+        {
+            List<Chat> chats = ChatParser.ParseText("ASK (a|b)?\nOPT (c|d|e) #f");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
+            Ask ask = (Ask)chats[0].commands[0];
+            string last = "", lastOpts = "";
+            for (int i = 0; i < 10; i++)
+            {
+                ask.Realize(globals);
+                string asked = ask.GetText(true);
+                string opts = ask.OptionsJoined();
+                //Console.WriteLine(i+") "+asked+" "+opts);
+                Assert.That(asked, Is.Not.EqualTo(last));
+                Assert.That(opts, Is.Not.EqualTo(lastOpts));
+                lastOpts = opts;
+                last = asked;
+            }
+        }
+
+        [Test]
+        public void TestReplacePrompt()
+        {
+            List<Chat> chats = ChatParser.ParseText("ASK Want a $animal?\nOPT $group #Game\n\nOPT $count #End");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
+
+            Ask ask = (Dialogic.Ask)chats[0].commands[0];
+            ask.Realize(globals);
+            Assert.That(ask.Text, Is.EqualTo("Want a $animal?"));
+            Assert.That(ask.GetText(true), Is.EqualTo("Want a dog?"));
+
+            Assert.That(ask.Options().Count, Is.EqualTo(2));
+
+            var options = ask.Options();
+            Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
+            //Assert.That(options[0].Text, Is.EqualTo("Y").Or.);
+            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].GetText(true));
+            Assert.That(options[0].action.GetType(), Is.EqualTo(typeof(Go)));
+            Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
+            Assert.That(options[1].GetText(true), Is.EqualTo("4"));
+            Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
         }
     }
 }

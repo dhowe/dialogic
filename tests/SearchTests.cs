@@ -77,23 +77,7 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Chat res = new ChatRuntime(chats).Find(new Constraints("dev", "1"));
-            Assert.That(res.Text, Is.EqualTo("c2"));
-        }
-
-        public void TestFindHard() // ???
-        {
-            Chat c;
-            List<Chat> chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("day", "hello");
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "1");
-            c.SetMeta("day", "hello");
-            chats.Add(c = Chat.Create("c4"));
-            ChatRuntime cr = new ChatRuntime(chats);
-            Chat res = new ChatRuntime(chats).Find(new Constraints("dev", "1").Add("day", "hello"));
+            Chat res = new ChatRuntime(chats).FindAll(new Constraints("dev", "1"))[0];
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 
@@ -112,6 +96,25 @@ namespace Dialogic
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].Text, Is.EqualTo("c1"));
+        }
+
+        [Test]
+        public void TestFindWithVarsInMeta()
+        {
+            string[] lines = {
+                "CHAT c1 {day=fri}",
+                "CHAT c2 {dev=4,day=fri}",
+                "CHAT c3 {dev=3}",
+                "CHAT c4"
+            };
+            string contents = String.Join("\n", lines);
+            List<Chat> chats = ChatParser.ParseText(contents);
+            List<Chat> result = new ChatRuntime(chats).FindAll
+                (new Constraints("dev", "$count"), RealizeTests.globals);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result[0].Text, Is.EqualTo("c2"));
         }
 
         [Test]
@@ -301,9 +304,7 @@ namespace Dialogic
                 "CHAT c3 {}"
             };
 
-            var contents = String.Join("\n", lines);
-
-            var chats = ChatParser.ParseText(contents);
+            var chats = ChatParser.ParseText(String.Join("\n", lines));
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             var finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -311,18 +312,14 @@ namespace Dialogic
             var mday = finder.GetMeta("day");
             Assert.That(mday is Constraint, Is.True);
             var cons = (Dialogic.Constraint)mday;
-            Console.WriteLine(cons);
             Assert.That(cons.type, Is.EqualTo(ConstraintType.Absolute));
             Assert.That(cons.IsStrict(), Is.True);
 
             var cr = new ChatRuntime(chats);
-
             chats = cr.FindAll((Find)finder);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
-
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
-
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
 

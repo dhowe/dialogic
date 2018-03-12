@@ -12,9 +12,35 @@ namespace Dialogic
 
     public class Say : Command, ISendable
     {
+        private string lastSpoken;
+
         public Say() : base()
         {
             this.DelayMs = (int)(Defaults.SAY_DURATION * 1000);
+        }
+
+        public override void Realize(IDictionary<string, object> globals)
+        {
+            base.Realize(globals);
+            CheckRecombination(globals);
+            lastSpoken = GetText(true);
+        }
+
+        private void CheckRecombination(IDictionary<string, object> globals)
+        {
+            if (IsRecombinant()) // try to say something different than last time
+            {
+                int tries = 0;
+                while (lastSpoken == GetText(true) && ++tries < 100)
+                {
+                    realized[Meta.TEXT] = Realizer.Do(Text, globals);
+                }
+            }
+        }
+
+        protected bool IsRecombinant()
+        {
+            return Text.IndexOf('|') > -1;
         }
 
         /**
@@ -29,14 +55,14 @@ namespace Dialogic
                 (GetTextLenScale() * GetMetaSpeedScale() * DelayMs);
         }
 
-        private double GetTextLenScale()
+        protected double GetTextLenScale()
         {
             return Util.Map(Text.Length,
                 Defaults.SAY_MIN_LEN, Defaults.SAY_MAX_LEN,
                 Defaults.SAY_MIN_LEN_MULT, Defaults.SAY_MAX_LEN_MULT);
         }
 
-        private double GetMetaSpeedScale()
+        protected double GetMetaSpeedScale()
         {
             double val = 1.0;
             if (meta != null && meta.ContainsKey("speed"))
@@ -59,10 +85,10 @@ namespace Dialogic
     {
         public Grammar grammar;
 
-        public override void Init(string text, string label, string[] meta)
+        public override void Init(string text, string label, string[] metas)
         {
             //Console.WriteLine("Gram.init: " + Util.Stringify(meta)+"\n"+String.Join("\n", meta));
-            grammar = new Grammar(String.Join("\n", meta));
+            grammar = new Grammar(String.Join("\n", metas));
         }
 
         public override string ToString()
@@ -147,7 +173,7 @@ namespace Dialogic
         }
     }
 
-    public class Ask : Command, ISendable
+    public class Ask : Say
     {
         public int SelectedIdx { get; protected set; }
 
@@ -159,6 +185,11 @@ namespace Dialogic
         {
             this.DelayMs = -1; // infinite
             this.Timeout = (int)(Defaults.ASK_TIMEOUT * 1000);
+        }
+
+        public override int ComputeDuration()
+        {
+            return DelayMs;
         }
 
         public List<Opt> Options()
@@ -173,11 +204,11 @@ namespace Dialogic
 
         public string OptionsJoined(string delim = "\n")
         {
-            var s = "";
+            var s = String.Empty;
             var opts = Options();
             for (int i = 0; i < opts.Count; i++)
             {
-                s += opts[i].Text;
+                s += opts[i].GetText(true);
                 if (i < opts.Count - 1) s += delim;
             }
             return s;
@@ -201,12 +232,12 @@ namespace Dialogic
             options.Add(o);
         }
 
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        public override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
-            data[Meta.OPTS] = Realizer.Do(OptionsJoined(), globals);
-            data[Meta.TIMEOUT] = Timeout.ToString();
-            return data;
+            Options().ForEach(o => o.Realize(globals));
+            realized[Meta.TIMEOUT] = Timeout.ToString();
+            realized[Meta.OPTS] = OptionsJoined();
         }
 
         protected override void HandleMetaTiming()
@@ -225,11 +256,11 @@ namespace Dialogic
         }
     }
 
-    public class Opt : Command
+    public class Opt : Say
     {
         public Command action;
 
-        public Opt() : this("", NOP) { }
+        public Opt() : this(String.Empty, NOP) { }
 
         public Opt(string text) : this(text, NOP) { }
 
@@ -249,18 +280,13 @@ namespace Dialogic
             }
 
             this.action = label.Length > 0 ?
-                Command.Create(typeof(Go), "", label, metas) : NOP;
+                Command.Create(typeof(Go), String.Empty, label, metas) : NOP;
         }
 
         public override string ToString()
         {
             return "[" + TypeName().ToUpper() + "] " + QQ(Text)
-                + (action is NoOp ? "" : " (-> " + action.Text + ")");
-        }
-
-        public string ActionText()
-        {
-            return action != null ? action.Text : "";
+                + (action is NoOp ? String.Empty : " (-> " + action.Text + ")");
         }
     }
 
@@ -270,6 +296,8 @@ namespace Dialogic
         {
             ParseMeta(metas);
         }
+
+        public override void Realize(IDictionary<string, object> globals) {/*noop*/}
 
         protected override void ParseMeta(string[] pairs)
         {
@@ -289,7 +317,7 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
                 ConstraintType ctype = ConstraintType.Soft;
 
-                if (Util.TrimFirst(ref key, '!'))
+                if (Util.TrimFirst(ref key, Constraint.TypeChar))
                 {
                     ctype = ConstraintType.Hard;
                     if (Util.TrimFirst(ref key, '!'))
@@ -307,7 +335,7 @@ namespace Dialogic
 
         protected override string MetaStr()
         {
-            string s = "";
+            string s = String.Empty;
             if (HasMeta())
             {
                 s += "{";
@@ -327,15 +355,10 @@ namespace Dialogic
     {
         public override void Init(string text, string label, string[] metas)
         {
-            Text = text.Length > 0 ? text : label;
+            base.Text = text.Length > 0 ? text : label;
             ValidateTextLabel();
 
         }
-
-        /*protected override void RealizeMeta(IDictionary<string, object> globals)
-        {
-            data[Meta.LABEL] = Text;
-        }*/
 
         public override string ToString()
         {
@@ -356,7 +379,7 @@ namespace Dialogic
         public static Chat Create(string name) // tests only
         {
             Chat c = new Chat();
-            c.Init(name, "", new string[0]);
+            c.Init(name, String.Empty, new string[0]);
             return c;
         }
 
@@ -377,18 +400,18 @@ namespace Dialogic
             if (string.IsNullOrEmpty(text)) throw BadArg("Missing label");
 
             this.Text = text;
-            if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
+            if (Regex.IsMatch(base.Text, @"\s+")) // TODO: compile
             {
-                throw BadArg("CHAT name '" + Text + "' contains spaces!");
+                throw BadArg("CHAT name '" + base.Text + "' contains spaces!");
             }
 
             ParseMeta(metas);
-//            SetMeta(Meta.LABEL, Text); // !realized
+            //            SetMeta(Meta.LABEL, Text); // !realized
         }
 
         protected override string MetaStr()
         {
-            string s = "";
+            string s = String.Empty;
             if (HasMeta())
             {
                 s += "{";
@@ -397,7 +420,7 @@ namespace Dialogic
                     //if (key != Meta.LABEL) 
                     s += key + "=" + meta[key] + ",";
                 }
-                s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : "";
+                s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : String.Empty;
             }
             return s;
         }
@@ -426,11 +449,11 @@ namespace Dialogic
         public const string OPTS = "opts";
         public const string TYPE = "type";
         public const string TEXT = "text";
-        //public const string LABEL = "label";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
+        //public const string LABEL = "label";
 
-        public IDictionary<string, object> meta, data;
+        public IDictionary<string, object> meta, realized;
 
         public bool HasMeta()
         {
@@ -445,6 +468,11 @@ namespace Dialogic
         public object GetMeta(string key, object defaultVal = null)
         {
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
+        }
+
+        public object GetRealized(string key, object defaultVal = null)
+        {
+            return realized.ContainsKey(key) ? realized[key] : defaultVal;
         }
 
         public void SetMeta(Constraint constraint)
@@ -471,6 +499,11 @@ namespace Dialogic
             return meta;
         }
 
+        public IDictionary<string, object> GetRealized()
+        {
+            return realized;
+        }
+
         public List<KeyValuePair<string, object>> ToList()
         {
             return meta != null ? meta.ToList() : null;
@@ -478,7 +511,7 @@ namespace Dialogic
 
         protected virtual string MetaStr()
         {
-            string s = "";
+            string s = String.Empty;
             if (HasMeta())
             {
                 s += "{";
@@ -518,11 +551,11 @@ namespace Dialogic
 
         public static readonly Command NOP = new NoOp();
 
+        public static string DefaultSpeaker = String.Empty; // ?
+
         public string Id { get; protected set; }
 
         public int DelayMs { get; protected set; }
-
-        public static string DefaultSpeaker = ""; // ?
 
         public string Text, Actor = DefaultSpeaker;
 
@@ -534,7 +567,7 @@ namespace Dialogic
         {
             this.Id = (++IDGEN).ToString();
             this.DelayMs = 0;
-            this.data = new Dictionary<string, object>();
+            this.realized = new Dictionary<string, object>();
         }
 
         protected void ValidateTextLabel()
@@ -545,11 +578,21 @@ namespace Dialogic
             if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
 
+        public string GetText(bool real=false)
+        {
+            return real ? (string)realized[Meta.TEXT] : Text;
+        }
+
+        public string GetActor()
+        {
+            return Actor;
+        }
+
         private static string ToMixedCase(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
 
-            return (s[0] + "").ToUpper() + s.Substring(1).ToLower();
+            return (s[0].ToString()).ToUpper() + s.Substring(1).ToLower();
         }
 
         public static Command Create(string type, string text, string label, string[] metas)
@@ -567,7 +610,7 @@ namespace Dialogic
 
         public virtual void Init(string text, string label, string[] metas)
         {
-            Text = text.Length > 0 ? text : label;
+            this.Text = text.Length > 0 ? text : label;
             ParseMeta(metas);
             HandleMetaTiming();
         }
@@ -582,28 +625,25 @@ namespace Dialogic
 
         public virtual string TypeName()
         {
-            return this.GetType().ToString().Replace(PACKAGE, "");
+            return this.GetType().ToString().Replace(PACKAGE, String.Empty);
         }
 
-        public virtual IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        public virtual void Realize(IDictionary<string, object> globals)
         {
-            data.Clear();
+            realized.Clear();
 
             RealizeMeta(globals);
 
-            data[Meta.TEXT] = Realizer.Do(Text, globals);
-            data[Meta.TYPE] = TypeName();
-
-            LastSentMs = Util.EpochMs();
-
-            return data;
+            realized[Meta.TEXT] = Realizer.Do(Text, globals);
+            realized[Meta.TYPE] = TypeName();
         }
 
         protected virtual void RealizeMeta(IDictionary<string, object> globals)
         {
             if (HasMeta())
             {
-                IEnumerable sorted = null;
+                IEnumerable sorted = null; // TODO: cache these key-sorts ?
+
                 foreach (KeyValuePair<string, object> pair in meta)
                 {
                     string val = pair.Value.ToString();
@@ -617,7 +657,7 @@ namespace Dialogic
                         }
                     }
 
-                    data[pair.Key] = val;
+                    realized[pair.Key] = val;
                 }
             }
         }

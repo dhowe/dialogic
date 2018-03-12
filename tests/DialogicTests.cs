@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using NUnit.Framework;
 using System;
 
@@ -19,6 +18,39 @@ namespace Dialogic
             Assert.That(Util.SecStrToMs("1x", 1000), Is.EqualTo(1000));
         }
 
+        [Test]
+        public void TestUpdateEvent()
+        {
+            var globals = new Dictionary<string, object>() {
+                { "animal", "dog" },
+                { "temp", "23.3" },
+                { "isok", "true" },
+                { "count", "4" }
+             };
+            UpdateEvent ue = new UpdateEvent(globals);
+            Assert.That(ue.Data().Count, Is.EqualTo(4));
+
+            Assert.That(ue.Get("animal"), Is.EqualTo("dog"));
+            Assert.That(ue.Get("MISS1"), Is.Null);
+            Assert.That(ue.Get("MISS2","cat"), Is.EqualTo("cat"));
+
+            Assert.That(ue.GetInt("count"), Is.EqualTo(4));
+            Assert.That(ue.GetInt("MISS1"), Is.EqualTo(-1));
+            Assert.That(ue.GetInt("MISS2", 0), Is.EqualTo(0));
+
+            Assert.That(ue.GetDouble("temp"), Is.EqualTo(23.3d));
+            Assert.That(ue.GetDouble("MISS1"), Is.EqualTo(-1d));
+            Assert.That(ue.GetDouble("MISS2", 0), Is.EqualTo(0d));
+
+            Assert.That(ue.GetFloat("temp"), Is.EqualTo(23.3f));
+            Assert.That(ue.GetFloat("MISS1"), Is.EqualTo(-1f));
+            Assert.That(ue.GetFloat("MISS2", 0), Is.EqualTo(0f));
+
+            Assert.That(ue.GetBool("isok"), Is.EqualTo(true));
+            Assert.That(ue.GetBool("MISS1"), Is.EqualTo(false));
+            Assert.That(ue.GetBool("MISS2", true), Is.EqualTo(true));
+        }
+            
         [Test]
         public void TestSimpleGrammar()
         {

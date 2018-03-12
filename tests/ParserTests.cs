@@ -132,6 +132,52 @@ namespace Dialogic
         }
 
         [Test]
+        public void TestFindSoftDynVar()
+        {
+            List<Chat> chats;
+
+            chats = ChatParser.ParseText("FIND {num=$count}");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+
+            chats[0].commands[0].Realize(RealizeTests.globals);
+
+            Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
+            var meta = chats[0].commands[0].GetMeta("num");
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            Constraint constraint = (Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+            Assert.That(constraint.name, Is.EqualTo("num"));
+            Assert.That(constraint.value, Is.EqualTo("$count"));
+        }
+
+        [Test]
+        public void TestFindSoftDynGroup()
+        {
+            // "FIND {a*=(hot|cool)}" in regex, means hot OR cool, no subs
+            var chats = ChatParser.ParseText("FIND {a*=(hot|cool)}"); 
+            var find = chats[0].commands[0];
+            find.Realize(RealizeTests.globals);
+
+            Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
+            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].GetMeta("a"), Is.Not.Null);
+
+            var meta = chats[0].commands[0].GetMeta("a");
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            var constraint = (Dialogic.Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+            Assert.That(constraint.name, Is.EqualTo("a"));
+            Assert.That(constraint.op, Is.EqualTo(Operator.RE));
+            Assert.That(constraint.value, Is.EqualTo("(hot|cool)"));
+            var real = chats[0].commands[0].GetRealized();
+            Assert.That(real.Count, Is.EqualTo(0));
+        }
+
+        [Test]
         public void TestFindHard()
         {
             List<Chat> chats;
@@ -280,7 +326,11 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[0].HasMeta(), Is.EqualTo(false));
+        }
 
+        [Test]
+        public void TestSimpleCommand()
+        {
             string[] lines = {
                 "DO #Twirl", "DO #Twirl {speed= fast}", "SAY Thank you", "WAIT", "WAIT .5",  "WAIT .5 {a=b}",
                 "SAY Thank you {pace=fast,count=2}", "SAY Thank you", "FIND { num > 1, an != 4 }",

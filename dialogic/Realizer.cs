@@ -9,7 +9,7 @@ namespace Dialogic
     {
         public static string Do(string text, IDictionary<string, object> globals)
         {
-            if (!String.IsNullOrEmpty(text))
+            if (IsDynamic(text))
             {
                 if (Util.IsNullOrEmpty(globals))
                 {
@@ -17,19 +17,29 @@ namespace Dialogic
                 }
 
                 int tries = 0;
-                string orig = text;
-                while (text.IndexOf('$') > -1 || text.IndexOf('|') > -1) // rethink
+                string arg = text;
+
+                do // rethink this
                 {
                     text = DoVars(text, globals);
                     text = DoGroups(text);
 
                     // bail on infinite loops:
-                    if (++tries > 1000) throw new Exception("Invalid-Sub: '"
-                        + orig + "' " + Util.Stringify(globals));
+                    if (++tries > 1000) throw new RealizeException
+                        ("Invalid-Sub: '" + arg + "' " + Util.Stringify(globals));
                 }
+                while (IsDynamic(text)); 
+
+                //Console.WriteLine("Realizer.Do: " + arg + " -> " + text);
             }
 
             return text;
+        }
+
+        private static bool IsDynamic(string text)
+        {
+            return (!String.IsNullOrEmpty(text)) && 
+                (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
         }
 
         public static string DoGroups(string text)
@@ -55,7 +65,7 @@ namespace Dialogic
         {
             if (!String.IsNullOrEmpty(text))
             {
-                IEnumerable sorted = null;
+                IEnumerable sorted = null; // TODO: cache these sorts ?
 
                 if (text.IndexOf('$') > -1)
                 {

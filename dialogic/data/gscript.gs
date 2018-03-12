@@ -9,7 +9,7 @@ GO #Prompt
 CHAT RePrompt
 DO #SadSpin
 ASK (Really|Awww), don't you want to play a game?
-OPT sure #Game
+OPT sure #RePrompt
 OPT $neg #RePrompt
 
 CHAT Prompt {notPlayed=true}
@@ -18,6 +18,6 @@ OPT Sure #Game
 OPT Nope #RePrompt
 
 CHAT Game
-DO #HappyFlip
+DO #HappyFlip {axis=y}
 ASK Great, let's play! {speed=slow,style=loud}
 Bye! {speed=fast}

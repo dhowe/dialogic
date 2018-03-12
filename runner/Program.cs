@@ -13,16 +13,6 @@ namespace runner
         }
 
         public static string srcpath = "../../../dialogic";
-
-        public static Dictionary<string, object> globals =
-            new Dictionary<string, object>() {
-                { "emotion", "special" },
-                { "place", "My Tank" },
-                { "Happy", "HappyFlip" },
-                { "verb", "play" },
-                { "neg", "(nah|no|nope)" },
-                { "var3", 2 }
-            };
     }
 
     public class MockGameEngine
@@ -60,20 +50,21 @@ namespace runner
             }
         }
 
-        private void HandleEvent(ref IUpdateEvent ge)
+        private void HandleEvent(ref IUpdateEvent ue)
         {
-            diaText = ge.Text();
-            diaType = ge.Type();
+            diaText = ue.Text();
+            diaType = ue.Type();
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
 
             switch (diaType)
             {
                 case "Say":
-                    ge.RemoveKeys(Meta.TEXT, Meta.TYPE);
-                    diaText += " " + Util.Stringify(ge.Data());
+                    ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
+                    diaText += " " + Util.Stringify(ue.Data()); // show meta
                     break;
 
                 case "Do":
-                    diaText = "(Do: " + diaText.Trim() + ")";
+                    diaText = "(Do: " + diaText + Util.Stringify(ue.Data())+")";
                     break;
 
                 case "Nvm":
@@ -81,14 +72,14 @@ namespace runner
                     break;
 
                 case "Ask":
-                    DoPrompt(ge);
-                    SendRandomResponse(ge);
+                    DoPrompt(ue);
+                    SendRandomResponse(ue);
                     break;
             }
 
             Console.WriteLine(diaText);
 
-            ge = null;  // dispose event 
+            ue = null;  // dispose event 
         }
 
         private void DoPrompt(IUpdateEvent ge)
@@ -96,7 +87,7 @@ namespace runner
             diaOpts = ge.Get(Meta.OPTS).Split('\n');
 
             ge.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
-            diaText += " " + Util.Stringify(ge.Data());
+            diaText += " " + Util.Stringify(ge.Data()); // show meta
 
             for (int i = 0; i < diaOpts.Length; i++)
             {

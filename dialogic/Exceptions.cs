@@ -7,6 +7,11 @@ namespace Dialogic
         public DialogicException(string msg = "") : base(msg) { }
     }
 
+    public class RealizeException : DialogicException
+    {
+        public RealizeException(string msg = "") : base(msg) { }
+    }
+
     public class FindException : DialogicException
     {
         public FindException(string msg) : base(msg) { }

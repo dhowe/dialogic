@@ -25,7 +25,7 @@ namespace Dialogic
     public static class RE
     {
         internal const string OP1 = @"(!?!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
-        internal const string OP2 = @"\s*([!<=>*^$]+)\s*([^ ]+)";
+        internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
         internal const string MLC = @"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/";
@@ -125,10 +125,7 @@ namespace Dialogic
         public static void ShowMatches(MatchCollection matches)
         {
             int i = 0;
-            foreach (Match match in matches)
-            {
-                ShowMatch(match, i++);
-            }
+            foreach (Match match in matches) ShowMatch(match, i++);
         }
 
         public static int ShowMatch(Match match, int i = 0)
@@ -271,9 +268,6 @@ namespace Dialogic
         }
     }
 
-    public enum ConstraintType { Soft = 0, Hard = 1, Absolute = 2 };
-
-
     /*public class LabelConstraint : Constraint
     {
         public LabelConstraint(string label) :
@@ -281,8 +275,11 @@ namespace Dialogic
         { }
     }*/
 
+    public enum ConstraintType { Soft = 0, Hard = 1, Absolute = 2 };
+
     public class Constraint
     {
+        public static char TypeChar = '!';
         public readonly ConstraintType type;
         public readonly string name, value;
         public readonly Operator op;
@@ -308,16 +305,38 @@ namespace Dialogic
             }
         }
 
-        public bool Check(string toCheck)
+        public bool Check(string check, IDictionary<string, object> globals=null)
         {
-            var passed = op.Invoke(toCheck, value);
-            //Console.WriteLine(toCheck+" "+op+" "+ value + " -> "+passed);
+            string rval = value;
+            if (globals != null)
+            {
+                if (check.Contains('$')) check = Realizer.DoVars(check, globals);
+                if (value.Contains('$')) rval = Realizer.DoVars(value, globals);
+            }
+                
+            var passed = op.Invoke(check, rval);
+            //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
             return passed;
         }
 
         public override string ToString()
         {
-            return name + op + value + "("+type+")";
+            return TypeToString() + name + op + value;
+        }
+
+        private string TypeToString()
+        {
+            switch (type)
+            {
+                case ConstraintType.Hard:
+                    return TypeChar.ToString();
+
+                case ConstraintType.Absolute:
+                    return TypeChar.ToString() + TypeChar;
+
+                default:
+                    return String.Empty;
+            }
         }
 
         public bool IsStrict()

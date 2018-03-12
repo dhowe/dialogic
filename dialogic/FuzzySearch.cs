@@ -9,9 +9,9 @@ namespace Dialogic
          * Find highest scoring chat which does not match any constraint key without also 
          * matching its value, or null if none match 
          */
-        public static Chat Find(List<Chat> chats, IDictionary<string, object> constraints)
+        public static Chat Find(List<Chat> chats, IDictionary<string, object> constraints, IDictionary<string, object> globals=null)
         {
-            return FindAll(chats, constraints).FirstOrDefault();
+            return FindAll(chats, constraints, globals).FirstOrDefault();
         }
 
         /**
@@ -24,7 +24,7 @@ namespace Dialogic
          *   3a. doesn't have key (normal) ->   allow
          *    b. doesn't have key (strict) ->   disallow
          */
-        public static List<Chat> FindAll(List<Chat> chats, IDictionary<string, object> constraints)
+        public static List<Chat> FindAll(List<Chat> chats, IDictionary<string, object> constraints, IDictionary<string, object> globals = null)
         {
             if (constraints == null) return chats;
 
@@ -47,7 +47,9 @@ namespace Dialogic
                     {
                         var chatPropVal = (string)chatProps[key];
 
-                        if (!(constraint.Check(chatPropVal)))
+                        // TODO: need to realize constraint & chat values here
+
+                        if (!(constraint.Check(chatPropVal, globals)))
                         {
                             //Console.WriteLine("    FAIL:" + constraints[key]);
                             hits = -1;
@@ -76,7 +78,7 @@ namespace Dialogic
             return (from kvp in list select kvp.Key).ToList();
         }
 
-        static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
+        private static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
         {
             List<KeyValuePair<Chat, int>> list = d.ToList();
             list.Sort((p1, p2) => CompareRandomizeTies(p1.Value, p2.Value));
@@ -84,7 +86,7 @@ namespace Dialogic
         }
 
         // sort descending with random ties
-        static int CompareRandomizeTies(int i, int j)
+        private static int CompareRandomizeTies(int i, int j)
         {
             return i == j ? (Util.Rand() < .5 ? 1 : -1) : j.CompareTo(i);
         }

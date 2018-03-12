@@ -22,6 +22,11 @@ namespace Dialogic
     {
         private IDictionary<string, object> data;
 
+        public UpdateEvent(Command c)
+        {
+            this.data = c.realized;
+        }
+
         public UpdateEvent(IDictionary<string, object> data)
         {
             this.data = data;
@@ -34,13 +39,31 @@ namespace Dialogic
 
         public string Get(string key, string def = null)
         {
-            return (string)(data.ContainsKey(key) ? data[key] : def);
+            return data.ContainsKey(key) ? (string)data[key] : def;
         }
 
         public int GetInt(string key, int def = -1)
         {
-            string s = Get(key, def + "");
+            string s = Get(key, def + String.Empty);
             return (int)Convert.ChangeType(s, typeof(int));
+        }
+
+        public bool GetBool(string key, bool def = false)
+        {
+            string s = Get(key, def + String.Empty);
+            return (bool)Convert.ChangeType(s, typeof(bool));
+        }
+
+        public float GetFloat(string key, float def = -1)
+        {
+            string s = Get(key, def + String.Empty);
+            return (float)Convert.ChangeType(s, typeof(float));
+        }
+
+        public double GetDouble(string key, double def = -1)
+        {
+            string s = Get(key, def + String.Empty);
+            return (double)Convert.ChangeType(s, typeof(double));
         }
 
         public void RemoveKeys(params string[] keys)
