@@ -26,9 +26,15 @@ namespace Dialogic
     public class ParseException : DialogicException
     {
         public ParseException(string msg = "") : base(msg) { }
-
+        public readonly int lineNumber;
+        public readonly string lineContents;
+        public readonly string reason;
         public ParseException(string line, int lineNo, string msg = "")
             : base("Line " + lineNo + " : " + line + 
-                   (msg.Length > 0 ? "\n\n" + msg : "")) { }
+                   (msg.Length > 0 ? "\n\n" + msg : "")) {
+            lineNumber = lineNo;
+            lineContents = line;
+            reason = msg;
+        }
     }
 }
