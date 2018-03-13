@@ -535,8 +535,11 @@ namespace Dialogic
                 {
                     string[] parts = pairs[i].Split('=');
 
-                    if (parts.Length != 2) throw new Exception
-                        ("Expected 2 parts, found " + parts.Length + ": " + parts);
+                    if (parts.Length != 2)
+                    {
+                        throw new Exception("Expected 2 parts for meta key/val," +
+                            " but found " + parts.Length + ": " + Util.Stringify(parts));
+                    }
 
                     SetMeta(parts[0].Trim(), parts[1].Trim());
                 }
@@ -580,7 +583,7 @@ namespace Dialogic
             if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
 
-        public string GetText(bool real=false)
+        public string GetText(bool real = false)
         {
             return real ? (string)realized[Meta.TEXT] : Text;
         }

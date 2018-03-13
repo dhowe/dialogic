@@ -10,7 +10,9 @@ namespace Dialogic
     public class ChatParser
     {
         public static string CHAT_FILE_EXT = ".gs";
-        public static bool PRESERVE_LINE_NUMBERS = false;
+        public static bool PRESERVE_LINE_NUMBERS = true;
+
+        private static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
         protected Stack<Command> parsedCommands;
         protected List<Chat> chats;
@@ -53,7 +55,7 @@ namespace Dialogic
         {
             if (PRESERVE_LINE_NUMBERS)  // slow two-pass
             {
-                var lines = text.Split('\n');
+                var lines = text.Split(LineBreaks, StringSplitOptions.None);
                 lines = Util.StripMultiLineComments(lines);
                 return Util.StripSingleLineComments(lines);
             }
@@ -74,24 +76,14 @@ namespace Dialogic
         {
             ChatParser parser = new ChatParser();
 
-            int i = 0;
-            foreach (var line in lines)
+            for (int i = 0; i < lines.Length; i++)
             {
-                if (ValidateLine(ref lines[i]))
+                if (!String.IsNullOrEmpty(lines[i]))
                 {
                     parser.ParseLine(lines[i], i + 1);
                 }
-                i++;
             }
             return parser.chats;
-        }
-
-        private static bool ValidateLine(ref string line)
-        {
-            if (line == null) return false;
-            line = line.Trim();
-            if (line.Length < 1) return false;
-            return true;
         }
 
         private Command ParseLine(string line, int lineNo)
@@ -139,10 +131,10 @@ namespace Dialogic
 
             });
 
-            return HandleCommand(c);
+            return HandleCommand(c, line, lineNo);
         }
 
-        private Command HandleCommand(Command c) // cleanup
+        private Command HandleCommand(Command c, string line, int lineNo)
         {
             if (c is Chat)
             {
@@ -155,7 +147,10 @@ namespace Dialogic
             if (c is Opt) // add option data to last Ask
             {
                 Command last = LastOfType(parsedCommands, typeof(Ask));
-                if (!(last is Ask)) throw new ParseException("Opt must follow Ask");
+
+                if (!(last is Ask)) throw new ParseException
+                    (line, lineNo, "Opt must follow Ask");
+                
                 ((Ask)last).AddOption((Opt)c);
             }
             else  // add command to last Chat

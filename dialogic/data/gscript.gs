@@ -9,7 +9,7 @@ GO #Prompt
 CHAT RePrompt
 DO #SadSpin
 ASK (Really|Awww), don't you want to play a game?
-OPT sure #RePrompt
+OPT sure #Game
 OPT $neg #RePrompt
 
 CHAT Prompt {notPlayed=true}

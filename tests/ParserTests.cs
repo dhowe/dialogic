@@ -32,9 +32,6 @@ namespace Dialogic
         [Test]
         public void TestComments()
         {
-            var orig = ChatParser.PRESERVE_LINE_NUMBERS;
-            ChatParser.PRESERVE_LINE_NUMBERS = true;
-
             string[] lines = {
                 "CHAT c1",
                 "SAY Thank you",
@@ -70,23 +67,21 @@ namespace Dialogic
                 "Done4",
                 "SAY Done4"
             };
-            //for (int i = 0; i < lines.Length; i++)
-            //    Console.WriteLine(i + "  " + lines[i]);
-            //Console.WriteLine();
+
             var parsed = ChatParser.StripComments(String.Join("\n", lines));
+
             Assert.That(parsed.Length, Is.EqualTo(lines.Length));
-            for (int i = 0; i < lines.Length; i++)
+            for (int i = 0; i < parsed.Length; i++)
             {
                 Assert.That(parsed[i], Is.EqualTo(result[i]));
             }
-
-            List<Chat> chats;
 
             var txt = "SAY Thank you/*\nSAY Hello //And Goodbye*/";
             var res = ChatParser.StripComments(txt);
             Assert.That(res[0], Is.EqualTo("SAY Thank you"));
             Assert.That(res[1], Is.EqualTo(""));
 
+            List<Chat> chats;
             chats = ChatParser.ParseText(txt);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -145,8 +140,6 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
-
-            ChatParser.PRESERVE_LINE_NUMBERS = orig;
         }
 
         [Test]
@@ -315,7 +308,6 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
-            //Assert.That((chats[0].commands[0].GetMeta(Meta.LABEL) is Constraint), Is.True);
 
             chats = ChatParser.ParseText("GO Twirl");
             //Console.WriteLine(chats[0].ToTree());
@@ -323,7 +315,6 @@ namespace Dialogic
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
-            //Assert.That((chats[0].commands[0].GetMeta(Meta.LABEL) is Constraint), Is.True);
 
             chats = ChatParser.ParseText("DO #Twirl");
             //Console.WriteLine(chats[0].ToTree());
@@ -406,8 +397,6 @@ namespace Dialogic
         {
             List<Chat> chats = ChatParser.ParseText("GRAM { start: 'The <item>', item: cat }");
             Command gram = chats[0].commands[0];
-            //Console.WriteLine(gram);
-            //Assert.That(chats.Count, Is.EqualTo(11111));
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -425,31 +414,50 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Chat chat = chats[0];
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
-            //Assert.That(chats[0].GetMeta(Meta.LABEL), Is.EqualTo("c1"));
-
-            //chats = ChatParser.ParseText("CHAT c1\nFIND {"+Meta.LABEL+"=c1}\nGO #c1\nDO #c1\n");
+ 
             chats = ChatParser.ParseText("CHAT c1\nGO #c1\nDO #c1\n");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Do)));
-            //Assert.That(chats[0].commands[2].GetType(), Is.EqualTo(typeof(Do)));
-
-            //Assert.That((chats[0].commands[0].GetMeta(Meta.LABEL) is Constraint), Is.True);
-            //Assert.That((chats[0].commands[1].GetMeta(Meta.LABEL) is Constraint), Is.True);
-            //Assert.That(chats[0].commands[2].GetMeta(Meta.LABEL), Is.Null);
-            //Console.WriteLine(chats[0].ToTree());
         }
 
         [Test]
         public void TestExceptions()
         {
-            //Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY")); // ?
-            //Assert.Throws<ParseException>(() => ChatParser.ParseText("GO Twirl")); // allowed
-            //Assert.Throws<ParseException>(() => ChatParser.ParseText("DO Flip")); // allowed
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT Two Words"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND {a = (b|c)}"));
+            //Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY")); // ?
+
+            string[] lines = {
+                "CHAT c1",
+                "SAY Thank you",
+                "SAY Hello",
+                "//SAY And Goodbye",
+                "SAY Done1",
+                "SAY And//Goodbye",
+                "SAY Done2",
+                "/*SAY And Goodbye*/",
+                "SAY And /*Goodbye*/",
+                "/*SAY And Goodbye",
+                "SAY Done2*/",
+                "SAY Done3",
+                "/*SAY And Goodbye",
+                "SAY */Done4",
+                "SAY Done4 {a}"
+            };
+
+            Assert.Throws<ParseException>(() => ChatParser.ParseText(String.Join("\n", lines)));
+            try
+            {
+                ChatParser.ParseText(String.Join("\n", lines));
+            }
+            catch(ParseException e) 
+            {
+                //Console.WriteLine(e);
+                Assert.That(e.lineNumber, Is.EqualTo(lines.Length));
+            }
         }
     }
 }
