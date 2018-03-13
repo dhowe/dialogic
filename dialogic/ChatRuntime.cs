@@ -33,6 +33,7 @@ namespace Dialogic
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
 
             currentChat = chatLabel != null ? FindByName(chatLabel) : chats[0];
+            currentChat.lastRunAt = Util.EpochMs();
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
@@ -74,6 +75,7 @@ namespace Dialogic
         {
             currentChat = chat;
             currentChat.Reset();
+            currentChat.lastRunAt = Util.EpochMs();
             nextEventTime = Util.Millis();
         }
 
@@ -149,6 +151,12 @@ namespace Dialogic
                 StartChat(chat);
 
             })).Start();
+        }
+
+        // for testing only
+        public Chat Find(Find f, IDictionary<string, object> globals = null)
+        {
+            return FuzzySearch.Find(chats, f.meta, globals);
         }
 
         // for testing only

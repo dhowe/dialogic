@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace Dialogic
 {
@@ -22,36 +23,6 @@ namespace Dialogic
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Text, Is.EqualTo("c1"));
         }
-
-        //[Test]
-        //public void TestFindNyNameAPILabelled()
-        //{
-        //    string[] lines = {
-        //        "CHAT c1 {day=fri}",
-        //        "CHAT c2 {dev=2,day=fri}",
-        //        "CHAT c3"
-        //    };
-        //    string contents = String.Join("\n", lines);
-        //    List<Chat> chats = ChatParser.ParseText(contents);
-        //    List<Chat> result = new ChatRuntime(chats).FindAll(new LabelConstraint("c1"));
-        //    //chats.ForEach(c=>Console.WriteLine(c));
-        //    Assert.That(result, Is.Not.Null);
-        //    Assert.That(result.Count, Is.EqualTo(1));
-        //    Assert.That(result[0].Text, Is.EqualTo("c1"));
-        //}
-
-        //[Test]
-        //public void TestFindByNameLabelled()
-        //{
-        //    Chat c;
-        //    List<Chat> chats = new List<Chat>();
-        //    chats.Add(c = Chat.Create("c1"));
-        //    chats.Add(c = Chat.Create("c2"));
-        //    chats.Add(c = Chat.Create("c3"));
-        //    ChatRuntime cr = new ChatRuntime(chats);
-        //    Chat res = new ChatRuntime(chats).Find(new LabelConstraint("c2"));
-        //    Assert.That(res.Text, Is.EqualTo("c2"));
-        //}
 
         [Test]
         public void TestFindByName()
@@ -376,6 +347,31 @@ namespace Dialogic
         }
 
         [Test]
+        public void TestFindRelaxation()
+        {
+            string[] lines = {
+                "CHAT c0 {day=wed}",
+                "FIND {dev>1,!day=fri}",
+                "CHAT c1 {dev=2,day=wed}",
+                "CHAT c2 {dev=3,day=wed}",
+                "CHAT c3 {}"
+            };
+
+            string contents = String.Join("\n", lines);
+
+            List<Chat> chats = ChatParser.ParseText(contents);
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            Command finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            ChatRuntime cr = new ChatRuntime(chats);
+
+            var chat = cr.Find((Find)finder);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.Text, Is.EqualTo("c3"));
+        }
+
+        [Test]
         public void TestFindAllOpHard1()
         {
             string[] lines = {
@@ -604,7 +600,7 @@ namespace Dialogic
         [Test]
         public void TestFindAllOp3()
         {
-            string[] lines = new string[]{
+            string[] lines = {
                 "CHAT c1 {emotion=cold}",
                 "FIND {emotion*=ho}",
                 "CHAT c2 {emotion=hot}"
@@ -674,6 +670,48 @@ namespace Dialogic
 
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c3"));
+        }
+
+        [Test]
+        public void TestDescendingFreshnessSort()
+        {
+            Dictionary<Chat, int> chatScores = new Dictionary<Chat, int>();
+
+            Chat c = Chat.Create("c1");
+            c.lastRunAt = Util.EpochMs();
+            c.SetMeta("lastRun", c.lastRunAt);
+            chatScores.Add(c, 1);
+
+            c = Chat.Create("c2");
+            c.lastRunAt = Util.EpochMs() - 1000;
+            c.SetMeta("lastRun", c.lastRunAt);
+            chatScores.Add(c, 1);
+
+            c = Chat.Create("c3");
+            c.lastRunAt = Util.EpochMs() - 2000;
+            c.SetMeta("lastRun", c.lastRunAt);
+            chatScores.Add(c, 1);
+
+            c = Chat.Create("c4");
+            chatScores.Add(c, 0);
+
+            c = Chat.Create("c5");
+            chatScores.Add(c, 10);
+
+            List<KeyValuePair<Chat, int>> list = FuzzySearch.DescendingFreshnessSort(chatScores);
+            for (int i = 1; i < list.Count; i++)
+            {
+                Assert.That(list[i].Value <= list[i - 1].Value, Is.True);
+            }
+
+            //list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
+
+            var chats = (from kvp in list select kvp.Key).ToList();
+            Assert.That(chats[0].Text, Is.EqualTo("c5"));
+            Assert.That(chats[1].Text, Is.EqualTo("c3"));
+            Assert.That(chats[2].Text, Is.EqualTo("c2"));
+            Assert.That(chats[3].Text, Is.EqualTo("c1"));
+            Assert.That(chats[4].Text, Is.EqualTo("c4"));
         }
     }
 }

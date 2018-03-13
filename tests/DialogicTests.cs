@@ -86,6 +86,20 @@ namespace Dialogic
             {
                 Assert.That(kv.Value, Is.GreaterThan(0));
             }
+
+            List<string> l = new List<string>() { "0", "1", "2" };
+            hits = new Dictionary<string, int>();
+            foreach (var s in l) hits.Add(s, 0);
+            for (int i = 0; i < 100; i++)
+            {
+                string s = Util.RandItem(l);
+                hits[s]++;
+                CollectionAssert.Contains(arr, s);
+            }
+            foreach (var kv in hits)
+            {
+                Assert.That(kv.Value, Is.GreaterThan(0));
+            }
         }
 
         [Test]

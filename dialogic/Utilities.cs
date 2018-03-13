@@ -187,7 +187,6 @@ namespace Dialogic
             {
                 string line = lines[i].Trim();
 
-
                 if (commentOpen)
                 {
                     int endIdx = line.IndexOf("*/", Util.IC);
@@ -230,14 +229,21 @@ namespace Dialogic
                         line = tmp + line.Substring(endIdx + 2);
                     }
                 }
+
                 lines[i] = line;
             }
+
             return lines;
         }
 
         public static object RandItem(object[] arr)
         {
             return arr[Rand(arr.Length)];
+        }
+
+        public static T RandItem<T>(List<T> l)
+        {
+            return l.ElementAt(Rand(l.Count));
         }
 
         public static int Rand(int max)
@@ -346,7 +352,8 @@ namespace Dialogic
     public class Constraint
     {
         public static char TypeChar = '!';
-        public readonly ConstraintType type;
+
+        public ConstraintType type;
         public readonly string name, value;
         public readonly Operator op;
 
@@ -413,7 +420,7 @@ namespace Dialogic
 
         public bool IsRelaxable()
         {
-            return this.type != ConstraintType.Absolute;
+            return this.type == ConstraintType.Hard;
         }
 
         public IDictionary<string, object> AsDict()
@@ -421,6 +428,16 @@ namespace Dialogic
             var dict = new Dictionary<string, object>();
             dict.Add(name, this);
             return dict;
+        }
+
+        internal Constraint Copy()
+        {
+            return new Constraint(op, name, value, type);
+        }
+
+        internal void Relax()
+        {
+            if (IsRelaxable()) type = ConstraintType.Soft;
         }
     }
 

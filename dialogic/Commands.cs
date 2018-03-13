@@ -359,7 +359,6 @@ namespace Dialogic
         {
             base.Text = text.Length > 0 ? text : label;
             ValidateTextLabel();
-
         }
 
         public override string ToString()
@@ -371,7 +370,7 @@ namespace Dialogic
     public class Chat : Command
     {
         public List<Command> commands;
-        public int cursor = 0;
+        public int cursor = 0, lastRunAt = -1;
 
         public Chat()
         {
@@ -393,7 +392,7 @@ namespace Dialogic
         public void AddCommand(Command c)
         {
             c.parent = this;
-            c.IndexInChat = commands.Count; // ?
+            //c.IndexInChat = commands.Count; // ?
             this.commands.Add(c);
         }
 
@@ -564,7 +563,7 @@ namespace Dialogic
 
         public string Text, Actor = DefaultSpeaker;
 
-        public int LastSentMs, IndexInChat = -1; // needed?
+        //public int LastSentMs, IndexInChat = -1; // needed?
 
         public Chat parent;
 
