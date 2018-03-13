@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using ExtensionMethods;
 
@@ -11,6 +10,7 @@ namespace Dialogic
     public class ChatParser
     {
         public static string CHAT_FILE_EXT = ".gs";
+        public static bool PRESERVE_LINE_NUMBERS = false;
 
         protected Stack<Command> parsedCommands;
         protected List<Chat> chats;
@@ -43,17 +43,31 @@ namespace Dialogic
             return chats;
         }
 
-        private static void ParseFiles(string[] files, List<Chat> chats)
-        {
-            foreach (var f in files) ParseFile(f, chats);
-        }
-
         public static List<Chat> ParseText(string text)
         {
             if (text == null) throw new ParseException("Null input");
-            text = RE.MultiComment.Replace(text, String.Empty);
-            text = RE.SingleComment.Replace(text, String.Empty);
-            return Parse(text.Split('\n'));
+            return Parse(StripComments(text));
+        }
+
+        public static string[] StripComments(string text) // public->testing
+        {
+            if (PRESERVE_LINE_NUMBERS)  // slow two-pass
+            {
+                var lines = text.Split('\n');
+                lines = Util.StripMultiLineComments(lines);
+                return Util.StripSingleLineComments(lines);
+            }
+            else                       // faster one-pass
+            {
+                text = RE.MultiComment.Replace(text, String.Empty);
+                text = RE.SingleComment.Replace(text, String.Empty);
+                return text.Split('\n');
+            }
+        }
+
+        private static void ParseFiles(string[] files, List<Chat> chats)
+        {
+            foreach (var f in files) ParseFile(f, chats);
         }
 
         private static List<Chat> Parse(string[] lines)
@@ -69,7 +83,6 @@ namespace Dialogic
                 }
                 i++;
             }
-
             return parser.chats;
         }
 

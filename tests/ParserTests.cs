@@ -32,15 +32,76 @@ namespace Dialogic
         [Test]
         public void TestComments()
         {
+            var orig = ChatParser.PRESERVE_LINE_NUMBERS;
+            ChatParser.PRESERVE_LINE_NUMBERS = true;
+
+            string[] lines = {
+                "CHAT c1",
+                "SAY Thank you",
+                "SAY Hello",
+                "//SAY And Goodbye",
+                "SAY Done1",
+                "SAY And//Goodbye",
+                "SAY Done2",
+                "/*SAY And Goodbye*/",
+                "SAY And /*Goodbye*/",
+                "/*SAY And Goodbye",
+                "SAY Done2*/",
+                "SAY Done3",
+                "/*SAY And Goodbye",
+                "SAY */Done4",
+                "SAY Done4"
+            };
+
+            string[] result = {
+                "CHAT c1",
+                "SAY Thank you",
+                "SAY Hello",
+                String.Empty,
+                "SAY Done1",
+                "SAY And",
+                "SAY Done2",
+                String.Empty,
+                "SAY And",
+                String.Empty,
+                String.Empty,
+                "SAY Done3",
+                String.Empty,
+                "Done4",
+                "SAY Done4"
+            };
+            //for (int i = 0; i < lines.Length; i++)
+            //    Console.WriteLine(i + "  " + lines[i]);
+            //Console.WriteLine();
+            var parsed = ChatParser.StripComments(String.Join("\n", lines));
+            Assert.That(parsed.Length, Is.EqualTo(lines.Length));
+            for (int i = 0; i < lines.Length; i++)
+            {
+                Assert.That(parsed[i], Is.EqualTo(result[i]));
+            }
+
             List<Chat> chats;
 
-            Assert.That(ChatParser.ParseText("//\n//SAY Thank you\n//SAY Hello\n// And Goodbye").Count, Is.EqualTo(0));
-            Assert.That(ChatParser.ParseText("/*SAY Thank you\nSAY Hello\nAnd Goodbye*/").Count, Is.EqualTo(0));
-            Assert.That(ChatParser.ParseText("///").Count, Is.EqualTo(0));
-            Assert.That(ChatParser.ParseText("//").Count, Is.EqualTo(0));
-            Assert.That(ChatParser.ParseText(" //").Count, Is.EqualTo(0));
-            Assert.That(ChatParser.ParseText(" /* */").Count, Is.EqualTo(0));
-            Assert.That(ChatParser.ParseText("/* */").Count, Is.EqualTo(0));
+            var txt = "SAY Thank you/*\nSAY Hello //And Goodbye*/";
+            var res = ChatParser.StripComments(txt);
+            Assert.That(res[0], Is.EqualTo("SAY Thank you"));
+            Assert.That(res[1], Is.EqualTo(""));
+
+            chats = ChatParser.ParseText(txt);
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            //Assert.That(parsed[14], Is.EqualTo("SAY Done4"));
+            //Assert.That(ChatParser.ParseText("//\n//SAY Thank you\n//SAY Hello\n// And Goodbye").Count, Is.EqualTo(0));
+            //Assert.That(ChatParser.ParseText("/*SAY Thank you\nSAY Hello\nAnd Goodbye*/").Count, Is.EqualTo(0));
+            //Assert.That(ChatParser.ParseText("///").Count, Is.EqualTo(0));
+            //Assert.That(ChatParser.ParseText("//").Count, Is.EqualTo(0));
+            //Assert.That(ChatParser.ParseText(" //").Count, Is.EqualTo(0));
+            //Assert.That(ChatParser.ParseText(" /* */").Count, Is.EqualTo(0));
+            //Assert.That(ChatParser.ParseText("/* */").Count, Is.EqualTo(0));
 
             chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\n// And Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -67,13 +128,6 @@ namespace Dialogic
             Assert.That(chats[0].commands[1].Text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY Thank you/*\nSAY Hello //And Goodbye*/");
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-
             chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\nAnd Goodbye\n");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
@@ -91,6 +145,8 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            ChatParser.PRESERVE_LINE_NUMBERS = orig;
         }
 
         [Test]
@@ -158,7 +214,7 @@ namespace Dialogic
         public void TestFindSoftDynGroup()
         {
             // "FIND {a*=(hot|cool)}" in regex, means hot OR cool, no subs
-            var chats = ChatParser.ParseText("FIND {a*=(hot|cool)}"); 
+            var chats = ChatParser.ParseText("FIND {a*=(hot|cool)}");
             var find = chats[0].commands[0];
             find.Realize(RealizeTests.globals);
 

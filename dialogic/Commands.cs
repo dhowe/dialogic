@@ -12,7 +12,8 @@ namespace Dialogic
 
     public class Say : Command, ISendable
     {
-        private string lastSpoken;
+        protected string lastSpoken;
+        protected int lastSpokenTime;
 
         public Say() : base()
         {
@@ -24,6 +25,7 @@ namespace Dialogic
             base.Realize(globals);
             CheckRecombination(globals);
             lastSpoken = GetText(true);
+            lastSpokenTime = Util.EpochMs();
         }
 
         private void CheckRecombination(IDictionary<string, object> globals)

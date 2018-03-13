@@ -169,6 +169,72 @@ namespace Dialogic
             return i;
         }
 
+        internal static string[] StripSingleLineComments(string[] lines)
+        {
+            for (int i = 0; i < lines.Length; i++)
+            {
+                lines[i] = lines[i].Trim();
+                int idx = lines[i].IndexOf("//", Util.IC);
+                if (idx > -1) lines[i] = lines[i].Substring(0, idx);
+            }
+            return lines;
+        }
+
+        internal static string[] StripMultiLineComments(string[] lines)
+        {
+            bool commentOpen = false;
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i].Trim();
+
+
+                if (commentOpen)
+                {
+                    int endIdx = line.IndexOf("*/", Util.IC);
+                    if (endIdx < 0)
+                    {
+                        line = String.Empty;
+                    }
+                    else
+                    {
+                        line = line.Substring(endIdx + 2);
+                    }
+                    commentOpen = false;
+                }
+
+                int startIdx = line.IndexOf("/*", Util.IC);
+                if (startIdx > -1)
+                {
+                    int endIdx = line.IndexOf("*/", Util.IC);
+
+                    if (endIdx < 0) // only open, no close
+                    {
+                        line = line.Substring(0, startIdx);
+                        commentOpen = true;
+                    }
+                    else if (startIdx == 0 && endIdx == line.Length - 2) // a
+                    {
+                        line = String.Empty;
+                    }
+                    else if (startIdx == 0 && endIdx > startIdx)        // b
+                    {
+                        line = line.Substring(endIdx + 2);
+                    }
+                    else if (startIdx > 0 && endIdx == line.Length - 2) // c
+                    {
+                        line = line.Substring(0, startIdx - 1);
+                    }
+                    else if (startIdx > 0 && endIdx < line.Length - 2) // d
+                    {
+                        var tmp = line.Substring(0, startIdx - 1);
+                        line = tmp + line.Substring(endIdx + 2);
+                    }
+                }
+                lines[i] = line;
+            }
+            return lines;
+        }
+
         public static object RandItem(object[] arr)
         {
             return arr[Rand(arr.Length)];
