@@ -10,10 +10,11 @@ namespace Dialogic
 {
     public static class Defaults
     {
-        public static double SAY_DURATION = 1.0;
+        public static double SAY_DURATION = 2.0;
         public static double DO_DURATION = 0.02;
         public static double NVM_DURATION = 5.0;
         public static double ASK_DURATION = Util.INFINITE;
+        public static double WAIT_DURATION = Util.INFINITE;
 
         public static double ASK_TIMEOUT = 5.0;
 
@@ -21,7 +22,7 @@ namespace Dialogic
         public static double SAY_SLOW_MULT = 2.0;
         public static double SAY_MAX_LEN_MULT = 2.0;
         public static double SAY_MIN_LEN_MULT = 0.5;
-        public static int    SAY_MAX_LINE_LEN = 100;
+        public static int    SAY_MAX_LINE_LEN = 80;
         public static int    SAY_MIN_LINE_LEN = 2;
     }
 
@@ -333,10 +334,12 @@ namespace Dialogic
             return from s in e orderby s.Length descending select s;
         }
 
+        /**
+         * Converts seconds to millis if seconds is >= 0, else returns -1
+         */
         public static int ToMillis(double seconds)
         {
-            if (seconds < 0) return (int)seconds;
-            return (int)(seconds * 1000);
+            return (seconds < 0) ? -1 : (int)(seconds * 1000);
         }
 
         public static double ToSec(int millis)
@@ -354,13 +357,6 @@ namespace Dialogic
             return false;
         }
     }
-
-    /*public class LabelConstraint : Constraint
-    {
-        public LabelConstraint(string label) :
-            base(Operator.EQ, Meta.LABEL, label, ConstraintType.Absolute)
-        { }
-    }*/
 
     public enum ConstraintType { Soft = 0, Hard = 1, Absolute = 2 };
 

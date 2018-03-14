@@ -8,14 +8,13 @@ namespace Dialogic
         string Text();
         string Type();
         string Get(string name, string def = null);
-        int GetInt(string name, int def = -1);
-        IDictionary<string, object> Data();
         void RemoveKeys(params string[] keys);
-    }
+        IDictionary<string, object> Data();
 
-    public interface IChoice
-    {
-        int GetChoiceIndex();
+        int GetInt(string name, int def = -1);
+        bool GetBool(string key, bool def = false);
+        double GetDouble(string key, double def = -1);
+        float GetFloat(string key, float def = -1);
     }
 
     public class UpdateEvent : IUpdateEvent
@@ -84,47 +83,46 @@ namespace Dialogic
 
     /// /////////////////////////////////////////////////////////
 
-    public class ChatEvent : EventArgs
+    public interface IChoice
     {
-        protected Command command;
+        int GetChoiceIndex();
+    }
 
-        public ChatEvent(Command c)
+    /**
+     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd
+     */
+    public interface IResume
+    {
+        int ResumeAfter();
+    }
+
+    /**
+     * Superclass for specific GameEvents
+     */
+    public abstract class GameEvent : EventArgs { }
+
+    /**
+     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd
+     */
+    public class ResumeEvent : GameEvent, IResume
+    {
+        public readonly int resumeAfterMs;
+
+        public ResumeEvent(int resumeAfterMs = 0) : base()
         {
-            this.command = c;
+            this.resumeAfterMs = resumeAfterMs;
         }
 
-        public Command Command()
+        public int ResumeAfter()
         {
-            return command;
+            return resumeAfterMs;
         }
     }
 
-    public class ClientEvent : EventArgs
-    {
-        protected string message;
-
-        internal ClientEvent() : this("User-Taps-Glass") { }
-
-        public ClientEvent(string s)
-        {
-            this.message = s;
-        }
-
-        public override string ToString()
-        {
-            return this.message;
-        }
-
-        public string Message
-        {
-            get
-            {
-                return message;
-            }
-        }
-    }
-
-    public class ChoiceEvent : EventArgs, IChoice
+    /**
+     * Tells Dialogic that an Ask->Option has been selected by the user
+     */
+    public class ChoiceEvent : GameEvent, IChoice
     {
         protected int choiceIndex;
 
@@ -135,7 +133,7 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return "Choice: " +choiceIndex;
+            return "Choice: " + choiceIndex;
         }
 
         public int GetChoiceIndex()

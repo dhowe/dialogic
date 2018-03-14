@@ -13,7 +13,7 @@ OPT sure #Game
 OPT $neg #RePrompt
 
 CHAT Prompt {notPlayed=true}
-ASK Do you want to $verb a game? {timeout=2}
+ASK Do you want to $verb a game? {timeout=4}
 OPT Sure #Game
 OPT Nope #RePrompt
 

@@ -30,7 +30,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestComments()
+        public void TestComments1()
         {
             string[] lines = {
                 "CHAT c1",
@@ -75,7 +75,11 @@ namespace Dialogic
             {
                 Assert.That(parsed[i], Is.EqualTo(result[i]));
             }
+        }
 
+        [Test]
+        public void TestComments2()
+        {
             var txt = "SAY Thank you/*\nSAY Hello //And Goodbye*/";
             var res = ChatParser.StripComments(txt);
             Assert.That(res[0], Is.EqualTo("SAY Thank you"));
@@ -265,6 +269,24 @@ namespace Dialogic
         }
 
         [Test]
+        public void TestWaitCommand()
+        {
+            List<Chat> chats;
+
+            chats = ChatParser.ParseText("WAIT .5 {waitForAnimation=true}");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Wait)));
+            Wait wait = (Dialogic.Wait)chats[0].commands[0];
+            Console.WriteLine(wait);
+            Assert.That(wait.Text, Is.EqualTo(".5"));
+            Assert.That(wait.DelayMs, Is.EqualTo(500));
+            Assert.That(wait.GetMeta("waitForAnimation"), Is.EqualTo("true"));
+        }
+
+        [Test]
         public void TestCommands()
         {
             List<Chat> chats;
@@ -414,7 +436,7 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Chat chat = chats[0];
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
- 
+
             chats = ChatParser.ParseText("CHAT c1\nGO #c1\nDO #c1\n");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
@@ -453,7 +475,7 @@ namespace Dialogic
             {
                 ChatParser.ParseText(String.Join("\n", lines));
             }
-            catch(ParseException e) 
+            catch (ParseException e)
             {
                 //Console.WriteLine(e);
                 Assert.That(e.lineNumber, Is.EqualTo(lines.Length));

@@ -8,11 +8,11 @@ namespace Dialogic
 {
     public class ChatRuntime
     {
-        public static string logFile = "../../../dialogic/dia.log";
+        public static string logFile;// = "../../../dialogic/dia.log";
 
         private List<Chat> chats;
-        private Chat currentChat;
         private Ask currentPrompt;
+        private Chat lastChat, currentChat;
 
         private bool logInitd;
         private int nextEventTime;
@@ -36,15 +36,34 @@ namespace Dialogic
             currentChat.lastRunAt = Util.EpochMs();
         }
 
-        public IUpdateEvent Update(IDictionary<string, object> globals, ref IChoice choice)
+        public IUpdateEvent Update(IDictionary<string, object> globals, ref GameEvent ge)
         {
-            return choice != null ? HandleChoiceEvent(ref choice, globals) : HandleChatEvent(globals);
+            return ge != null ? HandleGameEvent(ref ge, globals) : HandleChatEvent(globals);
         }
 
-        private IUpdateEvent HandleChoiceEvent(ref IChoice ic, IDictionary<string, object> globals)
+        private IUpdateEvent HandleGameEvent(ref GameEvent ge, IDictionary<string, object> globals)
         {
+            if (ge is IChoice) return HandleChoiceEvent(ref ge, globals);
+            if (ge is IResume) return HandleResumeEvent(ref ge, globals);
+            throw new DialogicException("Unexpected event-type: " + ge.GetType());
+        }
+
+        private IUpdateEvent HandleResumeEvent(ref GameEvent ge, IDictionary<string, object> globals)
+        {
+            IResume ir = (IResume)ge;
+
+            // WORKING HERE
+
+            throw new NotImplementedException();
+        }
+
+        private IUpdateEvent HandleChoiceEvent(ref GameEvent ge, IDictionary<string, object> globals)
+        {
+            //Console.WriteLine("HANDLE-CHOICE " + ge);
+
+            IChoice ic = (IChoice)ge;
             var idx = ic.GetChoiceIndex();
-            ic = null;
+            ge = null;
 
             if (idx < 0 || idx >= currentPrompt.Options().Count)
             {
@@ -64,19 +83,11 @@ namespace Dialogic
                 }
                 else
                 {
+                    //throw new DialogicException("opt with no GO: " + opt);
                     currentChat = currentPrompt.parent; // continue
                 }
-
                 return null;
             }
-        }
-
-        private void StartChat(Chat chat)
-        {
-            currentChat = chat;
-            currentChat.Reset();
-            currentChat.lastRunAt = Util.EpochMs();
-            nextEventTime = Util.Millis();
         }
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
@@ -93,14 +104,21 @@ namespace Dialogic
 
                     if (cmd is ISendable)
                     {
-                        if (cmd is Ask)
+                        if (cmd is Wait && cmd.DelayMs == Util.INFINITE)
                         {
-                            currentPrompt = (Dialogic.Ask)cmd;
-                            currentChat = null;
+                            PauseCurrentChat();  // wait until ResumeEvent
+                        }
+                        else if (cmd is Ask)
+                        {
+                            currentPrompt = (Ask)cmd;
+                            PauseCurrentChat(); // wait until ChoiceEvent
+                        }
+                        else
+                        {
+                            ComputeNextEventTime(cmd); // compute delay
                         }
 
-                        nextEventTime = Util.Millis() + cmd.ComputeDuration();
-                        return new UpdateEvent(cmd);
+                        return new UpdateEvent(cmd); // fire event
                     }
                     else if (cmd is Find)
                     {
@@ -110,6 +128,47 @@ namespace Dialogic
             }
 
             return null;
+        }
+
+        private void ComputeNextEventTime(Command cmd)
+        {
+            nextEventTime = cmd.DelayMs >= 0 ? Util.Millis()
+                + cmd.ComputeDuration() : Int32.MaxValue;
+        }
+
+        private void StartChat(Chat chat)
+        {
+            lastChat = currentChat;
+            currentChat = chat;
+            currentChat.Reset();
+            currentChat.lastRunAt = Util.EpochMs();
+        }
+
+        private void PauseCurrentChat()
+        {
+            if (false && currentChat == null)
+            {
+                throw new DialogicException("Attempt to pause null chat");
+            }
+            lastChat = currentChat;
+            currentChat = null;
+        }
+
+        private void ResumeLastChat(int msBeforeResuming = 0)
+        {
+            if (lastChat == null)
+            {
+                throw new DialogicException("Attempt to resume null chat");
+            }
+            if (currentChat != null)
+            {
+                throw new DialogicException("Attempt to resume chat while chat "
+                    + currentChat.Text + " is active");
+            }
+            currentChat = lastChat;
+            currentChat.lastRunAt = Util.EpochMs();
+            nextEventTime = Util.Millis() + msBeforeResuming; // now
+            lastChat = null;
         }
 
         public Chat FindByName(string label)
@@ -129,6 +188,8 @@ namespace Dialogic
 
         public void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
+            PauseCurrentChat();
+
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
             {

@@ -28,7 +28,7 @@ namespace runner
             };
 
         private readonly ChatRuntime runtime;
-        private IChoice choiceEvent = null;
+        private GameEvent gameEvent;
         string diaText, diaType;
         string[] diaOpts;
 
@@ -45,7 +45,7 @@ namespace runner
             while (true)
             {
                 Thread.Sleep(30);
-                IUpdateEvent ue = runtime.Update(globals, ref choiceEvent);
+                IUpdateEvent ue = runtime.Update(globals, ref gameEvent);
                 if (ue != null) HandleEvent(ref ue);
             }
         }
@@ -59,21 +59,16 @@ namespace runner
             switch (diaType)
             {
                 case "Say":
-                    ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
                     diaText += " " + Util.Stringify(ue.Data()); // show meta
-                    break;
-
-                case "Do":
-                    diaText = "(Do: " + diaText + Util.Stringify(ue.Data())+")";
-                    break;
-
-                case "Nvm":
-                    diaText = "...";
                     break;
 
                 case "Ask":
                     DoPrompt(ue);
                     SendRandomResponse(ue);
+                    break;
+
+                default:
+                    diaText = ("(" + diaType + ": " + diaText + " " + Util.Stringify(ue.Data())).Trim() + ")";
                     break;
             }
 
@@ -100,12 +95,13 @@ namespace runner
             int timeout = ge.GetInt(Meta.TIMEOUT, -1);
             if (timeout > -1)
             {
-                Timers.SetTimeout(Util.Rand(timeout / 3, timeout), () =>
+                var delay = Util.Rand(timeout / 3, timeout);
+                Timers.SetTimeout(delay, () =>
                 {
                     // choice a valid response, or -1 for no response
                     int choice = Util.Rand(diaOpts.Length + 1) - 1;
-                    Console.WriteLine("\n<choice-index#" + choice + ">\n");
-                    choiceEvent = new ChoiceEvent(choice);
+                    Console.WriteLine("\n<choice-index#" + choice + "> after "+delay+"ms\n");
+                    gameEvent = new ChoiceEvent(choice);
                 });
             }
         }

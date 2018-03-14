@@ -156,13 +156,12 @@ namespace Dialogic
         }
     }
 
-    public class Wait : Command
+    public class Wait : Command, ISendable
     {
         public override void Init(string text, string label, string[] metas)
         {
-            DelayMs = -1;
             base.Init(text, label, metas);
-            DelayMs = Util.SecStrToMs(text, -1);
+            DelayMs = Util.SecStrToMs(text, Util.ToMillis(Defaults.WAIT_DURATION));
         }
     }
 
