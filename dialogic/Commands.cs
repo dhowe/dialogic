@@ -17,7 +17,7 @@ namespace Dialogic
 
         public Say() : base()
         {
-            this.DelayMs = (int)(Defaults.SAY_DURATION * 1000);
+            this.DelayMs = Util.ToMillis(Defaults.SAY_DURATION);
         }
 
         public override void Realize(IDictionary<string, object> globals)
@@ -53,14 +53,14 @@ namespace Dialogic
          */
         public override int ComputeDuration()
         {
-            return (int)Math.Round
+            return Util.Round
                 (GetTextLenScale() * GetMetaSpeedScale() * DelayMs);
         }
 
         protected double GetTextLenScale()
         {
             return Util.Map(Text.Length,
-                Defaults.SAY_MIN_LEN, Defaults.SAY_MAX_LEN,
+                Defaults.SAY_MIN_LINE_LEN, Defaults.SAY_MAX_LINE_LEN,
                 Defaults.SAY_MIN_LEN_MULT, Defaults.SAY_MAX_LEN_MULT);
         }
 
@@ -103,7 +103,7 @@ namespace Dialogic
     {
         public override void Init(string text, string label, string[] metas)
         {
-            DelayMs = 20;
+            DelayMs = Util.ToMillis(Defaults.DO_DURATION);
             base.Init(text, label, metas);
             ValidateTextLabel();
         }
@@ -168,14 +168,14 @@ namespace Dialogic
 
     public class Nvm : Wait, ISendable
     {
-
-        public override int ComputeDuration()
+        public override void Init(string text, string label, string[] metas)
         {
-            return DelayMs;
+            base.Init(text, label, metas);
+            DelayMs = Util.SecStrToMs(text, Util.ToMillis(Defaults.NVM_DURATION));
         }
     }
 
-    public class Ask : Say
+    public class Ask : Say, ISendable
     {
         public int SelectedIdx { get; protected set; }
 
@@ -185,8 +185,8 @@ namespace Dialogic
 
         public Ask()
         {
-            this.DelayMs = -1; // infinite
-            this.Timeout = (int)(Defaults.ASK_TIMEOUT * 1000);
+            this.DelayMs = Util.ToMillis(Defaults.ASK_DURATION); // infinite
+            this.Timeout = Util.ToMillis(Defaults.ASK_TIMEOUT);
         }
 
         public override int ComputeDuration()
@@ -569,8 +569,8 @@ namespace Dialogic
 
         protected Command()
         {
-            this.Id = (++IDGEN).ToString();
             this.DelayMs = 0;
+            this.Id = (++IDGEN).ToString();
             this.realized = new Dictionary<string, object>();
         }
 

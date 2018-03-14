@@ -5,21 +5,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Timers;
 using System.Text.RegularExpressions;
-using System.Reflection;
 
 namespace Dialogic
 {
     public static class Defaults
     {
         public static double SAY_DURATION = 1.0;
+        public static double DO_DURATION = 0.02;
+        public static double NVM_DURATION = 5.0;
+        public static double ASK_DURATION = Util.INFINITE;
+
+        public static double ASK_TIMEOUT = 5.0;
+
         public static double SAY_FAST_MULT = 0.5;
         public static double SAY_SLOW_MULT = 2.0;
         public static double SAY_MAX_LEN_MULT = 2.0;
         public static double SAY_MIN_LEN_MULT = 0.5;
-        public static int SAY_MAX_LEN = 100;
-        public static int SAY_MIN_LEN = 2;
-
-        public static double ASK_TIMEOUT = 5.0;
+        public static int    SAY_MAX_LINE_LEN = 100;
+        public static int    SAY_MIN_LINE_LEN = 2;
     }
 
     public static class RE
@@ -51,6 +54,7 @@ namespace Dialogic
     public static class Util
     {
         public static StringComparison IC = StringComparison.InvariantCulture;
+        public static int INFINITE = -1;
 
         private static int start;
         private static Random random;
@@ -167,6 +171,16 @@ namespace Dialogic
             }
 
             return i;
+        }
+
+        internal static int Round(double p)
+        {
+            return (int)Math.Round(p);
+        }
+
+        internal static int Round(float p)
+        {
+            return (int)Math.Round(p);
         }
 
         internal static string[] StripSingleLineComments(string[] lines)
@@ -321,6 +335,7 @@ namespace Dialogic
 
         public static int ToMillis(double seconds)
         {
+            if (seconds < 0) return (int)seconds;
             return (int)(seconds * 1000);
         }
 
