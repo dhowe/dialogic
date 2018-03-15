@@ -38,11 +38,10 @@ namespace Dialogic
         internal const string SLC = @"//(.*?)(?:$|\r?\n)";
         public static Regex SingleComment = new Regex(SLC);
 
-        internal const string CMD = @"(^[A-Z][A-Z]+)?\s*";
         internal const string TXT = @"([^#}{]+)?\s*";
         internal const string LBL = @"(#[A-Za-z][\S]*)?\s*";
         internal const string MTA = @"(?:\{(.+?)\})?\s*";
-        public static Regex ParseLine = new Regex(CMD + TXT + LBL + MTA);
+        public static Regex ParseLine = new Regex(Command.TypesRegex() + TXT + LBL + MTA);
 
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
@@ -78,6 +77,13 @@ namespace Dialogic
                 return defaultMs;
             }
             return (int)(d * 1000);
+        }
+
+        public static string ToMixedCase(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+
+            return (s[0].ToString()).ToUpper() + s.Substring(1).ToLower();
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)

@@ -550,6 +550,21 @@ namespace Dialogic
     {
         public const string PACKAGE = "Dialogic.";
 
+        internal static IDictionary<string, Type> TypeMap
+            = new Dictionary<string, Type>() 
+        {
+            { "CHAT",   typeof(Dialogic.Chat) },
+            { "SAY",    typeof(Dialogic.Say)  },
+            { "ASK",    typeof(Dialogic.Ask)  },
+            { "OPT",    typeof(Dialogic.Opt)  },
+            { "DO",     typeof(Dialogic.Do)   },
+            { "GO",     typeof(Dialogic.Go)   },
+            { "WAIT",   typeof(Dialogic.Wait) },
+            { "FIND",   typeof(Dialogic.Find) },
+            { "GRAM",   typeof(Dialogic.Gram) },
+            { "NVM",    typeof(Dialogic.Nvm)  }
+        };
+
         protected static int IDGEN = 0;
 
         public static readonly Command NOP = new NoOp();
@@ -591,21 +606,9 @@ namespace Dialogic
             return Actor;
         }
 
-        private static string ToMixedCase(string s)
-        {
-            if (string.IsNullOrEmpty(s)) return s;
-
-            return (s[0].ToString()).ToUpper() + s.Substring(1).ToLower();
-        }
-
-        public static Command Create(string type, string text, string label, string[] metas)
-        {
-            //Console.WriteLine(type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(meta));
-            return Create(Type.GetType(PACKAGE + ToMixedCase(type)), label, text, metas);
-        }
-
         public static Command Create(Type type, string text, string label, string[] metas)
         {
+            //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(metas));
             Command cmd = (Command)Activator.CreateInstance(type);
             cmd.Init(text, label, metas);
             return cmd;
@@ -683,6 +686,18 @@ namespace Dialogic
         public virtual int ComputeDuration()
         {
             return DelayMs;
+        }
+
+        internal static string TypesRegex()
+        {
+            string s = @"(";
+            var cmds = TypeMap.Keys;
+            for (int i = 0; i < cmds.Count; i++)
+            {
+                s += cmds.ElementAt(i);
+                if (i < cmds.Count - 1) s += "|";
+            }
+            return s + @")?\s*";
         }
     }
 }

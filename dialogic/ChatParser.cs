@@ -9,8 +9,8 @@ namespace Dialogic
 {
     public class ChatParser
     {
-        public static string CHAT_FILE_EXT = ".gs";
         public static bool PRESERVE_LINE_NUMBERS = true;
+        public static string CHAT_FILE_EXT = ".gs";
 
         private static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
@@ -113,16 +113,11 @@ namespace Dialogic
 
             parts.Match((cmd, text, label, meta) =>
             {
-                //Console.WriteLine("P: "+cmd+"' '" +label+ "' '" 
-                // + text + "' " + Util.Stringify(meta));
-
-                cmd = cmd.Length > 0 ? cmd : "SAY"; // default
-
-                var pairs = RE.MetaSplit.Split(meta);
+                Type type = cmd.Length > 0 ? Command.TypeMap[cmd] : typeof(Say);
 
                 try
                 {
-                    c = Command.Create(cmd, label, text, pairs);
+                    c = Command.Create(type, text, label, RE.MetaSplit.Split(meta));
                 }
                 catch (Exception ex)
                 {
@@ -150,7 +145,7 @@ namespace Dialogic
 
                 if (!(last is Ask)) throw new ParseException
                     (line, lineNo, "Opt must follow Ask");
-                
+
                 ((Ask)last).AddOption((Opt)c);
             }
             else  // add command to last Chat
