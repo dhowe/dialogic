@@ -103,14 +103,19 @@ namespace Dialogic
 
                     if (cmd is ISendable)
                     {
-                        if (cmd is Wait && cmd.DelayMs == Util.INFINITE)
+                        if (cmd.GetType() == typeof(Wait))
                         {
-                            PauseCurrentChat();  // wait until ResumeEvent
+                            if (cmd.DelayMs != Util.INFINITE)
+                            {
+                                ComputeNextEventTime(cmd);
+                                return null;
+                            }
+                            PauseCurrentChat();  // wait for ResumeEvent
                         }
                         else if (cmd is Ask)
                         {
                             currentPrompt = (Ask)cmd;
-                            PauseCurrentChat();  // wait until ChoiceEvent
+                            PauseCurrentChat();  // wait for ChoiceEvent
                         }
                         else
                         {
@@ -245,7 +250,7 @@ namespace Dialogic
             using (StreamWriter w = File.AppendText(logFile))
             {
                 var now = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                w.WriteLine(now + "\t" + c + " @"+Util.Millis());
+                w.WriteLine(now + "\t" + c + " @" + Util.Millis());
             }
         }
     }

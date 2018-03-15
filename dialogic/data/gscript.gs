@@ -1,7 +1,8 @@
 ﻿Welcome to my $emotion world
 NVM 1.1
+WAIT 3
 DO #Twirl
-WAIT
+WAIT {ForAnimation=true}
 Thanks for visiting $place {speed=fast,style=whisper}
 
 GO #Prompt

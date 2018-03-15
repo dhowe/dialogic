@@ -72,11 +72,12 @@ namespace runner
                     var delay = 5000;
                     Timers.SetTimeout(delay, () =>
                     {
-                        Console.WriteLine("<resume-event#> after "+delay + "ms\n");
+                        Console.WriteLine("<resume-event#> after " + delay + "ms\n");
                         gameEvent = new ResumeEvent();
                     });
-                    diaText = "(" + diaType + ")";
-                    
+                    diaText = ("(" + diaType + " " + 
+                        Util.Stringify(ue.Data())).Trim() + ")";
+
                     break;
 
                 default:
@@ -113,7 +114,7 @@ namespace runner
                 {
                     // choice a valid response, or -1 for no response
                     int choice = Util.Rand(diaOpts.Length + 1) - 1;
-                    Console.WriteLine("\n<choice-index#" + choice + "> after "+delay+"ms\n");
+                    Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms\n");
                     gameEvent = new ChoiceEvent(choice);
                 });
             }
