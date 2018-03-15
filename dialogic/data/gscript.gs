@@ -1,5 +1,5 @@
 ﻿Welcome to my $emotion world
-WAIT .5
+WAIT
 NVM 3.1
 DO #Twirl
 Thanks for visiting $place {speed=fast,style=whisper}

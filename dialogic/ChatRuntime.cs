@@ -8,7 +8,7 @@ namespace Dialogic
 {
     public class ChatRuntime
     {
-        public static string logFile;// = "../../../dialogic/dia.log";
+        public static string logFile = "../../../dialogic/dia.log";
 
         private List<Chat> chats;
         private Ask currentPrompt;
@@ -32,8 +32,9 @@ namespace Dialogic
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
 
-            currentChat = chatLabel != null ? FindByName(chatLabel) : chats[0];
+            currentChat = (chatLabel != null) ? FindByName(chatLabel) : chats[0];
             currentChat.lastRunAt = Util.EpochMs();
+            lastChat = currentChat;
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref GameEvent ge)
@@ -51,10 +52,9 @@ namespace Dialogic
         private IUpdateEvent HandleResumeEvent(ref GameEvent ge, IDictionary<string, object> globals)
         {
             IResume ir = (IResume)ge;
-
-            // WORKING HERE
-
-            throw new NotImplementedException();
+            ResumeLastChat();
+            ge = null;
+            return null;
         }
 
         private IUpdateEvent HandleChoiceEvent(ref GameEvent ge, IDictionary<string, object> globals)
@@ -83,7 +83,6 @@ namespace Dialogic
                 }
                 else
                 {
-                    //throw new DialogicException("opt with no GO: " + opt);
                     currentChat = currentPrompt.parent; // continue
                 }
                 return null;
@@ -111,7 +110,7 @@ namespace Dialogic
                         else if (cmd is Ask)
                         {
                             currentPrompt = (Ask)cmd;
-                            PauseCurrentChat(); // wait until ChoiceEvent
+                            PauseCurrentChat();  // wait until ChoiceEvent
                         }
                         else
                         {
@@ -146,10 +145,6 @@ namespace Dialogic
 
         private void PauseCurrentChat()
         {
-            if (false && currentChat == null)
-            {
-                throw new DialogicException("Attempt to pause null chat");
-            }
             lastChat = currentChat;
             currentChat = null;
         }
@@ -250,7 +245,7 @@ namespace Dialogic
             using (StreamWriter w = File.AppendText(logFile))
             {
                 var now = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                w.WriteLine(now + "\t" + c);
+                w.WriteLine(now + "\t" + c + " @"+Util.Millis());
             }
         }
     }

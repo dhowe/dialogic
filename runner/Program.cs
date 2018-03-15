@@ -54,12 +54,13 @@ namespace runner
         {
             diaText = ue.Text();
             diaType = ue.Type();
+
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
 
             switch (diaType)
             {
                 case "Say":
-                    diaText += " " + Util.Stringify(ue.Data()); // show meta
+                    diaText += " " + Util.Stringify(ue.Data());
                     break;
 
                 case "Ask":
@@ -67,8 +68,21 @@ namespace runner
                     SendRandomResponse(ue);
                     break;
 
+                case "Wait":
+                    Console.WriteLine("abput to start timer");
+
+                    Timers.SetTimeout(5000, () =>
+                    {
+                        Console.WriteLine("create resume-event");
+                        gameEvent = new ResumeEvent();
+                    });
+                    diaText = ("(" + diaType + ": " + diaText + " "
+                        + Util.Stringify(ue.Data())).Trim() + ")";
+                    break;
+
                 default:
-                    diaText = ("(" + diaType + ": " + diaText + " " + Util.Stringify(ue.Data())).Trim() + ")";
+                    diaText = ("(" + diaType + ": " + diaText + " "
+                        + Util.Stringify(ue.Data())).Trim() + ")";
                     break;
             }
 
