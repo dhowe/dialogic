@@ -10,9 +10,7 @@
 <body>
     <h2 style="padding:5px">&nbsp; GuppyLint</h2>
     <div class="input-area">
-        <textarea id="main" class="lined" rows="29" cols="100">
-Paste your script here...
-</textarea>
+        <textarea id="main" class="lined" rows="29" cols="100">%%CODE%%</textarea>
     </div>
     <form name="main">
         <div class="validate">
@@ -21,28 +19,27 @@ Paste your script here...
             <button class="copy" id="copy">Copy</button>
         </div>
     </form>
-    <section id="result-container">
-        <h3>Results</h3>
-        <pre id="result" class="error"></pre>
+    <section id="result-container" class="%%CCLASS%%">
+        <pre id="result" class="%%RCLASS%%">%%RESULT%%</pre>
     </section>
     </div>
 
     <script>
-    $(function () {$(".lined").linedtextarea() });
+    $(function () { $(".lined").linedtextarea() });
 
     $(document).ready(function () {
 
       $("#clear").click(function () {
+        
         $("#main").val('');
       });
 
       $("#validate").click(function () {
+        
         event.preventDefault();
-        console.log("validate: " + $("#main").val());
-        //$.post(window.location, {name: 'John'});
-        window.location = 'http://localhost:8083/lint?code='+$("#main").val();
+        var code = $("#main").val().replace(/\r?\n/g, '%%BR%%');
+        window.location = 'http://localhost:8083/lint?code='+code;
       });
-
     });
     </script>
 </body>

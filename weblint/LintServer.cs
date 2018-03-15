@@ -10,33 +10,32 @@ namespace Dialogic.Server
 {
     public class LintServer
     {
-        private readonly HttpListener _listener = new HttpListener();
-        private readonly Func<HttpListenerRequest, string> _responderMethod;
-        private static string IndexPageContent;
+        const string SERVER_URL = "http://localhost:8083/lint/";
 
-        public LintServer(IReadOnlyCollection<string> prefixes, Func<HttpListenerRequest, string> method)
+        private static string indexPageContent;
+
+        private readonly HttpListener listener = new HttpListener();
+        private readonly Func<HttpListenerRequest, string> responderMethod;
+
+        public LintServer(Func<HttpListenerRequest, string> method, params string[] prefixes)
         {
-            if (prefixes == null || prefixes.Count == 0) throw new ArgumentException("URI required");
+            if (prefixes == null || prefixes.Length == 0) throw new ArgumentException("URI required");
 
             if (method == null) throw new ArgumentException("responder required");
 
-            foreach (var s in prefixes) _listener.Prefixes.Add(s);
+            foreach (var s in prefixes) listener.Prefixes.Add(s);
 
-            _responderMethod = method;
-            _listener.Start();
+            responderMethod = method;
+            listener.Start();
         }
-
-        public LintServer(Func<HttpListenerRequest, string> method, params string[] prefixes)
-           : this(prefixes, method) {}
 
         public void Run()
         {
             ThreadPool.QueueUserWorkItem(o =>
             {
-                Console.WriteLine("LintServer running...");
                 try
                 {
-                    while (_listener.IsListening)
+                    while (listener.IsListening)
                     {
                         ThreadPool.QueueUserWorkItem(c =>
                         {
@@ -45,7 +44,7 @@ namespace Dialogic.Server
                             {
                                 if (ctx == null) return;
 
-                                var rstr = _responderMethod(ctx.Request);
+                                var rstr = responderMethod(ctx.Request);
                                 var buf = Encoding.UTF8.GetBytes(rstr);
                                 ctx.Response.ContentLength64 = buf.Length;
                                 ctx.Response.OutputStream.Write(buf, 0, buf.Length);
@@ -62,7 +61,7 @@ namespace Dialogic.Server
                                     ctx.Response.OutputStream.Close();
                                 }
                             }
-                        }, _listener.GetContext());
+                        }, listener.GetContext());
                     }
                 }
                 catch (Exception)
@@ -74,32 +73,55 @@ namespace Dialogic.Server
 
         public void Stop()
         {
-            _listener.Stop();
-            _listener.Close();
+            listener.Stop();
+            listener.Close();
         }
 
         public static string SendResponse(HttpListenerRequest request)
         {
+            var html = indexPageContent;
             var code = request.QueryString.Get("code");
 
-            if (String.IsNullOrEmpty(code)) return IndexPageContent;
+            if (String.IsNullOrEmpty(code))
+            {
+                return html.Replace("%%CODE%%", "Input your code here");
+            }
+
+            code = code.Replace("%%BR%%", "\n");
 
             Console.WriteLine("code: '" + code + "'");
 
-            string result = "<HTML><BODY>" + code + "<BR>" + DateTime.Now + "</BODY></HTML>";
+            html = html.Replace("%%CODE%%", code);
+            html = html.Replace("%%CCLASS%%", "shown");
 
-            // NEXT: Append parse-results to html IndexPageContent here
+            List<Chat> chats = null;
+            try
+            {
+                string content = String.Empty;
+                chats = ChatParser.ParseText(code);
+                chats.ForEach(c => content += c.ToTree());
+                html = html.Replace("%%RESULT%%", content);
+                html = html.Replace("%%RCLASS%%", "success");
+            }
+            catch (ParseException ex)
+            {
+                html = html.Replace("%%RCLASS%%", "error");
+                html = html.Replace("%%RESULT%%", ex.Message);
+            }
 
-            return string.Format(result, DateTime.Now);
+            return html;
         }
 
-        public static void Main(string[] args)
+        public static void Main()
         {
-            LintServer ws = new LintServer(SendResponse, "http://localhost:8083/lint/");
-            LintServer.IndexPageContent = String.Join("\n", File.ReadAllLines("data/index.html", Encoding.UTF8));
+            string html = String.Join("\n", 
+                File.ReadAllLines("data/index.html", Encoding.UTF8));
+
+            LintServer ws = new LintServer(SendResponse, SERVER_URL);
+            LintServer.indexPageContent = html;
             ws.Run();
 
-            Console.WriteLine("LintServer: press any key to quit");
+            Console.WriteLine("LintServer running... press any key to quit");
             Console.ReadKey();
             ws.Stop();
         }
