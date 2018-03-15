@@ -290,14 +290,6 @@ namespace Dialogic
         {
             List<Chat> chats;
 
-            chats = ChatParser.ParseText("Chat c d");
-            //Console.WriteLine(chats[0].ToTree());
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("HAY is for horses"));
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-
             chats = ChatParser.ParseText("HAY is for horses");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -464,8 +456,16 @@ namespace Dialogic
         public void TestExceptions()
         {
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT Two Words"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("GO {no=label}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("DO {no=label}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND {a = (b|c)}"));
-            //Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY")); // ?
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND hello"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT {a}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("OPT {a=b}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY")); // ?
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY {a=b}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT a {a=b}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("NVM a {a=b}"));
 
             string[] lines = {
                 "CHAT c1",

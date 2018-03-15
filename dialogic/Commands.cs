@@ -20,6 +20,12 @@ namespace Dialogic
             this.DelayMs = Util.ToMillis(Defaults.SAY_DURATION);
         }
 
+        public override void Init(string text, string label, string[] metas)
+        {
+            base.Init(text, label, metas);
+            if (Text.Length < 1) throw new ParseException("SAY requires text");
+        }
+
         public override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
@@ -161,16 +167,29 @@ namespace Dialogic
         public override void Init(string text, string label, string[] metas)
         {
             base.Init(text, label, metas);
-            DelayMs = Util.SecStrToMs(text, Util.ToMillis(Defaults.WAIT_DURATION));
+            if (text.Length == 0)
+            {
+                DelayMs = Util.ToMillis(DefaultDuration());
+            }
+            else
+            {
+                DelayMs = Util.SecStrToMs(text, -1);
+                if (DelayMs == -1) throw new ParseException(TypeName() 
+                    + " accepts only a NUMBER, found: '"+text+"'");
+            }
+        }
+
+        protected virtual double DefaultDuration()
+        {
+            return Defaults.WAIT_DURATION;
         }
     }
 
     public class Nvm : Wait, ISendable
     {
-        public override void Init(string text, string label, string[] metas)
+        protected override double DefaultDuration()
         {
-            base.Init(text, label, metas);
-            DelayMs = Util.SecStrToMs(text, Util.ToMillis(Defaults.NVM_DURATION));
+            return Defaults.NVM_DURATION;
         }
     }
 
@@ -558,7 +577,7 @@ namespace Dialogic
         public const string PACKAGE = "Dialogic.";
 
         internal static IDictionary<string, Type> TypeMap
-            = new Dictionary<string, Type>() 
+            = new Dictionary<string, Type>()
         {
             { "CHAT",   typeof(Dialogic.Chat) },
             { "SAY",    typeof(Dialogic.Say)  },

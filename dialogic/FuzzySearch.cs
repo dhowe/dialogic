@@ -7,13 +7,14 @@ namespace Dialogic
     public static class FuzzySearch
     {
         /**
-         * Find highest scoring chat which does not match any constraint key without also 
-         * matching its value. If none match then start relaxing hard-type constraints until one does.
+         * Find highest scoring chat which does not match any of the constraint.
+         * If none match then start relaxing hard-type constraints until one does.
          * If all hard-type constraints have been relaxed and nothing is found, then return null;
          */
         public static Chat Find(List<Chat> chats, IDictionary<string, object> constraints, 
             IDictionary<string, object> globals = null)
         {
+            var dbug = false;
             var chat = FindAll(chats, constraints, globals).FirstOrDefault();
 
             if (chat == null)
@@ -26,7 +27,7 @@ namespace Dialogic
                     if (c.IsRelaxable()) relaxables.Add(kv.Key);
                 }
 
-                Console.WriteLine("Failed with " + relaxables.Count + " hard constraints");
+                if(dbug)Console.WriteLine("\nFailed with " + relaxables.Count + " hard constraints");
                 if (relaxables.Count == 0) return null;
 
                 // try again after relaxing each hard constraint
@@ -35,11 +36,11 @@ namespace Dialogic
                 {
                     Constraint toRelax = (Constraint)constraints[Util.RandItem(relaxables)];
                     relaxables.Remove(toRelax.name);
-                    Console.WriteLine("Relaxing "+toRelax+", "+relaxables.Count+" hard constraints remaining");
+                    if (dbug)Console.WriteLine("Relaxing {"+toRelax+"} "+relaxables.Count+" hard constraints remaining");
                     relaxed.Add(toRelax.name);
                     toRelax.type = ConstraintType.Soft;
                     chat = FindAll(chats, constraints, globals).FirstOrDefault();
-                    Console.WriteLine("Found: "+chat);
+                    if (dbug && chat != null) Console.WriteLine("Found: "+chat);
                 }
 
                 // restore the state of constraints for reuse

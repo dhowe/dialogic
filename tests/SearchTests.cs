@@ -347,6 +347,37 @@ namespace Dialogic
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.Text, Is.EqualTo("c3"));
+
+            lines = new[]{
+                "CHAT c0 {dev=1}",
+                "FIND {!dev>1,!day=fri}",
+                "CHAT c1 {dev=0,day=wed}",
+                "CHAT c2 {day=wed}",
+                "CHAT c3 {}"
+            };
+
+            contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+            cr = new ChatRuntime(chats);
+
+            chat = cr.Find((Find)finder);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.Text, Is.EqualTo("c3"));
+
+            lines = new[]{
+                "CHAT c0 {dev=1}",
+                "FIND {!dev>1,!day=fri}",
+                "CHAT c1 {dev=0,day=wed}",
+                "CHAT c2 {day=wed}",
+            };
+
+            chats = ChatParser.ParseText(String.Join("\n", lines));
+            Assert.That(new ChatRuntime(chats).Find((Find)chats[0].commands[0]), Is.Null);
         }
 
         [Test]

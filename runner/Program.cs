@@ -69,15 +69,18 @@ namespace runner
                     break;
 
                 case "Wait":
-                    var delay = 5000;
-                    Timers.SetTimeout(delay, () =>
+                    var now = Util.Millis();
+
+                    // send ResumeEvent after 5 sec
+                    Timers.SetTimeout(5000, () =>
                     {
-                        Console.WriteLine("<resume-event#> after " + delay + "ms\n");
+                        Console.WriteLine("<resume-event#>" +
+                            " after " + Util.Millis(now) + "ms\n");
                         gameEvent = new ResumeEvent();
                     });
+
                     diaText = ("(" + diaType + " " + 
                         Util.Stringify(ue.Data())).Trim() + ")";
-
                     break;
 
                 default:
