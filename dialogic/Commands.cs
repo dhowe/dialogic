@@ -370,6 +370,8 @@ namespace Dialogic
     {
         public List<Command> commands;
         public int cursor = 0, lastRunAt = -1;
+        public double stalenessIncrement = 1;
+        public double staleness = 0;
 
         public Chat()
         {
@@ -406,7 +408,6 @@ namespace Dialogic
             }
 
             ParseMeta(metas);
-            //            SetMeta(Meta.LABEL, Text); // !realized
         }
 
         protected override string MetaStr()
@@ -441,6 +442,13 @@ namespace Dialogic
         public void Reset()
         {
             this.cursor = 0;
+        }
+
+        internal void Run()
+        {
+            Reset();
+            lastRunAt = Util.EpochMs();
+            staleness += stalenessIncrement;
         }
     }
 
@@ -542,7 +550,6 @@ namespace Dialogic
                     SetMeta(parts[0].Trim(), parts[1].Trim());
                 }
             }
-
         }
     }
 
@@ -577,7 +584,7 @@ namespace Dialogic
 
         public string Text, Actor = DefaultSpeaker;
 
-        //public int LastSentMs, IndexInChat = -1; // needed?
+        //public int IndexInChat = -1; ?
 
         public Chat parent;
 

@@ -30,11 +30,10 @@ namespace Dialogic
 
         public void Run(string chatLabel = null)
         {
-            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats!");
+            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats found");
 
             currentChat = (chatLabel != null) ? FindByName(chatLabel) : chats[0];
-            currentChat.lastRunAt = Util.EpochMs();
-            lastChat = currentChat;
+            (lastChat = currentChat).Run();
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref GameEvent ge)
@@ -46,7 +45,7 @@ namespace Dialogic
         {
             if (ge is IChoice) return HandleChoiceEvent(ref ge, globals);
             if (ge is IResume) return HandleResumeEvent(ref ge, globals);
-            throw new DialogicException("Unexpected event-type: " + ge.GetType());
+            throw new DialogicException("Invalid event-type: " + ge.GetType());
         }
 
         private IUpdateEvent HandleResumeEvent(ref GameEvent ge, IDictionary<string, object> globals)
@@ -143,9 +142,7 @@ namespace Dialogic
         private void StartChat(Chat chat)
         {
             lastChat = currentChat;
-            currentChat = chat;
-            currentChat.Reset();
-            currentChat.lastRunAt = Util.EpochMs();
+            (currentChat = chat).Run();
         }
 
         private void PauseCurrentChat()
@@ -166,8 +163,8 @@ namespace Dialogic
                     + currentChat.Text + " is active");
             }
             currentChat = lastChat;
-            currentChat.lastRunAt = Util.EpochMs();
-            nextEventTime = Util.Millis() + msBeforeResuming; // now
+            currentChat.lastRunAt = Util.EpochMs(); // reset time on resume ?
+            nextEventTime = Util.Millis() + msBeforeResuming;
             lastChat = null;
         }
 
