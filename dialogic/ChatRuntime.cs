@@ -6,34 +6,85 @@ using System.Threading;
 
 namespace Dialogic
 {
+    class ChatScheduler
+    {
+        public Chat chat;
+        public Ask prompt;
+        public ChatRuntime runtime;
+        public Stack<Chat> resumables;
+
+        public ChatScheduler(ChatRuntime runtime)
+        {
+            this.runtime = runtime;
+            this.resumables = new Stack<Chat>();
+        }
+
+        public void StartNew(Chat next)
+        {
+            if (chat != null) resumables.Push(chat);
+            (chat = next).Run();
+        }
+
+        public void PauseCurrent()
+        {
+            if (chat != null) resumables.Push(chat);
+            chat = null;
+        }
+
+        public int ResumeLast(bool mustBeResumable = false)
+        {
+            if (resumables.IsNullOrEmpty())
+            {
+                throw new DialogicException("No Chat to resume");
+            }
+
+            if (chat != null)
+            {
+                throw new DialogicException("Cannot resume chat" +
+                    " while Chat#" + chat.Text + " is active");
+            }
+
+            var last = resumables.Pop();
+            while (mustBeResumable && !last.IsResumable())
+            {
+                if (resumables.Count < 1) throw new DialogicException
+                    ("No resumable Chat found on stack");
+                
+                last = resumables.Pop();
+            }
+
+            (chat = last).Run(false);
+
+            return Util.Millis();
+        }
+    }
+
     public class ChatRuntime
     {
-        public static string logFile = "../../../dialogic/dia.log";
-
-        private List<Chat> chats;
-        private Ask currentPrompt;
-        private Chat lastChat, currentChat;
+        public static string logFile;// = "../../../dialogic/dia.log";
 
         private bool logInitd;
         private int nextEventTime;
         private Thread searchThread;
+        private List<Chat> chats;
+        private ChatScheduler scheduler;
 
         public ChatRuntime(List<Chat> chats)
         {
             this.chats = chats;
-        }
-
-        public List<Chat> Chats()
-        {
-            return chats;
+            this.scheduler = new ChatScheduler(this);
         }
 
         public void Run(string chatLabel = null)
         {
             if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats found");
 
-            currentChat = (chatLabel != null) ? FindByName(chatLabel) : chats[0];
-            (lastChat = currentChat).Run();
+            scheduler.StartNew((chatLabel != null) ? FindByName(chatLabel) : chats[0]);
+        }
+
+        public List<Chat> Chats()
+        {
+            return chats;
         }
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
@@ -55,9 +106,9 @@ namespace Dialogic
             ge = null;
 
             if (String.IsNullOrEmpty(label))
-                ResumeLast();
+                nextEventTime = scheduler.ResumeLast();
             else
-                StartNew(FindByName(label));
+                scheduler.StartNew(FindByName(label));
 
             return null;
         }
@@ -68,16 +119,16 @@ namespace Dialogic
             var idx = ic.GetChoiceIndex();
             ge = null;
 
-            if (idx < 0 || idx >= currentPrompt.Options().Count)
+            if (idx < 0 || idx >= scheduler.prompt.Options().Count)
             {
                 // bad index, so reprompt for now
                 Console.WriteLine("Invalid index " + idx + ", reprompting\n");
-                currentPrompt.Realize(globals); // re-realize
-                return new UpdateEvent(currentPrompt);
+                scheduler.prompt.Realize(globals); // re-realize
+                return new UpdateEvent(scheduler.prompt);
             }
             else
             {
-                Opt opt = currentPrompt.Selected(idx);
+                Opt opt = scheduler.prompt.Selected(idx);
                 opt.Realize(globals);
 
                 if (opt.action != Command.NOP)
@@ -86,7 +137,7 @@ namespace Dialogic
                 }
                 else
                 {
-                    currentChat = currentPrompt.parent; // just continue
+                    scheduler.chat = scheduler.prompt.parent; // just continue
                 }
                 return null;
             }
@@ -96,9 +147,9 @@ namespace Dialogic
         {
             Command cmd = null;
 
-            if (currentChat != null && Util.Millis() >= nextEventTime)
+            if (scheduler.chat != null && Util.Millis() >= nextEventTime)
             {
-                cmd = currentChat.Next();
+                cmd = scheduler.chat.Next();
                 if (cmd != null)
                 {
                     cmd.Realize(globals);
@@ -113,12 +164,12 @@ namespace Dialogic
                                 ComputeNextEventTime(cmd);
                                 return null;
                             }
-                            PauseCurrent();  // wait for ResumeEvent
+                            scheduler.PauseCurrent();  // wait for ResumeEvent
                         }
                         else if (cmd is Ask)
                         {
-                            currentPrompt = (Ask)cmd;
-                            PauseCurrent();  // wait for ChoiceEvent
+                            scheduler.prompt = (Ask)cmd;
+                            scheduler.PauseCurrent();  // wait for ChoiceEvent
                         }
                         else
                         {
@@ -133,7 +184,6 @@ namespace Dialogic
                     }
                 }
             }
-
             return null;
         }
 
@@ -141,35 +191,6 @@ namespace Dialogic
         {
             nextEventTime = cmd.DelayMs >= 0 ? Util.Millis()
                 + cmd.ComputeDuration() : Int32.MaxValue;
-        }
-
-        private void StartNew(Chat chat)
-        {
-            lastChat = currentChat;
-            (currentChat = chat).Run();
-        }
-
-        private void PauseCurrent()
-        {
-            lastChat = currentChat;
-            currentChat = null;
-        }
-
-        private void ResumeLast(int msBeforeResuming = 0)
-        {
-            if (lastChat == null)
-            {
-                throw new DialogicException("Attempt to resume null chat");
-            }
-            if (currentChat != null)
-            {
-                throw new DialogicException("Attempt to resume chat while chat "
-                    + currentChat.Text + " is active");
-            }
-            currentChat = lastChat;
-            currentChat.lastRunAt = Util.EpochMs(); // reset time on resume ?
-            nextEventTime = Util.Millis() + msBeforeResuming;
-            lastChat = null;
         }
 
         public Chat FindByName(string label)
@@ -191,7 +212,7 @@ namespace Dialogic
 
         public void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            PauseCurrent();
+            scheduler.PauseCurrent();
 
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
@@ -212,7 +233,7 @@ namespace Dialogic
 
                 if (chat == null) throw new FindException(finder);
 
-                StartNew(chat);
+                scheduler.StartNew(chat);
 
             })).Start();
         }

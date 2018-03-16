@@ -388,6 +388,7 @@ namespace Dialogic
     public class Chat : Command
     {
         public List<Command> commands;
+        public bool resumeOnInterrupt = false;
         public int cursor = 0, lastRunAt = -1;
         public double stalenessIncrement = 1;
         public double staleness = 0;
@@ -463,11 +464,19 @@ namespace Dialogic
             this.cursor = 0;
         }
 
-        internal void Run()
+        internal void Run(bool resetCursor=true)
         {
-            Reset();
+            if (resetCursor) Reset();
+
             lastRunAt = Util.EpochMs();
-            staleness += stalenessIncrement;
+
+            // Q: what about (No-Label) WAIT events ?
+            staleness += stalenessIncrement; 
+        }
+
+        public bool IsResumable() // TODO: set from meta
+        {
+            return resumeOnInterrupt;
         }
     }
 
@@ -476,12 +485,14 @@ namespace Dialogic
         public const string OPTS = "opts";
         public const string TYPE = "type";
         public const string TEXT = "text";
+        public const string PLOT = "plot";
+        public const string STAGE = "stage";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
-        //public const string LABEL = "label";
+        public const string RESUMABLE = "resumable";
 
         public IDictionary<string, object> meta, realized;
-
+            
         public bool HasMeta()
         {
             return meta != null && meta.Count > 0;

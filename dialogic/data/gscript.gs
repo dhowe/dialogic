@@ -5,7 +5,6 @@ WAIT 3
 DO #Twirl
 WAIT {ForAnimation=true}
 Thanks for visiting $place {speed=fast,style=whisper}
-
 GO #Prompt
 
 CHAT RePrompt
