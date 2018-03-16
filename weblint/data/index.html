@@ -5,6 +5,24 @@
     <script src="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.js"></script>
     <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
     <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
+    <style>
+     body {
+        padding: 0 2em;
+     }
+    .line-error {
+        position: absolute;
+        width: 600px;
+        height:14px;
+        margin-top: -14px;
+        padding-right: 557px !important;
+        z-index: -1;
+        pointer-events: none;
+     }
+     .linedtextarea textarea{
+        outline: none !important;
+        background-color: transparent !important;
+     }
+    </style>
 </head>
 </head>
 <body>
@@ -49,7 +67,7 @@
       // Highlight error
       if (!$("#errorLine").text().includes("ERRORLINE")) {
          var idx = $("#errorLine").text() - 1;
-         $(".lineno:eq(" + idx  + ")").addClass("line-error");
+         $(".lineno:eq(" + idx  + ")").append("<div class='line-error'></div>");
       }
 
     });
