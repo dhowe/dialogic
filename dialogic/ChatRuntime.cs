@@ -36,19 +36,19 @@ namespace Dialogic
             (lastChat = currentChat).Run();
         }
 
-        public IUpdateEvent Update(IDictionary<string, object> globals, ref GameEvent ge)
+        public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
         {
             return ge != null ? HandleGameEvent(ref ge, globals) : HandleChatEvent(globals);
         }
 
-        private IUpdateEvent HandleGameEvent(ref GameEvent ge, IDictionary<string, object> globals)
+        private IUpdateEvent HandleGameEvent(ref EventArgs ge, IDictionary<string, object> globals)
         {
             if (ge is IChoice) return HandleChoiceEvent(ref ge, globals);
             if (ge is IResume) return HandleResumeEvent(ref ge, globals);
-            throw new DialogicException("Invalid event-type: " + ge.GetType());
+            throw new DialogicException("Unexpected event-type: " + ge.GetType());
         }
 
-        private IUpdateEvent HandleResumeEvent(ref GameEvent ge, IDictionary<string, object> globals)
+        private IUpdateEvent HandleResumeEvent(ref EventArgs ge, IDictionary<string, object> globals)
         {
             IResume ir = (IResume)ge;
             ResumeLastChat();
@@ -56,7 +56,7 @@ namespace Dialogic
             return null;
         }
 
-        private IUpdateEvent HandleChoiceEvent(ref GameEvent ge, IDictionary<string, object> globals)
+        private IUpdateEvent HandleChoiceEvent(ref EventArgs ge, IDictionary<string, object> globals)
         {
             //Console.WriteLine("HANDLE-CHOICE " + ge);
 

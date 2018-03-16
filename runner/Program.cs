@@ -28,7 +28,7 @@ namespace runner
             };
 
         private readonly ChatRuntime runtime;
-        private GameEvent gameEvent;
+        private EventArgs gameEvent;
         string diaText, diaType;
         string[] diaOpts;
 
