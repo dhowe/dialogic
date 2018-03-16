@@ -30,16 +30,18 @@
     $(document).ready(function () {
 
       $("#clear").click(function () {
-        
+
         $("#main").val('');
       });
 
       $("#validate").click(function () {
-        
+
         event.preventDefault();
 
-        // TODO: need to properly encode the code data before sending
         var code = $("#main").val().replace(/\r?\n/g, '%%BR%%');
+        code = code.replace(/\&/g,'%26');
+        code = code.replace(/\+/g,'%2B');
+        code = code.replace(/#/g,'%23');
         window.location = 'http://localhost:8083/lint?code='+code;
       });
     });
