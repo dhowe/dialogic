@@ -76,7 +76,7 @@ namespace runner
                     {
                         Console.WriteLine("<resume-event#>" +
                             " after " + Util.Millis(now) + "ms\n");
-                        gameEvent = new ResumeEvent();
+                        gameEvent = new ResumeEvent("#GScriptTest");
                     });
 
                     diaText = ("(" + diaType + " " + 

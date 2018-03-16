@@ -1,4 +1,5 @@
-﻿Welcome to my $emotion world
+﻿CHAT GScriptTest
+Welcome to my $emotion world
 NVM 1.1
 WAIT 3
 DO #Twirl

@@ -89,11 +89,12 @@ namespace Dialogic
     }
 
     /**
-     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd
+     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd,
+     * optionally using a specific chat, specified with its Label
      */
     public interface IResume
     {
-        int ResumeAfter();
+        string ResumeWith();
     }
 
     /**
@@ -102,20 +103,21 @@ namespace Dialogic
     public abstract class GameEvent : EventArgs { }
 
     /**
-     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd
+     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd,
+     * optionally with a new Chat, specified by its Label
      */
     public class ResumeEvent : GameEvent, IResume
     {
-        public readonly int resumeAfterMs;
+        public readonly string chatLabel;
 
-        public ResumeEvent(int resumeAfterMs = 0) : base()
+        public ResumeEvent(string chatLabel = null) : base()
         {
-            this.resumeAfterMs = resumeAfterMs;
+            this.chatLabel = chatLabel;
         }
 
-        public int ResumeAfter()
+        public string ResumeWith()
         {
-            return resumeAfterMs;
+            return chatLabel;
         }
     }
 
