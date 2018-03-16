@@ -109,7 +109,7 @@ namespace Dialogic.Server
                 html = html.Replace("%%RESULT%%", ex.Message);
 
                 var lineNo = ex.lineNumber;
-                // TODO: use this to highlight the problematic line in textarea
+                html = html.Replace("%%ERRORLINE%%", lineNo + "");
             }
 
             return html;
