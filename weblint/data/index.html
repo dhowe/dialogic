@@ -37,6 +37,8 @@
       $("#validate").click(function () {
         
         event.preventDefault();
+
+        // TODO: need to properly encode the code data before sending
         var code = $("#main").val().replace(/\r?\n/g, '%%BR%%');
         window.location = 'http://localhost:8083/lint?code='+code;
       });

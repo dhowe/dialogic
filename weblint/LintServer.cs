@@ -89,7 +89,7 @@ namespace Dialogic.Server
 
             code = code.Replace("%%BR%%", "\n");
 
-            Console.WriteLine("code: '" + code + "'");
+            //Console.WriteLine("code: '" + code + "'");
 
             html = html.Replace("%%CODE%%", code);
             html = html.Replace("%%CCLASS%%", "shown");
@@ -107,6 +107,9 @@ namespace Dialogic.Server
             {
                 html = html.Replace("%%RCLASS%%", "error");
                 html = html.Replace("%%RESULT%%", ex.Message);
+
+                var lineNo = ex.lineNumber;
+                // TODO: use this to highlight the problematic line in textarea
             }
 
             return html;
@@ -114,7 +117,7 @@ namespace Dialogic.Server
 
         public static void Main()
         {
-            string html = String.Join("\n", 
+            string html = String.Join("\n",
                 File.ReadAllLines("data/index.html", Encoding.UTF8));
 
             LintServer ws = new LintServer(SendResponse, SERVER_URL);
