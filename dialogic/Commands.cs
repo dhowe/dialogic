@@ -335,6 +335,13 @@ namespace Dialogic
 
     public class Find : Command
     {
+        public Find() : base() {}
+
+        internal Find(Constraints c) : base()
+        {
+            this.meta = c.AsDict();
+        }
+
         public override void Init(string text, string label, string[] metas)
         {
             ParseMeta(metas);

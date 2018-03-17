@@ -22,8 +22,8 @@ namespace Dialogic
         public static double SAY_SLOW_MULT = 2.0;
         public static double SAY_MAX_LEN_MULT = 2.0;
         public static double SAY_MIN_LEN_MULT = 0.5;
-        public static int    SAY_MAX_LINE_LEN = 80;
-        public static int    SAY_MIN_LINE_LEN = 2;
+        public static int SAY_MAX_LINE_LEN = 80;
+        public static int SAY_MIN_LINE_LEN = 2;
     }
 
     public static class RE
@@ -395,7 +395,7 @@ namespace Dialogic
             }
         }
 
-        public bool Check(string check, IDictionary<string, object> globals=null)
+        public bool Check(string check, IDictionary<string, object> globals = null)
         {
             string rval = value;
             if (globals != null)
@@ -403,7 +403,7 @@ namespace Dialogic
                 if (check.Contains('$')) check = Realizer.DoVars(check, globals);
                 if (value.Contains('$')) rval = Realizer.DoVars(value, globals);
             }
-                
+
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
             return passed;
@@ -467,15 +467,20 @@ namespace Dialogic
             pairs = new Dictionary<string, object>();
         }
 
-        public Constraints(string key, string value, ConstraintType type = ConstraintType.Soft) : this()
+        public Constraints(Constraint c)
         {
-            Add(new Constraint(key, value, type));
+            pairs = new Dictionary<string, object>() { { c.name, c } };
         }
 
-        public Constraints(string op, string key, string value, ConstraintType type = ConstraintType.Soft) : this()
-        {
-            Add(new Constraint(op, key, value, type));
-        }
+        //public Constraints(string key, string value, ConstraintType type = ConstraintType.Soft) : this()
+        //{
+        //    Add(new Constraint(key, value, type));
+        //}
+
+        //public Constraints(string op, string key, string value, ConstraintType type = ConstraintType.Soft) : this()
+        //{
+        //    Add(new Constraint(op, key, value, type));
+        //}
 
         public Constraints Add(Constraint c)
         {

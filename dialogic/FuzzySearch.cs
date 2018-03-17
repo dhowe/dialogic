@@ -6,28 +6,32 @@ namespace Dialogic
 {
     public static class FuzzySearch
     {
-        /**
-         * Find highest scoring chat which does not match any of the constraint.
-         * If none match then start relaxing hard-type constraints until one does.
-         * If all hard-type constraints have been relaxed and nothing is found, then return null;
-         */
-        public static Chat Find(List<Chat> chats, IDictionary<string, object> constraints,
-            IDictionary<string, object> globals = null)
+        /// <summary>
+        /// Finds the highest scoring chat which does not violate any of the constraints.
+        /// If none match then start relaxing hard-type constraints until one does.
+        /// If all hard-type constraints have been relaxed and nothing is found, then return null.
+        /// </summary>
+        /// <returns>Chat</returns>
+        /// <param name="finder">Finder.</param>
+        /// <param name="chats">Chats.</param>
+        /// <param name="globals">Globals.</param>
+        public static Chat Find(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
             var dbug = false;
-            var chat = FindAll(chats, constraints, globals).FirstOrDefault();
+            var constraints = ExtractMeta(finder);
+            var chat = FindAll(finder, chats, globals).FirstOrDefault();
 
             if (chat == null)
             {
                 List<string> relaxables = new List<string>();
-                //var types = new Dictionary<string, ConstraintType>();
                 foreach (var kv in constraints)
                 {
                     Constraint c = (Constraint)kv.Value;
                     if (c.IsRelaxable()) relaxables.Add(kv.Key);
                 }
 
-                if (dbug) Console.WriteLine("\nFailed with " + relaxables.Count + " hard constraints");
+                if (dbug) Console.WriteLine("\nFailed with "
+                    + relaxables.Count + " hard constraints");
                 if (relaxables.Count == 0) return null;
 
                 // try again after relaxing each hard constraint
@@ -36,10 +40,14 @@ namespace Dialogic
                 {
                     Constraint toRelax = (Constraint)constraints[Util.RandItem(relaxables)];
                     relaxables.Remove(toRelax.name);
-                    if (dbug) Console.WriteLine("Relaxing {" + toRelax + "} " + relaxables.Count + " hard constraints remaining");
+
+                    if (dbug) Console.WriteLine("Relaxing {" + toRelax + "} "
+                        + relaxables.Count + " hard constraints remaining");
+
                     relaxed.Add(toRelax.name);
                     toRelax.type = ConstraintType.Soft;
-                    chat = FindAll(chats, constraints, globals).FirstOrDefault();
+                    chat = FindAll(finder, chats, globals).FirstOrDefault();
+
                     if (dbug && chat != null) Console.WriteLine("Found: " + chat);
                 }
 
@@ -52,34 +60,34 @@ namespace Dialogic
             return chat;
         }
 
-        /**
-         * Find all chats according to specified constraints ordered by score.
-         * 
-         * If none match, an empty list will be returned
-         * Cases: 
-         *   1.  has key, matches ->             allow, score++
-         *   2.  has key, doesn't match ->       disallow
-         *   3a. doesn't have key (normal) ->    allow
-         *    b. doesn't have key (strict) ->    disallow
-         */
-        public static List<Chat> FindAll(List<Chat> chats, IDictionary<string, object> constraints, IDictionary<string, object> globals = null)
+        /// <summary>
+        /// Find all chats, ordered by score, which do not violate the specified constraints (no relaxation done here)
+        /// </summary>
+        /// <returns>List of chats ordered by score</returns>
+        /// <param name="finder">Finder.</param>
+        /// <param name="chats">Chats.</param>
+        /// <param name="globals">Globals.</param>
+        public static List<Chat> FindAll(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
+            var dbug = false;
+            var constraints = ExtractMeta(finder);
             if (constraints == null) return chats;
 
-            var dbug = false;
             Dictionary<Chat, int> matches = new Dictionary<Chat, int>();
 
             for (int i = 0; i < chats.Count; i++)
             {
+                // never return the source chat
+                if (chats[i] == finder.parent) continue;
+
                 var hits = 0;
                 var chatProps = chats[i].GetMeta();
 
-                if (dbug) Console.WriteLine("CHAT." + chats[i].Text);
+                if (dbug) Console.WriteLine("\n"+chats[i].Text+" ----------");
 
                 foreach (var key in constraints.Keys)
                 {
-                    if (dbug) Console.WriteLine("  Find " + key + " " + constraints[key] + " in "
-                         + chats[i].Text + " " + Util.Stringify(chatProps));
+                    if (dbug) Console.WriteLine("  Find " + constraints[key] + " in " + chats[i]);
 
                     Constraint constraint = (Constraint)constraints[key];
 
@@ -101,7 +109,7 @@ namespace Dialogic
                     }
                     else if (constraint.IsStrict()) // doesn't have-key, fails strict
                     {
-                        if (dbug) Console.WriteLine("    FAIL-STRICT:" + constraints[key]);
+                        if (dbug) Console.WriteLine("    !FAIL: " + constraints[key]);
                         hits = -1;
                         break;
                     }
@@ -111,15 +119,21 @@ namespace Dialogic
 
             List<KeyValuePair<Chat, int>> list = DescendingRandomSort(matches);
 
-            //list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
+            if (dbug) list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
+        }
+
+        private static IDictionary<string, object> ExtractMeta(Find finder)
+        {
+            // note: this is problematic! -- perhaps should throw in case of no realized data
+            return !Util.IsNullOrEmpty(finder.realized) ? finder.realized : finder.meta;
         }
 
         /*
          * Sort by points, highest first, break ties with a coin-flip
          */
-        public static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
+        private static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
         {
             List<KeyValuePair<Chat, int>> list = d.ToList();
             list.Sort((p1, p2) => CompareRandomizeTies(p1.Value, p2.Value));
@@ -131,6 +145,7 @@ namespace Dialogic
          */
         public static List<KeyValuePair<Chat, int>> DescendingFreshnessSort(Dictionary<Chat, int> d)
         {
+            // public for testing only
             List<KeyValuePair<Chat, int>> list = d.ToList();
             list.Sort((p1, p2) => CompareFreshnessTies(p1, p2));
             return list;

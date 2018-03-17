@@ -227,7 +227,7 @@ namespace Dialogic
                 }
                 else
                 {
-                    chat = FuzzySearch.Find(chats, finder.realized, globals);
+                    chat = FuzzySearch.Find(finder, chats, globals);
                     //Console.WriteLine("Found " + chat.Text + " in " + Util.Millis(ts) + "ms");
                 }
 
@@ -238,25 +238,36 @@ namespace Dialogic
             })).Start();
         }
 
-        // for testing only --------------------------------------
-        public Chat Find(Find f, IDictionary<string, object> globals = null)
+        // testing only ------------------------------------------
+
+        public Chat Find(Find f, IDictionary<string, object> globals)
         {
-            return FuzzySearch.Find(chats, f.meta, globals);
+            return FuzzySearch.Find(f, chats, globals);
+        }
+
+        public List<Chat> FindAll(Find f, IDictionary<string, object> globals)
+        {
+            return FuzzySearch.FindAll(f, chats, globals);
         }
 
         public Chat Find(Constraints constraints, IDictionary<string, object> globals = null)
         {
-            return FuzzySearch.Find(chats, constraints.AsDict(), globals);
-        }
-
-        public List<Chat> FindAll(Find f, IDictionary<string, object> globals = null)
-        {
-            return FuzzySearch.FindAll(chats, f.meta, globals);
+            return FuzzySearch.Find(new Find(constraints), chats, globals);
         }
 
         public List<Chat> FindAll(Constraints constraints, IDictionary<string, object> globals = null)
         {
-            return FuzzySearch.FindAll(chats, constraints.AsDict(), globals);
+            return FuzzySearch.FindAll(new Find(constraints), chats, globals);
+        }
+
+        public Chat Find(Constraint constraint, IDictionary<string, object> globals = null)
+        {
+            return FuzzySearch.Find(new Find(new Constraints(constraint)), chats, globals);
+        }
+
+        public List<Chat> FindAll(Constraint constraint, IDictionary<string, object> globals = null)
+        {
+            return FuzzySearch.FindAll(new Find(new Constraints(constraint)), chats, globals);
         }
         //  ------------------------------------------------------
 
