@@ -14,6 +14,7 @@ namespace Dialogic
 
         private static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
+        //protected static List<Func<Command, bool>> validators;
         protected Stack<Command> parsedCommands;
         protected List<Chat> chats;
 
@@ -22,6 +23,12 @@ namespace Dialogic
             parsedCommands = new Stack<Command>();
             chats = new List<Chat>();
         }
+
+        //public static void AddValidator(Func<Command, bool> validator)
+        //{
+        //    if (validators == null) validators = new List<Func<Command, bool>>();
+        //    validators.Add(validator);
+        //}
 
         public static Grammar ParseGrammar(FileInfo file)
         {
@@ -33,22 +40,22 @@ namespace Dialogic
             return new Grammar(src);
         }
 
-        public static List<Chat> ParseFile(string fileOrFolder)
+        public static List<Chat> ParseFile(string fileOrFolder, params Func<Command, bool>[] validators)
         {
             string[] files = Directory.Exists(fileOrFolder) ?
                 files = Directory.GetFiles(fileOrFolder, '*' + CHAT_FILE_EXT) :
                 files = new string[] { fileOrFolder };
 
             List<Chat> chats = new List<Chat>();
-            ParseFiles(files, chats);
+            ParseFiles(files, chats, validators);
 
             return chats;
         }
 
-        public static List<Chat> ParseText(string text)
+        public static List<Chat> ParseText(string text, params Func<Command, bool>[] validators)
         {
             if (text == null) throw new ParseException("Null input");
-            return Parse(StripComments(text));
+            return Parse(StripComments(text), validators);
         }
 
         public static string[] StripComments(string text) // public->testing
@@ -67,12 +74,12 @@ namespace Dialogic
             }
         }
 
-        private static void ParseFiles(string[] files, List<Chat> chats)
+        private static void ParseFiles(string[] files, List<Chat> chats, params Func<Command, bool>[] validators)
         {
-            foreach (var f in files) ParseFile(f, chats);
+            foreach (var f in files) ParseFile(f, chats, validators);
         }
 
-        private static List<Chat> Parse(string[] lines)
+        private static List<Chat> Parse(string[] lines, params Func<Command, bool>[] validators)
         {
             ChatParser parser = new ChatParser();
 
@@ -80,13 +87,13 @@ namespace Dialogic
             {
                 if (!String.IsNullOrEmpty(lines[i]))
                 {
-                    parser.ParseLine(lines[i], i + 1);
+                    parser.ParseLine(lines[i], i + 1, validators);
                 }
             }
             return parser.chats;
         }
 
-        private Command ParseLine(string line, int lineNo)
+        private Command ParseLine(string line, int lineNo, params Func<Command, bool>[] validators)
         {
             //Console.WriteLine("LINE " + lineNo + ": " + line);
 
@@ -104,10 +111,28 @@ namespace Dialogic
                 parts.Add(match.Groups[j + 1].Value.Trim());
             }
 
-            return ParseCommand(parts, line, lineNo);
+            Command c = ParseCommand(parts, line, lineNo);
+
+            if (!Util.IsNullOrEmpty(validators))
+            {
+                foreach (var check in validators)
+                {
+                    try
+                    {
+                        if (!check(c)) throw new Exception("fail");
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new ParseException
+                            (line, lineNo, "Validator: " + ex.Message);
+                    }
+                }
+            }
+
+            return c;
         }
 
-        public Command ParseCommand(List<string> parts, string line, int lineNo)
+        private Command ParseCommand(List<string> parts, string line, int lineNo)
         {
             Command c = null;
 
@@ -158,7 +183,7 @@ namespace Dialogic
             return c;
         }
 
-        private static void ParseFile(string fname, List<Chat> chats)
+        private static void ParseFile(string fname, List<Chat> chats, params Func<Command, bool>[] validators)
         {
             ParseText(File.ReadAllText(fname)).ForEach((f) => chats.Add(f));
         }

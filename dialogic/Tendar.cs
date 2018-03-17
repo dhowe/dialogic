@@ -3,15 +3,17 @@ using System.Collections.Generic;
 
 namespace Dialogic.Tendar
 {
-    public class Tendar
+    public static class Validators
     {
-        public static bool ValidateChatMeta(IDictionary<string, object> meta)
+        public static bool ValidateMeta(Command c)
         {
-            if (!meta.ContainsKey(Meta.PLOT)) throw new DialogicException
-                ("Mising required Meta key: " + Meta.PLOT);
-            if (!meta.ContainsKey(Meta.STAGE)) throw new DialogicException
-                ("Mising required Meta key: " + Meta.STAGE);
-            return false;
+            if (c.GetMeta(Meta.PLOT) == null) throw new ParseException
+                ("Mising required meta-key: " + Meta.PLOT);
+            
+            if (c.GetMeta(Meta.STAGE) == null) throw new ParseException
+                ("Mising required meta-key: " + Meta.STAGE);
+
+            return true;
         }   
     }
 }

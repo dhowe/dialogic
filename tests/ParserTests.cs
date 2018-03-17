@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Dialogic.Tendar;
 using NUnit.Framework;
 
 namespace Dialogic
@@ -283,6 +284,19 @@ namespace Dialogic
             Assert.That(wait.Text, Is.EqualTo(".5"));
             Assert.That(wait.DelayMs, Is.EqualTo(500));
             Assert.That(wait.GetMeta("waitForAnimation"), Is.EqualTo("true"));
+        }
+
+        [Test]
+        public void TestValidators()
+        {
+            List<Chat> chats;
+            chats = ChatParser.ParseText("CHAT c1 \nHAY is for horses", Validators.ValidateMeta);
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("HAY is for horses"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
         }
 
         [Test]
