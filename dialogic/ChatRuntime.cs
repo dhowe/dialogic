@@ -238,23 +238,27 @@ namespace Dialogic
             })).Start();
         }
 
-        // for testing only
+        // for testing only --------------------------------------
         public Chat Find(Find f, IDictionary<string, object> globals = null)
         {
             return FuzzySearch.Find(chats, f.meta, globals);
         }
 
-        // for testing only
+        public Chat Find(Constraints constraints, IDictionary<string, object> globals = null)
+        {
+            return FuzzySearch.Find(chats, constraints.AsDict(), globals);
+        }
+
         public List<Chat> FindAll(Find f, IDictionary<string, object> globals = null)
         {
             return FuzzySearch.FindAll(chats, f.meta, globals);
         }
 
-        // for testing only
         public List<Chat> FindAll(Constraints constraints, IDictionary<string, object> globals = null)
         {
             return FuzzySearch.FindAll(chats, constraints.AsDict(), globals);
         }
+        //  ------------------------------------------------------
 
         private bool Logging()
         {

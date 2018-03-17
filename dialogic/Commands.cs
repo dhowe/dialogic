@@ -118,6 +118,11 @@ namespace Dialogic
         {
             return "[" + TypeName().ToUpper() + "] #" + Text;
         }
+
+        public override string ToScript()
+        {
+            return TypeName().ToUpper() + " #" + Text;
+        }
     }
 
     public class Set : Command // TODO: rethink
@@ -160,6 +165,11 @@ namespace Dialogic
         {
             return "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
         }
+
+        public override string ToScript()
+        {
+            return TypeName().ToUpper() + " $" + Text + '=' + Value;
+        }
     }
 
     public class Wait : Command, ISendable
@@ -174,8 +184,8 @@ namespace Dialogic
             else
             {
                 DelayMs = Util.SecStrToMs(text, -1);
-                if (DelayMs == -1) throw new ParseException(TypeName() 
-                    + " accepts only a NUMBER, found: '"+text+"'");
+                if (DelayMs == -1) throw new ParseException(TypeName()
+                    + " accepts only a NUMBER, found: '" + text + "'");
             }
         }
 
@@ -274,6 +284,13 @@ namespace Dialogic
             if (options != null) options.ForEach(o => s += o.Text + ",");
             return s.Substring(0, s.Length - 1) + ") " + MetaStr();
         }
+
+        public override string ToScript()
+        {
+            string s = base.ToScript();
+            if (options != null) options.ForEach(o => s += "\n" + o.ToScript());
+            return s + MetaStr();
+        }
     }
 
     public class Opt : Say
@@ -308,6 +325,12 @@ namespace Dialogic
             return "[" + TypeName().ToUpper() + "] " + QQ(Text)
                 + (action is NoOp ? String.Empty : " (-> " + action.Text + ")");
         }
+
+        public override string ToScript()
+        {
+            return TypeName().ToUpper() + " " + Text
+                + (action is NoOp ? String.Empty : " #" + action.Text);
+        }
     }
 
     public class Find : Command
@@ -317,7 +340,7 @@ namespace Dialogic
             ParseMeta(metas);
         }
 
-        public override void Realize(IDictionary<string, object> globals) {/*noop*/}
+        public override void Realize(IDictionary<string, object> globals) { /*noop*/ }
 
         protected override void ParseMeta(string[] pairs)
         {
@@ -383,6 +406,11 @@ namespace Dialogic
         {
             return "[" + TypeName().ToUpper() + "] #" + Text;
         }
+
+        public override string ToScript()
+        {
+            return TypeName().ToUpper() + " #" + Text;
+        }
     }
 
     public class Chat : Command
@@ -436,20 +464,23 @@ namespace Dialogic
             if (HasMeta())
             {
                 s += "{";
-                foreach (var key in meta.Keys)
-                {
-                    //if (key != Meta.LABEL) 
-                    s += key + "=" + meta[key] + ",";
-                }
+                foreach (var key in meta.Keys) s += key + "=" + meta[key] + ",";
                 s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : String.Empty;
             }
             return s;
         }
 
-        public string ToTree()
+        public string ToTree() // remove?
         {
             string s = ToString() + "\n";
             commands.ForEach(c => s += "  " + c + "\n");
+            return s;
+        }
+
+        public override string ToScript()
+        {
+            string s = TypeName().ToUpper() + " " + Text + (" " + MetaStr()).TrimEnd();
+            commands.ForEach(c => s += "\n  " + c.ToScript());
             return s;
         }
 
@@ -464,14 +495,14 @@ namespace Dialogic
             this.cursor = 0;
         }
 
-        internal void Run(bool resetCursor=true)
+        internal void Run(bool resetCursor = true)
         {
             if (resetCursor) Reset();
 
             lastRunAt = Util.EpochMs();
 
             // Q: what about (No-Label) WAIT events ?
-            staleness += stalenessIncrement; 
+            staleness += stalenessIncrement;
         }
 
         public bool IsResumable() // TODO: set from meta
@@ -492,7 +523,7 @@ namespace Dialogic
         public const string RESUMABLE = "resumable";
 
         public IDictionary<string, object> meta, realized;
-            
+
         public bool HasMeta()
         {
             return meta != null && meta.Count > 0;
@@ -592,6 +623,7 @@ namespace Dialogic
         {
             { "CHAT",   typeof(Dialogic.Chat) },
             { "SAY",    typeof(Dialogic.Say)  },
+            { "SET",    typeof(Dialogic.Set)  },
             { "ASK",    typeof(Dialogic.Ask)  },
             { "OPT",    typeof(Dialogic.Opt)  },
             { "DO",     typeof(Dialogic.Do)   },
@@ -713,6 +745,11 @@ namespace Dialogic
         public override string ToString()
         {
             return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
+        }
+
+        public virtual string ToScript()
+        {
+            return (TypeName().ToUpper() + " " + Text).Trim() + (" " + MetaStr()).TrimEnd();
         }
 
         protected static string QQ(string text)

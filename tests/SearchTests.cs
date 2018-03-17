@@ -24,6 +24,55 @@ namespace Dialogic
         }
 
         [Test]
+        public void TestBasicFail()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            ChatRuntime cr = new ChatRuntime(chats);
+            var res = new ChatRuntime(chats).FindAll(new Constraints("dev", "1"));
+            Assert.That(res.Count, Is.EqualTo(0));
+
+            chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            cr = new ChatRuntime(chats);
+            var chat = new ChatRuntime(chats).Find(new Constraints("dev", "1"));
+            Assert.That(chat, Is.Null);
+
+            chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            cr = new ChatRuntime(chats);
+            chat = new ChatRuntime(chats).Find(new Constraints("dev", "1", ConstraintType.Hard));
+            Assert.That(chat, Is.Null);
+
+            chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            cr = new ChatRuntime(chats);
+            chat = new ChatRuntime(chats).Find(new Constraints("dev", "1", ConstraintType.Absolute));
+            Assert.That(chat, Is.Null);
+        }
+
+        [Test]
         public void TestFindByName()
         {
             string[] lines = {
@@ -378,6 +427,17 @@ namespace Dialogic
 
             chats = ChatParser.ParseText(String.Join("\n", lines));
             Assert.That(new ChatRuntime(chats).Find((Find)chats[0].commands[0]), Is.Null);
+
+            Chat c;
+            chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            chats.Add(c = Chat.Create("c3"));
+            cr = new ChatRuntime(chats);
+            chat = new ChatRuntime(chats).Find(new Constraints("dev", "1", ConstraintType.Hard));
+            Assert.That(chat.Text, Is.EqualTo("c3")); // success
         }
 
         [Test]

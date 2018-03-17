@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -11,7 +12,7 @@ namespace Dialogic.Server
 {
     public class LintServer
     {
-        const string SERVER_URL = "http://138.16.162.16:8080/glint/";
+        public static string SERVER_URL = "http://"+LocalIPAddress()+":8080/glint/";
         private static Regex Brackets = new Regex(@"(\]|\[)");
 
         private static string indexPageContent;
@@ -29,6 +30,19 @@ namespace Dialogic.Server
 
             responderMethod = method;
             listener.Start();
+        }
+
+        public static string LocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No IPv4 network adapters with a valid address");
         }
 
         public void Run()
@@ -97,7 +111,7 @@ namespace Dialogic.Server
             {
                 string content = String.Empty;
                 chats = ChatParser.ParseText(code);
-                chats.ForEach(c => content += Brackets.Replace(c.ToTree(),""));
+                chats.ForEach(c => content += c.ToScript());
 
                 html = html.Replace("%%RESULT%%", content);
                 html = html.Replace("%%RCLASS%%", "success");
@@ -123,7 +137,7 @@ namespace Dialogic.Server
             LintServer.indexPageContent = html;
             ws.Run();
 
-            Console.WriteLine("LintServer running... press any key to quit");
+            Console.WriteLine("LintServer running on "+SERVER_URL+" - press any key to quit");
             Console.ReadKey();
             ws.Stop();
         }

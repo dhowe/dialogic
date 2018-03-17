@@ -11,7 +11,7 @@ namespace Dialogic
          * If none match then start relaxing hard-type constraints until one does.
          * If all hard-type constraints have been relaxed and nothing is found, then return null;
          */
-        public static Chat Find(List<Chat> chats, IDictionary<string, object> constraints, 
+        public static Chat Find(List<Chat> chats, IDictionary<string, object> constraints,
             IDictionary<string, object> globals = null)
         {
             var dbug = false;
@@ -27,7 +27,7 @@ namespace Dialogic
                     if (c.IsRelaxable()) relaxables.Add(kv.Key);
                 }
 
-                if(dbug)Console.WriteLine("\nFailed with " + relaxables.Count + " hard constraints");
+                if (dbug) Console.WriteLine("\nFailed with " + relaxables.Count + " hard constraints");
                 if (relaxables.Count == 0) return null;
 
                 // try again after relaxing each hard constraint
@@ -36,16 +36,18 @@ namespace Dialogic
                 {
                     Constraint toRelax = (Constraint)constraints[Util.RandItem(relaxables)];
                     relaxables.Remove(toRelax.name);
-                    if (dbug)Console.WriteLine("Relaxing {"+toRelax+"} "+relaxables.Count+" hard constraints remaining");
+                    if (dbug) Console.WriteLine("Relaxing {" + toRelax + "} " + relaxables.Count + " hard constraints remaining");
                     relaxed.Add(toRelax.name);
                     toRelax.type = ConstraintType.Soft;
                     chat = FindAll(chats, constraints, globals).FirstOrDefault();
-                    if (dbug && chat != null) Console.WriteLine("Found: "+chat);
+                    if (dbug && chat != null) Console.WriteLine("Found: " + chat);
                 }
 
                 // restore the state of constraints for reuse
                 relaxed.ForEach(r => ((Constraint)constraints[r]).type = ConstraintType.Hard);
             }
+
+            if (dbug) Console.WriteLine("Result: " + chat);
 
             return chat;
         }
@@ -64,6 +66,7 @@ namespace Dialogic
         {
             if (constraints == null) return chats;
 
+            var dbug = false;
             Dictionary<Chat, int> matches = new Dictionary<Chat, int>();
 
             for (int i = 0; i < chats.Count; i++)
@@ -71,11 +74,12 @@ namespace Dialogic
                 var hits = 0;
                 var chatProps = chats[i].GetMeta();
 
-                //Console.WriteLine("CHECK: CHAT."+chatProps[Meta.LABEL]);
+                if (dbug) Console.WriteLine("CHAT." + chats[i].Text);
 
                 foreach (var key in constraints.Keys)
                 {
-                    //Console.WriteLine("  Find."+key+ " in "+chats[i].Text+" "+Util.Stringify(chatProps));
+                    if (dbug) Console.WriteLine("  Find " + key + " " + constraints[key] + " in "
+                         + chats[i].Text + " " + Util.Stringify(chatProps));
 
                     Constraint constraint = (Constraint)constraints[key];
 
@@ -83,23 +87,21 @@ namespace Dialogic
                     {
                         var chatPropVal = (string)chatProps[key];
 
-                        // TODO: need to realize constraint & chat values here
-
                         if (!(constraint.Check(chatPropVal, globals)))
                         {
-                            //Console.WriteLine("    FAIL:" + constraints[key]);
+                            if (dbug) Console.WriteLine("    FAIL:" + constraints[key]);
                             hits = -1;
                             break;
                         }
                         else
                         {
                             hits++;
-                            //Console.WriteLine("    HIT" + hits);
+                            if (dbug) Console.WriteLine("    HIT" + hits);
                         }
                     }
                     else if (constraint.IsStrict()) // doesn't have-key, fails strict
                     {
-                        //Console.WriteLine("    FAIL-STRICT:" + constraints[key]);
+                        if (dbug) Console.WriteLine("    FAIL-STRICT:" + constraints[key]);
                         hits = -1;
                         break;
                     }

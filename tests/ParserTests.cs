@@ -29,7 +29,6 @@ namespace Dialogic
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
         }
 
-
         [Test]
         public void TestComments1()
         {
@@ -298,6 +297,60 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
         }
+
+        [Test]
+        public void TestToScript()
+        {
+            string[] tests = {
+
+                "CHAT c1",
+                "CHAT c1 {plot=a,type=b}",
+            };
+
+            for (int i = 0; i < tests.Length; i++)
+            {
+                Assert.That(ChatParser.ParseText(tests[i])[0].ToScript(), Is.EqualTo(tests[i]));
+            }
+
+            tests = new[] {
+                "SAY hay is for horses",
+                "ASK hay is for horses?",
+                "DO #hay",
+                "FIND {!a=b}",
+                "WAIT",
+                "WAIT .5",
+                "WAIT {ForAnimation=true}",
+                "WAIT .5 {ForAnimation=true}",
+                "NVM",
+                "NVM {ForAnimation=true}",
+            };
+
+            for (int i = 0; i < tests.Length; i++)
+            {
+                Assert.That(ChatParser.ParseText(tests[i])[0].commands[0].ToScript(), Is.EqualTo(tests[i]));
+            }
+
+            var s = "GO #hay";
+            Assert.That(ChatParser.ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ChatParser.ParseText("GO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
+
+            s = "DO #hay";
+            Assert.That(ChatParser.ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ChatParser.ParseText("DO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
+
+            //s = "SET a 4";
+            //Assert.That(ChatParser.ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
+
+            s = "ASK hay is for horses?\nOPT Yes? #Yes\nOPT No? #No";
+            var parts1 = s.Split('\n');
+            var chats = ChatParser.ParseText(s);
+            var parts2 = chats[0].commands[0].ToScript().Split('\n');
+            for (int i = 0; i < parts1.Length; i++)
+            {
+                Assert.That(parts1[i], Is.EqualTo(parts2[i]));
+            }
+        }
+
 
         [Test]
         public void TestCommands()
