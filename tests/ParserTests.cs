@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Dialogic.Tendar;
 using NUnit.Framework;
+using Tendar;
 
 namespace Dialogic
 {
@@ -290,12 +290,12 @@ namespace Dialogic
         public void TestValidators()
         {
             List<Chat> chats;
-            chats = ChatParser.ParseText("CHAT c1 \nHAY is for horses", Validators.ValidateMeta);
-            //Console.WriteLine(chats[0].ToTree());
+            chats = ChatParser.ParseText("CHAT c1 {plot=a,stage=b}\nSAY Hello",
+                Validators.ValidateMeta);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("HAY is for horses"));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
         }
 
@@ -480,6 +480,7 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT a {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("NVM a {a=b}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT c1", Validators.ValidateMeta));
 
             string[] lines = {
                 "CHAT c1",
