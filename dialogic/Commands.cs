@@ -288,7 +288,7 @@ namespace Dialogic
         public override string ToScript()
         {
             string s = base.ToScript();
-            if (options != null) options.ForEach(o => s += "\n" + o.ToScript());
+            if (options != null) options.ForEach(o => s += "\n  " + o.ToScript());
             return s + MetaStr();
         }
     }
