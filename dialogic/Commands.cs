@@ -65,7 +65,8 @@ namespace Dialogic
 
         protected double GetTextLenScale()
         {
-            return Util.Map(Text.Length,
+            return Util.Map(Util.Constrain(
+                Text.Length,Defaults.SAY_MIN_LINE_LEN, Defaults.SAY_MAX_LINE_LEN),
                 Defaults.SAY_MIN_LINE_LEN, Defaults.SAY_MAX_LINE_LEN,
                 Defaults.SAY_MIN_LEN_MULT, Defaults.SAY_MAX_LEN_MULT);
         }
@@ -209,7 +210,7 @@ namespace Dialogic
 
         public override int ComputeDuration()
         {
-            return DelayMs;
+            return Util.Round(GetTextLenScale() * DelayMs);
         }
 
         public List<Opt> Options()

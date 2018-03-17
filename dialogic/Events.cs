@@ -24,6 +24,7 @@ namespace Dialogic
         public UpdateEvent(Command c)
         {
             this.data = c.realized;
+            this.data.Add("duration", c.ComputeDuration());
         }
 
         public UpdateEvent(IDictionary<string, object> data)
@@ -141,6 +142,26 @@ namespace Dialogic
         public int GetChoiceIndex()
         {
             return choiceIndex;
+        }
+    }
+
+    public interface IInterrupt
+    {
+        string InterruptWith();
+    }
+
+    public class InterruptEvent : GameEvent, IInterrupt
+    {
+        public readonly string chatLabel;
+
+        public InterruptEvent(string chatLabel) : base()
+        {
+            this.chatLabel = chatLabel;
+        }
+
+        public string InterruptWith()
+        {
+            return chatLabel;
         }
     }
 }

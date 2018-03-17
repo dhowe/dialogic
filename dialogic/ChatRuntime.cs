@@ -45,7 +45,22 @@ namespace Dialogic
         {
             if (ge is IChoice) return HandleChoiceEvent(ref ge, globals);
             if (ge is IResume) return HandleResumeEvent(ref ge, globals);
+            if (ge is IInterrupt) return HandleInterruptEvent(ref ge, globals);
             throw new DialogicException("Unexpected event-type: " + ge.GetType());
+        }
+        
+        private IUpdateEvent HandleInterruptEvent(ref EventArgs ge, IDictionary<string, object> globals)
+        {
+            IInterrupt ii = (IInterrupt)ge;
+            var label = ii.InterruptWith();
+            ge = null;
+
+            if (String.IsNullOrEmpty(label))
+                ResumeLast();
+            else
+                StartNew(FindByName(label));
+
+            return null;
         }
 
         private IUpdateEvent HandleResumeEvent(ref EventArgs ge, IDictionary<string, object> globals)
