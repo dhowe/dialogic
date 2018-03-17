@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Dialogic;
 
@@ -11,11 +12,13 @@ namespace Dialogic.Server
     public class LintServer
     {
         const string SERVER_URL = "http://localhost:8083/lint/";
+        private static Regex Brackets = new Regex(@"(\]|\[)");
 
         private static string indexPageContent;
 
         private readonly HttpListener listener = new HttpListener();
         private readonly Func<HttpListenerRequest, string> responderMethod;
+
 
         public LintServer(Func<HttpListenerRequest, string> method, params string[] prefixes)
         {
@@ -79,17 +82,23 @@ namespace Dialogic.Server
 
         public static string SendResponse(HttpListenerRequest request)
         {
-            var html = indexPageContent;
-            var code = request.QueryString.Get("code");
+            if (request.QueryString.Get("reload") == "1")
+            {
+                indexPageContent = String.Join("\n",
+                    File.ReadAllLines("data/index.html", Encoding.UTF8));
 
+                Console.WriteLine("Reloaded: "+indexPageContent);
+            }
+
+            var html = indexPageContent;
+
+            var code = request.QueryString.Get("code");
             if (String.IsNullOrEmpty(code))
             {
-                return html.Replace("%%CODE%%", "Input your code here");
+                return html.Replace("%%CODE%%", "Enter your code here");
             }
 
             code = code.Replace("%%BR%%", "\n");
-
-            //Console.WriteLine("code: '" + code + "'");
 
             html = html.Replace("%%CODE%%", code);
             html = html.Replace("%%CCLASS%%", "shown");
@@ -99,7 +108,7 @@ namespace Dialogic.Server
             {
                 string content = String.Empty;
                 chats = ChatParser.ParseText(code);
-                chats.ForEach(c => content += c.ToTree());
+                chats.ForEach(c => content += Brackets.Replace(c.ToTree(),""));
                 html = html.Replace("%%RESULT%%", content);
                 html = html.Replace("%%RCLASS%%", "success");
             }

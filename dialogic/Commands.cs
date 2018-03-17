@@ -296,7 +296,7 @@ namespace Dialogic
 
             if (label.Length > 0 && !label.StartsWith("#", Util.IC))
             {
-                throw BadArg("OPT requires a #Label");
+                throw BadArg("OPT requires a literal #Label");
             }
 
             this.action = label.Length > 0 ?
@@ -628,7 +628,7 @@ namespace Dialogic
         protected void ValidateTextLabel()
         {
             if (String.IsNullOrEmpty(Text)) throw BadArg
-                (TypeName().ToUpper() + " requires a #Label");
+                (TypeName().ToUpper() + " requires a literal #Label");
 
             if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }

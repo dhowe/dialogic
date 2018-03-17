@@ -22,19 +22,29 @@
         outline: none !important;
         background-color: transparent !important;
      }
+     .sub-title{
+        line-height: 42px;
+        font-size: 20px;
+     }
+     .input-area{
+        margin-top: 5px !important;
+     }
+
     </style>
 </head>
 </head>
 <body>
-    <h2 style="padding:5px">&nbsp; GuppyLint</h2>
+    <span class="sub-title"><img style="margin-top: 5px;" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
+    <b>GuppyLint</b>: a Dialogic validator</span></h2>
     <div class="input-area">
         <textarea id="main" class="lined" rows="29" cols="100">%%CODE%%</textarea>
     </div>
     <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
     <form name="main">
         <div class="validate">
-            &nbsp; <button type="submit" id="validate">Validate</button>
+            &nbsp; &nbsp; <button type="submit" id="validate">Validate</button>
             <button type="reset" id="clear">Clear</button>
+            <!--button type="reset" id="reload">Reload</button-->
             <button class="copy" id="copy">Copy</button>
         </div>
     </form>
@@ -53,14 +63,15 @@
         $("#main").val('');
       });
 
+      $("#reload").click(function () {
+
+        window.location = 'http://localhost:8083/lint?reload=1';
+      });
+
       $("#validate").click(function () {
 
         event.preventDefault();
-
-        var code = $("#main").val().replace(/\r?\n/g, '%%BR%%');
-        code = code.replace(/\&/g,'%26');
-        code = code.replace(/\+/g,'%2B');
-        code = code.replace(/#/g,'%23');
+        var code = encodeURIComponent($("#main").val());
         window.location = 'http://localhost:8083/lint?code='+code;
       });
 
