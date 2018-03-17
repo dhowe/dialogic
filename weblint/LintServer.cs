@@ -82,14 +82,6 @@ namespace Dialogic.Server
 
         public static string SendResponse(HttpListenerRequest request)
         {
-            if (request.QueryString.Get("reload") == "1")
-            {
-                indexPageContent = String.Join("\n",
-                    File.ReadAllLines("data/index.html", Encoding.UTF8));
-
-                Console.WriteLine("Reloaded: "+indexPageContent);
-            }
-
             var html = indexPageContent;
 
             var code = request.QueryString.Get("code");
@@ -97,8 +89,6 @@ namespace Dialogic.Server
             {
                 return html.Replace("%%CODE%%", "Enter your code here");
             }
-
-            code = code.Replace("%%BR%%", "\n");
 
             html = html.Replace("%%CODE%%", code);
             html = html.Replace("%%CCLASS%%", "shown");
@@ -109,6 +99,7 @@ namespace Dialogic.Server
                 string content = String.Empty;
                 chats = ChatParser.ParseText(code);
                 chats.ForEach(c => content += Brackets.Replace(c.ToTree(),""));
+
                 html = html.Replace("%%RESULT%%", content);
                 html = html.Replace("%%RCLASS%%", "success");
             }
