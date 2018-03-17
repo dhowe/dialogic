@@ -35,7 +35,7 @@
 </head>
 <body>
     <span class="sub-title"><img style="margin-top: 5px;" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
-    <b>GuppyLint</b>: a Dialogic validator</span></h2>
+    <b>GuppyLint</b></span></h2>
     <div class="input-area">
         <textarea id="main" class="lined" rows="29" cols="100">%%CODE%%</textarea>
     </div>
@@ -67,13 +67,13 @@
 
         event.preventDefault();
         var code = encodeURIComponent($("#main").val());
-        window.location = 'http://localhost:8083/lint?code='+code;
+        window.location = window.location.href.split('?')[0]+'?code='+code;
       });
 
       // Highlight error
       if (!$("#errorLine").text().includes("ERRORLINE")) {
-         var idx = $("#errorLine").text() - 1;
-         $(".lineno:eq(" + idx  + ")").append("<div class='line-error'></div>");
+        var idx = $("#errorLine").text() - 1;
+        $(".lineno:eq(" + idx  + ")").append("<div class='line-error'></div>");
       }
 
     });

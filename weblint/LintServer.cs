@@ -11,14 +11,13 @@ namespace Dialogic.Server
 {
     public class LintServer
     {
-        const string SERVER_URL = "http://localhost:8083/lint/";
+        const string SERVER_URL = "http://138.16.162.16:8080/glint/";
         private static Regex Brackets = new Regex(@"(\]|\[)");
 
         private static string indexPageContent;
 
         private readonly HttpListener listener = new HttpListener();
         private readonly Func<HttpListenerRequest, string> responderMethod;
-
 
         public LintServer(Func<HttpListenerRequest, string> method, params string[] prefixes)
         {
