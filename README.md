@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) <a href="http://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/badge/license-GPL-orange.svg" alt="gpl license"></a>
 
+[API Documentation](http://rednoise.org/dialogic/) 
+[Linter](http://rednoise.org/dialogic/) 
+
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
 
 Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each CHAT has a unique LABEL and contains one or more [COMMANDs](https://github.com/dhowe/dialogic/wiki/Command-Reference). When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system jumps to a new CHAT. 
