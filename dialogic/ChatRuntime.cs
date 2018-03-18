@@ -6,59 +6,6 @@ using System.Threading;
 
 namespace Dialogic
 {
-    class ChatScheduler
-    {
-        public Chat chat;
-        public Ask prompt;
-        public ChatRuntime runtime;
-        public Stack<Chat> resumables;
-
-        public ChatScheduler(ChatRuntime runtime)
-        {
-            this.runtime = runtime;
-            this.resumables = new Stack<Chat>();
-        }
-
-        public void StartNew(Chat next)
-        {
-            if (chat != null) resumables.Push(chat);
-            (chat = next).Run();
-        }
-
-        public void PauseCurrent()
-        {
-            if (chat != null) resumables.Push(chat);
-            chat = null;
-        }
-
-        public int ResumeLast(bool mustBeResumable = false)
-        {
-            if (resumables.IsNullOrEmpty())
-            {
-                throw new DialogicException("No Chat to resume");
-            }
-
-            if (chat != null)
-            {
-                throw new DialogicException("Cannot resume chat" +
-                    " while Chat#" + chat.Text + " is active");
-            }
-
-            var last = resumables.Pop();
-            while (mustBeResumable && !last.IsResumable())
-            {
-                if (resumables.Count < 1) throw new DialogicException
-                    ("No resumable Chat found on stack");
-                
-                last = resumables.Pop();
-            }
-
-            (chat = last).Run(false);
-
-            return Util.Millis();
-        }
-    }
-
     public class ChatRuntime
     {
         public static string logFile;// = "../../../dialogic/dia.log";
@@ -294,4 +241,56 @@ namespace Dialogic
         }
     }
 
+    internal class ChatScheduler
+    {
+        public Chat chat;
+        public Ask prompt;
+        public ChatRuntime runtime;
+        public Stack<Chat> resumables;
+
+        public ChatScheduler(ChatRuntime runtime)
+        {
+            this.runtime = runtime;
+            this.resumables = new Stack<Chat>();
+        }
+
+        public void StartNew(Chat next)
+        {
+            if (chat != null) resumables.Push(chat);
+            (chat = next).Run();
+        }
+
+        public void PauseCurrent()
+        {
+            if (chat != null) resumables.Push(chat);
+            chat = null;
+        }
+
+        public int ResumeLast(bool mustBeResumable = false)
+        {
+            if (resumables.IsNullOrEmpty())
+            {
+                throw new DialogicException("No Chat to resume");
+            }
+
+            if (chat != null)
+            {
+                throw new DialogicException("Cannot resume chat" +
+                    " while Chat#" + chat.Text + " is active");
+            }
+
+            var last = resumables.Pop();
+            while (mustBeResumable && !last.IsResumable())
+            {
+                if (resumables.Count < 1) throw new DialogicException
+                    ("No resumable Chat found on stack");
+
+                last = resumables.Pop();
+            }
+
+            (chat = last).Run(false);
+
+            return Util.Millis();
+        }
+    }
 }

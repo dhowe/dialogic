@@ -75,6 +75,17 @@ namespace Dialogic
             chat = new ChatRuntime(chats).Find(new Constraint("dev", "1", ConstraintType.Absolute));
             Assert.That(chat, Is.Null);
 
+            chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            cr = new ChatRuntime(chats);
+            chat = new ChatRuntime(chats).Find(new Constraint("dev", "1", ConstraintType.Absolute));
+            Assert.That(chat, Is.Null);
+
             // verify we never pick the source chat
             chats = ChatParser.ParseText("CHAT c0\nFIND {dev=1,day=fri}");
             Command finder = chats[0].commands[0];

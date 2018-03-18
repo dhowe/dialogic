@@ -40,12 +40,6 @@ namespace Dialogic
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
-        internal const string MLC = @"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/";
-        public static Regex MultiComment = new Regex(MLC);
-
-        internal const string SLC = @"//(.*?)(?:$|\r?\n)";
-        public static Regex SingleComment = new Regex(SLC);
-
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);

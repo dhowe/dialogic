@@ -27,36 +27,25 @@ namespace Dialogic
                     { "GRAM",   typeof(Dialogic.Gram) },
         };
 
-        private const string TXT = @"([^#}{]+)?\s*";
-        private const string LBL = @"(#[A-Za-z][\S]*)?\s*";
-        private const string MTA = @"(?:\{(.+?)\})?\s*";
+        const string TXT = @"([^#}{]+)?\s*";
+        const string LBL = @"(#[A-Za-z][\S]*)?\s*";
+        const string MTA = @"(?:\{(.+?)\})?\s*";
 
-        internal static string TypesRegex()
-        {
-            string s = @"(";
-            var cmds = TypeMap.Keys;
-            for (int i = 0; i < cmds.Count; i++)
-            {
-                s += cmds.ElementAt(i);
-                if (i < cmds.Count - 1) s += "|";
-            }
-            return s + @")?\s*";
-        }
-
-        private static string[] LineBreaks = { "\r\n", "\r", "\n" };
+        static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
+        static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
+        static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
         protected Stack<Command> parsedCommands;
         protected Func<Command, bool>[] validators;
         protected List<Chat> chats;
         protected Regex LineParser;
 
-
-        public ChatParser(params Func<Command, bool>[] validator)
+        public ChatParser(params Func<Command, bool>[] commandValidators)
         {
             LineParser = new Regex(TypesRegex() + TXT + LBL + MTA);
             parsedCommands = new Stack<Command>();
             chats = new List<Chat>();
-            validators = validator;
+            validators = commandValidators;
         }
 
         public static Grammar ParseGrammar(FileInfo file)
@@ -97,18 +86,32 @@ namespace Dialogic
             }
             else                       // faster one-pass
             {
-                text = RE.MultiComment.Replace(text, String.Empty);
-                text = RE.SingleComment.Replace(text, String.Empty);
+                text = MultiComment.Replace(text, String.Empty);
+                text = SingleComment.Replace(text, String.Empty);
                 return text.Split('\n');
             }
         }
 
-        private static void ParseFiles(string[] files, List<Chat> chats, params Func<Command, bool>[] validators)
+        private static string TypesRegex()
+        {
+            string s = @"(";
+            var cmds = TypeMap.Keys;
+            for (int i = 0; i < cmds.Count; i++)
+            {
+                s += cmds.ElementAt(i);
+                if (i < cmds.Count - 1) s += "|";
+            }
+            return s + @")?\s*";
+        }
+
+        private static void ParseFiles(string[] files, List<Chat> chats,
+            params Func<Command, bool>[] validators)
         {
             foreach (var f in files) ParseFile(f, chats, validators);
         }
 
-        private static List<Chat> Parse(string[] lines, params Func<Command, bool>[] validators)
+        private static List<Chat> Parse(string[] lines,
+            params Func<Command, bool>[] validators)
         {
             ChatParser parser = new ChatParser(validators);
 

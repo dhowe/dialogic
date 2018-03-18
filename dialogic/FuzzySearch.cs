@@ -140,6 +140,7 @@ namespace Dialogic
             return list;
         }
 
+        /// @cond TestOnly
         /*
          * Sort by points, highest first, break ties with the fresher chat
          */
@@ -150,6 +151,8 @@ namespace Dialogic
             list.Sort((p1, p2) => CompareFreshnessTies(p1, p2));
             return list;
         }
+        /// @endcond
+
 
         // sort descending with ties based on freshness
         private static int CompareFreshnessTies(KeyValuePair<Chat, int> i, KeyValuePair<Chat, int> j)
