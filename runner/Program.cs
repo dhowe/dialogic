@@ -36,7 +36,7 @@ namespace runner
         public MockGameEngine(string fileOrFolder)
         {
             List<Chat> chats = ChatParser.ParseFile
-                (fileOrFolder, Validators.ValidateMeta);
+                (fileOrFolder, Config.ValidateMeta);
             runtime = new ChatRuntime(chats);
             runtime.Run();
         }
@@ -73,12 +73,12 @@ namespace runner
                 case "Wait":
                     var now = Util.Millis();
 
-                    // send ResumeEvent after 5 sec
                     Timers.SetTimeout(5000, () =>
                     {
                         Console.WriteLine("<resume-event#>" +
                             " after " + Util.Millis(now) + "ms\n");
-                        
+
+                        // send ResumeEvent after 5 sec
                         gameEvent = new ResumeEvent(/*"#GScriptTest"*/);
                     });
 

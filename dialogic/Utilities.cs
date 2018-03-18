@@ -46,11 +46,6 @@ namespace Dialogic
         internal const string SLC = @"//(.*?)(?:$|\r?\n)";
         public static Regex SingleComment = new Regex(SLC);
 
-        internal const string TXT = @"([^#}{]+)?\s*";
-        internal const string LBL = @"(#[A-Za-z][\S]*)?\s*";
-        internal const string MTA = @"(?:\{(.+?)\})?\s*";
-        public static Regex ParseLine = new Regex(Command.TypesRegex() + TXT + LBL + MTA);
-
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
@@ -85,6 +80,21 @@ namespace Dialogic
                 return defaultMs;
             }
             return (int)(d * 1000);
+        }
+
+        public static bool IsNumber(this object value) // ext
+        {
+            return value is sbyte
+                    || value is byte
+                    || value is short
+                    || value is ushort
+                    || value is int
+                    || value is uint
+                    || value is long
+                    || value is ulong
+                    || value is float
+                    || value is double
+                    || value is decimal;
         }
 
         public static string ToMixedCase(string s)
@@ -299,7 +309,7 @@ namespace Dialogic
             }
         }
 
-        public static string Stringify(object o)
+        public static string Stringify(this object o) // ext
         {
             if (o == null) return "NULL";
 

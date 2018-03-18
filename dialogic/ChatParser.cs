@@ -12,23 +12,52 @@ namespace Dialogic
         public static bool PRESERVE_LINE_NUMBERS = true;
         public static string CHAT_FILE_EXT = ".gs";
 
-        private static string[] LineBreaks = { "\r\n", "\r", "\n" };
-
-        //protected static List<Func<Command, bool>> validators;
-        protected Stack<Command> parsedCommands;
-        protected List<Chat> chats;
-
-        public ChatParser()
+        public static IDictionary<string, Type> TypeMap
+            = new Dictionary<string, Type>()
         {
-            parsedCommands = new Stack<Command>();
-            chats = new List<Chat>();
+                    { "CHAT",   typeof(Dialogic.Chat) },
+                    { "SAY",    typeof(Dialogic.Say)  },
+                    { "SET",    typeof(Dialogic.Set)  },
+                    { "ASK",    typeof(Dialogic.Ask)  },
+                    { "OPT",    typeof(Dialogic.Opt)  },
+                    { "DO",     typeof(Dialogic.Do)   },
+                    { "GO",     typeof(Dialogic.Go)   },
+                    { "WAIT",   typeof(Dialogic.Wait) },
+                    { "FIND",   typeof(Dialogic.Find) },
+                    { "GRAM",   typeof(Dialogic.Gram) },
+        };
+
+        private const string TXT = @"([^#}{]+)?\s*";
+        private const string LBL = @"(#[A-Za-z][\S]*)?\s*";
+        private const string MTA = @"(?:\{(.+?)\})?\s*";
+
+        internal static string TypesRegex()
+        {
+            string s = @"(";
+            var cmds = TypeMap.Keys;
+            for (int i = 0; i < cmds.Count; i++)
+            {
+                s += cmds.ElementAt(i);
+                if (i < cmds.Count - 1) s += "|";
+            }
+            return s + @")?\s*";
         }
 
-        //public static void AddValidator(Func<Command, bool> validator)
-        //{
-        //    if (validators == null) validators = new List<Func<Command, bool>>();
-        //    validators.Add(validator);
-        //}
+        private static string[] LineBreaks = { "\r\n", "\r", "\n" };
+
+        protected Stack<Command> parsedCommands;
+        protected Func<Command, bool>[] validators;
+        protected List<Chat> chats;
+        protected Regex LineParser;
+
+
+        public ChatParser(params Func<Command, bool>[] validator)
+        {
+            LineParser = new Regex(TypesRegex() + TXT + LBL + MTA);
+            parsedCommands = new Stack<Command>();
+            chats = new List<Chat>();
+            validators = validator;
+        }
 
         public static Grammar ParseGrammar(FileInfo file)
         {
@@ -81,23 +110,23 @@ namespace Dialogic
 
         private static List<Chat> Parse(string[] lines, params Func<Command, bool>[] validators)
         {
-            ChatParser parser = new ChatParser();
+            ChatParser parser = new ChatParser(validators);
 
             for (int i = 0; i < lines.Length; i++)
             {
                 if (!String.IsNullOrEmpty(lines[i]))
                 {
-                    parser.ParseLine(lines[i], i + 1, validators);
+                    parser.ParseLine(lines[i], i + 1);
                 }
             }
             return parser.chats;
         }
 
-        private Command ParseLine(string line, int lineNo, params Func<Command, bool>[] validators)
+        private Command ParseLine(string line, int lineNo)
         {
             //Console.WriteLine("LINE " + lineNo + ": " + line);
 
-            Match match = RE.ParseLine.Match(line);
+            Match match = LineParser.Match(line);
 
             if (match.Groups.Count < 5)
             {
@@ -138,7 +167,7 @@ namespace Dialogic
 
             parts.Match((cmd, text, label, meta) =>
             {
-                Type type = cmd.Length > 0 ? Command.TypeMap[cmd] : typeof(Say);
+                Type type = cmd.Length > 0 ? TypeMap[cmd] : typeof(Say);
 
                 try
                 {

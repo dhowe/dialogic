@@ -4,8 +4,28 @@ using Dialogic;
 
 namespace Tendar
 {
+    public class Nvm : Wait, ISendable
+    {
+        public static double NVM_DURATION = 5.0;
+
+        protected override double DefaultDuration()
+        {
+            return NVM_DURATION;
+        }
+
+        public override string TypeName()
+        {
+            return "Nvm";
+        }
+    }
+
     public static class Config
     {
+        static Config() {
+
+            ChatParser.TypeMap.Add("NVM", typeof(Tendar.Nvm));
+        }
+
         public static bool ValidateMeta(Command c)
         {
             if (c is Chat)

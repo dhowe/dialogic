@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Tendar;
 
 namespace Dialogic
 {
     [TestFixture]
     public class ParserTests
     {
+        // NOTE: all tests here are done with the Tendar.Config validator
+        static List<Chat> ParseText(string s)
+        {
+            return ChatParser.ParseText(s, Tendar.Config.ValidateMeta);
+        }
+
         [Test]
         public void TestPrompts()
         {
-            List<Chat> chats = ChatParser.ParseText("ASK Want a game?\nOPT Y #Game\n\nOPT N #End");
+            List<Chat> chats = ParseText("ASK Want a game?\nOPT Y #Game\n\nOPT N #End");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -86,7 +91,7 @@ namespace Dialogic
             Assert.That(res[1], Is.EqualTo(""));
 
             List<Chat> chats;
-            chats = ChatParser.ParseText(txt);
+            chats = ParseText(txt);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -94,22 +99,22 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             //Assert.That(parsed[14], Is.EqualTo("SAY Done4"));
-            //Assert.That(ChatParser.ParseText("//\n//SAY Thank you\n//SAY Hello\n// And Goodbye").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText("/*SAY Thank you\nSAY Hello\nAnd Goodbye*/").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText("///").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText("//").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText(" //").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText(" /* */").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText("/* */").Count, Is.EqualTo(0));
+            //Assert.That(ParseText("//\n//SAY Thank you\n//SAY Hello\n// And Goodbye").Count, Is.EqualTo(0));
+            //Assert.That(ParseText("/*SAY Thank you\nSAY Hello\nAnd Goodbye*/").Count, Is.EqualTo(0));
+            //Assert.That(ParseText("///").Count, Is.EqualTo(0));
+            //Assert.That(ParseText("//").Count, Is.EqualTo(0));
+            //Assert.That(ParseText(" //").Count, Is.EqualTo(0));
+            //Assert.That(ParseText(" /* */").Count, Is.EqualTo(0));
+            //Assert.That(ParseText("/* */").Count, Is.EqualTo(0));
 
-            chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\n// And Goodbye");
+            chats = ParseText("SAY Thank you\n//SAY Hello\n// And Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY Thank you\nSAY Hello //And Goodbye");
+            chats = ParseText("SAY Thank you\nSAY Hello //And Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -118,7 +123,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[1].Text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY Thank you\nSAY Hello /*And Goodbye*/");
+            chats = ParseText("SAY Thank you\nSAY Hello /*And Goodbye*/");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -127,7 +132,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[1].Text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\nAnd Goodbye\n");
+            chats = ParseText("SAY Thank you\n//SAY Hello\nAnd Goodbye\n");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -136,7 +141,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Goodbye"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY Thank you\n//SAY Goodbye\nAnd Hello");
+            chats = ParseText("SAY Thank you\n//SAY Goodbye\nAnd Hello");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -151,7 +156,7 @@ namespace Dialogic
         {
             List<Chat> chats;
 
-            chats = ChatParser.ParseText("FIND {num=1}");
+            chats = ParseText("FIND {num=1}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -163,7 +168,7 @@ namespace Dialogic
             Constraint constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
 
-            chats = ChatParser.ParseText("FIND {a*=(hot|cool)}");
+            chats = ParseText("FIND {a*=(hot|cool)}");
             var find = chats[0].commands[0];
             Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
             Assert.That(chats[0].commands[0].Text, Is.Null);
@@ -173,7 +178,7 @@ namespace Dialogic
             constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
 
-            chats = ChatParser.ParseText("FIND {do=1}");
+            chats = ParseText("FIND {do=1}");
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             var finder = chats[0].commands[0];
@@ -189,7 +194,7 @@ namespace Dialogic
         {
             List<Chat> chats;
 
-            chats = ChatParser.ParseText("FIND {num=$count}");
+            chats = ParseText("FIND {num=$count}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -211,7 +216,7 @@ namespace Dialogic
         public void TestFindSoftDynGroup()
         {
             // "FIND {a*=(hot|cool)}" in regex, means hot OR cool, no subs
-            var chats = ChatParser.ParseText("FIND {a*=(hot|cool)}");
+            var chats = ParseText("FIND {a*=(hot|cool)}");
             var find = chats[0].commands[0];
             find.Realize(RealizeTests.globals);
 
@@ -235,7 +240,7 @@ namespace Dialogic
         {
             List<Chat> chats;
 
-            chats = ChatParser.ParseText("FIND {!num=1}");
+            chats = ParseText("FIND {!num=1}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -247,7 +252,7 @@ namespace Dialogic
             Constraint constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(true));
 
-            chats = ChatParser.ParseText("FIND {!a*=(hot|cool)}");
+            chats = ParseText("FIND {!a*=(hot|cool)}");
             var find = chats[0].commands[0];
             Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
             Assert.That(chats[0].commands[0].Text, Is.Null);
@@ -257,7 +262,7 @@ namespace Dialogic
             constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(true));
 
-            chats = ChatParser.ParseText("FIND {!do=1}");
+            chats = ParseText("FIND {!do=1}");
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             var finder = chats[0].commands[0];
@@ -273,7 +278,7 @@ namespace Dialogic
         {
             List<Chat> chats;
 
-            chats = ChatParser.ParseText("WAIT .5 {waitForAnimation=true}");
+            chats = ParseText("WAIT .5 {waitForAnimation=true}");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -289,8 +294,7 @@ namespace Dialogic
         public void TestValidators()
         {
             List<Chat> chats;
-            chats = ChatParser.ParseText("CHAT c1 {plot=a,stage=b}\nSAY Hello",
-                Config.ValidateMeta);
+            chats = ChatParser.ParseText("CHAT c1 {plot=a,stage=b}\nSAY Hello");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -303,20 +307,19 @@ namespace Dialogic
         {
             string[] tests = {
 
-                "CHAT c1",
-                "CHAT c1 {plot=a,type=b}",
+                "CHAT c1 {plot=a,stage=b}",
             };
 
             for (int i = 0; i < tests.Length; i++)
             {
-                Assert.That(ChatParser.ParseText(tests[i])[0].ToScript(), Is.EqualTo(tests[i]));
+                Assert.That(ParseText(tests[i])[0].ToScript(), Is.EqualTo(tests[i]));
             }
 
             tests = new[] {
                 "SAY hay is for horses",
                 "ASK hay is for horses?",
                 "DO #hay",
-                "FIND {!a=b}",
+                "FIND {!a=b,staleness=5}",
                 "WAIT",
                 "WAIT .5",
                 "WAIT {ForAnimation=true}",
@@ -327,27 +330,28 @@ namespace Dialogic
 
             for (int i = 0; i < tests.Length; i++)
             {
-                Assert.That(ChatParser.ParseText(tests[i])[0].commands[0].ToScript(), Is.EqualTo(tests[i]));
+                Assert.That(ParseText(tests[i])[0].commands[0].ToScript(), Is.EqualTo(tests[i]));
             }
 
             var s = "GO #hay";
-            Assert.That(ChatParser.ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
-            Assert.That(ChatParser.ParseText("GO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ParseText("GO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
 
             s = "DO #hay";
-            Assert.That(ChatParser.ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
-            Assert.That(ChatParser.ParseText("DO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ParseText("DO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
 
             //s = "SET a 4";
-            //Assert.That(ChatParser.ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
+            //Assert.That(ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
 
             s = "ASK hay is for horses?\nOPT Yes? #Yes\nOPT No? #No";
-            var parts1 = s.Split('\n');
-            var chats = ChatParser.ParseText(s);
-            var parts2 = chats[0].commands[0].ToScript().Split('\n');
-            for (int i = 0; i < parts1.Length; i++)
+            var exp = s.Replace("\n","\n  ").Split('\n');
+            var res = ParseText(s)[0].commands[0].ToScript().Split('\n');
+
+            Assert.That(res.Length, Is.EqualTo(exp.Length));
+            for (int i = 0; i < exp.Length; i++)
             {
-                Assert.That(parts1[i], Is.EqualTo(parts2[i]));
+                Assert.That(res[i], Is.EqualTo(exp[i]));
             }
         }
 
@@ -357,7 +361,7 @@ namespace Dialogic
         {
             List<Chat> chats;
 
-            chats = ChatParser.ParseText("HAY is for horses");
+            chats = ParseText("HAY is for horses");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -365,7 +369,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("HAY is for horses"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("hello");
+            chats = ParseText("hello");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -373,7 +377,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("hello"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("wei");
+            chats = ParseText("wei");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -381,7 +385,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("wei"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY ...");
+            chats = ParseText("SAY ...");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -389,7 +393,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("..."));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("...");
+            chats = ParseText("...");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -397,7 +401,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("..."));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("GO #Twirl");
+            chats = ParseText("GO #Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -405,22 +409,14 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
 
-            chats = ChatParser.ParseText("GO Twirl");
+            chats = ParseText("GO Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
 
-            chats = ChatParser.ParseText("DO #Twirl");
-            //Console.WriteLine(chats[0].ToTree());
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
-
-            chats = ChatParser.ParseText("DO Twirl");
+            chats = ParseText("DO #Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -428,14 +424,22 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
 
-            chats = ChatParser.ParseText("SAY Thank you");
+            chats = ParseText("DO Twirl");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+
+            chats = ParseText("SAY Thank you");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY Thank you\n \t\nAnd Goodbye");
+            chats = ParseText("SAY Thank you\n \t\nAnd Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -444,7 +448,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Goodbye"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chats = ChatParser.ParseText("SAY Thank you { pace = fast}");
+            chats = ParseText("SAY Thank you { pace = fast}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -452,7 +456,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
-            chats = ChatParser.ParseText("SAY Thank you {pace=fast,count=2}");
+            chats = ParseText("SAY Thank you {pace=fast,count=2}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -462,7 +466,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
             Assert.That(chats[0].commands[0].GetMeta("count"), Is.EqualTo("2"));
 
-            chats = ChatParser.ParseText("SAY Thank you {}");
+            chats = ParseText("SAY Thank you {}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -482,7 +486,7 @@ namespace Dialogic
             var parser = new ChatParser();
             for (int i = 0; i < lines.Length; i++)
             {
-                Command c = ChatParser.ParseText(lines[i])[0].commands[0];
+                Command c = ParseText(lines[i])[0].commands[0];
                 Assert.That(c is Command);
             }
         }
@@ -491,7 +495,7 @@ namespace Dialogic
         [Test]
         public void TestGrammars()
         {
-            List<Chat> chats = ChatParser.ParseText("GRAM { start: 'The <item>', item: cat }");
+            List<Chat> chats = ParseText("GRAM { start: 'The <item>', item: cat }");
             Command gram = chats[0].commands[0];
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
@@ -504,14 +508,14 @@ namespace Dialogic
         [Test]
         public void TestChats()
         {
-            List<Chat> chats = ChatParser.ParseText("CHAT c1");
+            List<Chat> chats = ParseText("CHAT c1 {plot=a,stage=b}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(0));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Chat chat = chats[0];
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
 
-            chats = ChatParser.ParseText("CHAT c1\nGO #c1\nDO #c1\n");
+            chats = ParseText("CHAT c1 {plot=a,stage=b}\nGO #c1\nDO #c1\n");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -522,21 +526,21 @@ namespace Dialogic
         [Test]
         public void TestExceptions()
         {
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT Two Words"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("GO {no=label}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("DO {no=label}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND {a = (b|c)}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND hello"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT {a}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("OPT {a=b}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY")); // ?
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY {a=b}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT a {a=b}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("NVM a {a=b}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT c1", Config.ValidateMeta));
+            Assert.Throws<ParseException>(() => ParseText("CHAT Two Words"));
+            Assert.Throws<ParseException>(() => ParseText("GO {no=label}"));
+            Assert.Throws<ParseException>(() => ParseText("DO {no=label}"));
+            Assert.Throws<ParseException>(() => ParseText("FIND {a = (b|c)}"));
+            Assert.Throws<ParseException>(() => ParseText("FIND hello"));
+            Assert.Throws<ParseException>(() => ParseText("WAIT {a}"));
+            Assert.Throws<ParseException>(() => ParseText("OPT {a=b}"));
+            Assert.Throws<ParseException>(() => ParseText("SAY")); // ?
+            Assert.Throws<ParseException>(() => ParseText("SAY {a=b}"));
+            Assert.Throws<ParseException>(() => ParseText("WAIT a {a=b}"));
+            Assert.Throws<ParseException>(() => ParseText("NVM a {a=b}"));
+            Assert.Throws<ParseException>(() => ParseText("CHAT c1"));
 
             string[] lines = {
-                "CHAT c1",
+                "CHAT c1 {plot=a,stage=b}",
                 "SAY Thank you",
                 "SAY Hello",
                 "//SAY And Goodbye",
@@ -553,10 +557,10 @@ namespace Dialogic
                 "SAY Done4 {a}"
             };
 
-            Assert.Throws<ParseException>(() => ChatParser.ParseText(String.Join("\n", lines)));
+            Assert.Throws<ParseException>(() => ParseText(String.Join("\n", lines)));
             try
             {
-                ChatParser.ParseText(String.Join("\n", lines));
+                ParseText(String.Join("\n", lines));
             }
             catch (ParseException e)
             {

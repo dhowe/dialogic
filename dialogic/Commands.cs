@@ -195,7 +195,7 @@ namespace Dialogic
         }
     }
 
-    public class Nvm : Wait, ISendable
+    public class Nvmx : Wait, ISendable
     {
         protected override double DefaultDuration()
         {
@@ -335,7 +335,7 @@ namespace Dialogic
 
     public class Find : Command
     {
-        public Find() : base() {}
+        public Find() : base() { }
 
         internal Find(Constraints c) : base()
         {
@@ -348,6 +348,15 @@ namespace Dialogic
         }
 
         public override void Realize(IDictionary<string, object> globals) { /*noop*/ }
+
+        public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
+        {
+            if (val is string || val.IsNumber())
+            {
+                val = new Constraint(key, val.ToString());
+            }
+            base.SetMeta(key, val, throwIfKeyExists);
+        }
 
         protected override void ParseMeta(string[] pairs)
         {
@@ -557,7 +566,7 @@ namespace Dialogic
             this.SetMeta(constraint.name, constraint, true);
         }
 
-        public void SetMeta(string key, object val, bool throwIfKeyExists = false)
+        public virtual void SetMeta(string key, object val, bool throwIfKeyExists = false)
         {
             if (meta == null) meta = new Dictionary<string, object>();
 
@@ -626,29 +635,13 @@ namespace Dialogic
     {
         public const string PACKAGE = "Dialogic.";
 
-        internal static IDictionary<string, Type> TypeMap
-            = new Dictionary<string, Type>()
-        {
-            { "CHAT",   typeof(Dialogic.Chat) },
-            { "SAY",    typeof(Dialogic.Say)  },
-            { "SET",    typeof(Dialogic.Set)  },
-            { "ASK",    typeof(Dialogic.Ask)  },
-            { "OPT",    typeof(Dialogic.Opt)  },
-            { "DO",     typeof(Dialogic.Do)   },
-            { "GO",     typeof(Dialogic.Go)   },
-            { "WAIT",   typeof(Dialogic.Wait) },
-            { "FIND",   typeof(Dialogic.Find) },
-            { "GRAM",   typeof(Dialogic.Gram) },
-            { "NVM",    typeof(Dialogic.Nvm)  }
-        };
-
         protected static int IDGEN = 0;
 
         public static readonly Command NOP = new NoOp();
 
         public static string DefaultSpeaker = String.Empty; // ?
 
-        public string Id { get; protected set; }
+        public int Id { get; protected set; }
 
         public int DelayMs { get; protected set; }
 
@@ -661,7 +654,7 @@ namespace Dialogic
         protected Command()
         {
             this.DelayMs = 0;
-            this.Id = (++IDGEN).ToString();
+            this.Id = ++IDGEN;
             this.realized = new Dictionary<string, object>();
         }
 
@@ -672,7 +665,7 @@ namespace Dialogic
 
             if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
-
+            
         public string GetText(bool real = false)
         {
             return real ? (string)realized[Meta.TEXT] : Text;
@@ -708,6 +701,7 @@ namespace Dialogic
 
         public virtual string TypeName()
         {
+            //return this.GetType().DeclaringType.Name; // an easier way ?
             return this.GetType().ToString().Replace(PACKAGE, String.Empty);
         }
 
@@ -770,16 +764,5 @@ namespace Dialogic
             return DelayMs;
         }
 
-        internal static string TypesRegex()
-        {
-            string s = @"(";
-            var cmds = TypeMap.Keys;
-            for (int i = 0; i < cmds.Count; i++)
-            {
-                s += cmds.ElementAt(i);
-                if (i < cmds.Count - 1) s += "|";
-            }
-            return s + @")?\s*";
-        }
     }
 }
