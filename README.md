@@ -127,7 +127,7 @@ The application calls the runtime's Update() function each frame, passing the cu
 
 1. To run a console demo, right-click 'runner' and select 'Run Item'
 
-![](res/vsloaded.png?raw=true)
+![](http://rednoise.org/images/vsloaded.png?raw=true)
 
 
 
