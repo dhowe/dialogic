@@ -1,6 +1,6 @@
 # Dialogic
 
-[![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) <a href="http://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/badge/license-GPL-orange.svg" alt="gpl license"></a>
+[![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic)![license](https://img.shields.io/badge/license-GPL-orange.svg)
 
 [Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Documentation](http://rednoise.org/dialogic/) &nbsp;::&nbsp; [Web Linter](http://138.16.162.16:8080/glint/) 
 
