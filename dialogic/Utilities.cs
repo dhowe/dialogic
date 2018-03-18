@@ -10,20 +10,28 @@ namespace Dialogic
 {
     public static class Defaults
     {
+        // Default Command durations
         public static double SAY_DURATION = 2.0;
         public static double DO_DURATION = 0.02;
         public static double NVM_DURATION = 5.0;
         public static double ASK_DURATION = Util.INFINITE;
         public static double WAIT_DURATION = Util.INFINITE;
 
+        // Default Timeout for Asks
         public static double ASK_TIMEOUT = 5.0;
 
+        // Default Timing fields for Say, Ask, Opt
         public static double SAY_FAST_MULT = 0.5;
         public static double SAY_SLOW_MULT = 2.0;
         public static double SAY_MAX_LEN_MULT = 2.0;
         public static double SAY_MIN_LEN_MULT = 0.5;
         public static int SAY_MAX_LINE_LEN = 80;
         public static int SAY_MIN_LINE_LEN = 2;
+
+        // Default staleness-threshold for Find
+        public static double FIND_STALENESS = 5;
+
+        //public static void Override(IDictionary<string, object> values)
     }
 
     public static class RE

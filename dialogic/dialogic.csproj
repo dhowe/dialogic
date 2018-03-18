@@ -9,7 +9,6 @@
     <RootNamespace>Dialogic</RootNamespace>
     <AssemblyName>Dialogic</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <PackOnBuild>true</PackOnBuild>
     <PackageId>rednoise.org.dialogic</PackageId>
     <PackageVersion>0.4.61</PackageVersion>
     <Authors>Daniel C Howe</Authors>
@@ -19,6 +18,7 @@
     <PackageProjectUrl>https://github.com/dhowe/dialogic</PackageProjectUrl>
     <Title>Dialogic</Title>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PackageIconUrl>http://rednoise.org/images/dialogic.png</PackageIconUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,7 +57,6 @@
     <Compile Include="Realizer.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Grammar.cs" />
-    <Compile Include="GrammarMods.cs" />
     <Compile Include="ChatRuntime.cs" />
     <Compile Include="ChatParser.cs" />
     <Compile Include="Tendar.cs" />

@@ -80,10 +80,7 @@ namespace Dialogic.Server
                         }, listener.GetContext());
                     }
                 }
-                catch (Exception)
-                {
-                    // ignored
-                }
+                catch (Exception) { }
             });
         }
 
@@ -111,7 +108,6 @@ namespace Dialogic.Server
             {
                 string content = String.Empty;
                 chats = ChatParser.ParseText(code);
-                //Console.WriteLine(chats.Count+" Chats parsed");
                 chats.ForEach(c =>
                 {
                     content += c.ToScript() + "\n\n";
@@ -141,7 +137,8 @@ namespace Dialogic.Server
             LintServer.indexPageContent = html;
             ws.Run();
 
-            Console.WriteLine("LintServer running on " + SERVER_URL + " - press any key to quit");
+            Console.WriteLine("LintServer running on " 
+                + SERVER_URL + " - press any key to quit");
             Console.ReadKey();
             ws.Stop();
         }

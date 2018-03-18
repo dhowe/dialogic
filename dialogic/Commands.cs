@@ -527,6 +527,7 @@ namespace Dialogic
         public const string STAGE = "stage";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
+        public const string STALENESS = "staleness";
         public const string RESUMABLE = "resumable";
 
         public IDictionary<string, object> meta, realized;

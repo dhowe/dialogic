@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Dialogic;
+using Tendar;
 
 namespace runner
 {
@@ -34,7 +35,8 @@ namespace runner
 
         public MockGameEngine(string fileOrFolder)
         {
-            List<Chat> chats = ChatParser.ParseFile(fileOrFolder);
+            List<Chat> chats = ChatParser.ParseFile
+                (fileOrFolder, Validators.ValidateMeta);
             runtime = new ChatRuntime(chats);
             runtime.Run();
         }

@@ -185,7 +185,7 @@ namespace Dialogic
 
         private static void ParseFile(string fname, List<Chat> chats, params Func<Command, bool>[] validators)
         {
-            ParseText(File.ReadAllText(fname)).ForEach((f) => chats.Add(f));
+            ParseText(File.ReadAllText(fname), validators).ForEach((f) => chats.Add(f));
         }
 
         private static Command LastOfType(Stack<Command> s, Type typeToFind)

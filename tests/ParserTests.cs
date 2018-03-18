@@ -290,7 +290,7 @@ namespace Dialogic
         {
             List<Chat> chats;
             chats = ChatParser.ParseText("CHAT c1 {plot=a,stage=b}\nSAY Hello",
-                Validators.ValidateMeta);
+                Config.ValidateMeta);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -533,7 +533,7 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT a {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("NVM a {a=b}"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT c1", Validators.ValidateMeta));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT c1", Config.ValidateMeta));
 
             string[] lines = {
                 "CHAT c1",
