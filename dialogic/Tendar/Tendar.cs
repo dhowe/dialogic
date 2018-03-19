@@ -16,9 +16,9 @@ namespace Tendar // move to runner (parse-time, runtime)
             Speakers.Add(new Speaker("Tendar"));
         }
 
-        private static bool ValidatorFun(Command c) // TODO: make private
+        private static bool ValidatorFun(Command c)
         {
-            if (c is Chat)
+            if (c is Chat && !c.HasMeta("NoStart"))
             {
                 if (c.GetMeta(Meta.PLOT) == null) throw new ParseException
                     ("Missing required meta-key: " + Meta.PLOT);
@@ -29,7 +29,8 @@ namespace Tendar // move to runner (parse-time, runtime)
 
             if (c is Find)
             {
-                if (c.GetMeta(Meta.STALENESS) == null) // default staleness
+                // add default staleness if not otherwise specified
+                if (c.GetMeta(Meta.STALENESS) == null) 
                 {
                     c.SetMeta(Meta.STALENESS, Defaults.FIND_STALENESS);
                 }

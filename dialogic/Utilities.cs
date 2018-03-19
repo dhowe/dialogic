@@ -96,21 +96,6 @@ namespace Dialogic
             return (int)(d * 1000);
         }
 
-        public static bool IsNumber(this object value) // ext
-        {
-            return value is sbyte
-                    || value is byte
-                    || value is short
-                    || value is ushort
-                    || value is int
-                    || value is uint
-                    || value is long
-                    || value is ulong
-                    || value is float
-                    || value is double
-                    || value is decimal;
-        }
-
         public static string ToMixedCase(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
@@ -118,12 +103,6 @@ namespace Dialogic
             return (s[0].ToString()).ToUpper() + s.Substring(1).ToLower();
         }
 
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
-        {
-            if (ie == null) return true;
-            var coll = ie as ICollection<T>;
-            return (coll != null) ? coll.Count < 1 : !ie.Any();
-        }
 
         public static double Map(double n, double start1, double stop1, double start2, double stop2)
         {
@@ -323,49 +302,7 @@ namespace Dialogic
             }
         }
 
-        public static string Stringify(this object o) // ext
-        {
-            if (o == null) return "NULL";
 
-            string s = "";
-            if (o is IDictionary)
-            {
-                IDictionary id = (System.Collections.IDictionary)o;
-                if (id.Count > 0)
-                {
-                    s += "{ ";
-                    foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
-                    s = s.Substring(0, s.Length - 1) + " }";
-                }
-            }
-            else if (o is object[])
-            {
-                var arr = ((object[])o);
-                s = "[ ";
-                for (int i = 0; i < arr.Length; i++)
-                {
-                    s += arr[i];
-                    if (i < arr.Length - 1) s += ",";
-                }
-                s += " ]";
-            }
-            else if (o is IList)
-            {
-                var list = (IList)o;
-                s = "[ ";
-                for (int i = 0; i < list.Count; i++)
-                {
-                    s += list[i].ToString();
-                    if (i < list.Count - 1) s += ",";
-                }
-                s += " ]";
-            }
-            else
-            {
-                s = o.ToString();
-            }
-            return s;
-        }
 
         public static IEnumerable<string> SortByLength(IEnumerable<string> e)
         {
@@ -701,15 +638,94 @@ namespace Dialogic
             return next;
         }
     }
-}
 
-namespace ExtensionMethods
-{
     public static class Exts
     {
         public static void Match<T>(this IList<T> il, Action<T, T, T, T> block)
         {
             block(il[0], il[1], il[2], il[3]);
+        }
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
+        {
+            if (ie == null) return true;
+            var coll = ie as ICollection<T>;
+            return (coll != null) ? coll.Count < 1 : !ie.Any();
+        }
+
+        public static bool IsNumber(this object value) // ext
+        {
+            return value is sbyte
+                    || value is byte
+                    || value is short
+                    || value is ushort
+                    || value is int
+                    || value is uint
+                    || value is long
+                    || value is ulong
+                    || value is float
+                    || value is double
+                    || value is decimal;
+        }
+
+        public static string TrimEnds(this string str, char start, char ends)
+        {
+            return str.TrimFirst(start).TrimLast(ends);
+        }
+
+        public static string TrimFirst(this string str, char c)
+        {
+            return (str[0] == c) ? str.Substring(1) : str;
+        }
+
+        public static string TrimLast(this string str, char c)
+        {
+            int last = str.Length - 2;
+            return (str[last] == c) ? str.Substring(0, last) : str;
+        }
+
+        public static string Stringify(this object o)
+        {
+            if (o == null) return "NULL";
+
+            string s = "";
+            if (o is IDictionary)
+            {
+                IDictionary id = (System.Collections.IDictionary)o;
+                if (id.Count > 0)
+                {
+                    s += "{ ";
+                    foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
+                    s = s.Substring(0, s.Length - 1) + " }";
+                }
+            }
+            else if (o is object[])
+            {
+                var arr = ((object[])o);
+                s = "[ ";
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    s += arr[i];
+                    if (i < arr.Length - 1) s += ",";
+                }
+                s += " ]";
+            }
+            else if (o is IList)
+            {
+                var list = (IList)o;
+                s = "[ ";
+                for (int i = 0; i < list.Count; i++)
+                {
+                    s += list[i].ToString();
+                    if (i < list.Count - 1) s += ",";
+                }
+                s += " ]";
+            }
+            else
+            {
+                s = o.ToString();
+            }
+            return s;
         }
     }
 }

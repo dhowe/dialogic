@@ -59,8 +59,8 @@
     <Compile Include="Grammar.cs" />
     <Compile Include="ChatRuntime.cs" />
     <Compile Include="ChatParser.cs" />
-    <Compile Include="Tendar.cs" />
     <Compile Include="Speaker.cs" />
+    <Compile Include="Tendar\Tendar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -70,6 +70,9 @@
     <None Include="bin\Debug\dialogic.dll" />
     <None Include="data\gscript.gs" />
     <None Include="data\queries.gs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tendar\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.targets" Condition="Exists('..\packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.targets')" />

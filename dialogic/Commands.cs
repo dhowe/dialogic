@@ -186,13 +186,13 @@ namespace Dialogic
         }
     }
 
-    public class Nvmx : Wait, ISendable
-    {
-        protected override double DefaultDuration()
-        {
-            return Defaults.NVM_DURATION;
-        }
-    }
+    //public class Nvmx : Wait, ISendable
+    //{
+    //    protected override double DefaultDuration()
+    //    {
+    //        return Defaults.NVM_DURATION;
+    //    }
+    //}
 
     public class Ask : Say, ISendable
     {
@@ -314,6 +314,8 @@ namespace Dialogic
 
     public class Find : Command
     {
+        double stalenessThreshold; // TODO: init with default for type
+
         public Find() : base() { }
 
         internal Find(Constraints c) : base()
@@ -324,6 +326,11 @@ namespace Dialogic
         public override void Init(string text, string label, string[] metas)
         {
             ParseMeta(metas);
+        }
+
+        public void Init(string metadata) // TODO: needs tests
+        {
+            ParseMeta(metadata.Trim().TrimEnds('{', '}').Split(','));
         }
 
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals) 
@@ -409,7 +416,8 @@ namespace Dialogic
     public class Chat : Command
     {
         public List<Command> commands;
-        public bool resumeOnInterrupt = false;
+        public bool interruptable = true;
+        public bool resumeLastAfterInterrupting = true;
         public int cursor = 0, lastRunAt = -1;
         public double stalenessIncrement = 1;
         public double staleness = 0;
@@ -510,7 +518,7 @@ namespace Dialogic
 
         public bool IsResumable() // TODO: set from meta
         {
-            return resumeOnInterrupt;
+            return resumeLastAfterInterrupting;
         }
     }
 
