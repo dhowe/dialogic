@@ -10,7 +10,8 @@ namespace Dialogic
         // NOTE: all tests here are done with the Tendar.Config validator
         static List<Chat> ParseText(string s)
         {
-            DialogManager.TypeMap.Add("NVM", typeof(Tendar.Nvm));
+            if (!ChatRuntime.TypeMap.ContainsKey("NVM")) // tmp
+                ChatRuntime.TypeMap.Add("NVM", typeof(Tendar.Nvm));
             return ChatParser.ParseText(s, Tendar.Config.Validator);
         }
 

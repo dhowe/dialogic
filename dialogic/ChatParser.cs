@@ -66,7 +66,7 @@ namespace Dialogic
         private static string TypesRegex()
         {
             string s = @"(";
-            var cmds = DialogManager.TypeMap.Keys;
+            var cmds = ChatRuntime.TypeMap.Keys;
             for (int i = 0; i < cmds.Count; i++)
             {
                 s += cmds.ElementAt(i);
@@ -120,7 +120,7 @@ namespace Dialogic
 
             parts.Match((cmd, text, label, meta) =>
             {
-                Type type = cmd.Length > 0 ? DialogManager.TypeMap[cmd] : typeof(Say);
+                Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] : typeof(Say);
 
                 try
                 {

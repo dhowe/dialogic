@@ -28,14 +28,14 @@ namespace runner
                 { "var3", 2 }
             };
 
-        private DialogManager dialogic; 
+        private ChatRuntime dialogic; 
         private EventArgs gameEvent;
         string diaText, diaType;
         string[] diaOpts;
 
         public MockGameEngine(string fileOrFolder)
         {
-            dialogic = new DialogManager(Config.Speakers);
+            dialogic = new ChatRuntime(Config.Speakers);
             dialogic.ParseFile(fileOrFolder);
             dialogic.Run();
         }
