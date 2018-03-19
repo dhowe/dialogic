@@ -8,6 +8,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "runner", "runner\runner.csproj", "{A784E61D-65E0-49B5-AD38-34B910864E6F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{026B3D3B-089D-4AF0-9D0C-6026E4672FC6}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		docs\Doxyfile = docs\Doxyfile
+		docs\doxy.css = docs\doxy.css
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "weblint", "weblint\weblint.csproj", "{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}"
 EndProject

@@ -29,12 +29,12 @@ namespace Dialogic
         public override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
-            CheckRecombination(globals);
+            Recombine(globals);
             lastSpoken = GetText(true);
             lastSpokenTime = Util.EpochMs();
         }
 
-        private void CheckRecombination(IDictionary<string, object> globals)
+        private void Recombine(IDictionary<string, object> globals)
         {
             if (IsRecombinant()) // try to say something different than last time
             {
@@ -57,7 +57,7 @@ namespace Dialogic
          *      b. Meta-data modifiers
          *      c. Character mood (TODO)
          */
-        public override int ComputeDuration()
+        public override int ComputeDuration() // Config?
         {
             return Util.Round
                 (GetTextLenScale() * GetMetaSpeedScale() * DelayMs);
@@ -70,7 +70,7 @@ namespace Dialogic
                 Defaults.SAY_MIN_LEN_MULT, Defaults.SAY_MAX_LEN_MULT);
         }
 
-        protected double GetMetaSpeedScale()
+        protected double GetMetaSpeedScale() // Config
         {
             double val = 1.0;
             if (meta != null && meta.ContainsKey("speed"))

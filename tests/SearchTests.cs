@@ -9,6 +9,26 @@ namespace Dialogic
     public class SearchTests
     {
         [Test]
+        public void TestStaleness()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            ChatRuntime cr = new ChatRuntime(chats);
+            var res = new ChatRuntime(chats).FindAll(new Constraint("dev", "1"));
+            Assert.That(res.Count, Is.EqualTo(0));
+
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            cr = new ChatRuntime(chats);
+            res = new ChatRuntime(chats).FindAll(new Constraint("dev", "1"));
+            Assert.That(res.Count, Is.EqualTo(100));
+        }
+
+        [Test]
         public void TestBasicFind()
         {
             Chat c;
@@ -62,17 +82,6 @@ namespace Dialogic
             c.SetMeta("dev", "3");
             cr = new ChatRuntime(chats);
             chat = new ChatRuntime(chats).Find(new Constraint("dev", "1", ConstraintType.Hard));
-            Assert.That(chat, Is.Null);
-
-            chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "hello");
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "3");
-            cr = new ChatRuntime(chats);
-            chat = new ChatRuntime(chats).Find(new Constraint("dev", "1", ConstraintType.Absolute));
             Assert.That(chat, Is.Null);
 
             chats = new List<Chat>();

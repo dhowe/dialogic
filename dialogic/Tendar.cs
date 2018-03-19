@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Dialogic;
 
-namespace Tendar
+namespace Tendar // move to runner (parse-time, runtime)
 {
     public class Nvm : Wait, ISendable
     {
