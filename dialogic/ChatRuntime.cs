@@ -58,6 +58,7 @@ namespace Dialogic
             this.chats = chats;
             this.speakers = speakers;
             this.scheduler = new ChatScheduler(this);
+            this.validators = new List<Func<Command, bool>>();
             ConfigureSpeakers();
         }
 
@@ -75,7 +76,10 @@ namespace Dialogic
                     }
                 }
                 var val = s.Validator();
-                if (val != null) validators.Add(val);
+                if (val != null)
+                {
+                    validators.Add(val);
+                }
             });
         }
 

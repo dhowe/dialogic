@@ -110,7 +110,7 @@ namespace Dialogic.Server
                 chats = ChatParser.ParseText(code);
                 chats.ForEach(c =>
                 {
-                    content += c.ToScript() + "\n\n";
+                    content += c + "\n\n";
                 });
 
                 html = html.Replace("%%RESULT%%", content);
