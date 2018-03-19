@@ -64,12 +64,12 @@ namespace Dialogic
 
         private void ConfigureSpeakers()
         {
-            if (Util.IsNullOrEmpty(speakers)) return;
+            if (speakers.IsNullOrEmpty()) return;
 
             speakers.ForEach(s =>
             {
                 var cmds = s.Commands();
-                if (!Util.IsNullOrEmpty(cmds)) {
+                if (!cmds.IsNullOrEmpty()) {
                     foreach (var cmd in cmds)
                     {
                         TypeMap.Add(cmd.label, cmd.type);
@@ -85,7 +85,7 @@ namespace Dialogic
 
         public void Run(string chatLabel = null)
         {
-            if (Util.IsNullOrEmpty(chats)) throw new Exception("No chats found");
+            if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
 
             scheduler.StartNew((chatLabel != null) ? FindByName(chatLabel) : chats[0]);
         }

@@ -61,7 +61,7 @@ namespace runner
             switch (diaType)
             {
                 case "Say":
-                    diaText += " " + Util.Stringify(ue.Data());
+                    diaText += " " + ue.Data().Stringify();
                     break;
 
                 case "Ask":
@@ -82,12 +82,12 @@ namespace runner
                     });
 
                     diaText = ("(" + diaType + " " + 
-                        Util.Stringify(ue.Data())).Trim() + ")";
+                        ue.Data().Stringify().Trim() + ")");
                     break;
 
                 default:
                     diaText = ("(" + diaType + ": " + diaText + " "
-                        + Util.Stringify(ue.Data())).Trim() + ")";
+                        + ue.Data().Stringify().Trim() + ")");
                     break;
             }
 
@@ -101,7 +101,7 @@ namespace runner
             diaOpts = ge.Get(Meta.OPTS).Split('\n');
 
             ge.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
-            diaText += " " + Util.Stringify(ge.Data()); // show meta
+                diaText += " " + ge.Data().Stringify(); // show meta
 
             for (int i = 0; i < diaOpts.Length; i++)
             {

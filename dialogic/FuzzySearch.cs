@@ -134,7 +134,7 @@ namespace Dialogic
         private static IDictionary<string, object> ExtractMeta(Find finder)
         {
             // note: this is problematic! -- perhaps should throw in case of no realized data
-            return !Util.IsNullOrEmpty(finder.realized) ? finder.realized : finder.meta;
+            return !finder.realized.IsNullOrEmpty() ? finder.realized : finder.meta;
         }
 
         /*

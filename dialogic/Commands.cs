@@ -617,7 +617,7 @@ namespace Dialogic
                     if (parts.Length != 2)
                     {
                         throw new Exception("Expected 2 parts for meta key/val," +
-                            " but found " + parts.Length + ": " + Util.Stringify(parts));
+                                            " but found " + parts.Length + ": " + parts.Stringify());
                     }
 
                     SetMeta(parts[0].Trim(), parts[1].Trim());

@@ -11,7 +11,7 @@ namespace Dialogic
         {
             if (IsDynamic(text))
             {
-                if (Util.IsNullOrEmpty(globals))
+                if (globals.IsNullOrEmpty())
                 {
                     return DoGroups(text);
                 }
@@ -26,7 +26,7 @@ namespace Dialogic
 
                     // bail on infinite loops:
                     if (++tries > 1000) throw new RealizeException
-                        ("Invalid-Sub: '" + arg + "' " + Util.Stringify(globals));
+                        ("Invalid-Sub: '" + arg + "' " + globals.Stringify());
                 }
                 while (IsDynamic(text)); 
 

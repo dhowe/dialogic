@@ -94,7 +94,7 @@ namespace Dialogic
 
             Command c = ParseCommand(parts, line, lineNo);
 
-            if (!Util.IsNullOrEmpty(validators))
+            if (!validators.IsNullOrEmpty())
             {
                 foreach (var check in validators)
                 {
