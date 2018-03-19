@@ -28,17 +28,16 @@ namespace runner
                 { "var3", 2 }
             };
 
-        private readonly ChatRuntime runtime;
+        private DialogManager dialogic; 
         private EventArgs gameEvent;
         string diaText, diaType;
         string[] diaOpts;
 
         public MockGameEngine(string fileOrFolder)
         {
-            List<Chat> chats = ChatParser.ParseFile
-                (fileOrFolder, Config.Validator);
-            runtime = new ChatRuntime(chats);
-            runtime.Run();
+            dialogic = new DialogManager(Config.Speakers);
+            dialogic.ParseFile(fileOrFolder);
+            dialogic.Run();
         }
 
         public void Run()
@@ -47,7 +46,7 @@ namespace runner
             while (true)
             {
                 Thread.Sleep(30);
-                IUpdateEvent ue = runtime.Update(globals, ref gameEvent);
+                IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
                 if (ue != null) HandleEvent(ref ue);
             }
         }

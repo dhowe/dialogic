@@ -5,9 +5,29 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Timers;
 using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("tests")]
 
 namespace Dialogic
 {
+    public class CommandDef
+    {
+        public readonly Type type;
+        public readonly string label;
+
+        public CommandDef(String cmd, Type cmdType)
+        {
+            this.label = cmd;
+            this.type = cmdType;
+            if (!typeof(Command).IsAssignableFrom(cmdType))
+            {
+                throw new DialogicException
+                    ("Expected subclass of Command, but found " + cmdType);
+            }
+        }
+    }
+
     public static class Defaults
     {
         // Default Command durations

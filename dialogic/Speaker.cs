@@ -7,31 +7,29 @@ namespace Dialogic
     {
         string Name();
         bool IsDefault();
-        Func<Command, bool>[] Validators();
-        IDictionary<string, Type> Commands();
+        CommandDef[] Commands();
+        Func<Command, bool> Validator();
     }
 
     public class Speaker : ISpeaker
     {
         readonly string name;
+        readonly bool isDefault;
+        readonly CommandDef[] commands;
+        readonly Func<Command, bool> validator;
 
-        bool isDefault;
-        Func<Command, bool>[] validators;
-        IDictionary<string, Type> commandsTypes;
+        public Speaker(string label) : this(label, false, null, null) { }
 
-        public Speaker(string label, IDictionary<string, Type> commands = null,
-            params Func<Command, bool>[] validators)
-            : this(label, false, commands, validators)
-        {
-        }
+        public Speaker(string label, Func<Command, bool> validator = null, 
+            params CommandDef[] commands) : this(label, false, validator, commands) { }
 
-        public Speaker(string label, bool isDefault = false, IDictionary<string, Type>
-            commands = null, params Func<Command, bool>[] validators)
+        public Speaker(string label, bool isDefault = false, Func<Command, bool> 
+            validator = null, params CommandDef[] commands)
         {
             this.name = label;
             this.isDefault = isDefault;
-            this.commandsTypes = commands;
-            this.validators = validators;
+            this.validator = validator;
+            this.commands = commands;
         }
 
         public string Name()
@@ -44,14 +42,14 @@ namespace Dialogic
             return isDefault;
         }
 
-        public Func<Command, bool>[] Validators()
+        public Func<Command, bool> Validator()
         {
-            return validators;
+            return validator;
         }
 
-        public IDictionary<string, Type> Commands()
+        public CommandDef[] Commands()
         {
-            return commandsTypes;
+            return commands;
         }
     }
 }

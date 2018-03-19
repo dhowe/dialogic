@@ -147,19 +147,16 @@ namespace Dialogic
             return list;
         }
 
-        /// @cond TestOnly
         /*
          * Sort by points, highest first, break ties with the fresher chat
          */
-        public static List<KeyValuePair<Chat, int>> DescendingFreshnessSort(Dictionary<Chat, int> d)
+        internal static List<KeyValuePair<Chat, int>> DescendingFreshnessSort(Dictionary<Chat, int> d)
         {
             // public for testing only
             List<KeyValuePair<Chat, int>> list = d.ToList();
             list.Sort((p1, p2) => CompareFreshnessTies(p1, p2));
             return list;
         }
-        /// @endcond
-
 
         // sort descending with ties based on freshness
         private static int CompareFreshnessTies(KeyValuePair<Chat, int> i, KeyValuePair<Chat, int> j)

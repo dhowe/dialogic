@@ -10,17 +10,73 @@ namespace Dialogic
     {
         public static string logFile;// = "../../../dialogic/dia.log";
 
+        public static string CHAT_FILE_EXT = ".gs";
+
+        public static IDictionary<string, Type> TypeMap
+            = new Dictionary<string, Type>()
+        {
+                    { "CHAT",   typeof(global::Dialogic.Chat) },
+                    { "SAY",    typeof(global::Dialogic.Say)  },
+                    { "SET",    typeof(global::Dialogic.Set)  },
+                    { "ASK",    typeof(global::Dialogic.Ask)  },
+                    { "OPT",    typeof(global::Dialogic.Opt)  },
+                    { "DO",     typeof(global::Dialogic.Do)   },
+                    { "GO",     typeof(global::Dialogic.Go)   },
+                    { "WAIT",   typeof(global::Dialogic.Wait) },
+                    { "FIND",   typeof(global::Dialogic.Find) },
+                    { "GRAM",   typeof(global::Dialogic.Gram) },
+        };
+
         private bool logInitd;
         private int nextEventTime;
         private Thread searchThread;
         private List<Chat> chats;
         private ChatScheduler scheduler;
         private List<ISpeaker> speakers;
+        private List<Func<Command, bool>> validators;
 
-        public ChatRuntime(List<Chat> chats)
+        public void ParseFile(string fileOrFolder)
+        {
+            string[] files = Directory.Exists(fileOrFolder) ?
+                files = Directory.GetFiles(fileOrFolder, '*' + ChatRuntime.CHAT_FILE_EXT) :
+                files = new string[] { fileOrFolder };
+
+            this.chats = new List<Chat>();
+            foreach (var f in files)
+            {
+                var text = File.ReadAllText(f);
+                var stripped = ChatParser.StripComments(text);
+                var parsed = new ChatParser(validators.ToArray()).Parse(stripped);
+                parsed.ForEach(c => chats.Add(c));
+            }
+        }
+
+        public ChatRuntime(List<ISpeaker> speakers = null) : this(null, speakers) { }
+
+        public ChatRuntime(List<Chat> chats, List<ISpeaker> speakers=null)
         {
             this.chats = chats;
+            this.speakers = speakers;
             this.scheduler = new ChatScheduler(this);
+            ConfigureSpeakers();
+        }
+
+        private void ConfigureSpeakers()
+        {
+            if (Util.IsNullOrEmpty(speakers)) return;
+
+            speakers.ForEach(s =>
+            {
+                var cmds = s.Commands();
+                if (!Util.IsNullOrEmpty(cmds)) {
+                    foreach (var cmd in cmds)
+                    {
+                        TypeMap.Add(cmd.label, cmd.type);
+                    }
+                }
+                var val = s.Validator();
+                if (val != null) validators.Add(val);
+            });
         }
 
         public void Run(string chatLabel = null)

@@ -6,20 +6,17 @@ namespace Tendar // move to runner (parse-time, runtime)
 {
     public static class Config
     {
-        public static List<Speaker> Speakers = new List<Speaker>();
-
-        static IDictionary<string, Type> Types = new Dictionary<string, Type>() {
-            { "NVM", typeof(Tendar.Nvm) }
-        };
+        public static List<ISpeaker> Speakers = new List<ISpeaker>();
+        public static Func<Command, bool> Validator = ValidatorFun;
 
         static Config()
         {
-            ChatParser.TypeMap.Add("NVM", typeof(Tendar.Nvm)); // remove
-            Speakers.Add(new Speaker("Guppy", true, Types, Validator));
-            Speakers.Add(new Speaker("Tendar", Types, Validator));
+            var customCmd = new CommandDef("NVM", typeof(Tendar.Nvm));
+            Speakers.Add(new Speaker("Guppy", true, Validator, customCmd));
+            Speakers.Add(new Speaker("Tendar"));
         }
 
-        public static bool Validator(Command c)
+        private static bool ValidatorFun(Command c) // TODO: make private
         {
             if (c is Chat)
             {
