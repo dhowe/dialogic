@@ -10,7 +10,7 @@ namespace Dialogic
         // NOTE: all tests here are done with the Tendar.Config validator
         static List<Chat> ParseText(string s)
         {
-            return ChatParser.ParseText(s, Tendar.Config.ValidateMeta);
+            return ChatParser.ParseText(s, Tendar.Config.Validator);
         }
 
         [Test]
@@ -312,7 +312,7 @@ namespace Dialogic
 
             for (int i = 0; i < tests.Length; i++)
             {
-                Assert.That(ParseText(tests[i])[0].ToScript(), Is.EqualTo(tests[i]));
+                Assert.That(ParseText(tests[i])[0].ToString(), Is.EqualTo(tests[i]));
             }
 
             tests = new[] {
@@ -330,23 +330,23 @@ namespace Dialogic
 
             for (int i = 0; i < tests.Length; i++)
             {
-                Assert.That(ParseText(tests[i])[0].commands[0].ToScript(), Is.EqualTo(tests[i]));
+                Assert.That(ParseText(tests[i])[0].commands[0].ToString(), Is.EqualTo(tests[i]));
             }
 
             var s = "GO #hay";
-            Assert.That(ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
-            Assert.That(ParseText("GO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ParseText(s)[0].commands[0].ToString(), Is.EqualTo(s));
+            Assert.That(ParseText("GO hay")[0].commands[0].ToString(), Is.EqualTo(s));
 
             s = "DO #hay";
-            Assert.That(ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
-            Assert.That(ParseText("DO hay")[0].commands[0].ToScript(), Is.EqualTo(s));
+            Assert.That(ParseText(s)[0].commands[0].ToString(), Is.EqualTo(s));
+            Assert.That(ParseText("DO hay")[0].commands[0].ToString(), Is.EqualTo(s));
 
             //s = "SET a 4";
-            //Assert.That(ParseText(s)[0].commands[0].ToScript(), Is.EqualTo(s));
+            //Assert.That(ParseText(s)[0].commands[0].ToString(), Is.EqualTo(s));
 
             s = "ASK hay is for horses?\nOPT Yes? #Yes\nOPT No? #No";
             var exp = s.Replace("\n","\n  ").Split('\n');
-            var res = ParseText(s)[0].commands[0].ToScript().Split('\n');
+            var res = ParseText(s)[0].commands[0].ToString().Split('\n');
 
             Assert.That(res.Length, Is.EqualTo(exp.Length));
             for (int i = 0; i < exp.Length; i++)

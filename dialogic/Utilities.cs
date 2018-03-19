@@ -380,7 +380,7 @@ namespace Dialogic
 
     public class Constraint
     {
-        public static char TypeChar = '!';
+        public static char TypeSetChar = '!';
 
         public ConstraintType type;
         public readonly string name, value;
@@ -394,7 +394,7 @@ namespace Dialogic
             this(Operator.FromString(opstr), key, val, type)
         { }
 
-        public Constraint(Operator op, string key, string val, ConstraintType type)
+        public Constraint(Operator op, string key, string val, ConstraintType type = ConstraintType.Soft)
         {
             this.type = type;
             this.value = val;
@@ -431,10 +431,10 @@ namespace Dialogic
             switch (type)
             {
                 case ConstraintType.Hard:
-                    return TypeChar.ToString();
+                    return TypeSetChar.ToString();
 
                 case ConstraintType.Absolute:
-                    return TypeChar.ToString() + TypeChar;
+                    return TypeSetChar.ToString() + TypeSetChar;
 
                 default:
                     return String.Empty;

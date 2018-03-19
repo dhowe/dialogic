@@ -4,29 +4,22 @@ using Dialogic;
 
 namespace Tendar // move to runner (parse-time, runtime)
 {
-    public class Nvm : Wait, ISendable
-    {
-        public static double NVM_DURATION = 5.0;
-
-        protected override double DefaultDuration()
-        {
-            return NVM_DURATION;
-        }
-
-        public override string TypeName()
-        {
-            return "Nvm";
-        }
-    }
-
     public static class Config
     {
-        static Config() {
+        public static List<Speaker> Speakers = new List<Speaker>();
 
-            ChatParser.TypeMap.Add("NVM", typeof(Tendar.Nvm));
+        static IDictionary<string, Type> Types = new Dictionary<string, Type>() {
+            { "NVM", typeof(Tendar.Nvm) }
+        };
+
+        static Config()
+        {
+            ChatParser.TypeMap.Add("NVM", typeof(Tendar.Nvm)); // remove
+            Speakers.Add(new Speaker("Guppy", true, Types, Validator));
+            Speakers.Add(new Speaker("Tendar", Types, Validator));
         }
 
-        public static bool ValidateMeta(Command c)
+        public static bool Validator(Command c)
         {
             if (c is Chat)
             {
@@ -46,6 +39,21 @@ namespace Tendar // move to runner (parse-time, runtime)
             }
 
             return true;
+        }
+    }
+
+    public class Nvm : Wait, ISendable
+    {
+        public static double NVM_DURATION = 5.0;
+
+        protected override double DefaultDuration()
+        {
+            return NVM_DURATION;
+        }
+
+        public override string TypeName()
+        {
+            return "Nvm";
         }
     }
 }

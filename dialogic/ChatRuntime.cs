@@ -15,6 +15,7 @@ namespace Dialogic
         private Thread searchThread;
         private List<Chat> chats;
         private ChatScheduler scheduler;
+        private List<ISpeaker> speakers;
 
         public ChatRuntime(List<Chat> chats)
         {
@@ -76,7 +77,7 @@ namespace Dialogic
             else
             {
                 Opt opt = scheduler.prompt.Selected(idx);
-                opt.Realize(globals);
+                //opt.Realize(globals); // not needed
 
                 if (opt.action != Command.NOP)
                 {

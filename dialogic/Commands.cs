@@ -26,12 +26,13 @@ namespace Dialogic
             if (Text.Length < 1) throw new ParseException("SAY requires text");
         }
 
-        public override void Realize(IDictionary<string, object> globals)
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Recombine(globals);
             lastSpoken = GetText(true);
             lastSpokenTime = Util.EpochMs();
+            return realized;
         }
 
         private void Recombine(IDictionary<string, object> globals)
@@ -116,11 +117,6 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return "[" + TypeName().ToUpper() + "] #" + Text;
-        }
-
-        public override string ToScript()
-        {
             return TypeName().ToUpper() + " #" + Text;
         }
     }
@@ -162,11 +158,6 @@ namespace Dialogic
         }
 
         public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] $" + Text + '=' + Value;
-        }
-
-        public override string ToScript()
         {
             return TypeName().ToUpper() + " $" + Text + '=' + Value;
         }
@@ -262,12 +253,13 @@ namespace Dialogic
             options.Add(o);
         }
 
-        public override void Realize(IDictionary<string, object> globals)
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Options().ForEach(o => o.Realize(globals));
             realized[Meta.TIMEOUT] = Timeout.ToString();
             realized[Meta.OPTS] = OptionsJoined();
+            return realized;
         }
 
         protected override void HandleMetaTiming()
@@ -280,15 +272,8 @@ namespace Dialogic
 
         public override string ToString()
         {
-            string s = "[" + TypeName().ToUpper() + "] " + QQ(Text) + " (";
-            if (options != null) options.ForEach(o => s += o.Text + ",");
-            return s.Substring(0, s.Length - 1) + ") " + MetaStr();
-        }
-
-        public override string ToScript()
-        {
-            string s = base.ToScript();
-            if (options != null) options.ForEach(o => s += "\n  " + o.ToScript());
+            string s = base.ToString();
+            if (options != null) options.ForEach(o => s += "\n  " + o);
             return s + MetaStr();
         }
     }
@@ -322,12 +307,6 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return "[" + TypeName().ToUpper() + "] " + QQ(Text)
-                + (action is NoOp ? String.Empty : " (-> " + action.Text + ")");
-        }
-
-        public override string ToScript()
-        {
             return TypeName().ToUpper() + " " + Text
                 + (action is NoOp ? String.Empty : " #" + action.Text);
         }
@@ -347,7 +326,10 @@ namespace Dialogic
             ParseMeta(metas);
         }
 
-        public override void Realize(IDictionary<string, object> globals) { /*noop*/ }
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals) 
+        {
+            return realized;
+        }
 
         public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
         {
@@ -376,7 +358,7 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
                 ConstraintType ctype = ConstraintType.Soft;
 
-                if (Util.TrimFirst(ref key, Constraint.TypeChar))
+                if (Util.TrimFirst(ref key, Constraint.TypeSetChar))
                 {
                     ctype = ConstraintType.Hard;
                     if (Util.TrimFirst(ref key, '!'))
@@ -406,7 +388,7 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return "[" + TypeName().ToUpper() + "] " + MetaStr();
+            return (TypeName().ToUpper() + " " + MetaStr()).Trim();
         }
     }
 
@@ -419,11 +401,6 @@ namespace Dialogic
         }
 
         public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] #" + Text;
-        }
-
-        public override string ToScript()
         {
             return TypeName().ToUpper() + " #" + Text;
         }
@@ -440,6 +417,7 @@ namespace Dialogic
         public Chat()
         {
             commands = new List<Command>();
+            realized = new Dictionary<string, object>();
         }
 
         public static Chat Create(string name) // tests only
@@ -459,6 +437,14 @@ namespace Dialogic
             c.parent = this;
             //c.IndexInChat = commands.Count; // ?
             this.commands.Add(c);
+        }
+
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        {
+            realized.Clear();
+            RealizeMeta(globals); // OPT: remove if not used
+            realized[Meta.STALENESS] = staleness.ToString();
+            return realized;
         }
 
         public override void Init(string text, string label, string[] metas)
@@ -486,17 +472,18 @@ namespace Dialogic
             return s;
         }
 
-        public string ToTree() // remove?
-        {
-            string s = ToString() + "\n";
-            commands.ForEach(c => s += "  " + c + "\n");
-            return s;
-        }
+        //public string ToTree() // remove?
+        //{
+        //    string s = ToString() + "\n";
+        //    commands.ForEach(c => s += "  " + c + "\n");
+        //    return s;
+        //}
 
-        public override string ToScript()
+        public string ToTree()
         {
-            string s = TypeName().ToUpper() + " " + Text + (" " + MetaStr()).TrimEnd();
-            commands.ForEach(c => s += "\n  " + c.ToScript());
+            string s = TypeName().ToUpper() + " " 
+                + Text + (" " + MetaStr()).TrimEnd();
+            commands.ForEach(c => s += "\n  " + c);
             return s;
         }
 
@@ -705,7 +692,7 @@ namespace Dialogic
             return this.GetType().ToString().Replace(PACKAGE, String.Empty);
         }
 
-        public virtual void Realize(IDictionary<string, object> globals)
+        public virtual IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
 
@@ -713,6 +700,8 @@ namespace Dialogic
 
             realized[Meta.TEXT] = Realizer.Do(Text, globals);
             realized[Meta.TYPE] = TypeName();
+
+            return realized; // for convenience
         }
 
         protected virtual void RealizeMeta(IDictionary<string, object> globals)
@@ -745,11 +734,6 @@ namespace Dialogic
         }
 
         public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] " + Text + " " + MetaStr();
-        }
-
-        public virtual string ToScript()
         {
             return (TypeName().ToUpper() + " " + Text).Trim() + (" " + MetaStr()).TrimEnd();
         }

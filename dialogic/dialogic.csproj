@@ -60,6 +60,7 @@
     <Compile Include="ChatRuntime.cs" />
     <Compile Include="ChatParser.cs" />
     <Compile Include="Tendar.cs" />
+    <Compile Include="Speaker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

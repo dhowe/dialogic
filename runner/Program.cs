@@ -36,7 +36,7 @@ namespace runner
         public MockGameEngine(string fileOrFolder)
         {
             List<Chat> chats = ChatParser.ParseFile
-                (fileOrFolder, Config.ValidateMeta);
+                (fileOrFolder, Config.Validator);
             runtime = new ChatRuntime(chats);
             runtime.Run();
         }

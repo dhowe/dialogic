@@ -10,6 +10,7 @@ namespace Dialogic
         /// Finds the highest scoring chat which does not violate any of the constraints.
         /// If none match then start relaxing hard-type constraints until one does.
         /// If all hard-type constraints have been relaxed and nothing is found, then return null.
+        /// Note that the Chat containing the Find object is never returned.
         /// </summary>
         /// <returns>Chat</returns>
         /// <param name="finder">Finder.</param>
@@ -18,11 +19,11 @@ namespace Dialogic
         public static Chat Find(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
             var dbug = false;
-            var constraints = ExtractMeta(finder);
             var chat = FindAll(finder, chats, globals).FirstOrDefault();
 
             if (chat == null)
             {
+                var constraints = ExtractMeta(finder);
                 List<string> relaxables = new List<string>();
                 foreach (var kv in constraints)
                 {
@@ -32,23 +33,15 @@ namespace Dialogic
 
                 if (dbug) Console.WriteLine("\nFailed with "
                     + relaxables.Count + " hard constraints");
+                
                 if (relaxables.Count == 0) return null;
 
                 // try again after relaxing each hard constraint
                 List<string> relaxed = new List<string>();
                 while (relaxables.Count > 0 && chat == null)
                 {
-                    Constraint toRelax = (Constraint)constraints[Util.RandItem(relaxables)];
-                    relaxables.Remove(toRelax.name);
-
-                    if (dbug) Console.WriteLine("Relaxing {" + toRelax + "} "
-                        + relaxables.Count + " hard constraints remaining");
-
-                    relaxed.Add(toRelax.name);
-                    toRelax.type = ConstraintType.Soft;
+                    RelaxOne(constraints, relaxables, relaxed, dbug);
                     chat = FindAll(finder, chats, globals).FirstOrDefault();
-
-                    if (dbug && chat != null) Console.WriteLine("Found: " + chat);
                 }
 
                 // restore the state of constraints for reuse
@@ -61,7 +54,8 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Find all chats, ordered by score, which do not violate the specified constraints (no relaxation done here)
+        /// Find all chats, ordered by score, which do not violate the specified constraints (no relaxation done here).
+        /// Note that the Chat containing the Find object is never returned.
         /// </summary>
         /// <returns>List of chats ordered by score</returns>
         /// <param name="finder">Finder.</param>
@@ -81,7 +75,7 @@ namespace Dialogic
                 if (chats[i] == finder.parent) continue;
 
                 var hits = 0;
-                var chatProps = chats[i].GetMeta();
+                var chatMeta = chats[i].Realize(globals);
 
                 if (dbug) Console.WriteLine("\n"+chats[i].Text+" ----------");
 
@@ -91,9 +85,9 @@ namespace Dialogic
 
                     Constraint constraint = (Constraint)constraints[key];
 
-                    if (chatProps != null && chatProps.ContainsKey(key)) // has-key
+                    if (chatMeta != null && chatMeta.ContainsKey(key)) // has-key
                     {
-                        var chatPropVal = (string)chatProps[key];
+                        var chatPropVal = (string)chatMeta[key];
 
                         if (!(constraint.Check(chatPropVal, globals)))
                         {
@@ -122,6 +116,19 @@ namespace Dialogic
             if (dbug) list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
+        }
+
+        private static void RelaxOne(IDictionary<string, object> constraints,
+            List<string> relaxables, List<string> relaxed, bool dbug = false)
+        {
+            Constraint toRelax = (Constraint)constraints[Util.RandItem(relaxables)];
+            relaxables.Remove(toRelax.name);
+
+            if (dbug) Console.WriteLine("Relaxing {" + toRelax + "}, "
+                + relaxables.Count + " hard constraints remaining");
+
+            relaxed.Add(toRelax.name);
+            toRelax.type = ConstraintType.Soft;
         }
 
         private static IDictionary<string, object> ExtractMeta(Find finder)

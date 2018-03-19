@@ -13,19 +13,45 @@ namespace Dialogic
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
-            ChatRuntime cr = new ChatRuntime(chats);
-            var res = new ChatRuntime(chats).FindAll(new Constraint("dev", "1"));
-            Assert.That(res.Count, Is.EqualTo(0));
-
             chats.Add(c = Chat.Create("c1"));
             c.SetMeta("dev", "hello");
+            c.staleness = 2;
             chats.Add(c = Chat.Create("c2"));
             c.SetMeta("dev", "2");
+            c.staleness = 3;
             chats.Add(c = Chat.Create("c3"));
             c.SetMeta("dev", "3");
-            cr = new ChatRuntime(chats);
-            res = new ChatRuntime(chats).FindAll(new Constraint("dev", "1"));
-            Assert.That(res.Count, Is.EqualTo(100));
+            c.staleness = 4;
+            var cnt = new Constraint(Operator.LT, "staleness", "3");
+            var res = new ChatRuntime(chats).FindAll(cnt);
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That(res[0].Text, Is.EqualTo("c1"));
+
+            string[] lines = {
+                "CHAT c0",
+                "FIND {dev=1,day=fri,staleness<5}",
+                "CHAT c1 {day=fri}",
+                "CHAT c2 {dev=2,day=fri}",
+                "CHAT c3 {}"
+            };
+
+            string contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+            Command finder = chats[0].commands[0];
+            Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
+
+            var crt = new ChatRuntime(chats);
+            c = crt.FindByName("#c1");
+            c.staleness = 6;
+            Assert.That(c, Is.Not.Null);
+            Assert.That(c.Text, Is.EqualTo("c1"));
+
+            chats = crt.FindAll((Find)finder, null);
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c3"));
         }
 
         [Test]
