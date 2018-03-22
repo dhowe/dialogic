@@ -45,4 +45,9 @@ namespace Dialogic
             reason = msg;
         }
     }
+
+    public class RuntimeParseException : ParseException
+    {
+        public RuntimeParseException(ParseException pe) : base(pe.Message) { }
+    }
 }

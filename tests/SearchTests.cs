@@ -9,6 +9,29 @@ namespace Dialogic
     public class SearchTests
     {
         [Test]
+        public void TestFindInit()
+        {
+            var find = new Find().Init("{a*=(hot|cool)}");
+            Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
+            Assert.That(find.Text, Is.Null);
+            var meta = find.GetMeta("a");
+            Assert.That(meta, Is.Not.Null);
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            var constraint = (Dialogic.Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+
+            find = new Find().Init("{plot=a,stage=b,last=true}");
+            Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
+            Assert.That(find.Text, Is.Null);
+            meta = find.GetMeta("last");
+            Assert.That(meta, Is.Not.Null);
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            constraint = (Dialogic.Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+            Assert.That(constraint.value, Is.EqualTo("true"));
+        }
+
+        [Test]
         public void TestStaleness()
         {
             Chat c;

@@ -91,14 +91,14 @@ namespace Dialogic
 
                         if (!(constraint.Check(chatPropVal, globals)))
                         {
-                            if (dbug) Console.WriteLine("    FAIL:" + constraints[key]);
+                            if (dbug) Console.WriteLine("    FAIL: " + constraints[key]);
                             hits = -1;
                             break;
                         }
                         else
                         {
                             hits++;
-                            if (dbug) Console.WriteLine("    HIT" + hits);
+                            if (dbug) Console.WriteLine("    HIT: " + hits);
                         }
                     }
                     else if (constraint.IsStrict()) // doesn't have-key, fails strict
@@ -107,6 +107,7 @@ namespace Dialogic
                         hits = -1;
                         break;
                     }
+                    else if (dbug) Console.WriteLine("    NOKEY");
                 }
                 if (hits > -1) matches.Add(chats[i], hits);
             }

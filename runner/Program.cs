@@ -42,7 +42,6 @@ namespace runner
 
         public void Run()
         {
-            Console.WriteLine();
             while (true)
             {
                 Thread.Sleep(30);
@@ -77,8 +76,9 @@ namespace runner
                         Console.WriteLine("<resume-event#>" +
                             " after " + Util.Millis(now) + "ms\n");
 
-                        // send ResumeEvent after 5 sec
-                        gameEvent = new ResumeEvent(/*"#GScriptTest"*/);
+                        // send ResumeEvent after 5 sec ('#Game' or '{plot=a,stage=b,last=true}')
+
+                        gameEvent = new ResumeEvent();
                     });
 
                     diaText = ("(" + diaType + " " + 

@@ -13,7 +13,7 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="dialogic_docs.css" rel="stylesheet" type="text/css"/>
+<link href="doxy.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -97,15 +97,15 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>Count</b> ()</td></tr>
 <tr class="memitem:acf3685ca9a749f3a21e9f33f36a5dd4b"><td class="memItemLeft" align="right" valign="top"><a id="acf3685ca9a749f3a21e9f33f36a5dd4b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>AddCommand</b> (<a class="el" href="class_dialogic_1_1_command.html">Command</a> c)</td></tr>
 <tr class="separator:acf3685ca9a749f3a21e9f33f36a5dd4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2ca043e3fccdf78847574b1094ce2ee"><td class="memItemLeft" align="right" valign="top"><a id="ab2ca043e3fccdf78847574b1094ce2ee"></a>
+override IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Realize</b> (IDictionary&lt; string, object &gt; globals)</td></tr>
+<tr class="separator:ab2ca043e3fccdf78847574b1094ce2ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab52c3ccb8e326dd2dd22dbcef2c58758"><td class="memItemLeft" align="right" valign="top"><a id="ab52c3ccb8e326dd2dd22dbcef2c58758"></a>
 override void&#160;</td><td class="memItemRight" valign="bottom"><b>Init</b> (string text, string label, string[] metas)</td></tr>
 <tr class="separator:ab52c3ccb8e326dd2dd22dbcef2c58758"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0213d1acee075d0794c5951fb8d9ded5"><td class="memItemLeft" align="right" valign="top"><a id="a0213d1acee075d0794c5951fb8d9ded5"></a>
 string&#160;</td><td class="memItemRight" valign="bottom"><b>ToTree</b> ()</td></tr>
 <tr class="separator:a0213d1acee075d0794c5951fb8d9ded5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19007e5c661e57ed623eb9ff9f220d0e"><td class="memItemLeft" align="right" valign="top"><a id="a19007e5c661e57ed623eb9ff9f220d0e"></a>
-override string&#160;</td><td class="memItemRight" valign="bottom"><b>ToScript</b> ()</td></tr>
-<tr class="separator:a19007e5c661e57ed623eb9ff9f220d0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a197acbdbe0e0d724c89ce3cbc3280e3e"><td class="memItemLeft" align="right" valign="top"><a id="a197acbdbe0e0d724c89ce3cbc3280e3e"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Reset</b> ()</td></tr>
 <tr class="separator:a197acbdbe0e0d724c89ce3cbc3280e3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,9 +122,6 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>GetActor</b> ()</td
 <tr class="memitem:a1f8a0d7bd49ffc10ef7ff4f63abce343 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a1f8a0d7bd49ffc10ef7ff4f63abce343"></a>
 virtual string&#160;</td><td class="memItemRight" valign="bottom"><b>TypeName</b> ()</td></tr>
 <tr class="separator:a1f8a0d7bd49ffc10ef7ff4f63abce343 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0195ef379ea2effc80ffee29e59881b3 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a0195ef379ea2effc80ffee29e59881b3"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>Realize</b> (IDictionary&lt; string, object &gt; globals)</td></tr>
-<tr class="separator:a0195ef379ea2effc80ffee29e59881b3 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14b619fbe3a23f3578912c7fc05f7fc0 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a14b619fbe3a23f3578912c7fc05f7fc0"></a>
 override string&#160;</td><td class="memItemRight" valign="bottom"><b>ToString</b> ()</td></tr>
 <tr class="separator:a14b619fbe3a23f3578912c7fc05f7fc0 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,9 +172,12 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a63f9cb4ad123451dad224ed61e9b5ca1"><td class="memItemLeft" align="right" valign="top"><a id="a63f9cb4ad123451dad224ed61e9b5ca1"></a>
 List&lt; <a class="el" href="class_dialogic_1_1_command.html">Command</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>commands</b></td></tr>
 <tr class="separator:a63f9cb4ad123451dad224ed61e9b5ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6a50b5d34ee288b7fb2beb0d925825f"><td class="memItemLeft" align="right" valign="top"><a id="aa6a50b5d34ee288b7fb2beb0d925825f"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>resumeOnInterrupt</b> = false</td></tr>
-<tr class="separator:aa6a50b5d34ee288b7fb2beb0d925825f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97db3eabb0574d383a8ea5c46ae756c8"><td class="memItemLeft" align="right" valign="top"><a id="a97db3eabb0574d383a8ea5c46ae756c8"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>interruptable</b> = true</td></tr>
+<tr class="separator:a97db3eabb0574d383a8ea5c46ae756c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d2cff6f9437c30968b92dae10f3c5d4"><td class="memItemLeft" align="right" valign="top"><a id="a6d2cff6f9437c30968b92dae10f3c5d4"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>resumeLastAfterInterrupting</b> = true</td></tr>
+<tr class="separator:a6d2cff6f9437c30968b92dae10f3c5d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31094342b5027b997f614e1dbc87e6ab"><td class="memItemLeft" align="right" valign="top"><a id="a31094342b5027b997f614e1dbc87e6ab"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>cursor</b> = 0</td></tr>
 <tr class="separator:a31094342b5027b997f614e1dbc87e6ab"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -13,7 +13,7 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="dialogic_docs.css" rel="stylesheet" type="text/css"/>
+<link href="doxy.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -79,9 +79,15 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2891c3948be9bb418944e17801dab869"><td class="memItemLeft" align="right" valign="top"><a id="a2891c3948be9bb418944e17801dab869"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ChatRuntime</b> (List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt; chats)</td></tr>
-<tr class="separator:a2891c3948be9bb418944e17801dab869"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b7890a43830dd72a43a0fd8aa5f4b23"><td class="memItemLeft" align="right" valign="top"><a id="a0b7890a43830dd72a43a0fd8aa5f4b23"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseFile</b> (string fileOrFolder)</td></tr>
+<tr class="separator:a0b7890a43830dd72a43a0fd8aa5f4b23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2ec7a1be9721f19d4612e9ff6c8a6d9"><td class="memItemLeft" align="right" valign="top"><a id="ab2ec7a1be9721f19d4612e9ff6c8a6d9"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ChatRuntime</b> (List&lt; <a class="el" href="interface_dialogic_1_1_i_speaker.html">ISpeaker</a> &gt; speakers=null)</td></tr>
+<tr class="separator:ab2ec7a1be9721f19d4612e9ff6c8a6d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acab8d0472e54b2ab6cb116b7b1dab3d5"><td class="memItemLeft" align="right" valign="top"><a id="acab8d0472e54b2ab6cb116b7b1dab3d5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ChatRuntime</b> (List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt; chats, List&lt; <a class="el" href="interface_dialogic_1_1_i_speaker.html">ISpeaker</a> &gt; speakers=null)</td></tr>
+<tr class="separator:acab8d0472e54b2ab6cb116b7b1dab3d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6739443890fb3601799da7c68543e304"><td class="memItemLeft" align="right" valign="top"><a id="a6739443890fb3601799da7c68543e304"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Run</b> (string chatLabel=null)</td></tr>
 <tr class="separator:a6739443890fb3601799da7c68543e304"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,7 +130,35 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:a993c113a3bf4918269588d75c40633a0"><td class="memItemLeft" align="right" valign="top"><a id="a993c113a3bf4918269588d75c40633a0"></a>
 static string&#160;</td><td class="memItemRight" valign="bottom"><b>logFile</b></td></tr>
 <tr class="separator:a993c113a3bf4918269588d75c40633a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26b1f4173d61ab2923ac8105342c63b4"><td class="memItemLeft" align="right" valign="top"><a id="a26b1f4173d61ab2923ac8105342c63b4"></a>
+static string&#160;</td><td class="memItemRight" valign="bottom"><b>CHAT_FILE_EXT</b> = &quot;.gs&quot;</td></tr>
+<tr class="separator:a26b1f4173d61ab2923ac8105342c63b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c2a26f6a1e8e017bee94abfa630fbf1"><td class="memItemLeft" align="right" valign="top">static IDictionary&lt; string, Type &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>TypeMap</b></td></tr>
+<tr class="separator:a2c2a26f6a1e8e017bee94abfa630fbf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2c2a26f6a1e8e017bee94abfa630fbf1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c2a26f6a1e8e017bee94abfa630fbf1">&#9670;&nbsp;</a></span>TypeMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">IDictionary&lt;string, Type&gt; Dialogic.ChatRuntime.TypeMap</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= <span class="keyword">new</span> Dictionary&lt;string, Type&gt;()</div><div class="line">        {</div><div class="line">                    { <span class="stringliteral">&quot;CHAT&quot;</span>,   typeof(global::Dialogic.Chat) },</div><div class="line">                    { <span class="stringliteral">&quot;SAY&quot;</span>,    typeof(global::Dialogic.Say)  },</div><div class="line">                    { <span class="stringliteral">&quot;SET&quot;</span>,    typeof(global::Dialogic.Set)  },</div><div class="line">                    { <span class="stringliteral">&quot;ASK&quot;</span>,    typeof(global::Dialogic.Ask)  },</div><div class="line">                    { <span class="stringliteral">&quot;OPT&quot;</span>,    typeof(global::Dialogic.Opt)  },</div><div class="line">                    { <span class="stringliteral">&quot;DO&quot;</span>,     typeof(global::Dialogic.Do)   },</div><div class="line">                    { <span class="stringliteral">&quot;GO&quot;</span>,     typeof(global::Dialogic.Go)   },</div><div class="line">                    { <span class="stringliteral">&quot;WAIT&quot;</span>,   typeof(global::Dialogic.Wait) },</div><div class="line">                    { <span class="stringliteral">&quot;FIND&quot;</span>,   typeof(global::Dialogic.Find) },</div><div class="line">                    { <span class="stringliteral">&quot;GRAM&quot;</span>,   typeof(global::Dialogic.Gram) },</div><div class="line">        }</div></div><!-- fragment -->
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>dialogic/ChatRuntime.cs</li>
 </ul>

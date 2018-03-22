@@ -23,7 +23,7 @@ namespace Dialogic
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
-			Ask ask = (global::Dialogic.Ask)chats[0].commands[0];
+			Ask ask = (Dialogic.Ask)chats[0].commands[0];
             Assert.That(ask.Text, Is.EqualTo("Want a game?"));
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
@@ -167,7 +167,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
             var meta = chats[0].commands[0].GetMeta("num");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-			Constraint constraint = (global::Dialogic.Constraint)meta;
+			Constraint constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
 
             chats = ParseText("FIND {a*=(hot|cool)}");
@@ -177,7 +177,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.Not.Null);
             meta = chats[0].commands[0].GetMeta("a");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-            constraint = (global::Dialogic.Constraint)meta;
+            constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
 
             chats = ParseText("FIND {do=1}");
@@ -187,7 +187,7 @@ namespace Dialogic
             Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
             meta = chats[0].commands[0].GetMeta("do");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-            constraint = (global::Dialogic.Constraint)meta;
+            constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
         }
 
@@ -228,7 +228,7 @@ namespace Dialogic
 
             var meta = chats[0].commands[0].GetMeta("a");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-            var constraint = (global::Dialogic.Constraint)meta;
+            var constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
             Assert.That(constraint.name, Is.EqualTo("a"));
             Assert.That(constraint.op, Is.EqualTo(Operator.RE));
@@ -251,7 +251,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
             var meta = chats[0].commands[0].GetMeta("num");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-			Constraint constraint = (global::Dialogic.Constraint)meta;
+			Constraint constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(true));
 
             chats = ParseText("FIND {!a*=(hot|cool)}");
@@ -261,7 +261,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.Not.Null);
             meta = chats[0].commands[0].GetMeta("a");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-            constraint = (global::Dialogic.Constraint)meta;
+            constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(true));
 
             chats = ParseText("FIND {!do=1}");
@@ -271,7 +271,7 @@ namespace Dialogic
             Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
             meta = chats[0].commands[0].GetMeta("do");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-            constraint = (global::Dialogic.Constraint)meta;
+            constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(true));
         }
 
@@ -286,7 +286,7 @@ namespace Dialogic
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Wait)));
-			Wait wait = (global::Dialogic.Wait)chats[0].commands[0];
+			Wait wait = (Dialogic.Wait)chats[0].commands[0];
             Assert.That(wait.Text, Is.EqualTo(".5"));
             Assert.That(wait.DelayMs, Is.EqualTo(500));
             Assert.That(wait.GetMeta("waitForAnimation"), Is.EqualTo("true"));

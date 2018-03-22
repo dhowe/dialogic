@@ -18,7 +18,7 @@ ASK Do you want to $verb a game? {timeout=4}
 OPT Sure #Game
 OPT Nope #RePrompt
 
-CHAT Game {plot=a,stage=b}
+CHAT Game {plot=a,stage=b,last=true}
 DO #HappyFlip {axis=y}
 Great, let's play! {speed=slow,style=loud}
 Bye! {speed=fast}

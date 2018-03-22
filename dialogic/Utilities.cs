@@ -11,6 +11,10 @@ using System.Runtime.CompilerServices;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// A 1=1 mapping from a string command to its object type, 
+    /// e.g., "SAY" -> Dialogic.Say
+    /// </summary>
     public class CommandDef
     {
         public readonly Type type;
@@ -28,6 +32,10 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// A (temporary) container for Dialogic defaults that can be changed
+    /// at runtime.
+    /// </summary>
     public static class Defaults
     {
         // Default Command durations
@@ -54,6 +62,9 @@ namespace Dialogic
         //public static void Override(IDictionary<string, object> values)
     }
 
+    /// <summary>
+    /// A set of precompiled regular expressions 
+    /// </summary>
     public static class RE
     {
         internal const string OP1 = @"(!?!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
@@ -68,6 +79,9 @@ namespace Dialogic
         public static Regex MetaSplit = new Regex(MSP);
     }
 
+    /// <summary>
+    /// Static utility functions for Dialogic
+    /// </summary>
     public static class Util
     {
         public static StringComparison IC = StringComparison.InvariantCulture;
@@ -333,8 +347,15 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// Refers to the Contraints behavior during search, specifically whether
+    /// it can be 'relaxed to allow a larger result set
+    /// </summary>
     public enum ConstraintType { Soft = 0, Hard = 1, Absolute = 2 };
 
+    /// <summary>
+    /// Implements a Constraint (a name, a value, an Operator) that can be checked
+    /// </summary>
     public class Constraint
     {
         public static char TypeSetChar = '!';
@@ -427,7 +448,10 @@ namespace Dialogic
         }
     }
 
-    public class Constraints
+    /// <summary>
+    /// A container for Constraint objects, wraps an IDictionary<string, object> 
+    /// </summary>
+    public class Constraints 
     {
         IDictionary<string, object> pairs;
 
@@ -440,16 +464,6 @@ namespace Dialogic
         {
             pairs = new Dictionary<string, object>() { { c.name, c } };
         }
-
-        //public Constraints(string key, string value, ConstraintType type = ConstraintType.Soft) : this()
-        //{
-        //    Add(new Constraint(key, value, type));
-        //}
-
-        //public Constraints(string op, string key, string value, ConstraintType type = ConstraintType.Soft) : this()
-        //{
-        //    Add(new Constraint(op, key, value, type));
-        //}
 
         public Constraints Add(Constraint c)
         {
@@ -482,9 +496,7 @@ namespace Dialogic
         public static Operator LTE = new Operator("<=", OpType.COMPARISON);
         public static Operator GTE = new Operator(">=", OpType.COMPARISON);
 
-        public static Operator[] ALL = new Operator[] {
-            GT, LT, EQ, NEQ, LTE, GTE, SW, EQ, RE
-        };
+        public static Operator[] ALL = { GT, LT, EQ, NEQ, LTE, GTE, SW, EQ, RE };
 
         private readonly string value;
         private readonly OpType type;
@@ -611,7 +623,8 @@ namespace Dialogic
         }
     }
 
-    public class ObjectPool<T>
+
+    public class ObjectPool<T> //@cond unused
     {
         private Func<T> generator;
         private Action<T> recycler;
@@ -637,7 +650,7 @@ namespace Dialogic
             cursor = ++cursor < pool.Length ? cursor : 0;
             return next;
         }
-    }
+    }//@endcond
 
     public static class Exts
     {
@@ -680,7 +693,7 @@ namespace Dialogic
 
         public static string TrimLast(this string str, char c)
         {
-            int last = str.Length - 2;
+            int last = str.Length - 1;
             return (str[last] == c) ? str.Substring(0, last) : str;
         }
 
@@ -710,16 +723,12 @@ namespace Dialogic
                 }
                 s += " ]";
             }
-            else if (o is IList)
+            else if (o is ICollection)
             {
-                var list = (IList)o;
+                var coll = (ICollection)o;
                 s = "[ ";
-                for (int i = 0; i < list.Count; i++)
-                {
-                    s += list[i].ToString();
-                    if (i < list.Count - 1) s += ",";
-                }
-                s += " ]";
+                foreach (var k in coll) s += k + ",";
+                s = (s.Substring(0, s.Length - 1) + " ]");
             }
             else
             {

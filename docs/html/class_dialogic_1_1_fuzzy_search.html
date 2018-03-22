@@ -13,7 +13,7 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="dialogic_docs.css" rel="stylesheet" type="text/css"/>
+<link href="doxy.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -79,10 +79,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a8c775f58ef3b22c1e4600e681418e5be"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_dialogic_1_1_chat.html">Chat</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_fuzzy_search.html#a8c775f58ef3b22c1e4600e681418e5be">Find</a> (<a class="el" href="class_dialogic_1_1_find.html">Find</a> finder, List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt; chats, IDictionary&lt; string, object &gt; globals)</td></tr>
-<tr class="memdesc:a8c775f58ef3b22c1e4600e681418e5be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the highest scoring chat which does not violate any of the constraints. If none match then start relaxing hard-type constraints until one does. If all hard-type constraints have been relaxed and nothing is found, then return null.  <a href="#a8c775f58ef3b22c1e4600e681418e5be">More...</a><br /></td></tr>
+<tr class="memdesc:a8c775f58ef3b22c1e4600e681418e5be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the highest scoring chat which does not violate any of the constraints. If none match then start relaxing hard-type constraints until one does. If all hard-type constraints have been relaxed and nothing is found, then return null. Note that the <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> containing the <a class="el" href="class_dialogic_1_1_find.html">Find</a> object is never returned.  <a href="#a8c775f58ef3b22c1e4600e681418e5be">More...</a><br /></td></tr>
 <tr class="separator:a8c775f58ef3b22c1e4600e681418e5be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aadd3e6144a1ab36159c49fcc27d80481"><td class="memItemLeft" align="right" valign="top">static List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_fuzzy_search.html#aadd3e6144a1ab36159c49fcc27d80481">FindAll</a> (<a class="el" href="class_dialogic_1_1_find.html">Find</a> finder, List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt; chats, IDictionary&lt; string, object &gt; globals)</td></tr>
-<tr class="memdesc:aadd3e6144a1ab36159c49fcc27d80481"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_dialogic_1_1_find.html">Find</a> all chats, ordered by score, which do not violate the specified constraints (no relaxation done here)  <a href="#aadd3e6144a1ab36159c49fcc27d80481">More...</a><br /></td></tr>
+<tr class="memdesc:aadd3e6144a1ab36159c49fcc27d80481"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_dialogic_1_1_find.html">Find</a> all chats, ordered by score, which do not violate the specified constraints (no relaxation done here). Note that the <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> containing the <a class="el" href="class_dialogic_1_1_find.html">Find</a> object is never returned.  <a href="#aadd3e6144a1ab36159c49fcc27d80481">More...</a><br /></td></tr>
 <tr class="separator:aadd3e6144a1ab36159c49fcc27d80481"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -126,7 +126,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Finds the highest scoring chat which does not violate any of the constraints. If none match then start relaxing hard-type constraints until one does. If all hard-type constraints have been relaxed and nothing is found, then return null. </p>
+<p>Finds the highest scoring chat which does not violate any of the constraints. If none match then start relaxing hard-type constraints until one does. If all hard-type constraints have been relaxed and nothing is found, then return null. Note that the <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> containing the <a class="el" href="class_dialogic_1_1_find.html">Find</a> object is never returned. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="class_dialogic_1_1_chat.html">Chat</a></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -179,7 +179,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="class_dialogic_1_1_find.html">Find</a> all chats, ordered by score, which do not violate the specified constraints (no relaxation done here) </p>
+<p><a class="el" href="class_dialogic_1_1_find.html">Find</a> all chats, ordered by score, which do not violate the specified constraints (no relaxation done here). Note that the <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> containing the <a class="el" href="class_dialogic_1_1_find.html">Find</a> object is never returned. </p>
 <dl class="section return"><dt>Returns</dt><dd>List of chats ordered by score</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

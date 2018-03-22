@@ -29,9 +29,12 @@ namespace Dialogic
 
         private bool logInitd;
         private int nextEventTime;
+
         private Thread searchThread;
         private List<Chat> chats;
+        private Find findDelegate;
         private ChatScheduler scheduler;
+
         private List<ISpeaker> speakers;
         private List<Func<Command, bool>> validators;
 
@@ -53,7 +56,7 @@ namespace Dialogic
 
         public ChatRuntime(List<ISpeaker> speakers = null) : this(null, speakers) { }
 
-        public ChatRuntime(List<Chat> chats, List<ISpeaker> speakers=null)
+        public ChatRuntime(List<Chat> chats, List<ISpeaker> speakers = null)
         {
             this.chats = chats;
             this.speakers = speakers;
@@ -69,7 +72,8 @@ namespace Dialogic
             speakers.ForEach(s =>
             {
                 var cmds = s.Commands();
-                if (!cmds.IsNullOrEmpty()) {
+                if (!cmds.IsNullOrEmpty())
+                {
                     foreach (var cmd in cmds)
                     {
                         TypeMap.Add(cmd.label, cmd.type);
@@ -102,26 +106,61 @@ namespace Dialogic
 
         private IUpdateEvent HandleGameEvent(ref EventArgs ge, IDictionary<string, object> globals)
         {
-            if (ge is IChoice) return HandleChoiceEvent(ref ge, globals);
-            if (ge is IResume) return HandleResumeEvent(ref ge, globals);
+            if (ge is ISuspend) return SuspendHandler(ref ge, globals);
+            if (ge is IResume) return ResumeHandler(ref ge, globals);
+            if (ge is IChoice) return ChoiceHandler(ref ge, globals);
+            if (ge is IClear) return ClearHandler(ref ge, globals);
             throw new DialogicException("Unexpected event-type: " + ge.GetType());
         }
 
-        private IUpdateEvent HandleResumeEvent(ref EventArgs ge, IDictionary<string, object> globals)
+        private IUpdateEvent SuspendHandler(ref EventArgs ge, IDictionary<string, object> globals)
+        {
+            ge = null;
+            scheduler.PauseCurrent();
+            return null;
+        }
+
+        private IUpdateEvent ClearHandler(ref EventArgs ge, IDictionary<string, object> globals)
+        {
+            ge = null;
+            scheduler.Clear();
+            return null;
+        }
+
+        private IUpdateEvent ResumeHandler(ref EventArgs ge, IDictionary<string, object> globals)
         {
             IResume ir = (IResume)ge;
             var label = ir.ResumeWith();
             ge = null;
 
             if (String.IsNullOrEmpty(label))
+            {
                 nextEventTime = scheduler.ResumeLast();
-            else
+            }
+            else if (label.StartsWith("#", Util.IC))
+            {
                 scheduler.StartNew(FindByName(label));
+            }
+            else // else, parse as FIND meta data
+            {
+                if (findDelegate == null) findDelegate = new Find();
+
+                try
+                {
+                    findDelegate.Init(label);
+                }
+                catch (ParseException e)
+                {
+                    throw new RuntimeParseException(e);
+                }
+
+                FindAsync(findDelegate, globals);
+            }
 
             return null;
         }
 
-        private IUpdateEvent HandleChoiceEvent(ref EventArgs ge, IDictionary<string, object> globals)
+        private IUpdateEvent ChoiceHandler(ref EventArgs ge, IDictionary<string, object> globals)
         {
             IChoice ic = (IChoice)ge;
             var idx = ic.GetChoiceIndex();
@@ -167,17 +206,18 @@ namespace Dialogic
                     {
                         if (cmd.GetType() == typeof(Wait))
                         {
+                            // just pause internally, no event needs to be fired
                             if (cmd.DelayMs != Util.INFINITE)
                             {
                                 ComputeNextEventTime(cmd);
                                 return null;
                             }
-                            scheduler.PauseCurrent();  // wait for ResumeEvent
+                            scheduler.PauseCurrent();
                         }
                         else if (cmd is Ask)
                         {
                             scheduler.prompt = (Ask)cmd;
-                            scheduler.PauseCurrent();  // wait for ChoiceEvent
+                            scheduler.PauseCurrent(); // wait for ChoiceEvent
                         }
                         else
                         {
@@ -195,10 +235,15 @@ namespace Dialogic
             return null;
         }
 
-        private void ComputeNextEventTime(Command cmd)
+        internal void SetNextEventTime(int millis)
         {
-            nextEventTime = cmd.DelayMs >= 0 ? Util.Millis()
-                + cmd.ComputeDuration() : Int32.MaxValue;
+            nextEventTime = millis;
+        }
+
+        internal void ComputeNextEventTime(Command cmd)
+        {
+            SetNextEventTime(cmd.DelayMs >= 0 ? Util.Millis()
+                + cmd.ComputeDuration() : Int32.MaxValue);
         }
 
         public Chat FindByName(string label)
@@ -277,7 +322,6 @@ namespace Dialogic
         {
             return FuzzySearch.FindAll(new Find(new Constraints(constraint)), chats, globals);
         }
-        //  ------------------------------------------------------
 
         private bool Logging()
         {
@@ -317,7 +361,7 @@ namespace Dialogic
 
         public void StartNew(Chat next)
         {
-            if (chat != null) resumables.Push(chat);
+            if (next != null) resumables.Push(next);
             (chat = next).Run();
         }
 
@@ -325,6 +369,11 @@ namespace Dialogic
         {
             if (chat != null) resumables.Push(chat);
             chat = null;
+        }
+
+        public void Clear()
+        {
+            resumables.Clear();
         }
 
         public int ResumeLast(bool mustBeResumable = false)
@@ -353,5 +402,7 @@ namespace Dialogic
 
             return Util.Millis();
         }
+
+
     }
 }

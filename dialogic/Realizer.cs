@@ -7,41 +7,6 @@ namespace Dialogic
 {
     public static class Realizer
     {
-        public static string Do(string text, IDictionary<string, object> globals)
-        {
-            if (IsDynamic(text))
-            {
-                if (globals.IsNullOrEmpty())
-                {
-                    return DoGroups(text);
-                }
-
-                int tries = 0;
-                string arg = text;
-
-                do // rethink this
-                {
-                    text = DoVars(text, globals);
-                    text = DoGroups(text);
-
-                    // bail on infinite loops:
-                    if (++tries > 1000) throw new RealizeException
-                        ("Invalid-Sub: '" + arg + "' " + globals.Stringify());
-                }
-                while (IsDynamic(text)); 
-
-                //Console.WriteLine("Realizer.Do: " + arg + " -> " + text);
-            }
-
-            return text;
-        }
-
-        private static bool IsDynamic(string text)
-        {
-            return (!String.IsNullOrEmpty(text)) && 
-                (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
-        }
-
         public static string DoGroups(string text)
         {
             if (!String.IsNullOrEmpty(text))
@@ -90,6 +55,41 @@ namespace Dialogic
             if (opts.Length < 2) throw InvalidState(sub);
 
             return (string)Util.RandItem(opts);
+        }
+
+        public static string Do(string text, IDictionary<string, object> globals)
+        {
+            if (IsDynamic(text))
+            {
+                if (globals.IsNullOrEmpty())
+                {
+                    return DoGroups(text);
+                }
+
+                int tries = 0;
+                string arg = text;
+
+                do // rethink this
+                {
+                    text = DoVars(text, globals);
+                    text = DoGroups(text);
+
+                    // bail on infinite loops:
+                    if (++tries > 1000) throw new RealizeException
+                        ("Invalid-Sub: '" + arg + "' " + globals.Stringify());
+                }
+                while (IsDynamic(text));
+
+                //Console.WriteLine("Realizer.Do: " + arg + " -> " + text);
+            }
+
+            return text;
+        }
+
+        private static bool IsDynamic(string text)
+        {
+            return (!String.IsNullOrEmpty(text)) &&
+                (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
         }
 
         private static Exception InvalidState(string sub)

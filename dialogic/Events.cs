@@ -3,6 +3,48 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
+    /// /////////////////////////////////////////////////////////
+
+    /**
+     * Tells Dialogic that the User has made a specific choice in response
+     * to a prompt
+     */
+    public interface IChoice
+    {
+        int GetChoiceIndex();
+    }
+
+    /**
+     * Tells Dialogic to restart the current Chat after a indefinite WAIT cmd, 
+     * or an ISuspend event, optionally with a specific chat, specified with its 
+     * Label, or with a Find, specified via its metadata constraints.
+     */
+    public interface IResume
+    {
+        string ResumeWith();
+    }
+
+    /**
+     * Suspends the current Chat. The current chat (or a new chat) can be resumed by 
+     * sending a ResumeEvent.
+     */
+    public interface ISuspend { }
+
+    /**
+     * Tells Dialogic to clear its stack of past chats, leaving none to be resumed
+     */
+    public interface IClear  { }
+
+    /**
+     * Superclass for specific GameEvents
+     */
+    public abstract class GameEvent : EventArgs { }
+
+
+    /**
+     * Send by Dialogic whenever an IEmittable Command (e.g., Say, Ask, Do, Wait) 
+     * is invoked, so that it may be handled by the application
+     */
     public interface IUpdateEvent
     {
         string Text();
@@ -17,6 +59,67 @@ namespace Dialogic
         float GetFloat(string key, float def = -1);
     }
 
+
+    // ---------------------- Implementations -----------------------
+
+
+    /**
+     * Basic implementation of ISuspend
+     */
+    public class SuspendEvent : GameEvent, ISuspend { }
+
+
+    /**
+     * Basic implementation of IClear
+     */
+    public class ClearEvent : GameEvent, IClear { }
+
+    /**
+     * Basic implementation of IResume
+     */
+    public class ResumeEvent : GameEvent, IResume
+    {
+        public readonly string data;
+
+        public ResumeEvent(string chatLabel = null) : base()
+        {
+            this.data = chatLabel;
+        }
+
+        public string ResumeWith()
+        {
+            return data;
+        }
+    }
+
+    /**
+     * * Basic implementation of IChoice
+     */
+    public class ChoiceEvent : GameEvent, IChoice
+    {
+        protected int choiceIndex;
+
+        public ChoiceEvent(int option)
+        {
+            this.choiceIndex = option;
+        }
+
+        public override string ToString()
+        {
+            return "Choice: " + choiceIndex;
+        }
+
+        public int GetChoiceIndex()
+        {
+            return choiceIndex;
+        }
+    }
+
+    /**
+     * Basic implementation of IUpdateEvent which wraps a string/object 
+     * dictionary containing relevant Command data with helper functions
+     * for extracting specific types. 
+     */
     public class UpdateEvent : IUpdateEvent
     {
         private IDictionary<string, object> data;
@@ -81,66 +184,4 @@ namespace Dialogic
         }
     }
 
-    /// /////////////////////////////////////////////////////////
-
-    public interface IChoice
-    {
-        int GetChoiceIndex();
-    }
-
-    /**
-     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd,
-     * optionally using a specific chat, specified with its Label
-     */
-    public interface IResume
-    {
-        string ResumeWith();
-    }
-
-    /**
-     * Superclass for specific GameEvents
-     */
-    public abstract class GameEvent : EventArgs { }
-
-    /**
-     * Tells Dialogic to restart the current Chat after an indefinite WAIT cmd,
-     * optionally with a new Chat, specified by its Label
-     */
-    public class ResumeEvent : GameEvent, IResume
-    {
-        public readonly string chatLabel;
-
-        public ResumeEvent(string chatLabel = null) : base()
-        {
-            this.chatLabel = chatLabel;
-        }
-
-        public string ResumeWith()
-        {
-            return chatLabel;
-        }
-    }
-
-    /**
-     * Tells Dialogic that an Ask->Option has been selected by the user
-     */
-    public class ChoiceEvent : GameEvent, IChoice
-    {
-        protected int choiceIndex;
-
-        public ChoiceEvent(int option)
-        {
-            this.choiceIndex = option;
-        }
-
-        public override string ToString()
-        {
-            return "Choice: " + choiceIndex;
-        }
-
-        public int GetChoiceIndex()
-        {
-            return choiceIndex;
-        }
-    }
 }

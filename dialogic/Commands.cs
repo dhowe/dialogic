@@ -323,14 +323,15 @@ namespace Dialogic
             this.meta = c.AsDict();
         }
 
+        public Find Init(string metadata)
+        {
+            Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
+            return this;
+        }
+
         public override void Init(string text, string label, string[] metas)
         {
             ParseMeta(metas);
-        }
-
-        public void Init(string metadata) // TODO: needs tests
-        {
-            ParseMeta(metadata.Trim().TrimEnds('{', '}').Split(','));
         }
 
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals) 

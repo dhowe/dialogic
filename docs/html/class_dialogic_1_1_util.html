@@ -13,7 +13,7 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="dialogic_docs.css" rel="stylesheet" type="text/css"/>
+<link href="doxy.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -76,21 +76,18 @@ $(function() {
 <div class="title">Dialogic.Util Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Static utility functions for <a class="el" href="namespace_dialogic.html">Dialogic</a>  
+ <a href="class_dialogic_1_1_util.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a4a39505c5e8ba50582c0625868048b96"><td class="memItemLeft" align="right" valign="top"><a id="a4a39505c5e8ba50582c0625868048b96"></a>
 static int&#160;</td><td class="memItemRight" valign="bottom"><b>SecStrToMs</b> (string s, int defaultMs=-1)</td></tr>
 <tr class="separator:a4a39505c5e8ba50582c0625868048b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4317c984f4bd54437ad35cc374844af6"><td class="memItemLeft" align="right" valign="top"><a id="a4317c984f4bd54437ad35cc374844af6"></a>
-static bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsNumber</b> (this object value)</td></tr>
-<tr class="separator:a4317c984f4bd54437ad35cc374844af6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af42c1e8d4ec6a3212928838323e4459e"><td class="memItemLeft" align="right" valign="top"><a id="af42c1e8d4ec6a3212928838323e4459e"></a>
 static string&#160;</td><td class="memItemRight" valign="bottom"><b>ToMixedCase</b> (string s)</td></tr>
 <tr class="separator:af42c1e8d4ec6a3212928838323e4459e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2cd0c1e43b3d1e6143196f5c4a181237"><td class="memItemLeft" align="right" valign="top"><a id="a2cd0c1e43b3d1e6143196f5c4a181237"></a>
-static bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsNullOrEmpty&lt; T &gt;</b> (this IEnumerable&lt; T &gt; ie)</td></tr>
-<tr class="separator:a2cd0c1e43b3d1e6143196f5c4a181237"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e5f3d8cb8f75c12eabda88e087760ff"><td class="memItemLeft" align="right" valign="top"><a id="a7e5f3d8cb8f75c12eabda88e087760ff"></a>
 static double&#160;</td><td class="memItemRight" valign="bottom"><b>Map</b> (double n, double start1, double stop1, double start2, double stop2)</td></tr>
 <tr class="separator:a7e5f3d8cb8f75c12eabda88e087760ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -139,9 +136,6 @@ static double&#160;</td><td class="memItemRight" valign="bottom"><b>Rand</b> (do
 <tr class="memitem:a7b3d0ab202474b5d55aa156f20cca1a5"><td class="memItemLeft" align="right" valign="top"><a id="a7b3d0ab202474b5d55aa156f20cca1a5"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>Log</b> (string logFileName, object msg)</td></tr>
 <tr class="separator:a7b3d0ab202474b5d55aa156f20cca1a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e4eac5a7342f006c9aa45f782337a6a"><td class="memItemLeft" align="right" valign="top"><a id="a2e4eac5a7342f006c9aa45f782337a6a"></a>
-static string&#160;</td><td class="memItemRight" valign="bottom"><b>Stringify</b> (this object o)</td></tr>
-<tr class="separator:a2e4eac5a7342f006c9aa45f782337a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ac88afbf36c39f0d6b9516b4dcb39b2"><td class="memItemLeft" align="right" valign="top"><a id="a0ac88afbf36c39f0d6b9516b4dcb39b2"></a>
 static IEnumerable&lt; string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>SortByLength</b> (IEnumerable&lt; string &gt; e)</td></tr>
 <tr class="separator:a0ac88afbf36c39f0d6b9516b4dcb39b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,7 +157,9 @@ static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC
 static int&#160;</td><td class="memItemRight" valign="bottom"><b>INFINITE</b> = -1</td></tr>
 <tr class="separator:a503f819b18acbfc74293d314995d2403"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Static utility functions for <a class="el" href="namespace_dialogic.html">Dialogic</a> </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a37840bebacbbc886a2f8aa4e61022aec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a37840bebacbbc886a2f8aa4e61022aec">&#9670;&nbsp;</a></span>ToMillis()</h2>
 
