@@ -8,6 +8,23 @@ namespace Dialogic
     public class DialogicTests
     {
         [Test]
+        public void TestPostValidate()
+        {
+            Go g = new Go().Init("a");
+            g.PostValidate();
+            Assert.That(g.Text, Is.EqualTo("a"));
+
+            Opt c = new Opt("Yes");
+            c.PostValidate();
+            Assert.That(c.Text, Is.EqualTo("Yes"));
+
+            c = new Opt("Yes", new Go().Init("#a"));
+            c.PostValidate();
+            Assert.That(c.Text, Is.EqualTo("Yes"));
+            Assert.That(c.action.Text, Is.EqualTo("a"));
+        }
+
+        [Test]
         public void TestSecStrToMs()
         {
             Assert.That(Util.SecStrToMs("1"), Is.EqualTo(1000));

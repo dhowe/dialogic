@@ -15,16 +15,16 @@ namespace Dialogic
         public static IDictionary<string, Type> TypeMap
             = new Dictionary<string, Type>()
         {
-                    { "CHAT",   typeof(global::Dialogic.Chat) },
-                    { "SAY",    typeof(global::Dialogic.Say)  },
-                    { "SET",    typeof(global::Dialogic.Set)  },
-                    { "ASK",    typeof(global::Dialogic.Ask)  },
-                    { "OPT",    typeof(global::Dialogic.Opt)  },
-                    { "DO",     typeof(global::Dialogic.Do)   },
-                    { "GO",     typeof(global::Dialogic.Go)   },
-                    { "WAIT",   typeof(global::Dialogic.Wait) },
-                    { "FIND",   typeof(global::Dialogic.Find) },
-                    { "GRAM",   typeof(global::Dialogic.Gram) },
+            { "CHAT",   typeof(global::Dialogic.Chat) },
+            { "SAY",    typeof(global::Dialogic.Say)  },
+            { "SET",    typeof(global::Dialogic.Set)  },
+            { "ASK",    typeof(global::Dialogic.Ask)  },
+            { "OPT",    typeof(global::Dialogic.Opt)  },
+            { "DO",     typeof(global::Dialogic.Do)   },
+            { "GO",     typeof(global::Dialogic.Go)   },
+            { "WAIT",   typeof(global::Dialogic.Wait) },
+            { "FIND",   typeof(global::Dialogic.Find) },
+            { "GRAM",   typeof(global::Dialogic.Gram) },
         };
 
         private bool logInitd;
@@ -35,7 +35,7 @@ namespace Dialogic
         private Find findDelegate;
         private ChatScheduler scheduler;
 
-        private List<IActor> speakers;
+        private List<IActor> actors;
         private List<Func<Command, bool>> validators;
 
         public void ParseFile(string fileOrFolder)
@@ -59,7 +59,7 @@ namespace Dialogic
         public ChatRuntime(List<Chat> chats, List<IActor> speakers = null)
         {
             this.chats = chats;
-            this.speakers = speakers;
+            this.actors = speakers;
             this.scheduler = new ChatScheduler(this);
             this.validators = new List<Func<Command, bool>>();
             ConfigureSpeakers();
@@ -67,9 +67,9 @@ namespace Dialogic
 
         private void ConfigureSpeakers()
         {
-            if (speakers.IsNullOrEmpty()) return;
+            if (actors.IsNullOrEmpty()) return;
 
-            speakers.ForEach(s =>
+            actors.ForEach(s =>
             {
                 var cmds = s.Commands();
                 if (!cmds.IsNullOrEmpty())

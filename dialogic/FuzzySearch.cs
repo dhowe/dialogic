@@ -9,7 +9,8 @@ namespace Dialogic
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
         /// If none match then start relaxing hard-type constraints until one does.
-        /// If all hard-type constraints have been relaxed and nothing is found, then return null.
+        /// If all hard-type constraints have been relaxed and nothing is found, 
+        /// then unrelax constraints, lower the staleness threshold and repeat.
         /// Note that the Chat containing the Find object is never returned.
         /// </summary>
         /// <returns>Chat</returns>
@@ -19,12 +20,18 @@ namespace Dialogic
         public static Chat Find(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
             var dbug = false;
+
             var chat = FindAll(finder, chats, globals).FirstOrDefault();
 
-            if (chat == null)
+            var tries = 0;
+            List<string> relaxables = null;
+            IDictionary<string, object> constraints = null;
+            double staleness = finder.stalenessThreshold;
+
+            while (chat == null && ++tries < 100)
             {
-                var constraints = ExtractMeta(finder);
-                List<string> relaxables = new List<string>();
+                constraints = ExtractMeta(finder);
+                if (relaxables == null) relaxables = new List<string>();
                 foreach (var kv in constraints)
                 {
                     Constraint c = (Constraint)kv.Value;
@@ -33,19 +40,23 @@ namespace Dialogic
 
                 if (dbug) Console.WriteLine("\nFailed with "
                     + relaxables.Count + " hard constraints");
-                
-                if (relaxables.Count == 0) return null;
 
-                // try again after relaxing each hard constraint
-                List<string> relaxed = new List<string>();
-                while (relaxables.Count > 0 && chat == null)
+                if (relaxables.Count > 0)
                 {
-                    RelaxOne(constraints, relaxables, relaxed, dbug);
-                    chat = FindAll(finder, chats, globals).FirstOrDefault();
+                    // try again after relaxing each hard constraint
+                    List<string> relaxed = new List<string>();
+                    while (relaxables.Count > 0 && chat == null)
+                    {
+                        RelaxOne(constraints, relaxables, relaxed, dbug);
+                        chat = FindAll(finder, chats, globals).FirstOrDefault();
+                    }
+
+                    // restore the state of constraints for reuse
+                    relaxed.ForEach(r => ((Constraint)constraints[r]).type = ConstraintType.Hard);
                 }
 
-                // restore the state of constraints for reuse
-                relaxed.ForEach(r => ((Constraint)constraints[r]).type = ConstraintType.Hard);
+                // if nothing, relax the staleness constraint and retry
+                if (chat == null) staleness *= .9;
             }
 
             if (dbug) Console.WriteLine("Result: " + chat);

@@ -357,11 +357,22 @@ namespace Dialogic
             }
         }
 
-
         [Test]
         public void TestCommands()
         {
             List<Chat> chats;
+
+            chats = ParseText("ASK is for horses?\nOPT Yes #game");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("is for horses?"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
+            Ask a = (Ask)chats[0].commands[0];
+            var opts = a.Options();
+            Assert.That(opts[0].Text, Is.EqualTo("Yes"));
+            Assert.That(opts[0].action.Text, Is.EqualTo("game"));
 
             chats = ParseText("HAY is for horses");
             //Console.WriteLine(chats[0].ToTree());

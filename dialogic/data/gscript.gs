@@ -3,7 +3,7 @@ Welcome to my $emotion world
 NVM 1.1
 WAIT 3
 DO #Twirl
-WAIT
+WAIT {ForAnimation=true}
 Thanks for visiting $place {speed=fast,style=whisper}
 GO #Prompt
 
@@ -14,7 +14,7 @@ OPT sure #Game
 OPT $neg #RePrompt
 
 CHAT Prompt {notPlayed=true,type=a,stage=b}
-ASK Do you want to $verb a game? {timeout=4}
+ASK Do you want to $verb a game? {timeout=4,speed=fast }
 OPT Sure #Game
 OPT Nope #RePrompt
 

@@ -9,7 +9,8 @@ namespace Tendar
         public static List<IActor> Speakers = new List<IActor>();
         public static Func<Command, bool> Validator = ValidatorFun;
 
-        public static IDictionary<string, double> FIND_STALENESS = new Dictionary<string, double>()
+        public static IDictionary<string, double> STALENESS_BY_TYPE
+            = new Dictionary<string, double>()
         {
             { "plot", 5.0 }, { "shake", 5.0 }, { "tap", 5.0 }, { "critic", 5.0 },
             { "tankResp", 5.0 }, { "hit", 5.0 }, { "poke", 5.0 }, { "hungry", 5.0 },
@@ -29,38 +30,31 @@ namespace Tendar
         {
             if ((c is Chat && !(c.HasMeta("NoStart") || c.HasMeta("noStart"))))
             {
-                ValidateKeys(c);
-            }
+                if (!c.HasMeta("type")) throw new ParseException
+                    ("Missing required meta-key 'type'");
 
-            if (c.GetType() == typeof(Find))
+                if (!c.HasMeta(Meta.STAGE)) throw new ParseException
+                    ("Missing required meta-key '" + Meta.STAGE + "'");
+            }
+            else if (c.GetType() == typeof(Find))
             {
                 // add default staleness if not otherwise specified
                 if (!c.HasMeta(Meta.STALENESS))
                 {
-                    var val = c.GetMeta("type");
-                    var ds = Defaults.FIND_STALENESS; // backup
-                    if (val != null)
+                    var type = c.GetMeta("type");
+                    if (type != null) // but only if a type is specified
                     {
-                        var type = (string)val;
-                        if (FIND_STALENESS.ContainsKey(type))
+                        var typeStr = (string)type;
+                        if (STALENESS_BY_TYPE.ContainsKey(typeStr))
                         {
-                            ds = FIND_STALENESS[type];
+                            var ds = STALENESS_BY_TYPE[(string)typeStr];
+                            c.SetMeta(Meta.STALENESS, new Constraint
+                                (Operator.LT, Meta.STALENESS, ds.ToString()));
                         }
                     }
-                    c.SetMeta(Meta.STALENESS, ds);
                 }
             }
-
             return true;
-        }
-
-        private static void ValidateKeys(Command c)
-        {
-            if (!c.HasMeta("type")) throw new ParseException
-                ("Missing required meta-key 'type'");
-
-            if (!c.HasMeta(Meta.STAGE)) throw new ParseException
-                ("Missing required meta-key '" + Meta.STAGE + "'");
         }
     }
 

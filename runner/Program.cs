@@ -101,8 +101,11 @@ namespace runner
             diaOpts = ge.Get(Meta.OPTS).Split('\n');
 
             ge.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
-                diaText += " " + ge.Data().Stringify(); // show meta
 
+            // add any meta tags
+            diaText += " " + ge.Data().Stringify(); 
+
+            // add the options
             for (int i = 0; i < diaOpts.Length; i++)
             {
                 diaText += "\n  (" + i + ") " + diaOpts[i];

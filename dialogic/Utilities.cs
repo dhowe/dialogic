@@ -363,11 +363,7 @@ namespace Dialogic
         public readonly Operator op;
 
         public Constraint(string key, string val, ConstraintType type = ConstraintType.Soft) :
-            this("=", key, val, type)
-        { }
-
-        public Constraint(string opstr, string key, string val, ConstraintType type = ConstraintType.Soft) :
-            this(Operator.FromString(opstr), key, val, type)
+            this(Operator.EQ, key, val, type)
         { }
 
         public Constraint(Operator op, string key, string val, ConstraintType type = ConstraintType.Soft)

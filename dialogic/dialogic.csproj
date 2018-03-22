@@ -10,7 +10,7 @@
     <AssemblyName>Dialogic</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <PackageId>rednoise.org.dialogic</PackageId>
-    <PackageVersion>0.4.61</PackageVersion>
+    <PackageVersion>0.4.62</PackageVersion>
     <Authors>Daniel C Howe</Authors>
     <Description>Generative interactive dialog</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -60,7 +60,7 @@
     <Compile Include="ChatRuntime.cs" />
     <Compile Include="ChatParser.cs" />
     <Compile Include="Actor.cs" />
-    <Compile Include="Tendar\AppConfig.cs" />
+    <Compile Include="AppConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -70,9 +70,6 @@
     <None Include="bin\Debug\dialogic.dll" />
     <None Include="data\gscript.gs" />
     <None Include="data\queries.gs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Tendar\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.targets" Condition="Exists('..\packages\NuGet.Build.Packaging.0.2.0\build\NuGet.Build.Packaging.targets')" />

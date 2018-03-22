@@ -20,10 +20,10 @@ namespace Dialogic
             this.DelayMs = Util.ToMillis(Defaults.SAY_DURATION);
         }
 
-        public override void Init(string text, string label, string[] metas)
+        public override Command PostValidate()
         {
-            base.Init(text, label, metas);
             if (Text.Length < 1) throw new ParseException("SAY requires text");
+            return this;
         }
 
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
@@ -108,11 +108,14 @@ namespace Dialogic
 
     public class Do : Command, ISendable
     {
-        public override void Init(string text, string label, string[] metas)
+        public override Command PostValidate()
         {
-            DelayMs = Util.ToMillis(Defaults.DO_DURATION);
-            base.Init(text, label, metas);
             ValidateTextLabel();
+            if (HasMeta(Meta.DELAY))
+            {
+                DelayMs = Util.ToMillis(Defaults.DO_DURATION);
+            }
+            return this;
         }
 
         public override string ToString()
@@ -185,14 +188,6 @@ namespace Dialogic
             return Defaults.WAIT_DURATION;
         }
     }
-
-    //public class Nvmx : Wait, ISendable
-    //{
-    //    protected override double DefaultDuration()
-    //    {
-    //        return Defaults.NVM_DURATION;
-    //    }
-    //}
 
     public class Ask : Say, ISendable
     {
@@ -305,6 +300,13 @@ namespace Dialogic
                 Command.Create(typeof(Go), String.Empty, label, metas) : NOP;
         }
 
+        public override Command PostValidate()
+        {
+            this.action.PostValidate();
+            return this;
+        }
+
+
         public override string ToString()
         {
             return TypeName().ToUpper() + " " + Text
@@ -314,7 +316,7 @@ namespace Dialogic
 
     public class Find : Command
     {
-        double stalenessThreshold; // TODO: init with default for type
+        public double stalenessThreshold;
 
         public Find() : base() { }
 
@@ -334,7 +336,16 @@ namespace Dialogic
             ParseMeta(metas);
         }
 
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals) 
+        public override Command PostValidate()
+        {
+            //Console.WriteLine("STALE: "+ GetMeta(Meta.STALENESS)+ GetMeta(Meta.STALENESS).GetType());
+            stalenessThreshold = HasMeta(Meta.STALENESS)
+                ? Double.Parse(((Constraint)GetMeta(Meta.STALENESS)).value)
+                : Defaults.FIND_STALENESS;
+            return this;
+        }
+
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
             return realized;
         }
@@ -377,7 +388,7 @@ namespace Dialogic
 
                 if (meta == null) meta = new Dictionary<string, object>();
 
-                meta.Add(key, new Constraint(match.Groups[2].Value,
+                meta.Add(key, new Constraint(Operator.FromString(match.Groups[2].Value),
                     key, match.Groups[3].Value, ctype));
             }
         }
@@ -404,8 +415,19 @@ namespace Dialogic
     {
         public override void Init(string text, string label, string[] metas)
         {
-            base.Text = text.Length > 0 ? text : label;
+            this.Text = text.Length > 0 ? text : label;
+        }
+
+        public new Go Init(string label)
+        {
+            Init(String.Empty, label, null);
+            return this;
+        }
+
+        public override Command PostValidate()
+        {
             ValidateTextLabel();
+            return this;
         }
 
         public override string ToString()
@@ -458,15 +480,19 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] metas)
         {
-            if (string.IsNullOrEmpty(text)) throw BadArg("Missing label");
-
             this.Text = text;
-            if (Regex.IsMatch(base.Text, @"\s+")) // TODO: compile
-            {
-                throw BadArg("CHAT name '" + base.Text + "' contains spaces!");
-            }
-
             ParseMeta(metas);
+        }
+
+        public override Command PostValidate()
+        {
+            if (string.IsNullOrEmpty(Text)) throw BadArg("Missing label");
+
+            if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
+            {
+                throw BadArg("CHAT name '" + Text + "' contains spaces!");
+            }
+            return this;
         }
 
         protected override string MetaStr()
@@ -481,16 +507,9 @@ namespace Dialogic
             return s;
         }
 
-        //public string ToTree() // remove?
-        //{
-        //    string s = ToString() + "\n";
-        //    commands.ForEach(c => s += "  " + c + "\n");
-        //    return s;
-        //}
-
         public string ToTree()
         {
-            string s = TypeName().ToUpper() + " " 
+            string s = TypeName().ToUpper() + " "
                 + Text + (" " + MetaStr()).TrimEnd();
             commands.ForEach(c => s += "\n  " + c);
             return s;
@@ -627,6 +646,10 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// Superclass for all Commands. When created by the parser, the default constructor is called first,
+    /// followed by Init(text,label,meta), followed by any app-specific validators, followed by PostValidate().
+    /// </summary>
     public abstract class Command : Meta
     {
         public const string PACKAGE = "Dialogic.";
@@ -661,7 +684,7 @@ namespace Dialogic
 
             if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
         }
-            
+
         public string GetText(bool real = false)
         {
             return real ? (string)realized[Meta.TEXT] : Text;
@@ -757,5 +780,14 @@ namespace Dialogic
             return DelayMs;
         }
 
+        /// <summary>
+        /// Run after all validators; can be used to ensure default values are set
+        /// if not otherwise specified directly in the script or in a validator
+        /// </summary>
+        /// <returns>The validated command</returns>
+        public virtual Command PostValidate()
+        {
+            return this;
+        }
     }
 }

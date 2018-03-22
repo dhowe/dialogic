@@ -27,8 +27,8 @@ namespace Dialogic
         {
             LineParser = new Regex(TypesRegex() + TXT + LBL + MTA);
             parsedCommands = new Stack<Command>();
-            chats = new List<Chat>();
             validators = commandValidators;
+            chats = new List<Chat>();
         }
 
         public static List<Chat> ParseText(string text, params Func<Command, bool>[] validators)
@@ -94,7 +94,7 @@ namespace Dialogic
 
             Command c = ParseCommand(parts, line, lineNo);
 
-            if (!validators.IsNullOrEmpty())
+            if (!validators.IsNullOrEmpty()) // run after Init() is called
             {
                 foreach (var check in validators)
                 {
@@ -110,7 +110,7 @@ namespace Dialogic
                 }
             }
 
-            return c;
+            return c.PostValidate();
         }
 
         private Command ParseCommand(List<string> parts, string line, int lineNo)
