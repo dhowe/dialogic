@@ -59,8 +59,8 @@
     <Compile Include="Grammar.cs" />
     <Compile Include="ChatRuntime.cs" />
     <Compile Include="ChatParser.cs" />
-    <Compile Include="Speaker.cs" />
-    <Compile Include="Tendar\Tendar.cs" />
+    <Compile Include="Actor.cs" />
+    <Compile Include="Tendar\AppConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

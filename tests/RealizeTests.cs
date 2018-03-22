@@ -38,9 +38,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            c.Realize(globals);
-            var data = c.realized;
-            //Console.WriteLine(Util.Stringify(data));
+            var data = c.Realize(globals);
             c.SetMeta("pace", "slow");
             Assert.That(data[Meta.TEXT], Is.EqualTo("Thank you"));
             Assert.That(data[Meta.TYPE], Is.EqualTo("Say"));

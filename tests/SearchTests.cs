@@ -20,7 +20,7 @@ namespace Dialogic
             var constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
 
-            find = new Find().Init("{plot=a,stage=b,last=true}");
+            find = new Find().Init("{type=a,stage=b,last=true}");
             Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
             Assert.That(find.Text, Is.Null);
             meta = find.GetMeta("last");

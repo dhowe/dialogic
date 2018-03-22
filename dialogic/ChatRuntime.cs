@@ -35,7 +35,7 @@ namespace Dialogic
         private Find findDelegate;
         private ChatScheduler scheduler;
 
-        private List<ISpeaker> speakers;
+        private List<IActor> speakers;
         private List<Func<Command, bool>> validators;
 
         public void ParseFile(string fileOrFolder)
@@ -54,9 +54,9 @@ namespace Dialogic
             }
         }
 
-        public ChatRuntime(List<ISpeaker> speakers = null) : this(null, speakers) { }
+        public ChatRuntime(List<IActor> speakers = null) : this(null, speakers) { }
 
-        public ChatRuntime(List<Chat> chats, List<ISpeaker> speakers = null)
+        public ChatRuntime(List<Chat> chats, List<IActor> speakers = null)
         {
             this.chats = chats;
             this.speakers = speakers;

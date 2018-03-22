@@ -35,7 +35,7 @@ namespace runner
 
         public MockGameEngine(string fileOrFolder)
         {
-            dialogic = new ChatRuntime(Config.Speakers);
+            dialogic = new ChatRuntime(AppConfig.Speakers);
             dialogic.ParseFile(fileOrFolder);
             dialogic.Run();
         }
@@ -76,18 +76,18 @@ namespace runner
                         Console.WriteLine("<resume-event#>" +
                             " after " + Util.Millis(now) + "ms\n");
 
-                        // send ResumeEvent after 5 sec ('#Game' or '{plot=a,stage=b,last=true}')
+                        // send ResumeEvent after 5 sec ('#Game' or '{type=a,stage=b,last=true}')
 
                         gameEvent = new ResumeEvent();
                     });
 
-                    diaText = ("(" + diaType + " " + 
-                        ue.Data().Stringify().Trim() + ")");
+                    diaText = ("(" + (diaType + " " + 
+                        ue.Data().Stringify()).Trim() + ")");
                     break;
 
                 default:
-                    diaText = ("(" + diaType + ": " + diaText + " "
-                        + ue.Data().Stringify().Trim() + ")");
+                    diaText = ("(" + diaType + ": " + (diaText + " "
+                        + ue.Data().Stringify()).Trim() + ")");
                     break;
             }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
-    public interface ISpeaker
+    public interface IActor
     {
         string Name();
         bool IsDefault();
@@ -11,19 +11,19 @@ namespace Dialogic
         Func<Command, bool> Validator();
     }
 
-    public class Speaker : ISpeaker
+    public class Actor : IActor
     {
         readonly string name;
         readonly bool isDefault;
         readonly CommandDef[] commands;
         readonly Func<Command, bool> validator;
 
-        public Speaker(string label) : this(label, false, null, null) { }
+        public Actor(string label) : this(label, false, null, null) { }
 
-        public Speaker(string label, Func<Command, bool> validator = null, 
+        public Actor(string label, Func<Command, bool> validator = null, 
             params CommandDef[] commands) : this(label, false, validator, commands) { }
 
-        public Speaker(string label, bool isDefault = false, Func<Command, bool> 
+        public Actor(string label, bool isDefault = false, Func<Command, bool> 
             validator = null, params CommandDef[] commands)
         {
             this.name = label;

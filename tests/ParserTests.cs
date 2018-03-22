@@ -12,7 +12,7 @@ namespace Dialogic
         {
             if (!ChatRuntime.TypeMap.ContainsKey("NVM")) // tmp
                 ChatRuntime.TypeMap.Add("NVM", typeof(Tendar.Nvm));
-            return ChatParser.ParseText(s, Tendar.Config.Validator);
+            return ChatParser.ParseText(s, Tendar.AppConfig.Validator);
         }
 
         [Test]
@@ -296,7 +296,7 @@ namespace Dialogic
         public void TestValidators()
         {
             List<Chat> chats;
-            chats = ChatParser.ParseText("CHAT c1 {plot=a,stage=b}\nSAY Hello");
+            chats = ChatParser.ParseText("CHAT c1 {type=a,stage=b}\nSAY Hello");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -309,7 +309,7 @@ namespace Dialogic
         {
             string[] tests = {
 
-                "CHAT c1 {plot=a,stage=b}",
+                "CHAT c1 {type=a,stage=b}",
             };
 
             for (int i = 0; i < tests.Length; i++)
@@ -478,7 +478,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestSimpleCommand()
+        public void TestSimpleCommands()
         {
             string[] lines = {
                 "DO #Twirl", "DO #Twirl {speed= fast}", "SAY Thank you", "WAIT", "WAIT .5",  "WAIT .5 {a=b}",
@@ -510,14 +510,14 @@ namespace Dialogic
         [Test]
         public void TestChats()
         {
-            List<Chat> chats = ParseText("CHAT c1 {plot=a,stage=b}");
+            List<Chat> chats = ParseText("CHAT c1 {type=a,stage=b}");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(0));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Chat chat = chats[0];
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
 
-            chats = ParseText("CHAT c1 {plot=a,stage=b}\nGO #c1\nDO #c1\n");
+            chats = ParseText("CHAT c1 {type=a,stage=b}\nGO #c1\nDO #c1\n");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -542,7 +542,7 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ParseText("CHAT c1"));
 
             string[] lines = {
-                "CHAT c1 {plot=a,stage=b}",
+                "CHAT c1 {type=a,stage=b}",
                 "SAY Thank you",
                 "SAY Hello",
                 "//SAY And Goodbye",

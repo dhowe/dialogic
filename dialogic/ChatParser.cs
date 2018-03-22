@@ -100,7 +100,7 @@ namespace Dialogic
                 {
                     try
                     {
-                        if (!check(c)) throw new Exception("fail");
+                        if (!check.Invoke(c)) throw new Exception("fail");
                     }
                     catch (Exception ex)
                     {

@@ -525,10 +525,10 @@ namespace Dialogic
 
     public class Meta
     {
-        public const string OPTS = "opts";
-        public const string TYPE = "type";
-        public const string TEXT = "text";
-        public const string PLOT = "plot";
+        public const string TYPE = "__type__";
+        public const string TEXT = "__text__";
+        public const string OPTS = "__opts__";
+
         public const string STAGE = "stage";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";

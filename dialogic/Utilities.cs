@@ -58,8 +58,6 @@ namespace Dialogic
 
         // Default staleness-threshold for Find
         public static double FIND_STALENESS = 5;
-
-        //public static void Override(IDictionary<string, object> values)
     }
 
     /// <summary>
@@ -451,7 +449,7 @@ namespace Dialogic
     /// <summary>
     /// A container for Constraint objects, wraps an IDictionary<string, object> 
     /// </summary>
-    public class Constraints 
+    public class Constraints
     {
         IDictionary<string, object> pairs;
 
