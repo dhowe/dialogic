@@ -31,6 +31,31 @@ namespace Dialogic
             Assert.That(constraint.value, Is.EqualTo("true"));
         }
 
+        //[Test]
+        //public void TestStalenessInit()
+        //{
+        //    Chat chat = ChatParser.ParseText("FIND {type=hit,a*=(hot|cool)}", 
+        //        Tendar.AppConfig.Validator)[0];
+        //    Assert.That(chat, Is.Not.Null);
+        //    var cmd = chat.commands[0];
+        //    Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
+        //    Find find = (Dialogic.Find)cmd;
+        //    Assert.That(find.stalenessThreshold, Is.EqualTo(Tendar.AppConfig.STALENESS_BY_TYPE["hit"]));
+
+        //    cmd = new Find().Init("{type=a,stage=b,last=true}").PostValidate();
+        //    Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
+        //    find = (Dialogic.Find)cmd;
+        //    Assert.That(find.stalenessThreshold, Is.EqualTo(Defaults.FIND_STALENESS));
+
+        //    chat = ChatParser.ParseText("FIND {type=a,stage=b,last=true}",
+        //        Tendar.AppConfig.Validator)[0];
+        //    Assert.That(chat, Is.Not.Null);
+        //    cmd = chat.commands[0];
+        //    Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
+        //    find = (Dialogic.Find)cmd;
+        //    Assert.That(find.stalenessThreshold, Is.EqualTo(Defaults.FIND_STALENESS));
+        //}
+
         [Test]
         public void TestStaleness()
         {
@@ -38,13 +63,13 @@ namespace Dialogic
             List<Chat> chats = new List<Chat>();
             chats.Add(c = Chat.Create("c1"));
             c.SetMeta("dev", "hello");
-            c.staleness = 2;
+            c.Staleness(2);
             chats.Add(c = Chat.Create("c2"));
             c.SetMeta("dev", "2");
-            c.staleness = 3;
+            c.Staleness(3);
             chats.Add(c = Chat.Create("c3"));
             c.SetMeta("dev", "3");
-            c.staleness = 4;
+            c.Staleness(4);
             var cnt = new Constraint(Operator.LT, "staleness", "3");
             var res = new ChatRuntime(chats).FindAll(cnt);
             Assert.That(res.Count, Is.EqualTo(1));
@@ -66,7 +91,7 @@ namespace Dialogic
 
             var crt = new ChatRuntime(chats);
             c = crt.FindByName("#c1");
-            c.staleness = 6;
+            c.Staleness(6);
             Assert.That(c, Is.Not.Null);
             Assert.That(c.Text, Is.EqualTo("c1"));
 
@@ -75,6 +100,27 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c3"));
+        }
+
+        [Test]
+        public void TestStalenessRelaxation()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            c.Staleness(2);
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            c.Staleness(3);
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            c.Staleness(4);
+            var cnt = new Constraint(Operator.LT, "staleness", "4");
+            var cnt2 = new Constraint(Operator.GT, "dev", "2");
+            var res = new ChatRuntime(chats).Find(cnt);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Text, Is.EqualTo("c3"));
         }
 
         [Test]

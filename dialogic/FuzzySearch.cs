@@ -6,6 +6,10 @@ namespace Dialogic
 {
     public static class FuzzySearch
     {
+        // NEXT:
+        // we have Chat.staleness and Find.staleNess threshold
+        // do we compare them as normal constraints in meta, or as special-varialbes 
+
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
         /// If none match then start relaxing hard-type constraints until one does.
@@ -19,44 +23,60 @@ namespace Dialogic
         /// <param name="globals">Globals.</param>
         public static Chat Find(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
-            var dbug = false;
+            var dbug = true;
 
-            var chat = FindAll(finder, chats, globals).FirstOrDefault();
+            Chat chat = FindAll(finder, chats, globals).FirstOrDefault();
 
-            var tries = 0;
+            int tries = 0;
             List<string> relaxables = null;
             IDictionary<string, object> constraints = null;
-            double staleness = finder.stalenessThreshold;
 
             while (chat == null && ++tries < 100)
             {
                 constraints = ExtractMeta(finder);
+
                 if (relaxables == null) relaxables = new List<string>();
+
+                Constraint staleness = null;
                 foreach (var kv in constraints)
                 {
                     Constraint c = (Constraint)kv.Value;
-                    if (c.IsRelaxable()) relaxables.Add(kv.Key);
+                    if (c.name == Meta.STALENESS)
+                    {
+                        staleness = c;
+                    }
+                    else if (c.IsRelaxable())
+                    {
+                        relaxables.Add(kv.Key);
+                    }
                 }
 
-                if (dbug) Console.WriteLine("\nFailed with "
-                    + relaxables.Count + " hard constraints");
+                if (dbug) Console.WriteLine("\nFailed with " + relaxables.Count
+                    + " hard constraints, staleness = " + staleness.value);
+
+                List<string> relaxed = null;
 
                 if (relaxables.Count > 0)
                 {
+                    relaxed = new List<string>();
+
                     // try again after relaxing each hard constraint
-                    List<string> relaxed = new List<string>();
-                    while (relaxables.Count > 0 && chat == null)
+                    while (chat == null && relaxables.Count > 0)
                     {
                         RelaxOne(constraints, relaxables, relaxed, dbug);
                         chat = FindAll(finder, chats, globals).FirstOrDefault();
                     }
-
-                    // restore the state of constraints for reuse
-                    relaxed.ForEach(r => ((Constraint)constraints[r]).type = ConstraintType.Hard);
                 }
 
+                // restore the state of constraints for reuse
+                relaxed.ForEach(r => ((Constraint)constraints[r]).type = ConstraintType.Hard);
+
                 // if nothing, relax the staleness constraint and retry
-                if (chat == null) staleness *= .9;
+                if (chat == null)
+                {
+                    staleness.ScaleValue(.5);
+                    if (dbug) Console.WriteLine("\nRelaxing staleness to " + staleness.value);
+                }
             }
 
             if (dbug) Console.WriteLine("Result: " + chat);
@@ -74,7 +94,7 @@ namespace Dialogic
         /// <param name="globals">Globals.</param>
         public static List<Chat> FindAll(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
-            var dbug = false;
+            var dbug = true;
             var constraints = ExtractMeta(finder);
             if (constraints == null) return chats;
 
@@ -88,7 +108,7 @@ namespace Dialogic
                 var hits = 0;
                 var chatMeta = chats[i].Realize(globals);
 
-                if (dbug) Console.WriteLine("\n"+chats[i].Text+" ----------");
+                if (dbug) Console.WriteLine("\n" + chats[i].Text + " ----------");
 
                 foreach (var key in constraints.Keys)
                 {

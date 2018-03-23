@@ -57,7 +57,10 @@ namespace Dialogic
         public static int SAY_MIN_LINE_LEN = 2;
 
         // Default staleness-threshold for Find
-        public static double FIND_STALENESS = 5;
+        public static double FIND_STALENESS = 4;
+
+        // Default staleness for new Chats
+        public static double CHAT_STALENESS = 0;
     }
 
     /// <summary>
@@ -345,11 +348,13 @@ namespace Dialogic
         }
     }
 
+
     /// <summary>
     /// Refers to the Contraints behavior during search, specifically whether
     /// it can be 'relaxed to allow a larger result set
     /// </summary>
     public enum ConstraintType { Soft = 0, Hard = 1, Absolute = 2 };
+
 
     /// <summary>
     /// Implements a Constraint (a name, a value, an Operator) that can be checked
@@ -358,9 +363,10 @@ namespace Dialogic
     {
         public static char TypeSetChar = '!';
 
-        public ConstraintType type;
-        public readonly string name, value;
+        public readonly string name;
         public readonly Operator op;
+        public ConstraintType type;
+        public string value;
 
         public Constraint(string key, string val, ConstraintType type = ConstraintType.Soft) :
             this(Operator.EQ, key, val, type)
@@ -417,6 +423,28 @@ namespace Dialogic
         {
             return this.type == ConstraintType.Hard
                 || this.type == ConstraintType.Absolute;
+        }
+
+        public double ValueAsDouble(double def = -1)
+        {
+            double d = def;
+            try
+            {
+                d = Double.Parse(value);
+            }
+            catch (Exception) { }
+            return d;
+        }
+
+        public bool ScaleValue(double scale)
+        {
+            double dval;
+            if (Double.TryParse(value, out dval))
+            {
+                value = (dval * scale).ToString();
+                return true;
+            }
+            return false;
         }
 
         public bool IsRelaxable()

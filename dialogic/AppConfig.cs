@@ -7,13 +7,13 @@ namespace Tendar
     public static class AppConfig
     {
         public static List<IActor> Speakers = new List<IActor>();
-        public static Func<Command, bool> Validator = ValidatorFun;
+        public static Func<Command, bool> Validator = ValidateCommand;
 
         public static IDictionary<string, double> STALENESS_BY_TYPE
             = new Dictionary<string, double>()
         {
             { "plot", 5.0 }, { "shake", 5.0 }, { "tap", 5.0 }, { "critic", 5.0 },
-            { "tankResp", 5.0 }, { "hit", 5.0 }, { "poke", 5.0 }, { "hungry", 5.0 },
+            { "tankResp", 5.0 }, { "hit", 5.1 }, { "poke", 5.0 }, { "hungry", 5.0 },
             { "eatResp", 5.0 }, { "poop", 5.0 }, { "pooped", 5.0 }, { "seeEmo", 5.0 },
             { "capReq", 5.0 }, { "capSuc", 5.0 }, { "capProg", 5.0 }, { "capFail", 5.0 },
             { "hello", 5.0 }, { "return", 5.0 }, { "rand",5.0}
@@ -26,15 +26,18 @@ namespace Tendar
             Speakers.Add(new Actor("Tendar"));
         }
 
-        private static bool ValidatorFun(Command c)
+        private static bool ValidateCommand(Command c)
         {
-            if ((c is Chat && !(c.HasMeta("NoStart") || c.HasMeta("noStart"))))
+            if (c.GetType() == typeof(Chat))
             {
-                if (!c.HasMeta("type")) throw new ParseException
-                    ("Missing required meta-key 'type'");
+                if (!(c.HasMeta("NoStart") || c.HasMeta("noStart")))
+                {
+                    if (!c.HasMeta("type")) throw new ParseException
+                        ("Missing required meta-key 'type'");
 
-                if (!c.HasMeta(Meta.STAGE)) throw new ParseException
-                    ("Missing required meta-key '" + Meta.STAGE + "'");
+                    if (!c.HasMeta(Meta.STAGE)) throw new ParseException
+                        ("Missing required meta-key '" + Meta.STAGE + "'");
+                }
             }
             else if (c.GetType() == typeof(Find))
             {
@@ -44,7 +47,7 @@ namespace Tendar
                     var type = c.GetMeta("type");
                     if (type != null) // but only if a type is specified
                     {
-                        var typeStr = (string)type;
+                        var typeStr = ((Constraint)type).value;
                         if (STALENESS_BY_TYPE.ContainsKey(typeStr))
                         {
                             var ds = STALENESS_BY_TYPE[(string)typeStr];

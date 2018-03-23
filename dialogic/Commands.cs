@@ -316,7 +316,7 @@ namespace Dialogic
 
     public class Find : Command
     {
-        public double stalenessThreshold;
+        //public double stalenessThreshold;
 
         public Find() : base() { }
 
@@ -339,9 +339,12 @@ namespace Dialogic
         public override Command PostValidate()
         {
             //Console.WriteLine("STALE: "+ GetMeta(Meta.STALENESS)+ GetMeta(Meta.STALENESS).GetType());
-            stalenessThreshold = HasMeta(Meta.STALENESS)
-                ? Double.Parse(((Constraint)GetMeta(Meta.STALENESS)).value)
-                : Defaults.FIND_STALENESS;
+            if (!HasMeta(Meta.STALENESS))
+            {
+                SetMeta(new Constraint(Operator.LT, Meta.STALENESS,
+                    Defaults.FIND_STALENESS.ToString()));
+            }
+
             return this;
         }
 
@@ -443,7 +446,6 @@ namespace Dialogic
         public bool resumeLastAfterInterrupting = true;
         public int cursor = 0, lastRunAt = -1;
         public double stalenessIncrement = 1;
-        public double staleness = 0;
 
         public Chat()
         {
@@ -456,6 +458,23 @@ namespace Dialogic
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
             return c;
+        }
+
+        public double Staleness()
+        {
+            return Convert.ToDouble(GetMeta(Meta.STALENESS));
+        }
+
+        public Chat Staleness(double d)
+        {
+            SetMeta(Meta.STALENESS, d.ToString());
+            return this;
+        }
+
+        public Chat IncrementStaleness()
+        {
+            SetMeta(Meta.STALENESS, (Staleness() + stalenessIncrement).ToString());
+            return this;
         }
 
         public int Count()
@@ -474,7 +493,7 @@ namespace Dialogic
         {
             realized.Clear();
             RealizeMeta(globals); // OPT: remove if not used
-            realized[Meta.STALENESS] = staleness.ToString();
+            //realized[Meta.STALENESS] = staleness.ToString();
             return realized;
         }
 
@@ -486,11 +505,9 @@ namespace Dialogic
 
         public override Command PostValidate()
         {
-            if (string.IsNullOrEmpty(Text)) throw BadArg("Missing label");
-
-            if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
+            if (!HasMeta(Meta.STALENESS))
             {
-                throw BadArg("CHAT name '" + Text + "' contains spaces!");
+                SetMeta(Meta.STALENESS, Defaults.CHAT_STALENESS);
             }
             return this;
         }
@@ -533,7 +550,7 @@ namespace Dialogic
             lastRunAt = Util.EpochMs();
 
             // Q: what about (No-Label) WAIT events ?
-            staleness += stalenessIncrement;
+            IncrementStaleness();
         }
 
         public bool IsResumable() // TODO: set from meta
