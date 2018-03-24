@@ -511,6 +511,11 @@ namespace Dialogic
 
         public override Command PostValidate()
         {
+            if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
+            {
+                throw BadArg("CHAT name '" + Text + "' contains spaces!");
+            }
+                
             // Realization happens only once in Chat
             if (HasMeta())
             {
@@ -528,7 +533,7 @@ namespace Dialogic
         {
             this.Text = text;
             ParseMeta(metas);
-            PostValidate(); // should be called by parser
+            PostValidate(); // tmp:  should be called by parser
         }
 
         protected override string MetaStr()

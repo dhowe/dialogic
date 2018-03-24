@@ -33,10 +33,10 @@ namespace Tendar
                 if (!(c.HasMeta("NoStart") || c.HasMeta("noStart")))
                 {
                     if (!c.HasMeta("type")) throw new ParseException
-                        ("Missing required meta-key 'type'");
+                        ("missing required meta-key 'type'");
 
                     if (!c.HasMeta(Meta.STAGE)) throw new ParseException
-                        ("Missing required meta-key '" + Meta.STAGE + "'");
+                        ("missing required meta-key '" + Meta.STAGE + "'");
                 }
             }
             else if (c.GetType() == typeof(Find))
@@ -48,6 +48,8 @@ namespace Tendar
                     if (type != null) // but only if a type is specified
                     {
                         var typeStr = ((Constraint)type).value;
+
+                        // TODO: change this to per-Find values ***
                         if (STALENESS_BY_TYPE.ContainsKey(typeStr))
                         {
                             var ds = STALENESS_BY_TYPE[(string)typeStr];

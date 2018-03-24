@@ -106,7 +106,7 @@ namespace Dialogic.Server
             try
             {
                 string content = String.Empty;
-                ParseText(code).ForEach(c => { content += c + "\n\n" });
+                ParseText(code).ForEach(c => { content += c.ToTree() + "\n\n"; });
 
                 html = html.Replace("%%RESULT%%", content);
                 html = html.Replace("%%RCLASS%%", "success");
