@@ -108,7 +108,7 @@ namespace Dialogic
             Chat c;
             List<Chat> chats = new List<Chat>();
             chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "hello");
+            c.SetMeta("dev", "1");
             c.Staleness(2);
             chats.Add(c = Chat.Create("c2"));
             c.SetMeta("dev", "2");
@@ -118,7 +118,28 @@ namespace Dialogic
             c.Staleness(4);
             var cnt = new Constraint(Operator.LT, "staleness", "4");
             var cnt2 = new Constraint(Operator.GT, "dev", "2");
-            var res = new ChatRuntime(chats).Find(cnt);
+            var res = new ChatRuntime(chats).Find(cnt, cnt2);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Text, Is.EqualTo("c3"));
+        }
+
+        [Test]
+        public void TestDoubleRelaxation()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "1");
+            c.Staleness(2);
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            c.Staleness(3);
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("other","2");
+            c.Staleness(4);
+            var cnt = new Constraint(Operator.LT, "staleness", "4");
+            var cnt2 = new Constraint(Operator.GT, "dev", "2", ConstraintType.Hard);
+            var res = new ChatRuntime(chats).Find(cnt, cnt2);
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Text, Is.EqualTo("c3"));
         }
@@ -134,7 +155,8 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Chat res = new ChatRuntime(chats).FindAll(new Constraint("dev", "1"))[0];
+            var cnt = new Constraint("dev", "1");
+            Chat res = new ChatRuntime(chats).FindAll(cnt)[0];
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 
@@ -194,7 +216,7 @@ namespace Dialogic
             chats = ChatParser.ParseText("CHAT c0\nFIND {dev=1,day=fri}");
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            chats = new ChatRuntime(chats).FindAll((Find)finder, RealizeTests.globals);          
+            chats = new ChatRuntime(chats).FindAll((Find)finder, RealizeTests.globals);
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(0));
         }
@@ -213,7 +235,7 @@ namespace Dialogic
             //chats.ForEach(c=>Console.WriteLine(c));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Text, Is.EqualTo("c1"));
-    
+
             Chat c;
             chats = new List<Chat>();
             chats.Add(c = Chat.Create("c1"));
@@ -234,8 +256,11 @@ namespace Dialogic
             };
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents);
-            List<Chat> result = new ChatRuntime(chats).FindAll
-                (new Constraints(new Constraint("dev", "1")).Add("day", "fri"));
+            List<Chat> result = new ChatRuntime(chats).FindAll(
+                new Constraint("dev", "1"),
+                new Constraint("day", "fri")
+            );
+                                                   
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].Text, Is.EqualTo("c1"));
@@ -314,7 +339,7 @@ namespace Dialogic
             finder = chats[0].commands[0];
             var mdev = finder.GetMeta("dev");
             Assert.That(mdev is Constraint, Is.True);
-			Constraint cons = (global::Dialogic.Constraint)mdev;
+            Constraint cons = (global::Dialogic.Constraint)mdev;
             Assert.That(cons.type, Is.EqualTo(ConstraintType.Hard));
             Assert.That(cons.IsStrict(), Is.True);
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
@@ -365,7 +390,7 @@ namespace Dialogic
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
 
-   
+
         [Test]
         public void TestFindAllHard2()
         {
@@ -592,7 +617,7 @@ namespace Dialogic
 
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
-  
+
             lines = new[]{
                 "CHAT c0",
                 "FIND {dev<2,!day=fri}",

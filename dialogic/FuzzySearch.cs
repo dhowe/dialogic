@@ -6,9 +6,23 @@ namespace Dialogic
 {
     public static class FuzzySearch
     {
-        // NEXT:
-        // we have Chat.staleness and Find.staleNess threshold
-        // do we compare them as normal constraints in meta, or as special-varialbes 
+        public static bool DEBUG_TO_CONSOLE = false;
+
+        class SearchContext
+        {
+            /*
+             * 1. Try normal search
+             * 2. If failed, create a SearchContext(SC)
+             * 3. If (relaxables) relaxEach until empty
+             * 4. If failed, unrelax, relax staleness, & repeat
+             */
+
+            int tries = 0;
+            List<string> relaxables;
+            List<string> relaxed;
+            Constraint staleness;
+            IDictionary<string, object> constraints;
+        }
 
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
@@ -23,20 +37,17 @@ namespace Dialogic
         /// <param name="globals">Globals.</param>
         public static Chat Find(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
-            var dbug = true;
-
             Chat chat = FindAll(finder, chats, globals).FirstOrDefault();
+            if (chat != null) return chat;
 
             int tries = 0;
-            List<string> relaxables = null;
-            IDictionary<string, object> constraints = null;
+            List<string> relaxables = new List<string>();
+            IDictionary<string, object> constraints = ExtractMeta(finder, globals);
+
+            var dbug = DEBUG_TO_CONSOLE;
 
             while (chat == null && ++tries < 100)
             {
-                constraints = ExtractMeta(finder);
-
-                if (relaxables == null) relaxables = new List<string>();
-
                 Constraint staleness = null;
                 foreach (var kv in constraints)
                 {
@@ -51,8 +62,12 @@ namespace Dialogic
                     }
                 }
 
-                if (dbug) Console.WriteLine("\nFailed with " + relaxables.Count
-                    + " hard constraints, staleness = " + staleness.value);
+                if (dbug)
+                {
+                    var msg = "\nFailed with " + relaxables.Count + " hard constraints";
+                    if (staleness != null) msg += (", staleness = " + staleness.value);
+                    Console.WriteLine(msg);
+                }
 
                 List<string> relaxed = null;
 
@@ -69,17 +84,21 @@ namespace Dialogic
                 }
 
                 // restore the state of constraints for reuse
-                relaxed.ForEach(r => ((Constraint)constraints[r]).type = ConstraintType.Hard);
+                if (!relaxed.IsNullOrEmpty())
+                {
+                    relaxed.ForEach(r => ((Constraint)constraints[r]).type = ConstraintType.Hard);
+                }
 
                 // if nothing, relax the staleness constraint and retry
-                if (chat == null)
+                if (chat == null && staleness != null)
                 {
-                    staleness.ScaleValue(.5);
+                    staleness.IncrementValue(.5);
                     if (dbug) Console.WriteLine("\nRelaxing staleness to " + staleness.value);
+                    chat = FindAll(finder, chats, globals).FirstOrDefault();
                 }
             }
 
-            if (dbug) Console.WriteLine("Result: " + chat);
+            if (dbug) Console.WriteLine("\nResult: " + chat); 
 
             return chat;
         }
@@ -94,8 +113,8 @@ namespace Dialogic
         /// <param name="globals">Globals.</param>
         public static List<Chat> FindAll(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
-            var dbug = true;
-            var constraints = ExtractMeta(finder);
+            var dbug = DEBUG_TO_CONSOLE;
+            var constraints = ExtractMeta(finder, globals);
             if (constraints == null) return chats;
 
             Dictionary<Chat, int> matches = new Dictionary<Chat, int>();
@@ -145,7 +164,7 @@ namespace Dialogic
 
             List<KeyValuePair<Chat, int>> list = DescendingRandomSort(matches);
 
-            if (dbug) list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
+            if (dbug) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
         }
@@ -163,10 +182,11 @@ namespace Dialogic
             toRelax.type = ConstraintType.Soft;
         }
 
-        private static IDictionary<string, object> ExtractMeta(Find finder)
+        private static IDictionary<string, object> ExtractMeta(Find finder, IDictionary<string, object> globals)
         {
-            // note: this is problematic! -- perhaps should throw in case of no realized data
-            return !finder.realized.IsNullOrEmpty() ? finder.realized : finder.meta;
+            // note: this is problematic - perhaps should throw in case of no realized data?
+            //return finder.realized.IsNullOrEmpty() ? finder.Realize(globals) : finder.realized;
+            return finder.realized.IsNullOrEmpty() ? finder.meta : finder.realized;
         }
 
         /*

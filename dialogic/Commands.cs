@@ -320,9 +320,9 @@ namespace Dialogic
 
         public Find() : base() { }
 
-        internal Find(Constraints c) : base()
+        internal Find(params Constraint[] cnts) : base()
         {
-            this.meta = c.AsDict();
+            this.meta = Constraint.AsDict(cnts);
         }
 
         public Find Init(string metadata)
@@ -444,13 +444,12 @@ namespace Dialogic
         public List<Command> commands;
         public bool interruptable = true;
         public bool resumeLastAfterInterrupting = true;
+        public double stalenessIncrement = Defaults.CHAT_STALENESS_INCR;
         public int cursor = 0, lastRunAt = -1;
-        public double stalenessIncrement = 1;
 
-        public Chat()
+        public Chat() : base()
         {
             commands = new List<Command>();
-            realized = new Dictionary<string, object>();
         }
 
         public static Chat Create(string name) // tests only
@@ -493,7 +492,10 @@ namespace Dialogic
         {
             realized.Clear();
             RealizeMeta(globals); // OPT: remove if not used
-            //realized[Meta.STALENESS] = staleness.ToString();
+            /*if (!realized.ContainsKey(Meta.STALENESS))
+            {
+                realized[Meta.STALENESS] = Defaults.CHAT_STALENESS;
+            }*/
             return realized;
         }
 
@@ -501,15 +503,6 @@ namespace Dialogic
         {
             this.Text = text;
             ParseMeta(metas);
-        }
-
-        public override Command PostValidate()
-        {
-            if (!HasMeta(Meta.STALENESS))
-            {
-                SetMeta(Meta.STALENESS, Defaults.CHAT_STALENESS);
-            }
-            return this;
         }
 
         protected override string MetaStr()

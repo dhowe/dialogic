@@ -7,7 +7,7 @@ namespace Dialogic
     [TestFixture]
     public class ParserTests
     {
-        // NOTE: all tests here are done with the Tendar.Config validator
+        // NOTE: all tests here are done with the Tendar.AppConfig validators
         static List<Chat> ParseText(string s)
         {
             if (!ChatRuntime.TypeMap.ContainsKey("NVM")) // tmp
@@ -309,7 +309,7 @@ namespace Dialogic
         {
             string[] tests = {
 
-                "CHAT c1 {type=a,stage=b}",
+                "CHAT c1 {type=a,stage=b,staleness=1}",
             };
 
             for (int i = 0; i < tests.Length; i++)

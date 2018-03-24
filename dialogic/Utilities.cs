@@ -12,6 +12,61 @@ using System.Runtime.CompilerServices;
 namespace Dialogic
 {
     /// <summary>
+    /// A (temporary) container for Dialogic defaults that can be changed
+    /// at runtime.
+    /// </summary>
+    public static class Defaults
+    {
+        /// <summary>
+        /// Default Command duration for Say
+        /// </summary>
+        public static double SAY_DURATION = 2.0;
+
+        /// <summary>
+        /// Default Command duration for Do
+        /// </summary>
+        public static double DO_DURATION = 0.02;
+
+        /// <summary>
+        /// Default Command duration for Ask
+        /// </summary>
+        public static double ASK_DURATION = Util.INFINITE;
+
+        /// <summary>
+        /// Default Command duration for Wait
+        /// </summary>
+        public static double WAIT_DURATION = Util.INFINITE;
+
+        /// <summary>
+        /// Default Timeout for Ask
+        /// </summary>
+        public static double ASK_TIMEOUT = 5.0;
+
+        /// <summary>
+        /// Default staleness-threshold for Find
+        /// </summary>
+        public static double FIND_STALENESS = 4;
+
+        /// <summary>
+        /// Default staleness for new Chats
+        /// </summary>
+        public static double CHAT_STALENESS = 0;
+
+        /// <summary>
+        ///  Default increment each time Chat is run
+        /// </summary>
+        public static double CHAT_STALENESS_INCR = 1;
+
+        // Default Timing fields for Say, Ask, Opt (?)
+        public static double SAY_FAST_MULT = 0.5;
+        public static double SAY_SLOW_MULT = 2.0;
+        public static double SAY_MAX_LEN_MULT = 2.0;
+        public static double SAY_MIN_LEN_MULT = 0.5;
+        public static int SAY_MAX_LINE_LEN = 80;
+        public static int SAY_MIN_LINE_LEN = 2;
+    }
+
+    /// <summary>
     /// A 1=1 mapping from a string command to its object type, 
     /// e.g., "SAY" -> Dialogic.Say
     /// </summary>
@@ -30,37 +85,6 @@ namespace Dialogic
                     ("Expected subclass of Command, but found " + cmdType);
             }
         }
-    }
-
-    /// <summary>
-    /// A (temporary) container for Dialogic defaults that can be changed
-    /// at runtime.
-    /// </summary>
-    public static class Defaults
-    {
-        // Default Command durations
-        public static double SAY_DURATION = 2.0;
-        public static double DO_DURATION = 0.02;
-        public static double NVM_DURATION = 5.0;
-        public static double ASK_DURATION = Util.INFINITE;
-        public static double WAIT_DURATION = Util.INFINITE;
-
-        // Default Timeout for Asks
-        public static double ASK_TIMEOUT = 5.0;
-
-        // Default Timing fields for Say, Ask, Opt
-        public static double SAY_FAST_MULT = 0.5;
-        public static double SAY_SLOW_MULT = 2.0;
-        public static double SAY_MAX_LEN_MULT = 2.0;
-        public static double SAY_MIN_LEN_MULT = 0.5;
-        public static int SAY_MAX_LINE_LEN = 80;
-        public static int SAY_MIN_LINE_LEN = 2;
-
-        // Default staleness-threshold for Find
-        public static double FIND_STALENESS = 4;
-
-        // Default staleness for new Chats
-        public static double CHAT_STALENESS = 0;
     }
 
     /// <summary>
@@ -368,6 +392,16 @@ namespace Dialogic
         public ConstraintType type;
         public string value;
 
+        public static IDictionary<string, object> AsDict(params Constraint[] c)
+        {
+            var dict = new Dictionary<string, object>();
+            for (int i = 0; i < c.Length; i++)
+            {
+                dict.Add(c[i].name, c[i]);
+            }
+            return dict;
+        }
+
         public Constraint(string key, string val, ConstraintType type = ConstraintType.Soft) :
             this(Operator.EQ, key, val, type)
         { }
@@ -447,6 +481,17 @@ namespace Dialogic
             return false;
         }
 
+        public bool IncrementValue(double incr=1)
+        {
+            double dval;
+            if (Double.TryParse(value, out dval))
+            {
+                value = (dval + incr).ToString();
+                return true;
+            }
+            return false;
+        }
+
         public bool IsRelaxable()
         {
             return this.type == ConstraintType.Hard;
@@ -454,9 +499,7 @@ namespace Dialogic
 
         public IDictionary<string, object> AsDict()
         {
-            var dict = new Dictionary<string, object>();
-            dict.Add(name, this);
-            return dict;
+            return Constraint.AsDict(this);
         }
 
         internal Constraint Copy()
@@ -470,9 +513,7 @@ namespace Dialogic
         }
     }
 
-    /// <summary>
-    /// A container for Constraint objects, wraps an IDictionary<string, object> 
-    /// </summary>
+    /*
     public class Constraints
     {
         IDictionary<string, object> pairs;
@@ -502,7 +543,7 @@ namespace Dialogic
         {
             return pairs;
         }
-    }
+    }*/
 
     public class Operator
     {
@@ -588,9 +629,14 @@ namespace Dialogic
                     if (this == GTE) return o1 >= o2;
                     if (this == LTE) return o1 <= o2;
                 }
-                catch (Exception)
+                catch (FormatException)
                 {
-                    throw new OperatorException(this);
+                    throw new OperatorException(this, "Expected numeric " 
+                        + "operands, but found [" + s1 + "," + s2 +"]");
+                }
+                catch (Exception e)
+                {
+                    throw new OperatorException(this, e);
                 }
             }
             throw new OperatorException(this, "Unexpected Op type: ");

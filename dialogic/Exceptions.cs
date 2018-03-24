@@ -24,6 +24,9 @@ namespace Dialogic
     {
         public OperatorException(Operator o) : this(o, "Invalid Operator") { }
 
+        public OperatorException(Operator o, Exception e)
+            : base(e.Message + ": " + o) { }
+
         public OperatorException(Operator o, string message)
             : base(message + ": " + o) { }
     }
