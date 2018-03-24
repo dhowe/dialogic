@@ -42,8 +42,8 @@ namespace Dialogic
 
 
     /**
-     * Send by Dialogic whenever an IEmittable Command (e.g., Say, Ask, Do, Wait) 
-     * is invoked, so that it may be handled by the application
+     * Sent by Dialogic whenever an IEmittable Command (e.g., Say, Ask, Do, Wait) 
+     * is invoked so that it may be handled by the application
      */
     public interface IUpdateEvent
     {

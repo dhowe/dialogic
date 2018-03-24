@@ -10,7 +10,7 @@
     <AssemblyName>Dialogic</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <PackageId>rednoise.org.dialogic</PackageId>
-    <PackageVersion>0.4.62</PackageVersion>
+    <PackageVersion>0.4.63</PackageVersion>
     <Authors>Daniel C Howe</Authors>
     <Description>Generative interactive dialog</Description>
     <NeutralLanguage>en-US</NeutralLanguage>

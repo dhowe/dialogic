@@ -516,7 +516,7 @@ namespace Dialogic
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
                 
-            // Realization happens only once in Chat
+            // Note: realization happens on Init (just once) in Chat
             if (HasMeta())
             {
                 foreach (KeyValuePair<string, object> pair in meta)

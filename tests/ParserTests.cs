@@ -539,7 +539,7 @@ namespace Dialogic
         [Test]
         public void TestExceptions()
         {
-            Assert.Throws<ParseException>(() => ParseText("CHAT Two Words"));
+            Assert.Throws<ParseException>(() => ParseText("CHAT Two Words {type=a,stage=b}"));
             Assert.Throws<ParseException>(() => ParseText("GO {no=label}"));
             Assert.Throws<ParseException>(() => ParseText("DO {no=label}"));
             Assert.Throws<ParseException>(() => ParseText("FIND {a = (b|c)}"));
