@@ -48,6 +48,11 @@ namespace Dialogic
         public static double FIND_STALENESS = 4;
 
         /// <summary>
+        /// Max staleness-threshold to try for a Find
+        /// </summary>
+        public static double FIND_MAX_STALENESS = 50;
+
+        /// <summary>
         /// Default staleness for new Chats
         /// </summary>
         public static double CHAT_STALENESS = 0;
@@ -485,8 +490,12 @@ namespace Dialogic
             double dval;
             if (Double.TryParse(value, out dval))
             {
-                value = (dval + incr).ToString();
-                return true;
+                double newval = dval + incr;
+                value = (newval + incr).ToString();
+                if (newval < Defaults.FIND_MAX_STALENESS)
+                {
+                    return true;
+                }
             }
             return false;
         }

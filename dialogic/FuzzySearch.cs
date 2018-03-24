@@ -6,9 +6,9 @@ namespace Dialogic
 {
     public static class FuzzySearch
     {
-        public static bool DEBUG_TO_CONSOLE = false;
+        public static bool DBUG = false;
 
-        class SearchContext
+        class SearchContext  // NEXT
         {
             /*
              * 1. Try normal search
@@ -16,12 +16,6 @@ namespace Dialogic
              * 3. If (relaxables) relaxEach until empty
              * 4. If failed, unrelax, relax staleness, & repeat
              */
-
-            int tries = 0;
-            List<string> relaxables;
-            List<string> relaxed;
-            Constraint staleness;
-            IDictionary<string, object> constraints;
         }
 
         /// <summary>
@@ -40,41 +34,25 @@ namespace Dialogic
         /// <param name="globals">Globals.</param>
         public static Chat Find(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
-            var dbug = DEBUG_TO_CONSOLE;
+            var constraints = finder.Realize(globals);
 
-            finder.Realize(globals);
-
-            if (dbug) Console.WriteLine("FIND: "+finder.realized.Stringify());
+            if (DBUG) Console.WriteLine("FIND: " + finder.realized.Stringify());
 
             Chat chat = FindAll(finder, chats, globals).FirstOrDefault();
             if (chat != null) return chat;
 
             int tries = 0;
             List<string> relaxables = new List<string>();
-            IDictionary<string, object> constraints = ExtractMeta(finder, globals);
 
             while (chat == null && ++tries < 100)
             {
-                Constraint staleness = null;
                 foreach (var kv in constraints)
                 {
                     Constraint c = (Constraint)kv.Value;
-                    if (c.name == Meta.STALENESS)
-                    {
-                        staleness = c;
-                    }
-                    else if (c.IsRelaxable())
-                    {
-                        relaxables.Add(kv.Key);
-                    }
+                    if (c.IsRelaxable()) relaxables.Add(kv.Key);
                 }
 
-                if (dbug)
-                {
-                    var msg = "\nFailed with " + relaxables.Count + " hard constraints";
-                    if (staleness != null) msg += (", staleness = " + staleness.value);
-                    Console.WriteLine(msg);
-                }
+                if (DBUG) Console.WriteLine("\nFailed with " + relaxables.Count + " hard constraints");
 
                 List<string> relaxed = null;
 
@@ -85,7 +63,7 @@ namespace Dialogic
                     // try again after relaxing each hard constraint
                     while (chat == null && relaxables.Count > 0)
                     {
-                        RelaxOne(constraints, relaxables, relaxed, dbug);
+                        RelaxOne(constraints, relaxables, relaxed, DBUG);
                         chat = FindAll(finder, chats, globals).FirstOrDefault();
                     }
                 }
@@ -97,17 +75,160 @@ namespace Dialogic
                 }
 
                 // if nothing, relax the staleness constraint and retry
-                if (chat == null && staleness != null)
+                if (chat == null && constraints.ContainsKey(Meta.STALENESS))
                 {
+                    Constraint staleness = (Constraint)constraints[Meta.STALENESS];
                     staleness.IncrementValue(.5);
-                    if (dbug) Console.WriteLine("\nRelaxing staleness to " + staleness.value);
+                    if (DBUG) Console.WriteLine("\nRelaxing staleness to " + staleness.value);
                     chat = FindAll(finder, chats, globals).FirstOrDefault();
                 }
             }
 
-            if (dbug) Console.WriteLine("\nResult: " + chat); 
+            if (DBUG) Console.WriteLine("\nResult: " + chat);
 
             return chat;
+        }
+
+
+        internal static Chat DoFind(List<Chat> chats,
+            IDictionary<Constraint, bool> constraints, Chat parent, IDictionary<string, object> globals)
+        {
+            bool resetRequired = false;
+            Chat chat = DoFindAll(chats, constraints.Keys, parent, globals).FirstOrDefault();
+            while (chat == null)
+            {
+                Constraint c = FindRelaxable(constraints);
+
+                if (c != null)  // relax hard constraint and retry
+                {
+                    c.Relax();
+                    resetRequired = true;
+                    chat = DoFindAll(chats, constraints.Keys, parent, globals).FirstOrDefault();
+                    if (chat == null)
+                    {
+                        if (DBUG) Console.WriteLine("\nFailed with " + 
+                            RelaxableCount(constraints) + " hard constraints");
+                        continue;
+                    }
+                }
+                else    // no more constraints, reset & try staleness
+                {
+                    if (chat == null)
+                    {
+                        if (resetRequired)
+                        {
+                            ResetConstraints(constraints);
+                            resetRequired = false;
+                        }
+                        Constraint staleness = GetConstraint(constraints, Meta.STALENESS);
+                        if (!staleness.IncrementValue(.5)) return null;
+                        if (DBUG) Console.WriteLine("\nRelaxing staleness to " + staleness.value);
+                        chat = DoFindAll(chats, constraints.Keys, parent, globals).FirstOrDefault();
+                    }
+                }
+            }
+            return chat;
+        }
+
+        private static int RelaxableCount(IDictionary<Constraint, bool> constraints)
+        {
+            int count = 0;
+            foreach (var constraint in constraints.Keys)
+            {
+                if (constraints[constraint]) count++;
+            }
+            return count;
+        }
+
+        private static Constraint GetConstraint(IDictionary<Constraint, bool> constraints, string key)
+        {
+            foreach (var constraint in constraints.Keys)
+            {
+                if (constraint.name == key) return constraint;
+            }
+            return null;
+        }
+
+        private static Constraint FindRelaxable(IDictionary<Constraint, bool> constraints)
+        {
+            foreach (var constraint in constraints.Keys)
+            {
+                if (constraints[constraint])
+                {
+                    constraints[constraint] = false;
+                    return constraint;
+                }
+            }
+            return null;
+        }
+
+        private static void ResetConstraints(IDictionary<Constraint, bool> constraints)
+        {
+            for (int i = 0; i < constraints.Keys.Count; i++)
+            {
+                Constraint c = constraints.Keys.ElementAt(i);
+                constraints[c] = c.IsRelaxable();
+            }
+        }
+
+        internal static List<Chat> DoFindAll(List<Chat> chats,
+            IEnumerable<Constraint> constraints, Chat parent, IDictionary<string, object> globals)
+        {
+            Dictionary<Chat, int> matches = new Dictionary<Chat, int>();
+
+            if (DBUG) Console.WriteLine("\nFIND: " + constraints.Stringify());
+
+            for (int i = 0; i < chats.Count; i++)
+            {
+                // never return the source chat
+                if (chats[i] == parent) continue;
+
+                var hits = 0;
+                var chatMeta = chats[i].realized;
+
+                if (DBUG) Console.WriteLine("\n" + chats[i].Text + " ----------");
+
+                foreach (var constraint in constraints)
+                {
+                    string key = constraint.name;
+
+                    if (DBUG) Console.WriteLine("  Find " + constraint + " in " + chats[i]);
+
+                    if (chatMeta != null && chatMeta.ContainsKey(key)) // has-key
+                    {
+                        var chatPropVal = (string)chatMeta[key];
+
+                        if (!(constraint.Check(chatPropVal, globals)))
+                        {
+                            if (DBUG) Console.WriteLine("    FAIL: " + constraint);
+                            hits = -1;
+                            break;
+                        }
+                        else
+                        {
+                            hits++;
+                            if (DBUG) Console.WriteLine("    HIT: " + hits);
+                        }
+                    }
+                    else if (constraint.IsStrict()) // doesn't have-key, fails strict
+                    {
+                        if (DBUG) Console.WriteLine("    !FAIL: " + constraint);
+                        hits = -1;
+                        break;
+                    }
+                    else if (DBUG)
+                    {
+                        Console.WriteLine("    NOKEY");
+                    }
+                }
+                if (hits > -1) matches.Add(chats[i], hits);
+            }
+
+            List<KeyValuePair<Chat, int>> list = DescendingRandomSort(matches);
+
+            if (DBUG) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
+
+            return (from kvp in list select kvp.Key).ToList();
         }
 
         /// <summary>
@@ -120,10 +241,7 @@ namespace Dialogic
         /// <param name="globals">Globals.</param>
         public static List<Chat> FindAll(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
-            var dbug = DEBUG_TO_CONSOLE;
-
-            finder.Realize(globals);
-            var constraints = ExtractMeta(finder, globals);
+            var constraints = finder.Realize(globals);
             if (constraints == null) return chats;
 
             Dictionary<Chat, int> matches = new Dictionary<Chat, int>();
@@ -136,11 +254,11 @@ namespace Dialogic
                 var hits = 0;
                 var chatMeta = chats[i].realized;
 
-                if (dbug) Console.WriteLine("\n" + chats[i].Text + " ----------");
+                if (DBUG) Console.WriteLine("\n" + chats[i].Text + " ----------");
 
                 foreach (var key in constraints.Keys)
                 {
-                    if (dbug) Console.WriteLine("  Find " + constraints[key] + " in " + chats[i]);
+                    if (DBUG) Console.WriteLine("  Find " + constraints[key] + " in " + chats[i]);
 
                     Constraint constraint = (Constraint)constraints[key];
 
@@ -150,52 +268,48 @@ namespace Dialogic
 
                         if (!(constraint.Check(chatPropVal, globals)))
                         {
-                            if (dbug) Console.WriteLine("    FAIL: " + constraints[key]);
+                            if (DBUG) Console.WriteLine("    FAIL: " + constraints[key]);
                             hits = -1;
                             break;
                         }
                         else
                         {
                             hits++;
-                            if (dbug) Console.WriteLine("    HIT: " + hits);
+                            if (DBUG) Console.WriteLine("    HIT: " + hits);
                         }
                     }
                     else if (constraint.IsStrict()) // doesn't have-key, fails strict
                     {
-                        if (dbug) Console.WriteLine("    !FAIL: " + constraints[key]);
+                        if (DBUG) Console.WriteLine("    !FAIL: " + constraints[key]);
                         hits = -1;
                         break;
                     }
-                    else if (dbug) Console.WriteLine("    NOKEY");
+                    else if (DBUG)
+                    {
+                        Console.WriteLine("    NOKEY");
+                    }
                 }
                 if (hits > -1) matches.Add(chats[i], hits);
             }
 
             List<KeyValuePair<Chat, int>> list = DescendingRandomSort(matches);
 
-            if (dbug) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
+            if (DBUG) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
         }
 
         private static void RelaxOne(IDictionary<string, object> constraints,
-            List<string> relaxables, List<string> relaxed, bool dbug = false)
+            List<string> relaxables, List<string> relaxed, bool DBUG = false)
         {
             Constraint toRelax = (Constraint)constraints[Util.RandItem(relaxables)];
             relaxables.Remove(toRelax.name);
 
-            if (dbug) Console.WriteLine("Relaxing {" + toRelax + "}, "
+            if (DBUG) Console.WriteLine("Relaxing {" + toRelax + "}, "
                 + relaxables.Count + " hard constraints remaining");
 
             relaxed.Add(toRelax.name);
             toRelax.type = ConstraintType.Soft;
-        }
-
-        private static IDictionary<string, object> ExtractMeta(Find finder, IDictionary<string, object> globals)
-        {
-            // note: this is problematic - perhaps should throw in case of no realized data?
-            //return finder.realized.IsNullOrEmpty() ? finder.Realize(globals) : finder.realized;
-            return finder.realized;//.IsNullOrEmpty() ? finder.meta : finder.realized;
         }
 
         /*

@@ -8,145 +8,6 @@ namespace Dialogic
     [TestFixture]
     public class SearchTests
     {
-        [Test]
-        public void TestFindInit()
-        {
-            var find = new Find().Init("{a*=(hot|cool)}");
-            Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
-            Assert.That(find.Text, Is.Null);
-            var meta = find.GetMeta("a");
-            Assert.That(meta, Is.Not.Null);
-            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-            var constraint = (Dialogic.Constraint)meta;
-            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
-
-            find = new Find().Init("{type=a,stage=b,last=true}");
-            Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
-            Assert.That(find.Text, Is.Null);
-            meta = find.GetMeta("last");
-            Assert.That(meta, Is.Not.Null);
-            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-            constraint = (Dialogic.Constraint)meta;
-            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
-            Assert.That(constraint.value, Is.EqualTo("true"));
-        }
-
-        [Test]
-        public void TestStalenessInit()
-        {
-            Chat chat = ChatParser.ParseText("FIND {type=hit,a*=(hot|cool)}", 
-                Tendar.AppConfig.Validator)[0];
-            Assert.That(chat, Is.Not.Null);
-            var cmd = chat.commands[0];
-            Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
-            Find find = (Dialogic.Find)cmd;
-            Constraint cnt = (Constraint)find.GetMeta(Meta.STALENESS);
-            Assert.That(cnt.ValueAsDouble(), Is.EqualTo(Tendar.AppConfig.STALENESS_BY_TYPE["hit"]));
-
-            cmd = new Find().Init("{type=a,stage=b,last=true}").PostValidate();
-            Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
-            find = (Dialogic.Find)cmd;
-            cnt = (Constraint)find.GetMeta(Meta.STALENESS);
-            Assert.That(cnt.ValueAsDouble(), Is.EqualTo(Defaults.FIND_STALENESS));
-
-            chat = ChatParser.ParseText("FIND {type=a,stage=b,last=true}",
-                Tendar.AppConfig.Validator)[0];
-            Assert.That(chat, Is.Not.Null);
-            cmd = chat.commands[0];
-            Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
-            find = (Dialogic.Find)cmd;
-            cnt = (Constraint)find.GetMeta(Meta.STALENESS);
-            Assert.That(cnt.ValueAsDouble(), Is.EqualTo(Defaults.FIND_STALENESS));
-        }
-
-        [Test]
-        public void TestStaleness()
-        {
-            Chat c;
-            List<Chat> chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "hello");
-            c.Staleness(2);
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            c.Staleness(3);
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "3");
-            c.Staleness(4);
-            var cnt = new Constraint(Operator.LT, "staleness", "3");
-            var res = new ChatRuntime(chats).FindAll(cnt);
-            Assert.That(res.Count, Is.EqualTo(1));
-            Assert.That(res[0].Text, Is.EqualTo("c1"));
-
-            string[] lines = {
-                "CHAT c0",
-                "FIND {dev=1,day=fri,staleness<5}",
-                "CHAT c1 {day=fri}",
-                "CHAT c2 {dev=2,day=fri}",
-                "CHAT c3 {}"
-            };
-
-            string contents = String.Join("\n", lines);
-
-            chats = ChatParser.ParseText(contents);
-
-            Command finder = chats[0].commands[0];
-            Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
-
-            var crt = new ChatRuntime(chats);
-            c = crt.FindByName("#c1");
-            c.Staleness(6);
-            Assert.That(c, Is.Not.Null);
-            Assert.That(c.Text, Is.EqualTo("c1"));
-
-            chats = crt.FindAll((Find)finder, null);
-            Assert.That(chats, Is.Not.Null);
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c3"));
-        }
-
-        [Test]
-        public void TestStalenessRelaxation()
-        {
-            Chat c;
-            List<Chat> chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "1");
-            c.Staleness(2);
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            c.Staleness(3);
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "3");
-            c.Staleness(4);
-            var cnt = new Constraint(Operator.LT, "staleness", "4");
-            var cnt2 = new Constraint(Operator.GT, "dev", "2");
-            var res = new ChatRuntime(chats).Find(cnt, cnt2);
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res.Text, Is.EqualTo("c3"));
-        }
-
-        [Test]
-        public void TestDoubleRelaxation()
-        {
-            Chat c;
-            List<Chat> chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "1");
-            c.Staleness(2);
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            c.Staleness(3);
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("other","2");
-            c.Staleness(4);
-            var cnt = new Constraint(Operator.LT, "staleness", "4");
-            var cnt2 = new Constraint(Operator.GT, "dev", "2", ConstraintType.Hard);
-            var res = new ChatRuntime(chats).Find(cnt, cnt2);
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res.Text, Is.EqualTo("c3"));
-        }
 
         [Test]
         public void TestBasicFind()
@@ -160,9 +21,10 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             var cnt = new Constraint("dev", "1");
-            Chat res = new ChatRuntime(chats).Find(cnt);
+            Chat res = new ChatRuntime(chats).DoFind(null,null,  cnt);
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
+
 
         [Test]
         public void TestBasicFindAll()
@@ -176,69 +38,8 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             var cnt = new Constraint("dev", "1");
-            Chat res = new ChatRuntime(chats).FindAll(cnt)[0];
+            Chat res = new ChatRuntime(chats).DoFindAll(null, null, cnt)[0];
             Assert.That(res.Text, Is.EqualTo("c2"));
-        }
-
-        [Test]
-        public void TestBasicFail()
-        {
-            Chat c;
-            List<Chat> chats = new List<Chat>();
-            ChatRuntime cr = new ChatRuntime(chats);
-            var res = new ChatRuntime(chats).FindAll(new Constraint("dev", "1"));
-            Assert.That(res.Count, Is.EqualTo(0));
-
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "hello");
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "3");
-            cr = new ChatRuntime(chats);
-            res = new ChatRuntime(chats).FindAll(new Constraint("dev", "1"));
-            Assert.That(res.Count, Is.EqualTo(0));
-
-            chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "hello");
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "3");
-            cr = new ChatRuntime(chats);
-            var chat = new ChatRuntime(chats).Find(new Constraint("dev", "1"));
-            Assert.That(chat, Is.Null);
-
-            chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "hello");
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "3");
-            cr = new ChatRuntime(chats);
-            chat = new ChatRuntime(chats).Find(new Constraint("dev", "1", ConstraintType.Hard));
-            Assert.That(chat, Is.Null);
-
-            chats = new List<Chat>();
-            chats.Add(c = Chat.Create("c1"));
-            c.SetMeta("dev", "hello");
-            chats.Add(c = Chat.Create("c2"));
-            c.SetMeta("dev", "2");
-            chats.Add(c = Chat.Create("c3"));
-            c.SetMeta("dev", "3");
-            cr = new ChatRuntime(chats);
-            chat = new ChatRuntime(chats).Find(new Constraint("dev", "1", ConstraintType.Absolute));
-            Assert.That(chat, Is.Null);
-
-            // verify we never pick the source chat
-            chats = ChatParser.ParseText("CHAT c0\nFIND {dev=1,day=fri}");
-            Command finder = chats[0].commands[0];
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            chats = new ChatRuntime(chats).FindAll((Find)finder, RealizeTests.globals);
-            Assert.That(chats, Is.Not.Null);
-            Assert.That(chats.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -266,6 +67,7 @@ namespace Dialogic
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 
+
         [Test]
         public void TestFindAll()
         {
@@ -276,11 +78,11 @@ namespace Dialogic
             };
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents);
-            List<Chat> result = new ChatRuntime(chats).FindAll(
+            List<Chat> result = new ChatRuntime(chats).DoFindAll(null,null,  
                 new Constraint("dev", "1"),
                 new Constraint("day", "fri")
             );
-                                                   
+
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].Text, Is.EqualTo("c1"));
@@ -293,7 +95,7 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            chats = cr.FindAll(new Constraint("dev", "1"));
+            chats = cr.DoFindAll(null, null, new Constraint("dev", "1"));
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(3));
@@ -308,7 +110,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c3"));
 
             cr = new ChatRuntime(chats);
-            chats = cr.FindAll(new Constraint("dev", "1"));
+            chats = cr.DoFindAll(null, null, new Constraint("dev", "1"));
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
@@ -334,9 +136,8 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            ChatRuntime cr;
 
-            chats = new ChatRuntime(chats).FindAll((Find)finder, null);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder);
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
@@ -345,12 +146,12 @@ namespace Dialogic
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
 
             lines = new[]{
-                    "CHAT c0",
-                    "FIND {!dev=1,day=fri}",
-                    "CHAT c1 {day=fri}",
-                    "CHAT c2 {dev=2,day=fri}",
-                    "CHAT c3 {}"
-                };
+                "CHAT c0",
+                "FIND {!dev=1,day=fri}",
+                "CHAT c1 {day=fri}",
+                "CHAT c2 {dev=2,day=fri}",
+                "CHAT c3 {}"
+            };
 
             contents = String.Join("\n", lines);
 
@@ -359,19 +160,19 @@ namespace Dialogic
             finder = chats[0].commands[0];
             var mdev = finder.GetMeta("dev");
             Assert.That(mdev is Constraint, Is.True);
-            Constraint cons = (global::Dialogic.Constraint)mdev;
+            Constraint cons = (Constraint)mdev;
             Assert.That(cons.type, Is.EqualTo(ConstraintType.Hard));
             Assert.That(cons.IsStrict(), Is.True);
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            cr = new ChatRuntime(chats);
-
-            chats = cr.FindAll((Find)finder, null);
+            Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
+      
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(0));
         }
 
+  
 
         [Test]
         public void TestFindAllWithMetaVars()
@@ -384,8 +185,8 @@ namespace Dialogic
             };
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents);
-            List<Chat> result = new ChatRuntime(chats).FindAll
-                (new Constraint("dev", "$count"), RealizeTests.globals);
+            List<Chat> result = new ChatRuntime(chats).DoFindAll
+                (null, RealizeTests.globals, new Constraint("dev", "$count"));
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(3));
@@ -403,13 +204,12 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            chats = cr.FindAll(new Constraint("dev", "1", ConstraintType.Hard));
+            chats = cr.DoFindAll(null, null, new Constraint("dev", "1", ConstraintType.Hard));
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
-
 
         [Test]
         public void TestFindAllHard2()
@@ -424,7 +224,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c3"));
 
             ChatRuntime cr = new ChatRuntime(chats);
-            chats = cr.FindAll(new Constraint("dev", "1", ConstraintType.Hard));
+            chats = cr.DoFindAll(null, null, new Constraint("dev", "1", ConstraintType.Hard));
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -452,13 +252,13 @@ namespace Dialogic
 
             var mday = finder.GetMeta("day");
             Assert.That(mday is Constraint, Is.True);
-            var cons = (global::Dialogic.Constraint)mday;
+            var cons = (Dialogic.Constraint)mday;
             Assert.That(cons.type, Is.EqualTo(ConstraintType.Hard));
             Assert.That(cons.IsStrict, Is.True);
 
             var cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = cr.DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -468,6 +268,7 @@ namespace Dialogic
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
         }
 
+       
         [Test]
         public void TestFindAllHard4()
         {
@@ -490,15 +291,14 @@ namespace Dialogic
             Assert.That(cons.type, Is.EqualTo(ConstraintType.Absolute));
             Assert.That(cons.IsStrict(), Is.True);
 
-            var cr = new ChatRuntime(chats);
-            chats = cr.FindAll((Find)finder, null);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
         }
-
+ 
         [Test]
         public void TestFindAllOps()
         {
@@ -512,7 +312,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             ChatRuntime cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = cr.DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -534,7 +334,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = cr.DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -543,7 +343,170 @@ namespace Dialogic
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c1"));
         }
+      
+        [Test]
+        public void TestFindAllOp3()
+        {
+            string[] lines = {
+                "CHAT c1 {emotion=cold}",
+                "FIND {emotion*=ho}",
+                "CHAT c2 {emotion=hot}"
+            };
 
+            var contents = String.Join("\n", lines);
+
+            var chats = ChatParser.ParseText(contents);
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            var finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+          
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+
+            lines = new string[]{
+                "CHAT c1 {emotion=cold}",
+                "FIND {emotion^=h}",
+                "CHAT c2 {emotion=hot}",
+                "CHAT c3 {emotion=that}"
+            };
+
+            contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+     
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+
+            lines = new string[]{
+                "CHAT c1 {emotion=hot}",
+                "FIND {emotion$=ld}",
+                "CHAT c2 {emotion=hot}",
+                "CHAT c3 {emotion=cold}"
+            };
+
+            contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
+            finder = chats[0].commands[0];
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
+     
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
+
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c3"));
+        }
+
+    
+        [Test]
+        public void TestStaleness()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "hello");
+            c.Staleness(2);
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            c.Staleness(3);
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            c.Staleness(4);
+            var cnt = new Constraint(Operator.LT, "staleness", "3");
+            var res = new ChatRuntime(chats).DoFindAll(null,null,cnt);
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That(res[0].Text, Is.EqualTo("c1"));
+
+            string[] lines = {
+                "CHAT c0",
+                "FIND {dev=1,day=fri,staleness<5}",
+                "CHAT c1 {day=fri}",
+                "CHAT c2 {dev=2,day=fri}",
+                "CHAT c3 {}"
+            };
+
+            string contents = String.Join("\n", lines);
+
+            chats = ChatParser.ParseText(contents);
+
+            Command finder = chats[0].commands[0];
+            Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
+
+            var crt = new ChatRuntime(chats);
+            c = crt.FindByName("#c1");
+            c.Staleness(6);
+            Assert.That(c, Is.Not.Null);
+            Assert.That(c.Text, Is.EqualTo("c1"));
+
+            chats = crt.DoFindAll((Find)finder, null);
+            Assert.That(chats, Is.Not.Null);
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].Text, Is.EqualTo("c3"));
+        }
+      
+        [Test]
+        public void TestStalenessRelaxation()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "1");
+            c.Staleness(2);
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            c.Staleness(3);
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("dev", "3");
+            c.Staleness(4);
+            var cnt = new Constraint(Operator.LT, "staleness", "4");
+            var cnt2 = new Constraint(Operator.GT, "dev", "2");
+            var res = new ChatRuntime(chats).DoFind(null,null,cnt, cnt2);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Text, Is.EqualTo("c3"));
+        }
+
+        [Test]
+        public void TestDoubleRelaxation()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            c.SetMeta("dev", "1");
+            c.Staleness(2);
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "2");
+            c.Staleness(3);
+            chats.Add(c = Chat.Create("c3"));
+            c.SetMeta("other","2");
+            c.Staleness(4);
+            var cnt = new Constraint(Operator.LT, "staleness", "4");
+            var cnt2 = new Constraint(Operator.GT, "dev", "2", ConstraintType.Hard);
+            var res = new ChatRuntime(chats).DoFind(null, null,cnt, cnt2);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Text, Is.EqualTo("c3"));
+        }
+
+        
         [Test]
         public void TestFindWithRelaxation()
         {
@@ -561,9 +524,8 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            ChatRuntime cr = new ChatRuntime(chats);
 
-            var chat = cr.Find((Find)finder, null);
+            var chat = new ChatRuntime(chats).DoFind((Find)finder, null);
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.Text, Is.EqualTo("c3"));
 
@@ -581,10 +543,9 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            cr = new ChatRuntime(chats);
+    
+            chat = new ChatRuntime(chats).DoFind((Find)finder, null);
 
-            chat = cr.Find((Find)finder, null);
-            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.Text, Is.EqualTo("c3"));
 
@@ -596,7 +557,8 @@ namespace Dialogic
             };
 
             chats = ChatParser.ParseText(String.Join("\n", lines));
-            Assert.That(new ChatRuntime(chats).Find((Find)chats[0].commands[0], null), Is.Null);
+            finder = chats[0].commands[0];
+            Assert.That(new ChatRuntime(chats).DoFind((Find)finder, null), Is.Null);
 
             Chat c;
             chats = new List<Chat>();
@@ -605,11 +567,11 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c2"));
             c.SetMeta("dev", "2");
             chats.Add(c = Chat.Create("c3"));
-            cr = new ChatRuntime(chats);
-            chat = new ChatRuntime(chats).Find(new Constraint("dev", "1", ConstraintType.Hard));
+            chat = new ChatRuntime(chats).DoFind(null,null,new Constraint("dev", "1", ConstraintType.Hard));
             Assert.That(chat.Text, Is.EqualTo("c3")); // success
         }
 
+    
         [Test]
         public void TestFindAllOpsHard()
         {
@@ -629,7 +591,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             ChatRuntime cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = cr.DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -654,7 +616,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = cr.DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -663,7 +625,7 @@ namespace Dialogic
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
-
+      
         [Test]
         public void TestFindAllMulti()
         {
@@ -682,9 +644,8 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            ChatRuntime cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -708,9 +669,8 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            cr = new ChatRuntime(chats);
-
-            chats = cr.FindAll((Find)finder, null);
+  
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -718,7 +678,8 @@ namespace Dialogic
 
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c2").Or.EqualTo("c4"));
-        }
+        } 
+  
 
         [Test]
         public void TestFindAllMultiHard1()
@@ -738,9 +699,8 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            ChatRuntime cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats.Count, Is.EqualTo(2));
@@ -762,9 +722,8 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            cr = new ChatRuntime(chats);
-
-            chats = cr.FindAll((Find)finder, null);
+      
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -774,7 +733,7 @@ namespace Dialogic
             Assert.That(chats[0].Text, Is.EqualTo("c2").Or.EqualTo("c4"));
         }
 
-
+    
         [Test]
         public void TestFindAllMultiHard2()
         {
@@ -793,9 +752,8 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            ChatRuntime cr = new ChatRuntime(chats);
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -819,9 +777,9 @@ namespace Dialogic
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            cr = new ChatRuntime(chats);
+       
 
-            chats = cr.FindAll((Find)finder, null);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats, Is.Not.Null);
@@ -830,82 +788,7 @@ namespace Dialogic
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].Text, Is.EqualTo("c2"));
         }
-
-
-        [Test]
-        public void TestFindAllOp3()
-        {
-            string[] lines = {
-                "CHAT c1 {emotion=cold}",
-                "FIND {emotion*=ho}",
-                "CHAT c2 {emotion=hot}"
-            };
-
-            var contents = String.Join("\n", lines);
-
-            var chats = ChatParser.ParseText(contents);
-            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
-            var finder = chats[0].commands[0];
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            var cr = new ChatRuntime(chats);
-
-            chats = cr.FindAll((Find)finder, null);
-            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
-
-            Assert.That(chats, Is.Not.Null);
-            Assert.That(chats.Count, Is.EqualTo(1));
-
-            Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
-
-            lines = new string[]{
-                "CHAT c1 {emotion=cold}",
-                "FIND {emotion^=h}",
-                "CHAT c2 {emotion=hot}",
-                "CHAT c3 {emotion=that}"
-            };
-
-            contents = String.Join("\n", lines);
-
-            chats = ChatParser.ParseText(contents);
-            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
-            finder = chats[0].commands[0];
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            cr = new ChatRuntime(chats);
-
-            chats = cr.FindAll((Find)finder, null);
-            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
-
-            Assert.That(chats, Is.Not.Null);
-            Assert.That(chats.Count, Is.EqualTo(1));
-
-            Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
-
-            lines = new string[]{
-                "CHAT c1 {emotion=hot}",
-                "FIND {emotion$=ld}",
-                "CHAT c2 {emotion=hot}",
-                "CHAT c3 {emotion=cold}"
-            };
-
-            contents = String.Join("\n", lines);
-
-            chats = ChatParser.ParseText(contents);
-            //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));
-            finder = chats[0].commands[0];
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
-            cr = new ChatRuntime(chats);
-
-            chats = cr.FindAll((Find)finder, null);
-            //chats.ForEach((obj) => Console.WriteLine(obj.Text));
-
-            Assert.That(chats, Is.Not.Null);
-            Assert.That(chats.Count, Is.EqualTo(1));
-
-            Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c3"));
-        }
+       
 
         [Test]
         public void TestDescendingFreshnessSort()

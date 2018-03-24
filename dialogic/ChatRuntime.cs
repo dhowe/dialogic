@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Dialogic
@@ -200,7 +201,7 @@ namespace Dialogic
                 if (cmd != null)
                 {
                     cmd.Realize(globals);
-                    LogCommand(cmd);
+                    WriteToLog(cmd);
 
                     if (cmd is ISendable)
                     {
@@ -265,8 +266,6 @@ namespace Dialogic
 
         public void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            finder.Realize(globals);
-
             scheduler.PauseCurrent();
 
             int ts = Util.Millis();
@@ -274,17 +273,8 @@ namespace Dialogic
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = null;
-
-                if (finder is Go)
-                {
-                    chat = FindByName(((Go)finder).Text);
-                }
-                else
-                {
-                    chat = FuzzySearch.Find(finder, chats, globals);
-                    //Console.WriteLine("Found " + chat.Text + " in " + Util.Millis(ts) + "ms");
-                }
+                Chat chat = (finder is Go) ? FindByName(((Go)finder).Text) :
+                    FuzzySearch.Find(finder, chats, globals);
 
                 if (chat == null) throw new FindException(finder);
 
@@ -295,7 +285,33 @@ namespace Dialogic
 
         // testing only ------------------------------------------
 
-        internal Chat Find(Find f, IDictionary<string, object> globals)
+        internal Chat DoFind(Chat parent, IDictionary<string, object> globals, params Constraint[] constraints)
+        {
+            IDictionary<Constraint, bool> cdict = new Dictionary<Constraint, bool>();
+            foreach (var c in constraints) cdict.Add(c, c.IsRelaxable());
+            return FuzzySearch.DoFind(chats, cdict, parent, globals);
+        }
+
+        internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
+        {
+            f.Realize(globals); // possibly redundant
+            return FuzzySearch.DoFind(chats, ToConstraintMap(f), f.parent, globals);
+        }
+
+        internal List<Chat> DoFindAll(Chat parent, IDictionary<string, object> globals, params Constraint[] constraints)
+        {
+            return FuzzySearch.DoFindAll(chats, constraints, parent, globals);
+        }
+
+        internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals = null)
+        {
+            f.Realize(globals);  // possibly redundant
+            return FuzzySearch.DoFindAll(chats, ToList(f.realized), f.parent, globals);
+        }
+
+        // testing old ------------------------------------------
+
+        /*internal Chat Find(Find f, IDictionary<string, object> globals)
         {
             return FuzzySearch.Find(f, chats, globals);
         }
@@ -333,14 +349,32 @@ namespace Dialogic
         internal List<Chat> FindAll(Constraint constraint, IDictionary<string, object> globals = null)
         {
             return FuzzySearch.FindAll(new Find(constraint), chats, globals);
-        }
+        }*/
 
         private bool Logging()
         {
             return logFile != null;
         }
 
-        public void LogCommand(Command c)
+        private static IDictionary<Constraint, bool> ToConstraintMap(Find f)
+        {
+            IDictionary<Constraint, bool> cdict = new Dictionary<Constraint, bool>();
+            foreach (var val in f.realized.Values)
+            {
+                Constraint c = (Constraint)val;
+                cdict.Add(c, c.IsRelaxable());
+            }
+            return cdict;
+        }
+
+        private static IEnumerable<Constraint> ToList(IDictionary<string, object> dict)
+        {
+            List<Constraint> ic = new List<Constraint>();
+            foreach (var val in dict.Values) ic.Add((Constraint)val);
+            return ic;
+        }
+
+        public void WriteToLog(Command c)
         {
             if (logFile == null) return;
 
