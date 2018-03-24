@@ -506,7 +506,7 @@ namespace Dialogic
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
             throw new DialogicException("Chats should not be Realized"); //tmp-remove
-            return realized;
+            //return realized;
         }
 
         public override Command PostValidate()

@@ -8,7 +8,7 @@ namespace Dialogic
     {
         public static bool DBUG = false;
 
-        class SearchContext  // NEXT
+        class SearchContext  // NEXT, then => GO
         {
             /*
              * 1. Try normal search

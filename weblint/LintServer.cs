@@ -13,22 +13,22 @@ namespace Dialogic.Server
     public class LintServer
     {
         public static string SERVER_URL = "http://" + LocalIPAddress() + ":8080/glint/";
-        private static Regex Brackets = new Regex(@"(\]|\[)");
 
-        private static string indexPageContent;
+        private static Regex Brackets = new Regex(@"(\]|\[)");
+        private static string IndexPageContent;
 
         private readonly HttpListener listener = new HttpListener();
-        private readonly Func<HttpListenerRequest, string> responderMethod;
+        private readonly Func<HttpListenerRequest, string> responderFunc;
 
-        public LintServer(Func<HttpListenerRequest, string> method, params string[] prefixes)
+        public LintServer(Func<HttpListenerRequest, string> func, params string[] prefixes)
         {
             if (prefixes == null || prefixes.Length == 0) throw new ArgumentException("URI required");
 
-            if (method == null) throw new ArgumentException("responder required");
+            if (func == null) throw new ArgumentException("responder required");
 
             foreach (var s in prefixes) listener.Prefixes.Add(s);
 
-            responderMethod = method;
+            responderFunc = func;
             listener.Start();
         }
 
@@ -60,7 +60,7 @@ namespace Dialogic.Server
                             {
                                 if (ctx == null) return;
 
-                                var rstr = responderMethod(ctx.Request);
+                                var rstr = responderFunc(ctx.Request);
                                 var buf = Encoding.UTF8.GetBytes(rstr);
                                 ctx.Response.ContentLength64 = buf.Length;
                                 ctx.Response.OutputStream.Write(buf, 0, buf.Length);
@@ -92,7 +92,7 @@ namespace Dialogic.Server
 
         public static string SendResponse(HttpListenerRequest request)
         {
-            var html = indexPageContent;
+            var html = IndexPageContent;
 
             var code = request.QueryString.Get("code");
             if (String.IsNullOrEmpty(code))
@@ -103,15 +103,10 @@ namespace Dialogic.Server
             html = html.Replace("%%CODE%%", code);
             html = html.Replace("%%CCLASS%%", "shown");
 
-            List<Chat> chats = null;
             try
             {
                 string content = String.Empty;
-                chats = ChatParser.ParseText(code);
-                chats.ForEach(c =>
-                {
-                    content += c + "\n\n";
-                });
+                ParseText(code).ForEach(c => { content += c + "\n\n" });
 
                 html = html.Replace("%%RESULT%%", content);
                 html = html.Replace("%%RCLASS%%", "success");
@@ -128,16 +123,24 @@ namespace Dialogic.Server
             return html;
         }
 
+        // NOTE: linting done here with Tendar.AppConfig validators
+        static List<Chat> ParseText(string s)
+        {
+            if (!ChatRuntime.TypeMap.ContainsKey("NVM")) // tmp
+                ChatRuntime.TypeMap.Add("NVM", typeof(Tendar.Nvm));
+            return ChatParser.ParseText(s, Tendar.AppConfig.Validator);
+        }
+
         public static void Main()
         {
             string html = String.Join("\n",
                 File.ReadAllLines("data/index.html", Encoding.UTF8));
 
             LintServer ws = new LintServer(SendResponse, SERVER_URL);
-            LintServer.indexPageContent = html;
+            LintServer.IndexPageContent = html;
             ws.Run();
 
-            Console.WriteLine("LintServer running on " 
+            Console.WriteLine("LintServer running on "
                 + SERVER_URL + " - press any key to quit");
             Console.ReadKey();
             ws.Stop();
