@@ -427,7 +427,6 @@ namespace Dialogic
                 if (check.Contains('$')) check = Realizer.DoVars(check, globals);
                 if (value.Contains('$')) rval = Realizer.DoVars(value, globals);
             }
-
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
             return passed;

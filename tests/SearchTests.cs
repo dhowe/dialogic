@@ -31,30 +31,33 @@ namespace Dialogic
             Assert.That(constraint.value, Is.EqualTo("true"));
         }
 
-        //[Test]
-        //public void TestStalenessInit()
-        //{
-        //    Chat chat = ChatParser.ParseText("FIND {type=hit,a*=(hot|cool)}", 
-        //        Tendar.AppConfig.Validator)[0];
-        //    Assert.That(chat, Is.Not.Null);
-        //    var cmd = chat.commands[0];
-        //    Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
-        //    Find find = (Dialogic.Find)cmd;
-        //    Assert.That(find.stalenessThreshold, Is.EqualTo(Tendar.AppConfig.STALENESS_BY_TYPE["hit"]));
+        [Test]
+        public void TestStalenessInit()
+        {
+            Chat chat = ChatParser.ParseText("FIND {type=hit,a*=(hot|cool)}", 
+                Tendar.AppConfig.Validator)[0];
+            Assert.That(chat, Is.Not.Null);
+            var cmd = chat.commands[0];
+            Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
+            Find find = (Dialogic.Find)cmd;
+            Constraint cnt = (Constraint)find.GetMeta(Meta.STALENESS);
+            Assert.That(cnt.ValueAsDouble(), Is.EqualTo(Tendar.AppConfig.STALENESS_BY_TYPE["hit"]));
 
-        //    cmd = new Find().Init("{type=a,stage=b,last=true}").PostValidate();
-        //    Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
-        //    find = (Dialogic.Find)cmd;
-        //    Assert.That(find.stalenessThreshold, Is.EqualTo(Defaults.FIND_STALENESS));
+            cmd = new Find().Init("{type=a,stage=b,last=true}").PostValidate();
+            Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
+            find = (Dialogic.Find)cmd;
+            cnt = (Constraint)find.GetMeta(Meta.STALENESS);
+            Assert.That(cnt.ValueAsDouble(), Is.EqualTo(Defaults.FIND_STALENESS));
 
-        //    chat = ChatParser.ParseText("FIND {type=a,stage=b,last=true}",
-        //        Tendar.AppConfig.Validator)[0];
-        //    Assert.That(chat, Is.Not.Null);
-        //    cmd = chat.commands[0];
-        //    Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
-        //    find = (Dialogic.Find)cmd;
-        //    Assert.That(find.stalenessThreshold, Is.EqualTo(Defaults.FIND_STALENESS));
-        //}
+            chat = ChatParser.ParseText("FIND {type=a,stage=b,last=true}",
+                Tendar.AppConfig.Validator)[0];
+            Assert.That(chat, Is.Not.Null);
+            cmd = chat.commands[0];
+            Assert.That(cmd.GetType(), Is.EqualTo(typeof(Find)));
+            find = (Dialogic.Find)cmd;
+            cnt = (Constraint)find.GetMeta(Meta.STALENESS);
+            Assert.That(cnt.ValueAsDouble(), Is.EqualTo(Defaults.FIND_STALENESS));
+        }
 
         [Test]
         public void TestStaleness()
@@ -86,6 +89,7 @@ namespace Dialogic
             string contents = String.Join("\n", lines);
 
             chats = ChatParser.ParseText(contents);
+
             Command finder = chats[0].commands[0];
             Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
 
@@ -146,6 +150,22 @@ namespace Dialogic
 
         [Test]
         public void TestBasicFind()
+        {
+            Chat c;
+            List<Chat> chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "1");
+            c.SetMeta("day", "hello");
+            chats.Add(c = Chat.Create("c3"));
+            ChatRuntime cr = new ChatRuntime(chats);
+            var cnt = new Constraint("dev", "1");
+            Chat res = new ChatRuntime(chats).Find(cnt);
+            Assert.That(res.Text, Is.EqualTo("c2"));
+        }
+
+        [Test]
+        public void TestBasicFindAll()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();

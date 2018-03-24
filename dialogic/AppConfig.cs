@@ -38,12 +38,6 @@ namespace Tendar
                     if (!c.HasMeta(Meta.STAGE)) throw new ParseException
                         ("Missing required meta-key '" + Meta.STAGE + "'");
                 }
-
-                // moved to Chat.Realize()
-                if (!c.HasMeta(Meta.STALENESS))
-                {
-                    c.SetMeta(Meta.STALENESS, Defaults.CHAT_STALENESS);
-                }
             }
             else if (c.GetType() == typeof(Find))
             {

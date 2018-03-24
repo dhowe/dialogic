@@ -233,8 +233,8 @@ namespace Dialogic
             Assert.That(constraint.name, Is.EqualTo("a"));
             Assert.That(constraint.op, Is.EqualTo(Operator.RE));
             Assert.That(constraint.value, Is.EqualTo("(hot|cool)"));
-            var real = chats[0].commands[0].GetRealized();
-            Assert.That(real.Count, Is.EqualTo(0));
+            var real = chats[0].commands[0].realized;
+            Assert.That(real.Count, Is.EqualTo(2)); // a,staleness
         }
 
         [Test]
@@ -309,7 +309,7 @@ namespace Dialogic
         {
             string[] tests = {
 
-                "CHAT c1 {type=a,stage=b,staleness=1}",
+                "CHAT c1 {staleness=1,type=a,stage=b}",
             };
 
             for (int i = 0; i < tests.Length; i++)

@@ -336,6 +336,15 @@ namespace Dialogic
             ParseMeta(metas);
         }
 
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        {
+            realized.Clear();
+
+            RealizeMeta(globals);
+
+            return realized; // for convenience
+        }
+
         public override Command PostValidate()
         {
             //Console.WriteLine("STALE: "+ GetMeta(Meta.STALENESS)+ GetMeta(Meta.STALENESS).GetType());
@@ -348,10 +357,10 @@ namespace Dialogic
             return this;
         }
 
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
-        {
-            return realized;
-        }
+        //public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        //{
+        //    return realized;
+        //}
 
         public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
         {
@@ -481,6 +490,12 @@ namespace Dialogic
             return commands.Count();
         }
 
+        public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
+        {
+            base.SetMeta(key, val, throwIfKeyExists);
+            realized[key] = val; // update our realized values each time
+        }
+
         public void AddCommand(Command c)
         {
             c.parent = this;
@@ -490,19 +505,30 @@ namespace Dialogic
 
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
-            realized.Clear();
-            RealizeMeta(globals); // OPT: remove if not used
-            /*if (!realized.ContainsKey(Meta.STALENESS))
-            {
-                realized[Meta.STALENESS] = Defaults.CHAT_STALENESS;
-            }*/
+            throw new DialogicException("Chats should not be Realized"); //tmp-remove
             return realized;
+        }
+
+        public override Command PostValidate()
+        {
+            // Realization happens only once in Chat
+            if (HasMeta())
+            {
+                foreach (KeyValuePair<string, object> pair in meta)
+                {
+                    realized[pair.Key] = pair.Value.ToString();
+                }
+            }
+            realized[Meta.STALENESS] = Defaults.CHAT_STALENESS.ToString();
+
+            return this;
         }
 
         public override void Init(string text, string label, string[] metas)
         {
             this.Text = text;
             ParseMeta(metas);
+            PostValidate(); // should be called by parser
         }
 
         protected override string MetaStr()
@@ -564,7 +590,8 @@ namespace Dialogic
         public const string STALENESS = "staleness";
         public const string RESUMABLE = "resumable";
 
-        public IDictionary<string, object> meta, realized;
+        protected IDictionary<string, object> meta;
+        public IDictionary<string, object> realized;
 
         public bool HasMeta()
         {
@@ -608,11 +635,6 @@ namespace Dialogic
         public IDictionary<string, object> GetMeta()
         {
             return meta;
-        }
-
-        public IDictionary<string, object> GetRealized()
-        {
-            return realized;
         }
 
         public List<KeyValuePair<string, object>> ToList()
@@ -740,8 +762,11 @@ namespace Dialogic
 
             RealizeMeta(globals);
 
-            realized[Meta.TEXT] = Realizer.Do(Text, globals);
-            realized[Meta.TYPE] = TypeName();
+            if (this is ISendable)
+            {
+                realized[Meta.TEXT] = Realizer.Do(Text, globals);
+                realized[Meta.TYPE] = TypeName();
+            }
 
             return realized; // for convenience
         }
@@ -754,15 +779,26 @@ namespace Dialogic
 
                 foreach (KeyValuePair<string, object> pair in meta)
                 {
-                    string val = pair.Value.ToString();
+                    object val = pair.Value;
 
-                    if (val.IndexOf('$') > -1)
+                    if (val is string)
                     {
-                        if (sorted == null) sorted = Util.SortByLength(globals.Keys);
-                        foreach (string s in sorted)
+                        string tmp = (string)val;
+
+                        if (tmp.IndexOf('$') > -1)
                         {
-                            val = val.Replace("$" + s, globals[s].ToString());
+                            if (sorted == null) sorted = Util.SortByLength(globals.Keys);
+                            foreach (string s in sorted)
+                            {
+                                tmp = tmp.Replace("$" + s, globals[s].ToString());
+                            }
                         }
+
+                        val = tmp;
+                    }
+                    else if (!(val is Constraint))
+                    {
+                        throw new DialogicException("Unexpected meta-value: " + val + " " + val.GetType());
                     }
 
                     realized[pair.Key] = val;

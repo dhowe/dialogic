@@ -26,9 +26,12 @@ namespace Dialogic
 
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
+        /// 
         /// If none match then start relaxing hard-type constraints until one does.
+        /// 
         /// If all hard-type constraints have been relaxed and nothing is found, 
         /// then unrelax constraints, lower the staleness threshold and repeat.
+        /// 
         /// Note that the Chat containing the Find object is never returned.
         /// </summary>
         /// <returns>Chat</returns>
@@ -37,14 +40,18 @@ namespace Dialogic
         /// <param name="globals">Globals.</param>
         public static Chat Find(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
+            var dbug = DEBUG_TO_CONSOLE;
+
+            finder.Realize(globals);
+
+            if (dbug) Console.WriteLine("FIND: "+finder.realized.Stringify());
+
             Chat chat = FindAll(finder, chats, globals).FirstOrDefault();
             if (chat != null) return chat;
 
             int tries = 0;
             List<string> relaxables = new List<string>();
             IDictionary<string, object> constraints = ExtractMeta(finder, globals);
-
-            var dbug = DEBUG_TO_CONSOLE;
 
             while (chat == null && ++tries < 100)
             {
@@ -114,6 +121,8 @@ namespace Dialogic
         public static List<Chat> FindAll(Find finder, List<Chat> chats, IDictionary<string, object> globals)
         {
             var dbug = DEBUG_TO_CONSOLE;
+
+            finder.Realize(globals);
             var constraints = ExtractMeta(finder, globals);
             if (constraints == null) return chats;
 
@@ -125,7 +134,7 @@ namespace Dialogic
                 if (chats[i] == finder.parent) continue;
 
                 var hits = 0;
-                var chatMeta = chats[i].Realize(globals);
+                var chatMeta = chats[i].realized;
 
                 if (dbug) Console.WriteLine("\n" + chats[i].Text + " ----------");
 
@@ -186,7 +195,7 @@ namespace Dialogic
         {
             // note: this is problematic - perhaps should throw in case of no realized data?
             //return finder.realized.IsNullOrEmpty() ? finder.Realize(globals) : finder.realized;
-            return finder.realized.IsNullOrEmpty() ? finder.meta : finder.realized;
+            return finder.realized;//.IsNullOrEmpty() ? finder.meta : finder.realized;
         }
 
         /*

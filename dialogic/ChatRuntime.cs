@@ -265,6 +265,8 @@ namespace Dialogic
 
         public void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
+            finder.Realize(globals);
+
             scheduler.PauseCurrent();
 
             int ts = Util.Millis();
