@@ -485,7 +485,7 @@ namespace Dialogic
             return false;
         }
 
-        public bool IncrementValue(double incr=1)
+        public bool IncrementValue(double incr = 1)
         {
             double dval;
             if (Double.TryParse(value, out dval))
@@ -639,8 +639,8 @@ namespace Dialogic
                 }
                 catch (FormatException)
                 {
-                    throw new OperatorException(this, "Expected numeric " 
-                        + "operands, but found [" + s1 + "," + s2 +"]");
+                    throw new OperatorException(this, "Expected numeric "
+                        + "operands, but found [" + s1 + "," + s2 + "]");
                 }
                 catch (Exception e)
                 {
@@ -699,7 +699,6 @@ namespace Dialogic
         }
     }
 
-
     public class ObjectPool<T> //@cond unused
     {
         private Func<T> generator;
@@ -730,9 +729,12 @@ namespace Dialogic
 
     public static class Exts
     {
-        public static void Match<T>(this IList<T> il, Action<T, T, T, T> block)
+        public delegate void Action<T1, T2, T3, T4, T5>
+            (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+
+        public static void Apply<T>(this IList<T> il, Action<T, T, T, T, T> action)
         {
-            block(il[0], il[1], il[2], il[3]);
+            action(il[0], il[1], il[2], il[3], il[4]);
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)

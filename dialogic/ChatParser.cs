@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -8,34 +7,38 @@ namespace Dialogic
 {
     public class ChatParser
     {
+        /// <summary>
+        /// Whether the parser should preserve incoming line numbers for debugging;
+        /// default is true though potentially faster if false.
+        /// </summary>
         public static bool PRESERVE_LINE_NUMBERS = true;
-  
-        const string ACT = @"([A-Za-z0-9]+:)?\s*";
+
         const string TXT = @"([^#}{]+)?\s*";
         const string LBL = @"(#[A-Za-z][\S]*)?\s*";
         const string MTA = @"(?:\{(.+?)\})?\s*";
+        const string ACT = @"(?:([A-Za-z][A-Za-z0-9_-]+):)?\s*";
 
         static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
-        static string[] LineBreaks = { "\r\n", "\r", "\n" };
+        internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
+        protected ChatRuntime runtime;
         protected Stack<Command> parsedCommands;
-        protected Func<Command, bool>[] validators;
         protected internal List<Chat> chats;
         protected Regex LineParser;
 
-        public ChatParser(params Func<Command, bool>[] commandValidators)
+        internal ChatParser(ChatRuntime runtime)
         {
-            LineParser = new Regex(/*ACT +*/ TypesRegex() + TXT + LBL + MTA);
-            parsedCommands = new Stack<Command>();
-            validators = commandValidators;
-            chats = new List<Chat>();
+            this.LineParser = new Regex(ACT + TypesRegex() + TXT + LBL + MTA);
+            this.parsedCommands = new Stack<Command>();
+            this.chats = new List<Chat>();
+            this.runtime = runtime;
         }
 
-        public static List<Chat> ParseText(string text, params Func<Command, bool>[] validators)
+        internal static List<Chat> ParseText(string s, bool noValidators = false)
         {
-            var lines = text.Split(LineBreaks, StringSplitOptions.None);
-            return new ChatParser(validators).Parse(lines);
+            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            return rt.ParseText(s, noValidators);
         }
 
         internal List<Chat> Parse(string[] lines)
@@ -52,13 +55,8 @@ namespace Dialogic
             }
             return chats;
         }
-            
-        public static Grammar ParseGrammar(FileInfo file) // TODO:
-        {
-            return new Grammar(file);
-        }
 
-        public static Grammar ParseGrammar(string src) // TODO:
+        internal static Grammar ParseGrammar(string src) // TODO:
         {
             return new Grammar(src);
         }
@@ -79,23 +77,43 @@ namespace Dialogic
         {
             //Console.WriteLine("LINE " + lineNo + ": " + line);
 
+            List<string> parts = DoSubDivision(line, lineNo);
+
+            Command c = ParseCommand(parts, line, lineNo);
+
+            // Run after Create/Init are called
+            RunValidators(c, line, lineNo);
+
+            // But before post-validate
+            return c.PostValidate();
+        }
+
+        private List<string> DoSubDivision(string line, int lineNo)
+        {
             Match match = LineParser.Match(line);
 
-            if (match.Groups.Count < 5)
+            if (match.Groups.Count < 6)
             {
                 //Util.ShowMatch(match);
                 throw new ParseException(line, lineNo, "cannot be parsed");
             }
 
             var parts = new List<string>();
-            for (int j = 0; j < 4; j++)
+            for (int j = 1; j < 6; j++)
             {
-                parts.Add(match.Groups[j + 1].Value.Trim());
+                parts.Add(match.Groups[j].Value.Trim());
             }
 
-            Command c = ParseCommand(parts, line, lineNo);
+            return parts;
+        }
 
-            if (!validators.IsNullOrEmpty()) // run after Init() is called
+        private void RunValidators(Command c, string line, int lineNo)
+        {
+            if (runtime == null || runtime.validatorsDisabled) return;
+
+            var validators = runtime.Validators();
+            
+            if (!validators.IsNullOrEmpty())
             {
                 foreach (var check in validators)
                 {
@@ -110,15 +128,13 @@ namespace Dialogic
                     }
                 }
             }
-
-            return c.PostValidate();
         }
 
         private Command ParseCommand(List<string> parts, string line, int lineNo)
         {
             Command c = null;
 
-            parts.Match((cmd, text, label, meta) =>
+            parts.Apply((actor, cmd, text, label, meta) =>
             {
                 Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] : typeof(Say);
 
@@ -131,6 +147,14 @@ namespace Dialogic
                     throw new ParseException(line, lineNo, ex.Message);
                 }
 
+                if (!string.IsNullOrEmpty(actor))
+                {
+                    if (runtime == null || runtime.ActorExists(actor))
+                    {
+                        throw new ParseException("Unknown actor: '" + actor + "'");
+                    }
+                    c.actor = actor;
+                }
             });
 
             return HandleCommand(c, line, lineNo);
@@ -165,7 +189,6 @@ namespace Dialogic
             return c;
         }
 
-        /// @cond TestOnly
         internal static string[] StripComments(string text)
         {
             if (text == null) throw new ParseException("Null input");
@@ -183,7 +206,6 @@ namespace Dialogic
                 return text.Split('\n');
             }
         }
-        /// @endcond
 
         private static Command LastOfType(Stack<Command> s, Type typeToFind)
         {

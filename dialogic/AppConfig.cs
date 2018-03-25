@@ -7,7 +7,7 @@ namespace Tendar
     public static class AppConfig //: IAppConfig
     {
         public static List<IActor> Actors = new List<IActor>();
-        public static Func<Command, bool> Validator = ValidateCommand;
+        private static Func<Command, bool> Validator = ValidateCommand;
 
         static AppConfig()
         {

@@ -32,6 +32,7 @@ namespace Dialogic
             this.isDefault = isDefault;
             this.validator = validator;
             this.commands = commands;
+            if (isDefault) Default = name;
         }
 
         public string Name()

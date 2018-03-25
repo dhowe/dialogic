@@ -13,7 +13,7 @@ namespace Dialogic
 
         public static string CHAT_FILE_EXT = ".gs";
 
-        public static IDictionary<string, Type> TypeMap
+        internal static IDictionary<string, Type> TypeMap
             = new Dictionary<string, Type>()
         {
             { "CHAT",   typeof(global::Dialogic.Chat) },
@@ -28,6 +28,8 @@ namespace Dialogic
             { "GRAM",   typeof(global::Dialogic.Gram) },
         };
 
+        internal bool validatorsDisabled;
+
         private bool logInitd;
         private int nextEventTime;
 
@@ -35,33 +37,41 @@ namespace Dialogic
         private List<Chat> chats;
         private Find findDelegate;
         private ChatScheduler scheduler;
+        private ChatParser parser;
 
         private List<IActor> actors;
         private List<Func<Command, bool>> validators;
 
-        public ChatRuntime(List<IActor> speakers = null) : this(null, speakers) { }
+        public ChatRuntime(List<IActor> actors) : this(null, actors) { }
 
-        public ChatRuntime(List<Chat> chats, List<IActor> speakers = null)
+        public ChatRuntime(List<Chat> chats, List<IActor> actors = null)
         {
             this.chats = chats;
-            this.actors = speakers;
+            this.parser = new ChatParser(this);
             this.scheduler = new ChatScheduler(this);
-            this.validators = new List<Func<Command, bool>>();
-            ConfigureSpeakers();
+            RegisterActors(actors);
         }
 
-        public void ParseFile(string fileOrFolder)
+        public List<Chat> ParseText(string text, bool disableValidators = false)
+        {
+            this.validatorsDisabled = disableValidators;
+            var lines = text.Split(ChatParser.LineBreaks, StringSplitOptions.None);
+            return parser.Parse(lines);
+        }
+
+        public void ParseFile(string fileOrFolder, bool disableValidators = false)
         {
             string[] files = Directory.Exists(fileOrFolder) ?
                 files = Directory.GetFiles(fileOrFolder, '*' + ChatRuntime.CHAT_FILE_EXT) :
                 files = new string[] { fileOrFolder };
 
+            this.validatorsDisabled = disableValidators;
             this.chats = new List<Chat>();
             foreach (var f in files)
             {
                 var text = File.ReadAllText(f);
                 var stripped = ChatParser.StripComments(text);
-                var parsed = new ChatParser(validators.ToArray()).Parse(stripped);
+                var parsed = parser.Parse(stripped);
                 parsed.ForEach(c => chats.Add(c));
             }
         }
@@ -101,6 +111,27 @@ namespace Dialogic
             return result;
         }
 
+        // ----------------------------------------------------------------
+
+        internal List<Func<Command, bool>> Validators()
+        {
+            return validators;
+        }
+
+        internal ChatParser Parser()
+        {
+            return parser;
+        }
+
+        internal bool ActorExists(string name)
+        {
+            foreach (var actor in actors)
+            {
+                if (actor.Name() == name) return true;
+            }
+            return false;
+        }
+
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
             scheduler.Suspend();
@@ -121,9 +152,12 @@ namespace Dialogic
         }
 
 
-        private void ConfigureSpeakers()
+        private void RegisterActors(List<IActor> iActors)
         {
-            if (actors.IsNullOrEmpty()) return;
+            if (iActors.IsNullOrEmpty()) return;
+
+            this.actors = iActors;
+            this.validators = new List<Func<Command, bool>>();
 
             actors.ForEach(s =>
             {
@@ -253,8 +287,6 @@ namespace Dialogic
 
             if (scheduler.chat != null && Util.Millis() >= nextEventTime)
             {
-                Console.WriteLine("EVENT @" + Util.Millis());
-
                 cmd = scheduler.chat.Next();
                 if (cmd != null)
                 {
@@ -294,10 +326,10 @@ namespace Dialogic
                     // Here the Chat has completed without redirecting 
                     // so we check the stack for something to resume
 
-                    Console.WriteLine("CHAT COMPLETE #"+scheduler.chat.Text+" @"+Util.Millis());
+                    Console.WriteLine("CHAT #"+scheduler.chat.Text+" Completed");
                     scheduler.chat = null;
                     var tmp = scheduler.Resume();
-                    if (tmp > -1) Console.WriteLine("CHAT #"+scheduler.chat+" resumed @" + tmp);
+                    if (tmp > -1) Console.WriteLine("CHAT #"+scheduler.chat+" resumed");
                 }
             }
             return null;
@@ -316,6 +348,11 @@ namespace Dialogic
 
         // testing only ------------------------------------------
 
+        internal Chat DoFind(params Constraint[] constraints)
+        {
+            return DoFind(null, null, constraints);
+        }
+
         internal Chat DoFind(Chat parent, IDictionary<string, object> globals, params Constraint[] constraints)
         {
             IDictionary<Constraint, bool> cdict = new Dictionary<Constraint, bool>();
@@ -329,6 +366,11 @@ namespace Dialogic
             return FuzzySearch.DoFind(chats, ToConstraintMap(f), f.parent, globals);
         }
 
+        internal List<Chat> DoFindAll(params Constraint[] constraints)
+        {
+            return DoFindAll(null, null, constraints);
+        }
+
         internal List<Chat> DoFindAll(Chat parent, IDictionary<string, object> globals, params Constraint[] constraints)
         {
             return FuzzySearch.DoFindAll(chats, constraints, parent, globals);
@@ -340,47 +382,8 @@ namespace Dialogic
             return FuzzySearch.DoFindAll(chats, ToList(f.realized), f.parent, globals);
         }
 
-        // testing old ------------------------------------------
+        // end testing -------------------------------------------
 
-        /*internal Chat Find(Find f, IDictionary<string, object> globals)
-        {
-            return FuzzySearch.Find(f, chats, globals);
-        }
-
-        internal Chat Find(Constraint[] constraints, IDictionary<string, object> globals)
-        {
-            return FuzzySearch.Find(new Find(constraints), chats, globals);
-        }
-
-        internal Chat Find(params Constraint[] constraints)
-        {
-            return FuzzySearch.Find(new Find(constraints), chats, null);
-        }
-
-        internal Chat Find(Constraint constraint, IDictionary<string, object> globals)
-        {
-            return FuzzySearch.Find(new Find(constraint), chats, globals);
-        }
-
-        internal List<Chat> FindAll(Find f, IDictionary<string, object> globals)
-        {
-            return FuzzySearch.FindAll(f, chats, globals);
-        }
-
-        internal List<Chat> FindAll(Constraint[] constraints, IDictionary<string, object> globals)
-        {
-            return FuzzySearch.FindAll(new Find(constraints), chats, globals);
-        }
-
-        internal List<Chat> FindAll(params Constraint[] constraints)
-        {
-            return FuzzySearch.FindAll(new Find(constraints), chats, null);
-        }
-
-        internal List<Chat> FindAll(Constraint constraint, IDictionary<string, object> globals = null)
-        {
-            return FuzzySearch.FindAll(new Find(constraint), chats, globals);
-        }*/
 
         private bool Logging()
         {

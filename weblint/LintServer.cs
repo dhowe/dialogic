@@ -14,11 +14,14 @@ namespace Dialogic.Server
     {
         public static string SERVER_URL = "http://" + LocalIPAddress() + ":8080/glint/";
 
-        private static Regex Brackets = new Regex(@"(\]|\[)");
-        private static string IndexPageContent;
+        static Regex Brackets = new Regex(@"(\]|\[)");
+        static string IndexPageContent;
 
-        private readonly HttpListener listener = new HttpListener();
-        private readonly Func<HttpListenerRequest, string> responderFunc;
+        static bool noValidators = false;
+
+        readonly HttpListener listener = new HttpListener();
+        readonly Func<HttpListenerRequest, string> responderFunc;
+
 
         public LintServer(Func<HttpListenerRequest, string> func, params string[] prefixes)
         {
@@ -105,8 +108,7 @@ namespace Dialogic.Server
 
             try
             {
-                string content = String.Empty;
-                ParseText(code).ForEach(c => { content += c.ToTree() + "\n\n"; });
+                string content = ParserText(code, noValidators);
 
                 html = html.Replace("%%RESULT%%", content);
                 html = html.Replace("%%RCLASS%%", "success");
@@ -123,12 +125,12 @@ namespace Dialogic.Server
             return html;
         }
 
-        // NOTE: linting done here with Tendar.AppConfig validators
-        static List<Chat> ParseText(string s)
+        private static string ParserText(string code, bool noVal=false)
         {
-            if (!ChatRuntime.TypeMap.ContainsKey("NVM")) // tmp
-                ChatRuntime.TypeMap.Add("NVM", typeof(Tendar.Nvm));
-            return ChatParser.ParseText(s, Tendar.AppConfig.Validator);
+            string content = String.Empty;
+            new ChatRuntime(Tendar.AppConfig.Actors).ParseText(code, noVal)
+                .ForEach(c => { content += c.ToTree() + "\n\n"; });
+            return content;
         }
 
         public static void Main()

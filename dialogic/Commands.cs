@@ -13,7 +13,6 @@ namespace Dialogic
     public class Say : Command, ISendable
     {
         protected string lastSpoken;
-        protected int lastSpokenTime;
 
         public Say() : base()
         {
@@ -31,7 +30,7 @@ namespace Dialogic
             base.Realize(globals);
             Recombine(globals);
             lastSpoken = GetText(true);
-            lastSpokenTime = Util.EpochMs();
+            //lastSpokenTime = Util.EpochMs();
             return realized;
         }
 
@@ -699,13 +698,13 @@ namespace Dialogic
 
         public static readonly Command NOP = new NoOp();
 
-        public static string DefaultSpeaker = String.Empty; // ?
-
         public int Id { get; protected set; }
 
         public int DelayMs { get; protected set; }
 
-        public string Text, Actor = DefaultSpeaker;
+        public string Text;
+
+        public string actor = Actor.Default;
 
         //public int IndexInChat = -1; ?
 
@@ -733,7 +732,7 @@ namespace Dialogic
 
         public string GetActor()
         {
-            return Actor;
+            return actor;
         }
 
         public static Command Create(Type type, string text, string label, string[] metas)
@@ -774,6 +773,7 @@ namespace Dialogic
             if (this is ISendable)
             {
                 realized[Meta.TEXT] = Realizer.Do(Text, globals);
+                realized[Meta.ACTOR] = GetActor();
                 realized[Meta.TYPE] = TypeName();
             }
 
