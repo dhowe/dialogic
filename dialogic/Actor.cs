@@ -13,6 +13,8 @@ namespace Dialogic
 
     public class Actor : IActor
     {
+        public static string Default = "Default";
+
         readonly string name;
         readonly bool isDefault;
         readonly CommandDef[] commands;

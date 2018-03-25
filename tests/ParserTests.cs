@@ -16,6 +16,23 @@ namespace Dialogic
         }
 
         [Test]
+        public void TestSpeakerAssign()
+        {
+            List<Chat> chats = ParseText("Eric:SAY Hello from Eric");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Say say = (Dialogic.Say)chats[0].commands[0];
+            Assert.That(say.Text, Is.EqualTo("Hello from Eric"));
+            Assert.That(say.Actor, Is.EqualTo("Eric"));
+            say.Realize(null);
+            Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
+            Assert.That(say.realized[Meta.TEXT], Is.EqualTo("Hello from Eric"));
+            Assert.That(say.realized[Meta.ACTOR], Is.EqualTo("Eric"));
+        }
+
+        [Test]
         public void TestPrompts()
         {
             List<Chat> chats = ParseText("ASK Want a game?\nOPT Y #Game\n\nOPT N #End");

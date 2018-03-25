@@ -210,6 +210,21 @@ namespace Dialogic
         {
             return (string)data[Meta.TYPE];
         }
+
+        public string Actor()
+        {
+            if (!data.ContainsKey(Meta.ACTOR))
+            {
+                return Dialogic.Actor.Default;
+            }
+            return (string)data[Meta.ACTOR];
+        }
+
+        public string Opts()
+        {
+            return (!data.ContainsKey(Meta.OPTS)) ? 
+                (string)data[Meta.OPTS] : null;
+        }
     }
 
 }

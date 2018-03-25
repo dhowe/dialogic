@@ -10,6 +10,7 @@ namespace Dialogic
     {
         public static bool PRESERVE_LINE_NUMBERS = true;
   
+        const string ACT = @"([A-Za-z0-9]+:)?\s*";
         const string TXT = @"([^#}{]+)?\s*";
         const string LBL = @"(#[A-Za-z][\S]*)?\s*";
         const string MTA = @"(?:\{(.+?)\})?\s*";
@@ -25,7 +26,7 @@ namespace Dialogic
 
         public ChatParser(params Func<Command, bool>[] commandValidators)
         {
-            LineParser = new Regex(TypesRegex() + TXT + LBL + MTA);
+            LineParser = new Regex(/*ACT +*/ TypesRegex() + TXT + LBL + MTA);
             parsedCommands = new Stack<Command>();
             validators = commandValidators;
             chats = new List<Chat>();
