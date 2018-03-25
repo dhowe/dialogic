@@ -450,8 +450,8 @@ namespace Dialogic
     public class Chat : Command
     {
         public List<Command> commands;
-        public bool interruptable = true;
-        public bool resumeLastAfterInterrupting = true;
+        public bool interruptable = true; // TODO: parse from meta
+        public bool resumeAfterInterrupting = true;
         public double stalenessIncrement = Defaults.CHAT_STALENESS_INCR;
         public int cursor = 0, lastRunAt = -1;
 
@@ -460,7 +460,7 @@ namespace Dialogic
             commands = new List<Command>();
         }
 
-        public static Chat Create(string name) // tests only
+        internal static Chat Create(string name)
         {
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
@@ -532,7 +532,7 @@ namespace Dialogic
         {
             this.Text = text;
             ParseMeta(metas);
-            PostValidate(); // tmp:  should be called by parser
+            //PostValidate(); // TODO:  should be called by parser
         }
 
         protected override string MetaStr()
@@ -577,11 +577,6 @@ namespace Dialogic
            
             // Q: what about (No-Label) WAIT events ?
             IncrementStaleness();
-        }
-
-        public bool IsResumable() // TODO: set from meta
-        {
-            return resumeLastAfterInterrupting;
         }
     }
 

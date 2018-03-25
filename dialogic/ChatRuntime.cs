@@ -7,6 +7,14 @@ using System.Threading;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// The main entry point for Dialogic. Construct a runtime instance as follows:
+    /// \code
+    ///     ChatRuntime dialogic = new ChatRuntime();
+    ///     dialogic.ParseFile(scriptFolder);
+    ///     dialogic.Run("#FirstChat");
+    /// \endcode
+    /// </summary>
     public class ChatRuntime
     {
         public static string logFile;// = "../../../dialogic/dia.log";
@@ -65,8 +73,9 @@ namespace Dialogic
                 files = Directory.GetFiles(fileOrFolder, '*' + ChatRuntime.CHAT_FILE_EXT) :
                 files = new string[] { fileOrFolder };
 
-            this.validatorsDisabled = disableValidators;
-            this.chats = new List<Chat>();
+            chats = new List<Chat>();
+            validatorsDisabled = disableValidators;
+
             foreach (var f in files)
             {
                 var text = File.ReadAllText(f);
@@ -80,7 +89,8 @@ namespace Dialogic
         {
             if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
 
-            scheduler.Launch((chatLabel != null) ? FindByName(chatLabel) : chats[0]);
+            var first = chatLabel != null ? FindByName(chatLabel) : chats[0];
+            scheduler.Launch(first);
         }
 
         public List<Chat> Chats()
@@ -142,7 +152,7 @@ namespace Dialogic
                 Thread.CurrentThread.IsBackground = true;
 
                 Chat chat = (finder is Go) ? FindByName(((Go)finder).Text) :
-                    FuzzySearch.Find(finder, chats, globals);
+                    this.DoFind(finder, globals);
 
                 if (chat == null) throw new FindException(finder);
 
@@ -150,7 +160,6 @@ namespace Dialogic
 
             })).Start();
         }
-
 
         private void RegisterActors(List<IActor> iActors)
         {
@@ -198,12 +207,11 @@ namespace Dialogic
             var label = ue.GetEventType();
             ge = null;
 
-            Chat chat = FindByName("#On"+label+"Event");
-            if (chat == null) throw new DialogicException("No Find for event: "+label);
-            scheduler.Launch(chat);
+            scheduler.Suspend();
+            scheduler.Launch("#On" + label + "Event");
             return null;
         }
-            
+
         private IUpdateEvent SuspendHandler(ref EventArgs ge, IDictionary<string, object> globals)
         {
             ge = null;
@@ -230,7 +238,7 @@ namespace Dialogic
             }
             else if (label.StartsWith("#", Util.IC))
             {
-                scheduler.Launch(FindByName(label));
+                scheduler.Launch(label);
             }
             else // else, parse as FIND meta data
             {
@@ -288,10 +296,12 @@ namespace Dialogic
             if (scheduler.chat != null && Util.Millis() >= nextEventTime)
             {
                 cmd = scheduler.chat.Next();
+
                 if (cmd != null)
                 {
                     cmd.Realize(globals);
-                    WriteToLog(cmd);
+
+                    if (logFile != null) WriteToLog(cmd);
 
                     if (cmd is ISendable)
                     {
@@ -308,7 +318,7 @@ namespace Dialogic
                         else if (cmd is Ask)
                         {
                             scheduler.prompt = (Ask)cmd;
-                            scheduler.Suspend(); // wait for ChoiceEvent
+                            scheduler.Suspend();         // wait on ChoiceEvent
                         }
                         else
                         {
@@ -319,31 +329,32 @@ namespace Dialogic
                     }
                     else if (cmd is Find)
                     {
-                        FindAsync((Find)cmd);
+                        FindAsync((Find)cmd);      // find next
                     }
                 }
-                else {
+                else
+                {
                     // Here the Chat has completed without redirecting 
                     // so we check the stack for something to resume
 
-                    Console.WriteLine("CHAT #"+scheduler.chat.Text+" Completed");
-                    scheduler.chat = null;
-                    var tmp = scheduler.Resume();
-                    if (tmp > -1) Console.WriteLine("CHAT #"+scheduler.chat+" resumed");
+                    Console.WriteLine("<#" + scheduler.chat.Text + "-finished>");
+
+                    int nextEventMs = scheduler.Completed();
+
+                    if (nextEventMs > -1)
+                    {
+                        Console.WriteLine("<#" + scheduler.chat.Text + "-resumed>");
+                        nextEventTime = nextEventMs;
+                    }
                 }
             }
             return null;
         }
 
-        internal void SetNextEventTime(int millis)
-        {
-            nextEventTime = millis;
-        }
-
         internal void ComputeNextEventTime(Command cmd)
         {
-            SetNextEventTime(cmd.DelayMs >= 0 ? Util.Millis()
-                + cmd.ComputeDuration() : Int32.MaxValue);
+            nextEventTime = cmd.DelayMs >= 0 ? Util.Millis()
+                + cmd.ComputeDuration() : Int32.MaxValue;
         }
 
         // testing only ------------------------------------------
@@ -357,13 +368,13 @@ namespace Dialogic
         {
             IDictionary<Constraint, bool> cdict = new Dictionary<Constraint, bool>();
             foreach (var c in constraints) cdict.Add(c, c.IsRelaxable());
-            return FuzzySearch.DoFind(chats, cdict, parent, globals);
+            return FuzzySearch.Find(chats, cdict, parent, globals);
         }
 
         internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
         {
             f.Realize(globals); // possibly redundant
-            return FuzzySearch.DoFind(chats, ToConstraintMap(f), f.parent, globals);
+            return FuzzySearch.Find(chats, ToConstraintMap(f), f.parent, globals);
         }
 
         internal List<Chat> DoFindAll(params Constraint[] constraints)
@@ -373,13 +384,13 @@ namespace Dialogic
 
         internal List<Chat> DoFindAll(Chat parent, IDictionary<string, object> globals, params Constraint[] constraints)
         {
-            return FuzzySearch.DoFindAll(chats, constraints, parent, globals);
+            return FuzzySearch.FindAll(chats, constraints, parent, globals);
         }
 
         internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals = null)
         {
             f.Realize(globals);  // possibly redundant
-            return FuzzySearch.DoFindAll(chats, ToList(f.realized), f.parent, globals);
+            return FuzzySearch.FindAll(chats, ToList(f.realized), f.parent, globals);
         }
 
         // end testing -------------------------------------------
@@ -410,8 +421,6 @@ namespace Dialogic
 
         public void WriteToLog(Command c)
         {
-            if (logFile == null) return;
-
             if (!logInitd)
             {
                 logInitd = true;
@@ -428,59 +437,82 @@ namespace Dialogic
 
     internal class ChatScheduler
     {
-        public Chat chat;
-        public Ask prompt;
-        public ChatRuntime runtime;
-        public Stack<Chat> resumables;
+        internal Chat chat;
+        internal Ask prompt;
+        internal ChatRuntime runtime;
+        internal Stack<Chat> resumables;
 
-        public ChatScheduler(ChatRuntime runtime)
+        internal ChatScheduler(ChatRuntime runtime)
         {
             this.runtime = runtime;
             this.resumables = new Stack<Chat>();
         }
 
-        public void Launch(Chat next)
+        internal void Launch(string label)
         {
+            var next = runtime.FindByName(label);
+            if (next == null) throw new DialogicException
+                ("Unable to find Chat: '" + label + "'");
+            Launch(next);
+        }
+
+        internal void Launch(Chat next)
+        {
+            // TODO: when Chats branch we may want to consider them
+            // finished and remove them from the stack, leaving only
+            // those that have been explictly interrupted ...
             (chat = next).Run();
         }
 
-        public void Suspend()
+        internal void Suspend()
         {
-            if (chat != null) resumables.Push(chat);
+            if (chat != null)
+            {
+                if (!chat.interruptable)
+                {
+                    Console.WriteLine("Cannot interrupt #" + chat.Text + "!");
+                    return;
+                }
+                resumables.Push(chat);
+            }
             chat = null;
         }
 
-        public void Clear()
+        internal void Clear()
         {
             resumables.Clear();
         }
 
-        public int Resume(bool mustBeResumable = false)
+        internal int Resume()
         {
             if (resumables.IsNullOrEmpty())
             {
-                Console.WriteLine("No Chat to resume... Waiting");
+                //Console.WriteLine("No Chat to resume... Waiting");
                 return -1;
             }
 
-            if (chat != null)
-            {
-                throw new DialogicException("Cannot resume chat" +
-                    " while Chat#" + chat.Text + " is active");
-            }
+            if (chat != null) throw new DialogicException("Cannot resume"
+                + " while Chat#" + chat.Text + " is active");
 
             var last = resumables.Pop();
-            while (mustBeResumable && !last.IsResumable())
-            {
-                if (resumables.Count < 1) throw new DialogicException
-                    ("No resumable Chat found on stack");
-
-                last = resumables.Pop();
-            }
-
             (chat = last).Run(false);
 
             return Util.Millis();
+        }
+
+        internal int Completed()
+        {
+            if (resumables.Count > 0 && chat == resumables.Peek())
+            {
+                resumables.Pop(); // remove from stack
+            }
+
+            // if false, we don't resume after finishing
+            var resumesAfter = chat.resumeAfterInterrupting;
+
+            this.chat = null;
+
+            return resumesAfter ? this.Resume() : -1;
         }
     }
 }

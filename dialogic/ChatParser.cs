@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// Handles parsing of scripts via a ChatRuntime instance - no public API.
+    /// </summary>
     public class ChatParser
     {
         /// <summary>
