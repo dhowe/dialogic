@@ -7,3 +7,7 @@ div.contents {
   width: 600px;
   margin-left: 24px;
 }
+
+div.fragment {
+  padding: 5px;
+}

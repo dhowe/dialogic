@@ -72,6 +72,7 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="class_dialogic_1_1_meta-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Dialogic.Meta Class Reference</div>  </div>
@@ -83,7 +84,7 @@ Inheritance diagram for Dialogic.Meta:</div>
  <div class="center">
   <img src="class_dialogic_1_1_meta.png" usemap="#Dialogic.Meta_map" alt=""/>
   <map id="Dialogic.Meta_map" name="Dialogic.Meta_map">
-<area href="class_dialogic_1_1_command.html" alt="Dialogic.Command" shape="rect" coords="0,56,117,80"/>
+<area href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first..." alt="Dialogic.Command" shape="rect" coords="0,56,117,80"/>
 <area href="class_dialogic_1_1_chat.html" alt="Dialogic.Chat" shape="rect" coords="127,112,244,136"/>
 <area href="class_dialogic_1_1_do.html" alt="Dialogic.Do" shape="rect" coords="127,168,244,192"/>
 <area href="class_dialogic_1_1_find.html" alt="Dialogic.Find" shape="rect" coords="127,224,244,248"/>
@@ -118,27 +119,24 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>SetMeta</b> (
 <tr class="memitem:ad2dffa54cbcdd24e07174cd471d8175b"><td class="memItemLeft" align="right" valign="top"><a id="ad2dffa54cbcdd24e07174cd471d8175b"></a>
 IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetMeta</b> ()</td></tr>
 <tr class="separator:ad2dffa54cbcdd24e07174cd471d8175b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1f3f7681c890761e70a87c67659e4bf"><td class="memItemLeft" align="right" valign="top"><a id="ad1f3f7681c890761e70a87c67659e4bf"></a>
-IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetRealized</b> ()</td></tr>
-<tr class="separator:ad1f3f7681c890761e70a87c67659e4bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1528abdff2b1007b5f094abe4133b1d2"><td class="memItemLeft" align="right" valign="top"><a id="a1528abdff2b1007b5f094abe4133b1d2"></a>
 List&lt; KeyValuePair&lt; string, object &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ToList</b> ()</td></tr>
 <tr class="separator:a1528abdff2b1007b5f094abe4133b1d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a2d84a950541aa436bbeb8ae1027adf06"><td class="memItemLeft" align="right" valign="top"><a id="a2d84a950541aa436bbeb8ae1027adf06"></a>
-const string&#160;</td><td class="memItemRight" valign="bottom"><b>OPTS</b> = &quot;opts&quot;</td></tr>
-<tr class="separator:a2d84a950541aa436bbeb8ae1027adf06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac218697046cde754ba5ae5a6a5b46c15"><td class="memItemLeft" align="right" valign="top"><a id="ac218697046cde754ba5ae5a6a5b46c15"></a>
-const string&#160;</td><td class="memItemRight" valign="bottom"><b>TYPE</b> = &quot;type&quot;</td></tr>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>TYPE</b> = &quot;__type__&quot;</td></tr>
 <tr class="separator:ac218697046cde754ba5ae5a6a5b46c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74a214f909610197c50e10025e800b65"><td class="memItemLeft" align="right" valign="top"><a id="a74a214f909610197c50e10025e800b65"></a>
-const string&#160;</td><td class="memItemRight" valign="bottom"><b>TEXT</b> = &quot;text&quot;</td></tr>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>TEXT</b> = &quot;__text__&quot;</td></tr>
 <tr class="separator:a74a214f909610197c50e10025e800b65"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a312c52144ae4f31170a1da910c3f7167"><td class="memItemLeft" align="right" valign="top"><a id="a312c52144ae4f31170a1da910c3f7167"></a>
-const string&#160;</td><td class="memItemRight" valign="bottom"><b>PLOT</b> = &quot;plot&quot;</td></tr>
-<tr class="separator:a312c52144ae4f31170a1da910c3f7167"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d84a950541aa436bbeb8ae1027adf06"><td class="memItemLeft" align="right" valign="top"><a id="a2d84a950541aa436bbeb8ae1027adf06"></a>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>OPTS</b> = &quot;__opts__&quot;</td></tr>
+<tr class="separator:a2d84a950541aa436bbeb8ae1027adf06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a577dbbd1f352ae754ca34240d0b1b5f8"><td class="memItemLeft" align="right" valign="top"><a id="a577dbbd1f352ae754ca34240d0b1b5f8"></a>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>ACTOR</b> = &quot;__actor__&quot;</td></tr>
+<tr class="separator:a577dbbd1f352ae754ca34240d0b1b5f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af741cd3185f372f9ee5fcc4f84aa3ac2"><td class="memItemLeft" align="right" valign="top"><a id="af741cd3185f372f9ee5fcc4f84aa3ac2"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>STAGE</b> = &quot;stage&quot;</td></tr>
 <tr class="separator:af741cd3185f372f9ee5fcc4f84aa3ac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,9 +152,9 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>STALENESS</b>
 <tr class="memitem:a04ea0fe68d888be339f2f796df6afd2b"><td class="memItemLeft" align="right" valign="top"><a id="a04ea0fe68d888be339f2f796df6afd2b"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUMABLE</b> = &quot;resumable&quot;</td></tr>
 <tr class="separator:a04ea0fe68d888be339f2f796df6afd2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c639b02df04ef52ace5dda5464d0416"><td class="memItemLeft" align="right" valign="top"><a id="a4c639b02df04ef52ace5dda5464d0416"></a>
-IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>meta</b></td></tr>
-<tr class="separator:a4c639b02df04ef52ace5dda5464d0416"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9bac903b1e2dae14b6ef7380e4d0edc"><td class="memItemLeft" align="right" valign="top"><a id="ac9bac903b1e2dae14b6ef7380e4d0edc"></a>
+IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>realized</b></td></tr>
+<tr class="separator:ac9bac903b1e2dae14b6ef7380e4d0edc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -166,6 +164,12 @@ virtual string&#160;</td><td class="memItemRight" valign="bottom"><b>MetaStr</b>
 <tr class="memitem:ae2a2863e76f96063cfdbf071c38c6ae0"><td class="memItemLeft" align="right" valign="top"><a id="ae2a2863e76f96063cfdbf071c38c6ae0"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseMeta</b> (string[] pairs)</td></tr>
 <tr class="separator:ae2a2863e76f96063cfdbf071c38c6ae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:a4c639b02df04ef52ace5dda5464d0416"><td class="memItemLeft" align="right" valign="top"><a id="a4c639b02df04ef52ace5dda5464d0416"></a>
+IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>meta</b></td></tr>
+<tr class="separator:a4c639b02df04ef52ace5dda5464d0416"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>dialogic/Commands.cs</li>

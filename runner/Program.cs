@@ -10,7 +10,7 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            new MockGameEngine(srcpath + "/data/term.gs").Run();
+            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
         }
 
         public static string srcpath = "../../../dialogic";
@@ -38,7 +38,7 @@ namespace runner
         {
             dialogic = new ChatRuntime(AppConfig.Actors);
             dialogic.ParseFile(fileOrFolder);
-            dialogic.Run();
+            dialogic.Run("#GScriptTest");
         }
 
         public void Run()
@@ -69,7 +69,7 @@ namespace runner
             diaText = ue.Text();
             diaType = ue.Type();
 
-            ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.ACTOR);
 
             switch (diaType)
             {
@@ -92,7 +92,8 @@ namespace runner
                             Console.WriteLine("<resume-event#>" +
                                 " after " + Util.Millis(now) + "ms\n");
 
-                            // send ResumeEvent after 5 sec ('#Game' or '{type=a,stage=b,last=true}')
+                            // send ResumeEvent after 5 sec
+                            // ('#Game' or '{type=a,stage=b,last=true}')
 
                             gameEvent = new ResumeEvent();
                         }

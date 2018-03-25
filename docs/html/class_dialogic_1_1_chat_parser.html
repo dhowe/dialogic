@@ -69,8 +69,6 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="class_dialogic_1_1_chat_parser-members.html">List of all members</a>  </div>
@@ -78,43 +76,55 @@ $(function() {
 <div class="title">Dialogic.ChatParser Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Handles parsing of scripts via a <a class="el" href="class_dialogic_1_1_chat_runtime.html" title="The main entry point for Dialogic. Construct a runtime instance as follows: ">ChatRuntime</a> instance - no public API.  
+ <a href="class_dialogic_1_1_chat_parser.html#details">More...</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:ae4b89b172e0601b280d7cf443c4395e4"><td class="memItemLeft" align="right" valign="top"><a id="ae4b89b172e0601b280d7cf443c4395e4"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ChatParser</b> (params Func&lt; <a class="el" href="class_dialogic_1_1_command.html">Command</a>, bool &gt;[] commandValidators)</td></tr>
-<tr class="separator:ae4b89b172e0601b280d7cf443c4395e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a6e1cad96c7af53c8a7e4dfe36ee74c04"><td class="memItemLeft" align="right" valign="top"><a id="a6e1cad96c7af53c8a7e4dfe36ee74c04"></a>
-static List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ParseText</b> (string text, params Func&lt; <a class="el" href="class_dialogic_1_1_command.html">Command</a>, bool &gt;[] validators)</td></tr>
-<tr class="separator:a6e1cad96c7af53c8a7e4dfe36ee74c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad09a5f11e033047a4d84520650e2d127"><td class="memItemLeft" align="right" valign="top"><a id="ad09a5f11e033047a4d84520650e2d127"></a>
-static <a class="el" href="class_dialogic_1_1_grammar.html">Grammar</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ParseGrammar</b> (FileInfo file)</td></tr>
-<tr class="separator:ad09a5f11e033047a4d84520650e2d127"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66edc598bec8fa7a62d4e235ae5ec03a"><td class="memItemLeft" align="right" valign="top"><a id="a66edc598bec8fa7a62d4e235ae5ec03a"></a>
-static <a class="el" href="class_dialogic_1_1_grammar.html">Grammar</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ParseGrammar</b> (string src)</td></tr>
-<tr class="separator:a66edc598bec8fa7a62d4e235ae5ec03a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a192d5160d1a64382222aec5fc85a3d2d"><td class="memItemLeft" align="right" valign="top"><a id="a192d5160d1a64382222aec5fc85a3d2d"></a>
-static bool&#160;</td><td class="memItemRight" valign="bottom"><b>PRESERVE_LINE_NUMBERS</b> = true</td></tr>
+<tr class="memitem:a192d5160d1a64382222aec5fc85a3d2d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_parser.html#a192d5160d1a64382222aec5fc85a3d2d">PRESERVE_LINE_NUMBERS</a> = true</td></tr>
+<tr class="memdesc:a192d5160d1a64382222aec5fc85a3d2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the parser should preserve incoming line numbers for debugging; default is true though potentially faster if false.  <a href="#a192d5160d1a64382222aec5fc85a3d2d">More...</a><br /></td></tr>
 <tr class="separator:a192d5160d1a64382222aec5fc85a3d2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a56c7cad77ed228ca2ee534df391334e8"><td class="memItemLeft" align="right" valign="top"><a id="a56c7cad77ed228ca2ee534df391334e8"></a>
+<a class="el" href="class_dialogic_1_1_chat_runtime.html">ChatRuntime</a>&#160;</td><td class="memItemRight" valign="bottom"><b>runtime</b></td></tr>
+<tr class="separator:a56c7cad77ed228ca2ee534df391334e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acbea421272b163e41b1d148b24fbc819"><td class="memItemLeft" align="right" valign="top"><a id="acbea421272b163e41b1d148b24fbc819"></a>
 Stack&lt; <a class="el" href="class_dialogic_1_1_command.html">Command</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>parsedCommands</b></td></tr>
 <tr class="separator:acbea421272b163e41b1d148b24fbc819"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57572ccecd3236126ae62e3198db17e0"><td class="memItemLeft" align="right" valign="top"><a id="a57572ccecd3236126ae62e3198db17e0"></a>
-Func&lt; <a class="el" href="class_dialogic_1_1_command.html">Command</a>, bool &gt; []&#160;</td><td class="memItemRight" valign="bottom"><b>validators</b></td></tr>
-<tr class="separator:a57572ccecd3236126ae62e3198db17e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a2c0e1f2b3862fdd3b9c6c9e3e3ab7c"><td class="memItemLeft" align="right" valign="top"><a id="a0a2c0e1f2b3862fdd3b9c6c9e3e3ab7c"></a>
 Regex&#160;</td><td class="memItemRight" valign="bottom"><b>LineParser</b></td></tr>
 <tr class="separator:a0a2c0e1f2b3862fdd3b9c6c9e3e3ab7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Handles parsing of scripts via a <a class="el" href="class_dialogic_1_1_chat_runtime.html" title="The main entry point for Dialogic. Construct a runtime instance as follows: ">ChatRuntime</a> instance - no public API. </p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a192d5160d1a64382222aec5fc85a3d2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a192d5160d1a64382222aec5fc85a3d2d">&#9670;&nbsp;</a></span>PRESERVE_LINE_NUMBERS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Dialogic.ChatParser.PRESERVE_LINE_NUMBERS = true</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the parser should preserve incoming line numbers for debugging; default is true though potentially faster if false. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>dialogic/ChatParser.cs</li>
 </ul>

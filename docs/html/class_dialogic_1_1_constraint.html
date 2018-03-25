@@ -70,6 +70,7 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="class_dialogic_1_1_constraint-members.html">List of all members</a>  </div>
@@ -86,9 +87,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac10aec736c89d1d67fb6e077ec13a1c1"><td class="memItemLeft" align="right" valign="top"><a id="ac10aec736c89d1d67fb6e077ec13a1c1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Constraint</b> (string key, string val, <a class="el" href="namespace_dialogic.html#a6c19a14a5b18a1d8eedc29ce8c163631">ConstraintType</a> type=ConstraintType.Soft)</td></tr>
 <tr class="separator:ac10aec736c89d1d67fb6e077ec13a1c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a800ffd0505a6d71f8ebb193d9e4892a8"><td class="memItemLeft" align="right" valign="top"><a id="a800ffd0505a6d71f8ebb193d9e4892a8"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Constraint</b> (string opstr, string key, string val, <a class="el" href="namespace_dialogic.html#a6c19a14a5b18a1d8eedc29ce8c163631">ConstraintType</a> type=ConstraintType.Soft)</td></tr>
-<tr class="separator:a800ffd0505a6d71f8ebb193d9e4892a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b1d7cf5d531e436f2335049290254f7"><td class="memItemLeft" align="right" valign="top"><a id="a0b1d7cf5d531e436f2335049290254f7"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Constraint</b> (<a class="el" href="class_dialogic_1_1_operator.html">Operator</a> op, string key, string val, <a class="el" href="namespace_dialogic.html#a6c19a14a5b18a1d8eedc29ce8c163631">ConstraintType</a> type=ConstraintType.Soft)</td></tr>
 <tr class="separator:a0b1d7cf5d531e436f2335049290254f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -101,6 +99,15 @@ override string&#160;</td><td class="memItemRight" valign="bottom"><b>ToString</
 <tr class="memitem:a2ea8f191f4169afa1e639dc365a0a610"><td class="memItemLeft" align="right" valign="top"><a id="a2ea8f191f4169afa1e639dc365a0a610"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsStrict</b> ()</td></tr>
 <tr class="separator:a2ea8f191f4169afa1e639dc365a0a610"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbb7abb7db7f2eb935c8a516426f714e"><td class="memItemLeft" align="right" valign="top"><a id="acbb7abb7db7f2eb935c8a516426f714e"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>ValueAsDouble</b> (double def=-1)</td></tr>
+<tr class="separator:acbb7abb7db7f2eb935c8a516426f714e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabdd821b28badfca7ed600fb0320f3bf"><td class="memItemLeft" align="right" valign="top"><a id="aabdd821b28badfca7ed600fb0320f3bf"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>ScaleValue</b> (double scale)</td></tr>
+<tr class="separator:aabdd821b28badfca7ed600fb0320f3bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa80886be3ddcebeb4bc0d40513ceee8"><td class="memItemLeft" align="right" valign="top"><a id="afa80886be3ddcebeb4bc0d40513ceee8"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>IncrementValue</b> (double incr=1)</td></tr>
+<tr class="separator:afa80886be3ddcebeb4bc0d40513ceee8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9c80408117844b6fd663d92ffd421b2"><td class="memItemLeft" align="right" valign="top"><a id="ab9c80408117844b6fd663d92ffd421b2"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsRelaxable</b> ()</td></tr>
 <tr class="separator:ab9c80408117844b6fd663d92ffd421b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -108,17 +115,26 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsRelaxable</b> ()</t
 IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>AsDict</b> ()</td></tr>
 <tr class="separator:a13f8e0fd6e4a65fbdef6e4467d7b451b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ad229104209095f4c43496a4f3a639b5a"><td class="memItemLeft" align="right" valign="top"><a id="ad229104209095f4c43496a4f3a639b5a"></a>
+static IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>AsDict</b> (params <a class="el" href="class_dialogic_1_1_constraint.html">Constraint</a>[] c)</td></tr>
+<tr class="separator:ad229104209095f4c43496a4f3a639b5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:aad0ddcc2a88fea7c229a504c5e47b159"><td class="memItemLeft" align="right" valign="top"><a id="aad0ddcc2a88fea7c229a504c5e47b159"></a>
-<a class="el" href="namespace_dialogic.html#a6c19a14a5b18a1d8eedc29ce8c163631">ConstraintType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>type</b></td></tr>
-<tr class="separator:aad0ddcc2a88fea7c229a504c5e47b159"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc2ad2e3bb4b9caea5b1ff3815d18610"><td class="memItemLeft" align="right" valign="top"><a id="abc2ad2e3bb4b9caea5b1ff3815d18610"></a>
 readonly string&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
 <tr class="separator:abc2ad2e3bb4b9caea5b1ff3815d18610"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c28b39fc62332e80bb9617626b5a2cd"><td class="memItemLeft" align="right" valign="top"><a id="a5c28b39fc62332e80bb9617626b5a2cd"></a>
 readonly <a class="el" href="class_dialogic_1_1_operator.html">Operator</a>&#160;</td><td class="memItemRight" valign="bottom"><b>op</b></td></tr>
 <tr class="separator:a5c28b39fc62332e80bb9617626b5a2cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad0ddcc2a88fea7c229a504c5e47b159"><td class="memItemLeft" align="right" valign="top"><a id="aad0ddcc2a88fea7c229a504c5e47b159"></a>
+<a class="el" href="namespace_dialogic.html#a6c19a14a5b18a1d8eedc29ce8c163631">ConstraintType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>type</b></td></tr>
+<tr class="separator:aad0ddcc2a88fea7c229a504c5e47b159"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97e42cdc51538cf7e01acb42b2321d14"><td class="memItemLeft" align="right" valign="top"><a id="a97e42cdc51538cf7e01acb42b2321d14"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>value</b></td></tr>
+<tr class="separator:a97e42cdc51538cf7e01acb42b2321d14"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
