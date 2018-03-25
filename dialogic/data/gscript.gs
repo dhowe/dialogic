@@ -22,3 +22,9 @@ CHAT Game {type=a,stage=b,last=true}
 DO #HappyFlip {axis=y}
 Great, let's play! {speed=slow,style=loud}
 Bye! {speed=fast}
+
+
+CHAT OnTapEvent {noStart=true,resumeAfter=true}
+DO #TapResponse
+SAY I see you!
+// then should resume

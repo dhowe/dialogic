@@ -39,6 +39,17 @@ namespace Dialogic
         private List<IActor> actors;
         private List<Func<Command, bool>> validators;
 
+        public ChatRuntime(List<IActor> speakers = null) : this(null, speakers) { }
+
+        public ChatRuntime(List<Chat> chats, List<IActor> speakers = null)
+        {
+            this.chats = chats;
+            this.actors = speakers;
+            this.scheduler = new ChatScheduler(this);
+            this.validators = new List<Func<Command, bool>>();
+            ConfigureSpeakers();
+        }
+
         public void ParseFile(string fileOrFolder)
         {
             string[] files = Directory.Exists(fileOrFolder) ?
@@ -55,44 +66,11 @@ namespace Dialogic
             }
         }
 
-        public ChatRuntime(List<IActor> speakers = null) : this(null, speakers) { }
-
-        public ChatRuntime(List<Chat> chats, List<IActor> speakers = null)
-        {
-            this.chats = chats;
-            this.actors = speakers;
-            this.scheduler = new ChatScheduler(this);
-            this.validators = new List<Func<Command, bool>>();
-            ConfigureSpeakers();
-        }
-
-        private void ConfigureSpeakers()
-        {
-            if (actors.IsNullOrEmpty()) return;
-
-            actors.ForEach(s =>
-            {
-                var cmds = s.Commands();
-                if (!cmds.IsNullOrEmpty())
-                {
-                    foreach (var cmd in cmds)
-                    {
-                        TypeMap.Add(cmd.label, cmd.type);
-                    }
-                }
-                var val = s.Validator();
-                if (val != null)
-                {
-                    validators.Add(val);
-                }
-            });
-        }
-
         public void Run(string chatLabel = null)
         {
             if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
 
-            scheduler.StartNew((chatLabel != null) ? FindByName(chatLabel) : chats[0]);
+            scheduler.Launch((chatLabel != null) ? FindByName(chatLabel) : chats[0]);
         }
 
         public List<Chat> Chats()
@@ -105,19 +83,97 @@ namespace Dialogic
             return ge != null ? HandleGameEvent(ref ge, globals) : HandleChatEvent(globals);
         }
 
+
+        public Chat FindByName(string label)
+        {
+            if (label.StartsWith("#", Util.IC)) label = label.Substring(1);
+
+            Chat result = null;
+
+            for (int i = 0; i < chats.Count; i++)
+            {
+                if (chats[i].Text == label)
+                {
+                    result = chats[i];
+                    break;
+                }
+            }
+            return result;
+        }
+
+        internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
+        {
+            scheduler.Suspend();
+
+            int ts = Util.Millis();
+            (searchThread = new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+
+                Chat chat = (finder is Go) ? FindByName(((Go)finder).Text) :
+                    FuzzySearch.Find(finder, chats, globals);
+
+                if (chat == null) throw new FindException(finder);
+
+                scheduler.Launch(chat);
+
+            })).Start();
+        }
+
+
+        private void ConfigureSpeakers()
+        {
+            if (actors.IsNullOrEmpty()) return;
+
+            actors.ForEach(s =>
+            {
+                var cmds = s.Commands();
+                if (!cmds.IsNullOrEmpty())
+                {
+                    foreach (var cmd in cmds)
+                    {
+                        if (!TypeMap.ContainsKey(cmd.label))
+                        {
+                            TypeMap.Add(cmd.label, cmd.type);
+                        }
+                    }
+                }
+                var val = s.Validator();
+                if (val != null)
+                {
+                    validators.Add(val);
+                }
+            });
+        }
+
+
         private IUpdateEvent HandleGameEvent(ref EventArgs ge, IDictionary<string, object> globals)
         {
+            if (ge is IUserEvent) return UserActionHandler(ref ge, globals);
             if (ge is ISuspend) return SuspendHandler(ref ge, globals);
             if (ge is IResume) return ResumeHandler(ref ge, globals);
             if (ge is IChoice) return ChoiceHandler(ref ge, globals);
             if (ge is IClear) return ClearHandler(ref ge, globals);
+
             throw new DialogicException("Unexpected event-type: " + ge.GetType());
         }
 
+        private IUpdateEvent UserActionHandler(ref EventArgs ge, IDictionary<string, object> globals)
+        {
+            IUserEvent ue = (IUserEvent)ge;
+            var label = ue.GetEventType();
+            ge = null;
+
+            Chat chat = FindByName("#On"+label+"Event");
+            if (chat == null) throw new DialogicException("No Find for event: "+label);
+            scheduler.Launch(chat);
+            return null;
+        }
+            
         private IUpdateEvent SuspendHandler(ref EventArgs ge, IDictionary<string, object> globals)
         {
             ge = null;
-            scheduler.PauseCurrent();
+            scheduler.Suspend();
             return null;
         }
 
@@ -136,11 +192,11 @@ namespace Dialogic
 
             if (String.IsNullOrEmpty(label))
             {
-                nextEventTime = scheduler.ResumeLast();
+                nextEventTime = scheduler.Resume();
             }
             else if (label.StartsWith("#", Util.IC))
             {
-                scheduler.StartNew(FindByName(label));
+                scheduler.Launch(FindByName(label));
             }
             else // else, parse as FIND meta data
             {
@@ -197,6 +253,8 @@ namespace Dialogic
 
             if (scheduler.chat != null && Util.Millis() >= nextEventTime)
             {
+                Console.WriteLine("EVENT @" + Util.Millis());
+
                 cmd = scheduler.chat.Next();
                 if (cmd != null)
                 {
@@ -213,12 +271,12 @@ namespace Dialogic
                                 ComputeNextEventTime(cmd);
                                 return null;
                             }
-                            scheduler.PauseCurrent();
+                            scheduler.Suspend();
                         }
                         else if (cmd is Ask)
                         {
                             scheduler.prompt = (Ask)cmd;
-                            scheduler.PauseCurrent(); // wait for ChoiceEvent
+                            scheduler.Suspend(); // wait for ChoiceEvent
                         }
                         else
                         {
@@ -231,6 +289,15 @@ namespace Dialogic
                     {
                         FindAsync((Find)cmd);
                     }
+                }
+                else {
+                    // Here the Chat has completed without redirecting 
+                    // so we check the stack for something to resume
+
+                    Console.WriteLine("CHAT COMPLETE #"+scheduler.chat.Text+" @"+Util.Millis());
+                    scheduler.chat = null;
+                    var tmp = scheduler.Resume();
+                    if (tmp > -1) Console.WriteLine("CHAT #"+scheduler.chat+" resumed @" + tmp);
                 }
             }
             return null;
@@ -245,42 +312,6 @@ namespace Dialogic
         {
             SetNextEventTime(cmd.DelayMs >= 0 ? Util.Millis()
                 + cmd.ComputeDuration() : Int32.MaxValue);
-        }
-
-        public Chat FindByName(string label)
-        {
-            if (label.StartsWith("#", Util.IC)) label = label.Substring(1);
-
-            Chat result = null;
-
-            for (int i = 0; i < chats.Count; i++)
-            {
-                if (chats[i].Text == label)
-                {
-                    result = chats[i];
-                    break;
-                }
-            }
-            return result;
-        }
-
-        public void FindAsync(Find finder, IDictionary<string, object> globals = null)
-        {
-            scheduler.PauseCurrent();
-
-            int ts = Util.Millis();
-            (searchThread = new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
-
-                Chat chat = (finder is Go) ? FindByName(((Go)finder).Text) :
-                    FuzzySearch.Find(finder, chats, globals);
-
-                if (chat == null) throw new FindException(finder);
-
-                scheduler.StartNew(chat);
-
-            })).Start();
         }
 
         // testing only ------------------------------------------
@@ -405,13 +436,12 @@ namespace Dialogic
             this.resumables = new Stack<Chat>();
         }
 
-        public void StartNew(Chat next)
+        public void Launch(Chat next)
         {
-            if (next != null) resumables.Push(next);
             (chat = next).Run();
         }
 
-        public void PauseCurrent()
+        public void Suspend()
         {
             if (chat != null) resumables.Push(chat);
             chat = null;
@@ -422,11 +452,12 @@ namespace Dialogic
             resumables.Clear();
         }
 
-        public int ResumeLast(bool mustBeResumable = false)
+        public int Resume(bool mustBeResumable = false)
         {
             if (resumables.IsNullOrEmpty())
             {
-                throw new DialogicException("No Chat to resume");
+                Console.WriteLine("No Chat to resume... Waiting");
+                return -1;
             }
 
             if (chat != null)
@@ -448,7 +479,5 @@ namespace Dialogic
 
             return Util.Millis();
         }
-
-
     }
 }

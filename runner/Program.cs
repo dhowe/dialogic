@@ -10,7 +10,7 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
+            new MockGameEngine(srcpath + "/data/term.gs").Run();
         }
 
         public static string srcpath = "../../../dialogic";
@@ -30,18 +30,31 @@ namespace runner
 
         private ChatRuntime dialogic; 
         private EventArgs gameEvent;
+        bool interrupted = false;
         string diaText, diaType;
         string[] diaOpts;
 
         public MockGameEngine(string fileOrFolder)
         {
-            dialogic = new ChatRuntime(AppConfig.Speakers);
+            dialogic = new ChatRuntime(AppConfig.Actors);
             dialogic.ParseFile(fileOrFolder);
             dialogic.Run();
         }
 
         public void Run()
         {
+            // TODO: test suspend/resume on user events
+
+            var now = Util.Millis();
+            Timers.SetTimeout(Util.Rand(2000,10000), () =>
+            {
+                interrupted = true;
+                Console.WriteLine("<user-event#tap>" +
+                    " after " + Util.Millis(now) + "ms\n");
+
+                gameEvent = new UserEvent("Tap");
+            });
+
             while (true)
             {
                 Thread.Sleep(30);
@@ -52,6 +65,7 @@ namespace runner
 
         private void HandleEvent(ref IUpdateEvent ue)
         {
+            interrupted = false;
             diaText = ue.Text();
             diaType = ue.Type();
 
@@ -73,12 +87,15 @@ namespace runner
 
                     Timers.SetTimeout(5000, () =>
                     {
-                        Console.WriteLine("<resume-event#>" +
-                            " after " + Util.Millis(now) + "ms\n");
+                        if (!interrupted)
+                        {
+                            Console.WriteLine("<resume-event#>" +
+                                " after " + Util.Millis(now) + "ms\n");
 
-                        // send ResumeEvent after 5 sec ('#Game' or '{type=a,stage=b,last=true}')
+                            // send ResumeEvent after 5 sec ('#Game' or '{type=a,stage=b,last=true}')
 
-                        gameEvent = new ResumeEvent();
+                            gameEvent = new ResumeEvent();
+                        }
                     });
 
                     diaText = ("(" + (diaType + " " + 

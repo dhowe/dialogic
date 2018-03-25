@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
-    /// /////////////////////////////////////////////////////////
-
     /**
      * Tells Dialogic that the User has made a specific choice in response
      * to a prompt
@@ -12,6 +10,15 @@ namespace Dialogic
     public interface IChoice
     {
         int GetChoiceIndex();
+    }
+
+    /**
+     * Tells Dialogic that the User has performed a specific action, repesented by
+     * the eventType.
+     */
+    public interface IUserEvent
+    {
+        string GetEventType();
     }
 
     /**
@@ -28,18 +35,16 @@ namespace Dialogic
      * Suspends the current Chat. The current chat (or a new chat) can be resumed by 
      * sending a ResumeEvent.
      */
-    public interface ISuspend { }
+    public interface ISuspend
+    {
+    }
 
     /**
      * Tells Dialogic to clear its stack of past chats, leaving none to be resumed
      */
-    public interface IClear  { }
-
-    /**
-     * Superclass for specific GameEvents
-     */
-    public abstract class GameEvent : EventArgs { }
-
+    public interface IClear
+    {
+    }
 
     /**
      * Sent by Dialogic whenever an IEmittable Command (e.g., Say, Ask, Do, Wait) 
@@ -64,6 +69,11 @@ namespace Dialogic
 
 
     /**
+     * Superclass for specific GameEvents
+     */
+    public abstract class GameEvent : EventArgs { }
+
+    /**
      * Basic implementation of ISuspend
      */
     public class SuspendEvent : GameEvent, ISuspend { }
@@ -77,9 +87,27 @@ namespace Dialogic
     /**
      * Basic implementation of IResume
      */
+    public class UserEvent : GameEvent, IUserEvent
+    {
+        protected readonly string type;
+
+        public UserEvent(string type) : base()
+        {
+            this.type = type;
+        }
+
+        public string GetEventType()
+        {
+            return type;
+        }
+    }
+
+    /**
+     * Basic implementation of IResume
+     */
     public class ResumeEvent : GameEvent, IResume
     {
-        public readonly string data;
+        protected readonly string data;
 
         public ResumeEvent(string chatLabel = null) : base()
         {

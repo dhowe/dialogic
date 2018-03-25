@@ -571,8 +571,11 @@ namespace Dialogic
         {
             if (resetCursor) Reset();
 
-            lastRunAt = Util.EpochMs();
+            // Q: Do we reset this stuff on resume ?
+            // Prob not in case of staleness
 
+            lastRunAt = Util.EpochMs();
+           
             // Q: what about (No-Label) WAIT events ?
             IncrementStaleness();
         }

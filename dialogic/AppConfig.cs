@@ -4,26 +4,16 @@ using Dialogic;
 
 namespace Tendar
 {
-    public static class AppConfig
+    public static class AppConfig //: IAppConfig
     {
-        public static List<IActor> Speakers = new List<IActor>();
+        public static List<IActor> Actors = new List<IActor>();
         public static Func<Command, bool> Validator = ValidateCommand;
-
-        public static IDictionary<string, double> STALENESS_BY_TYPE
-            = new Dictionary<string, double>()
-        {
-            { "plot", 5.0 }, { "shake", 5.0 }, { "tap", 5.0 }, { "critic", 5.0 },
-            { "tankResp", 5.0 }, { "hit", 5.1 }, { "poke", 5.0 }, { "hungry", 5.0 },
-            { "eatResp", 5.0 }, { "poop", 5.0 }, { "pooped", 5.0 }, { "seeEmo", 5.0 },
-            { "capReq", 5.0 }, { "capSuc", 5.0 }, { "capProg", 5.0 }, { "capFail", 5.0 },
-            { "hello", 5.0 }, { "return", 5.0 }, { "rand",5.0}
-        };
 
         static AppConfig()
         {
-            var customCmd = new CommandDef("NVM", typeof(Tendar.Nvm));
-            Speakers.Add(new Actor("Guppy", true, Validator, customCmd));
-            Speakers.Add(new Actor("Tendar"));
+            Actors.Add(new Actor("Guppy", true, Validator, 
+                new CommandDef("NVM", typeof(Tendar.Nvm))));
+            Actors.Add(new Actor("Tendar"));
         }
 
         private static bool ValidateCommand(Command c)
@@ -41,7 +31,7 @@ namespace Tendar
             }
             else if (c.GetType() == typeof(Find))
             {
-                // add default staleness if not otherwise specified
+                /* add default staleness if not otherwise specified
                 if (!c.HasMeta(Meta.STALENESS))
                 {
                     var type = c.GetMeta("type");
@@ -49,7 +39,7 @@ namespace Tendar
                     {
                         var typeStr = ((Constraint)type).value;
 
-                        // TODO: change this to per-Find values ***
+                        // TODO: change this to per-Find values
                         if (STALENESS_BY_TYPE.ContainsKey(typeStr))
                         {
                             var ds = STALENESS_BY_TYPE[(string)typeStr];
@@ -57,7 +47,7 @@ namespace Tendar
                                 (Operator.LT, Meta.STALENESS, ds.ToString()));
                         }
                     }
-                }
+                }*/
             }
             return true;
         }
@@ -77,4 +67,10 @@ namespace Tendar
             return "Nvm";
         }
     }
+
+    //public interface IAppConfig {
+    //    List<IActor> GetActors();
+    //    List<CommandDef> GetCommands();
+    //    Func<Command, bool>[] GetValidators();
+    //}
 }
