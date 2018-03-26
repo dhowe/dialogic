@@ -13,7 +13,7 @@ namespace Dialogic
 
     public class Actor : IActor
     {
-        public static string Default = "Default";
+        public static IActor Default;
 
         readonly string name;
         readonly bool isDefault;
@@ -32,7 +32,7 @@ namespace Dialogic
             this.isDefault = isDefault;
             this.validator = validator;
             this.commands = commands;
-            if (isDefault) Default = name;
+            if (isDefault) Default = this;
         }
 
         public string Name()
@@ -42,7 +42,7 @@ namespace Dialogic
 
         public bool IsDefault()
         {
-            return isDefault;
+            return this == Default;
         }
 
         public Func<Command, bool> Validator()

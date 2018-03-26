@@ -18,8 +18,8 @@ namespace Dialogic
 
         const string TXT = @"([^#}{]+)?\s*";
         const string LBL = @"(#[A-Za-z][\S]*)?\s*";
-        const string MTA = @"(?:\{(.+?)\})?\s*";
-        const string ACT = @"(?:([A-Za-z][A-Za-z0-9_-]+):)?\s*";
+        const string MTD = @"(?:\{(.+?)\})?\s*";
+        const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
 
         static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
@@ -32,7 +32,7 @@ namespace Dialogic
 
         internal ChatParser(ChatRuntime runtime)
         {
-            this.LineParser = new Regex(ACT + TypesRegex() + TXT + LBL + MTA);
+            this.LineParser = new Regex(ACTR + TypesRegex() + TXT + LBL + MTD);
             this.parsedCommands = new Stack<Command>();
             this.chats = new List<Chat>();
             this.runtime = runtime;
@@ -88,12 +88,13 @@ namespace Dialogic
             RunValidators(c, line, lineNo);
 
             // But before post-validate
-            return c.PostValidate();
+            return c;//.PostValidate();
         }
 
         private List<string> DoSubDivision(string line, int lineNo)
         {
             Match match = LineParser.Match(line);
+
 
             if (match.Groups.Count < 6)
             {
@@ -137,12 +138,13 @@ namespace Dialogic
         {
             Command c = null;
 
-            parts.Apply((actor, cmd, text, label, meta) =>
+            parts.Apply((spkr, cmd, text, label, meta) =>
             {
                 Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] : typeof(Say);
 
                 try
                 {
+                    //Console.WriteLine("META:'"+meta+"'");
                     c = Command.Create(type, text, label, RE.MetaSplit.Split(meta));
                 }
                 catch (Exception ex)
@@ -150,17 +152,24 @@ namespace Dialogic
                     throw new ParseException(line, lineNo, ex.Message);
                 }
 
-                if (!string.IsNullOrEmpty(actor))
-                {
-                    if (runtime == null || runtime.ActorExists(actor))
-                    {
-                        throw new ParseException("Unknown actor: '" + actor + "'");
-                    }
-                    c.actor = actor;
-                }
+                HandleActor(spkr, c, line, lineNo);
             });
 
             return HandleCommand(c, line, lineNo);
+        }
+
+        private void HandleActor(string spkr, Command c, string line, int lineNo)
+        {
+            c.actor = Actor.Default;
+            if (!string.IsNullOrEmpty(spkr) && runtime != null)
+            {
+                c.actor = runtime.FindActor(spkr);
+                if (c.actor == null)
+                {
+                    throw new ParseException(line, lineNo, "Unknown actor: '" + spkr + "'");
+                }
+                if (!Equals(c.actor, Actor.Default)) c.SetMeta(Meta.ACTOR, c.actor.Name());
+            }
         }
 
         private Command HandleCommand(Command c, string line, int lineNo)

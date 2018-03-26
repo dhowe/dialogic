@@ -97,16 +97,15 @@ namespace Dialogic
     /// </summary>
     public static class RE
     {
-        internal const string OP1 = @"(!?!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
-        internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)";
+        internal const string OP1 = @"^(!?!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
+        internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        internal const string MSP = @"\s*,\s*";
-        public static Regex MetaSplit = new Regex(MSP);
+        public static Regex MetaSplit = new Regex(@"\s*,\s*");
     }
 
     /// <summary>
@@ -213,10 +212,10 @@ namespace Dialogic
             }
 
             groupNo = 0;
-            Console.WriteLine("\n  match.Value == \"{0}\"", match.Value);
+            Console.WriteLine("\n  match.Value = \"{0}\"", match.Value);
             foreach (Group mm in match.Groups)
             {
-                Console.WriteLine("  match.Groups[{0}].Value == \"{1}\"",
+                Console.WriteLine("  match.Groups[{0}].Value = \"{1}\"",
                     groupNo, match.Groups[groupNo++].Value);
             }
 
@@ -226,7 +225,7 @@ namespace Dialogic
                 int captureNo = 0;
                 foreach (Capture cc in mm.Captures)
                 {
-                    Console.WriteLine("  match.Groups[{0}].Captures[{1}].Value == \"{2}\"",
+                    Console.WriteLine("  match.Groups[{0}].Captures[{1}].Value = \"{2}\"",
                         groupNo, captureNo, match.Groups[groupNo].Captures[captureNo++].Value); //**
                 }
                 groupNo++;
@@ -521,38 +520,6 @@ namespace Dialogic
         }
     }
 
-    /*
-    public class Constraints
-    {
-        IDictionary<string, object> pairs;
-
-        public Constraints()
-        {
-            pairs = new Dictionary<string, object>();
-        }
-
-        public Constraints(Constraint c)
-        {
-            pairs = new Dictionary<string, object>() { { c.name, c } };
-        }
-
-        public Constraints Add(Constraint c)
-        {
-            pairs.Add(c.name, c);
-            return this;
-        }
-
-        public Constraints Add(string key, string value, ConstraintType type = ConstraintType.Soft)
-        {
-            return Add(new Constraint(key, value, type));
-        }
-
-        public IDictionary<string, object> AsDict()
-        {
-            return pairs;
-        }
-    }*/
-
     public class Operator
     {
         private enum OpType { EQUALITY, COMPARISON, MATCHING }
@@ -790,6 +757,7 @@ namespace Dialogic
                     s = s.Substring(0, s.Length - 1) + " }";
                 }
             }
+            //else if (o is Match) {}
             else if (o is object[])
             {
                 var arr = ((object[])o);

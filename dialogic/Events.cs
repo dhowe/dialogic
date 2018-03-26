@@ -215,7 +215,8 @@ namespace Dialogic
         {
             if (!data.ContainsKey(Meta.ACTOR))
             {
-                return Dialogic.Actor.Default;
+                var def = Dialogic.Actor.Default;
+                return def != null ? def.Name() : null;
             }
             return (string)data[Meta.ACTOR];
         }

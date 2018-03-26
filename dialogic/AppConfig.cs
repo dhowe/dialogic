@@ -4,10 +4,12 @@ using Dialogic;
 
 namespace Tendar
 {
-    public static class AppConfig //: IAppConfig
+    public static class AppConfig
     {
         public static List<IActor> Actors = new List<IActor>();
         private static Func<Command, bool> Validator = ValidateCommand;
+
+        const string STAGE = "stage", TYPE = "type";
 
         static AppConfig()
         {
@@ -22,11 +24,11 @@ namespace Tendar
             {
                 if (!(c.HasMeta("NoStart") || c.HasMeta("noStart")))
                 {
-                    if (!c.HasMeta("type")) throw new ParseException
-                        ("missing required meta-key 'type'");
+                    if (!c.HasMeta(TYPE)) throw new ParseException
+                        ("missing required meta-key '"+TYPE+"'");
 
-                    if (!c.HasMeta(Meta.STAGE)) throw new ParseException
-                        ("missing required meta-key '" + Meta.STAGE + "'");
+                    if (!c.HasMeta(STAGE)) throw new ParseException
+                        ("missing required meta-key '" + STAGE + "'");
                 }
             }
             else if (c.GetType() == typeof(Find))

@@ -7,7 +7,7 @@ namespace Dialogic
     [TestFixture]
     public class DialogicTests
     {
-        [Test]
+        /*[Test]
         public void TestPostValidate()
         {
             Go g = new Go().Init("a");
@@ -22,7 +22,7 @@ namespace Dialogic
             c.PostValidate();
             Assert.That(c.Text, Is.EqualTo("Yes"));
             Assert.That(c.action.Text, Is.EqualTo("a"));
-        }
+        }*/
 
         [Test]
         public void TestSecStrToMs()

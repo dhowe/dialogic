@@ -19,7 +19,7 @@ namespace Dialogic
             this.DelayMs = Util.ToMillis(Defaults.SAY_DURATION);
         }
 
-        public override Command PostValidate()
+        protected internal override Command Validate()
         {
             if (Text.Length < 1) throw new ParseException("SAY requires text");
             return this;
@@ -57,10 +57,9 @@ namespace Dialogic
          *      b. Meta-data modifiers
          *      c. Character mood (TODO)
          */
-        public override int ComputeDuration() // Config?
+        protected internal override int ComputeDuration() // Config?
         {
-            return Util.Round
-                (GetTextLenScale() * GetMetaSpeedScale() * DelayMs);
+            return Util.Round(GetTextLenScale() * GetMetaSpeedScale() * DelayMs);
         }
 
         protected double GetTextLenScale()
@@ -107,7 +106,7 @@ namespace Dialogic
 
     public class Do : Command, ISendable
     {
-        public override Command PostValidate()
+        protected internal override Command Validate()
         {
             ValidateTextLabel();
             if (HasMeta(Meta.DELAY))
@@ -202,7 +201,7 @@ namespace Dialogic
             this.Timeout = Util.ToMillis(Defaults.ASK_TIMEOUT);
         }
 
-        public override int ComputeDuration()
+        protected internal override int ComputeDuration()
         {
             return DelayMs;
         }
@@ -268,7 +267,7 @@ namespace Dialogic
         {
             string s = base.ToString();
             if (options != null) options.ForEach(o => s += "\n  " + o);
-            return s + MetaStr();
+            return s;
         }
     }
 
@@ -297,14 +296,15 @@ namespace Dialogic
 
             this.action = label.Length > 0 ?
                 Command.Create(typeof(Go), String.Empty, label, metas) : NOP;
+
+            Validate();
         }
 
-        public override Command PostValidate()
+        protected internal override Command Validate()
         {
-            this.action.PostValidate();
+            this.action.Validate();
             return this;
         }
-
 
         public override string ToString()
         {
@@ -333,6 +333,7 @@ namespace Dialogic
         public override void Init(string text, string label, string[] metas)
         {
             ParseMeta(metas);
+            Validate();
         }
 
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
@@ -344,7 +345,7 @@ namespace Dialogic
             return realized; // for convenience
         }
 
-        public override Command PostValidate()
+        protected internal override Command Validate()
         {
             //Console.WriteLine("STALE: "+ GetMeta(Meta.STALENESS)+ GetMeta(Meta.STALENESS).GetType());
             if (!HasMeta(Meta.STALENESS))
@@ -355,11 +356,6 @@ namespace Dialogic
 
             return this;
         }
-
-        //public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
-        //{
-        //    return realized;
-        //}
 
         public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
         {
@@ -374,16 +370,14 @@ namespace Dialogic
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
-                if (String.IsNullOrEmpty(pairs[i]))
-                {
-                    throw new ParseException("Invalid query");
-                }
+                if (String.IsNullOrEmpty(pairs[i])) throw new ParseException
+                    ("Invalid query: {empty}");
 
                 Match match = RE.FindMeta.Match(pairs[i]);
-                if (match.Groups.Count != 4)
-                {
-                    throw new ParseException("Invalid query: '" + pairs[i] + "'");
-                }
+                //Util.ShowMatch(match);
+
+                if (match.Groups.Count != 4) throw new ParseException
+                    ("Invalid query: '" + pairs[i] + "'");
 
                 string key = match.Groups[1].Value;
                 ConstraintType ctype = ConstraintType.Soft;
@@ -399,8 +393,8 @@ namespace Dialogic
 
                 if (meta == null) meta = new Dictionary<string, object>();
 
-                meta.Add(key, new Constraint(Operator.FromString(match.Groups[2].Value),
-                    key, match.Groups[3].Value, ctype));
+                meta.Add(key, new Constraint(Operator.FromString
+                    (match.Groups[2].Value), key, match.Groups[3].Value, ctype));
             }
         }
 
@@ -427,6 +421,7 @@ namespace Dialogic
         public override void Init(string text, string label, string[] metas)
         {
             this.Text = text.Length > 0 ? text : label;
+            Validate();
         }
 
         public new Go Init(string label)
@@ -435,7 +430,7 @@ namespace Dialogic
             return this;
         }
 
-        public override Command PostValidate()
+        protected internal override Command Validate()
         {
             ValidateTextLabel();
             return this;
@@ -508,13 +503,13 @@ namespace Dialogic
             //return realized;
         }
 
-        public override Command PostValidate()
+        protected internal override Command Validate()
         {
             if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
             {
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
-                
+
             // Note: realization happens on Init (just once) in Chat
             if (HasMeta())
             {
@@ -532,7 +527,7 @@ namespace Dialogic
         {
             this.Text = text;
             ParseMeta(metas);
-            //PostValidate(); // TODO:  should be called by parser
+            Validate();
         }
 
         protected override string MetaStr()
@@ -574,7 +569,7 @@ namespace Dialogic
             // Prob not in case of staleness
 
             lastRunAt = Util.EpochMs();
-           
+
             // Q: what about (No-Label) WAIT events ?
             IncrementStaleness();
         }
@@ -582,12 +577,11 @@ namespace Dialogic
 
     public class Meta
     {
-        public const string TYPE =  "__type__";
-        public const string TEXT =  "__text__";
-        public const string OPTS =  "__opts__";
-        public const string ACTOR = "__actor__";
+        public const string TYPE = "__type__";
+        public const string TEXT = "__text__";
+        public const string OPTS = "__opts__";
 
-        public const string STAGE = "stage";
+        public const string ACTOR = "actor";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
         public const string STALENESS = "staleness";
@@ -664,20 +658,29 @@ namespace Dialogic
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
-                //Console.WriteLine(i+") "+args[i]);
+                //Console.WriteLine(i+") "+pairs[i]);
                 if (!string.IsNullOrEmpty(pairs[i]))
                 {
                     string[] parts = pairs[i].Split('=');
-
-                    if (parts.Length != 2)
-                    {
-                        throw new Exception("Expected 2 parts for meta key/val," +
-                                            " but found " + parts.Length + ": " + parts.Stringify());
-                    }
-
-                    SetMeta(parts[0].Trim(), parts[1].Trim());
+                    ValidateMetaPairs(parts);
+                    SetMeta(parts[0], parts[1]);
                 }
             }
+        }
+
+        protected void ValidateMetaPairs(string[] prs)
+        {
+            if (prs.Length != 2) throw new ParseException
+                ("Expected 2 parts for meta key/val, but found "
+                 + prs.Length + ": " + prs.Stringify());
+
+            for (int i = 0; i < prs.Length; i++) prs[i] = prs[i].Trim();
+
+            if (prs[0].IndexOf(' ') > -1) throw new ParseException
+                ("Meta keys cannot contains spaces: '" + prs[0] + "'");
+
+            if (prs[1].IndexOf(' ') > -1) throw new ParseException
+                ("Meta values cannot contains spaces: '" + prs[1] + "'");
         }
     }
 
@@ -699,9 +702,7 @@ namespace Dialogic
 
         public string Text;
 
-        public string actor = Actor.Default;
-
-        //public int IndexInChat = -1; ?
+        public IActor actor;
 
         public Chat parent;
 
@@ -710,24 +711,6 @@ namespace Dialogic
             this.DelayMs = 0;
             this.Id = ++IDGEN;
             this.realized = new Dictionary<string, object>();
-        }
-
-        protected void ValidateTextLabel()
-        {
-            if (String.IsNullOrEmpty(Text)) throw BadArg
-                (TypeName().ToUpper() + " requires a literal #Label");
-
-            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
-        }
-
-        public string GetText(bool real = false)
-        {
-            return real ? (string)realized[Meta.TEXT] : Text;
-        }
-
-        public string GetActor()
-        {
-            return actor;
         }
 
         public static Command Create(Type type, string text, string label, string[] metas)
@@ -743,6 +726,30 @@ namespace Dialogic
             this.Text = text.Length > 0 ? text : label;
             ParseMeta(metas);
             HandleMetaTiming();
+            Validate();
+        }
+
+        protected void ValidateTextLabel()
+        {
+            if (String.IsNullOrEmpty(Text)) throw BadArg
+                (TypeName().ToUpper() + " requires a literal #Label");
+
+            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
+        }
+
+        public string GetText(bool real = false)
+        {
+            return real ? (string)realized[Meta.TEXT] : Text;
+        }
+
+        public IActor GetActor()
+        {
+            return actor;
+        }
+
+        protected internal virtual Command Validate()
+        {
+            return this;
         }
 
         protected virtual void HandleMetaTiming()
@@ -768,7 +775,7 @@ namespace Dialogic
             if (this is ISendable)
             {
                 realized[Meta.TEXT] = Realizer.Do(Text, globals);
-                realized[Meta.ACTOR] = GetActor();
+                realized[Meta.ACTOR] = GetActor().Name();
                 realized[Meta.TYPE] = TypeName();
             }
 
@@ -815,29 +822,14 @@ namespace Dialogic
             throw new ParseException(msg);
         }
 
-        public override string ToString()
-        {
-            return (TypeName().ToUpper() + " " + Text).Trim() + (" " + MetaStr()).TrimEnd();
-        }
-
-        protected static string QQ(string text)
-        {
-            return "'" + text + "'";
-        }
-
-        public virtual int ComputeDuration()
+        protected internal virtual int ComputeDuration()
         {
             return DelayMs;
         }
 
-        /// <summary>
-        /// Run after all validators; can be used to ensure default values are set
-        /// if not otherwise specified directly in the script or in a validator
-        /// </summary>
-        /// <returns>The validated command</returns>
-        public virtual Command PostValidate()
+        public override string ToString()
         {
-            return this;
+            return (TypeName().ToUpper() + " " + Text).Trim() + (" " + MetaStr()).TrimEnd();
         }
     }
 }

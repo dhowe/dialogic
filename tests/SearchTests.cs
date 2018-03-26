@@ -49,7 +49,7 @@ namespace Dialogic
             };
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents, NO_VALIDATORS);
-            Chat result = new ChatRuntime(chats).FindByName("c1");
+            Chat result = new ChatRuntime(chats).FindChat("c1");
             //chats.ForEach(c=>Console.WriteLine(c));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Text, Is.EqualTo("c1"));
@@ -60,7 +60,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c2"));
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
-            Chat res = new ChatRuntime(chats).FindByName("c2");
+            Chat res = new ChatRuntime(chats).FindChat("c2");
             Assert.That(res.Text, Is.EqualTo("c2"));
         }
 
@@ -449,7 +449,7 @@ namespace Dialogic
             Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
 
             var crt = new ChatRuntime(chats);
-            c = crt.FindByName("#c1");
+            c = crt.FindChat("#c1");
             c.Staleness(6);
             Assert.That(c, Is.Not.Null);
             Assert.That(c.Text, Is.EqualTo("c1"));

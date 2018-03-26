@@ -14,6 +14,13 @@ namespace Dialogic
     ///     dialogic.ParseFile(scriptFolder);
     ///     dialogic.Run("#FirstChat");
     /// \endcode
+    /// 
+    /// Or configure with a List of IActors
+    /// \code
+    ///     ChatRuntime dialogic = new ChatRuntime(theActors);
+    ///     dialogic.ParseFile(scriptFolder);
+    ///     dialogic.Run("#FirstChat");
+    /// \endcode
     /// </summary>
     public class ChatRuntime
     {
@@ -37,17 +44,15 @@ namespace Dialogic
         };
 
         internal bool validatorsDisabled;
+        internal ChatScheduler scheduler;
+        internal int nextEventTime;
 
         private bool logInitd;
-        private int nextEventTime;
-
         private Thread searchThread;
         private List<Chat> chats;
-        private Find findDelegate;
-        private ChatScheduler scheduler;
         private ChatParser parser;
-
         private List<IActor> actors;
+        private AppEventHandler appEvents;
         private List<Func<Command, bool>> validators;
 
         public ChatRuntime(List<IActor> actors) : this(null, actors) { }
@@ -57,6 +62,7 @@ namespace Dialogic
             this.chats = chats;
             this.parser = new ChatParser(this);
             this.scheduler = new ChatScheduler(this);
+            this.appEvents = new AppEventHandler(this);
             RegisterActors(actors);
         }
 
@@ -89,7 +95,7 @@ namespace Dialogic
         {
             if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
 
-            var first = chatLabel != null ? FindByName(chatLabel) : chats[0];
+            var first = chatLabel != null ? FindChat(chatLabel) : chats[0];
             scheduler.Launch(first);
         }
 
@@ -100,11 +106,10 @@ namespace Dialogic
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
         {
-            return ge != null ? HandleGameEvent(ref ge, globals) : HandleChatEvent(globals);
+            return ge != null ? appEvents.OnEvent(ref ge, globals) : HandleChatEvent(globals);
         }
 
-
-        public Chat FindByName(string label)
+        public Chat FindChat(string label)
         {
             if (label.StartsWith("#", Util.IC)) label = label.Substring(1);
 
@@ -121,6 +126,17 @@ namespace Dialogic
             return result;
         }
 
+        public IActor FindActor(string name)
+        {
+            if (name.StartsWith("#", Util.IC)) name = name.Substring(1);
+
+            foreach (var actor in actors)
+            {
+                if (actor.Name() == name) return actor;
+            }
+            return null;
+        }
+
         // ----------------------------------------------------------------
 
         internal List<Func<Command, bool>> Validators()
@@ -133,15 +149,6 @@ namespace Dialogic
             return parser;
         }
 
-        internal bool ActorExists(string name)
-        {
-            foreach (var actor in actors)
-            {
-                if (actor.Name() == name) return true;
-            }
-            return false;
-        }
-
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
             scheduler.Suspend();
@@ -151,7 +158,7 @@ namespace Dialogic
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = (finder is Go) ? FindByName(((Go)finder).Text) :
+                Chat chat = (finder is Go) ? FindChat(((Go)finder).Text) :
                     this.DoFind(finder, globals);
 
                 if (chat == null) throw new FindException(finder);
@@ -187,106 +194,6 @@ namespace Dialogic
                     validators.Add(val);
                 }
             });
-        }
-
-
-        private IUpdateEvent HandleGameEvent(ref EventArgs ge, IDictionary<string, object> globals)
-        {
-            if (ge is IUserEvent) return UserActionHandler(ref ge, globals);
-            if (ge is ISuspend) return SuspendHandler(ref ge, globals);
-            if (ge is IResume) return ResumeHandler(ref ge, globals);
-            if (ge is IChoice) return ChoiceHandler(ref ge, globals);
-            if (ge is IClear) return ClearHandler(ref ge, globals);
-
-            throw new DialogicException("Unexpected event-type: " + ge.GetType());
-        }
-
-        private IUpdateEvent UserActionHandler(ref EventArgs ge, IDictionary<string, object> globals)
-        {
-            IUserEvent ue = (IUserEvent)ge;
-            var label = ue.GetEventType();
-            ge = null;
-
-            scheduler.Suspend();
-            scheduler.Launch("#On" + label + "Event");
-            return null;
-        }
-
-        private IUpdateEvent SuspendHandler(ref EventArgs ge, IDictionary<string, object> globals)
-        {
-            ge = null;
-            scheduler.Suspend();
-            return null;
-        }
-
-        private IUpdateEvent ClearHandler(ref EventArgs ge, IDictionary<string, object> globals)
-        {
-            ge = null;
-            scheduler.Clear();
-            return null;
-        }
-
-        private IUpdateEvent ResumeHandler(ref EventArgs ge, IDictionary<string, object> globals)
-        {
-            IResume ir = (IResume)ge;
-            var label = ir.ResumeWith();
-            ge = null;
-
-            if (String.IsNullOrEmpty(label))
-            {
-                nextEventTime = scheduler.Resume();
-            }
-            else if (label.StartsWith("#", Util.IC))
-            {
-                scheduler.Launch(label);
-            }
-            else // else, parse as FIND meta data
-            {
-                if (findDelegate == null) findDelegate = new Find();
-
-                try
-                {
-                    findDelegate.Init(label);
-                }
-                catch (ParseException e)
-                {
-                    throw new RuntimeParseException(e);
-                }
-
-                FindAsync(findDelegate, globals);
-            }
-
-            return null;
-        }
-
-        private IUpdateEvent ChoiceHandler(ref EventArgs ge, IDictionary<string, object> globals)
-        {
-            IChoice ic = (IChoice)ge;
-            var idx = ic.GetChoiceIndex();
-            ge = null;
-
-            if (idx < 0 || idx >= scheduler.prompt.Options().Count)
-            {
-                // bad index, so reprompt for now
-                Console.WriteLine("Invalid index " + idx + ", reprompting\n");
-                scheduler.prompt.Realize(globals); // re-realize
-                return new UpdateEvent(scheduler.prompt);
-            }
-            else
-            {
-                Opt opt = scheduler.prompt.Selected(idx);
-                //opt.Realize(globals); // not needed
-
-                if (opt.action != Command.NOP)
-                {
-                    FindAsync((Find)opt.action); // find next
-                }
-                else
-                {
-                    scheduler.chat = scheduler.prompt.parent; // just continue
-                }
-                return null;
-            }
         }
 
         private IUpdateEvent HandleChatEvent(IDictionary<string, object> globals)
@@ -335,15 +242,14 @@ namespace Dialogic
                 else
                 {
                     // Here the Chat has completed without redirecting 
-                    // so we check the stack for something to resume
+                    // so we check the stack for a chat to resume
 
-                    Console.WriteLine("<#" + scheduler.chat.Text + "-finished>");
-
+                    //Console.WriteLine("<#" + scheduler.chat.Text + "-finished>");
                     int nextEventMs = scheduler.Completed();
 
                     if (nextEventMs > -1)
                     {
-                        Console.WriteLine("<#" + scheduler.chat.Text + "-resumed>");
+                        //Console.WriteLine("<#" + scheduler.chat.Text + "-resumed>");
                         nextEventTime = nextEventMs;
                     }
                 }
@@ -450,7 +356,7 @@ namespace Dialogic
 
         internal void Launch(string label)
         {
-            var next = runtime.FindByName(label);
+            var next = runtime.FindChat(label);
             if (next == null) throw new DialogicException
                 ("Unable to find Chat: '" + label + "'");
             Launch(next);
