@@ -74,7 +74,6 @@ $(function() {
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
-<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="#properties">Properties</a> &#124;
 <a href="class_dialogic_1_1_command-members.html">List of all members</a>  </div>
@@ -83,7 +82,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Superclass for all Commands. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by <a class="el" href="class_dialogic_1_1_command.html#a0ab8006b33c9f46d2e18f0df269609ff" title="Run after all validators; can be used to ensure default values are set if not otherwise specified dir...">PostValidate()</a>.  
+<p>Superclass for all Commands. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by PostValidate().  
  <a href="class_dialogic_1_1_command.html#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Dialogic.Command:</div>
@@ -105,15 +104,15 @@ Inheritance diagram for Dialogic.Command:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a09f98b53b0f905862c354a2aa9d5d255"><td class="memItemLeft" align="right" valign="top"><a id="a09f98b53b0f905862c354a2aa9d5d255"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>GetText</b> (bool real=false)</td></tr>
-<tr class="separator:a09f98b53b0f905862c354a2aa9d5d255"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a249d912a3a69352c21984d58931f07ab"><td class="memItemLeft" align="right" valign="top"><a id="a249d912a3a69352c21984d58931f07ab"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>GetActor</b> ()</td></tr>
-<tr class="separator:a249d912a3a69352c21984d58931f07ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2122889022ae7f2ec3ec8aa3af9e524"><td class="memItemLeft" align="right" valign="top"><a id="ad2122889022ae7f2ec3ec8aa3af9e524"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>Init</b> (string text, string label, string[] metas)</td></tr>
 <tr class="separator:ad2122889022ae7f2ec3ec8aa3af9e524"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09f98b53b0f905862c354a2aa9d5d255"><td class="memItemLeft" align="right" valign="top"><a id="a09f98b53b0f905862c354a2aa9d5d255"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>GetText</b> (bool real=false)</td></tr>
+<tr class="separator:a09f98b53b0f905862c354a2aa9d5d255"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a081051f09320a3f4500a829eb527eb80"><td class="memItemLeft" align="right" valign="top"><a id="a081051f09320a3f4500a829eb527eb80"></a>
+<a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><b>GetActor</b> ()</td></tr>
+<tr class="separator:a081051f09320a3f4500a829eb527eb80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f8a0d7bd49ffc10ef7ff4f63abce343"><td class="memItemLeft" align="right" valign="top"><a id="a1f8a0d7bd49ffc10ef7ff4f63abce343"></a>
 virtual string&#160;</td><td class="memItemRight" valign="bottom"><b>TypeName</b> ()</td></tr>
 <tr class="separator:a1f8a0d7bd49ffc10ef7ff4f63abce343"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -123,12 +122,6 @@ virtual IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" v
 <tr class="memitem:a14b619fbe3a23f3578912c7fc05f7fc0"><td class="memItemLeft" align="right" valign="top"><a id="a14b619fbe3a23f3578912c7fc05f7fc0"></a>
 override string&#160;</td><td class="memItemRight" valign="bottom"><b>ToString</b> ()</td></tr>
 <tr class="separator:a14b619fbe3a23f3578912c7fc05f7fc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a618ec602ff8ca04eec7da2b82a0c47cf"><td class="memItemLeft" align="right" valign="top"><a id="a618ec602ff8ca04eec7da2b82a0c47cf"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>ComputeDuration</b> ()</td></tr>
-<tr class="separator:a618ec602ff8ca04eec7da2b82a0c47cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ab8006b33c9f46d2e18f0df269609ff"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_dialogic_1_1_command.html">Command</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a0ab8006b33c9f46d2e18f0df269609ff">PostValidate</a> ()</td></tr>
-<tr class="memdesc:a0ab8006b33c9f46d2e18f0df269609ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run after all validators; can be used to ensure default values are set if not otherwise specified directly in the script or in a validator  <a href="#a0ab8006b33c9f46d2e18f0df269609ff">More...</a><br /></td></tr>
-<tr class="separator:a0ab8006b33c9f46d2e18f0df269609ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_dialogic_1_1_meta"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_dialogic_1_1_meta')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_dialogic_1_1_meta.html">Dialogic.Meta</a></td></tr>
 <tr class="memitem:a2cd8e36bd424ee432b149d6f03e361e2 inherit pub_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a2cd8e36bd424ee432b149d6f03e361e2"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>HasMeta</b> ()</td></tr>
@@ -169,9 +162,9 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>PACKAGE</b> =
 <tr class="memitem:afcae3e59a746de587a4515cfa7c0694a"><td class="memItemLeft" align="right" valign="top"><a id="afcae3e59a746de587a4515cfa7c0694a"></a>
 string&#160;</td><td class="memItemRight" valign="bottom"><b>Text</b></td></tr>
 <tr class="separator:afcae3e59a746de587a4515cfa7c0694a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f48298169ec3b4dce6199b5ed52d762"><td class="memItemLeft" align="right" valign="top"><a id="a8f48298169ec3b4dce6199b5ed52d762"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>actor</b> = Actor.Default</td></tr>
-<tr class="separator:a8f48298169ec3b4dce6199b5ed52d762"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af742709e677ad75fbf2e9a1b8e079786"><td class="memItemLeft" align="right" valign="top"><a id="af742709e677ad75fbf2e9a1b8e079786"></a>
+<a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><b>actor</b></td></tr>
+<tr class="separator:af742709e677ad75fbf2e9a1b8e079786"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8fb4cb98c623e0de3446a9823f3f1fa"><td class="memItemLeft" align="right" valign="top"><a id="ad8fb4cb98c623e0de3446a9823f3f1fa"></a>
 <a class="el" href="class_dialogic_1_1_chat.html">Chat</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parent</b></td></tr>
 <tr class="separator:ad8fb4cb98c623e0de3446a9823f3f1fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,11 +179,8 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>TEXT</b> = &q
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>OPTS</b> = &quot;__opts__&quot;</td></tr>
 <tr class="separator:a2d84a950541aa436bbeb8ae1027adf06 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a577dbbd1f352ae754ca34240d0b1b5f8 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a577dbbd1f352ae754ca34240d0b1b5f8"></a>
-const string&#160;</td><td class="memItemRight" valign="bottom"><b>ACTOR</b> = &quot;__actor__&quot;</td></tr>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>ACTOR</b> = &quot;actor&quot;</td></tr>
 <tr class="separator:a577dbbd1f352ae754ca34240d0b1b5f8 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af741cd3185f372f9ee5fcc4f84aa3ac2 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="af741cd3185f372f9ee5fcc4f84aa3ac2"></a>
-const string&#160;</td><td class="memItemRight" valign="bottom"><b>STAGE</b> = &quot;stage&quot;</td></tr>
-<tr class="separator:af741cd3185f372f9ee5fcc4f84aa3ac2 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31a76e1ebaa402a1ab777cace3e960d1 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a31a76e1ebaa402a1ab777cace3e960d1"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>DELAY</b> = &quot;delay&quot;</td></tr>
 <tr class="separator:a31a76e1ebaa402a1ab777cace3e960d1 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,12 +224,9 @@ virtual string&#160;</td><td class="memItemRight" valign="bottom"><b>MetaStr</b>
 <tr class="memitem:ae2a2863e76f96063cfdbf071c38c6ae0 inherit pro_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="ae2a2863e76f96063cfdbf071c38c6ae0"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseMeta</b> (string[] pairs)</td></tr>
 <tr class="separator:ae2a2863e76f96063cfdbf071c38c6ae0 inherit pro_methods_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-methods"></a>
-Static Protected Member Functions</h2></td></tr>
-<tr class="memitem:a28c334c550df7b6e58605721af343472"><td class="memItemLeft" align="right" valign="top"><a id="a28c334c550df7b6e58605721af343472"></a>
-static string&#160;</td><td class="memItemRight" valign="bottom"><b>QQ</b> (string text)</td></tr>
-<tr class="separator:a28c334c550df7b6e58605721af343472"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b3b59c6c1619e89b78fb497bc4540f3 inherit pro_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a8b3b59c6c1619e89b78fb497bc4540f3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>ValidateMetaPairs</b> (string[] prs)</td></tr>
+<tr class="separator:a8b3b59c6c1619e89b78fb497bc4540f3 inherit pro_methods_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -264,39 +251,8 @@ IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="b
 <tr class="separator:a4c639b02df04ef52ace5dda5464d0416 inherit pro_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Superclass for all Commands. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by <a class="el" href="class_dialogic_1_1_command.html#a0ab8006b33c9f46d2e18f0df269609ff" title="Run after all validators; can be used to ensure default values are set if not otherwise specified dir...">PostValidate()</a>. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a0ab8006b33c9f46d2e18f0df269609ff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0ab8006b33c9f46d2e18f0df269609ff">&#9670;&nbsp;</a></span>PostValidate()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="class_dialogic_1_1_command.html">Command</a> Dialogic.Command.PostValidate </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Run after all validators; can be used to ensure default values are set if not otherwise specified directly in the script or in a validator </p>
-<dl class="section return"><dt>Returns</dt><dd>The validated command</dd></dl>
-
-<p>Reimplemented in <a class="el" href="class_dialogic_1_1_chat.html#a2f482afbf740fa2a81d8a5b3eab2ef0a">Dialogic.Chat</a>, <a class="el" href="class_dialogic_1_1_go.html#ae1180ce419c27cf154b071a5a15b1383">Dialogic.Go</a>, <a class="el" href="class_dialogic_1_1_find.html#ab6cc9223d00115a203271dca2899a060">Dialogic.Find</a>, <a class="el" href="class_dialogic_1_1_opt.html#a5f5070c9437b4fc81fae2f9202484c41">Dialogic.Opt</a>, <a class="el" href="class_dialogic_1_1_do.html#ab19c166d974f4eff4dd384dd98a0d17f">Dialogic.Do</a>, and <a class="el" href="class_dialogic_1_1_say.html#ac369c3d1459a903268c5536b10943d78">Dialogic.Say</a>.</p>
-
-</div>
-</div>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<div class="textblock"><p>Superclass for all Commands. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by PostValidate(). </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>dialogic/Commands.cs</li>
 </ul>
 </div><!-- contents -->

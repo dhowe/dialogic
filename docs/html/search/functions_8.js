@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['s',['S',['../class_dialogic_1_1_modifiers.html#aa77a087a68ed4f896f1a3f2dea2dc71e',1,'Dialogic::Modifiers']]]
+  ['tomillis',['ToMillis',['../class_dialogic_1_1_util.html#a37840bebacbbc886a2f8aa4e61022aec',1,'Dialogic::Util']]]
 ];
