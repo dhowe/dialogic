@@ -152,6 +152,11 @@ namespace Dialogic
             return null;
         }
 
+        public bool EventQueued ()
+        {
+            return (nextEventTime > Util.Millis());
+        }
+
         private void ComputeNextEventTime(Command cmd)
         {
             nextEventTime = cmd.DelayMs >= 0 ? Util.Millis()
