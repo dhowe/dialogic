@@ -101,7 +101,7 @@ namespace Dialogic
             if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
 
             var first = chatLabel != null ? FindChat(chatLabel) : chats[0];
-            scheduler.Launch(first);
+            scheduler.Start(first);
         }
 
         public Chat FindChat(string label)
@@ -150,7 +150,7 @@ namespace Dialogic
 
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            scheduler.Completed(false);             // branching, mark as done
+            scheduler.Finish(false);             // branching, mark as done
             scheduler.Suspend();
 
             int ts = Util.Millis();
@@ -163,7 +163,7 @@ namespace Dialogic
 
                 if (chat == null) throw new FindException(finder);
 
-                scheduler.Launch(chat);
+                scheduler.Start(chat);
 
             })).Start();
         }
@@ -195,8 +195,6 @@ namespace Dialogic
                 }
             });
         }
-
-
 
         // testing only ------------------------------------------
 
@@ -269,65 +267,12 @@ namespace Dialogic
     ///   Chat-Suspended: chat!=null,net=-1 -> waiting (either on a Wait or Prompt)
     ///   Waiting:        chat=null, net=-1 -> waiting (on a SuspendEvent, or all Chats done)
     /// </summary>
-    internal class ChatStateMachine
+    internal class ChatScheduler
     {
         internal enum State { RUNNING, WAITING, SUSPENDED }; // unused
 
         internal State state;
-        internal Chat chat;
-        internal Ask prompt;
-        internal ChatRuntime runtime;
-        internal Stack<Chat> resumables;
-        internal UpdateEvent chatEvent;
-        internal bool debugCycle = true;
-        internal int nextEventTime;
-
-        internal ChatStateMachine(ChatRuntime runtime)
-        {
-            this.runtime = runtime;
-            this.resumables = new Stack<Chat>();
-            Trigger(State.WAITING);
-        }
-
-        internal bool Ready()
-        {
-            return chat != null && nextEventTime > -1
-                && Util.Millis() >= nextEventTime;
-        }
-
-        internal void Launch(Chat next)
-        {
-            Trigger(State.RUNNING, next);
-        }
-
-        internal void Trigger(State s, Chat c = null) // unused
-        {
-            switch (s)
-            {
-                case State.RUNNING:
-                    chat = c;
-                    c.Run();
-                    nextEventTime = Util.Millis();
-                    if (debugCycle) Console.WriteLine("<#" + chat.Text + "-started>");
-                    break;
-                case State.WAITING:
-                    chat = null;
-                    nextEventTime = -1;
-                    if (debugCycle) Console.WriteLine("<...waiting...>");
-                    break;
-                case State.SUSPENDED:
-                    chat = c;
-                    nextEventTime = -1;
-                    if (debugCycle) Console.WriteLine("<#" + chat.Text + "-suspended>");
-                    break;
-            }
-        }
-    }
-
-    internal class ChatScheduler
-    {
-
-        internal Chat chat;
+        internal Chat current;
         internal Ask prompt;
         internal ChatRuntime runtime;
         internal Stack<Chat> resumables;
@@ -336,6 +281,119 @@ namespace Dialogic
         internal int nextEventTime;
 
         internal ChatScheduler(ChatRuntime runtime)
+        {
+            this.runtime = runtime;
+            this.resumables = new Stack<Chat>();
+            Trigger(State.WAITING);
+        }
+
+        internal bool Ready()
+        {
+            return current != null && nextEventTime > -1
+                && Util.Millis() >= nextEventTime;
+        }
+
+        internal void Start(string label)
+        {
+            var next = runtime.FindChat(label);
+            if (next == null) throw new DialogicException
+                ("No Chat exists with label: " + label);
+            Start(runtime.FindChat(label));
+        }
+
+        internal void Start(Chat next)
+        {
+            if (next == null) Console.WriteLine
+                ("[WARN] Attempt to start null chat");
+
+            Trigger(State.RUNNING, next, false);
+        }
+
+        internal void Suspend()
+        {
+            if (current == null) Console.WriteLine
+                ("[WARN] Attempt to suspend null chat");
+
+            resumables.Push(current);
+            Trigger(State.SUSPENDED, current);
+        }
+
+        internal void Resume()
+        {
+            if (resumables.IsNullOrEmpty())
+            {
+                Console.WriteLine("[WARN] No Chat to resume...");
+                Trigger(State.WAITING);
+            }
+            else
+            {
+                Trigger(State.RUNNING, resumables.Pop(), true);
+            }
+        }
+
+        internal void Finish(bool attemptToResume)
+        {
+            if (current == null) throw new DialogicException
+                ("Invalid attempt to finish a null Chat");
+            
+            if (debugCycle) Console.WriteLine("<#" + current.Text + "-finished>");
+
+            if (attemptToResume && current.resumeAfterInterrupting)
+            {
+                this.Resume();
+            }
+            else
+            {
+                Trigger(State.WAITING);
+            }
+        }
+
+        internal void Clear()
+        {
+            resumables.Clear(); // a ClearEvent
+        }
+
+        private void Trigger(State s, Chat c = null, bool resume = false) // unused
+        {
+            switch (s)
+            {
+                case State.RUNNING:
+                    current = c;
+                    c.Run(resume);
+                    nextEventTime = Util.Millis();
+                    if (debugCycle) Console.WriteLine("<#" + current.Text 
+                        + (resume ? "-resumed>" : "-started>"));
+                    break;
+                case State.WAITING:
+                    current = null;
+                    nextEventTime = -1;
+                    if (debugCycle) Console.WriteLine("<waiting>");
+                    break;
+                case State.SUSPENDED:
+                    nextEventTime = -1;
+                    if (c != null)
+                    {
+                        current = c;
+                        if (debugCycle) Console.WriteLine
+                            ("<#" + current.Text + "-suspended>");
+                    } 
+                    break;
+            }
+        }
+    }
+
+    /*internal class ChatSchedulerOrig
+    {
+
+        internal Chat chat;
+        internal Ask prompt;
+        internal ChatRuntime runtime;
+        internal Stack<Chat> resumables;
+        internal UpdateEvent chatEvent;
+        internal bool debugCycle = true;
+        internal int nextEventTime;
+
+        internal ChatSchedulerOrig(ChatRuntime runtime)
         {
             this.runtime = runtime;
             this.resumables = new Stack<Chat>();
@@ -432,5 +490,5 @@ namespace Dialogic
             return chat != null && nextEventTime > -1
                 && Util.Millis() >= nextEventTime;
         }
-    }
+    }*/
 }

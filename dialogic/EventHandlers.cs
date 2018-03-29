@@ -34,7 +34,7 @@ namespace Dialogic
             ge = null;
 
             scheduler.Suspend();
-            scheduler.Launch("#On" + label + "Event");
+            scheduler.Start("#On" + label + "Event");
             return null;
         }
 
@@ -64,7 +64,7 @@ namespace Dialogic
             }
             else if (label.StartsWith("#", Util.IC))
             {
-                scheduler.Launch(label);
+                scheduler.Start(label);
             }
             else // else, parse as FIND meta data
             {
@@ -110,7 +110,7 @@ namespace Dialogic
                 }
                 else
                 {
-                    scheduler.chat = scheduler.prompt.parent; // just continue
+                    scheduler.current = scheduler.prompt.parent; // just continue
                 }
                 return null;
             }
@@ -142,7 +142,7 @@ namespace Dialogic
 
             if (scheduler.Ready())
             {
-                cmd = scheduler.chat.Next();
+                cmd = scheduler.current.Next();
 
                 if (cmd != null)
                 {
@@ -157,7 +157,7 @@ namespace Dialogic
                     // Here the Chat has completed without redirecting 
                     // so we check the stack for a chat to resume
 
-                    scheduler.Completed(true);
+                    scheduler.Finish(true);
                 }
             }
             return null;
@@ -175,7 +175,7 @@ namespace Dialogic
                         ComputeNextEventTime(cmd);
                         return null;
                     }
-                    scheduler.Suspend();
+                    scheduler.Suspend();            // wait on ResumeEvent
                 }
                 else if (cmd is Ask)
                 {

@@ -46,7 +46,7 @@ namespace runner
             // TODO: test suspend/resume on user events
 
             var now = Util.Millis();
-            Timers.SetTimeout(Util.Rand(2000,10000), () =>
+            if (false) Timers.SetTimeout(Util.Rand(2000,10000), () =>
             {
                 interrupted = true;
                 Console.WriteLine("<user-event#tap>" +

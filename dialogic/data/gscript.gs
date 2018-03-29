@@ -5,7 +5,8 @@ WAIT 3
 DO #Twirl
 WAIT {ForAnimation=true}
 Thanks for visiting $place {speed=fast,style=whisper}
-GO #Prompt
+
+/*GO #Prompt
 
 CHAT RePrompt {type=a,stage=b}
 DO #SadSpin
@@ -26,4 +27,4 @@ Bye! {speed=fast}
 
 CHAT OnTapEvent {noStart=true,resumeAfter=true}
 DO #TapResponse
-SAY I see you!
+SAY I see you!*/
