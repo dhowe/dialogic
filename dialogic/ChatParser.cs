@@ -78,23 +78,21 @@ namespace Dialogic
 
         internal Command ParseLine(string line, int lineNo)
         {
-            //Console.WriteLine("LINE " + lineNo + ": " + line);
-
             List<string> parts = DoSubDivision(line, lineNo);
 
             Command c = ParseCommand(parts, line, lineNo);
 
+            //Console.WriteLine("LINE " + lineNo + ": " + line+" => "+c);
+
             // Run after Create/Init are called
             RunValidators(c, line, lineNo);
 
-            // But before post-validate
-            return c;//.PostValidate();
+            return c;
         }
 
         private List<string> DoSubDivision(string line, int lineNo)
         {
             Match match = LineParser.Match(line);
-
 
             if (match.Groups.Count < 6)
             {

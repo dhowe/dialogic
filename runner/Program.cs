@@ -28,7 +28,7 @@ namespace runner
                 { "var3", 2 }
             };
 
-        private ChatRuntime dialogic; 
+        private ChatRuntime dialogic;
         private EventArgs gameEvent;
         bool interrupted = false;
         string diaText, diaType;
@@ -46,14 +46,14 @@ namespace runner
             // TODO: test suspend/resume on user events
 
             var now = Util.Millis();
-            Timers.SetTimeout(Util.Rand(2000,10000), () =>
-            {
-                interrupted = true;
-                Console.WriteLine("<user-event#tap>" +
-                    " after " + Util.Millis(now) + "ms\n");
+            Timers.SetTimeout(Util.Rand(2000, 10000), () =>
+             {
+                 interrupted = true;
+                 Console.WriteLine("\n<user-event#tap>" +
+                     " after " + Util.Millis(now) + "ms");
 
-                gameEvent = new UserEvent("Tap");
-            });
+                 gameEvent = new UserEvent("Tap");
+             });
 
             while (true)
             {
@@ -73,8 +73,12 @@ namespace runner
 
             switch (diaType)
             {
+                case "Chat":
+                    diaText = "\nCHAT " + diaText;
+                    break;
+
                 case "Say":
-                    diaText += " " + ue.Data().Stringify();
+                    diaText = "  " + diaText + " " + ue.Data().Stringify();
                     break;
 
                 case "Ask":
@@ -85,26 +89,25 @@ namespace runner
                 case "Wait":
                     var now = Util.Millis();
 
-                    Timers.SetTimeout(5000, () =>
+                    Timers.SetTimeout(3000, () =>
                     {
                         if (!interrupted)
                         {
-                            Console.WriteLine("<resume-event#>" +
-                                " after " + Util.Millis(now) + "ms\n");
+                            Console.WriteLine("\n<resume-event#>" +
+                                " after " + Util.Millis(now) + "ms");
 
                             // send ResumeEvent after 5 sec
-                            // ('#Game' or '{type=a,stage=b,last=true}')
-
+                            // (), (#Game), or ({type=a,stage=b,last=true})
                             gameEvent = new ResumeEvent();
                         }
                     });
 
-                    diaText = ("(" + (diaType + " " + 
+                    diaText = ("  (" + (diaType + " " +
                         ue.Data().Stringify()).Trim() + ")");
                     break;
 
                 default:
-                    diaText = ("(" + diaType + ": " + (diaText + " "
+                    diaText = ("  (" + diaType + ": " + (diaText + " "
                         + ue.Data().Stringify()).Trim() + ")");
                     break;
             }
@@ -114,14 +117,14 @@ namespace runner
             ue = null;  // dispose event 
         }
 
-        private void DoPrompt(IUpdateEvent ge)
+        private void DoPrompt(IUpdateEvent ue)
         {
-            diaOpts = ge.Get(Meta.OPTS).Split('\n');
+            diaOpts = ue.Get(Meta.OPTS).Split('\n');
 
-            ge.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
 
             // add any meta tags
-            diaText += " " + ge.Data().Stringify(); 
+            diaText = "  " + diaText + " " + ue.Data().Stringify();
 
             // add the options
             for (int i = 0; i < diaOpts.Length; i++)
@@ -130,9 +133,9 @@ namespace runner
             }
         }
 
-        private void SendRandomResponse(IUpdateEvent ge)
+        private void SendRandomResponse(IUpdateEvent ue)
         {
-            int timeout = ge.GetInt(Meta.TIMEOUT, -1);
+            int timeout = ue.GetInt(Meta.TIMEOUT, -1);
             if (timeout > -1)
             {
                 var delay = Util.Rand(timeout / 3, timeout);
@@ -140,7 +143,7 @@ namespace runner
                 {
                     // choice a valid response, or -1 for no response
                     int choice = Util.Rand(diaOpts.Length + 1) - 1;
-                    Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms\n");
+                    Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms");
                     gameEvent = new ChoiceEvent(choice);
                 });
             }

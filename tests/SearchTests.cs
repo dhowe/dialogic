@@ -284,7 +284,7 @@ namespace Dialogic
 
             var mday = finder.GetMeta("day");
             Assert.That(mday is Constraint, Is.True);
-            var cons = (global::Dialogic.Constraint)mday;
+            var cons = (Constraint)mday;
             Assert.That(cons.type, Is.EqualTo(ConstraintType.Absolute));
             Assert.That(cons.IsStrict(), Is.True);
 

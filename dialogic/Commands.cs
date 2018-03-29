@@ -326,6 +326,7 @@ namespace Dialogic
 
         public Find Init(string metadata)
         {
+            meta.Clear();
             Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
             return this;
         }
@@ -552,18 +553,17 @@ namespace Dialogic
 
         internal Command Next()
         {
-            bool hasNext = cursor > -1 && cursor < commands.Count;
-            return hasNext ? commands[cursor++] : null;
+            return HasNext() ? commands[cursor++] : null;
         }
 
-        public void Reset()
+        internal bool HasNext()
         {
-            this.cursor = 0;
+            return cursor > -1 && cursor < commands.Count;
         }
 
         internal void Run(bool resetCursor = true)
         {
-            if (resetCursor) Reset();
+            if (resetCursor) this.cursor = 0;
 
             // Q: Do we reset this stuff on resume ?
             // Prob not in case of staleness

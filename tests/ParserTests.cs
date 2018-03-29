@@ -76,7 +76,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestComments1()
+        public void TestStripComments()
         {
             string[] lines = {
                 "CHAT c1",
@@ -124,7 +124,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestComments2()
+        public void TestParseComments()
         {
             var txt = "SAY Thank you/*\nSAY Hello //And Goodbye*/";
             var res = ChatParser.StripComments(txt);
@@ -138,15 +138,6 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-
-            //Assert.That(parsed[14], Is.EqualTo("SAY Done4"));
-            //Assert.That(ChatParser.ParseText(("//\n//SAY Thank you\n//SAY Hello\n// And Goodbye").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText(("/*SAY Thank you\nSAY Hello\nAnd Goodbye*/").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText(("///").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText(("//").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText((" //").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText((" /* */").Count, Is.EqualTo(0));
-            //Assert.That(ChatParser.ParseText(("/* */").Count, Is.EqualTo(0));
 
             chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\n// And Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -564,8 +555,18 @@ namespace Dialogic
 
             chats = ChatParser.ParseText("ok { a = b , c = d }");
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].GetType, Is.EqualTo(typeof(Say)));
+            Assert.That(chats[0].commands[0].TypeName(), Is.EqualTo("Say"));
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.EqualTo("b"));
             Assert.That(chats[0].commands[0].GetMeta("c"), Is.EqualTo("d"));
+
+            chats = ChatParser.ParseText("NVM 1.1");
+
+            Console.WriteLine(chats[0].commands[0]);
+            Assert.That(chats[0].commands[0].GetType, Is.EqualTo(typeof(Tendar.Nvm)));
+            Assert.That(chats[0].commands[0].TypeName(), Is.EqualTo("Nvm"));
+            Assert.That(chats[0].commands[0].Text, Is.EqualTo("1.1"));
+            Assert.That(chats[0].commands[0].DelayMs, Is.EqualTo(1100));
         }
 
         [Test]
@@ -638,6 +639,7 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND {a,b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT {a}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT {a,b}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT hello"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("OPT {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY")); // ?
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY {a=b}"));

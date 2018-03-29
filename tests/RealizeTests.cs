@@ -190,7 +190,7 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
 
-			Ask ask = (global::Dialogic.Ask)chats[0].commands[0];
+			Ask ask = (Ask)chats[0].commands[0];
             ask.Realize(globals);
             Assert.That(ask.Text, Is.EqualTo("Want a $animal?"));
             Assert.That(ask.GetText(true), Is.EqualTo("Want a dog?"));
