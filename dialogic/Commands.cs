@@ -556,14 +556,9 @@ namespace Dialogic
             return hasNext ? commands[cursor++] : null;
         }
 
-        public void Reset()
+        internal void Run(bool resume = true)
         {
-            this.cursor = 0;
-        }
-
-        internal void Run(bool resetCursor = true)
-        {
-            if (resetCursor) Reset();
+            if (!resume) this.cursor = 0;
 
             // Q: Do we reset this stuff on resume ?
             // Prob not in case of staleness

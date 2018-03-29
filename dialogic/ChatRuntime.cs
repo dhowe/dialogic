@@ -311,21 +311,32 @@ namespace Dialogic
 
         internal void Suspend()
         {
-            if (current == null) Console.WriteLine
+            if (current == null)
+            {
+                Console.WriteLine
                 ("[WARN] Attempt to suspend null chat");
+            }
+            else
+            {
+                resumables.Push(current);
+                Console.WriteLine("PUSH: " + current.Text + " " + resumables.Count + " total");
+            }
 
-            resumables.Push(current);
             Trigger(State.SUSPENDED, current);
         }
 
         internal void Resume()
         {
-            if (resumables.IsNullOrEmpty())
+            if (current != null)                    // resume suspended current
+            {
+                Trigger(State.RUNNING, current, true);
+            }
+            else if (resumables.IsNullOrEmpty())  // nothing to resume
             {
                 Console.WriteLine("[WARN] No Chat to resume...");
                 Trigger(State.WAITING);
             }
-            else
+            else                                // resume from stack
             {
                 Trigger(State.RUNNING, resumables.Pop(), true);
             }
@@ -338,14 +349,7 @@ namespace Dialogic
             
             if (debugCycle) Console.WriteLine("<#" + current.Text + "-finished>");
 
-            if (attemptToResume && current.resumeAfterInterrupting)
-            {
-                this.Resume();
-            }
-            else
-            {
-                Trigger(State.WAITING);
-            }
+            Trigger(State.WAITING, null, attemptToResume && current.resumeAfterInterrupting);
         }
 
         internal void Clear()
@@ -359,16 +363,29 @@ namespace Dialogic
             {
                 case State.RUNNING:
                     current = c;
+                    // make sure we aren't running something still on the stack
+                    if (resumables.Count > 0 && resumables.Peek() == c)
+                    {
+                        Console.WriteLine("POP: "+c.Text+ " "+(resumables.Count-1)+" remaining");
+                        resumables.Pop();
+                    }
                     c.Run(resume);
                     nextEventTime = Util.Millis();
                     if (debugCycle) Console.WriteLine("<#" + current.Text 
                         + (resume ? "-resumed>" : "-started>"));
                     break;
+
                 case State.WAITING:
                     current = null;
                     nextEventTime = -1;
                     if (debugCycle) Console.WriteLine("<waiting>");
+                    if (resume)
+                    {
+                        Console.WriteLine("Attempting to resume after Finish");
+                        this.Resume();
+                    }
                     break;
+
                 case State.SUSPENDED:
                     nextEventTime = -1;
                     if (c != null)

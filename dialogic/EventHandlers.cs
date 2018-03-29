@@ -156,7 +156,6 @@ namespace Dialogic
                 {
                     // Here the Chat has completed without redirecting 
                     // so we check the stack for a chat to resume
-
                     scheduler.Finish(true);
                 }
             }

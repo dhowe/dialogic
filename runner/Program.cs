@@ -89,7 +89,7 @@ namespace runner
                 case "Wait":
                     var now = Util.Millis();
 
-                    Timers.SetTimeout(5000, () =>
+                    Timers.SetTimeout(3000, () =>
                     {
                         if (!interrupted)
                         {
