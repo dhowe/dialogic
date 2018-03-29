@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Dialogic
 {
@@ -59,7 +60,7 @@ namespace Dialogic
 
             if (String.IsNullOrEmpty(label))
             {
-                runtime.nextEventTime = scheduler.Resume();
+                scheduler.Resume();
             }
             else if (label.StartsWith("#", Util.IC))
             {
@@ -84,7 +85,8 @@ namespace Dialogic
             return null;
         }
 
-        private IUpdateEvent ChoiceHandler(ref EventArgs ge, IDictionary<string, object> globals)
+        private IUpdateEvent ChoiceHandler(ref EventArgs ge,
+            IDictionary<string, object> globals)
         {
             IChoice ic = (IChoice)ge;
             var idx = ic.GetChoiceIndex();
@@ -114,4 +116,109 @@ namespace Dialogic
             }
         }
     }
+
+    internal class ChatEventHandler
+    {
+        private readonly ChatRuntime runtime;
+        private readonly ChatScheduler scheduler;
+        private bool logInitialized = false;
+
+        internal ChatEventHandler(ChatRuntime rt)
+        {
+            this.runtime = rt;
+            this.scheduler = rt.scheduler;
+        }
+
+        internal IUpdateEvent OnEvent(IDictionary<string, object> globals)
+        {
+            Command cmd = null;
+
+            if (scheduler.chatEvent != null)
+            {
+                var toSend = scheduler.chatEvent;
+                scheduler.chatEvent = null;
+                return toSend;
+            }
+
+            if (scheduler.Ready())
+            {
+                cmd = scheduler.chat.Next();
+
+                if (cmd != null)
+                {
+                    cmd.Realize(globals);
+
+                    WriteToLog(cmd);
+
+                    return HandleCommand(cmd);
+                }
+                else
+                {
+                    // Here the Chat has completed without redirecting 
+                    // so we check the stack for a chat to resume
+
+                    scheduler.Completed(true);
+                }
+            }
+            return null;
+        }
+
+        private IUpdateEvent HandleCommand(Command cmd)
+        {
+            if (cmd is ISendable)
+            {
+                if (cmd.GetType() == typeof(Wait))
+                {
+                    // just pause internally, no event needs to be fired
+                    if (cmd.DelayMs != Util.INFINITE)
+                    {
+                        ComputeNextEventTime(cmd);
+                        return null;
+                    }
+                    scheduler.Suspend();
+                }
+                else if (cmd is Ask)
+                {
+                    scheduler.prompt = (Ask)cmd;
+                    scheduler.Suspend();         // wait on ChoiceEvent
+                }
+                else
+                {
+                    ComputeNextEventTime(cmd); // compute delay
+                }
+
+                return new UpdateEvent(cmd); // fire event
+            }
+            else if (cmd is Find) // or Go
+            {
+                runtime.FindAsync((Find)cmd);      // find next
+            }
+
+            return null;
+        }
+
+        private void ComputeNextEventTime(Command cmd)
+        {
+            scheduler.nextEventTime = cmd.DelayMs >= 0 ? 
+                Util.Millis() + cmd.ComputeDuration() : -1;
+        }
+
+        private void WriteToLog(Command c)
+        {
+            if (ChatRuntime.LOG_FILE == null) return;
+
+            if (!logInitialized)
+            {
+                logInitialized = true;
+                File.WriteAllText(ChatRuntime.LOG_FILE, "============\n");
+            }
+
+            using (StreamWriter w = File.AppendText(ChatRuntime.LOG_FILE))
+            {
+                var now = DateTime.Now.ToString("HH:mm:ss.fff");
+                w.WriteLine(now + "\t" + c + " @" + Util.Millis());
+            }
+        }
+    }
+
 }

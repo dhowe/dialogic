@@ -31,26 +31,6 @@ namespace Tendar
                         ("missing required meta-key '" + STAGE + "'");
                 }
             }
-            else if (c.GetType() == typeof(Find))
-            {
-                /* add default staleness if not otherwise specified
-                if (!c.HasMeta(Meta.STALENESS))
-                {
-                    var type = c.GetMeta("type");
-                    if (type != null) // but only if a type is specified
-                    {
-                        var typeStr = ((Constraint)type).value;
-
-                        // TODO: change this to per-Find values
-                        if (STALENESS_BY_TYPE.ContainsKey(typeStr))
-                        {
-                            var ds = STALENESS_BY_TYPE[(string)typeStr];
-                            c.SetMeta(Meta.STALENESS, new Constraint
-                                (Operator.LT, Meta.STALENESS, ds.ToString()));
-                        }
-                    }
-                }*/
-            }
             return true;
         }
     }
@@ -68,11 +48,20 @@ namespace Tendar
         {
             return "Nvm";
         }
+
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        {
+            realized.Clear();
+
+            if (this is ISendable)
+            {
+                realized[Meta.TEXT] = Realizer.Do(Text, globals);
+                realized[Meta.ACTOR] = GetActor().Name();
+                realized[Meta.TYPE] = TypeName();
+            }
+
+            return realized; // convenience
+        }
     }
 
-    //public interface IAppConfig {
-    //    List<IActor> GetActors();
-    //    List<CommandDef> GetCommands();
-    //    Func<Command, bool>[] GetValidators();
-    //}
 }

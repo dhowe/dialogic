@@ -73,6 +73,10 @@ namespace runner
 
             switch (diaType)
             {
+                case "Chat":
+                    diaText = "\nCHAT #" + diaText;
+                    break;
+
                 case "Say":
                     diaText += " " + ue.Data().Stringify();
                     break;
@@ -114,14 +118,14 @@ namespace runner
             ue = null;  // dispose event 
         }
 
-        private void DoPrompt(IUpdateEvent ge)
+        private void DoPrompt(IUpdateEvent ue)
         {
-            diaOpts = ge.Get(Meta.OPTS).Split('\n');
+            diaOpts = ue.Get(Meta.OPTS).Split('\n');
 
-            ge.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
 
             // add any meta tags
-            diaText += " " + ge.Data().Stringify(); 
+            diaText += " " + ue.Data().Stringify(); 
 
             // add the options
             for (int i = 0; i < diaOpts.Length; i++)
@@ -130,9 +134,9 @@ namespace runner
             }
         }
 
-        private void SendRandomResponse(IUpdateEvent ge)
+        private void SendRandomResponse(IUpdateEvent ue)
         {
-            int timeout = ge.GetInt(Meta.TIMEOUT, -1);
+            int timeout = ue.GetInt(Meta.TIMEOUT, -1);
             if (timeout > -1)
             {
                 var delay = Util.Rand(timeout / 3, timeout);

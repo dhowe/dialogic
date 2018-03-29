@@ -577,9 +577,10 @@ namespace Dialogic
 
     public class Meta
     {
-        public const string TYPE = "__type__";
-        public const string TEXT = "__text__";
-        public const string OPTS = "__opts__";
+        public const string TYPE =  "__type__";
+        public const string TEXT =  "__text__";
+        public const string OPTS =  "__opts__";
+        public const string STATE = "__state__";
 
         public const string ACTOR = "actor";
         public const string DELAY = "delay";
