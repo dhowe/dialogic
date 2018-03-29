@@ -326,6 +326,7 @@ namespace Dialogic
 
         public Find Init(string metadata)
         {
+            meta.Clear();
             Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
             return this;
         }

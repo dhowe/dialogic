@@ -104,6 +104,7 @@ namespace Dialogic
 
                 if (opt.action != Command.NOP)
                 {
+                    // We've gotten a response with a branch, so finish & take it
                     runtime.FindAsync((Find)opt.action); // find next
                 }
                 else

@@ -91,22 +91,17 @@ namespace Dialogic
             }
         }
 
+        public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
+        {
+            return ge != null ? appEvents.OnEvent(ref ge, globals) : HandleChatEvent(globals);
+        }
+
         public void Run(string chatLabel = null)
         {
             if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
 
             var first = chatLabel != null ? FindChat(chatLabel) : chats[0];
             scheduler.Launch(first);
-        }
-
-        public List<Chat> Chats()
-        {
-            return chats;
-        }
-
-        public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
-        {
-            return ge != null ? appEvents.OnEvent(ref ge, globals) : HandleChatEvent(globals);
         }
 
         public Chat FindChat(string label)
@@ -137,7 +132,6 @@ namespace Dialogic
             return null;
         }
 
-        // ----------------------------------------------------------------
 
         internal List<Func<Command, bool>> Validators()
         {
@@ -151,7 +145,7 @@ namespace Dialogic
 
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            scheduler.Suspend();
+            scheduler.Completed(false); // finish current after FIND commands
 
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
@@ -200,60 +194,65 @@ namespace Dialogic
         {
             Command cmd = null;
 
-            if (scheduler.chat != null && Util.Millis() >= nextEventTime)
+            if (scheduler.chat != null && nextEventTime > -1 && Util.Millis() >= nextEventTime)
             {
                 cmd = scheduler.chat.Next();
 
                 if (cmd != null)
                 {
                     cmd.Realize(globals);
-
-                    if (logFile != null) WriteToLog(cmd);
-
-                    if (cmd is ISendable)
-                    {
-                        if (cmd.GetType() == typeof(Wait))
-                        {
-                            // just pause internally, no event needs to be fired
-                            if (cmd.DelayMs != Util.INFINITE)
-                            {
-                                ComputeNextEventTime(cmd);
-                                return null;
-                            }
-                            scheduler.Suspend();
-                        }
-                        else if (cmd is Ask)
-                        {
-                            scheduler.prompt = (Ask)cmd;
-                            scheduler.Suspend();         // wait on ChoiceEvent
-                        }
-                        else
-                        {
-                            ComputeNextEventTime(cmd); // compute delay
-                        }
-
-                        return new UpdateEvent(cmd); // fire event
-                    }
-                    else if (cmd is Find)
-                    {
-                        FindAsync((Find)cmd);      // find next
-                    }
+                    return HandleCommand(cmd);
                 }
                 else
                 {
                     // Here the Chat has completed without redirecting 
                     // so we check the stack for a chat to resume
 
-                    //Console.WriteLine("<#" + scheduler.chat.Text + "-finished>");
-                    int nextEventMs = scheduler.Completed();
+                    int nextEventMs = scheduler.Completed(true);
 
                     if (nextEventMs > -1)
                     {
-                        //Console.WriteLine("<#" + scheduler.chat.Text + "-resumed>");
+                        Console.WriteLine("<#" + scheduler.chat.Text + "-resumed>");
                         nextEventTime = nextEventMs;
                     }
                 }
             }
+            return null;
+        }
+
+        private IUpdateEvent HandleCommand(Command cmd)
+        {
+            if (logFile != null) WriteToLog(cmd);
+
+            if (cmd is ISendable)
+            {
+                if (cmd.GetType() == typeof(Wait))
+                {
+                    // just pause internally, no event needs to be fired
+                    if (cmd.DelayMs != Util.INFINITE)
+                    {
+                        ComputeNextEventTime(cmd);
+                        return null;
+                    }
+                    scheduler.Suspend();           // wait on infinite WAIT
+                }
+                else if (cmd is Ask)
+                {
+                    scheduler.prompt = (Ask)cmd;
+                    scheduler.Suspend();         // wait on ChoiceEvent
+                }
+                else
+                {
+                    ComputeNextEventTime(cmd); // compute delay
+                }
+
+                return new UpdateEvent(cmd); // fire event
+            }
+            else if (cmd is Find)
+            {
+                FindAsync((Find)cmd);      // find next
+            }
+
             return null;
         }
 
@@ -367,7 +366,12 @@ namespace Dialogic
             // TODO: when Chats branch we may want to consider them
             // finished and remove them from the stack, leaving only
             // those that have been explictly interrupted ...
-            (chat = next).Run();
+            if (next == null) throw new DialogicException
+                ("Attempt to launch a null Chat");
+            chat = next;
+            Console.WriteLine("<#" + chat.Text + "-started>");
+            runtime.nextEventTime = Util.Millis();
+            chat.Run();
         }
 
         internal void Suspend()
@@ -380,8 +384,10 @@ namespace Dialogic
                     return;
                 }
                 resumables.Push(chat);
+                Console.WriteLine("<#" + chat.Text + "-suspending>");
             }
-            chat = null;
+            runtime.nextEventTime = -1;
+            //chat = null;
         }
 
         internal void Clear()
@@ -391,30 +397,47 @@ namespace Dialogic
 
         internal int Resume()
         {
-            if (resumables.IsNullOrEmpty())
+            if (chat != null && runtime.nextEventTime > -1)
             {
-                //Console.WriteLine("No Chat to resume... Waiting");
-                return -1;
+                throw new DialogicException("Cannot resume while Chat#"
+                    + chat.Text + " is active & running");
             }
 
-            if (chat != null) throw new DialogicException("Cannot resume"
-                + " while Chat#" + chat.Text + " is active");
 
-            var last = resumables.Pop();
-            (chat = last).Run(false);
+            if (chat == null)
+            {
+                if (!resumables.IsNullOrEmpty())
+                {
+                    var last = resumables.Pop();
+                    Console.WriteLine("Resuming "+last.Text);
+                    chat = last;
+                    chat.Run(false);
+                    return Util.Millis();
+                }
+                else
+                {
+                    Console.WriteLine("No Chat to resume... Waiting");
+                    return -1;
+                }
+            }
 
-            return Util.Millis();
+            return Util.Millis(); // unsuspend non-null current chat
         }
 
-        internal int Completed()
+        internal int Completed(bool allowResume)
         {
+            if (chat == null) throw new DialogicException
+                ("Attempt to complete a null Chat");
+            
             if (resumables.Count > 0 && chat == resumables.Peek())
             {
-                resumables.Pop(); // remove from stack
+                resumables.Pop(); // remove finished from stack
             }
 
             // if false, we don't resume after finishing
-            var resumesAfter = chat.resumeAfterInterrupting;
+            var resumesAfter = allowResume && chat.resumeAfterInterrupting;
+
+            Console.WriteLine("<#" + chat.Text + "-finished>");
 
             this.chat = null;
 
