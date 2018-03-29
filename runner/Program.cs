@@ -66,6 +66,7 @@ namespace runner
         private void HandleEvent(ref IUpdateEvent ue)
         {
             interrupted = false;
+
             diaText = ue.Text();
             diaType = ue.Type();
 
@@ -73,8 +74,12 @@ namespace runner
 
             switch (diaType)
             {
+                case "Chat":
+                    diaText = "\nCHAT " + diaText + " " + ue.Data().Stringify();
+                    break;
+
                 case "Say":
-                    diaText += " " + ue.Data().Stringify();
+                    diaText = "  " + diaText + " " + ue.Data().Stringify();
                     break;
 
                 case "Ask":
@@ -99,12 +104,12 @@ namespace runner
                         }
                     });
 
-                    diaText = ("(" + (diaType + " " + 
+                    diaText = ("  (" + (diaType + " " + 
                         ue.Data().Stringify()).Trim() + ")");
                     break;
 
                 default:
-                    diaText = ("(" + diaType + ": " + (diaText + " "
+                    diaText = ("  (" + diaType + ": " + (diaText + " "
                         + ue.Data().Stringify()).Trim() + ")");
                     break;
             }
@@ -114,14 +119,14 @@ namespace runner
             ue = null;  // dispose event 
         }
 
-        private void DoPrompt(IUpdateEvent ge)
+        private void DoPrompt(IUpdateEvent ue)
         {
-            diaOpts = ge.Get(Meta.OPTS).Split('\n');
+            diaOpts = ue.Get(Meta.OPTS).Split('\n');
 
-            ge.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
 
             // add any meta tags
-            diaText += " " + ge.Data().Stringify(); 
+            diaText = "  "+ diaText + " " + ue.Data().Stringify(); 
 
             // add the options
             for (int i = 0; i < diaOpts.Length; i++)

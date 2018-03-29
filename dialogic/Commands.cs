@@ -315,8 +315,6 @@ namespace Dialogic
 
     public class Find : Command
     {
-        //public double stalenessThreshold;
-
         public Find() : base() { }
 
         internal Find(params Constraint[] cnts) : base()
@@ -326,6 +324,7 @@ namespace Dialogic
 
         public Find Init(string metadata)
         {
+            if (meta != null) meta.Clear();
             Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
             return this;
         }
@@ -453,6 +452,7 @@ namespace Dialogic
         public Chat() : base()
         {
             commands = new List<Command>();
+            DelayMs = 0;
         }
 
         internal static Chat Create(string name)
@@ -460,6 +460,28 @@ namespace Dialogic
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
             return c;
+        }
+
+        public override void Init(string text, string label, string[] metas)
+        {
+            this.Text = text;
+            ParseMeta(metas);
+            Validate();
+        }
+
+        public override IDictionary<string, object> Realize(IDictionary<string, object> globals = null)
+        {
+            //realized.Clear();
+            //RealizeMeta(globals);
+            //realized[Meta.STATE] = Math.Round((cursor / (double)commands.Count) * 100) + "%";
+            //Console.WriteLine("#"+this.Text + ".Realize() -> "+realized.Stringify());
+
+            return realized;
+        }
+
+        public static void Staleness(double staleness, params Chat[] chats)
+        {
+            foreach (var c in chats) { c.Staleness(staleness); }
         }
 
         public double Staleness()
@@ -497,12 +519,6 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
-        {
-            throw new DialogicException("Chats should not be Realized"); //tmp-remove
-            //return realized;
-        }
-
         protected internal override Command Validate()
         {
             if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
@@ -521,13 +537,6 @@ namespace Dialogic
             realized[Meta.STALENESS] = Defaults.CHAT_STALENESS.ToString();
 
             return this;
-        }
-
-        public override void Init(string text, string label, string[] metas)
-        {
-            this.Text = text;
-            ParseMeta(metas);
-            Validate();
         }
 
         protected override string MetaStr()
@@ -572,6 +581,8 @@ namespace Dialogic
 
             // Q: what about (No-Label) WAIT events ?
             IncrementStaleness();
+
+            this.Realize();
         }
     }
 
@@ -581,11 +592,13 @@ namespace Dialogic
         public const string TEXT = "__text__";
         public const string OPTS = "__opts__";
 
+        public const string STATE = "state";
         public const string ACTOR = "actor";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
         public const string STALENESS = "staleness";
-        public const string RESUMABLE = "resumable";
+        public const string INTERRUPTIBLE = "interruptible";
+        public const string STALENESS_INCR = "stalenessIncr";
 
         protected IDictionary<string, object> meta;
         public IDictionary<string, object> realized;
@@ -654,6 +667,7 @@ namespace Dialogic
             return s;
         }
 
+        // TODO: auto-write to object properties if names match ?
         protected virtual void ParseMeta(string[] pairs)
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)

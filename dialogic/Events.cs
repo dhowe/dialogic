@@ -143,6 +143,17 @@ namespace Dialogic
         }
     }
 
+    /*
+    Fired when a Chat has completed, either because it has completed all of
+    its commands, or because it has branched
+    public class CompleteEvent : UpdateEvent
+    {
+        public CompleteEvent(Command c) : base(c)
+        {
+            if (!(c is Chat)) throw new DialogicException("Invalid event");
+        }
+    }*/
+
     /**
      * Basic implementation of IUpdateEvent which wraps a string/object 
      * dictionary containing relevant Command data with helper functions
@@ -152,9 +163,16 @@ namespace Dialogic
     {
         private IDictionary<string, object> data;
 
+        public UpdateEvent(params KeyValuePair<string,object>[] meta) 
+        {
+            this.data = new Dictionary<string, object>();
+            foreach (var kv in meta) this.data.Add(kv);
+        }
+
         public UpdateEvent(Command c)
         {
-            this.data = c.realized;
+            if (c == null) throw new DialogicException("Null Command");
+            this.data = c.realized; // copy ?
         }
 
         public UpdateEvent(IDictionary<string, object> data)
@@ -223,7 +241,7 @@ namespace Dialogic
 
         public string Opts()
         {
-            return (!data.ContainsKey(Meta.OPTS)) ? 
+            return (!data.ContainsKey(Meta.OPTS)) ?
                 (string)data[Meta.OPTS] : null;
         }
     }

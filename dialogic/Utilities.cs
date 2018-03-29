@@ -12,8 +12,8 @@ using System.Runtime.CompilerServices;
 namespace Dialogic
 {
     /// <summary>
-    /// A (temporary) container for Dialogic defaults that can be changed
-    /// at runtime.
+    /// A (temporary) container for Dialogic defaults which can be changed 
+    /// by apps as needed (replace with file-based config mechanism?)
     /// </summary>
     public static class Defaults
     {
@@ -69,6 +69,12 @@ namespace Dialogic
         public static double SAY_MIN_LEN_MULT = 0.5;
         public static int SAY_MAX_LINE_LEN = 80;
         public static int SAY_MIN_LINE_LEN = 2;
+
+        /// <summary>
+        /// Whether to throw an exception when an IResume
+        /// is sent during an active Chat
+        /// </summary>
+        public static bool THROW_ON_UNEXPECTED_RESUME = true;
     }
 
     /// <summary>
