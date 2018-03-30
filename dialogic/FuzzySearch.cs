@@ -94,7 +94,7 @@ namespace Dialogic
                 if (chats[i] == parent) continue;
 
                 var hits = 0;
-                var chatMeta = chats[i].realized;
+                var chatMeta = chats[i].meta;
 
                 if (DBUG) Console.WriteLine("\n" + chats[i].Text + " ----------");
 

@@ -304,7 +304,7 @@ namespace Dialogic
         {
             if (chat != null)
             {
-                if (!chat.interruptable)
+                if (!chat.Interruptable)
                 {
                     Console.WriteLine("Cannot interrupt #" + chat.Text + "!");
                     return;
@@ -359,7 +359,7 @@ namespace Dialogic
             }
 
             // if false, we don't resume after finishing
-            var resumesAfter = allowResume && chat.resumeAfterInterrupting;
+            var resumesAfter = allowResume && chat.ResumeAfterInterrupting;
 
             Info("<#" + chat.Text + "-finished>");
 

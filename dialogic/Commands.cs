@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
@@ -69,7 +70,7 @@ namespace Dialogic
                 Defaults.SAY_MIN_LEN_MULT, Defaults.SAY_MAX_LEN_MULT);
         }
 
-        protected double GetMetaSpeedScale() // Config
+        protected double GetMetaSpeedScale()
         {
             double val = 1.0;
             if (meta != null && meta.ContainsKey("speed"))
@@ -189,7 +190,7 @@ namespace Dialogic
 
     public class Ask : Say, ISendable
     {
-        public int SelectedIdx { get; protected set; }
+        internal int selectedIdx;
 
         protected List<Opt> options = new List<Opt>();
 
@@ -230,12 +231,12 @@ namespace Dialogic
 
         public Opt Selected()
         {
-            return Options()[SelectedIdx];
+            return Options()[selectedIdx];
         }
 
         public Opt Selected(int i)
         {
-            this.SelectedIdx = i;
+            this.selectedIdx = i;
             if (i >= 0 && i < options.Count) return Selected();
             return null;
         }
@@ -273,7 +274,7 @@ namespace Dialogic
 
     public class Opt : Say
     {
-        public Command action;
+        internal Command action;
 
         public Opt() : this(String.Empty, NOP) { }
 
@@ -445,15 +446,16 @@ namespace Dialogic
 
     public class Chat : Command
     {
-        public List<Command> commands;
-        public bool interruptable = true; // TODO: parse from meta
-        public bool resumeAfterInterrupting = true;
-        public double stalenessIncrement = Defaults.CHAT_STALENESS_INCR;
-        public int cursor = 0, lastRunAt = -1;
+        internal List<Command> commands;
+        public bool Interruptable = true; // TODO: parse from meta
+        public bool ResumeAfterInterrupting = true;
+        public double StalenessIncrement = Defaults.CHAT_STALENESS_INCR;
+        internal int cursor = 0, lastRunAt = -1;
 
         public Chat() : base()
         {
             commands = new List<Command>();
+            realized = null;
         }
 
         internal static Chat Create(string name)
@@ -476,7 +478,7 @@ namespace Dialogic
 
         public Chat IncrementStaleness()
         {
-            SetMeta(Meta.STALENESS, (Staleness() + stalenessIncrement).ToString());
+            SetMeta(Meta.STALENESS, (Staleness() + StalenessIncrement).ToString());
             return this;
         }
 
@@ -485,11 +487,26 @@ namespace Dialogic
             return commands.Count();
         }
 
+        /*public override bool HasMeta()
+        {
+            return realized != null && realized.Count > 0;
+        }
         public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
         {
-            base.SetMeta(key, val, throwIfKeyExists);
+            //base.SetMeta(key, val, throwIfKeyExists);
             realized[key] = val; // update our realized values each time
         }
+        protected override string MetaStr()
+        {
+            string s = String.Empty;
+            if (HasMeta())
+            {
+                s += "{";
+                foreach (var key in realized.Keys) s += key + "=" + realized[key] + ",";
+                s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : String.Empty;
+            }
+            return s;
+        }*/
 
         public void AddCommand(Command c)
         {
@@ -500,8 +517,7 @@ namespace Dialogic
 
         public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
         {
-            throw new DialogicException("Chats should not be Realized"); //tmp-remove
-            //return realized;
+            throw new DialogicException("Chats should not be Realized");
         }
 
         protected internal override Command Validate()
@@ -511,15 +527,12 @@ namespace Dialogic
                 throw BadArg("CHAT name '" + Text + "' contains spaces!");
             }
 
-            // Note: realization happens on Init (just once) in Chat
-            if (HasMeta())
+            if (meta == null) meta = new Dictionary<string, object>();
+
+            if (!HasMeta(Meta.STALENESS))
             {
-                foreach (KeyValuePair<string, object> pair in meta)
-                {
-                    realized[pair.Key] = pair.Value.ToString();
-                }
+                meta[Meta.STALENESS] = Defaults.CHAT_STALENESS.ToString();
             }
-            realized[Meta.STALENESS] = Defaults.CHAT_STALENESS.ToString();
 
             return this;
         }
@@ -529,18 +542,7 @@ namespace Dialogic
             this.Text = text;
             ParseMeta(metas);
             Validate();
-        }
-
-        protected override string MetaStr()
-        {
-            string s = String.Empty;
-            if (HasMeta())
-            {
-                s += "{";
-                foreach (var key in meta.Keys) s += key + "=" + meta[key] + ",";
-                s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : String.Empty;
-            }
-            return s;
+            //Console.WriteLine("Chat #"+text +" "+realized.Stringify());
         }
 
         public string ToTree()
@@ -587,10 +589,9 @@ namespace Dialogic
         public const string STALENESS = "staleness";
         public const string RESUMABLE = "resumable";
 
-        protected IDictionary<string, object> meta;
-        public IDictionary<string, object> realized;
+        internal IDictionary<string, object> meta, realized;
 
-        public bool HasMeta()
+        public virtual bool HasMeta()
         {
             return meta != null && meta.Count > 0;
         }
@@ -691,29 +692,38 @@ namespace Dialogic
     public abstract class Command : Meta
     {
         public const string PACKAGE = "Dialogic.";
-
+        public static readonly Command NOP = new NoOp();
         protected static int IDGEN = 0;
 
-        public static readonly Command NOP = new NoOp();
-
-        public int Id { get; protected set; }
-
         public int DelayMs { get; protected set; }
-
         public string Text;
 
-        public IActor actor;
-
-        public Chat parent;
+        internal readonly int Id;
+        internal IDictionary<string, Type> metameta;
+        internal IActor actor;
+        internal Chat parent;
 
         protected Command()
         {
             this.DelayMs = 0;
             this.Id = ++IDGEN;
             this.realized = new Dictionary<string, object>();
+            ExtractMetaMeta();
         }
 
-        public static Command Create(Type type, string text, string label, string[] metas)
+        private void ExtractMetaMeta()
+        {
+            metameta = new Dictionary<string, Type>();
+
+            var type = GetType();
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            foreach (FieldInfo mi in fields) metameta.Add(mi.Name, mi.FieldType);
+
+            var props = type.GetProperties();
+            foreach (PropertyInfo pi in props) metameta.Add(pi.Name, pi.PropertyType);
+        }
+
+        internal static Command Create(Type type, string text, string label, string[] metas)
         {
             //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(metas));
             Command cmd = (Command)Activator.CreateInstance(type);
@@ -829,7 +839,8 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return (TypeName().ToUpper() + " " + Text).Trim() + (" " + MetaStr()).TrimEnd();
+            return (TypeName().ToUpper() + " "
+                + Text).Trim() + (" " + MetaStr()).TrimEnd();
         }
     }
 }

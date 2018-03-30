@@ -7,6 +7,83 @@ namespace Dialogic
     [TestFixture]
     public class ParserTests
     {
+
+        [Test]
+        public void TestDynamicAssign()
+        {
+            var chat = ChatParser.ParseText("SAY ok { type = a,stage = b}")[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            Say say = (Dialogic.Say)chat.commands[0];
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.meta, Is.Not.Null);
+            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
+
+            say.Realize(null);
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.GetRealized("type"), Is.EqualTo("a"));
+            Assert.That(say.GetRealized("stage"), Is.EqualTo("b"));
+            Assert.That(say.DelayMs, Is.EqualTo(2000));
+
+
+
+
+            chat = ChatParser.ParseText("SAY ok { type = a,stage = b, DelayMs=100}")[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            say = (Dialogic.Say)chat.commands[0];
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.meta, Is.Not.Null);
+            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
+            Assert.That(say.GetMeta("DelayMs"), Is.EqualTo("100"));
+
+            say.Realize(null);
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.GetRealized("type"), Is.EqualTo("a"));
+            Assert.That(say.GetRealized("stage"), Is.EqualTo("b"));
+            Assert.That(say.GetRealized("DelayMs"), Is.EqualTo("100"));
+
+            // TODO: WORKING here on Dynamic Assign
+            Assert.That(say.DelayMs, Is.EqualTo(100));
+        }
+
+        [Test]
+        public void TestChatMeta()
+        {
+            var chat = ChatParser.ParseText("CHAT c1", true)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Staleness(), Is.EqualTo(Defaults.CHAT_STALENESS));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), 
+                Is.EqualTo(Convert.ToDouble(Defaults.CHAT_STALENESS)));
+
+            chat = ChatParser.ParseText("CHAT c1 { type = a, stage = b }")[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Staleness(), Is.EqualTo(Defaults.CHAT_STALENESS));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
+                Is.EqualTo(Convert.ToDouble(Defaults.CHAT_STALENESS)));
+            Assert.That(chat.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(chat.GetMeta("stage"), Is.EqualTo("b"));
+
+            chat = ChatParser.ParseText("CHAT c1 { staleness = 1,type = a,stage = b}")[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Staleness(), Is.EqualTo(1));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
+                Is.EqualTo(Convert.ToDouble("1")));
+            Assert.That(chat.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(chat.GetMeta("stage"), Is.EqualTo("b"));
+        }
   
         [Test]
         public void TestAssignActors()
@@ -561,8 +638,6 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("c"), Is.EqualTo("d"));
 
             chats = ChatParser.ParseText("NVM 1.1");
-
-            Console.WriteLine(chats[0].commands[0]);
             Assert.That(chats[0].commands[0].GetType, Is.EqualTo(typeof(Tendar.Nvm)));
             Assert.That(chats[0].commands[0].TypeName(), Is.EqualTo("Nvm"));
             Assert.That(chats[0].commands[0].Text, Is.EqualTo("1.1"));
