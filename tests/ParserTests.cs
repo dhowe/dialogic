@@ -7,6 +7,113 @@ namespace Dialogic
     [TestFixture]
     public class ParserTests
     {
+
+        [Test]
+        public void TestDynamicAssign()
+        {
+            var chat = ChatParser.ParseText("SAY ok { type = a,stage = b}")[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            Say say = (Dialogic.Say)chat.commands[0];
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.meta, Is.Not.Null);
+            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
+
+            say.Realize(null);
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.GetRealized("type"), Is.EqualTo("a"));
+            Assert.That(say.GetRealized("stage"), Is.EqualTo("b"));
+            Assert.That(say.delay, Is.EqualTo(2000));
+
+            chat = ChatParser.ParseText("SAY ok { type = a,stage = b, delay=1.01}")[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            say = (Dialogic.Say)chat.commands[0];
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.meta, Is.Not.Null);
+            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
+            Assert.That(say.GetMeta("delay"), Is.EqualTo("1.01"));
+            Assert.That(say.delay, Is.EqualTo(1.01));
+
+            say.Realize(null);
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.GetRealized("type"), Is.EqualTo("a"));
+            Assert.That(say.GetRealized("stage"), Is.EqualTo("b"));
+            Assert.That(say.GetRealized("delay"), Is.EqualTo("1.01"));
+            Assert.That(say.delay, Is.EqualTo(1.01));
+
+            chat = ChatParser.ParseText("SAY ok { type = a,stage = b, delay=1, actor=Tendar}")[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
+            say = (Dialogic.Say)chat.commands[0];
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.meta, Is.Not.Null);
+            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
+            Assert.That(say.GetMeta("delay"), Is.EqualTo("1"));
+            Assert.That(say.GetMeta("actor"), Is.EqualTo("Tendar"));
+            Assert.That(say.actor, Is.EqualTo(Tendar.AppConfig.Actors[1]));
+            Assert.That(say.delay, Is.EqualTo(1));
+
+            say.Realize(null);
+            Assert.That(say, Is.Not.Null);
+            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.GetRealized("type"), Is.EqualTo("a"));
+            Assert.That(say.GetRealized("stage"), Is.EqualTo("b"));
+            Assert.That(say.GetRealized("delay"), Is.EqualTo("1"));
+            Assert.That(say.GetRealized("actor"), Is.EqualTo("Tendar"));
+            Assert.That(say.actor, Is.EqualTo(Tendar.AppConfig.Actors[1]));
+            Assert.That(say.delay, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TestChatMeta()
+        {
+            Chat chat;
+
+            chat = ChatParser.ParseText("CHAT c1", true)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.staleness, Is.EqualTo(Defaults.CHAT_STALENESS));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), 
+                Is.EqualTo(Convert.ToDouble(Defaults.CHAT_STALENESS)));
+
+            chat = ChatParser.ParseText("CHAT c1 { type = a, stage = b }")[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.staleness, Is.EqualTo(Defaults.CHAT_STALENESS));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
+                Is.EqualTo(Convert.ToDouble(Defaults.CHAT_STALENESS)));
+            Assert.That(chat.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(chat.GetMeta("stage"), Is.EqualTo("b"));
+
+            chat = ChatParser.ParseText("CHAT c1 { staleness = 1,type = a,stage = b}")[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.staleness, Is.EqualTo(1));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
+                Is.EqualTo(Convert.ToDouble("1")));
+            Assert.That(chat.GetMeta("type"), Is.EqualTo("a"));
+            Assert.That(chat.GetMeta("stage"), Is.EqualTo("b"));
+
+            chat = ChatParser.ParseText("CHAT c1 { resumeAfterInt=false,type = a,stage = b}")[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.resumeAfterInt, Is.EqualTo(false));
+            Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUME_AFTER_INT)),
+                Is.EqualTo(Convert.ToBoolean("false")));
+        }
   
         [Test]
         public void TestAssignActors()
@@ -15,11 +122,11 @@ namespace Dialogic
 
             chats = ChatParser.ParseText("Guppy:SAY Hello from Guppy");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Say say = (Dialogic.Say)chats[0].commands[0];
-            Assert.That(say.Text, Is.EqualTo("Hello from Guppy"));
+            Assert.That(say.text, Is.EqualTo("Hello from Guppy"));
             Assert.That(say.actor.Name(), Is.EqualTo("Guppy"));
             say.Realize(null);
             Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
@@ -28,29 +135,29 @@ namespace Dialogic
 
             chats = ChatParser.ParseText("Guppy: Hello from Guppy");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             say = (Dialogic.Say)chats[0].commands[0];
-            Assert.That(say.Text, Is.EqualTo("Hello from Guppy"));
+            Assert.That(say.text, Is.EqualTo("Hello from Guppy"));
             Assert.That(say.actor.Name(), Is.EqualTo("Guppy"));
 
             chats = ChatParser.ParseText("Tendar:Hello from Tendar");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             say = (Dialogic.Say)chats[0].commands[0];
-            Assert.That(say.Text, Is.EqualTo("Hello from Tendar"));
+            Assert.That(say.text, Is.EqualTo("Hello from Tendar"));
             Assert.That(say.actor.Name(), Is.EqualTo("Tendar"));
 
             chats = ChatParser.ParseText("Hello from Guppy");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             say = (Dialogic.Say)chats[0].commands[0];
-            Assert.That(say.Text, Is.EqualTo("Hello from Guppy"));
+            Assert.That(say.text, Is.EqualTo("Hello from Guppy"));
             Assert.That(say.actor.Name(), Is.EqualTo(Actor.Default.Name()));
         }
 
@@ -59,19 +166,19 @@ namespace Dialogic
         {
             List<Chat> chats = ChatParser.ParseText("ASK Want a game?\nOPT Y #Game\n\nOPT N #End");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
 			Ask ask = (Dialogic.Ask)chats[0].commands[0];
-            Assert.That(ask.Text, Is.EqualTo("Want a game?"));
+            Assert.That(ask.text, Is.EqualTo("Want a game?"));
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
             var options = ask.Options();
             Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
-            Assert.That(options[0].Text, Is.EqualTo("Y"));
+            Assert.That(options[0].text, Is.EqualTo("Y"));
             Assert.That(options[0].action.GetType(), Is.EqualTo(typeof(Go)));
             Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
-            Assert.That(options[1].Text, Is.EqualTo("N"));
+            Assert.That(options[1].text, Is.EqualTo("N"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
         }
 
@@ -134,52 +241,52 @@ namespace Dialogic
             List<Chat> chats;
             chats = ChatParser.ParseText(txt);
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\n// And Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY Thank you\nSAY Hello //And Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].Count(), Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Assert.That(chats[0].commands[1].Text, Is.EqualTo("Hello"));
+            Assert.That(chats[0].commands[1].text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY Thank you\nSAY Hello /*And Goodbye*/");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].Count(), Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Assert.That(chats[0].commands[1].Text, Is.EqualTo("Hello"));
+            Assert.That(chats[0].commands[1].text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY Thank you\n//SAY Hello\nAnd Goodbye\n");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].Count(), Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Goodbye"));
+            Assert.That(chats[0].commands[1].text, Is.EqualTo("And Goodbye"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY Thank you\n//SAY Goodbye\nAnd Hello");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].Count(), Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Hello"));
+            Assert.That(chats[0].commands[1].text, Is.EqualTo("And Hello"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
         }
 
@@ -190,9 +297,9 @@ namespace Dialogic
 
             chats = ChatParser.ParseText("FIND {num=1}");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].text, Is.Null);
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
             var meta = chats[0].commands[0].GetMeta("num");
@@ -203,7 +310,7 @@ namespace Dialogic
             chats = ChatParser.ParseText("FIND {a*=(hot|cool)}");
             var find = chats[0].commands[0];
             Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
-            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].text, Is.Null);
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.Not.Null);
             meta = chats[0].commands[0].GetMeta("a");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
@@ -211,7 +318,7 @@ namespace Dialogic
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
 
             chats = ChatParser.ParseText("FIND {do=1}");
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             var finder = chats[0].commands[0];
             Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
@@ -228,9 +335,9 @@ namespace Dialogic
 
             chats = ChatParser.ParseText("FIND {num=$count}");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].text, Is.Null);
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
 
             chats[0].commands[0].Realize(RealizeTests.globals);
@@ -253,7 +360,7 @@ namespace Dialogic
             find.Realize(RealizeTests.globals);
 
             Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
-            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].text, Is.Null);
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.Not.Null);
 
             var meta = chats[0].commands[0].GetMeta("a");
@@ -274,9 +381,9 @@ namespace Dialogic
 
             chats = ChatParser.ParseText("FIND {!num=1}");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].text, Is.Null);
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
             var meta = chats[0].commands[0].GetMeta("num");
@@ -287,7 +394,7 @@ namespace Dialogic
             chats = ChatParser.ParseText("FIND {!a*=(hot|cool)}");
             var find = chats[0].commands[0];
             Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
-            Assert.That(chats[0].commands[0].Text, Is.Null);
+            Assert.That(chats[0].commands[0].text, Is.Null);
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.Not.Null);
             meta = chats[0].commands[0].GetMeta("a");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
@@ -295,7 +402,7 @@ namespace Dialogic
             Assert.That(constraint.IsStrict(), Is.EqualTo(true));
 
             chats = ChatParser.ParseText("FIND {!do=1}");
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             var finder = chats[0].commands[0];
             Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
@@ -313,12 +420,13 @@ namespace Dialogic
             chats = ChatParser.ParseText("WAIT .5 {waitForAnimation=true}");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Wait)));
 			Wait wait = (Dialogic.Wait)chats[0].commands[0];
-            Assert.That(wait.Text, Is.EqualTo(".5"));
-            Assert.That(wait.DelayMs, Is.EqualTo(500));
+            Assert.That(wait.text, Is.EqualTo(".5"));
+            Assert.That(wait.delay, Is.EqualTo(.5));
+            Assert.That(wait.ComputeDuration(), Is.EqualTo(500));
             Assert.That(wait.GetMeta("waitForAnimation"), Is.EqualTo("true"));
         }
 
@@ -328,9 +436,9 @@ namespace Dialogic
             List<Chat> chats;
             chats = ChatParser.ParseText("CHAT c1 {type=a,stage=b}\nSAY Hello");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Hello"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Hello"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
         }
 
@@ -395,115 +503,115 @@ namespace Dialogic
             chats = ChatParser.ParseText("ASK is for horses?\nOPT Yes #game");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("is for horses?"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("is for horses?"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
             Ask a = (Ask)chats[0].commands[0];
             var opts = a.Options();
-            Assert.That(opts[0].Text, Is.EqualTo("Yes"));
-            Assert.That(opts[0].action.Text, Is.EqualTo("game"));
+            Assert.That(opts[0].text, Is.EqualTo("Yes"));
+            Assert.That(opts[0].action.text, Is.EqualTo("game"));
 
             chats = ChatParser.ParseText("HAY is for horses");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("HAY is for horses"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("HAY is for horses"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("hello");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("hello"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("hello"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("wei");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("wei"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("wei"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY ...");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("..."));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("..."));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("...");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("..."));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("..."));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("GO #Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
 
             chats = ChatParser.ParseText("GO Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Twirl"));
 
             chats = ChatParser.ParseText("DO #Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
 
             chats = ChatParser.ParseText("DO Twirl");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Twirl"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Twirl"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
 
             chats = ChatParser.ParseText("SAY Thank you");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY Thank you\n \t\nAnd Goodbye");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].Count(), Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            Assert.That(chats[0].commands[1].Text, Is.EqualTo("And Goodbye"));
+            Assert.That(chats[0].commands[1].text, Is.EqualTo("And Goodbye"));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
             chats = ChatParser.ParseText("SAY Thank you { pace = fast}");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
             chats = ChatParser.ParseText("SAY Thank you {pace=fast,count=2}");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[0].HasMeta(), Is.EqualTo(true));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
@@ -511,62 +619,61 @@ namespace Dialogic
 
             chats = ChatParser.ParseText("SAY Thank you {}");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("Thank you"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("Thank you"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[0].HasMeta(), Is.EqualTo(false));
 
             // meta variations
             chats = ChatParser.ParseText("ok { pace = fast }");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
             chats = ChatParser.ParseText("ok {pace = fast}");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
             chats = ChatParser.ParseText("ok {pace =fast}");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
             chats = ChatParser.ParseText("ok {pace= fast}");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
             chats = ChatParser.ParseText("ok {pace= fast}");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("pace"), Is.EqualTo("fast"));
 
             chats = ChatParser.ParseText("ok {a=b,c=d}");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.EqualTo("b"));
             Assert.That(chats[0].commands[0].GetMeta("c"), Is.EqualTo("d"));
 
             chats = ChatParser.ParseText("ok {a=b, c=d}");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.EqualTo("b"));
             Assert.That(chats[0].commands[0].GetMeta("c"), Is.EqualTo("d"));
 
             chats = ChatParser.ParseText("ok {a=b ,c=d}");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.EqualTo("b"));
             Assert.That(chats[0].commands[0].GetMeta("c"), Is.EqualTo("d"));
 
             chats = ChatParser.ParseText("ok { a = b , c = d }");
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("ok"));
-            Assert.That(chats[0].commands[0].GetType, Is.EqualTo(typeof(Say)));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("ok"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Assert.That(chats[0].commands[0].TypeName(), Is.EqualTo("Say"));
             Assert.That(chats[0].commands[0].GetMeta("a"), Is.EqualTo("b"));
             Assert.That(chats[0].commands[0].GetMeta("c"), Is.EqualTo("d"));
 
             chats = ChatParser.ParseText("NVM 1.1");
-
-            Console.WriteLine(chats[0].commands[0]);
-            Assert.That(chats[0].commands[0].GetType, Is.EqualTo(typeof(Tendar.Nvm)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Tendar.Nvm)));
             Assert.That(chats[0].commands[0].TypeName(), Is.EqualTo("Nvm"));
-            Assert.That(chats[0].commands[0].Text, Is.EqualTo("1.1"));
-            Assert.That(chats[0].commands[0].DelayMs, Is.EqualTo(1100));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("1.1"));
+            Assert.That(chats[0].commands[0].delay, Is.EqualTo(1.1));
+            Assert.That(chats[0].commands[0].ComputeDuration(), Is.EqualTo(1100));
         }
 
         [Test]
@@ -591,11 +698,10 @@ namespace Dialogic
             List<Chat> chats = ChatParser.ParseText("GRAM { start: 'The <item>', item: cat }");
             Command gram = chats[0].commands[0];
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(gram.Text, Is.Null);
+            Assert.That(gram.text, Is.Null);
             Assert.That(gram.GetType(), Is.EqualTo(typeof(Gram)));
-            //new ChatRuntime(chats).Run();
         }
 
         [Test]
@@ -603,14 +709,14 @@ namespace Dialogic
         {
             List<Chat> chats = ChatParser.ParseText("CHAT c1 {type=a,stage=b}");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(0));
+            Assert.That(chats[0].Count(), Is.EqualTo(0));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Chat chat = chats[0];
-            Assert.That(chats[0].Text, Is.EqualTo("c1"));
+            Assert.That(chats[0].text, Is.EqualTo("c1"));
 
             chats = ChatParser.ParseText("CHAT c1 {type=a,stage=b}\nGO #c1\nDO #c1\n");
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count, Is.EqualTo(2));
+            Assert.That(chats[0].Count(), Is.EqualTo(2));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
             Assert.That(chats[0].commands[1].GetType(), Is.EqualTo(typeof(Do)));

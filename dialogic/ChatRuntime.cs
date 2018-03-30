@@ -115,7 +115,7 @@ namespace Dialogic
 
             for (int i = 0; i < chats.Count; i++)
             {
-                if (chats[i].Text == label)
+                if (chats[i].text == label)
                 {
                     result = chats[i];
                     break;
@@ -155,7 +155,7 @@ namespace Dialogic
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = (finder is Go) ? FindChat(((Go)finder).Text) :
+                Chat chat = (finder is Go) ? FindChat(((Go)finder).text) :
                     this.DoFind(finder, globals);
 
                 if (chat == null) throw new FindException(finder);
@@ -294,10 +294,10 @@ namespace Dialogic
 
             chatEvent = new UpdateEvent(new Dictionary<string, object>(){
                 { Meta.TYPE, chat.TypeName() },
-                { Meta.TEXT, chat.Text },
+                { Meta.TEXT, chat.text },
             });
 
-            Info("\n<#" + chat.Text + "-started>");
+            Info("\n<#" + chat.text + "-started>");
         }
 
         internal void Suspend()
@@ -306,12 +306,12 @@ namespace Dialogic
             {
                 if (!chat.interruptable)
                 {
-                    Console.WriteLine("Cannot interrupt #" + chat.Text + "!");
+                    Console.WriteLine("Cannot interrupt #" + chat.text + "!");
                     return;
                 }
                 resumables.Push(chat);
 
-                Info("<#" + chat.Text + "-suspending>");
+                Info("<#" + chat.text + "-suspending>");
             }
             nextEventTime = -1;
         }
@@ -326,7 +326,7 @@ namespace Dialogic
             if (chat != null && nextEventTime > -1)
             {
                 Warn("Ignoring attempt to resume while Chat#"
-                     + chat.Text + " is active & running");
+                     + chat.text + " is active & running");
             }
 
             if (chat == null)
@@ -359,9 +359,9 @@ namespace Dialogic
             }
 
             // if false, we don't resume after finishing
-            var resumesAfter = allowResume && chat.resumeAfterInterrupting;
+            var resumesAfter = allowResume && chat.resumeAfterInt;
 
-            Info("<#" + chat.Text + "-finished>");
+            Info("<#" + chat.text + "-finished>");
 
             this.chat = null;
 

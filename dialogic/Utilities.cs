@@ -58,7 +58,7 @@ namespace Dialogic
         public static double CHAT_STALENESS = 0;
 
         /// <summary>
-        ///  Default increment each time Chat is run
+        /// Default increment each time Chat is run
         /// </summary>
         public static double CHAT_STALENESS_INCR = 1;
 
@@ -72,8 +72,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// A 1=1 mapping from a string command to its object type, 
-    /// e.g., "SAY" -> Dialogic.Say
+    /// A 1=1 mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
     /// </summary>
     public class CommandDef
     {
@@ -113,8 +112,9 @@ namespace Dialogic
     /// </summary>
     public static class Util
     {
-        public static StringComparison IC = StringComparison.InvariantCulture;
         public static int INFINITE = -1;
+
+        internal static StringComparison IC = StringComparison.InvariantCulture;
 
         private static int start;
         private static Random random;
@@ -125,7 +125,199 @@ namespace Dialogic
             random = new Random();
         }
 
-        public static int SecStrToMs(string s, int defaultMs = -1)
+        /// <summary>
+        /// Constrains the specified number to the range specified by low and high.
+        /// </summary>
+        /// <returns>The constrained number</returns>
+        /// <param name="n">N.</param>
+        /// <param name="low">Low.</param>
+        /// <param name="high">High.</param>
+        public static double Constrain(double n, double low, double high)
+        {
+            return Math.Max(Math.Min(n, high), low);
+        }
+
+        /// <summary>
+        /// Maps a number from one range to another.
+        /// </summary>
+        /// <returns>The map.</returns>
+        /// <param name="n">the incoming value to be converted</param>
+        /// <param name="min">lower bound of the value's current range</param>
+        /// <param name="max">upper bound of the value's current range</param>
+        /// <param name="targetMin">lower bound of the value's target range</param>
+        /// <param name="targetMax">upper bound of the value's target range</param>
+        public static double Map(double n, 
+            double min, double max, double targetMin, double targetMax)
+        {
+            return (n - min) / (max - min) * (targetMax - targetMin) + targetMin;
+        }
+
+        /// <summary>
+        /// Returns the number of milliseconds elapsed since the start of the program 
+        /// </summary>
+        /// <returns>The milliseconds.</returns>
+        public static int Millis()
+        {
+            return EpochMs() - start;
+        }
+
+        /// <summary>
+        /// Returns the number of milliseconds elapsed since the specified timestamp 
+        /// </summary>
+        /// <returns>The milliseconds.</returns>
+        /// <param name="since">Since.</param>
+        public static int Millis(int since)
+        {
+            return Millis() - since;
+        }
+
+        /// <summary>
+        /// Returns the number of seconds elapsed since the specified timestamp, 
+        /// or start of the program if not supplied
+        /// </summary>
+        /// <returns>The seconds</returns>
+        /// <param name="since">Since.</param>
+        public static string ElapsedSec(int since = 0)
+        {
+            return (Millis(since) / 1000.0).ToString("0.##") + "s";
+        }
+
+        /// <summary>
+        /// Returns the number of milliseconds elapsed since epoch start
+        /// </summary>
+        /// <returns>The milliseconds</returns>
+        public static int EpochMs()
+        {
+            return Environment.TickCount & Int32.MaxValue;
+        }
+
+        /// <summary>
+        /// Returns a random item from the array
+        /// </summary>
+        /// <returns>a random item.</returns>
+        /// <param name="arr">Arr.</param>
+        public static object RandItem(object[] arr)
+        {
+            return arr[Rand(arr.Length)];
+        }
+
+        /// <summary>
+        /// Returns a random item from the List
+        /// </summary>
+        /// <returns>a random item.</returns>
+        /// <param name="l">L.</param>
+        /// <typeparam name="T">The 1st type parameter.</typeparam>
+        public static T RandItem<T>(List<T> l)
+        {
+            return l.ElementAt(Rand(l.Count));
+        }
+
+        /// <summary>
+        /// Returns a random int i, where min &lte; i &gt; max
+        /// </summary>
+        /// <returns>The rand.</returns>
+        /// <param name="min">Minimum.</param>
+        /// <param name="max">Max.</param>
+        public static int Rand(int min, int max)
+        {
+            return random.Next(min, max);
+        }
+
+        /// <summary>
+        /// Returns a random int i, where 0 &lte; i &gt; max
+        /// </summary>
+        /// <returns>The rand.</returns>
+        /// <param name="max">Max.</param>
+        public static int Rand(int max)
+        {
+            return Rand(0, max);
+        }
+
+        /// <summary>
+        /// Returns a random double d, where 0 &lte; d &gt; 1
+        /// </summary>
+        /// <returns>The rand.</returns>
+        public static double Rand()
+        {
+            return random.NextDouble();
+        }
+
+        /// <summary>
+        /// Returns a random double d, where min &lte; d &gt; max
+        /// </summary>
+        /// <returns>The rand.</returns>
+        /// <param name="min">Minimum.</param>
+        /// <param name="max">Max.</param>
+        public static double Rand(double min, double max)
+        {
+            return min + Rand() * max;
+        }
+
+        /// <summary>
+        /// Returns a random double d, where 0 &lte; d &gt; max
+        /// </summary>
+        /// <returns>The rand.</returns>
+        /// <param name="max">Max.</param>
+        public static double Rand(double max)
+        {
+            return Rand(0, max);
+        }
+
+        /// <summary>
+        /// Converts seconds to milliseconds if seconds is >= 0, else returns -1
+        /// </summary>
+        /// <returns>The milliseconds.</returns>
+        /// <param name="seconds">Seconds.</param>
+        public static int ToMillis(double seconds)
+        {
+            return (seconds < 0) ? -1 : (int)(seconds * 1000);
+        }
+
+        /// <summary>
+        /// Converts milliseconds to seconds
+        /// </summary>
+        /// <returns>The seconds.</returns>
+        /// <param name="millis">Millis.</param>
+        public static double ToSec(int millis)
+        {
+            return millis / 1000.0;
+        }
+
+        /// <summary>
+        /// Trim the specified character if the string starts with it
+        /// </summary>
+        /// <returns><c>true</c>, if first was trimed, <c>false</c> otherwise.</returns>
+        /// <param name="s">S.</param>
+        /// <param name="c">C.</param>
+        public static bool TrimFirst(ref string s, char c)
+        {
+            if (s.IndexOf(c) == 0)
+            {
+                s = s.Substring(1);
+                return true;
+            }
+            return false;
+        }
+
+
+        internal static object ConvertTo(Type t, object val)
+        {
+            if (t == typeof(double))
+            {
+                val = Convert.ToDouble(val);
+            }
+            else if (t == typeof(int))
+            {
+                val = Convert.ToInt32(val);
+            }
+            else if (t == typeof(bool))
+            {
+                val = Convert.ToBoolean(val);
+            }
+            return val;
+        }
+
+        internal static int SecStrToMs(string s, int defaultMs = -1)
         {
             double d;
             try
@@ -139,7 +331,7 @@ namespace Dialogic
             return (int)(d * 1000);
         }
 
-        public static string ToMixedCase(string s)
+        internal static string ToMixedCase(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
 
@@ -147,53 +339,13 @@ namespace Dialogic
         }
 
 
-        public static double Map(double n, double start1, double stop1, double start2, double stop2)
-        {
-            return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
-        }
-
-        public static double Constrain(double n, double low, double high)
-        {
-            return Math.Max(Math.Min(n, high), low);
-        }
-
-        public static int Millis()
-        {
-            return EpochMs() - start;
-        }
-
-        public static int Millis(int since)
-        {
-            return Millis() - since;
-        }
-
-        public static string ElapsedSec(int since = 0)
-        {
-            return (Millis(since) / 1000.0).ToString("0.##") + "s";
-        }
-
-        public static int EpochMs()
-        {
-            return Environment.TickCount & Int32.MaxValue;
-        }
-
-        public static double Rand()
-        {
-            return random.NextDouble();
-        }
-
-        public static int Rand(int min, int max)
-        {
-            return random.Next(min, max);
-        }
-
-        public static void ShowMatches(MatchCollection matches)
+        internal static void ShowMatches(MatchCollection matches)
         {
             int i = 0;
             foreach (Match match in matches) ShowMatch(match, i++);
         }
 
-        public static int ShowMatch(Match match, int i = 0)
+        internal static int ShowMatch(Match match, int i = 0)
         {
             Console.WriteLine("\nMatch {0} has {1} groups:\n", i, match.Groups.Count);
 
@@ -311,32 +463,7 @@ namespace Dialogic
             return lines;
         }
 
-        public static object RandItem(object[] arr)
-        {
-            return arr[Rand(arr.Length)];
-        }
-
-        public static T RandItem<T>(List<T> l)
-        {
-            return l.ElementAt(Rand(l.Count));
-        }
-
-        public static int Rand(int max)
-        {
-            return Rand(0, max);
-        }
-
-        public static double Rand(double min, double max)
-        {
-            return min + Rand() * max;
-        }
-
-        public static double Rand(double max)
-        {
-            return Rand(0, max);
-        }
-
-        public static void Log(string logFileName, object msg)
+        internal static void Log(string logFileName, object msg)
         {
             using (StreamWriter w = File.AppendText(logFileName))
             {
@@ -345,34 +472,9 @@ namespace Dialogic
             }
         }
 
-
-
-        public static IEnumerable<string> SortByLength(IEnumerable<string> e)
+        internal static IEnumerable<string> SortByLength(IEnumerable<string> e)
         {
             return from s in e orderby s.Length descending select s;
-        }
-
-        /**
-         * Converts seconds to millis if seconds is >= 0, else returns -1
-         */
-        public static int ToMillis(double seconds)
-        {
-            return (seconds < 0) ? -1 : (int)(seconds * 1000);
-        }
-
-        public static double ToSec(int millis)
-        {
-            return millis / 1000.0;
-        }
-
-        public static bool TrimFirst(ref string s, char c)
-        {
-            if (s.IndexOf(c) == 0)
-            {
-                s = s.Substring(1);
-                return true;
-            }
-            return false;
         }
     }
 

@@ -158,10 +158,10 @@ namespace Dialogic
 
         private void HandleActor(string spkr, Command c, string line, int lineNo)
         {
-            c.actor = Actor.Default;
+            c.Actor(Actor.Default);
             if (!string.IsNullOrEmpty(spkr) && runtime != null)
             {
-                c.actor = runtime.FindActor(spkr);
+                c.Actor(runtime, spkr);
                 if (c.actor == null)
                 {
                     throw new ParseException(line, lineNo, "Unknown actor: '" + spkr + "'");
@@ -172,6 +172,9 @@ namespace Dialogic
 
         private Command HandleCommand(Command c, string line, int lineNo)
         {
+            //Console.WriteLine("HandleCommand:"+c);
+            c.MetaToProperties(runtime); // set properties from meta
+
             if (c is Chat)
             {
                 chats.Add((Chat)c);

@@ -2,10 +2,212 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// Superclass for all Commands. When created by the parser, the default constructor is called first,
+    /// followed by Init(text,label,meta), followed by any app-specific validators, followed by PostValidate().
+    /// </summary>
+    public abstract class Command : Meta
+    {
+        internal static readonly Command NOP = new NoOp();
+        protected static int IDGEN = 0;
+
+        protected internal IActor actor { get; protected set; }
+        protected internal double delay { get; protected set; }
+
+        public string text;
+
+        protected internal readonly int id;
+        protected internal Chat parent;
+
+        protected Command()
+        {
+            this.delay = 0;
+            this.id = ++IDGEN;
+            this.realized = new Dictionary<string, object>();
+            ExtractMetaMeta();
+        }
+
+        protected internal void MetaToProperties(ChatRuntime rt) // ?
+        {
+            if (HasMeta()) // OPT: reflection
+            {
+                foreach (KeyValuePair<string, object> pair in meta)
+                {
+                    string key = pair.Key;
+                    //Console.WriteLine("META: '" + key+"'");
+                    object val = pair.Value;
+                    if (metameta.ContainsKey(key))
+                    {
+                        if (key == Meta.ACTOR)
+                        {
+                            this.Actor(rt, (string)val);
+                        }
+                        else
+                        {
+                            var propInfo = metameta[key];
+                            val = Util.ConvertTo(propInfo.PropertyType, val);
+                            //Console.WriteLine("DYN: " + val + " " + val.GetType());
+                            propInfo.SetValue(this, val, null);
+                        }
+                    }
+                }
+            }
+        }
+
+        protected void ExtractMetaMeta()
+        {
+            metameta = new Dictionary<string, PropertyInfo>();
+
+            //Console.WriteLine("\n" + TypeName() + " ========================");
+            var props = GetType().GetProperties(BindingFlags.Instance
+                | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (PropertyInfo pi in props)
+            {
+                //Console.WriteLine(pi.Name);
+                metameta.Add(pi.Name, pi);
+            }
+        }
+
+        protected double Delay()
+        {
+            return delay;
+        }
+
+        protected Command Delay(double seconds)
+        {
+            delay = seconds;
+            SetMeta(Meta.DELAY, seconds.ToString());
+            return this;
+        }
+
+        internal static Command Create(Type type, string text, string label, string[] metas)
+        {
+            //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(metas));
+            Command cmd = (Command)Activator.CreateInstance(type);
+            cmd.Init(text, label, metas);
+            return cmd;
+        }
+
+        public virtual void Init(string text, string label, string[] metas)
+        {
+            this.text = text.Length > 0 ? text : label;
+            ParseMeta(metas);
+            //HandleMetaTiming();
+            Validate();
+        }
+
+        protected void ValidateTextLabel()
+        {
+            if (String.IsNullOrEmpty(text)) throw BadArg
+                (TypeName().ToUpper() + " requires a literal #Label");
+
+            if (text.StartsWith("#", Util.IC)) text = text.Substring(1);
+        }
+
+        public string Text(bool real = false)
+        {
+            return real ? (string)realized[Meta.TEXT] : text;
+        }
+
+        public IActor Actor()
+        {
+            return actor;
+        }
+
+        public Command Actor(IActor actor)
+        {
+            this.actor = actor;
+            return this;
+        }
+
+        public Command Actor(ChatRuntime rt, string actorName)
+        {
+            return Actor(rt.FindActor(actorName));
+        }
+
+        protected internal virtual Command Validate()
+        {
+            return this;
+        }
+
+        public virtual string TypeName()
+        {
+            return this.GetType().Name;
+        }
+
+        public virtual void Realize(IDictionary<string, object> globals)
+        {
+            realized.Clear();
+
+            RealizeMeta(globals);
+
+            if (this is ISendable)
+            {
+                realized[Meta.TEXT] = Realizer.Do(text, globals);
+                realized[Meta.ACTOR] = Actor().Name();
+                realized[Meta.TYPE] = TypeName();
+            }
+
+            //return realized; // convenience
+        }
+
+        protected virtual void RealizeMeta(IDictionary<string, object> globals)
+        {
+            if (HasMeta())
+            {
+                IEnumerable sorted = null; // TODO: cache these key-sorts ?
+
+                foreach (KeyValuePair<string, object> pair in meta)
+                {
+                    object val = pair.Value;
+
+                    if (val is string)
+                    {
+                        string tmp = (string)val;
+
+                        if (tmp.IndexOf('$') > -1)
+                        {
+                            if (sorted == null) sorted = Util.SortByLength(globals.Keys);
+                            foreach (string s in sorted)
+                            {
+                                tmp = tmp.Replace("$" + s, globals[s].ToString());
+                            }
+                        }
+
+                        val = tmp;
+                    }
+                    else if (!(val is Constraint))
+                    {
+                        throw new DialogicException("Unexpected meta-value: " + val + " " + val.GetType());
+                    }
+
+                    realized[pair.Key] = val;
+                }
+            }
+        }
+
+        protected Exception BadArg(string msg)
+        {
+            throw new ParseException(msg);
+        }
+
+        protected internal virtual int ComputeDuration()
+        {
+            return Util.ToMillis(delay);
+        }
+
+        public override string ToString()
+        {
+            return (TypeName().ToUpper() + " "
+                + text).Trim() + (" " + MetaStr()).TrimEnd();
+        }
+    }
+
     public interface ISendable { }
 
     public class NoOp : Command { }
@@ -16,22 +218,22 @@ namespace Dialogic
 
         public Say() : base()
         {
-            this.DelayMs = Util.ToMillis(Defaults.SAY_DURATION);
+            this.delay = Util.ToMillis(Defaults.SAY_DURATION);
         }
 
         protected internal override Command Validate()
         {
-            if (Text.Length < 1) throw new ParseException("SAY requires text");
+            if (text.Length < 1) throw new ParseException("SAY requires text");
             return this;
         }
 
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        public override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Recombine(globals);
-            lastSpoken = GetText(true);
+            lastSpoken = Text(true);
             //lastSpokenTime = Util.EpochMs();
-            return realized;
+            //return realized;
         }
 
         private void Recombine(IDictionary<string, object> globals)
@@ -39,16 +241,16 @@ namespace Dialogic
             if (IsRecombinant()) // try to say something different than last time
             {
                 int tries = 0;
-                while (lastSpoken == GetText(true) && ++tries < 100)
+                while (lastSpoken == Text(true) && ++tries < 100)
                 {
-                    realized[Meta.TEXT] = Realizer.Do(Text, globals);
+                    realized[Meta.TEXT] = Realizer.Do(text, globals);
                 }
             }
         }
 
         protected bool IsRecombinant()
         {
-            return Text.IndexOf('|') > -1;
+            return text.IndexOf('|') > -1;
         }
 
         /**
@@ -59,17 +261,17 @@ namespace Dialogic
          */
         protected internal override int ComputeDuration() // Config?
         {
-            return Util.Round(GetTextLenScale() * GetMetaSpeedScale() * DelayMs);
+            return Util.Round(GetTextLenScale() * GetMetaSpeedScale() * delay);
         }
 
         protected double GetTextLenScale()
         {
-            return Util.Map(Text.Length,
+            return Util.Map(text.Length,
                 Defaults.SAY_MIN_LINE_LEN, Defaults.SAY_MAX_LINE_LEN,
                 Defaults.SAY_MIN_LEN_MULT, Defaults.SAY_MAX_LEN_MULT);
         }
 
-        protected double GetMetaSpeedScale() // Config
+        protected double GetMetaSpeedScale()
         {
             double val = 1.0;
             if (meta != null && meta.ContainsKey("speed"))
@@ -109,16 +311,16 @@ namespace Dialogic
         protected internal override Command Validate()
         {
             ValidateTextLabel();
-            if (HasMeta(Meta.DELAY))
-            {
-                DelayMs = Util.ToMillis(Defaults.DO_DURATION);
-            }
+            //if (HasMeta(Meta.DELAY))
+            //{
+            //    delay = Util.ToMillis(Defaults.DO_DURATION);
+            //}
             return this;
         }
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + " #" + Text;
+            return TypeName().ToUpper() + " #" + text;
         }
     }
 
@@ -130,14 +332,14 @@ namespace Dialogic
 
         internal Set(string name, string value) : base() // tests only
         {
-            this.Text = name;
+            this.text = name;
             this.Value = value;
         }
 
         public override void Init(string text, string label, string[] metas)
         {
             string[] parts = ParseSetArgs(text);
-            this.Text = parts[0];
+            this.text = parts[0];
             this.Value = parts[1];
         }
 
@@ -160,7 +362,7 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + " $" + Text + '=' + Value;
+            return TypeName().ToUpper() + " $" + text + '=' + Value;
         }
     }
 
@@ -169,16 +371,7 @@ namespace Dialogic
         public override void Init(string text, string label, string[] metas)
         {
             base.Init(text, label, metas);
-            if (text.Length == 0)
-            {
-                DelayMs = Util.ToMillis(DefaultDuration());
-            }
-            else
-            {
-                DelayMs = Util.SecStrToMs(text, -1);
-                if (DelayMs == -1) throw new ParseException(TypeName()
-                    + " accepts only a NUMBER, found: '" + text + "'");
-            }
+            delay = text.Length == 0 ? DefaultDuration() : Convert.ToDouble(text);
         }
 
         protected virtual double DefaultDuration()
@@ -189,21 +382,28 @@ namespace Dialogic
 
     public class Ask : Say, ISendable
     {
-        public int SelectedIdx { get; protected set; }
+        internal int selectedIdx;
 
         protected List<Opt> options = new List<Opt>();
 
-        public int Timeout;
+        protected internal double timeout { get; protected set; }
 
         public Ask()
         {
-            this.DelayMs = Util.ToMillis(Defaults.ASK_DURATION); // infinite
-            this.Timeout = Util.ToMillis(Defaults.ASK_TIMEOUT);
+            this.delay = Defaults.ASK_DURATION;
+            this.timeout = Defaults.ASK_TIMEOUT;
         }
 
-        protected internal override int ComputeDuration()
+        protected double Timeout()
         {
-            return DelayMs;
+            return timeout;
+        }
+
+        protected Ask Timeout(double seconds)
+        {
+            timeout = seconds;
+            SetMeta(Meta.TIMEOUT, seconds.ToString());
+            return this;
         }
 
         public List<Opt> Options()
@@ -222,7 +422,7 @@ namespace Dialogic
             var opts = Options();
             for (int i = 0; i < opts.Count; i++)
             {
-                s += opts[i].GetText(true);
+                s += opts[i].Text(true);
                 if (i < opts.Count - 1) s += delim;
             }
             return s;
@@ -230,38 +430,37 @@ namespace Dialogic
 
         public Opt Selected()
         {
-            return Options()[SelectedIdx];
+            return Options()[selectedIdx];
         }
 
         public Opt Selected(int i)
         {
-            this.SelectedIdx = i;
+            this.selectedIdx = i;
             if (i >= 0 && i < options.Count) return Selected();
             return null;
         }
 
         public void AddOption(Opt o)
         {
-            //o.prompt = this;
             options.Add(o);
         }
 
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        public override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Options().ForEach(o => o.Realize(globals));
-            realized[Meta.TIMEOUT] = Timeout.ToString();
+            realized[Meta.TIMEOUT] = timeout.ToString();
             realized[Meta.OPTS] = OptionsJoined();
-            return realized;
+            //return realized;
         }
 
-        protected override void HandleMetaTiming()
-        {
-            if (HasMeta(Meta.TIMEOUT))
-            {
-                Timeout = Util.SecStrToMs((string)meta[Meta.TIMEOUT]);
-            }
-        }
+        //protected override void HandleMetaTiming()
+        //{
+        //    if (HasMeta(Meta.TIMEOUT))
+        //    {
+        //        timeout = Util.SecStrToMs((string)meta[Meta.TIMEOUT]);
+        //    }
+        //}
 
         public override string ToString()
         {
@@ -273,7 +472,7 @@ namespace Dialogic
 
     public class Opt : Say
     {
-        public Command action;
+        internal Command action;
 
         public Opt() : this(String.Empty, NOP) { }
 
@@ -281,13 +480,13 @@ namespace Dialogic
 
         public Opt(string text, Command action) : base()
         {
-            this.Text = text;
+            this.text = text;
             this.action = action;
         }
 
         public override void Init(string text, string label, string[] metas)
         {
-            this.Text = text;
+            this.text = text;
 
             if (label.Length > 0 && !label.StartsWith("#", Util.IC))
             {
@@ -308,8 +507,8 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + " " + Text
-                + (action is NoOp ? String.Empty : " #" + action.Text);
+            return TypeName().ToUpper() + " " + text
+                + (action is NoOp ? String.Empty : " #" + action.text);
         }
     }
 
@@ -337,13 +536,13 @@ namespace Dialogic
             Validate();
         }
 
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
+        public override void Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
 
             RealizeMeta(globals);
 
-            return realized; // for convenience
+            //return realized; // for convenience
         }
 
         protected internal override Command Validate()
@@ -421,7 +620,7 @@ namespace Dialogic
     {
         public override void Init(string text, string label, string[] metas)
         {
-            this.Text = text.Length > 0 ? text : label;
+            this.text = text.Length > 0 ? text : label;
             Validate();
         }
 
@@ -439,139 +638,7 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + " #" + Text;
-        }
-    }
-
-    public class Chat : Command
-    {
-        public List<Command> commands;
-        public bool interruptable = true; // TODO: parse from meta
-        public bool resumeAfterInterrupting = true;
-        public double stalenessIncrement = Defaults.CHAT_STALENESS_INCR;
-        public int cursor = 0, lastRunAt = -1;
-
-        public Chat() : base()
-        {
-            commands = new List<Command>();
-        }
-
-        internal static Chat Create(string name)
-        {
-            Chat c = new Chat();
-            c.Init(name, String.Empty, new string[0]);
-            return c;
-        }
-
-        public double Staleness()
-        {
-            return Convert.ToDouble(GetMeta(Meta.STALENESS));
-        }
-
-        public Chat Staleness(double d)
-        {
-            SetMeta(Meta.STALENESS, d.ToString());
-            return this;
-        }
-
-        public Chat IncrementStaleness()
-        {
-            SetMeta(Meta.STALENESS, (Staleness() + stalenessIncrement).ToString());
-            return this;
-        }
-
-        public int Count()
-        {
-            return commands.Count();
-        }
-
-        public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
-        {
-            base.SetMeta(key, val, throwIfKeyExists);
-            realized[key] = val; // update our realized values each time
-        }
-
-        public void AddCommand(Command c)
-        {
-            c.parent = this;
-            //c.IndexInChat = commands.Count; // ?
-            this.commands.Add(c);
-        }
-
-        public override IDictionary<string, object> Realize(IDictionary<string, object> globals)
-        {
-            throw new DialogicException("Chats should not be Realized"); //tmp-remove
-            //return realized;
-        }
-
-        protected internal override Command Validate()
-        {
-            if (Regex.IsMatch(Text, @"\s+")) // TODO: compile
-            {
-                throw BadArg("CHAT name '" + Text + "' contains spaces!");
-            }
-
-            // Note: realization happens on Init (just once) in Chat
-            if (HasMeta())
-            {
-                foreach (KeyValuePair<string, object> pair in meta)
-                {
-                    realized[pair.Key] = pair.Value.ToString();
-                }
-            }
-            realized[Meta.STALENESS] = Defaults.CHAT_STALENESS.ToString();
-
-            return this;
-        }
-
-        public override void Init(string text, string label, string[] metas)
-        {
-            this.Text = text;
-            ParseMeta(metas);
-            Validate();
-        }
-
-        protected override string MetaStr()
-        {
-            string s = String.Empty;
-            if (HasMeta())
-            {
-                s += "{";
-                foreach (var key in meta.Keys) s += key + "=" + meta[key] + ",";
-                s = s.Length > 1 ? s.Substring(0, s.Length - 1) + "}" : String.Empty;
-            }
-            return s;
-        }
-
-        public string ToTree()
-        {
-            string s = TypeName().ToUpper() + " "
-                + Text + (" " + MetaStr()).TrimEnd();
-            commands.ForEach(c => s += "\n  " + c);
-            return s;
-        }
-
-        internal Command Next()
-        {
-            return HasNext() ? commands[cursor++] : null;
-        }
-
-        internal bool HasNext()
-        {
-            return cursor > -1 && cursor < commands.Count;
-        }
-
-        internal void Run(bool resetCursor = true)
-        {
-            if (resetCursor) this.cursor = 0;
-
-            // Q: Do we reset this stuff on resume ?
-            // Prob not in case of staleness
-
-            lastRunAt = Util.EpochMs();
-
-            // Q: what about (No-Label) WAIT events ?
-            IncrementStaleness();
+            return TypeName().ToUpper() + " #" + text;
         }
     }
 
@@ -585,12 +652,14 @@ namespace Dialogic
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
         public const string STALENESS = "staleness";
-        public const string RESUMABLE = "resumable";
+        public const string INTERRUPTIBLE = "interruptible";
+        public const string STALENESS_INCR = "stalenessIncr";
+        public const string RESUME_AFTER_INT = "resumeAfterInt";
 
-        protected IDictionary<string, object> meta;
-        public IDictionary<string, object> realized;
+        internal IDictionary<string, object> meta, realized;
+        protected IDictionary<string, PropertyInfo> metameta;
 
-        public bool HasMeta()
+        public virtual bool HasMeta()
         {
             return meta != null && meta.Count > 0;
         }
@@ -645,10 +714,7 @@ namespace Dialogic
             if (HasMeta())
             {
                 s += "{";
-                foreach (var key in meta.Keys)
-                {
-                    s += key + "=" + meta[key] + ",";
-                }
+                foreach (var key in meta.Keys) s += key + "=" + meta[key] + ",";
                 s = s.Substring(0, s.Length - 1) + "}";
             }
             return s;
@@ -684,152 +750,4 @@ namespace Dialogic
         }
     }
 
-    /// <summary>
-    /// Superclass for all Commands. When created by the parser, the default constructor is called first,
-    /// followed by Init(text,label,meta), followed by any app-specific validators, followed by PostValidate().
-    /// </summary>
-    public abstract class Command : Meta
-    {
-        public const string PACKAGE = "Dialogic.";
-
-        protected static int IDGEN = 0;
-
-        public static readonly Command NOP = new NoOp();
-
-        public int Id { get; protected set; }
-
-        public int DelayMs { get; protected set; }
-
-        public string Text;
-
-        public IActor actor;
-
-        public Chat parent;
-
-        protected Command()
-        {
-            this.DelayMs = 0;
-            this.Id = ++IDGEN;
-            this.realized = new Dictionary<string, object>();
-        }
-
-        public static Command Create(Type type, string text, string label, string[] metas)
-        {
-            //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(metas));
-            Command cmd = (Command)Activator.CreateInstance(type);
-            cmd.Init(text, label, metas);
-            return cmd;
-        }
-
-        public virtual void Init(string text, string label, string[] metas)
-        {
-            this.Text = text.Length > 0 ? text : label;
-            ParseMeta(metas);
-            HandleMetaTiming();
-            Validate();
-        }
-
-        protected void ValidateTextLabel()
-        {
-            if (String.IsNullOrEmpty(Text)) throw BadArg
-                (TypeName().ToUpper() + " requires a literal #Label");
-
-            if (Text.StartsWith("#", Util.IC)) Text = Text.Substring(1);
-        }
-
-        public string GetText(bool real = false)
-        {
-            return real ? (string)realized[Meta.TEXT] : Text;
-        }
-
-        public IActor GetActor()
-        {
-            return actor;
-        }
-
-        protected internal virtual Command Validate()
-        {
-            return this;
-        }
-
-        protected virtual void HandleMetaTiming()
-        {
-            if (HasMeta(Meta.DELAY))
-            {
-                DelayMs = Util.SecStrToMs((string)meta[Meta.DELAY]);
-            }
-        }
-
-        public virtual string TypeName()
-        {
-            //return this.GetType().DeclaringType.Name; // an easier way ?
-            return this.GetType().ToString().Replace(PACKAGE, String.Empty);
-        }
-
-        public virtual IDictionary<string, object> Realize(IDictionary<string, object> globals)
-        {
-            realized.Clear();
-
-            RealizeMeta(globals);
-
-            if (this is ISendable)
-            {
-                realized[Meta.TEXT] = Realizer.Do(Text, globals);
-                realized[Meta.ACTOR] = GetActor().Name();
-                realized[Meta.TYPE] = TypeName();
-            }
-
-            return realized; // convenience
-        }
-
-        protected virtual void RealizeMeta(IDictionary<string, object> globals)
-        {
-            if (HasMeta())
-            {
-                IEnumerable sorted = null; // TODO: cache these key-sorts ?
-
-                foreach (KeyValuePair<string, object> pair in meta)
-                {
-                    object val = pair.Value;
-
-                    if (val is string)
-                    {
-                        string tmp = (string)val;
-
-                        if (tmp.IndexOf('$') > -1)
-                        {
-                            if (sorted == null) sorted = Util.SortByLength(globals.Keys);
-                            foreach (string s in sorted)
-                            {
-                                tmp = tmp.Replace("$" + s, globals[s].ToString());
-                            }
-                        }
-
-                        val = tmp;
-                    }
-                    else if (!(val is Constraint))
-                    {
-                        throw new DialogicException("Unexpected meta-value: " + val + " " + val.GetType());
-                    }
-
-                    realized[pair.Key] = val;
-                }
-            }
-        }
-
-        protected Exception BadArg(string msg)
-        {
-            throw new ParseException(msg);
-        }
-
-        protected internal virtual int ComputeDuration()
-        {
-            return DelayMs;
-        }
-
-        public override string ToString()
-        {
-            return (TypeName().ToUpper() + " " + Text).Trim() + (" " + MetaStr()).TrimEnd();
-        }
-    }
 }

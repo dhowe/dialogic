@@ -25,7 +25,7 @@ namespace Dialogic
             c.Realize(globals);
             c.SetMeta("pace", "slow");
 
-            Assert.That(c.GetText(true), Is.EqualTo("Thank you"));
+            Assert.That(c.Text(true), Is.EqualTo("Thank you"));
             Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
             Assert.That(c.realized["pace"], Is.EqualTo("fast"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
@@ -38,11 +38,11 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            var data = c.Realize(globals);
+            c.Realize(globals);
             c.SetMeta("pace", "slow");
-            Assert.That(data[Meta.TEXT], Is.EqualTo("Thank you"));
-            Assert.That(data[Meta.TYPE], Is.EqualTo("Say"));
-            Assert.That(data["pace"], Is.EqualTo("dog"));
+            Assert.That(c.GetRealized(Meta.TEXT), Is.EqualTo("Thank you"));
+            Assert.That(c.GetRealized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.GetRealized("pace"), Is.EqualTo("dog"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
         }
 
@@ -54,9 +54,9 @@ namespace Dialogic
             Command say = chat.commands[0];
             Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
             say.Realize(globals);
-            Assert.That(say.GetText(true), Is.EqualTo("Thank 4"));
-            say.Text = "Thank you";
-            Assert.That(say.Text, Is.EqualTo("Thank you"));
+            Assert.That(say.Text(true), Is.EqualTo("Thank 4"));
+            say.text = "Thank you";
+            Assert.That(say.text, Is.EqualTo("Thank you"));
             Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
             Assert.That(say.realized["pace"], Is.EqualTo("dog"));
         }
@@ -71,7 +71,7 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
-            CollectionAssert.Contains(ok, c.GetText(true));
+            CollectionAssert.Contains(ok, c.Text(true));
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 c.Realize(globals);
-                CollectionAssert.Contains(ok, c.GetText(true));
+                CollectionAssert.Contains(ok, c.Text(true));
             }
         }
 
@@ -152,7 +152,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 say.Realize(globals);
-                string said = say.GetText(true);
+                string said = say.Text(true);
                 Assert.That(said, Is.Not.EqualTo(last));
                 last = said;
             }
@@ -171,7 +171,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 ask.Realize(globals);
-                string asked = ask.GetText(true);
+                string asked = ask.Text(true);
                 string opts = ask.OptionsJoined();
                 //Console.WriteLine(i+") "+asked+" "+opts);
                 Assert.That(asked, Is.Not.EqualTo(last));
@@ -192,18 +192,18 @@ namespace Dialogic
 
 			Ask ask = (Ask)chats[0].commands[0];
             ask.Realize(globals);
-            Assert.That(ask.Text, Is.EqualTo("Want a $animal?"));
-            Assert.That(ask.GetText(true), Is.EqualTo("Want a dog?"));
+            Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
+            Assert.That(ask.Text(true), Is.EqualTo("Want a dog?"));
 
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
             var options = ask.Options();
             Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
             //Assert.That(options[0].Text, Is.EqualTo("Y").Or.);
-            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].GetText(true));
+            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].Text(true));
             Assert.That(options[0].action.GetType(), Is.EqualTo(typeof(Go)));
             Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
-            Assert.That(options[1].GetText(true), Is.EqualTo("4"));
+            Assert.That(options[1].Text(true), Is.EqualTo("4"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
         }
     }

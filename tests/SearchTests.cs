@@ -21,7 +21,7 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             Chat res = new ChatRuntime(chats).DoFind(new Constraint("dev", "1"));
-            Assert.That(res.Text, Is.EqualTo("c2"));
+            Assert.That(res.text, Is.EqualTo("c2"));
         }
 
 
@@ -36,7 +36,7 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             Chat res = new ChatRuntime(chats).DoFindAll(new Constraint("dev", "1"))[0];
-            Assert.That(res.Text, Is.EqualTo("c2"));
+            Assert.That(res.text, Is.EqualTo("c2"));
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace Dialogic
             Chat result = new ChatRuntime(chats).FindChat("c1");
             //chats.ForEach(c=>Console.WriteLine(c));
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Text, Is.EqualTo("c1"));
+            Assert.That(result.text, Is.EqualTo("c1"));
 
             Chat c;
             chats = new List<Chat>();
@@ -61,7 +61,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c3"));
             ChatRuntime cr = new ChatRuntime(chats);
             Chat res = new ChatRuntime(chats).FindChat("c2");
-            Assert.That(res.Text, Is.EqualTo("c2"));
+            Assert.That(res.text, Is.EqualTo("c2"));
         }
 
 
@@ -82,7 +82,7 @@ namespace Dialogic
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
-            Assert.That(result[0].Text, Is.EqualTo("c1"));
+            Assert.That(result[0].text, Is.EqualTo("c1"));
 
             Chat c;
             chats = new List<Chat>();
@@ -96,7 +96,7 @@ namespace Dialogic
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(3));
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
 
             chats = new List<Chat>();
             chats.Add(c = Chat.Create("c1"));
@@ -111,8 +111,8 @@ namespace Dialogic
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
-            Assert.That(chats[1].Text, Is.EqualTo("c3"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
+            Assert.That(chats[1].text, Is.EqualTo("c3"));
         }
 
 
@@ -140,7 +140,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(2));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c1"));
+            Assert.That(chats[0].text, Is.EqualTo("c1"));
 
             lines = new[]{
                 "CHAT c0",
@@ -187,7 +187,7 @@ namespace Dialogic
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(3));
-            Assert.That(result[0].Text, Is.EqualTo("c2"));
+            Assert.That(result[0].text, Is.EqualTo("c2"));
         }
 
         [Test]
@@ -205,7 +205,7 @@ namespace Dialogic
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
         }
 
         [Test]
@@ -225,7 +225,7 @@ namespace Dialogic
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
         }
 
 
@@ -262,7 +262,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c1"));
+            Assert.That(chats[0].text, Is.EqualTo("c1"));
         }
 
        
@@ -293,7 +293,7 @@ namespace Dialogic
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c1"));
+            Assert.That(chats[0].text, Is.EqualTo("c1"));
         }
  
         [Test]
@@ -338,7 +338,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(2));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c1"));
+            Assert.That(chats[0].text, Is.EqualTo("c1"));
         }
       
         [Test]
@@ -364,7 +364,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
 
             lines = new string[]{
                 "CHAT c1 {emotion=cold}",
@@ -387,7 +387,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
 
             lines = new string[]{
                 "CHAT c1 {emotion=hot}",
@@ -410,7 +410,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c3"));
+            Assert.That(chats[0].text, Is.EqualTo("c3"));
         }
 
     
@@ -431,7 +431,7 @@ namespace Dialogic
             var res = new ChatRuntime(chats).DoFindAll
                 (new Constraint(Operator.LT, "staleness", "3"));
             Assert.That(res.Count, Is.EqualTo(1));
-            Assert.That(res[0].Text, Is.EqualTo("c1"));
+            Assert.That(res[0].text, Is.EqualTo("c1"));
 
             string[] lines = {
                 "CHAT c0",
@@ -452,13 +452,13 @@ namespace Dialogic
             c = crt.FindChat("#c1");
             c.Staleness(6);
             Assert.That(c, Is.Not.Null);
-            Assert.That(c.Text, Is.EqualTo("c1"));
+            Assert.That(c.text, Is.EqualTo("c1"));
 
             chats = crt.DoFindAll((Find)finder, null);
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c3"));
+            Assert.That(chats[0].text, Is.EqualTo("c3"));
         }
       
         [Test]
@@ -479,7 +479,7 @@ namespace Dialogic
             var cnt2 = new Constraint(Operator.GT, "dev", "2");
             var res = new ChatRuntime(chats).DoFind(cnt, cnt2);
             Assert.That(res, Is.Not.Null);
-            Assert.That(res.Text, Is.EqualTo("c3"));
+            Assert.That(res.text, Is.EqualTo("c3"));
         }
 
         [Test]
@@ -500,7 +500,7 @@ namespace Dialogic
             var cnt2 = new Constraint(Operator.GT, "dev", "2", ConstraintType.Hard);
             var res = new ChatRuntime(chats).DoFind(cnt, cnt2);
             Assert.That(res, Is.Not.Null);
-            Assert.That(res.Text, Is.EqualTo("c3"));
+            Assert.That(res.text, Is.EqualTo("c3"));
         }
 
         
@@ -524,7 +524,7 @@ namespace Dialogic
 
             var chat = new ChatRuntime(chats).DoFind((Find)finder, null);
             Assert.That(chat, Is.Not.Null);
-            Assert.That(chat.Text, Is.EqualTo("c3"));
+            Assert.That(chat.text, Is.EqualTo("c3"));
 
             lines = new[]{
                 "CHAT c0 {dev=1}",
@@ -544,7 +544,7 @@ namespace Dialogic
             chat = new ChatRuntime(chats).DoFind((Find)finder, null);
 
             Assert.That(chat, Is.Not.Null);
-            Assert.That(chat.Text, Is.EqualTo("c3"));
+            Assert.That(chat.text, Is.EqualTo("c3"));
 
             lines = new[]{
                 "CHAT c0 {dev=1}",
@@ -566,7 +566,7 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c3"));
             chat = new ChatRuntime(chats).DoFind
                 (new Constraint("dev", "1", ConstraintType.Hard));
-            Assert.That(chat.Text, Is.EqualTo("c3")); // success
+            Assert.That(chat.text, Is.EqualTo("c3")); // success
         }
 
     
@@ -596,7 +596,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c1"));
+            Assert.That(chats[0].text, Is.EqualTo("c1"));
 
             lines = new[]{
                 "CHAT c0",
@@ -621,7 +621,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
         }
       
         [Test]
@@ -650,7 +650,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(2));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2").Or.EqualTo("c4"));
+            Assert.That(chats[0].text, Is.EqualTo("c2").Or.EqualTo("c4"));
 
             lines = new string[] {
                 "CHAT c0 {day=sunday}",
@@ -675,7 +675,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(2));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2").Or.EqualTo("c4"));
+            Assert.That(chats[0].text, Is.EqualTo("c2").Or.EqualTo("c4"));
         } 
   
 
@@ -702,7 +702,7 @@ namespace Dialogic
             //chats.ForEach((obj) => Console.WriteLine(obj.Text));
 
             Assert.That(chats.Count, Is.EqualTo(2));
-            Assert.That(chats[0].Text, Is.EqualTo("c2").Or.EqualTo("c4"));
+            Assert.That(chats[0].text, Is.EqualTo("c2").Or.EqualTo("c4"));
 
 
             lines = new string[] {
@@ -728,7 +728,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(2));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2").Or.EqualTo("c4"));
+            Assert.That(chats[0].text, Is.EqualTo("c2").Or.EqualTo("c4"));
         }
 
     
@@ -758,7 +758,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
 
             lines = new string[] {
                 "CHAT c0 {day=sunday}",
@@ -784,7 +784,7 @@ namespace Dialogic
             Assert.That(chats.Count, Is.EqualTo(1));
 
             Assert.That(chats[0], Is.Not.Null);
-            Assert.That(chats[0].Text, Is.EqualTo("c2"));
+            Assert.That(chats[0].text, Is.EqualTo("c2"));
         }
        
 
@@ -823,11 +823,11 @@ namespace Dialogic
             //list.ForEach((kvp) => Console.WriteLine(kvp.Key + " -> " + kvp.Value));
 
             var chats = (from kvp in list select kvp.Key).ToList();
-            Assert.That(chats[0].Text, Is.EqualTo("c5"));
-            Assert.That(chats[1].Text, Is.EqualTo("c3"));
-            Assert.That(chats[2].Text, Is.EqualTo("c2"));
-            Assert.That(chats[3].Text, Is.EqualTo("c1"));
-            Assert.That(chats[4].Text, Is.EqualTo("c4"));
+            Assert.That(chats[0].text, Is.EqualTo("c5"));
+            Assert.That(chats[1].text, Is.EqualTo("c3"));
+            Assert.That(chats[2].text, Is.EqualTo("c2"));
+            Assert.That(chats[3].text, Is.EqualTo("c1"));
+            Assert.That(chats[4].text, Is.EqualTo("c4"));
         }
     }
 }

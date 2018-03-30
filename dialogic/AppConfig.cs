@@ -64,10 +64,10 @@ namespace Tendar
             return NVM_DURATION;
         }
 
-        public override string TypeName()
-        {
-            return "Nvm";
-        }
+        //public override string TypeName()
+        //{
+        //    return "Nvm";
+        //}
     }
 
     //public interface IAppConfig {

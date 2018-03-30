@@ -26,4 +26,4 @@ Bye! {speed=fast}
 
 CHAT OnTapEvent {noStart=true,resumeAfter=true}
 DO #TapResponse
-SAY I see you!
+SAY Ok, I see you!

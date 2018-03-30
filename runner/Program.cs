@@ -50,7 +50,7 @@ namespace runner
              {
                  interrupted = true;
                  Console.WriteLine("\n<user-event#tap>" +
-                     " after " + Util.Millis(now) + "ms");
+                     " after " + Util.Millis(now) + "ms\n");
 
                  gameEvent = new UserEvent("Tap");
              });
@@ -73,12 +73,12 @@ namespace runner
 
             switch (diaType)
             {
-                case "Chat":
-                    diaText = "\nCHAT " + diaText;
-                    break;
+                //case "Chat":
+                    //diaText = "\nCHAT " + diaText;
+                    //break;
 
                 case "Say":
-                    diaText = "  " + diaText + " " + ue.Data().Stringify();
+                    diaText = diaText + " " + ue.Data().Stringify();
                     break;
 
                 case "Ask":
@@ -94,7 +94,7 @@ namespace runner
                         if (!interrupted)
                         {
                             Console.WriteLine("\n<resume-event#>" +
-                                " after " + Util.Millis(now) + "ms");
+                                " after " + Util.Millis(now) + "ms\n");
 
                             // send ResumeEvent after 5 sec
                             // (), (#Game), or ({type=a,stage=b,last=true})
@@ -102,12 +102,12 @@ namespace runner
                         }
                     });
 
-                    diaText = ("  (" + (diaType + " " +
+                    diaText = ("(" + (diaType + " " +
                         ue.Data().Stringify()).Trim() + ")");
                     break;
 
                 default:
-                    diaText = ("  (" + diaType + ": " + (diaText + " "
+                    diaText = ("(" + diaType + ": " + (diaText + " "
                         + ue.Data().Stringify()).Trim() + ")");
                     break;
             }
@@ -124,7 +124,7 @@ namespace runner
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
 
             // add any meta tags
-            diaText = "  " + diaText + " " + ue.Data().Stringify();
+            diaText = diaText + " " + ue.Data().Stringify();
 
             // add the options
             for (int i = 0; i < diaOpts.Length; i++)
@@ -135,15 +135,15 @@ namespace runner
 
         private void SendRandomResponse(IUpdateEvent ue)
         {
-            int timeout = ue.GetInt(Meta.TIMEOUT, -1);
+            double timeout = ue.GetDouble(Meta.TIMEOUT, -1);
             if (timeout > -1)
             {
-                var delay = Util.Rand(timeout / 3, timeout);
+                var delay = Util.ToMillis(Util.Rand(timeout / 3, timeout));
                 Timers.SetTimeout(delay, () =>
                 {
                     // choice a valid response, or -1 for no response
                     int choice = Util.Rand(diaOpts.Length + 1) - 1;
-                    Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms");
+                    Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms\n");
                     gameEvent = new ChoiceEvent(choice);
                 });
             }

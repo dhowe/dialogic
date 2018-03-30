@@ -159,7 +159,7 @@ namespace Dialogic
 
                     if (nextEventMs > -1)
                     {
-                        scheduler.Info("<#" + scheduler.chat.Text + "-resumed>");
+                        scheduler.Info("<#" + scheduler.chat.text + "-resumed>");
                         scheduler.nextEventTime = nextEventMs;
                     }
                 }
@@ -176,7 +176,7 @@ namespace Dialogic
                 if (cmd.GetType() == typeof(Wait))
                 {
                     // just pause internally, no event needs to be fired
-                    if (cmd.DelayMs != Util.INFINITE)
+                    if (cmd.delay != Util.INFINITE)
                     {
                         ComputeNextEventTime(cmd);
                         return null;
@@ -205,7 +205,7 @@ namespace Dialogic
 
         internal void ComputeNextEventTime(Command cmd)
         {
-            scheduler.nextEventTime = cmd.DelayMs >= 0 ? Util.Millis()
+            scheduler.nextEventTime = cmd.delay >= 0 ? Util.Millis()
                 + cmd.ComputeDuration() : Int32.MaxValue;
         }
 

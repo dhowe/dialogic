@@ -129,8 +129,8 @@ namespace Dialogic
             Assert.That(slow.ComputeDuration(), Is.EqualTo(defa.ComputeDuration() * 2).Within(1));
             Say longer = (Say)ChatParser.ParseText("SAY Thank you very much")[0].commands[0];
             Assert.That(longer.ComputeDuration(), Is.GreaterThan(defa.ComputeDuration()));
-            Assert.That(fast.Text, Is.EqualTo(defa.Text));
-            Assert.That(slow.Text, Is.EqualTo(defa.Text));
+            Assert.That(fast.text, Is.EqualTo(defa.text));
+            Assert.That(slow.text, Is.EqualTo(defa.text));
         }
     }
 }
