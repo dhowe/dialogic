@@ -40,7 +40,7 @@ namespace Dialogic
             icu = new StalenessUpdate(10, "{!type=a}");
             rt.Update(null, ref icu);
 
-            new AutoResetEvent(false).WaitOne(10); // async hack
+            new AutoResetEvent(false).WaitOne(20); // async hack for C# 4.0
 
             //chats.ForEach(Console.WriteLine);
             Assert.That(rt.FindChatByLabel("c1").Staleness(), Is.EqualTo(10));

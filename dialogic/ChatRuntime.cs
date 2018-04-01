@@ -337,7 +337,7 @@ namespace Dialogic
             if (chat != null && nextEventTime > -1)
             {
                 Warn("Ignoring attempt to resume while Chat#"
-                     + chat.text + " is active & running");
+                     + chat.text + " is active & running\n");
             }
 
             if (chat == null)
