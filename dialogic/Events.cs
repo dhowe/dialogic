@@ -22,6 +22,25 @@ namespace Dialogic
     }
 
     /**
+     * Tells Dialogic that some configuration change need to be made
+     */
+    public interface IConfigEvent
+    {
+        Constraint FindByCriteria();
+        string PropertyName();
+        string PropertyValue();
+    }
+
+    /**
+     * Tells Dialogic to run the specifid action on one or more Chats
+     */
+    public interface IChatUpdate
+    {
+        string FindByCriteria();
+        Action<Chat> GetAction();
+    }
+
+    /**
      * Tells Dialogic to restart the current Chat after a indefinite WAIT cmd, 
      * or an ISuspend event, optionally with a specific chat, specified with its 
      * Label, or with a Find, specified via its metadata constraints.
@@ -77,7 +96,6 @@ namespace Dialogic
      * Basic implementation of ISuspend
      */
     public class SuspendEvent : GameEvent, ISuspend { }
-
 
     /**
      * Basic implementation of IClear
@@ -144,9 +162,44 @@ namespace Dialogic
     }
 
     /**
+     * Basic implementation of IChatUpdate
+     */
+    public class ChatUpdate : GameEvent, IChatUpdate
+    {
+        private readonly string findBy;
+        private readonly Action<Chat> action;
+
+        public ChatUpdate(Action<Chat> action, string findBy = null)
+        {
+            this.action = action;
+            this.findBy = findBy;
+        }
+
+        public string FindByCriteria()
+        {
+            return findBy;
+        }
+
+        public Action<Chat> GetAction()
+        {
+            return action;
+        }
+    }
+
+    /**
+     * Basic implementation of IChatUpdate that sets the staleness
+     * value for one or more Chats, as specified by the find criteria
+     */
+    public class StalenessUpdate : ChatUpdate, IChatUpdate
+    {
+        public StalenessUpdate(double staleness, string findBy = null) 
+            : base((c) => { c.Staleness(staleness); }, findBy) {}
+    }
+
+    /**
      * Basic implementation of IUpdateEvent which wraps a string/object 
      * dictionary containing relevant Command data with helper functions
-     * for extracting specific types. 
+     * for extracting specific primitive types (double, bool, string, int, float)
      */
     public class UpdateEvent : IUpdateEvent
     {

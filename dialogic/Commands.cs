@@ -467,9 +467,9 @@ namespace Dialogic
             this.meta = Constraint.AsDict(cnts);
         }
 
-        public Find Init(string metadata)
+        internal Find Init(string metadata)
         {
-            meta.Clear();
+            if (meta != null) meta.Clear();
             Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
             return this;
         }

@@ -9,7 +9,7 @@ namespace Dialogic
     {
         private readonly ChatRuntime runtime;
         private readonly ChatScheduler scheduler;
-        private Find findDelegate;
+        private Find findDelegate, updateDelegate;
 
         internal AppEventHandler(ChatRuntime rt)
         {
@@ -19,6 +19,7 @@ namespace Dialogic
 
         internal IUpdateEvent OnEvent(ref EventArgs ea, IDictionary<string, object> globals)
         {
+            if (ea is IChatUpdate) return ChatUpdateHandler(ref ea, globals);
             if (ea is IUserEvent) return UserActionHandler(ref ea, globals);
             if (ea is ISuspend) return SuspendHandler(ref ea, globals);
             if (ea is IResume) return ResumeHandler(ref ea, globals);
@@ -26,6 +27,39 @@ namespace Dialogic
             if (ea is IClear) return ClearHandler(ref ea, globals);
 
             throw new DialogicException("Unexpected event-type: " + ea.GetType());
+        }
+
+        private IUpdateEvent ChatUpdateHandler(ref EventArgs ea, IDictionary<string, object> globals)
+        {
+            IChatUpdate evt = (IChatUpdate)ea;
+            var findBy = evt.FindByCriteria();
+            var action = evt.GetAction();
+
+            ea = null;
+
+            if (String.IsNullOrEmpty(findBy)) // apply to all chats
+            {
+                runtime.chats.ForEach(action);
+            }
+            else  if (findBy.StartsWith(Util.LABEL_IDENT, Util.IC)) // label
+            {
+                action.Invoke(runtime.FindChatByLabel(findBy));
+            }
+            else // else, parse as FIND meta data
+            {
+                if (updateDelegate == null) updateDelegate = new Find();
+                try
+                {
+                    updateDelegate.Init(findBy);
+                }
+                catch (ParseException e)
+                {
+                    throw new RuntimeParseException(e);
+                }
+                runtime.FindAllAsync(updateDelegate, action, globals);
+            }
+
+            return null;
         }
 
         private IUpdateEvent UserActionHandler(ref EventArgs ea, IDictionary<string, object> globals)
@@ -36,6 +70,7 @@ namespace Dialogic
 
             scheduler.Suspend();
             scheduler.Launch("#On" + label + "Event");
+
             return null;
         }
 
@@ -57,6 +92,7 @@ namespace Dialogic
         {
             IResume ir = (IResume)ea;
             var label = ir.ResumeWith();
+
             ea = null;
 
             if (String.IsNullOrEmpty(label))

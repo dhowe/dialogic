@@ -46,9 +46,9 @@ namespace Dialogic
 
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
+        internal List<Chat> chats;
 
         private Thread searchThread;
-        private List<Chat> chats;
         private ChatParser parser;
         private List<IActor> actors;
         private AppEventHandler appEvents;
@@ -136,9 +136,33 @@ namespace Dialogic
             return parser;
         }
 
+        /// <summary>
+        /// Invokes 'action' on all the chats matching the Find command
+        /// </summary>
+        /// <param name="finder">Finder.</param>
+        /// <param name="action">Action.</param>
+        /// <param name="globals">Globals.</param>
+        internal void FindAllAsync(Find finder, Action<Chat> action, IDictionary<string, object> globals = null)
+        {
+            (searchThread = new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                if (finder is Go)
+                {
+                    action.Invoke(FindChatByLabel(((Go)finder).text));
+                }
+                else
+                {
+                    var found = DoFindAll(finder, globals);
+                    found.ForEach(action);
+                }
+
+            })).Start();
+        }
+
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            scheduler.Completed(false); // finish current after a FIND command
+            scheduler.Completed(false); // finish current on a FIND command
 
             int ts = Util.Millis();
             (searchThread = new Thread(() =>

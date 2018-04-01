@@ -91,7 +91,7 @@ namespace Dialogic
         {
             Chat chat;
 
-            chat = ChatParser.ParseText("CHAT c1", true)[0];
+            chat = ChatParser.ParseText("CHAT c1", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.meta, Is.Not.Null);
             Assert.That(chat.realized, Is.Null);
@@ -150,14 +150,14 @@ namespace Dialogic
             total = 10 + (5 * Defaults.CHAT_STALENESS_INCR);
             Assert.That(chats[0].staleness, Is.EqualTo(total));
 
-            chats = ChatParser.ParseText("CHAT c1 {staleness=9.1,stalenessIncr=.6}", true);
+            chats = ChatParser.ParseText("CHAT c1 {staleness=9.1,stalenessIncr=.6}", NO_VALIDATORS);
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].staleness, Is.EqualTo(9.1));
             rt = new ChatRuntime(chats);
             for (int i = 0; i < 5; i++) rt.Run("#c1");
             Assert.That(chats[0].staleness, Is.EqualTo(9.1 + (5 * .6)).Within(.01));
 
-            chats = ChatParser.ParseText("CHAT c1 {staleness=9,stalenessIncr=2}", true);
+            chats = ChatParser.ParseText("CHAT c1 {staleness=9,stalenessIncr=2}", NO_VALIDATORS);
             Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].staleness, Is.EqualTo(9));
             rt = new ChatRuntime(chats);
@@ -783,8 +783,8 @@ namespace Dialogic
             //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].ToTree());
 
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT c1"));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT x{t pe=a,stage=b}", true));
-            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT x{type=a b,stage=b}", true));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT x{t pe=a,stage=b}", NO_VALIDATORS));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT x{type=a b,stage=b}", NO_VALIDATORS));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT Two Words {type=a,stage=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("GO {no=label}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("DO {no=label}"));

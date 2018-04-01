@@ -112,7 +112,7 @@ namespace Dialogic
     /// </summary>
     public static class Util
     {
-        public static int INFINITE = -1;
+        public static double INFINITE = -1;
         public static StringComparison IC = StringComparison.InvariantCulture;
         internal static string LABEL_IDENT = "#";
 
