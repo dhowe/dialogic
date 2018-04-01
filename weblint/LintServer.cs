@@ -125,12 +125,40 @@ namespace Dialogic.Server
             return html;
         }
 
-        private static string ParserText(string code, bool noVal=false)
+        private static string ParserText(string code, bool noVal = false)
         {
             string content = String.Empty;
             new ChatRuntime(Tendar.AppConfig.Actors).ParseText(code, noVal)
                 .ForEach(c => { content += c.ToTree() + "\n\n"; });
             return content;
+        }
+
+        private IDictionary<string, string> ParsePostData(HttpListenerRequest request)
+        {
+            IDictionary<string, string> formVars = new Dictionary<string, string>();
+
+            if (request.HasEntityBody)
+            {
+                Stream body = request.InputStream;
+                Encoding encoding = request.ContentEncoding;
+                StreamReader reader = new System.IO.StreamReader(body, encoding);
+
+                if (request.ContentType.ToLower() == "application/x-www-form-urlencoded")
+                {
+                    string s = reader.ReadToEnd();
+                    string[] pairs = s.Split('&');
+                    for (int i = 0; i < pairs.Length; i++)
+                    {
+                        string[] item = pairs[i].Split('=');
+                        formVars.Add(item[0], Uri.UnescapeDataString(item[1]));
+                    }
+                }
+
+                body.Close();
+                reader.Close();
+            }
+
+            return formVars;
         }
 
         public static void Main()
