@@ -19,7 +19,7 @@ namespace Dialogic
         protected internal IActor actor { get; protected set; }
         protected internal double delay { get; protected set; }
 
-        public string text;
+        protected internal string text;
 
         protected internal readonly int id;
         protected internal Chat parent;
@@ -29,48 +29,6 @@ namespace Dialogic
             this.delay = 0;
             this.id = ++IDGEN;
             this.realized = new Dictionary<string, object>();
-            ExtractMetaMeta();
-        }
-
-        protected internal void MetaToProperties(ChatRuntime rt) // ?
-        {
-            if (HasMeta()) // OPT: reflection
-            {
-                foreach (KeyValuePair<string, object> pair in meta)
-                {
-                    string key = pair.Key;
-                    //Console.WriteLine("META: '" + key+"'");
-                    object val = pair.Value;
-                    if (metameta.ContainsKey(key))
-                    {
-                        if (key == Meta.ACTOR)
-                        {
-                            this.Actor(rt, (string)val);
-                        }
-                        else
-                        {
-                            var propInfo = metameta[key];
-                            val = Util.ConvertTo(propInfo.PropertyType, val);
-                            //Console.WriteLine("DYN: " + val + " " + val.GetType());
-                            propInfo.SetValue(this, val, null);
-                        }
-                    }
-                }
-            }
-        }
-
-        protected void ExtractMetaMeta()
-        {
-            metameta = new Dictionary<string, PropertyInfo>();
-
-            //Console.WriteLine("\n" + TypeName() + " ========================");
-            var props = GetType().GetProperties(BindingFlags.Instance
-                | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (PropertyInfo pi in props)
-            {
-                //Console.WriteLine(pi.Name);
-                metameta.Add(pi.Name, pi);
-            }
         }
 
         protected double Delay()
@@ -87,7 +45,7 @@ namespace Dialogic
 
         internal static Command Create(Type type, string text, string label, string[] metas)
         {
-            //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+Util.Stringify(metas));
+            //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+metas.Stringify());
             Command cmd = (Command)Activator.CreateInstance(type);
             cmd.Init(text, label, metas);
             return cmd;
@@ -98,7 +56,7 @@ namespace Dialogic
             this.text = text.Length > 0 ? text : label;
             ParseMeta(metas);
             //HandleMetaTiming();
-            Validate();
+            //Validate();
         }
 
         protected void ValidateTextLabel()
@@ -106,7 +64,7 @@ namespace Dialogic
             if (String.IsNullOrEmpty(text)) throw BadArg
                 (TypeName().ToUpper() + " requires a literal #Label");
 
-            if (text.StartsWith("#", Util.IC)) text = text.Substring(1);
+            Util.ValidateLabel(ref text);
         }
 
         public string Text(bool real = false)
@@ -127,9 +85,13 @@ namespace Dialogic
 
         public Command Actor(ChatRuntime rt, string actorName)
         {
-            return Actor(rt.FindActor(actorName));
+            return Actor(rt.FindActorByName(actorName));
         }
 
+        /// <summary>
+        /// Validates this instance by verifying that (at least) it has all
+        /// required metadata values (no-op here)
+        /// </summary>
         protected internal virtual Command Validate()
         {
             return this;
@@ -152,8 +114,6 @@ namespace Dialogic
                 realized[Meta.ACTOR] = Actor().Name();
                 realized[Meta.TYPE] = TypeName();
             }
-
-            //return realized; // convenience
         }
 
         protected virtual void RealizeMeta(IDictionary<string, object> globals)
@@ -311,10 +271,6 @@ namespace Dialogic
         protected internal override Command Validate()
         {
             ValidateTextLabel();
-            //if (HasMeta(Meta.DELAY))
-            //{
-            //    delay = Util.ToMillis(Defaults.DO_DURATION);
-            //}
             return this;
         }
 
@@ -408,15 +364,15 @@ namespace Dialogic
 
         public List<Opt> Options()
         {
-            if (options.Count < 1)
+            if (options.Count < 1) // default options
             {
-                options.Add(new Opt("Yes"));
-                options.Add(new Opt("No"));
+                options.Add(new Opt("Yes", NOP));
+                options.Add(new Opt("No", NOP));
             }
             return options;
         }
 
-        public string OptionsJoined(string delim = "\n")
+        public string JoinOptions(string delim = "\n")
         {
             var s = String.Empty;
             var opts = Options();
@@ -445,22 +401,14 @@ namespace Dialogic
             options.Add(o);
         }
 
+        // Call Realize() on text and options, then add both to realized
         public override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Options().ForEach(o => o.Realize(globals));
             realized[Meta.TIMEOUT] = timeout.ToString();
-            realized[Meta.OPTS] = OptionsJoined();
-            //return realized;
+            realized[Meta.OPTS] = JoinOptions();
         }
-
-        //protected override void HandleMetaTiming()
-        //{
-        //    if (HasMeta(Meta.TIMEOUT))
-        //    {
-        //        timeout = Util.SecStrToMs((string)meta[Meta.TIMEOUT]);
-        //    }
-        //}
 
         public override string ToString()
         {
@@ -476,8 +424,6 @@ namespace Dialogic
 
         public Opt() : this(String.Empty, NOP) { }
 
-        public Opt(string text) : this(text, NOP) { }
-
         public Opt(string text, Command action) : base()
         {
             this.text = text;
@@ -488,7 +434,7 @@ namespace Dialogic
         {
             this.text = text;
 
-            if (label.Length > 0 && !label.StartsWith("#", Util.IC))
+            if (label.Length > 0 && !label.StartsWith(Util.LABEL_IDENT, Util.IC))
             {
                 throw BadArg("OPT requires a literal #Label");
             }
@@ -496,12 +442,12 @@ namespace Dialogic
             this.action = label.Length > 0 ?
                 Command.Create(typeof(Go), String.Empty, label, metas) : NOP;
 
-            Validate();
+            //Validate();
         }
 
         protected internal override Command Validate()
         {
-            this.action.Validate();
+            this.action.Validate(); // validate the option
             return this;
         }
 
@@ -514,8 +460,6 @@ namespace Dialogic
 
     public class Find : Command
     {
-        //public double stalenessThreshold;
-
         public Find() : base() { }
 
         internal Find(params Constraint[] cnts) : base()
@@ -532,38 +476,33 @@ namespace Dialogic
 
         public override void Init(string text, string label, string[] metas)
         {
+            if (!text.IsNullOrEmpty()) throw new DialogicException
+                ("FIND does not accept text, only metadata");
             ParseMeta(metas);
-            Validate();
         }
 
         public override void Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
-
-            RealizeMeta(globals);
-
-            //return realized; // for convenience
+            RealizeMeta(globals); // only realized meta
         }
 
+        ///  All Find commands must have a 'staleness' value
         protected internal override Command Validate()
         {
-            //Console.WriteLine("STALE: "+ GetMeta(Meta.STALENESS)+ GetMeta(Meta.STALENESS).GetType());
-            if (!HasMeta(Meta.STALENESS))
-            {
-                SetMeta(new Constraint(Operator.LT, Meta.STALENESS,
-                    Defaults.FIND_STALENESS.ToString()));
-            }
+            SetMeta(new Constraint(Operator.LT, Meta.STALENESS,
+                    Defaults.FIND_STALENESS.ToString()), true);
 
             return this;
         }
 
-        public override void SetMeta(string key, object val, bool throwIfKeyExists = false)
+        protected internal override void SetMeta(string key, object val, bool onlyIfNotSet = false)
         {
             if (val is string || val.IsNumber())
             {
                 val = new Constraint(key, val.ToString());
             }
-            base.SetMeta(key, val, throwIfKeyExists);
+            base.SetMeta(key, val, onlyIfNotSet);
         }
 
         protected override void ParseMeta(string[] pairs)
@@ -621,7 +560,7 @@ namespace Dialogic
         public override void Init(string text, string label, string[] metas)
         {
             this.text = text.Length > 0 ? text : label;
-            Validate();
+            //Validate();
         }
 
         public new Go Init(string label)
@@ -656,56 +595,38 @@ namespace Dialogic
         public const string STALENESS_INCR = "stalenessIncr";
         public const string RESUME_AFTER_INT = "resumeAfterInt";
 
-        internal IDictionary<string, object> meta, realized;
-        protected IDictionary<string, PropertyInfo> metameta;
+        protected internal IDictionary<string, object> meta, realized;
 
-        public virtual bool HasMeta()
+        protected internal virtual bool HasMeta()
         {
             return meta != null && meta.Count > 0;
         }
 
-        public bool HasMeta(string key)
+        protected internal bool HasMeta(string key)
         {
             return meta != null && meta.ContainsKey(key);
         }
 
-        public object GetMeta(string key, object defaultVal = null)
+        protected internal object GetMeta(string key, object defaultVal = null)
         {
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
         }
 
-        public object GetRealized(string key, object defaultVal = null)
+        protected internal object GetRealized(string key, object defaultVal = null)
         {
             return realized.ContainsKey(key) ? realized[key] : defaultVal;
         }
 
-        public void SetMeta(Constraint constraint)
+        protected internal void SetMeta(Constraint constraint, bool onlyIfNotSet = false)
         {
-            this.SetMeta(constraint.name, constraint, true);
+            this.SetMeta(constraint.name, constraint, onlyIfNotSet);
         }
 
-        public virtual void SetMeta(string key, object val, bool throwIfKeyExists = false)
+        protected internal virtual void SetMeta(string key, object val, bool onlyIfNotSet = false)
         {
             if (meta == null) meta = new Dictionary<string, object>();
-
-            if (throwIfKeyExists)
-            {
-                meta.Add(key, val);
-            }
-            else
-            {
-                meta[key] = val;
-            }
-        }
-
-        public IDictionary<string, object> GetMeta()
-        {
-            return meta;
-        }
-
-        public List<KeyValuePair<string, object>> ToList()
-        {
-            return meta != null ? meta.ToList() : null;
+            if (onlyIfNotSet && HasMeta(key)) return;
+            meta[key] = val;
         }
 
         protected virtual string MetaStr()

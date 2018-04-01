@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
     /// <summary>
-    /// Handles parsing of scripts via a ChatRuntime instance - no public API.
+    /// Handles parsing of scripts via a ChatRuntime instance - no public API
     /// </summary>
     public class ChatParser
     {
@@ -78,14 +79,19 @@ namespace Dialogic
 
         internal Command ParseLine(string line, int lineNo)
         {
-            List<string> parts = DoSubDivision(line, lineNo);
+            Command c = null;
 
-            Command c = ParseCommand(parts, line, lineNo);
-
-            //Console.WriteLine("LINE " + lineNo + ": " + line+" => "+c);
-
-            // Run after Create/Init are called
-            RunValidators(c, line, lineNo);
+            try
+            {
+                List<string> parts = DoSubDivision(line, lineNo);
+                c = ParseCommand(parts, line, lineNo);
+                RunExternalValidators(c);
+                RunInternalValidators(c);
+            }
+            catch (Exception ex)
+            {
+                throw new ParseException(line, lineNo, ex.Message);
+            }
 
             return c;
         }
@@ -109,7 +115,7 @@ namespace Dialogic
             return parts;
         }
 
-        private void RunValidators(Command c, string line, int lineNo)
+        private void RunExternalValidators(Command c)
         {
             if (runtime == null || runtime.validatorsDisabled) return;
 
@@ -125,8 +131,7 @@ namespace Dialogic
                     }
                     catch (Exception ex)
                     {
-                        throw new ParseException
-                            (line, lineNo, "Validator: " + ex.Message);
+                        throw new Exception("Validator: " + ex.Message);
                     }
                 }
             }
@@ -139,46 +144,40 @@ namespace Dialogic
             parts.Apply((spkr, cmd, text, label, meta) =>
             {
                 Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] : typeof(Say);
-
-                try
-                {
-                    //Console.WriteLine("META:'"+meta+"'");
-                    c = Command.Create(type, text, label, RE.MetaSplit.Split(meta));
-                }
-                catch (Exception ex)
-                {
-                    throw new ParseException(line, lineNo, ex.Message);
-                }
-
+                c = Command.Create(type, text, label, SplitMeta(meta));
                 HandleActor(spkr, c, line, lineNo);
+                HandleCommand(c, line, lineNo);
             });
 
-            return HandleCommand(c, line, lineNo);
+            return c;
+        }
+
+        private string[] SplitMeta(string meta)
+        {
+            return meta.IsNullOrEmpty() ? null : RE.MetaSplit.Split(meta);
         }
 
         private void HandleActor(string spkr, Command c, string line, int lineNo)
         {
             c.Actor(Actor.Default);
+
             if (!string.IsNullOrEmpty(spkr) && runtime != null)
             {
                 c.Actor(runtime, spkr);
-                if (c.actor == null)
-                {
-                    throw new ParseException(line, lineNo, "Unknown actor: '" + spkr + "'");
-                }
+
+                if (c.actor == null) throw new ParseException
+                    (line, lineNo, "Unknown actor: '" + spkr + "'");
+                
                 if (!Equals(c.actor, Actor.Default)) c.SetMeta(Meta.ACTOR, c.actor.Name());
             }
         }
 
-        private Command HandleCommand(Command c, string line, int lineNo)
+        private void HandleCommand(Command c, string line, int lineNo)
         {
-            //Console.WriteLine("HandleCommand:"+c);
-            c.MetaToProperties(runtime); // set properties from meta
-
             if (c is Chat)
             {
                 chats.Add((Chat)c);
-                return c;
+                return;
             }
 
             if (chats.Count == 0) CreateDefaultChat();
@@ -198,9 +197,66 @@ namespace Dialogic
             }
 
             parsedCommands.Push(c);
-
-            return c;
         }
+
+        private void RunInternalValidators(Command c)
+        {
+            SetPropValuesFromMeta(c);
+            c.Validate();
+        }
+
+        /// Extract properties that can be set from metadata
+        protected void ExtractMetaMeta(Command c)
+        {
+            var type = c.GetType();
+
+            if (!metameta.ContainsKey(type))
+            {
+                metameta.Add(type, new Dictionary<string, PropertyInfo>());
+                // Console.WriteLine(type+":");
+
+                var props = type.GetProperties(BindingFlags.Instance
+                    | BindingFlags.Public | BindingFlags.NonPublic);
+
+                foreach (var pi in props)
+                {
+                    metameta[type].Add(pi.Name, pi);
+                    // Console.WriteLine("  "+pi.Name);
+                }
+            }
+        }
+
+        /// Updates any property values that have been set in metadata
+        protected internal void SetPropValuesFromMeta(Command c)
+        {
+            if (c.HasMeta())
+            {
+                if (!metameta.ContainsKey(c.GetType())) ExtractMetaMeta(c);
+
+                var cmetameta = metameta[c.GetType()];
+
+                foreach (KeyValuePair<string, object> pair in c.meta)
+                {
+                    object val = pair.Value;
+                    if (cmetameta.ContainsKey(pair.Key))
+                    {
+                        if (pair.Key == Meta.ACTOR) // special case
+                        {
+                            c.Actor(runtime, (string)val); // hrmm
+                        }
+                        else
+                        {
+                            var propInfo = cmetameta[pair.Key];
+                            val = Util.ConvertTo(propInfo.PropertyType, val);
+                            propInfo.SetValue(c, val, null);
+                        }
+                    }
+                }
+            }
+        }
+
+        static internal IDictionary<Type, IDictionary<string,PropertyInfo>> metameta =
+            new Dictionary<Type, IDictionary<string, PropertyInfo>>();
 
         internal static string[] StripComments(string text)
         {

@@ -19,7 +19,7 @@ namespace Dialogic
         {
             commands = new List<Command>();
 
-            realized = null; // not used for Chat
+            realized = null; // not relevant for chats
             interruptable = true;
             resumeAfterInt = true;
             stalenessIncr = Defaults.CHAT_STALENESS_INCR;
@@ -38,6 +38,21 @@ namespace Dialogic
             return staleness;
         }
 
+        internal double StalenessIncr()
+        {
+            return stalenessIncr;
+        }
+
+        internal bool Interruptable()
+        {
+            return interruptable;
+        }
+
+        internal bool ResumeAfterInterrupting()
+        {
+            return resumeAfterInt;
+        }
+
         internal Chat Staleness(double d)
         {
             staleness = d;
@@ -48,6 +63,28 @@ namespace Dialogic
         internal Chat IncrementStaleness()
         {
             Staleness(staleness + stalenessIncr);
+            return this;
+        }
+
+        internal Chat StalenessIncr(double incr)
+        {
+            this.stalenessIncr = incr;
+            SetMeta(Meta.STALENESS_INCR, incr.ToString());
+            return this;
+        }
+
+        internal Chat Interruptable(bool val)
+        {
+            this.interruptable = val;
+            SetMeta(Meta.INTERRUPTIBLE, val.ToString());
+
+            return this;
+        }
+
+        internal Chat ResumeAfterInterrupting(bool val)
+        {
+            this.resumeAfterInt = val;
+            SetMeta(Meta.RESUME_AFTER_INT, val.ToString());
             return this;
         }
 
@@ -68,19 +105,15 @@ namespace Dialogic
             throw new DialogicException("Chats should not be Realized");
         }
 
+        ///  All Chats must have a valid unique label, and a staleness value
         protected internal override Command Validate()
         {
-            if (Regex.IsMatch(text, @"\s+")) // TODO: compile
+            if (Regex.IsMatch(text, @"\s+")) // OPT: compile
             {
-                throw BadArg("CHAT name '" + text + "' contains spaces!");
+                throw BadArg("CHAT name '" + text + "' contains spaces");
             }
 
-            if (meta == null) meta = new Dictionary<string, object>();
-
-            if (!HasMeta(Meta.STALENESS))
-            {
-                meta[Meta.STALENESS] = Defaults.CHAT_STALENESS.ToString();
-            }
+            SetMeta(Meta.STALENESS, Defaults.CHAT_STALENESS.ToString(), true);
 
             return this;
         }
@@ -89,7 +122,7 @@ namespace Dialogic
         {
             this.text = text;
             ParseMeta(metas);
-            Validate();
+            //Validate();
             //Console.WriteLine("Chat #"+text +" "+realized.Stringify());
         }
 

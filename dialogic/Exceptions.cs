@@ -17,7 +17,7 @@ namespace Dialogic
         public FindException(string msg) : base(msg) { }
 
         public FindException(Command finder, string msg = "Find failed")
-            : base(msg + " " + finder.GetMeta()) { }
+            : base(msg + " " + finder.meta.Stringify()) { }
     }
 
     public class OperatorException : DialogicException

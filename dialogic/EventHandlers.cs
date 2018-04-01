@@ -63,7 +63,7 @@ namespace Dialogic
             {
                 scheduler.nextEventTime = scheduler.Resume();
             }
-            else if (label.StartsWith("#", Util.IC))
+            else if (label.StartsWith(Util.LABEL_IDENT, Util.IC))
             {
                 scheduler.Launch(label);
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Dialogic
@@ -103,38 +104,27 @@ namespace Dialogic
         {
             if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
 
-            var first = chatLabel != null ? FindChat(chatLabel) : chats[0];
+            var first = chatLabel != null ? FindChatByLabel(chatLabel) : chats[0];
             scheduler.Launch(first);
         }
 
-        public Chat FindChat(string label)
+        public List<Chat> FindChatByMeta(string key, string value)
         {
-            if (label.StartsWith("#", Util.IC)) label = label.Substring(1);
-
-            Chat result = null;
-
-            for (int i = 0; i < chats.Count; i++)
-            {
-                if (chats[i].text == label)
-                {
-                    result = chats[i];
-                    break;
-                }
-            }
-            return result;
+            //foreach (var c in chats) Console.WriteLine(c.text + ": "+c.GetMeta(key)+ " " + ((string)c.GetMeta(key)==value));
+            return chats.Where(c => ((string)c.GetMeta(key)) == value).ToList<Chat>();
         }
 
-        public IActor FindActor(string name)
+        public Chat FindChatByLabel(string label)
         {
-            if (name.StartsWith("#", Util.IC)) name = name.Substring(1);
-
-            foreach (var actor in actors)
-            {
-                if (actor.Name() == name) return actor;
-            }
-            return null;
+            Util.ValidateLabel(ref label);
+            return chats.FirstOrDefault(c => c.text == label);
         }
 
+        public IActor FindActorByName(string name)
+        {
+            Util.ValidateLabel(ref name);
+            return actors.FirstOrDefault(c => c.Name() == name);
+        }
 
         internal List<Func<Command, bool>> Validators()
         {
@@ -155,7 +145,7 @@ namespace Dialogic
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = (finder is Go) ? FindChat(((Go)finder).text) :
+                Chat chat = (finder is Go) ? FindChatByLabel(((Go)finder).text) :
                     this.DoFind(finder, globals);
 
                 if (chat == null) throw new FindException(finder);
@@ -185,10 +175,7 @@ namespace Dialogic
                     }
                 }
                 var val = s.Validator();
-                if (val != null)
-                {
-                    validators.Add(val);
-                }
+                if (val != null) validators.Add(val);
             });
 
             return iActors;
@@ -201,7 +188,7 @@ namespace Dialogic
             return DoFind(null, null, constraints);
         }
 
-        internal Chat DoFind(Chat parent, 
+        internal Chat DoFind(Chat parent,
             IDictionary<string, object> globals, params Constraint[] constraints)
         {
             IDictionary<Constraint, bool> cdict = new Dictionary<Constraint, bool>();
@@ -220,7 +207,7 @@ namespace Dialogic
             return DoFindAll(null, null, constraints);
         }
 
-        internal List<Chat> DoFindAll(Chat parent, 
+        internal List<Chat> DoFindAll(Chat parent,
             IDictionary<string, object> globals, params Constraint[] constraints)
         {
             return FuzzySearch.FindAll(chats, constraints, parent, globals);
@@ -278,7 +265,7 @@ namespace Dialogic
 
         internal void Launch(string label)
         {
-            var next = runtime.FindChat(label);
+            var next = runtime.FindChatByLabel(label);
             if (next == null) throw new DialogicException
                 ("Unable to find Chat: '" + label + "'");
             Launch(next);
@@ -352,7 +339,7 @@ namespace Dialogic
         {
             if (chat == null) throw new DialogicException
                 ("Attempt to complete a null Chat");
-            
+
             if (resumables.Count > 0 && chat == resumables.Peek())
             {
                 resumables.Pop(); // remove finished from stack
@@ -378,7 +365,7 @@ namespace Dialogic
 
         internal void Warn(object msg)
         {
-            Console.WriteLine("[WARN] "+msg);
+            Console.WriteLine("[WARN] " + msg);
         }
 
         internal bool Ready()

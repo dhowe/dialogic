@@ -172,7 +172,7 @@ namespace Dialogic
             {
                 ask.Realize(globals);
                 string asked = ask.Text(true);
-                string opts = ask.OptionsJoined();
+                string opts = ask.JoinOptions();
                 //Console.WriteLine(i+") "+asked+" "+opts);
                 Assert.That(asked, Is.Not.EqualTo(last));
                 Assert.That(opts, Is.Not.EqualTo(lastOpts));

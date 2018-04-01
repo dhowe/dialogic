@@ -6,17 +6,16 @@ namespace Tendar
 {
     public static class AppConfig
     {
-        public static List<IActor> Actors = new List<IActor>();
         private static Func<Command, bool> Validator = ValidateCommand;
 
         const string STAGE = "stage", TYPE = "type";
 
-        static AppConfig()
-        {
-            Actors.Add(new Actor("Guppy", true, Validator, 
-                new CommandDef("NVM", typeof(Tendar.Nvm))));
-            Actors.Add(new Actor("Tendar"));
-        }
+        public static Actor GUPPY = new Actor("Guppy",
+            true, Validator, new CommandDef("NVM", typeof(Tendar.Nvm)));
+
+        public static Actor TENDAR = new Actor("Tendar");
+
+        public static List<IActor> Actors = new List<IActor> { GUPPY, TENDAR };
 
         private static bool ValidateCommand(Command c)
         {
@@ -25,32 +24,13 @@ namespace Tendar
                 if (!(c.HasMeta("NoStart") || c.HasMeta("noStart")))
                 {
                     if (!c.HasMeta(TYPE)) throw new ParseException
-                        ("missing required meta-key '"+TYPE+"'");
+                        ("missing required meta-key '" + TYPE + "'");
 
                     if (!c.HasMeta(STAGE)) throw new ParseException
                         ("missing required meta-key '" + STAGE + "'");
                 }
             }
-            else if (c.GetType() == typeof(Find))
-            {
-                /* add default staleness if not otherwise specified
-                if (!c.HasMeta(Meta.STALENESS))
-                {
-                    var type = c.GetMeta("type");
-                    if (type != null) // but only if a type is specified
-                    {
-                        var typeStr = ((Constraint)type).value;
 
-                        // TODO: change this to per-Find values
-                        if (STALENESS_BY_TYPE.ContainsKey(typeStr))
-                        {
-                            var ds = STALENESS_BY_TYPE[(string)typeStr];
-                            c.SetMeta(Meta.STALENESS, new Constraint
-                                (Operator.LT, Meta.STALENESS, ds.ToString()));
-                        }
-                    }
-                }*/
-            }
             return true;
         }
     }
@@ -63,11 +43,6 @@ namespace Tendar
         {
             return NVM_DURATION;
         }
-
-        //public override string TypeName()
-        //{
-        //    return "Nvm";
-        //}
     }
 
     //public interface IAppConfig {

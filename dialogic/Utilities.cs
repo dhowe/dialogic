@@ -113,8 +113,8 @@ namespace Dialogic
     public static class Util
     {
         public static int INFINITE = -1;
-
-        internal static StringComparison IC = StringComparison.InvariantCulture;
+        public static StringComparison IC = StringComparison.InvariantCulture;
+        internal static string LABEL_IDENT = "#";
 
         private static int start;
         private static Random random;
@@ -394,6 +394,11 @@ namespace Dialogic
         internal static int Round(float p)
         {
             return (int)Math.Round(p);
+        }
+
+        internal static void ValidateLabel(ref string lbl)
+        {
+            if (lbl.StartsWith(LABEL_IDENT, IC)) lbl = lbl.Substring(1);
         }
 
         internal static string[] StripSingleLineComments(string[] lines)

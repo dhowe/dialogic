@@ -7,6 +7,16 @@ namespace Dialogic
     [TestFixture]
     public class ParserTests
     {
+        const bool NO_VALIDATORS = true;
+
+        [Test]
+        public void ASimpleTest()
+        {
+            var chat = ChatParser.ParseText("CHAT c1\nSAY ok", NO_VALIDATORS)[0];
+            //Console.WriteLine(chat.ToTree());
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+        }
 
         [Test]
         public void TestDynamicAssign()
@@ -71,6 +81,9 @@ namespace Dialogic
             Assert.That(say.GetRealized("actor"), Is.EqualTo("Tendar"));
             Assert.That(say.actor, Is.EqualTo(Tendar.AppConfig.Actors[1]));
             Assert.That(say.delay, Is.EqualTo(1));
+
+            //Assert.That(say.ComputeDuration(), Is.EqualTo(1));
+            // TODO: need to test Say.ComputeDuration...
         }
 
         [Test]
@@ -83,7 +96,7 @@ namespace Dialogic
             Assert.That(chat.meta, Is.Not.Null);
             Assert.That(chat.realized, Is.Null);
             Assert.That(chat.staleness, Is.EqualTo(Defaults.CHAT_STALENESS));
-            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), 
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
                 Is.EqualTo(Convert.ToDouble(Defaults.CHAT_STALENESS)));
 
             chat = ChatParser.ParseText("CHAT c1 { type = a, stage = b }")[0];
@@ -114,7 +127,48 @@ namespace Dialogic
             Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUME_AFTER_INT)),
                 Is.EqualTo(Convert.ToBoolean("false")));
         }
-  
+
+        [Test]
+        public void TestChatStaleness()
+        {
+            List<Chat> chats;
+            ChatRuntime rt;
+
+            chats = ChatParser.ParseText("CHAT c1 { type = a, stage = b }");
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].staleness, Is.EqualTo(Defaults.CHAT_STALENESS));
+            rt = new ChatRuntime(chats);
+            for (int i = 0; i < 5; i++) rt.Run("#c1");
+            var total = Defaults.CHAT_STALENESS + (5 * Defaults.CHAT_STALENESS_INCR);
+            Assert.That(chats[0].staleness, Is.EqualTo(total));
+
+            chats = ChatParser.ParseText("CHAT c1 {staleness=10,type=a, stage=b}");
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].staleness, Is.EqualTo(10));
+            rt = new ChatRuntime(chats);
+            for (int i = 0; i < 5; i++) rt.Run("#c1");
+            total = 10 + (5 * Defaults.CHAT_STALENESS_INCR);
+            Assert.That(chats[0].staleness, Is.EqualTo(total));
+
+            chats = ChatParser.ParseText("CHAT c1 {staleness=9.1,stalenessIncr=.6}", true);
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].staleness, Is.EqualTo(9.1));
+            rt = new ChatRuntime(chats);
+            for (int i = 0; i < 5; i++) rt.Run("#c1");
+            Assert.That(chats[0].staleness, Is.EqualTo(9.1 + (5 * .6)).Within(.01));
+
+            chats = ChatParser.ParseText("CHAT c1 {staleness=9,stalenessIncr=2}", true);
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].staleness, Is.EqualTo(9));
+            rt = new ChatRuntime(chats);
+            for (int i = 0; i < 5; i++) rt.Run("#c1");
+            Assert.That(chats[0].staleness, Is.EqualTo(9+5*2).Within(.01));
+            chats[0].Staleness(0);
+            chats[0].StalenessIncr(10);
+            for (int i = 0; i < 5; i++) rt.Run("#c1");
+            Assert.That(chats[0].staleness, Is.EqualTo(0+5*10).Within(.01));
+        }
+
         [Test]
         public void TestAssignActors()
         {
@@ -169,7 +223,7 @@ namespace Dialogic
             Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
-			Ask ask = (Dialogic.Ask)chats[0].commands[0];
+            Ask ask = (Dialogic.Ask)chats[0].commands[0];
             Assert.That(ask.text, Is.EqualTo("Want a game?"));
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
@@ -304,7 +358,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
             var meta = chats[0].commands[0].GetMeta("num");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-			Constraint constraint = (Dialogic.Constraint)meta;
+            Constraint constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(false));
 
             chats = ChatParser.ParseText("FIND {a*=(hot|cool)}");
@@ -388,7 +442,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
             var meta = chats[0].commands[0].GetMeta("num");
             Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
-			Constraint constraint = (Dialogic.Constraint)meta;
+            Constraint constraint = (Dialogic.Constraint)meta;
             Assert.That(constraint.IsStrict(), Is.EqualTo(true));
 
             chats = ChatParser.ParseText("FIND {!a*=(hot|cool)}");
@@ -423,7 +477,7 @@ namespace Dialogic
             Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Wait)));
-			Wait wait = (Dialogic.Wait)chats[0].commands[0];
+            Wait wait = (Dialogic.Wait)chats[0].commands[0];
             Assert.That(wait.text, Is.EqualTo(".5"));
             Assert.That(wait.delay, Is.EqualTo(.5));
             Assert.That(wait.ComputeDuration(), Is.EqualTo(500));
@@ -485,7 +539,7 @@ namespace Dialogic
             //Assert.That(ChatParser.ParseText((s)[0].commands[0].ToString(), Is.EqualTo(s));
 
             s = "ASK hay is for horses?\nOPT Yes? #Yes\nOPT No? #No";
-            var exp = s.Replace("\n","\n  ").Split('\n');
+            var exp = s.Replace("\n", "\n  ").Split('\n');
             var res = ChatParser.ParseText(s)[0].commands[0].ToString().Split('\n');
 
             Assert.That(res.Length, Is.EqualTo(exp.Length));
