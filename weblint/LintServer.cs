@@ -97,7 +97,8 @@ namespace Dialogic.Server
         {
             var html = IndexPageContent;
 
-            var code = request.QueryString.Get("code");
+            var code = ParsePostData(request);
+
             if (String.IsNullOrEmpty(code))
             {
                 return html.Replace("%%CODE%%", "Enter your code here");
@@ -133,9 +134,9 @@ namespace Dialogic.Server
             return content;
         }
 
-        private IDictionary<string, string> ParsePostData(HttpListenerRequest request)
+        private static string ParsePostData(HttpListenerRequest request)
         {
-            IDictionary<string, string> formVars = new Dictionary<string, string>();
+            string s="";
 
             if (request.HasEntityBody)
             {
@@ -143,22 +144,16 @@ namespace Dialogic.Server
                 Encoding encoding = request.ContentEncoding;
                 StreamReader reader = new System.IO.StreamReader(body, encoding);
 
-                if (request.ContentType.ToLower() == "application/x-www-form-urlencoded")
+                if (request.ContentType == "application/x-www-form-urlencoded")
                 {
-                    string s = reader.ReadToEnd();
-                    string[] pairs = s.Split('&');
-                    for (int i = 0; i < pairs.Length; i++)
-                    {
-                        string[] item = pairs[i].Split('=');
-                        formVars.Add(item[0], Uri.UnescapeDataString(item[1]));
-                    }
+                    s = Uri.UnescapeDataString(reader.ReadToEnd());      
                 }
 
                 body.Close();
                 reader.Close();
             }
 
-            return formVars;
+            return s;
         }
 
         public static void Main()

@@ -66,8 +66,19 @@
       $("#validate").click(function () {
 
         event.preventDefault();
+        if ($("#main").val() === "Enter your code here") return;
         var code = encodeURIComponent($("#main").val());
-        window.location = window.location.href.split('?')[0]+'?code='+code;
+        $.ajax({
+          type: "POST",
+          url: "http://172.16.54.164:8080/glint/",
+          data: code,
+          contentType: 'application/x-www-form-urlencoded',
+          success: function(data){
+            document.open();
+            document.write(data);
+            document.close();
+          }
+        });
       });
 
       // Highlight error
