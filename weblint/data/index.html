@@ -70,7 +70,7 @@
         var code = encodeURIComponent($("#main").val());
         $.ajax({
           type: "POST",
-          url: "http://172.16.54.164:8080/glint/",
+          url: "%%URL%%",
           data: code,
           contentType: 'application/x-www-form-urlencoded',
           success: function(data){

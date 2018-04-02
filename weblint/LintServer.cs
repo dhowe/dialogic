@@ -95,7 +95,7 @@ namespace Dialogic.Server
 
         public static string SendResponse(HttpListenerRequest request)
         {
-            var html = IndexPageContent;
+            var html = IndexPageContent.Replace("%%URL%%", SERVER_URL);
 
             var code = ParsePostData(request);
 
@@ -134,9 +134,14 @@ namespace Dialogic.Server
             return content;
         }
 
+        //private static IDictionary<string,string> ParsePostData(HttpListenerRequest request)
         private static string ParsePostData(HttpListenerRequest request)
         {
             string s="";
+            //IDictionary<string, string> result = new Dictionary<string, string>();
+
+            // TODO: need to return key-value pairs here as we will have more than one; 
+            // in c# a Dictionary, in Java a HashMap
 
             if (request.HasEntityBody)
             {
@@ -152,6 +157,8 @@ namespace Dialogic.Server
                 body.Close();
                 reader.Close();
             }
+
+            //return result;
 
             return s;
         }
