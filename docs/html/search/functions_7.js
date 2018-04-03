@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['s',['S',['../class_dialogic_1_1_modifiers.html#aa77a087a68ed4f896f1a3f2dea2dc71e',1,'Dialogic::Modifiers']]]
+  ['quotify',['Quotify',['../class_dialogic_1_1_modifiers.html#a472a5fbeb2b67301dc0e84a712eb2155',1,'Dialogic::Modifiers']]]
 ];

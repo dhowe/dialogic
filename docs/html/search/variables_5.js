@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['preserve_5fline_5fnumbers',['PRESERVE_LINE_NUMBERS',['../class_dialogic_1_1_chat_parser.html#a192d5160d1a64382222aec5fc85a3d2d',1,'Dialogic::ChatParser']]]
+  ['say_5fduration',['SAY_DURATION',['../class_dialogic_1_1_defaults.html#ad8ef6a7453dcac7a87b5304c3590a3fa',1,'Dialogic::Defaults']]]
 ];

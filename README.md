@@ -78,15 +78,11 @@ Writers may also specify probability weightings for various choices, as well as 
 SAY I'm (very | super | really) glad to ((meet | know) you | make your acquaintance).
 ````
 
-[tbd]
-
 &nbsp;
 
 ### Interruption / Smoothing
 
 Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be added in order to make transitions more natural, i.e., 'so as I was saying'.
-
-[tbd]
 
 &nbsp;
 

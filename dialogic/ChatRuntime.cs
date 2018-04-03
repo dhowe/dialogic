@@ -284,12 +284,18 @@ namespace Dialogic
 
     }
 
+    /// <summary>
+    /// Holds the current state of a ChatRuntime, either Running, Suspended, or Waiting
+    /// </summary>
     /// States:
     ///   Running:        chat != null, net > -1 -> running Chat commands
     ///   Suspended:      chat != null, net = -1 -> waiting (either on a Wait or Prompt)
     ///   Waiting:        chat  = null, net = -1 -> waiting (on a SuspendEvent, or all Chats done)
     public enum RuntimeState { Running, Suspended, Waiting };
 
+    /// <summary>
+    /// Holds the current context of a ChatRuntime including its RuntimeState, the current Chat, and the nextEventTime offset (in ms)
+    /// </summary>
     public class RuntimeContext
     {
         private static RuntimeContext instance;

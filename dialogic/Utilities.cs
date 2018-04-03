@@ -72,7 +72,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// A 1=1 mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
+    /// A one-to-one mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
     /// </summary>
     public class CommandDef
     {

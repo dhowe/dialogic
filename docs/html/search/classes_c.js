@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['say',['Say',['../class_dialogic_1_1_say.html',1,'Dialogic']]],
-  ['set',['Set',['../class_dialogic_1_1_set.html',1,'Dialogic']]],
-  ['suspendevent',['SuspendEvent',['../class_dialogic_1_1_suspend_event.html',1,'Dialogic']]]
+  ['wait',['Wait',['../class_dialogic_1_1_wait.html',1,'Dialogic']]]
 ];

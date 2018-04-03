@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// Handles realization of variables, probabilistic groups, and grammar rules
+    /// </summary>
     public static class Realizer
     {
         public static string DoGroups(string text)

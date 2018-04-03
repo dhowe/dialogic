@@ -4,13 +4,16 @@ using System.Linq;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// Handles fuzzy logic for Find commands containing one or more constraints to be matched in candidate Chats.
+    /// </summary>
     public static class FuzzySearch
     {
         public static bool DBUG = false;
 
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
-        /// 
+        ///
         /// If none match, then start relaxing hard-type constraints until one does.
         /// 
         /// If all hard constraints have been relaxed and nothing is found, then 
@@ -23,8 +26,8 @@ namespace Dialogic
         /// <param name="constraints">Constraints.</param>
         /// <param name="parent">Parent.</param>
         /// <param name="globals">Globals.</param>
-        public static Chat Find(List<Chat> chats, 
-            IDictionary<Constraint, bool> constraints, 
+        public static Chat Find(List<Chat> chats,
+            IDictionary<Constraint, bool> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
             bool resetRequired = false; // opt
@@ -43,7 +46,7 @@ namespace Dialogic
 
                     if (chat == null)
                     {
-                        if (DBUG) Console.WriteLine("\nFailed with " + 
+                        if (DBUG) Console.WriteLine("\nFailed with " +
                             RelaxableCount(constraints) + " hard constraints");
                         continue;
                     }
@@ -81,7 +84,7 @@ namespace Dialogic
         /// <param name="parent">Parent.</param>
         /// <param name="globals">Globals.</param>
         internal static List<Chat> FindAll(List<Chat> chats,
-            IEnumerable<Constraint> constraints, 
+            IEnumerable<Constraint> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
             Dictionary<Chat, double> matches = new Dictionary<Chat, double>();

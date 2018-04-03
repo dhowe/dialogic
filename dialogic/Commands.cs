@@ -257,7 +257,7 @@ namespace Dialogic
         }
     }
 
-    public class Gram : Command
+    public class Gram : Command //@cond unused
     {
         public Grammar grammar;
 
@@ -271,7 +271,7 @@ namespace Dialogic
         {
             return "[" + TypeName().ToUpper() + "] >\n" + grammar;
         }
-    }
+    }//@endcond
 
     /// <summary>
     /// The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environment. It accepts a label, optionally followed by metadata, which can be used to supply arguments to the triggered action.
@@ -489,15 +489,8 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// FIND is used to do a fuzzy search for the next CHAT, according to 
-    /// criteria that you supply. The FIND command accepts any number of metadata
-    ///  key-value pairs specifying constraints to match. The highest scoring 
-    /// CHAT that does not violate any of the constraints is located, and the 
-    /// system then branches to this CHAT. Normally, CHATs will match a constraint
-    ///  if they do not have the given key in their metadata or if it is present 
-    /// and matches. Prepending the strict operator (!) to a key signifies that 
-    /// the key MUST be both present and matching. FIND also allows comparison 
-    /// operators in its metadata.
+    /// Find is used to do a fuzzy search for the next Chat, according to criteria that you supply. The Find command accepts any number of metadata key-value pairs specifying constraints to match. The highest scoring  Chat that does not violate any of the constraints is located, and the system then branches to this Chat. 
+    /// Normally, Chats will match a constraint if they do not have the given key in their metadata or if it is present  and matches. Prepending the strict operator (!) to a key signifies that  the key MUST be both present and matching. Find also allows comparison  operators in its metadata.
     /// </summary>
     public class Find : Command
     {

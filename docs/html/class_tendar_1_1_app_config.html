@@ -75,13 +75,46 @@ $(function() {
 <div class="title">Tendar.AppConfig Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Specifies custom behavior for the <a class="el" href="namespace_tendar.html">Tendar</a> application, including Actors, validators, and custom command types.  
+ <a href="class_tendar_1_1_app_config.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
+<tr class="memitem:af88434f1b3b60f7767d92d5e19a47edf"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_dialogic_1_1_actor.html">Actor</a>&#160;</td><td class="memItemRight" valign="bottom"><b>GUPPY</b></td></tr>
+<tr class="separator:af88434f1b3b60f7767d92d5e19a47edf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d1c3e921d74dabd723447d4e8eebb55"><td class="memItemLeft" align="right" valign="top"><a id="a8d1c3e921d74dabd723447d4e8eebb55"></a>
+static <a class="el" href="class_dialogic_1_1_actor.html">Actor</a>&#160;</td><td class="memItemRight" valign="bottom"><b>TENDAR</b> = new <a class="el" href="class_dialogic_1_1_actor.html">Actor</a>(&quot;Tendar&quot;)</td></tr>
+<tr class="separator:a8d1c3e921d74dabd723447d4e8eebb55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ae92753f7d28cdc75c0a3d1731c26c8"><td class="memItemLeft" align="right" valign="top"><a id="a0ae92753f7d28cdc75c0a3d1731c26c8"></a>
-static List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Actors</b> = new List&lt;<a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&gt;()</td></tr>
+static List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Actors</b> = new List&lt;<a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&gt; { GUPPY, TENDAR }</td></tr>
 <tr class="separator:a0ae92753f7d28cdc75c0a3d1731c26c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Specifies custom behavior for the <a class="el" href="namespace_tendar.html">Tendar</a> application, including Actors, validators, and custom command types. </p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="af88434f1b3b60f7767d92d5e19a47edf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af88434f1b3b60f7767d92d5e19a47edf">&#9670;&nbsp;</a></span>GUPPY</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_dialogic_1_1_actor.html">Actor</a> Tendar.AppConfig.GUPPY</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= <span class="keyword">new</span> Actor(<span class="stringliteral">&quot;Guppy&quot;</span>,</div><div class="line">            <span class="keyword">true</span>, Validator, <span class="keyword">new</span> CommandDef(<span class="stringliteral">&quot;NVM&quot;</span>, typeof(<a class="code" href="namespace_tendar.html">Tendar</a>.<a class="code" href="class_tendar_1_1_nvm.html">Nvm</a>)))</div></div><!-- fragment -->
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>dialogic/AppConfig.cs</li>
 </ul>

@@ -3,25 +3,24 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
-
-    /**
-     * Superclass for specific GameEvents
-     */
+    /// <summary>
+    /// Superclass for specific GameEvents
+    /// </summary>
     public abstract class GameEvent : EventArgs { }
 
-    /**
-     * Basic implementation of ISuspend
-     */
+    /// <summary>
+    /// Basic implementation of ISuspend
+    /// </summary>
     public class SuspendEvent : GameEvent, ISuspend { }
 
-    /**
-     * Basic implementation of IClear
-     */
+    /// <summary>
+    /// Basic implementation of IClear
+    /// </summary>
     public class ClearEvent : GameEvent, IClear { }
 
-    /**
-     * Basic implementation of IResume
-     */
+    /// <summary>
+    /// Basic implementation of IUserEvent
+    /// </summary>
     public class UserEvent : GameEvent, IUserEvent
     {
         protected readonly string type;
@@ -79,9 +78,9 @@ namespace Dialogic
         }
     }
 
-    /**
-     * Basic implementation of IChatUpdate: tells Dialogic to execute the specified 'action' on all Chats matching the the find criteria
-     */
+    /// <summary>
+    /// Basic implementation of IChatUpdate: tells Dialogic to execute the specified 'action' on all Chats matching the the find criteria
+    /// </summary>
     public class ChatUpdate : GameEvent, IChatUpdate
     {
         private readonly string findBy;
@@ -104,20 +103,18 @@ namespace Dialogic
         }
     }
 
-    /**
-     * Basic implementation of IChatUpdate: sets the staleness value for one or more Chats, as specified by the find criteria
-     */
+    /// <summary>
+    /// Basic implementation of IChatUpdate: sets the staleness value for one or more Chats, as specified by the find criteria
+    /// </summary>
     public class StalenessUpdate : ChatUpdate, IChatUpdate
     {
-        public StalenessUpdate(double staleness, string findBy = null) 
-            : base((c) => { c.Staleness(staleness); }, findBy) {}
+        public StalenessUpdate(double staleness, string findBy = null)
+            : base((c) => { c.Staleness(staleness); }, findBy) { }
     }
 
-    /**
-     * Basic implementation of IUpdateEvent which wraps a string/object 
-     * dictionary containing relevant Command data with helper functions
-     * for extracting specific primitive types (double, bool, string, int, float)
-     */
+    /// <summary>
+    /// Basic implementation of IUpdateEvent which wraps a string/object  dictionary containing relevant Command data with helper functions for extracting specific primitive types (double, bool, string, int, float)
+    /// </summary>
     public class UpdateEvent : IUpdateEvent
     {
         private IDictionary<string, object> data;
@@ -193,7 +190,7 @@ namespace Dialogic
 
         public string Opts()
         {
-            return (!data.ContainsKey(Meta.OPTS)) ? 
+            return (!data.ContainsKey(Meta.OPTS)) ?
                 (string)data[Meta.OPTS] : null;
         }
     }

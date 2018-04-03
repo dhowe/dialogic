@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['find',['Find',['../class_dialogic_1_1_find.html',1,'Dialogic']]],
-  ['findexception',['FindException',['../class_dialogic_1_1_find_exception.html',1,'Dialogic']]],
-  ['fuzzysearch',['FuzzySearch',['../class_dialogic_1_1_fuzzy_search.html',1,'Dialogic']]]
+  ['gameevent',['GameEvent',['../class_dialogic_1_1_game_event.html',1,'Dialogic']]],
+  ['go',['Go',['../class_dialogic_1_1_go.html',1,'Dialogic']]],
+  ['gram',['Gram',['../class_dialogic_1_1_gram.html',1,'Dialogic']]]
 ];

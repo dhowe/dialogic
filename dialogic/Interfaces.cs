@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// An Actor to which IAssignable Commands can be assigned; may also include custom Commands and Validators specific to the client application
+    /// </summary>
     public interface IActor
     {
         string Name();
@@ -12,7 +15,7 @@ namespace Dialogic
     }
 
     ////////////////////////////// Commands ///////////////////////////////////
-     
+
     /// <summary>
     /// Tagging interface denoting Commands should be dispatched to clients
     /// </summary>
@@ -34,19 +37,17 @@ namespace Dialogic
         int GetChoiceIndex();
     }
 
-
-    /**
-     * Tells Dialogic that the User has performed a specific action, repesented by
-     * the eventType.
-     */
+    /// <summary>
+    /// Tells Dialogic that the user has performed a specific action, repesented by the eventType.
+    /// </summary>
     public interface IUserEvent
     {
         string GetEventType();
     }
 
-    /**
-     * Tells Dialogic that some configuration change need to be made
-     */
+    /// <summary>
+    /// Tells Dialogic that some configuration change need to be made
+    /// </summary>
     public interface IConfigEvent
     {
         Constraint FindByCriteria();
@@ -54,44 +55,41 @@ namespace Dialogic
         string PropertyValue();
     }
 
-    /**
-     * Tells Dialogic to run the specifid action on one or more Chats
-     */
+    /// <summary>
+    /// Tells Dialogic to run the specifid action on one or more Chats
+    /// </summary>
     public interface IChatUpdate
     {
         string FindByCriteria();
         Action<Chat> GetAction();
     }
 
-    /**
-     * Tells Dialogic to restart the current Chat after a indefinite WAIT cmd, 
-     * or an ISuspend event, optionally with a specific chat, specified with its 
-     * Label, or with a Find, specified via its metadata constraints.
-     */
+
+    /// <summary>
+    ///  Tells Dialogic to restart the current Chat after a indefinite WAIT cmd, or an ISuspend event, optionally with a specific chat, specified with its Label, or with a Find, specified via its metadata constraints.
+    /// </summary>
     public interface IResume
     {
         string ResumeWith();
     }
 
-    /**
-     * Suspends the current Chat. The current chat (or a new chat) can be resumed by 
-     * sending a ResumeEvent.
-     */
+    /// <summary>
+    /// Suspends the current Chat. The current chat (or a new chat) can be resumed by  sending a ResumeEvent.
+    /// </summary>
     public interface ISuspend
     {
     }
 
-    /**
-     * Tells Dialogic to clear its stack of past chats, leaving none to be resumed
-     */
+    /// <summary>
+    /// Tells Dialogic to clear its stack of past chats, leaving none to be resumed
+    /// </summary>
     public interface IClear
     {
     }
 
-    /**
-     * Sent by Dialogic whenever an IEmittable Command (e.g., Say, Ask, Do, Wait) 
-     * is invoked so that it may be handled by the application
-     */
+    /// <summary>
+    /// Sent by Dialogic whenever an ISendable Command (e.g., Say, Ask, Do, Wait) is invoked so that it may be handled by the client application
+    /// </summary>
     public interface IUpdateEvent
     {
         string Text();
