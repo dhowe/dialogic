@@ -53,6 +53,11 @@ namespace Dialogic
         public static double FIND_MAX_STALENESS = 50;
 
         /// <summary>
+        /// Whether scores should be normalized (0-1) on Finds
+        /// </summary>
+        public static bool FIND_NORMALIZE_SCORES = true;
+
+        /// <summary>
         /// Default staleness for new Chats
         /// </summary>
         public static double CHAT_STALENESS = 0;

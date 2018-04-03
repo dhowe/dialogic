@@ -134,7 +134,7 @@ namespace Dialogic
                         Console.WriteLine("    NOKEY");
                     }
                 }
-                if (hits > -1) matches.Add(chats[i], Normalize(constraints, hits));
+                if (hits > -1) matches.Add(chats[i], ComputeScore(constraints, hits));
             }
 
             List<KeyValuePair<Chat, double>> list = DescendingFreshnessSort(matches);
@@ -144,9 +144,14 @@ namespace Dialogic
             return (from kvp in list select kvp.Key).ToList();
         }
 
+        private static double ComputeScore(IEnumerable<Constraint> constraints, int hits)
+        {
+            return Defaults.FIND_NORMALIZE_SCORES ? Normalize(constraints, hits) : hits;
+        }
+
         private static double Normalize(IEnumerable<Constraint> constraints, int hits)
         {
-            return hits / constraints.Count();
+            return hits / (double)constraints.Count();
         }
 
         // --------------------------------------------------------------------
