@@ -9,7 +9,7 @@ namespace Dialogic
 {
     /// <summary>
     /// Superclass for all Commands. When created by the parser, the default constructor is called first,
-    /// followed by Init(text,label,meta), followed by any app-specific validators, followed by PostValidate().
+    /// followed by Init(text,label,meta), followed by any app-specific validators, followed by Validate().
     /// </summary>
     public abstract class Command : Meta
     {
@@ -111,8 +111,11 @@ namespace Dialogic
             if (this is ISendable)
             {
                 realized[Meta.TEXT] = Realizer.Do(text, globals);
-                realized[Meta.ACTOR] = Actor().Name();
                 realized[Meta.TYPE] = TypeName();
+                if (this is IAssignable)
+                {
+                    realized[Meta.ACTOR] = Actor().Name();
+                }
             }
         }
 
@@ -170,9 +173,14 @@ namespace Dialogic
 
     public interface ISendable { }
 
+    /// <summary>
+    /// Tagging interface denoting Commands that can be assigned an Actor
+    /// </summary>
+    public interface IAssignable : ISendable { }
+
     public class NoOp : Command { }
 
-    public class Say : Command, ISendable
+    public class Say : Command, ISendable, IAssignable
     {
         protected string lastSpoken;
 
@@ -192,8 +200,6 @@ namespace Dialogic
             base.Realize(globals);
             Recombine(globals);
             lastSpoken = Text(true);
-            //lastSpokenTime = Util.EpochMs();
-            //return realized;
         }
 
         private void Recombine(IDictionary<string, object> globals)
@@ -266,7 +272,7 @@ namespace Dialogic
         }
     }
 
-    public class Do : Command, ISendable
+    public class Do : Command, ISendable, IAssignable
     {
         protected internal override Command Validate()
         {
@@ -336,7 +342,7 @@ namespace Dialogic
         }
     }
 
-    public class Ask : Say, ISendable
+    public class Ask : Say, ISendable, IAssignable
     {
         internal int selectedIdx;
 

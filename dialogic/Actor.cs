@@ -11,6 +11,10 @@ namespace Dialogic
         Func<Command, bool> Validator();
     }
 
+    /// <summary>
+    /// Represents a character in the system, capable of being assigned
+    /// commands such as SAY, ASK, and DO
+    /// </summary>
     public class Actor : IActor
     {
         public static IActor Default;

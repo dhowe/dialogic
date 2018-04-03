@@ -35,13 +35,14 @@ namespace Tendar
         }
     }
 
-    public class Nvm : Wait, ISendable
+    public class Nvm : Command, ISendable
     {
         public static double NVM_DURATION = 5.0;
 
-        protected override double DefaultDuration()
+        public override void Init(string text, string label, string[] metas)
         {
-            return NVM_DURATION;
+            base.Init(text, label, metas);
+            delay = text.Length == 0 ? NVM_DURATION : Convert.ToDouble(text);
         }
     }
 

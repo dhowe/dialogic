@@ -152,6 +152,33 @@ namespace Dialogic
             return (n - min) / (max - min) * (targetMax - targetMin) + targetMin;
         }
 
+        /// <summary> A version of Equals for floating point comparison </summary>
+        public static bool FloatingEquals(double a, double b, double epsilon=0.00001f)
+        {
+            double absA = Math.Abs(a);
+            double absB = Math.Abs(b);
+            double diff = Math.Abs(a - b);
+
+            // shortcut, handles infinities
+            #pragma warning disable RECS0018 // floating point equality 
+            if (a == b)
+            { 
+                return true;
+            }
+            else if (a == 0 || b == 0 || diff < Double.Epsilon)
+            {
+                // a or b is zero or both are extremely close
+                // so relative error is less meaningful here
+                return diff < epsilon;
+            }
+            else // use relative error
+            { 
+                return diff / (absA + absB) < epsilon;
+            }
+            #pragma warning restore RECS0018 // floating point equality 
+
+        }
+
         /// <summary>
         /// Returns the number of milliseconds elapsed since the start of the program 
         /// </summary>

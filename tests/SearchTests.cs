@@ -821,7 +821,7 @@ namespace Dialogic
         [Test]
         public void TestDescendingFreshnessSort()
         {
-            Dictionary<Chat, int> chatScores = new Dictionary<Chat, int>();
+            var chatScores = new Dictionary<Chat, double>();
 
             Chat c = Chat.Create("c1");
             c.lastRunAt = Util.EpochMs();
@@ -844,7 +844,7 @@ namespace Dialogic
             c = Chat.Create("c5");
             chatScores.Add(c, 10);
 
-            List<KeyValuePair<Chat, int>> list = FuzzySearch.DescendingFreshnessSort(chatScores);
+            List<KeyValuePair<Chat, double>> list = FuzzySearch.DescendingFreshnessSort(chatScores);
             for (int i = 1; i < list.Count; i++)
             {
                 Assert.That(list[i].Value <= list[i - 1].Value, Is.True);

@@ -72,8 +72,7 @@ namespace Dialogic
         {
             this.validatorsDisabled = disableValidators;
             var lines = text.Split(ChatParser.LineBreaks, StringSplitOptions.None);
-            chats = parser.Parse(lines);
-            return chats;
+            return (chats = parser.Parse(lines));
         }
 
         public void ParseFile(string fileOrFolder, bool disableValidators = false)

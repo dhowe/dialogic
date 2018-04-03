@@ -84,7 +84,7 @@ namespace Dialogic
             IEnumerable<Constraint> constraints, 
             Chat parent, IDictionary<string, object> globals)
         {
-            Dictionary<Chat, int> matches = new Dictionary<Chat, int>();
+            Dictionary<Chat, double> matches = new Dictionary<Chat, double>();
 
             if (DBUG) Console.WriteLine("\nFIND: " + constraints.Stringify());
 
@@ -131,14 +131,19 @@ namespace Dialogic
                         Console.WriteLine("    NOKEY");
                     }
                 }
-                if (hits > -1) matches.Add(chats[i], hits);
+                if (hits > -1) matches.Add(chats[i], Normalize(constraints, hits));
             }
 
-            List<KeyValuePair<Chat, int>> list = DescendingFreshnessSort(matches);
+            List<KeyValuePair<Chat, double>> list = DescendingFreshnessSort(matches);
 
             if (DBUG) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
+        }
+
+        private static double Normalize(IEnumerable<Constraint> constraints, int hits)
+        {
+            return hits / constraints.Count();
         }
 
         // --------------------------------------------------------------------
@@ -197,9 +202,9 @@ namespace Dialogic
         /*
          * Sort by points, highest first, break ties with a coin-flip
          */
-        private static List<KeyValuePair<Chat, int>> DescendingRandomSort(Dictionary<Chat, int> d)
+        private static List<KeyValuePair<Chat, double>> DescendingRandomSort(Dictionary<Chat, double> d)
         {
-            List<KeyValuePair<Chat, int>> list = d.ToList();
+            List<KeyValuePair<Chat, double>> list = d.ToList();
             list.Sort((p1, p2) => CompareRandomizeTies(p1.Value, p2.Value));
             return list;
         }
@@ -207,25 +212,25 @@ namespace Dialogic
         /*
          * Sort by points, highest first, break ties with the fresher chat
          */
-        internal static List<KeyValuePair<Chat, int>> DescendingFreshnessSort(Dictionary<Chat, int> d)
+        internal static List<KeyValuePair<Chat, double>> DescendingFreshnessSort(Dictionary<Chat, double> d)
         {
             // public for testing only
-            List<KeyValuePair<Chat, int>> list = d.ToList();
+            List<KeyValuePair<Chat, double>> list = d.ToList();
             list.Sort(CompareFreshnessTies);
             return list;
         }
 
         // sort descending with ties based on freshness
-        private static int CompareFreshnessTies(KeyValuePair<Chat, int> i, KeyValuePair<Chat, int> j)
+        private static int CompareFreshnessTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
         {
-            return i.Value == j.Value ? (i.Key.lastRunAt > j.Key.lastRunAt
+            return Util.FloatingEquals(i.Value, j.Value) ? (i.Key.lastRunAt > j.Key.lastRunAt
                 ? 1 : -1) : j.Value.CompareTo(i.Value);
         }
 
         // sort descending with randomized ties
-        private static int CompareRandomizeTies(int i, int j)
+        private static int CompareRandomizeTies(double i, double j)
         {
-            return i == j ? (Util.Rand() < .5 ? 1 : -1) : j.CompareTo(i);
+            return Util.FloatingEquals(i, j) ? (Util.Rand() < .5 ? 1 : -1) : j.CompareTo(i);
         }
     }
 }

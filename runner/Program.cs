@@ -60,8 +60,6 @@ namespace runner
                 Thread.Sleep(30);
                 IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
                 if (ue != null) HandleEvent(ref ue);
-                var rtc = dialogic.CurrentContext();
-                Console.WriteLine(rtc.State);
             }
         }
 
@@ -71,7 +69,7 @@ namespace runner
             diaText = ue.Text();
             diaType = ue.Type();
 
-            ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.ACTOR);
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
 
             switch (diaType)
             {
