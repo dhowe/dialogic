@@ -3,89 +3,6 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
-    /**
-     * Tells Dialogic that the User has made a specific choice in response
-     * to a prompt
-     */
-    public interface IChoice
-    {
-        int GetChoiceIndex();
-    }
-
-    /**
-     * Tells Dialogic that the User has performed a specific action, repesented by
-     * the eventType.
-     */
-    public interface IUserEvent
-    {
-        string GetEventType();
-    }
-
-    /**
-     * Tells Dialogic that some configuration change need to be made
-     */
-    public interface IConfigEvent
-    {
-        Constraint FindByCriteria();
-        string PropertyName();
-        string PropertyValue();
-    }
-
-    /**
-     * Tells Dialogic to run the specifid action on one or more Chats
-     */
-    public interface IChatUpdate
-    {
-        string FindByCriteria();
-        Action<Chat> GetAction();
-    }
-
-    /**
-     * Tells Dialogic to restart the current Chat after a indefinite WAIT cmd, 
-     * or an ISuspend event, optionally with a specific chat, specified with its 
-     * Label, or with a Find, specified via its metadata constraints.
-     */
-    public interface IResume
-    {
-        string ResumeWith();
-    }
-
-    /**
-     * Suspends the current Chat. The current chat (or a new chat) can be resumed by 
-     * sending a ResumeEvent.
-     */
-    public interface ISuspend
-    {
-    }
-
-    /**
-     * Tells Dialogic to clear its stack of past chats, leaving none to be resumed
-     */
-    public interface IClear
-    {
-    }
-
-    /**
-     * Sent by Dialogic whenever an IEmittable Command (e.g., Say, Ask, Do, Wait) 
-     * is invoked so that it may be handled by the application
-     */
-    public interface IUpdateEvent
-    {
-        string Text();
-        string Type();
-        string Get(string name, string def = null);
-        void RemoveKeys(params string[] keys);
-        IDictionary<string, object> Data();
-
-        int GetInt(string name, int def = -1);
-        bool GetBool(string key, bool def = false);
-        double GetDouble(string key, double def = -1);
-        float GetFloat(string key, float def = -1);
-    }
-
-
-    // ---------------------- Implementations -----------------------
-
 
     /**
      * Superclass for specific GameEvents
@@ -120,16 +37,17 @@ namespace Dialogic
         }
     }
 
-    /**
-     * Basic implementation of IResume
-     */
+    /// <summary>
+    /// Basic implementation of IResume: tells Dialogic to Resume running the last suspended Chat.
+    /// If label or finder string is provided, then it will be used to specify the Chat to resume.
+    /// </summary>
     public class ResumeEvent : GameEvent, IResume
     {
         protected readonly string data;
 
-        public ResumeEvent(string chatLabel = null) : base()
+        public ResumeEvent(string labelOrFind = null) : base()
         {
-            this.data = chatLabel;
+            this.data = labelOrFind;
         }
 
         public string ResumeWith()
@@ -138,9 +56,9 @@ namespace Dialogic
         }
     }
 
-    /**
-     * * Basic implementation of IChoice
-     */
+    /// <summary>
+    /// Basic implementation of IChoice: tells Dialogic that the User has made a specific choice in response to a prompt
+    /// </summary>
     public class ChoiceEvent : GameEvent, IChoice
     {
         protected int choiceIndex;
@@ -162,7 +80,7 @@ namespace Dialogic
     }
 
     /**
-     * Basic implementation of IChatUpdate
+     * Basic implementation of IChatUpdate: tells Dialogic to execute the specified 'action' on all Chats matching the the find criteria
      */
     public class ChatUpdate : GameEvent, IChatUpdate
     {
@@ -187,8 +105,7 @@ namespace Dialogic
     }
 
     /**
-     * Basic implementation of IChatUpdate that sets the staleness
-     * value for one or more Chats, as specified by the find criteria
+     * Basic implementation of IChatUpdate: sets the staleness value for one or more Chats, as specified by the find criteria
      */
     public class StalenessUpdate : ChatUpdate, IChatUpdate
     {

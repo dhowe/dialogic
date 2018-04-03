@@ -64,6 +64,7 @@
     <Compile Include="AppConfig.cs" />
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Chat.cs" />
+    <Compile Include="Interfaces.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

@@ -72,6 +72,10 @@ namespace Dialogic
             return real ? (string)realized[Meta.TEXT] : text;
         }
 
+        /// <summary>
+        /// In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific Actor, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.
+        /// </summary>
+        /// <returns>The actor.</returns>
         public IActor Actor()
         {
             return actor;
@@ -171,15 +175,12 @@ namespace Dialogic
         }
     }
 
-    public interface ISendable { }
+    public class NoOp : Command //@cond unused 
+    { } //@endcond
 
     /// <summary>
-    /// Tagging interface denoting Commands that can be assigned an Actor
+    /// The Say command allows a character to speak. It is the default command. If a line does not start with a command, than it is assumed to be a Say command. It accepts free text, optionally followed by metadata, which can be used to control various display parameters. In multi-speaker environments, Say commands (also Ask, Do, and other IAssignables) can be assigned to a specific Actor, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.
     /// </summary>
-    public interface IAssignable : ISendable { }
-
-    public class NoOp : Command { }
-
     public class Say : Command, ISendable, IAssignable
     {
         protected string lastSpoken;
@@ -272,6 +273,9 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environment. It accepts a label, optionally followed by metadata, which can be used to supply arguments to the triggered action.
+    /// </summary>
     public class Do : Command, ISendable, IAssignable
     {
         protected internal override Command Validate()
@@ -286,6 +290,9 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// The Set command is used to create or modify a variable. Variables  generally originate from the game environment itself, but can also be created, accessed or modified within Dialogic.
+    /// </summary>
     public class Set : Command // TODO: rethink
     {
         public string Value;
@@ -328,6 +335,9 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// The Wait command is used to pause the runtime for a period of time.  It accepts a single number specifying the time to wait in seconds. If no time is specified, the system will wait until it receives a  ResumeEvent, after which it will continue with the current Chat, or the Chat specified in the event.
+    /// </summary>
     public class Wait : Command, ISendable
     {
         public override void Init(string text, string label, string[] metas)
@@ -342,6 +352,16 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// The ASK command is for prompting the user, and is generally followed by 
+    /// one or more OPT commands. If no OPT commands are supplied, then a simple
+    /// Yes/No pair is created. ASK pauses the current chat, after which it waits
+    /// for a ChoiceEvent object to be returned from the application. Based upon
+    /// the ChoiceEvent data (which option was selected), the chat will then go 
+    /// to the next chat specified.
+    /// It accepts free text, optionally followed by metadata, which can be 
+    /// used to control various display parameters.
+    /// </summary>
     public class Ask : Say, ISendable, IAssignable
     {
         internal int selectedIdx;
@@ -424,6 +444,10 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// The Opt command is used when prompting the user, and generally follows 
+    /// an Ask command.Each Opt specifies an option that the user can choose.
+    /// </summary>
     public class Opt : Say
     {
         internal Command action;
@@ -464,6 +488,17 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// FIND is used to do a fuzzy search for the next CHAT, according to 
+    /// criteria that you supply. The FIND command accepts any number of metadata
+    ///  key-value pairs specifying constraints to match. The highest scoring 
+    /// CHAT that does not violate any of the constraints is located, and the 
+    /// system then branches to this CHAT. Normally, CHATs will match a constraint
+    ///  if they do not have the given key in their metadata or if it is present 
+    /// and matches. Prepending the strict operator (!) to a key signifies that 
+    /// the key MUST be both present and matching. FIND also allows comparison 
+    /// operators in its metadata.
+    /// </summary>
     public class Find : Command
     {
         public Find() : base() { }
@@ -561,6 +596,11 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// The Go command accepts a single label used to specify the next Chat to 
+    /// jump to. When a Go command is executed, the current Chat is marked as
+    /// finished and execution switches to the Chat specified.
+    /// </summary>
     public class Go : Find
     {
         public override void Init(string text, string label, string[] metas)
@@ -587,6 +627,9 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// Superclass for all Commands that may be assigned metadata
+    /// </summary>
     public class Meta
     {
         public const string TYPE = "__type__";

@@ -654,6 +654,9 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// Represents an atomic operation on a pair of metadata string that when invoked returns a boolean
+    /// </summary>
     public class Operator
     {
         private enum OpType { EQUALITY, COMPARISON, MATCHING }
@@ -754,7 +757,7 @@ namespace Dialogic
 
     // adapted from:
     //   https://codereview.stackexchange.com/questions/113596/writing-cs-analog-of-settimeout-setinterval-and-clearinterval
-    public static class Timers
+    public static class Timers //@cond hidden
     {
         static IInterruptable timer;
 
@@ -777,13 +780,12 @@ namespace Dialogic
 
             return new TimerInterrupter(t);
         }
-    }
+    }//@endcond
 
-    public interface IInterruptable
+    public interface IInterruptable //@cond hidden
     {
         void Stop();
     }
-
     public class TimerInterrupter : IInterruptable
     {
         private readonly Timer t;
@@ -798,7 +800,7 @@ namespace Dialogic
         {
             t.Stop();
         }
-    }
+    }//@endcond
 
     public class ObjectPool<T> //@cond unused
     {
@@ -828,7 +830,8 @@ namespace Dialogic
         }
     }//@endcond
 
-    public static class Exts
+
+    public static class Exts //@cond unused
     {
         public delegate void Action<T1, T2, T3, T4, T5>
             (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
@@ -916,5 +919,5 @@ namespace Dialogic
             }
             return s;
         }
-    }
+    }//@endcond
 }

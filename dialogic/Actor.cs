@@ -3,14 +3,6 @@ using System.Collections.Generic;
 
 namespace Dialogic
 {
-    public interface IActor
-    {
-        string Name();
-        bool IsDefault();
-        CommandDef[] Commands();
-        Func<Command, bool> Validator();
-    }
-
     /// <summary>
     /// Represents a character in the system, capable of being assigned
     /// commands such as SAY, ASK, and DO
