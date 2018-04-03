@@ -303,18 +303,7 @@ namespace Dialogic
         {
             string[] parts = ParseSetArgs(txt);
             this.text = parts[0];
-
-            var val = parts[1];
-            Console.WriteLine("CHECKING: "+val);
-            MatchCollection matches = RE.GrammarRules.Matches(val);
-            if (matches.Count > 0) {
-                
-            }
-            Console.WriteLine("GOT: " + matches.Count);
-            Util.ShowMatches(matches);
-            value = val;
-            //if (match.Groups.Count != 4) throw new ParseException
-                //("Invalid query: '" + val + "'");
+            this.value = parts[1];
         }
 
         protected internal override void Realize(IDictionary<string, object> globals)
@@ -322,7 +311,25 @@ namespace Dialogic
             //String result = Regex.Replace(htmlDocument, @"<[^>]*>", String.Empty);
 
             string key = globals.ContainsKey(text) ? text : parent.text + "." + text;
-            globals[key] = Realizer.DoVars(value, globals);
+
+            if (value.IndexOf('<') > -1 && value.IndexOf('>') > -1) {
+                
+                string val = value;
+                //Console.WriteLine("CHECKING: " + val);
+                MatchCollection matches = RE.GrammarRules.Matches(val);
+                if (matches.Count > 0)
+                {
+                    var rules = matches.Cast<Match>().Select(match => match.Groups[1].Value).ToList();
+                    rules.ForEach(rule => val = val.Replace("<" + rule + ">", "$" + rule));
+                    //Console.WriteLine("GOT: " + matches.Count+" "+rules.Count+" "+rules.Stringify());
+                    //Util.ShowMatches(matches);
+
+                }
+
+                value = val.Replace("$", "$" + parent.text + ".");;
+            }
+            //if (value.Contains(".")) Console.WriteLine("Adding global: " + value + " "+globals.Stringify());
+            globals[key] = value;// Realizer.DoVars(value, globals);
         }
 
         protected string[] ParseSetArgs(string s)

@@ -8,6 +8,7 @@ namespace Dialogic
     public class RealizeTests
     {
         public static IDictionary<string, object> globals = new Dictionary<string, object>() {
+            { "obj.prop", "dog" },
             { "animal", "dog" },
             { "prep", "then" },
             { "group", "(a|b)" },
@@ -37,6 +38,17 @@ namespace Dialogic
             Chat chat = ChatParser.ParseText("SAY Thank you { pace=$animal}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
+            Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
+            c.Realize(globals);
+            c.SetMeta("pace", "slow");
+            Assert.That(c.GetRealized(Meta.TEXT), Is.EqualTo("Thank you"));
+            Assert.That(c.GetRealized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.GetRealized("pace"), Is.EqualTo("dog"));
+            Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
+
+            chat = ChatParser.ParseText("SAY Thank you { pace=$obj.prop}")[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             c.SetMeta("pace", "slow");
@@ -115,9 +127,18 @@ namespace Dialogic
             s = Realizer.DoVars(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
        
+            s = @"SAY The $obj.prop woke $count times";
+            s = Realizer.DoVars(s, globals);
+            Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
+
             s = @"SAY The $animal woke and $prep (ate|ate)";
             s = Realizer.Do(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
+
+            s = @"SAY The $obj.prop woke and $prep (ate|ate)";
+            s = Realizer.Do(s, globals);
+            Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
+  
   
             var txt = "letter $group";
             string[] ok = { "letter a", "letter b" };
@@ -198,6 +219,29 @@ namespace Dialogic
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
             var options = ask.Options();
+            Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
+            //Assert.That(options[0].Text, Is.EqualTo("Y").Or.);
+            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].Text(true));
+            Assert.That(options[0].action.GetType(), Is.EqualTo(typeof(Go)));
+            Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
+            Assert.That(options[1].Text(true), Is.EqualTo("4"));
+            Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
+
+
+            chats = ChatParser.ParseText("ASK Want a $obj.prop?\nOPT $group #Game\n\nOPT $count #End");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count, Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
+
+            ask = (Ask)chats[0].commands[0];
+            ask.Realize(globals);
+            Assert.That(ask.text, Is.EqualTo("Want a $obj.prop?"));
+            Assert.That(ask.Text(true), Is.EqualTo("Want a dog?"));
+
+            Assert.That(ask.Options().Count, Is.EqualTo(2));
+
+            options = ask.Options();
             Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
             //Assert.That(options[0].Text, Is.EqualTo("Y").Or.);
             CollectionAssert.Contains(new string[] { "a", "b" }, options[0].Text(true));

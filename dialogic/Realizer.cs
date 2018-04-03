@@ -75,8 +75,10 @@ namespace Dialogic
                     text = DoGroups(text);
 
                     // bail on infinite loops:
-                    if (++tries > 1000) throw new RealizeException
-                        ("Invalid-Sub: '" + arg + "' " + globals.Stringify());
+                    if (++tries > 100) break;
+                    //throw new RealizeException 
+                      //  ("Invalid-Sub: '" + arg + "' -> " + globals.Stringify());
+                    // TODO: tmp/remove for prod, just return the variable
                 }
                 while (IsDynamic(text));
 

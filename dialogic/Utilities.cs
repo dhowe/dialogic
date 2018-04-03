@@ -882,35 +882,34 @@ namespace Dialogic
         {
             if (o == null) return "NULL";
 
-            string s = "";
+            string s = string.Empty;
             if (o is IDictionary)
             {
                 IDictionary id = (System.Collections.IDictionary)o;
                 if (id.Count > 0)
                 {
-                    s += "{ ";
+                    s += "{";
                     foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
-                    s = s.Substring(0, s.Length - 1) + " }";
+                    s = s.Substring(0, s.Length - 1) + "}";
                 }
             }
-            //else if (o is Match) {}
             else if (o is object[])
             {
                 var arr = ((object[])o);
-                s = "[ ";
+                s = "[";
                 for (int i = 0; i < arr.Length; i++)
                 {
                     s += arr[i];
                     if (i < arr.Length - 1) s += ",";
                 }
-                s += " ]";
+                s += "]";
             }
             else if (o is ICollection)
             {
                 var coll = (ICollection)o;
-                s = "[ ";
+                s = "[";
                 foreach (var k in coll) s += k + ",";
-                s = (s.Substring(0, s.Length - 1) + " ]");
+                s = (s.Substring(0, s.Length - 1) + "]");
             }
             else
             {

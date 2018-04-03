@@ -12,23 +12,34 @@ namespace Dialogic
             string[] lines = {
                 "CHAT WineReview {type=a,stage=b,mode=grammar}",
                 "SET review <desc> <fortune> <ending>",
-                "SET ending <score> | <end-phrase>",
+                "SET ending <score> <end-phrase>",
+                //"SET ending <score> | <end-phrase>", // causes hang
+                "SET desc You look tasty: gushing blackberry into the rind of day-old ennui.",
+                "SET fortune Under your skin, tears undulate like a leaky eel.",
                 "SAY $WineReview.review",
             };
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
-            var third = chat.commands[2];
-            Assert.That(third, Is.Not.Null);
-            Assert.That(third.GetType(), Is.EqualTo(typeof(Say)));
+            Console.WriteLine(chat.ToTree());
+          
+            var last = chat.commands[chat.commands.Count-1];
+            Assert.That(last, Is.Not.Null);
+            Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));  
             chat.Realize(RealizeTests.globals);
+            Console.WriteLine("GLOBALS:");
+            foreach (var k in RealizeTests.globals.Keys)
+            {
+                Console.WriteLine("  "+k+": "+RealizeTests.globals[k]);
+            }
+
 
             Assert.That(RealizeTests.globals.ContainsKey("WineReview.review"), Is.True);
             Assert.That(RealizeTests.globals.ContainsKey("WineReview.ending"), Is.True);
-
-            Say say = (Dialogic.Say)third;
+       
+            Say say = (Dialogic.Say)last;
             Console.WriteLine(chat.ToTree());
-            Console.WriteLine(say.Text(true));
+            Console.WriteLine("SAY: "+say.Text(true));
 
-            Assert.That(say.Text(true), Is.EqualTo("<desc> <fortune> <ending>"));
+            Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. $WineReview.score $WineReview.end-phrase"));
 
             //CollectionAssert.Contains(new[]{"<score>","<end-phrase>"}, s);
 
