@@ -97,14 +97,15 @@ The application calls the runtime's Update() function each frame, passing the cu
 
  public RealtimeGame() 
  {
-     var chats = ChatParser.ParseFile(scriptDir); 
-     dialogic = new ChatRuntime(chats);
+    dialogic = new ChatRuntime();
+    dialogic.ParseFile(fileOrFolder);
+    dialogic.Run("#StartChat");
  }
 
  public IUpdateEvent Update() // Game Loop
  {
      // Call the dialogic interface
-     IUpdateEvent evt = dialogic.Update(globals, ref gameEvent);
+     IUpdateEvent evt = dialogic.Update(worldState, ref gameEvent);
 
      // Handle the event received
      if (evt != null) HandleEvent(evt);

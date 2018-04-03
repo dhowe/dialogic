@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Dialogic
 {
     /// <summary>
-    /// An Actor to which IAssignable Commands can be assigned; may also include custom Commands and Validators specific to the client application
+    /// An Actor to which IAssignable Commands can be assigned; may also include custom Commands and validators specific to the client application
     /// </summary>
     public interface IActor
     {
@@ -14,7 +14,9 @@ namespace Dialogic
         Func<Command, bool> Validator();
     }
 
+
     ////////////////////////////// Commands ///////////////////////////////////
+
 
     /// <summary>
     /// Tagging interface denoting Commands should be dispatched to clients
@@ -25,6 +27,7 @@ namespace Dialogic
     /// Tagging interface denoting Commands that can be assigned an Actor
     /// </summary>
     public interface IAssignable : ISendable { }
+
 
     /////////////////////////////// Events ////////////////////////////////////
 
@@ -94,6 +97,8 @@ namespace Dialogic
     {
         string Text();
         string Type();
+        string Actor();
+
         string Get(string name, string def = null);
         void RemoveKeys(params string[] keys);
         IDictionary<string, object> Data();

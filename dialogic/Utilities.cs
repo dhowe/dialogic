@@ -240,7 +240,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random int i, where min &lte; i &gt; max
+        /// Returns a random int i, where min &le; i &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="min">Minimum.</param>
@@ -251,7 +251,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random int i, where 0 &lte; i &gt; max
+        /// Returns a random int i, where 0 &le; i &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="max">Max.</param>
@@ -261,7 +261,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random double d, where 0 &lte; d &gt; 1
+        /// Returns a random double d, where 0 &le; d &gt; 1
         /// </summary>
         /// <returns>The rand.</returns>
         public static double Rand()
@@ -270,7 +270,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random double d, where min &lte; d &gt; max
+        /// Returns a random double d, where min &le; d &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="min">Minimum.</param>
@@ -281,7 +281,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random double d, where 0 &lte; d &gt; max
+        /// Returns a random double d, where 0 &le; d &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="max">Max.</param>

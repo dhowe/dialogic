@@ -178,14 +178,14 @@ namespace Dialogic
             return (string)data[Meta.TYPE];
         }
 
+        /// <summary>
+        /// Return Actor.name for the event if it is IAssignable, else null.
+        /// </summary>
+        /// <returns>The Actor name.</returns>
         public string Actor()
         {
-            if (!data.ContainsKey(Meta.ACTOR))
-            {
-                var def = Dialogic.Actor.Default;
-                return def != null ? def.Name() : null;
-            }
-            return (string)data[Meta.ACTOR];
+            return data.ContainsKey(Meta.ACTOR) ?
+                (string)data[Meta.ACTOR] : null;
         }
 
         public string Opts()

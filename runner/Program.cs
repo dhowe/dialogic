@@ -18,7 +18,7 @@ namespace runner
 
     public class MockGameEngine
     {
-        public static Dictionary<string, object> globals =
+        static Dictionary<string, object> globals =
             new Dictionary<string, object>() {
                 { "emotion", "special" },
                 { "place", "my tank" },
@@ -28,11 +28,12 @@ namespace runner
                 { "var3", 2 }
             };
 
-        private ChatRuntime dialogic;
-        private EventArgs gameEvent;
+        ChatRuntime dialogic;
+        EventArgs gameEvent;
+
         bool interrupted = false;
-        string diaText, diaType;
-        string[] diaOpts;
+        string evtText, evtType, evtActor;
+        string[] evtOpts;
 
         public MockGameEngine(string fileOrFolder)
         {
@@ -43,8 +44,6 @@ namespace runner
 
         public void Run()
         {
-            // TODO: test suspend/resume on user events
-
             var now = Util.Millis();
             Timers.SetTimeout(Util.Rand(2000, 10000), () =>
              {
@@ -66,19 +65,23 @@ namespace runner
         private void HandleEvent(ref IUpdateEvent ue)
         {
             interrupted = false;
-            diaText = ue.Text();
-            diaType = ue.Type();
 
-            ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
+            evtText = ue.Text();
+            evtType = ue.Type();
+            evtActor = ue.Actor();
 
-            switch (diaType)
+            //evtText = "["+evtActor + "] " + evtText;
+
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.ACTOR);
+
+            switch (evtType)
             {
                 //case "Chat":
                     //diaText = "\nCHAT " + diaText;
                     //break;
 
                 case "Say":
-                    diaText = diaText + " " + ue.Data().Stringify();
+                    evtText = evtText + " " + ue.Data().Stringify();
                     break;
 
                 case "Ask":
@@ -102,34 +105,34 @@ namespace runner
                         }
                     });
 
-                    diaText = ("(" + (diaType + " " +
+                    evtText = ("(" + (evtType + " " +
                         ue.Data().Stringify()).Trim() + ")");
                     break;
 
                 default:
-                    diaText = ("(" + diaType + ": " + (diaText + " "
+                    evtText = ("(" + evtType + ": " + (evtText + " "
                         + ue.Data().Stringify()).Trim() + ")");
                     break;
             }
 
-            Console.WriteLine(diaText);
+            Console.WriteLine(evtText);
 
             ue = null;  // dispose event 
         }
 
         private void DoPrompt(IUpdateEvent ue)
         {
-            diaOpts = ue.Get(Meta.OPTS).Split('\n');
+            evtOpts = ue.Get(Meta.OPTS).Split('\n');
 
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
 
             // add any meta tags
-            diaText = diaText + " " + ue.Data().Stringify();
+            evtText = evtText + " " + ue.Data().Stringify();
 
             // add the options
-            for (int i = 0; i < diaOpts.Length; i++)
+            for (int i = 0; i < evtOpts.Length; i++)
             {
-                diaText += "\n  (" + i + ") " + diaOpts[i];
+                evtText += "\n  (" + i + ") " + evtOpts[i];
             }
         }
 
@@ -142,7 +145,7 @@ namespace runner
                 Timers.SetTimeout(delay, () =>
                 {
                     // choice a valid response, or -1 for no response
-                    int choice = Util.Rand(diaOpts.Length + 1) - 1;
+                    int choice = Util.Rand(evtOpts.Length + 1) - 1;
                     Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms\n");
                     gameEvent = new ChoiceEvent(choice);
                 });
