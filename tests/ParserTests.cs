@@ -187,6 +187,19 @@ namespace Dialogic
             Assert.That(say.realized[Meta.TEXT], Is.EqualTo("Hello from Guppy"));
             Assert.That(say.realized[Meta.ACTOR], Is.EqualTo("Guppy"));
 
+            chats = ChatParser.ParseText("Guppy:DO #HelloSpin");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+            Do doo = (Dialogic.Do)chats[0].commands[0];
+            Assert.That(doo.text, Is.EqualTo("HelloSpin"));
+            Assert.That(doo.actor.Name(), Is.EqualTo("Guppy"));
+            doo.Realize(null);
+            Assert.That(doo.realized[Meta.TYPE], Is.EqualTo("Do"));
+            Assert.That(doo.realized[Meta.TEXT], Is.EqualTo("HelloSpin"));
+            Assert.That(doo.realized[Meta.ACTOR], Is.EqualTo("Guppy"));
+
             chats = ChatParser.ParseText("Guppy: Hello from Guppy");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count(), Is.EqualTo(1));

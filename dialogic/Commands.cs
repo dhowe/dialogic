@@ -118,6 +118,7 @@ namespace Dialogic
                 realized[Meta.TYPE] = TypeName();
                 if (this is IAssignable)
                 {
+                    
                     realized[Meta.ACTOR] = Actor().Name();
                 }
             }
@@ -353,14 +354,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// The ASK command is for prompting the user, and is generally followed by 
-    /// one or more OPT commands. If no OPT commands are supplied, then a simple
-    /// Yes/No pair is created. ASK pauses the current chat, after which it waits
-    /// for a ChoiceEvent object to be returned from the application. Based upon
-    /// the ChoiceEvent data (which option was selected), the chat will then go 
-    /// to the next chat specified.
-    /// It accepts free text, optionally followed by metadata, which can be 
-    /// used to control various display parameters.
+    /// The ASK command is for prompting the user, and is generally followed by one or more OPT commands. If no OPT commands are supplied, then a simple Yes/No pair is created. ASK pauses the current chat, after which it waits for a ChoiceEvent object to be returned from the application. Based upon the ChoiceEvent data (which option was selected), the chat will then go to the next chat specified. It accepts free text, optionally followed by metadata, which can be  used to control various display parameters.
     /// </summary>
     public class Ask : Say, ISendable, IAssignable
     {
