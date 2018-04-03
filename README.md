@@ -75,7 +75,7 @@ You look depressed.
 Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
 
 ````
-SAY I'm (very | super | really) glad to ((meet | know) you | make your acquaintance).
+SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 ````
 
 &nbsp;
