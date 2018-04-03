@@ -7,6 +7,34 @@ namespace Dialogic
     class GrammarTests
     {
         [Test]
+        public void SetRules()
+        {
+            string[] lines = {
+                "CHAT WineReview {type=a,stage=b,mode=grammar}",
+                "SET review <desc> <fortune> <ending>",
+                "SET ending <score> | <end-phrase>",
+                "SAY $WineReview.review",
+            };
+            var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
+            var third = chat.commands[2];
+            Assert.That(third, Is.Not.Null);
+            Assert.That(third.GetType(), Is.EqualTo(typeof(Say)));
+            chat.Realize(RealizeTests.globals);
+
+            Assert.That(RealizeTests.globals.ContainsKey("WineReview.review"), Is.True);
+            Assert.That(RealizeTests.globals.ContainsKey("WineReview.ending"), Is.True);
+
+            Say say = (Dialogic.Say)third;
+            Console.WriteLine(chat.ToTree());
+            Console.WriteLine(say.Text(true));
+
+            Assert.That(say.Text(true), Is.EqualTo("<desc> <fortune> <ending>"));
+
+            //CollectionAssert.Contains(new[]{"<score>","<end-phrase>"}, s);
+
+        }
+
+        [Test]
         public void ExpansionRegexOneMatchNoModifiersOneMatch()
         {
             var matches = Grammar.ExpansionRegex.Matches("<colour>");
@@ -85,7 +113,7 @@ namespace Dialogic
         [Test]
         public void ExpandHelloWorldSuccess()
         {
-            
+
             var json = "{" +
                        "    'origin': 'hello world'" +
                        "}";
@@ -98,7 +126,7 @@ namespace Dialogic
         [Test]
         public void ExpandExpandSymbolAnimal()
         {
-            
+
             var json = "{" +
                        "    'origin': 'hello <animal>'," +
                        "    'animal': 'cat'" +
@@ -112,7 +140,7 @@ namespace Dialogic
         [Test]
         public void ExpandCapitalizeFirstLetterCapitalized()
         {
-            
+
             var json = "{" +
                        "    'origin': 'hello <animal.capitalize>'," +
                        "    'animal': 'cat'" +
@@ -168,7 +196,7 @@ namespace Dialogic
         [Test]
         public void ExpandAAnElephant()
         {
-            
+
             var json = "{" +
                        "    'origin': 'you are <animal.a>'," +
                        "    'animal': 'elephant'" +
@@ -182,7 +210,7 @@ namespace Dialogic
         [Test]
         public void ExpandCaptitalizeAACat()
         {
-            
+
             var json = "{" +
                        "    'origin': 'you are <animal.capitalize.a>'," +
                        "    'animal': 'cat'" +
@@ -196,7 +224,7 @@ namespace Dialogic
         [Test]
         public void ExpandACaptitalizeACat()
         {
-            
+
             var json = "{" +
                        "    'origin': 'you are <animal.a.capitalize>'," +
                        "    'animal': 'cat'" +
@@ -210,7 +238,7 @@ namespace Dialogic
         [Test]
         public void ExpandCaptitalizeAllCuteCatCuteCat()
         {
-            
+
             var json = "{" +
                        "    'origin': 'you are a <animal.allCaps>'," +
                        "    'animal': 'cute cat'" +
@@ -224,7 +252,7 @@ namespace Dialogic
         [Test]
         public void ExpandPastTensifyBullyBullied()
         {
-            
+
             var json = "{" +
                        "    'origin': 'you <verb.ed>'," +
                        "    'verb': 'bully'" +
@@ -238,7 +266,7 @@ namespace Dialogic
         [Test]
         public void ExpandPastTensifyQuackQuacked()
         {
-            
+
             var json = "{" +
                        "    'origin': 'you <verb.ed>'," +
                        "    'verb': 'quack'" +
@@ -252,7 +280,7 @@ namespace Dialogic
         [Test]
         public void ExpandPastTensifyCallCalled()
         {
-            
+
             var json = "{" +
                        "    'origin': 'you <verb.ed>?'," +
                        "    'verb': 'call'" +
@@ -266,7 +294,7 @@ namespace Dialogic
         [Test]
         public void CustomModifiersMakeEverythingHelloWorldHelloWorld()
         {
-            
+
             var json = "{" +
                 "    'origin': '<sentence.helloWorld>'," +
                        "    'sentence': 'this sentence is irrelevant'" +
@@ -286,7 +314,7 @@ namespace Dialogic
         [Test]
         public void CustomModifiersSlurringSlurring()
         {
-            
+
             var json = "{" +
                        "    'origin': '<sentence.slur>'," +
                        "    'sentence': 'this is a long sentence ready for slurring'" +
@@ -319,7 +347,7 @@ namespace Dialogic
         [Test]
         public void CustomModifiersToUpperToUpper()
         {
-            
+
             var json = "{" +
                 "    'origin': '<sentence.toUpper>'," +
                        "    'sentence': 'hello cat'" +
@@ -339,7 +367,7 @@ namespace Dialogic
         [Test]
         public void SaveSymbolNoExpansionSymbolSaves()
         {
-            
+
             var json = "{" +
                        "    'origin': '<[hero=Alfred]story>'," +
                        "    'story': 'His name was <hero>.'" +
@@ -353,7 +381,7 @@ namespace Dialogic
         [Test]
         public void SaveSymbolOneExpansionSymbolSaves()
         {
-            
+
             var json = "{" +
                 "    'origin': '<[hero=<name>]story>'," +
                        "    'name': 'Alfred'," +
@@ -368,8 +396,8 @@ namespace Dialogic
         [Test]
         public void SaveSymbolNoExpansionSymbolWithModifierSaves()
         {
-            
-            var json =  "{" +
+
+            var json = "{" +
                         "    'origin': '<[hero=alfred]story>'," +
                         "    'story': 'His name was <hero.capitalize>.'" +
                         "}";

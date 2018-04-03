@@ -105,6 +105,8 @@ namespace Dialogic
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
         public static Regex MetaSplit = new Regex(@"\s*,\s*");
+
+        public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
     }
 
     /// <summary>

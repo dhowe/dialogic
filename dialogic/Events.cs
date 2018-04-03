@@ -73,6 +73,8 @@ namespace Dialogic
     {
         string Text();
         string Type();
+        string Actor();
+
         string Get(string name, string def = null);
         void RemoveKeys(params string[] keys);
         IDictionary<string, object> Data();
@@ -80,7 +82,7 @@ namespace Dialogic
         int GetInt(string name, int def = -1);
         bool GetBool(string key, bool def = false);
         double GetDouble(string key, double def = -1);
-        float GetFloat(string key, float def = -1);
+		float GetFloat(string key, float def = -1);
     }
 
 
@@ -264,14 +266,14 @@ namespace Dialogic
             return (string)data[Meta.TYPE];
         }
 
+        /// <summary>
+        /// Return Actor.name for the event if it is IAssignable, else null.
+        /// </summary>
+        /// <returns>The Actor name.</returns>
         public string Actor()
         {
-            if (!data.ContainsKey(Meta.ACTOR))
-            {
-                var def = Dialogic.Actor.Default;
-                return def != null ? def.Name() : null;
-            }
-            return (string)data[Meta.ACTOR];
+            return data.ContainsKey(Meta.ACTOR) ? 
+                (string)data[Meta.ACTOR] : null;
         }
 
         public string Opts()

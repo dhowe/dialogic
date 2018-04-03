@@ -6,6 +6,9 @@ using Tendar;
 
 namespace runner
 {
+    /// <summary>
+    /// Entry point to run the test program (a mock game engine)
+    /// </summary>
     class Program
     {
         public static void Main(string[] args)
@@ -16,8 +19,13 @@ namespace runner
         public static string srcpath = "../../../dialogic";
     }
 
+    /// <summary>
+    /// A simple fake game engine that calls dialogic's Update function
+    /// 30 times (or so) per second
+    /// </summary>
     public class MockGameEngine
     {
+        /// <summary>Mock game state variables</summary>
         public static Dictionary<string, object> globals =
             new Dictionary<string, object>() {
                 { "emotion", "special" },
@@ -30,10 +38,14 @@ namespace runner
 
         private ChatRuntime dialogic;
         private EventArgs gameEvent;
-        bool interrupted = false;
-        string diaText, diaType;
-        string[] diaOpts;
+        private bool interrupted = false;
+        private string evtText, evtType, evtActor;
+        private string[] diaOpts;
 
+        /// <summary>
+        /// Create an engine from a script file or folder script files
+        /// </summary>
+        /// <param name="fileOrFolder">File or folder.</param>
         public MockGameEngine(string fileOrFolder)
         {
             dialogic = new ChatRuntime(AppConfig.Actors);
@@ -41,6 +53,9 @@ namespace runner
             dialogic.Run("#GScriptTest");
         }
 
+        /// <summary>
+        /// Start the Run loop for the engine
+        /// </summary>
         public void Run()
         {
             // TODO: test suspend/resume on user events
@@ -63,22 +78,27 @@ namespace runner
             }
         }
 
+
+        ////////////////////////////////////////////////////////////////////////   
+
+
+        /// <summary>
+        /// Prints our the various commands with useful debugging info
+        /// </summary>
         private void HandleEvent(ref IUpdateEvent ue)
         {
             interrupted = false;
-            diaText = ue.Text();
-            diaType = ue.Type();
 
-            ue.RemoveKeys(Meta.TEXT, Meta.TYPE);
+            evtText = ue.Text();
+            evtType = ue.Type();
+            evtActor = ue.Actor();
 
-            switch (diaType)
+            ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.ACTOR);
+
+            switch (evtType)
             {
-                //case "Chat":
-                    //diaText = "\nCHAT " + diaText;
-                    //break;
-
                 case "Say":
-                    diaText = diaText + " " + ue.Data().Stringify();
+                    evtText = evtText + " " + ue.Data().Stringify();
                     break;
 
                 case "Ask":
@@ -102,17 +122,17 @@ namespace runner
                         }
                     });
 
-                    diaText = ("(" + (diaType + " " +
+                    evtText = ("(" + (evtType + " " +
                         ue.Data().Stringify()).Trim() + ")");
                     break;
 
                 default:
-                    diaText = ("(" + diaType + ": " + (diaText + " "
+                    evtText = ("(" + evtType + ": " + (evtText + " "
                         + ue.Data().Stringify()).Trim() + ")");
                     break;
             }
 
-            Console.WriteLine(diaText);
+            Console.WriteLine(evtText);
 
             ue = null;  // dispose event 
         }
@@ -124,12 +144,12 @@ namespace runner
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
 
             // add any meta tags
-            diaText = diaText + " " + ue.Data().Stringify();
+            evtText = evtText + " " + ue.Data().Stringify();
 
             // add the options
             for (int i = 0; i < diaOpts.Length; i++)
             {
-                diaText += "\n  (" + i + ") " + diaOpts[i];
+                evtText += "\n  (" + i + ") " + diaOpts[i];
             }
         }
 

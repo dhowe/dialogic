@@ -8,11 +8,11 @@ namespace Dialogic
     public class RealizeTests
     {
         public static IDictionary<string, object> globals = new Dictionary<string, object>() {
-                { "animal", "dog" },
-                { "prep", "then" },
-                { "group", "(a|b)" },
-                { "cmplx", "($group | $prep)" },
-                { "count", 4 }
+            { "animal", "dog" },
+            { "prep", "then" },
+            { "group", "(a|b)" },
+            { "cmplx", "($group | $prep)" },
+            { "count", 4 }
         };
 
         [Test]

@@ -100,9 +100,10 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        public override void Realize(IDictionary<string, object> globals)
+        protected internal override void Realize(IDictionary<string, object> globals)
         {
-            throw new DialogicException("Chats should not be Realized");
+            Console.WriteLine("[WARN] Chats should not be realized, doing commands");
+            commands.ForEach(c => c.Realize(globals));
         }
 
         ///  All Chats must have a valid unique label, and a staleness value
@@ -118,9 +119,9 @@ namespace Dialogic
             return this;
         }
 
-        public override void Init(string text, string label, string[] metas)
+        protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            this.text = text;
+            this.text = txt;
             ParseMeta(metas);
             //Validate();
             //Console.WriteLine("Chat #"+text +" "+realized.Stringify());

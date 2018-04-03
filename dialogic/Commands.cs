@@ -43,17 +43,17 @@ namespace Dialogic
             return this;
         }
 
-        internal static Command Create(Type type, string text, string label, string[] metas)
+        internal static Command Create(Type type, string txt, string lbl, string[] metas)
         {
             //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+metas.Stringify());
             Command cmd = (Command)Activator.CreateInstance(type);
-            cmd.Init(text, label, metas);
+            cmd.Init(txt, lbl, metas);
             return cmd;
         }
 
-        public virtual void Init(string text, string label, string[] metas)
+        protected internal virtual void Init(string txt, string lbl, string[] metas)
         {
-            this.text = text.Length > 0 ? text : label;
+            this.text = txt.Length > 0 ? txt : lbl;
             ParseMeta(metas);
             //HandleMetaTiming();
             //Validate();
@@ -77,13 +77,13 @@ namespace Dialogic
             return actor;
         }
 
-        public Command Actor(IActor actor)
+        protected internal Command Actor(IActor actor)
         {
             this.actor = actor;
             return this;
         }
 
-        public Command Actor(ChatRuntime rt, string actorName)
+        protected internal Command Actor(ChatRuntime rt, string actorName)
         {
             return Actor(rt.FindActorByName(actorName));
         }
@@ -97,12 +97,12 @@ namespace Dialogic
             return this;
         }
 
-        public virtual string TypeName()
+        protected internal virtual string TypeName()
         {
             return this.GetType().Name;
         }
 
-        public virtual void Realize(IDictionary<string, object> globals)
+        protected internal virtual void Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
 
@@ -195,7 +195,7 @@ namespace Dialogic
             return this;
         }
 
-        public override void Realize(IDictionary<string, object> globals)
+        protected internal override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Recombine(globals);
@@ -260,7 +260,7 @@ namespace Dialogic
     {
         public Grammar grammar;
 
-        public override void Init(string text, string label, string[] metas)
+        protected internal override void Init(string txt, string lbl, string[] metas)
         {
             //Console.WriteLine("Gram.init: " + Util.Stringify(meta)+"\n"+String.Join("\n", meta));
             grammar = new Grammar(String.Join("\n", metas));
@@ -288,52 +288,71 @@ namespace Dialogic
 
     public class Set : Command // TODO: rethink
     {
-        public string Value;
+        public string value;
 
         public Set() : base() { }
 
         internal Set(string name, string value) : base() // tests only
         {
             this.text = name;
-            this.Value = value;
+            this.value = value;
+            this.realized = null; // not used
         }
 
-        public override void Init(string text, string label, string[] metas)
+        protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            string[] parts = ParseSetArgs(text);
+            string[] parts = ParseSetArgs(txt);
             this.text = parts[0];
-            this.Value = parts[1];
+
+            var val = parts[1];
+            Console.WriteLine("CHECKING: "+val);
+            MatchCollection matches = RE.GrammarRules.Matches(val);
+            if (matches.Count > 0) {
+                
+            }
+            Console.WriteLine("GOT: " + matches.Count);
+            Util.ShowMatches(matches);
+            value = val;
+            //if (match.Groups.Count != 4) throw new ParseException
+                //("Invalid query: '" + val + "'");
         }
 
-        private string[] ParseSetArgs(string s)
+        protected internal override void Realize(IDictionary<string, object> globals)
+        {
+            //String result = Regex.Replace(htmlDocument, @"<[^>]*>", String.Empty);
+
+            string key = globals.ContainsKey(text) ? text : parent.text + "." + text;
+            globals[key] = Realizer.DoVars(value, globals);
+        }
+
+        protected string[] ParseSetArgs(string s)
         {
             if (s.Length < 1) throw BadArg("ParseSetArgs");
 
-            var pair = Regex.Split(s, @"\s*=\s*"); // TODO: compile
-            if (pair.Length != 2) pair = Regex.Split(s, @"\s+");
+            string[] pair = s.Split(new[] { ' ' }, 2);
 
-            if (pair.Length != 2) throw BadArg("SET requires NAME and VALUE");
+            if (pair.Length != 2) throw BadArg
+                ("SET requires NAME and VALUE [" + pair.Length + "]");
 
-            if (pair[0].StartsWith("$", StringComparison.Ordinal))
-            {
-                pair[0] = pair[0].Substring(1); // tmp: leading $ is optional
-            }
+            //Console.WriteLine("'" + pair[0] + "' '" + pair[1]  + "'");
+
+            Util.TrimFirst(ref pair[0], '$'); // tmp: leading $ is optional}
 
             return pair;
         }
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + " $" + text + '=' + Value;
+            return TypeName().ToUpper() + ' ' + text + ' ' + value;
         }
     }
 
     public class Wait : Command, ISendable
     {
-        public override void Init(string text, string label, string[] metas)
+        protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            base.Init(text, label, metas);
-            delay = text.Length == 0 ? DefaultDuration() : Convert.ToDouble(text);
+            base.Init(txt, lbl, metas);
+            delay = txt.Length == 0 ? DefaultDuration() : Convert.ToDouble(txt);
         }
 
         protected virtual double DefaultDuration()
@@ -378,7 +397,7 @@ namespace Dialogic
             return options;
         }
 
-        public string JoinOptions(string delim = "\n")
+        protected internal string JoinOptions(string delim = "\n")
         {
             var s = String.Empty;
             var opts = Options();
@@ -395,20 +414,20 @@ namespace Dialogic
             return Options()[selectedIdx];
         }
 
-        public Opt Selected(int i)
+        protected internal Opt Selected(int i)
         {
             this.selectedIdx = i;
             if (i >= 0 && i < options.Count) return Selected();
             return null;
         }
 
-        public void AddOption(Opt o)
+        protected internal void AddOption(Opt o)
         {
             options.Add(o);
         }
 
         // Call Realize() on text and options, then add both to realized
-        public override void Realize(IDictionary<string, object> globals)
+        protected internal override void Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Options().ForEach(o => o.Realize(globals));
@@ -436,17 +455,17 @@ namespace Dialogic
             this.action = action;
         }
 
-        public override void Init(string text, string label, string[] metas)
+        protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            this.text = text;
+            this.text = txt;
 
-            if (label.Length > 0 && !label.StartsWith(Util.LABEL_IDENT, Util.IC))
+            if (lbl.Length > 0 && !lbl.StartsWith(Util.LABEL_IDENT, Util.IC))
             {
                 throw BadArg("OPT requires a literal #Label");
             }
 
-            this.action = label.Length > 0 ?
-                Command.Create(typeof(Go), String.Empty, label, metas) : NOP;
+            this.action = lbl.Length > 0 ?
+                Command.Create(typeof(Go), String.Empty, lbl, metas) : NOP;
 
             //Validate();
         }
@@ -480,14 +499,14 @@ namespace Dialogic
             return this;
         }
 
-        public override void Init(string text, string label, string[] metas)
+        protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            if (!text.IsNullOrEmpty()) throw new DialogicException
+            if (!txt.IsNullOrEmpty()) throw new DialogicException
                 ("FIND does not accept text, only metadata");
             ParseMeta(metas);
         }
 
-        public override void Realize(IDictionary<string, object> globals)
+        protected internal override void Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
             RealizeMeta(globals); // only realized meta
@@ -563,9 +582,9 @@ namespace Dialogic
 
     public class Go : Find
     {
-        public override void Init(string text, string label, string[] metas)
+        protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            this.text = text.Length > 0 ? text : label;
+            this.text = txt.Length > 0 ? txt : lbl;
             //Validate();
         }
 

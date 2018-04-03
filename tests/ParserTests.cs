@@ -19,7 +19,96 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestDynamicAssign()
+        public void SetLocals()
+        {
+            var chat = ChatParser.ParseText("CHAT c1\nSET a 4", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Set set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text,Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("4"));
+            set.Realize(RealizeTests.globals);
+            object outv = null;
+            RealizeTests.globals.TryGetValue("a", out outv);
+            Assert.That(outv, Is.Null);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET a the white dog", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("the white dog"));
+            set.Realize(RealizeTests.globals);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("the white dog"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET a the white dog\nSET a 4", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("the white dog"));
+            set = (Dialogic.Set)chat.commands[1];
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("4"));
+            set.Realize(RealizeTests.globals);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET $a 4", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("4"));
+            set.Realize(RealizeTests.globals);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET $a the white dog", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("the white dog"));
+            set.Realize(RealizeTests.globals);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("the white dog"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET $a the white dog\nSET $a 4", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("the white dog"));
+            set = (Dialogic.Set)chat.commands[1];
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("4"));
+            set.Realize(RealizeTests.globals);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+        }
+
+        [Test]
+        public void SetGlobals()
+        {
+            Assert.That(RealizeTests.globals["animal"], Is.EqualTo("dog"));
+            var chat = ChatParser.ParseText("CHAT c1\nSET animal cat", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            var set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("animal"));
+            Assert.That(set.value, Is.EqualTo("cat"));
+
+
+            set.Realize(RealizeTests.globals);
+            object outv = null;
+            RealizeTests.globals.TryGetValue("c1.animal", out outv);
+            Assert.That(outv, Is.Null);
+            Assert.That(RealizeTests.globals["animal"], Is.EqualTo("cat"));
+
+            RealizeTests.globals["animal"] = "dog";
+            Assert.That(RealizeTests.globals["animal"], Is.EqualTo("dog"));
+        }
+
+        [Test]
+        public void DynamicAssign()
         {
             var chat = ChatParser.ParseText("SAY ok { type = a,stage = b}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
@@ -87,7 +176,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestChatMeta()
+        public void ChatMeta()
         {
             Chat chat;
 
@@ -129,7 +218,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestChatStaleness()
+        public void ChatStaleness()
         {
             List<Chat> chats;
             ChatRuntime rt;
@@ -170,7 +259,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestAssignActors()
+        public void AssignActors()
         {
             List<Chat> chats;
 
@@ -216,7 +305,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestPrompts()
+        public void Prompts()
         {
             List<Chat> chats = ChatParser.ParseText("ASK Want a game?\nOPT Y #Game\n\nOPT N #End");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -237,7 +326,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestStripComments()
+        public void StripComments()
         {
             string[] lines = {
                 "CHAT c1",
@@ -285,7 +374,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestParseComments()
+        public void ParseComments()
         {
             var txt = "SAY Thank you/*\nSAY Hello //And Goodbye*/";
             var res = ChatParser.StripComments(txt);
@@ -345,7 +434,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindSoft()
+        public void FindSoft()
         {
             List<Chat> chats;
 
@@ -383,7 +472,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindSoftDynVar()
+        public void FindSoftDynVar()
         {
             List<Chat> chats;
 
@@ -406,7 +495,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindSoftDynGroup()
+        public void FindSoftDynGroup()
         {
             // "FIND {a*=(hot|cool)}" in regex, means hot OR cool, no subs
             var chats = ChatParser.ParseText("FIND {a*=(hot|cool)}");
@@ -429,7 +518,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindHard()
+        public void FindHard()
         {
             List<Chat> chats;
 
@@ -467,7 +556,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestWaitCommand()
+        public void WaitCommand()
         {
             List<Chat> chats;
 
@@ -485,7 +574,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestValidators()
+        public void Validators()
         {
             List<Chat> chats;
             chats = ChatParser.ParseText("CHAT c1 {type=a,stage=b}\nSAY Hello");
@@ -497,7 +586,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestToScript()
+        public void ToScript()
         {
             string[] tests = {
 
@@ -535,8 +624,8 @@ namespace Dialogic
             Assert.That(ChatParser.ParseText(s)[0].commands[0].ToString(), Is.EqualTo(s));
             Assert.That(ChatParser.ParseText("DO hay")[0].commands[0].ToString(), Is.EqualTo(s));
 
-            //s = "SET a 4";
-            //Assert.That(ChatParser.ParseText((s)[0].commands[0].ToString(), Is.EqualTo(s));
+            s = "SET a 4";
+            Assert.That(ChatParser.ParseText(s)[0].commands[0].ToString(), Is.EqualTo(s));
 
             s = "ASK hay is for horses?\nOPT Yes? #Yes\nOPT No? #No";
             var exp = s.Replace("\n", "\n  ").Split('\n');
@@ -550,7 +639,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestCommands()
+        public void Commands()
         {
             List<Chat> chats;
 
@@ -731,7 +820,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestSimpleCommands()
+        public void SimpleCommands()
         {
             string[] lines = {
                 "DO #Twirl", "DO #Twirl {speed= fast}", "SAY Thank you", "WAIT", "WAIT .5",  "WAIT .5 {a=b}",
@@ -747,7 +836,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestGrammars()
+        public void Grammars()
         {
             List<Chat> chats = ChatParser.ParseText("GRAM { start: 'The <item>', item: cat }");
             Command gram = chats[0].commands[0];
@@ -759,7 +848,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestChats()
+        public void ChatParsing()
         {
             List<Chat> chats = ChatParser.ParseText("CHAT c1 {type=a,stage=b}");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -777,7 +866,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestExceptions()
+        public void Exceptions()
         {
             //var ff = "FIND {a b=e}";
             //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].ToTree());
