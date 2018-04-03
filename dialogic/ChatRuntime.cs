@@ -95,6 +95,16 @@ namespace Dialogic
             //chats.ForEach(c => Console.WriteLine(c.ToTree()));
         }
 
+        /// <summary>
+        /// Returns the current context for the runtime, consisting of its current
+        /// state, the current Chat, and the offset until the next scheduled event
+        /// </summary>
+        /// <returns>The context.</returns>
+        public RuntimeContext CurrentContext()
+        {
+            return RuntimeContext.Update(scheduler);
+        }
+
         public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
         {
             return ge != null ? appEvents.OnEvent(ref ge, globals) : chatEvents.OnEvent(globals);
@@ -125,6 +135,8 @@ namespace Dialogic
             Util.ValidateLabel(ref name);
             return actors.FirstOrDefault(c => c.Name() == name);
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         internal List<Func<Command, bool>> Validators()
         {
@@ -162,7 +174,7 @@ namespace Dialogic
 
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            scheduler.Completed(false); // finish current on a FIND command
+            scheduler.Completed(false); // Consider current chat finished on a FIND cmd
 
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
@@ -270,6 +282,47 @@ namespace Dialogic
             return ic;
         }
 
+    }
+
+    /// States:
+    ///   Running:        chat != null, net > -1 -> running Chat commands
+    ///   Suspended:      chat != null, net = -1 -> waiting (either on a Wait or Prompt)
+    ///   Waiting:        chat  = null, net = -1 -> waiting (on a SuspendEvent, or all Chats done)
+    public enum RuntimeState { Running, Suspended, Waiting };
+
+    public class RuntimeContext
+    {
+        private static RuntimeContext instance;
+
+        public RuntimeState State  { get; protected set; }
+		public int NextEventTime { get; protected set; }
+        public Chat Chat { get; protected set; }
+
+        private RuntimeContext() { }
+
+        internal static RuntimeContext Update(ChatScheduler sc)
+        {
+            if (instance == null) instance = new RuntimeContext();
+
+            instance.Chat = sc.chat;
+            instance.NextEventTime = sc.nextEventTime;
+            instance.State = GetState(sc.chat, sc.nextEventTime);
+
+            return instance;
+        }
+
+        private static RuntimeState GetState(Chat chat, int nextEventTime)
+        {
+            RuntimeState state = RuntimeState.Waiting;
+            if (chat != null) state = nextEventTime > -1 ?
+                RuntimeState.Running : RuntimeState.Suspended;
+            return state;
+        }
+
+        public override string ToString()
+        {
+            return "{ state: " + State + ", chat:" + Chat + ", nextEventMs: " + NextEventTime + " }";
+        }
     }
 
     internal class ChatScheduler

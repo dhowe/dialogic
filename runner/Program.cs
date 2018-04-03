@@ -60,6 +60,8 @@ namespace runner
                 Thread.Sleep(30);
                 IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
                 if (ue != null) HandleEvent(ref ue);
+                var rtc = dialogic.CurrentContext();
+                Console.WriteLine(rtc.State);
             }
         }
 
