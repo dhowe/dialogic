@@ -82,84 +82,626 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a4a39505c5e8ba50582c0625868048b96"><td class="memItemLeft" align="right" valign="top"><a id="a4a39505c5e8ba50582c0625868048b96"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>SecStrToMs</b> (string s, int defaultMs=-1)</td></tr>
-<tr class="separator:a4a39505c5e8ba50582c0625868048b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af42c1e8d4ec6a3212928838323e4459e"><td class="memItemLeft" align="right" valign="top"><a id="af42c1e8d4ec6a3212928838323e4459e"></a>
-static string&#160;</td><td class="memItemRight" valign="bottom"><b>ToMixedCase</b> (string s)</td></tr>
-<tr class="separator:af42c1e8d4ec6a3212928838323e4459e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e5f3d8cb8f75c12eabda88e087760ff"><td class="memItemLeft" align="right" valign="top"><a id="a7e5f3d8cb8f75c12eabda88e087760ff"></a>
-static double&#160;</td><td class="memItemRight" valign="bottom"><b>Map</b> (double n, double start1, double stop1, double start2, double stop2)</td></tr>
-<tr class="separator:a7e5f3d8cb8f75c12eabda88e087760ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62bf6e95d663b41267ba58f4e2176dad"><td class="memItemLeft" align="right" valign="top"><a id="a62bf6e95d663b41267ba58f4e2176dad"></a>
-static double&#160;</td><td class="memItemRight" valign="bottom"><b>Constrain</b> (double n, double low, double high)</td></tr>
+<tr class="memitem:a62bf6e95d663b41267ba58f4e2176dad"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a62bf6e95d663b41267ba58f4e2176dad">Constrain</a> (double n, double low, double high)</td></tr>
+<tr class="memdesc:a62bf6e95d663b41267ba58f4e2176dad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constrains the specified number to the range specified by low and high.  <a href="#a62bf6e95d663b41267ba58f4e2176dad">More...</a><br /></td></tr>
 <tr class="separator:a62bf6e95d663b41267ba58f4e2176dad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad26c864be4ade63717dc822d7d93aae7"><td class="memItemLeft" align="right" valign="top"><a id="ad26c864be4ade63717dc822d7d93aae7"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>Millis</b> ()</td></tr>
+<tr class="memitem:a0d6ff682b0a8b29f08e477b462e15c92"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a0d6ff682b0a8b29f08e477b462e15c92">Map</a> (double n, double min, double max, double targetMin, double targetMax)</td></tr>
+<tr class="memdesc:a0d6ff682b0a8b29f08e477b462e15c92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps a number from one range to another.  <a href="#a0d6ff682b0a8b29f08e477b462e15c92">More...</a><br /></td></tr>
+<tr class="separator:a0d6ff682b0a8b29f08e477b462e15c92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad32881d5b54aa70a4bb52c53475ecf02"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#ad32881d5b54aa70a4bb52c53475ecf02">FloatingEquals</a> (double a, double b, double epsilon=0.00001f)</td></tr>
+<tr class="memdesc:ad32881d5b54aa70a4bb52c53475ecf02"><td class="mdescLeft">&#160;</td><td class="mdescRight">A version of Equals for floating point comparison  <a href="#ad32881d5b54aa70a4bb52c53475ecf02">More...</a><br /></td></tr>
+<tr class="separator:ad32881d5b54aa70a4bb52c53475ecf02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad26c864be4ade63717dc822d7d93aae7"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#ad26c864be4ade63717dc822d7d93aae7">Millis</a> ()</td></tr>
+<tr class="memdesc:ad26c864be4ade63717dc822d7d93aae7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of milliseconds elapsed since the start of the program  <a href="#ad26c864be4ade63717dc822d7d93aae7">More...</a><br /></td></tr>
 <tr class="separator:ad26c864be4ade63717dc822d7d93aae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada380e5d3eef7d8d7412d38f504458eb"><td class="memItemLeft" align="right" valign="top"><a id="ada380e5d3eef7d8d7412d38f504458eb"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>Millis</b> (int since)</td></tr>
+<tr class="memitem:ada380e5d3eef7d8d7412d38f504458eb"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#ada380e5d3eef7d8d7412d38f504458eb">Millis</a> (int since)</td></tr>
+<tr class="memdesc:ada380e5d3eef7d8d7412d38f504458eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of milliseconds elapsed since the specified timestamp  <a href="#ada380e5d3eef7d8d7412d38f504458eb">More...</a><br /></td></tr>
 <tr class="separator:ada380e5d3eef7d8d7412d38f504458eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9caeba26563fcac97460d2116db8423a"><td class="memItemLeft" align="right" valign="top"><a id="a9caeba26563fcac97460d2116db8423a"></a>
-static string&#160;</td><td class="memItemRight" valign="bottom"><b>ElapsedSec</b> (int since=0)</td></tr>
+<tr class="memitem:a9caeba26563fcac97460d2116db8423a"><td class="memItemLeft" align="right" valign="top">static string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a9caeba26563fcac97460d2116db8423a">ElapsedSec</a> (int since=0)</td></tr>
+<tr class="memdesc:a9caeba26563fcac97460d2116db8423a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of seconds elapsed since the specified timestamp, or start of the program if not supplied  <a href="#a9caeba26563fcac97460d2116db8423a">More...</a><br /></td></tr>
 <tr class="separator:a9caeba26563fcac97460d2116db8423a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab26f819067b642f2da46367af7580caf"><td class="memItemLeft" align="right" valign="top"><a id="ab26f819067b642f2da46367af7580caf"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>EpochMs</b> ()</td></tr>
+<tr class="memitem:ab26f819067b642f2da46367af7580caf"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#ab26f819067b642f2da46367af7580caf">EpochMs</a> ()</td></tr>
+<tr class="memdesc:ab26f819067b642f2da46367af7580caf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of milliseconds elapsed since epoch start  <a href="#ab26f819067b642f2da46367af7580caf">More...</a><br /></td></tr>
 <tr class="separator:ab26f819067b642f2da46367af7580caf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c0a2e7c745e6402a6e96c60cb8f19d8"><td class="memItemLeft" align="right" valign="top"><a id="a1c0a2e7c745e6402a6e96c60cb8f19d8"></a>
-static double&#160;</td><td class="memItemRight" valign="bottom"><b>Rand</b> ()</td></tr>
-<tr class="separator:a1c0a2e7c745e6402a6e96c60cb8f19d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3756e2bdfb7c38ef9ff07b457bffc51"><td class="memItemLeft" align="right" valign="top"><a id="ad3756e2bdfb7c38ef9ff07b457bffc51"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>Rand</b> (int min, int max)</td></tr>
-<tr class="separator:ad3756e2bdfb7c38ef9ff07b457bffc51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf9f7bb3991f2de627e30cf6567f4daf"><td class="memItemLeft" align="right" valign="top"><a id="aaf9f7bb3991f2de627e30cf6567f4daf"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>ShowMatches</b> (MatchCollection matches)</td></tr>
-<tr class="separator:aaf9f7bb3991f2de627e30cf6567f4daf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a6064586bea5ae30ea91e6143e46d3c"><td class="memItemLeft" align="right" valign="top"><a id="a1a6064586bea5ae30ea91e6143e46d3c"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>ShowMatch</b> (Match match, int i=0)</td></tr>
-<tr class="separator:a1a6064586bea5ae30ea91e6143e46d3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa616e37687406132dc2f97aec4688601"><td class="memItemLeft" align="right" valign="top"><a id="aa616e37687406132dc2f97aec4688601"></a>
-static object&#160;</td><td class="memItemRight" valign="bottom"><b>RandItem</b> (object[] arr)</td></tr>
+<tr class="memitem:aa616e37687406132dc2f97aec4688601"><td class="memItemLeft" align="right" valign="top">static object&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#aa616e37687406132dc2f97aec4688601">RandItem</a> (object[] arr)</td></tr>
+<tr class="memdesc:aa616e37687406132dc2f97aec4688601"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a random item from the array  <a href="#aa616e37687406132dc2f97aec4688601">More...</a><br /></td></tr>
 <tr class="separator:aa616e37687406132dc2f97aec4688601"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1277b5761b1ede721df5bba06e7f8a4e"><td class="memItemLeft" align="right" valign="top"><a id="a1277b5761b1ede721df5bba06e7f8a4e"></a>
-static T&#160;</td><td class="memItemRight" valign="bottom"><b>RandItem&lt; T &gt;</b> (List&lt; T &gt; l)</td></tr>
+<tr class="memitem:a1277b5761b1ede721df5bba06e7f8a4e"><td class="memItemLeft" align="right" valign="top">static T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a1277b5761b1ede721df5bba06e7f8a4e">RandItem&lt; T &gt;</a> (List&lt; T &gt; l)</td></tr>
+<tr class="memdesc:a1277b5761b1ede721df5bba06e7f8a4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a random item from the List  <a href="#a1277b5761b1ede721df5bba06e7f8a4e">More...</a><br /></td></tr>
 <tr class="separator:a1277b5761b1ede721df5bba06e7f8a4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62bf750a02349fb1ee11cc4d6ceecbdc"><td class="memItemLeft" align="right" valign="top"><a id="a62bf750a02349fb1ee11cc4d6ceecbdc"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>Rand</b> (int max)</td></tr>
+<tr class="memitem:ad3756e2bdfb7c38ef9ff07b457bffc51"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#ad3756e2bdfb7c38ef9ff07b457bffc51">Rand</a> (int min, int max)</td></tr>
+<tr class="memdesc:ad3756e2bdfb7c38ef9ff07b457bffc51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a random int i, where min &le; i &gt; max  <a href="#ad3756e2bdfb7c38ef9ff07b457bffc51">More...</a><br /></td></tr>
+<tr class="separator:ad3756e2bdfb7c38ef9ff07b457bffc51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62bf750a02349fb1ee11cc4d6ceecbdc"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a62bf750a02349fb1ee11cc4d6ceecbdc">Rand</a> (int max)</td></tr>
+<tr class="memdesc:a62bf750a02349fb1ee11cc4d6ceecbdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a random int i, where 0 &le; i &gt; max  <a href="#a62bf750a02349fb1ee11cc4d6ceecbdc">More...</a><br /></td></tr>
 <tr class="separator:a62bf750a02349fb1ee11cc4d6ceecbdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa89b14917300ac1b97cdc0a6d5d6034a"><td class="memItemLeft" align="right" valign="top"><a id="aa89b14917300ac1b97cdc0a6d5d6034a"></a>
-static double&#160;</td><td class="memItemRight" valign="bottom"><b>Rand</b> (double min, double max)</td></tr>
+<tr class="memitem:a1c0a2e7c745e6402a6e96c60cb8f19d8"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a1c0a2e7c745e6402a6e96c60cb8f19d8">Rand</a> ()</td></tr>
+<tr class="memdesc:a1c0a2e7c745e6402a6e96c60cb8f19d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a random double d, where 0 &le; d &gt; 1  <a href="#a1c0a2e7c745e6402a6e96c60cb8f19d8">More...</a><br /></td></tr>
+<tr class="separator:a1c0a2e7c745e6402a6e96c60cb8f19d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa89b14917300ac1b97cdc0a6d5d6034a"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#aa89b14917300ac1b97cdc0a6d5d6034a">Rand</a> (double min, double max)</td></tr>
+<tr class="memdesc:aa89b14917300ac1b97cdc0a6d5d6034a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a random double d, where min &le; d &gt; max  <a href="#aa89b14917300ac1b97cdc0a6d5d6034a">More...</a><br /></td></tr>
 <tr class="separator:aa89b14917300ac1b97cdc0a6d5d6034a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af1b90cd8b59890294d13deba2a1010b1"><td class="memItemLeft" align="right" valign="top"><a id="af1b90cd8b59890294d13deba2a1010b1"></a>
-static double&#160;</td><td class="memItemRight" valign="bottom"><b>Rand</b> (double max)</td></tr>
+<tr class="memitem:af1b90cd8b59890294d13deba2a1010b1"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#af1b90cd8b59890294d13deba2a1010b1">Rand</a> (double max)</td></tr>
+<tr class="memdesc:af1b90cd8b59890294d13deba2a1010b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a random double d, where 0 &le; d &gt; max  <a href="#af1b90cd8b59890294d13deba2a1010b1">More...</a><br /></td></tr>
 <tr class="separator:af1b90cd8b59890294d13deba2a1010b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b3d0ab202474b5d55aa156f20cca1a5"><td class="memItemLeft" align="right" valign="top"><a id="a7b3d0ab202474b5d55aa156f20cca1a5"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>Log</b> (string logFileName, object msg)</td></tr>
-<tr class="separator:a7b3d0ab202474b5d55aa156f20cca1a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ac88afbf36c39f0d6b9516b4dcb39b2"><td class="memItemLeft" align="right" valign="top"><a id="a0ac88afbf36c39f0d6b9516b4dcb39b2"></a>
-static IEnumerable&lt; string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>SortByLength</b> (IEnumerable&lt; string &gt; e)</td></tr>
-<tr class="separator:a0ac88afbf36c39f0d6b9516b4dcb39b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37840bebacbbc886a2f8aa4e61022aec"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a37840bebacbbc886a2f8aa4e61022aec">ToMillis</a> (double seconds)</td></tr>
+<tr class="memdesc:a37840bebacbbc886a2f8aa4e61022aec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts seconds to milliseconds if seconds is &gt;= 0, else returns -1  <a href="#a37840bebacbbc886a2f8aa4e61022aec">More...</a><br /></td></tr>
 <tr class="separator:a37840bebacbbc886a2f8aa4e61022aec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a751f2c3ec959c4d67e13c388f04f0642"><td class="memItemLeft" align="right" valign="top"><a id="a751f2c3ec959c4d67e13c388f04f0642"></a>
-static double&#160;</td><td class="memItemRight" valign="bottom"><b>ToSec</b> (int millis)</td></tr>
+<tr class="memitem:a751f2c3ec959c4d67e13c388f04f0642"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a751f2c3ec959c4d67e13c388f04f0642">ToSec</a> (int millis)</td></tr>
+<tr class="memdesc:a751f2c3ec959c4d67e13c388f04f0642"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts milliseconds to seconds  <a href="#a751f2c3ec959c4d67e13c388f04f0642">More...</a><br /></td></tr>
 <tr class="separator:a751f2c3ec959c4d67e13c388f04f0642"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d7be3f803ce0f2807d3a72590f16191"><td class="memItemLeft" align="right" valign="top"><a id="a6d7be3f803ce0f2807d3a72590f16191"></a>
-static bool&#160;</td><td class="memItemRight" valign="bottom"><b>TrimFirst</b> (ref string s, char c)</td></tr>
+<tr class="memitem:a6d7be3f803ce0f2807d3a72590f16191"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a6d7be3f803ce0f2807d3a72590f16191">TrimFirst</a> (ref string s, char c)</td></tr>
+<tr class="memdesc:a6d7be3f803ce0f2807d3a72590f16191"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trim the specified character if the string starts with it  <a href="#a6d7be3f803ce0f2807d3a72590f16191">More...</a><br /></td></tr>
 <tr class="separator:a6d7be3f803ce0f2807d3a72590f16191"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
+<tr class="memitem:a5c8173f207bc0b89a87088a16fbb405e"><td class="memItemLeft" align="right" valign="top"><a id="a5c8173f207bc0b89a87088a16fbb405e"></a>
+static double&#160;</td><td class="memItemRight" valign="bottom"><b>INFINITE</b> = -1</td></tr>
+<tr class="separator:a5c8173f207bc0b89a87088a16fbb405e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa909bdf34f86b0090a4f2e7a7f2056f6"><td class="memItemLeft" align="right" valign="top"><a id="aa909bdf34f86b0090a4f2e7a7f2056f6"></a>
 static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC</b> = StringComparison.InvariantCulture</td></tr>
 <tr class="separator:aa909bdf34f86b0090a4f2e7a7f2056f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a503f819b18acbfc74293d314995d2403"><td class="memItemLeft" align="right" valign="top"><a id="a503f819b18acbfc74293d314995d2403"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>INFINITE</b> = -1</td></tr>
-<tr class="separator:a503f819b18acbfc74293d314995d2403"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Static utility functions for <a class="el" href="namespace_dialogic.html">Dialogic</a> </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a62bf6e95d663b41267ba58f4e2176dad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62bf6e95d663b41267ba58f4e2176dad">&#9670;&nbsp;</a></span>Constrain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.Constrain </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>low</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>high</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constrains the specified number to the range specified by low and high. </p>
+<dl class="section return"><dt>Returns</dt><dd>The constrained number</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>N.</td></tr>
+    <tr><td class="paramname">low</td><td>Low.</td></tr>
+    <tr><td class="paramname">high</td><td>High.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9caeba26563fcac97460d2116db8423a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9caeba26563fcac97460d2116db8423a">&#9670;&nbsp;</a></span>ElapsedSec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static string Dialogic.Util.ElapsedSec </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>since</em> = <code>0</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the number of seconds elapsed since the specified timestamp, or start of the program if not supplied </p>
+<dl class="section return"><dt>Returns</dt><dd>The seconds</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">since</td><td>Since.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab26f819067b642f2da46367af7580caf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab26f819067b642f2da46367af7580caf">&#9670;&nbsp;</a></span>EpochMs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int Dialogic.Util.EpochMs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the number of milliseconds elapsed since epoch start </p>
+<dl class="section return"><dt>Returns</dt><dd>The milliseconds</dd></dl>
+
+</div>
+</div>
+<a id="ad32881d5b54aa70a4bb52c53475ecf02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad32881d5b54aa70a4bb52c53475ecf02">&#9670;&nbsp;</a></span>FloatingEquals()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool Dialogic.Util.FloatingEquals </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>epsilon</em> = <code>0.00001f</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A version of Equals for floating point comparison </p>
+
+</div>
+</div>
+<a id="a0d6ff682b0a8b29f08e477b462e15c92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d6ff682b0a8b29f08e477b462e15c92">&#9670;&nbsp;</a></span>Map()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.Map </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>targetMin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>targetMax</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maps a number from one range to another. </p>
+<dl class="section return"><dt>Returns</dt><dd>The map.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>the incoming value to be converted</td></tr>
+    <tr><td class="paramname">min</td><td>lower bound of the value's current range</td></tr>
+    <tr><td class="paramname">max</td><td>upper bound of the value's current range</td></tr>
+    <tr><td class="paramname">targetMin</td><td>lower bound of the value's target range</td></tr>
+    <tr><td class="paramname">targetMax</td><td>upper bound of the value's target range</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad26c864be4ade63717dc822d7d93aae7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad26c864be4ade63717dc822d7d93aae7">&#9670;&nbsp;</a></span>Millis() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int Dialogic.Util.Millis </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the number of milliseconds elapsed since the start of the program </p>
+<dl class="section return"><dt>Returns</dt><dd>The milliseconds.</dd></dl>
+
+</div>
+</div>
+<a id="ada380e5d3eef7d8d7412d38f504458eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada380e5d3eef7d8d7412d38f504458eb">&#9670;&nbsp;</a></span>Millis() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int Dialogic.Util.Millis </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>since</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the number of milliseconds elapsed since the specified timestamp </p>
+<dl class="section return"><dt>Returns</dt><dd>The milliseconds.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">since</td><td>Since.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad3756e2bdfb7c38ef9ff07b457bffc51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3756e2bdfb7c38ef9ff07b457bffc51">&#9670;&nbsp;</a></span>Rand() <span class="overload">[1/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int Dialogic.Util.Rand </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a random int i, where min &le; i &gt; max </p>
+<dl class="section return"><dt>Returns</dt><dd>The rand.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">min</td><td>Minimum.</td></tr>
+    <tr><td class="paramname">max</td><td>Max.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a62bf750a02349fb1ee11cc4d6ceecbdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62bf750a02349fb1ee11cc4d6ceecbdc">&#9670;&nbsp;</a></span>Rand() <span class="overload">[2/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int Dialogic.Util.Rand </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>max</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a random int i, where 0 &le; i &gt; max </p>
+<dl class="section return"><dt>Returns</dt><dd>The rand.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">max</td><td>Max.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1c0a2e7c745e6402a6e96c60cb8f19d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c0a2e7c745e6402a6e96c60cb8f19d8">&#9670;&nbsp;</a></span>Rand() <span class="overload">[3/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.Rand </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a random double d, where 0 &le; d &gt; 1 </p>
+<dl class="section return"><dt>Returns</dt><dd>The rand.</dd></dl>
+
+</div>
+</div>
+<a id="aa89b14917300ac1b97cdc0a6d5d6034a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa89b14917300ac1b97cdc0a6d5d6034a">&#9670;&nbsp;</a></span>Rand() <span class="overload">[4/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.Rand </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a random double d, where min &le; d &gt; max </p>
+<dl class="section return"><dt>Returns</dt><dd>The rand.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">min</td><td>Minimum.</td></tr>
+    <tr><td class="paramname">max</td><td>Max.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af1b90cd8b59890294d13deba2a1010b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1b90cd8b59890294d13deba2a1010b1">&#9670;&nbsp;</a></span>Rand() <span class="overload">[5/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.Rand </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>max</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a random double d, where 0 &le; d &gt; max </p>
+<dl class="section return"><dt>Returns</dt><dd>The rand.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">max</td><td>Max.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa616e37687406132dc2f97aec4688601"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa616e37687406132dc2f97aec4688601">&#9670;&nbsp;</a></span>RandItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static object Dialogic.Util.RandItem </td>
+          <td>(</td>
+          <td class="paramtype">object []&#160;</td>
+          <td class="paramname"><em>arr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a random item from the array </p>
+<dl class="section return"><dt>Returns</dt><dd>a random item.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">arr</td><td>Arr.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1277b5761b1ede721df5bba06e7f8a4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1277b5761b1ede721df5bba06e7f8a4e">&#9670;&nbsp;</a></span>RandItem&lt; T &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static T <a class="el" href="class_dialogic_1_1_util.html#aa616e37687406132dc2f97aec4688601">Dialogic.Util.RandItem</a>&lt; T &gt; </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; T &gt;&#160;</td>
+          <td class="paramname"><em>l</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a random item from the List </p>
+<dl class="section return"><dt>Returns</dt><dd>a random item.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">l</td><td>L.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The 1st type parameter.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a37840bebacbbc886a2f8aa4e61022aec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a37840bebacbbc886a2f8aa4e61022aec">&#9670;&nbsp;</a></span>ToMillis()</h2>
 
@@ -183,7 +725,96 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>INFINITE</b> = 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Converts seconds to millis if seconds is &gt;= 0, else returns -1 </p>
+
+<p>Converts seconds to milliseconds if seconds is &gt;= 0, else returns -1 </p>
+<dl class="section return"><dt>Returns</dt><dd>The milliseconds.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">seconds</td><td>Seconds.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a751f2c3ec959c4d67e13c388f04f0642"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a751f2c3ec959c4d67e13c388f04f0642">&#9670;&nbsp;</a></span>ToSec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.ToSec </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>millis</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Converts milliseconds to seconds </p>
+<dl class="section return"><dt>Returns</dt><dd>The seconds.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">millis</td><td>Millis.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6d7be3f803ce0f2807d3a72590f16191"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d7be3f803ce0f2807d3a72590f16191">&#9670;&nbsp;</a></span>TrimFirst()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool Dialogic.Util.TrimFirst </td>
+          <td>(</td>
+          <td class="paramtype">ref string&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Trim the specified character if the string starts with it </p>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code>, if first was trimed, <code>false</code> otherwise.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>S.</td></tr>
+    <tr><td class="paramname">c</td><td>C.</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

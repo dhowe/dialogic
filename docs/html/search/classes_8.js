@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['noop',['NoOp',['../class_dialogic_1_1_no_op.html',1,'Dialogic']]],
-  ['nvm',['Nvm',['../class_tendar_1_1_nvm.html',1,'Tendar']]]
+  ['operator',['Operator',['../class_dialogic_1_1_operator.html',1,'Dialogic']]],
+  ['opt',['Opt',['../class_dialogic_1_1_opt.html',1,'Dialogic']]]
 ];

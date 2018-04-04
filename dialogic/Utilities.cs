@@ -53,6 +53,11 @@ namespace Dialogic
         public static double FIND_MAX_STALENESS = 50;
 
         /// <summary>
+        /// Whether scores should be normalized (0-1) on Finds
+        /// </summary>
+        public static bool FIND_NORMALIZE_SCORES = true;
+
+        /// <summary>
         /// Default staleness for new Chats
         /// </summary>
         public static double CHAT_STALENESS = 0;
@@ -72,7 +77,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// A 1=1 mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
+    /// A one-to-one mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
     /// </summary>
     public class CommandDef
     {
@@ -242,7 +247,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random int i, where min &lte; i &gt; max
+        /// Returns a random int i, where min &le; i &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="min">Minimum.</param>
@@ -253,7 +258,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random int i, where 0 &lte; i &gt; max
+        /// Returns a random int i, where 0 &le; i &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="max">Max.</param>
@@ -263,7 +268,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random double d, where 0 &lte; d &gt; 1
+        /// Returns a random double d, where 0 &le; d &gt; 1
         /// </summary>
         /// <returns>The rand.</returns>
         public static double Rand()
@@ -272,7 +277,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random double d, where min &lte; d &gt; max
+        /// Returns a random double d, where min &le; d &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="min">Minimum.</param>
@@ -283,7 +288,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns a random double d, where 0 &lte; d &gt; max
+        /// Returns a random double d, where 0 &le; d &gt; max
         /// </summary>
         /// <returns>The rand.</returns>
         /// <param name="max">Max.</param>
@@ -656,6 +661,9 @@ namespace Dialogic
         }
     }
 
+    /// <summary>
+    /// Represents an atomic operation on a pair of metadata string that when invoked returns a boolean
+    /// </summary>
     public class Operator
     {
         private enum OpType { EQUALITY, COMPARISON, MATCHING }
@@ -756,7 +764,7 @@ namespace Dialogic
 
     // adapted from:
     //   https://codereview.stackexchange.com/questions/113596/writing-cs-analog-of-settimeout-setinterval-and-clearinterval
-    public static class Timers
+    public static class Timers //@cond hidden
     {
         static IInterruptable timer;
 
@@ -779,13 +787,12 @@ namespace Dialogic
 
             return new TimerInterrupter(t);
         }
-    }
+    }//@endcond
 
-    public interface IInterruptable
+    public interface IInterruptable //@cond hidden
     {
         void Stop();
     }
-
     public class TimerInterrupter : IInterruptable
     {
         private readonly Timer t;
@@ -800,7 +807,7 @@ namespace Dialogic
         {
             t.Stop();
         }
-    }
+    }//@endcond
 
     public class ObjectPool<T> //@cond unused
     {
@@ -830,7 +837,8 @@ namespace Dialogic
         }
     }//@endcond
 
-    public static class Exts
+
+    public static class Exts //@cond unused
     {
         public delegate void Action<T1, T2, T3, T4, T5>
             (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
@@ -917,5 +925,5 @@ namespace Dialogic
             }
             return s;
         }
-    }
+    }//@endcond
 }

@@ -11,8 +11,10 @@ using System.Globalization;
 
 namespace Dialogic
 {
+    //@cond unused
+
     // adapted from https://github.com/josh-perry/Tracery.Net
-    public class Grammar
+    public class Grammar 
     {
         public static string OPEN_TAG = "<", CLOSE_TAG = ">";
         public static string OPEN_SAVE = "[", CLOSE_SAVE = "]";
@@ -491,4 +493,5 @@ namespace Dialogic
             return !vowels.Contains(c);
         }
     }
+    //@endcond
 }

@@ -69,60 +69,32 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
-<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="class_dialogic_1_1_meta-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Dialogic.Meta Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Superclass for all Commands that may be assigned metadata  
+ <a href="class_dialogic_1_1_meta.html#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Dialogic.Meta:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="class_dialogic_1_1_meta.png" usemap="#Dialogic.Meta_map" alt=""/>
   <map id="Dialogic.Meta_map" name="Dialogic.Meta_map">
-<area href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first..." alt="Dialogic.Command" shape="rect" coords="0,56,117,80"/>
-<area href="class_dialogic_1_1_chat.html" alt="Dialogic.Chat" shape="rect" coords="127,112,244,136"/>
-<area href="class_dialogic_1_1_do.html" alt="Dialogic.Do" shape="rect" coords="127,168,244,192"/>
-<area href="class_dialogic_1_1_find.html" alt="Dialogic.Find" shape="rect" coords="127,224,244,248"/>
-<area href="class_dialogic_1_1_gram.html" alt="Dialogic.Gram" shape="rect" coords="127,280,244,304"/>
-<area href="class_dialogic_1_1_no_op.html" alt="Dialogic.NoOp" shape="rect" coords="127,336,244,360"/>
-<area href="class_dialogic_1_1_say.html" alt="Dialogic.Say" shape="rect" coords="127,392,244,416"/>
-<area href="class_dialogic_1_1_set.html" alt="Dialogic.Set" shape="rect" coords="127,448,244,472"/>
-<area href="class_dialogic_1_1_wait.html" alt="Dialogic.Wait" shape="rect" coords="127,504,244,528"/>
+<area href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first..." alt="Dialogic.Command" shape="rect" coords="254,56,371,80"/>
+<area href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai..." alt="Dialogic.Chat" shape="rect" coords="0,112,117,136"/>
+<area href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply..." alt="Dialogic.Find" shape="rect" coords="127,112,244,136"/>
+<area href="class_dialogic_1_1_set.html" title="The Set command is used to create or modify a variable. Variables generally originate from the game e..." alt="Dialogic.Set" shape="rect" coords="254,112,371,136"/>
+<area href="class_dialogic_1_1_wait.html" title="The Wait command is used to pause the runtime for a period of time. It accepts a single number specif..." alt="Dialogic.Wait" shape="rect" coords="381,112,498,136"/>
+<area href="class_tendar_1_1_nvm.html" title="A custom Command for the Tendar application " alt="Tendar.Nvm" shape="rect" coords="508,112,625,136"/>
+<area href="class_dialogic_1_1_go.html" title="The Go command accepts a single label used to specify the next Chat to jump to. When a Go command is ..." alt="Dialogic.Go" shape="rect" coords="127,168,244,192"/>
 </map>
  </div></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:a2cd8e36bd424ee432b149d6f03e361e2"><td class="memItemLeft" align="right" valign="top"><a id="a2cd8e36bd424ee432b149d6f03e361e2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>HasMeta</b> ()</td></tr>
-<tr class="separator:a2cd8e36bd424ee432b149d6f03e361e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af30530ca1f646f326e266fd7ecbb4d70"><td class="memItemLeft" align="right" valign="top"><a id="af30530ca1f646f326e266fd7ecbb4d70"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>HasMeta</b> (string key)</td></tr>
-<tr class="separator:af30530ca1f646f326e266fd7ecbb4d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83d3c73e6470a47e8ae16bd1111b9bd9"><td class="memItemLeft" align="right" valign="top"><a id="a83d3c73e6470a47e8ae16bd1111b9bd9"></a>
-object&#160;</td><td class="memItemRight" valign="bottom"><b>GetMeta</b> (string key, object defaultVal=null)</td></tr>
-<tr class="separator:a83d3c73e6470a47e8ae16bd1111b9bd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68f392df4c17f5809bde31d3a77dab95"><td class="memItemLeft" align="right" valign="top"><a id="a68f392df4c17f5809bde31d3a77dab95"></a>
-object&#160;</td><td class="memItemRight" valign="bottom"><b>GetRealized</b> (string key, object defaultVal=null)</td></tr>
-<tr class="separator:a68f392df4c17f5809bde31d3a77dab95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cae199d843eec50a80848d31e615577"><td class="memItemLeft" align="right" valign="top"><a id="a3cae199d843eec50a80848d31e615577"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>SetMeta</b> (<a class="el" href="class_dialogic_1_1_constraint.html">Constraint</a> constraint)</td></tr>
-<tr class="separator:a3cae199d843eec50a80848d31e615577"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e994aed553a45eae6d629b440c41a6b"><td class="memItemLeft" align="right" valign="top"><a id="a1e994aed553a45eae6d629b440c41a6b"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>SetMeta</b> (string key, object val, bool throwIfKeyExists=false)</td></tr>
-<tr class="separator:a1e994aed553a45eae6d629b440c41a6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2dffa54cbcdd24e07174cd471d8175b"><td class="memItemLeft" align="right" valign="top"><a id="ad2dffa54cbcdd24e07174cd471d8175b"></a>
-IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetMeta</b> ()</td></tr>
-<tr class="separator:ad2dffa54cbcdd24e07174cd471d8175b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1528abdff2b1007b5f094abe4133b1d2"><td class="memItemLeft" align="right" valign="top"><a id="a1528abdff2b1007b5f094abe4133b1d2"></a>
-List&lt; KeyValuePair&lt; string, object &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ToList</b> ()</td></tr>
-<tr class="separator:a1528abdff2b1007b5f094abe4133b1d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ac218697046cde754ba5ae5a6a5b46c15"><td class="memItemLeft" align="right" valign="top"><a id="ac218697046cde754ba5ae5a6a5b46c15"></a>
@@ -146,12 +118,15 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>TIMEOUT</b> =
 <tr class="memitem:af9d9c317510d0b6f4674509c3ddf09ab"><td class="memItemLeft" align="right" valign="top"><a id="af9d9c317510d0b6f4674509c3ddf09ab"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>STALENESS</b> = &quot;staleness&quot;</td></tr>
 <tr class="separator:af9d9c317510d0b6f4674509c3ddf09ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04ea0fe68d888be339f2f796df6afd2b"><td class="memItemLeft" align="right" valign="top"><a id="a04ea0fe68d888be339f2f796df6afd2b"></a>
-const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUMABLE</b> = &quot;resumable&quot;</td></tr>
-<tr class="separator:a04ea0fe68d888be339f2f796df6afd2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9bac903b1e2dae14b6ef7380e4d0edc"><td class="memItemLeft" align="right" valign="top"><a id="ac9bac903b1e2dae14b6ef7380e4d0edc"></a>
-IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>realized</b></td></tr>
-<tr class="separator:ac9bac903b1e2dae14b6ef7380e4d0edc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36c41194aff80634f7a6152e2b65d063"><td class="memItemLeft" align="right" valign="top"><a id="a36c41194aff80634f7a6152e2b65d063"></a>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>INTERRUPTIBLE</b> = &quot;interruptible&quot;</td></tr>
+<tr class="separator:a36c41194aff80634f7a6152e2b65d063"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98534fb85e689d3d769858e006cb332b"><td class="memItemLeft" align="right" valign="top"><a id="a98534fb85e689d3d769858e006cb332b"></a>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>STALENESS_INCR</b> = &quot;stalenessIncr&quot;</td></tr>
+<tr class="separator:a98534fb85e689d3d769858e006cb332b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30d9ef6e92d5233d53b5e8cce109da69"><td class="memItemLeft" align="right" valign="top"><a id="a30d9ef6e92d5233d53b5e8cce109da69"></a>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_INT</b> = &quot;resumeAfterInt&quot;</td></tr>
+<tr class="separator:a30d9ef6e92d5233d53b5e8cce109da69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -164,14 +139,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseMeta</b>
 <tr class="memitem:a8b3b59c6c1619e89b78fb497bc4540f3"><td class="memItemLeft" align="right" valign="top"><a id="a8b3b59c6c1619e89b78fb497bc4540f3"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>ValidateMetaPairs</b> (string[] prs)</td></tr>
 <tr class="separator:a8b3b59c6c1619e89b78fb497bc4540f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
-Protected Attributes</h2></td></tr>
-<tr class="memitem:a4c639b02df04ef52ace5dda5464d0416"><td class="memItemLeft" align="right" valign="top"><a id="a4c639b02df04ef52ace5dda5464d0416"></a>
-IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>meta</b></td></tr>
-<tr class="separator:a4c639b02df04ef52ace5dda5464d0416"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Superclass for all Commands that may be assigned metadata </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>dialogic/Commands.cs</li>
 </ul>
 </div><!-- contents -->

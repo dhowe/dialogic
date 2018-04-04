@@ -2,6 +2,8 @@
 
 namespace Dialogic
 {
+    //@cond hidden
+
     public class DialogicException : Exception
     {
         public DialogicException(string msg = "") : base(msg) { }
@@ -53,4 +55,6 @@ namespace Dialogic
     {
         public RuntimeParseException(ParseException pe) : base(pe.Message) { }
     }
+
+    //@endcond
 }

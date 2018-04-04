@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['tendar',['Tendar',['../namespace_tendar.html',1,'']]],
-  ['timerinterrupter',['TimerInterrupter',['../class_dialogic_1_1_timer_interrupter.html',1,'Dialogic']]],
-  ['timers',['Timers',['../class_dialogic_1_1_timers.html',1,'Dialogic']]],
-  ['tomillis',['ToMillis',['../class_dialogic_1_1_util.html#a37840bebacbbc886a2f8aa4e61022aec',1,'Dialogic::Util']]]
+  ['updateevent',['UpdateEvent',['../class_dialogic_1_1_update_event.html',1,'Dialogic']]],
+  ['userevent',['UserEvent',['../class_dialogic_1_1_user_event.html',1,'Dialogic']]],
+  ['util',['Util',['../class_dialogic_1_1_util.html',1,'Dialogic']]]
 ];

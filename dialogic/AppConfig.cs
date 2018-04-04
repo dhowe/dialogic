@@ -4,6 +4,10 @@ using Dialogic;
 
 namespace Tendar
 {
+    /// <summary>
+    /// Specifies custom behavior for the Tendar application, including Actors,
+    /// validators, and custom command types.
+    /// </summary>
     public static class AppConfig
     {
         private static Func<Command, bool> Validator = ValidateCommand;

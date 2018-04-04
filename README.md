@@ -75,18 +75,14 @@ You look depressed.
 Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
 
 ````
-SAY I'm (very | super | really) glad to ((meet | know) you | make your acquaintance).
+SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 ````
-
-[tbd]
 
 &nbsp;
 
 ### Interruption / Smoothing
 
 Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be added in order to make transitions more natural, i.e., 'so as I was saying'.
-
-[tbd]
 
 &nbsp;
 
@@ -101,14 +97,15 @@ The application calls the runtime's Update() function each frame, passing the cu
 
  public RealtimeGame() 
  {
-     var chats = ChatParser.ParseFile(scriptDir); 
-     dialogic = new ChatRuntime(chats);
+    dialogic = new ChatRuntime();
+    dialogic.ParseFile(fileOrFolder);
+    dialogic.Run("#StartChat");
  }
 
  public IUpdateEvent Update() // Game Loop
  {
      // Call the dialogic interface
-     IUpdateEvent evt = dialogic.Update(globals, ref gameEvent);
+     IUpdateEvent evt = dialogic.Update(worldState, ref gameEvent);
 
      // Handle the event received
      if (evt != null) HandleEvent(evt);

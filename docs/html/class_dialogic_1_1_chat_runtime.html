@@ -94,37 +94,66 @@ List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt;&#160;</
 <tr class="memitem:a733eb084501d32385a5373c26eca7729"><td class="memItemLeft" align="right" valign="top"><a id="a733eb084501d32385a5373c26eca7729"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseFile</b> (string fileOrFolder, bool disableValidators=false)</td></tr>
 <tr class="separator:a733eb084501d32385a5373c26eca7729"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6739443890fb3601799da7c68543e304"><td class="memItemLeft" align="right" valign="top"><a id="a6739443890fb3601799da7c68543e304"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>Run</b> (string chatLabel=null)</td></tr>
-<tr class="separator:a6739443890fb3601799da7c68543e304"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85f723d0b3156a8de035772dc07365dc"><td class="memItemLeft" align="right" valign="top"><a id="a85f723d0b3156a8de035772dc07365dc"></a>
-List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Chats</b> ()</td></tr>
-<tr class="separator:a85f723d0b3156a8de035772dc07365dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a888dd1a2375de0d74d6315414d9e3c9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_dialogic_1_1_runtime_context.html">RuntimeContext</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a888dd1a2375de0d74d6315414d9e3c9a">CurrentContext</a> ()</td></tr>
+<tr class="memdesc:a888dd1a2375de0d74d6315414d9e3c9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current context for the runtime, consisting of its current state, the current <a class="el" href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai...">Chat</a>, and the offset until the next scheduled event  <a href="#a888dd1a2375de0d74d6315414d9e3c9a">More...</a><br /></td></tr>
+<tr class="separator:a888dd1a2375de0d74d6315414d9e3c9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef00f833ff5eeb0625ddfbefd6da47cd"><td class="memItemLeft" align="right" valign="top"><a id="aef00f833ff5eeb0625ddfbefd6da47cd"></a>
 <a class="el" href="interface_dialogic_1_1_i_update_event.html">IUpdateEvent</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Update</b> (IDictionary&lt; string, object &gt; globals, ref EventArgs ge)</td></tr>
 <tr class="separator:aef00f833ff5eeb0625ddfbefd6da47cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00a3fc86a80dc0e9c507934f950bd4e1"><td class="memItemLeft" align="right" valign="top"><a id="a00a3fc86a80dc0e9c507934f950bd4e1"></a>
-<a class="el" href="class_dialogic_1_1_chat.html">Chat</a>&#160;</td><td class="memItemRight" valign="bottom"><b>FindChat</b> (string label)</td></tr>
-<tr class="separator:a00a3fc86a80dc0e9c507934f950bd4e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26fa8e9f0827e03285ca72df70b523b2"><td class="memItemLeft" align="right" valign="top"><a id="a26fa8e9f0827e03285ca72df70b523b2"></a>
-<a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><b>FindActor</b> (string name)</td></tr>
-<tr class="separator:a26fa8e9f0827e03285ca72df70b523b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a098a354d7c1e907009c257b812374dfd"><td class="memItemLeft" align="right" valign="top"><a id="a098a354d7c1e907009c257b812374dfd"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>WriteToLog</b> (<a class="el" href="class_dialogic_1_1_command.html">Command</a> c)</td></tr>
-<tr class="separator:a098a354d7c1e907009c257b812374dfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6739443890fb3601799da7c68543e304"><td class="memItemLeft" align="right" valign="top"><a id="a6739443890fb3601799da7c68543e304"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>Run</b> (string chatLabel=null)</td></tr>
+<tr class="separator:a6739443890fb3601799da7c68543e304"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab46aac1c1232367fd8fec08da41fe8ee"><td class="memItemLeft" align="right" valign="top"><a id="ab46aac1c1232367fd8fec08da41fe8ee"></a>
+List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>FindChatByMeta</b> (string key, string value)</td></tr>
+<tr class="separator:ab46aac1c1232367fd8fec08da41fe8ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49d73329dc06aa59d41d5a1b3978dfe5"><td class="memItemLeft" align="right" valign="top"><a id="a49d73329dc06aa59d41d5a1b3978dfe5"></a>
+<a class="el" href="class_dialogic_1_1_chat.html">Chat</a>&#160;</td><td class="memItemRight" valign="bottom"><b>FindChatByLabel</b> (string label)</td></tr>
+<tr class="separator:a49d73329dc06aa59d41d5a1b3978dfe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62b3cb76b571fe3cf76f2de0b75fb63e"><td class="memItemLeft" align="right" valign="top"><a id="a62b3cb76b571fe3cf76f2de0b75fb63e"></a>
+<a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><b>FindActorByName</b> (string name)</td></tr>
+<tr class="separator:a62b3cb76b571fe3cf76f2de0b75fb63e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a993c113a3bf4918269588d75c40633a0"><td class="memItemLeft" align="right" valign="top"><a id="a993c113a3bf4918269588d75c40633a0"></a>
-static string&#160;</td><td class="memItemRight" valign="bottom"><b>logFile</b></td></tr>
-<tr class="separator:a993c113a3bf4918269588d75c40633a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cd1c38f2ee879b6c7ac82f59a4c06a4"><td class="memItemLeft" align="right" valign="top"><a id="a4cd1c38f2ee879b6c7ac82f59a4c06a4"></a>
+static string&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_FILE</b></td></tr>
+<tr class="separator:a4cd1c38f2ee879b6c7ac82f59a4c06a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26b1f4173d61ab2923ac8105342c63b4"><td class="memItemLeft" align="right" valign="top"><a id="a26b1f4173d61ab2923ac8105342c63b4"></a>
 static string&#160;</td><td class="memItemRight" valign="bottom"><b>CHAT_FILE_EXT</b> = &quot;.gs&quot;</td></tr>
 <tr class="separator:a26b1f4173d61ab2923ac8105342c63b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The main entry point for <a class="el" href="namespace_dialogic.html">Dialogic</a>. Construct a runtime instance as follows: </p>
-<div class="fragment"><div class="line">ChatRuntime dialogic = <span class="keyword">new</span> ChatRuntime();</div><div class="line">dialogic.ParseFile(scriptFolder);</div><div class="line">dialogic.Run(<span class="stringliteral">&quot;#FirstChat&quot;</span>);</div></div><!-- fragment --><p>Or configure with a List of IActors </p><div class="fragment"><div class="line">ChatRuntime dialogic = <span class="keyword">new</span> ChatRuntime(theActors);</div><div class="line">dialogic.ParseFile(scriptFolder);</div><div class="line">dialogic.Run(<span class="stringliteral">&quot;#FirstChat&quot;</span>);</div></div><!-- fragment --> </div><hr/>The documentation for this class was generated from the following file:<ul>
+<div class="fragment"><div class="line">ChatRuntime dialogic = <span class="keyword">new</span> ChatRuntime();</div><div class="line">dialogic.ParseFile(scriptFolder);</div><div class="line">dialogic.Run(<span class="stringliteral">&quot;#FirstChat&quot;</span>);</div></div><!-- fragment --><p>Or configure with a List of Actors </p><div class="fragment"><div class="line">ChatRuntime dialogic = <span class="keyword">new</span> ChatRuntime(theActors);</div><div class="line">dialogic.ParseFile(scriptFolder);</div><div class="line">dialogic.Run(<span class="stringliteral">&quot;#FirstChat&quot;</span>);</div></div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a888dd1a2375de0d74d6315414d9e3c9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a888dd1a2375de0d74d6315414d9e3c9a">&#9670;&nbsp;</a></span>CurrentContext()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_dialogic_1_1_runtime_context.html">RuntimeContext</a> Dialogic.ChatRuntime.CurrentContext </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the current context for the runtime, consisting of its current state, the current <a class="el" href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai...">Chat</a>, and the offset until the next scheduled event </p>
+<dl class="section return"><dt>Returns</dt><dd>The context.</dd></dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>dialogic/ChatRuntime.cs</li>
 </ul>
 </div><!-- contents -->

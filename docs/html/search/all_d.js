@@ -1,9 +1,7 @@
 var searchData=
 [
-  ['s',['S',['../class_dialogic_1_1_modifiers.html#aa77a087a68ed4f896f1a3f2dea2dc71e',1,'Dialogic::Modifiers']]],
-  ['savesymbolregex',['SaveSymbolRegex',['../class_dialogic_1_1_grammar.html#aefb2294331029b8badb1f212ecfdfbd1',1,'Dialogic::Grammar']]],
-  ['say',['Say',['../class_dialogic_1_1_say.html',1,'Dialogic']]],
-  ['say_5fduration',['SAY_DURATION',['../class_dialogic_1_1_defaults.html#ad8ef6a7453dcac7a87b5304c3590a3fa',1,'Dialogic::Defaults']]],
-  ['set',['Set',['../class_dialogic_1_1_set.html',1,'Dialogic']]],
-  ['suspendevent',['SuspendEvent',['../class_dialogic_1_1_suspend_event.html',1,'Dialogic']]]
+  ['tendar',['Tendar',['../namespace_tendar.html',1,'']]],
+  ['tomillis',['ToMillis',['../class_dialogic_1_1_util.html#a37840bebacbbc886a2f8aa4e61022aec',1,'Dialogic::Util']]],
+  ['tosec',['ToSec',['../class_dialogic_1_1_util.html#a751f2c3ec959c4d67e13c388f04f0642',1,'Dialogic::Util']]],
+  ['trimfirst',['TrimFirst',['../class_dialogic_1_1_util.html#a6d7be3f803ce0f2807d3a72590f16191',1,'Dialogic::Util']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['exts',['Exts',['../class_dialogic_1_1_exts.html',1,'Dialogic']]]
+  ['find',['Find',['../class_dialogic_1_1_find.html',1,'Dialogic']]],
+  ['fuzzysearch',['FuzzySearch',['../class_dialogic_1_1_fuzzy_search.html',1,'Dialogic']]]
 ];

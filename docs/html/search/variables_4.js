@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['find_5fmax_5fstaleness',['FIND_MAX_STALENESS',['../class_dialogic_1_1_defaults.html#ab56fd4a024e341edeae89f4fe382d1d9',1,'Dialogic::Defaults']]],
-  ['find_5fstaleness',['FIND_STALENESS',['../class_dialogic_1_1_defaults.html#a0fbad28c55447a0f8c3c5fb18b4bd227',1,'Dialogic::Defaults']]]
+  ['preserve_5fline_5fnumbers',['PRESERVE_LINE_NUMBERS',['../class_dialogic_1_1_chat_parser.html#a192d5160d1a64382222aec5fc85a3d2d',1,'Dialogic::ChatParser']]]
 ];

@@ -4,17 +4,23 @@ using System.Linq;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// Handles fuzzy logic for Find commands containing one or more constraints to be matched in candidate Chats.
+    /// </summary>
     public static class FuzzySearch
     {
         public static bool DBUG = false;
 
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
-        /// 
+        ///
         /// If none match, then start relaxing hard-type constraints until one does.
         /// 
         /// If all hard constraints have been relaxed and nothing is found, then 
         /// unrelax hard constraints, lower the staleness threshold, and repeat.
+        /// 
+        /// Break ties based on milliseconds since the Chat was last run. If there
+        /// are still ties, break them with coin-flip.
         /// 
         /// Note that the Chat containing the Find object is never returned.
         /// </summary>
@@ -23,8 +29,8 @@ namespace Dialogic
         /// <param name="constraints">Constraints.</param>
         /// <param name="parent">Parent.</param>
         /// <param name="globals">Globals.</param>
-        public static Chat Find(List<Chat> chats, 
-            IDictionary<Constraint, bool> constraints, 
+        public static Chat Find(List<Chat> chats,
+            IDictionary<Constraint, bool> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
             bool resetRequired = false; // opt
@@ -43,7 +49,7 @@ namespace Dialogic
 
                     if (chat == null)
                     {
-                        if (DBUG) Console.WriteLine("\nFailed with " + 
+                        if (DBUG) Console.WriteLine("\nFailed with " +
                             RelaxableCount(constraints) + " hard constraints");
                         continue;
                     }
@@ -73,7 +79,9 @@ namespace Dialogic
         /// <summary>
         /// Find all chats, ordered by score, which do not violate the specified
         /// constraints (no relaxation done here).
+        /// 
         /// Note that the Chat containing the Find object is never returned.
+        /// 
         /// </summary>
         /// <returns>List of chats ordered by score</returns>
         /// <param name="chats">Chats.</param>
@@ -81,7 +89,7 @@ namespace Dialogic
         /// <param name="parent">Parent.</param>
         /// <param name="globals">Globals.</param>
         internal static List<Chat> FindAll(List<Chat> chats,
-            IEnumerable<Constraint> constraints, 
+            IEnumerable<Constraint> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
             Dictionary<Chat, double> matches = new Dictionary<Chat, double>();
@@ -131,24 +139,29 @@ namespace Dialogic
                         Console.WriteLine("    NOKEY");
                     }
                 }
-                if (hits > -1) matches.Add(chats[i], Normalize(constraints, hits));
+                if (hits > -1) matches.Add(chats[i], ComputeScore(constraints, hits));
             }
 
-            List<KeyValuePair<Chat, double>> list = DescendingFreshnessSort(matches);
+            List<KeyValuePair<Chat, double>> list = DescendingScoreLastRunAtRandomizedSort(matches);
 
             if (DBUG) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
         }
 
+        private static double ComputeScore(IEnumerable<Constraint> constraints, int hits)
+        {
+            return Defaults.FIND_NORMALIZE_SCORES ? Normalize(constraints, hits) : hits;
+        }
+
         private static double Normalize(IEnumerable<Constraint> constraints, int hits)
         {
-            return hits / constraints.Count();
+            return hits / (double)constraints.Count();
         }
 
         // --------------------------------------------------------------------
 
-        class SearchContext  // NEXT, then => GO
+        internal class SearchContext // TODO:
         {
             /*
              * 1. Try normal search
@@ -199,38 +212,76 @@ namespace Dialogic
             }
         }
 
-        /*
-         * Sort by points, highest first, break ties with a coin-flip
-         */
-        private static List<KeyValuePair<Chat, double>> DescendingRandomSort(Dictionary<Chat, double> d)
+        /// <summary>
+        /// Sort by points, highest first, break ties with a coin-flip
+        /// </summary>
+        internal static List<KeyValuePair<Chat, double>> DescendingRandomizedSort(Dictionary<Chat, double> d)
         {
             List<KeyValuePair<Chat, double>> list = d.ToList();
-            list.Sort((p1, p2) => CompareRandomizeTies(p1.Value, p2.Value));
+            list.Sort((p1, p2) => CompareWithRandomizedTies(p1.Value, p2.Value));
             return list;
         }
 
-        /*
-         * Sort by points, highest first, break ties with the fresher chat
-         */
-        internal static List<KeyValuePair<Chat, double>> DescendingFreshnessSort(Dictionary<Chat, double> d)
+        /// <summary>
+        /// Sort by points, highest first, break ties with Chat.Staleness(), then coin-flip
+        /// </summary>
+        internal static List<KeyValuePair<Chat, double>> DescendingStalenessRandomizedSort(Dictionary<Chat, double> d)
         {
-            // public for testing only
             List<KeyValuePair<Chat, double>> list = d.ToList();
-            list.Sort(CompareFreshnessTies);
+            list.Sort(CompareStalenessTies);
             return list;
         }
 
-        // sort descending with ties based on freshness
-        private static int CompareFreshnessTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
+        /// <summary>
+        /// Sort by points, highest first, break ties with the lastRunAt time, then coin-flip
+        /// </summary>
+        internal static List<KeyValuePair<Chat, double>> DescendingScoreLastRunAtRandomizedSort(Dictionary<Chat, double> d)
         {
-            return Util.FloatingEquals(i.Value, j.Value) ? (i.Key.lastRunAt > j.Key.lastRunAt
-                ? 1 : -1) : j.Value.CompareTo(i.Value);
+            List<KeyValuePair<Chat, double>> list = d.ToList();
+            list.Sort(CompareLastRunAtTies);
+            return list;
         }
 
-        // sort descending with randomized ties
-        private static int CompareRandomizeTies(double i, double j)
+        /// <summary>
+        /// Sort descending based on score with ties decided by lastRunAt, then a coin-flip
+        /// </summary>
+        internal static int CompareLastRunAtTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
         {
-            return Util.FloatingEquals(i, j) ? (Util.Rand() < .5 ? 1 : -1) : j.CompareTo(i);
+            if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
+            {
+                // check staleness and randomize ties
+                return CompareWithRandomizedTies(i.Key.lastRunAt, j.Key.lastRunAt);
+            }
+            return j.Value.CompareTo(i.Value);
+        }
+
+        /// <summary>
+        /// Sort descending based on score with ties decided by lastRunAt, then a coin-flip
+        /// </summary>
+        internal static int CompareStalenessTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
+        {
+            if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
+            {
+                // check staleness and randomize ties
+                return CompareWithRandomizedTies(i.Key.Staleness(), j.Key.Staleness());
+            }
+            return j.Value.CompareTo(i.Value);
+        }
+
+        /// <summary>
+        /// Sort int with ties decided by coin-flip
+        /// </summary> 
+        internal static int CompareWithRandomizedTies(int i, int j)
+        {
+            return i == j ? (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
+        }
+
+        /// <summary>
+        /// Sort int with ties decided by coin-flip
+        /// </summary> 
+        internal static int CompareWithRandomizedTies(double i, double j)
+        {
+            return Util.FloatingEquals(i, j) ? (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
         }
     }
 }

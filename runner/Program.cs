@@ -25,8 +25,7 @@ namespace runner
     /// </summary>
     public class MockGameEngine
     {
-        /// <summary>Mock game state variables</summary>
-        public static Dictionary<string, object> globals =
+        static Dictionary<string, object> globals =
             new Dictionary<string, object>() {
                 { "emotion", "special" },
                 { "place", "my tank" },
@@ -36,11 +35,13 @@ namespace runner
                 { "var3", 2 }
             };
 
-        private ChatRuntime dialogic;
-        private EventArgs gameEvent;
-        private bool interrupted = false;
-        private string evtText, evtType, evtActor;
-        private string[] diaOpts;
+
+        ChatRuntime dialogic;
+        EventArgs gameEvent;
+
+        bool interrupted = false;
+        string evtText, evtType, evtActor;
+        string[] evtOpts;
 
         /// <summary>
         /// Create an engine from a script file or folder script files
@@ -58,8 +59,6 @@ namespace runner
         /// </summary>
         public void Run()
         {
-            // TODO: test suspend/resume on user events
-
             var now = Util.Millis();
             Timers.SetTimeout(Util.Rand(2000, 10000), () =>
              {
@@ -92,6 +91,8 @@ namespace runner
             evtText = ue.Text();
             evtType = ue.Type();
             evtActor = ue.Actor();
+
+            //evtText = "["+evtActor + "] " + evtText;
 
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.ACTOR);
 
@@ -139,7 +140,7 @@ namespace runner
 
         private void DoPrompt(IUpdateEvent ue)
         {
-            diaOpts = ue.Get(Meta.OPTS).Split('\n');
+            evtOpts = ue.Get(Meta.OPTS).Split('\n');
 
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.OPTS);
 
@@ -147,9 +148,9 @@ namespace runner
             evtText = evtText + " " + ue.Data().Stringify();
 
             // add the options
-            for (int i = 0; i < diaOpts.Length; i++)
+            for (int i = 0; i < evtOpts.Length; i++)
             {
-                evtText += "\n  (" + i + ") " + diaOpts[i];
+                evtText += "\n  (" + i + ") " + evtOpts[i];
             }
         }
 
@@ -162,7 +163,7 @@ namespace runner
                 Timers.SetTimeout(delay, () =>
                 {
                     // choice a valid response, or -1 for no response
-                    int choice = Util.Rand(diaOpts.Length + 1) - 1;
+                    int choice = Util.Rand(evtOpts.Length + 1) - 1;
                     Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms\n");
                     gameEvent = new ChoiceEvent(choice);
                 });

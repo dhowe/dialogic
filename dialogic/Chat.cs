@@ -4,6 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
+    /// <summary>
+    /// Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contains one or more commands. When a Chat is run, each command is executed in order, until all have been run, or the system jumps to a new Chat. The Chat command accepts a required label, followed, optionally, by metadata, which can be used with the Find command to search for Chats matching desired criteria.
+    /// </summary>
     public class Chat : Command
     {
         internal List<Command> commands;
@@ -152,10 +155,16 @@ namespace Dialogic
             // Q: Do we reset this stuff on resume ?
             // Prob not in case of staleness
 
-            lastRunAt = Util.EpochMs();
+            LastRunAt(Util.EpochMs());
 
             // Q: what about (No-Label) WAIT events ?
             IncrementStaleness();
+        }
+
+        internal Chat LastRunAt(int ms)
+        {
+            this.lastRunAt = ms;
+            return this;
         }
     }
 }
