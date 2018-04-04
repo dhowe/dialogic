@@ -11,7 +11,7 @@ namespace Dialogic
         const bool NO_VALIDATORS = true;
 
         [Test]
-        public void TestFindChatByMeta()
+        public void FindChatByMeta()
         {
             string[] lines = {
                 "CHAT c1 {type=a}",
@@ -37,11 +37,11 @@ namespace Dialogic
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(0));
             labels = result.Select(o => o.text).ToList();
-            Assert.That(labels, Is.EquivalentTo(new string[] {  }));
+            Assert.That(labels, Is.EquivalentTo(new string[] { }));
         }
 
         [Test]
-        public void TestFindChatByName()
+        public void FindChatByName()
         {
             string[] lines = {
                 "CHAT c1 {day=fri}",
@@ -66,7 +66,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestBasicFind()
+        public void BasicFind()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
@@ -81,7 +81,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestBasicFindAll()
+        public void BasicFindAll()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
@@ -96,7 +96,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAll()
+        public void FindAll()
         {
             string[] lines = {
                 "CHAT c1 {day=fri}",
@@ -147,7 +147,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAll2()
+        public void FindAll2()
         {
             string[] lines = {
                 "CHAT c0",
@@ -202,7 +202,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAllWithMetaVars()
+        public void FindAllWithMetaVars()
         {
             string[] lines = {
                 "CHAT c1 {day=fri}",
@@ -221,7 +221,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindAllHard()
+        public void FindAllHard()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
@@ -239,7 +239,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindAllHard2()
+        public void FindAllHard2()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
@@ -260,7 +260,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAllHard3()
+        public void FindAllHard3()
         {
             var lines = new string[]{
                 "CHAT c0",
@@ -297,7 +297,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAllHard4()
+        public void FindAllHard4()
         {
             var lines = new string[] {
                 "CHAT c0",
@@ -327,7 +327,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindAllOps()
+        public void FindAllOps()
         {
             string[] lines = { "CHAT c0 {dev=1}", "FIND {dev>2,day=fri}" };
 
@@ -372,7 +372,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindAllOp3()
+        public void FindAllOp3()
         {
             string[] lines = {
                 "CHAT c1 {emotion=cold}",
@@ -445,7 +445,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestStaleness()
+        public void Staleness()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
@@ -492,7 +492,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestStalenessRelaxation()
+        public void StalenessRelaxation()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
@@ -513,7 +513,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestDoubleRelaxation()
+        public void DoubleRelaxation()
         {
             Chat c;
             List<Chat> chats = new List<Chat>();
@@ -535,7 +535,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindWithRelaxation()
+        public void FindWithRelaxation()
         {
             string[] lines = {
                 "CHAT c0",
@@ -601,7 +601,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAllOpsHard()
+        public void FindAllOpsHard()
         {
             string[] lines = {
                 "CHAT c0",
@@ -655,7 +655,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestFindAllMulti()
+        public void FindAllMulti()
         {
             string[] lines = {
                 "CHAT c0 {day=sunday}",
@@ -710,7 +710,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAllMultiHard1()
+        public void FindAllMultiHard1()
         {
             string[] lines = {
                 "CHAT c0",
@@ -763,7 +763,7 @@ namespace Dialogic
 
 
         [Test]
-        public void TestFindAllMultiHard2()
+        public void FindAllMultiHard2()
         {
             string[] lines = {
                 "CHAT c0",
@@ -817,25 +817,112 @@ namespace Dialogic
             Assert.That(chats[0].text, Is.EqualTo("c2"));
         }
 
+        [Test]
+        public void DescendingLastRunAtSort()
+        {
+            var chatScores = new Dictionary<Chat, double>();
+
+            chatScores.Add(Chat.Create("c1").LastRunAt(Util.EpochMs()), 1);
+            chatScores.Add(Chat.Create("c2").LastRunAt(Util.EpochMs()), 2);
+            chatScores.Add(Chat.Create("c3").LastRunAt(Util.EpochMs()), 3);
+            chatScores.Add(Chat.Create("c4").LastRunAt(Util.EpochMs()), 4);
+            chatScores.Add(Chat.Create("c5").LastRunAt(Util.EpochMs()), 5);
+
+            var chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Key.text));
+
+            for (int i = 0; i < 5; i++)
+                Assert.That(chats[i].Key.text, Is.EqualTo("c" + (5 - i)));
+
+            ////////////////////////////////////////////////////////////////////
+
+            chatScores = new Dictionary<Chat, double>();
+            chatScores.Add(Chat.Create("c1").LastRunAt(Util.EpochMs()), 1);
+            chatScores.Add(Chat.Create("c2").LastRunAt(Util.EpochMs()), 2);
+            chatScores.Add(Chat.Create("c3").LastRunAt(Util.EpochMs()), 3);
+            chatScores.Add(Chat.Create("c4").LastRunAt(Util.EpochMs()), 5);
+            chatScores.Add(Chat.Create("c5").LastRunAt(Util.EpochMs() - 1), 5);
+
+            chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Key.text));
+
+            for (int i = 0; i < 5; i++)
+                Assert.That(chats[i].Key.text, Is.EqualTo("c" + (5 - i)));
+
+            ////////////////////////////////////////////////////////////////////
+
+            chatScores = new Dictionary<Chat, double>();
+            chatScores.Add(Chat.Create("c1").LastRunAt(Util.EpochMs()), 1);
+            chatScores.Add(Chat.Create("c2").LastRunAt(Util.EpochMs()), 2);
+            chatScores.Add(Chat.Create("c3").LastRunAt(Util.EpochMs()), 3);
+            chatScores.Add(Chat.Create("c4").LastRunAt(Util.EpochMs()), 5);
+            chatScores.Add(Chat.Create("c5").LastRunAt(-1), 5);
+
+            chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            //chats.ForEach((obj) => Console.WriteLine(obj.Key.text));
+
+            for (int i = 0; i < 5; i++)
+                Assert.That(chats[i].Key.text, Is.EqualTo("c" + (5 - i)));
+
+            //////////////////////////////////////////////////////////////////////
+
+            chatScores = new Dictionary<Chat, double>();
+            chatScores.Add(Chat.Create("c1").LastRunAt(Util.EpochMs()), 1);
+            chatScores.Add(Chat.Create("c2").LastRunAt(Util.EpochMs()), 2);
+            chatScores.Add(Chat.Create("c3").LastRunAt(Util.EpochMs()), 3);
+            chatScores.Add(Chat.Create("c4").LastRunAt(-1), 5);
+            chatScores.Add(Chat.Create("c5").LastRunAt(-1), 5);
+
+            for (int j = 0; j < 10; j++) // repeat a few times
+            {
+                chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+                //chats.ForEach(obj => Console.Write(obj.Key.text+ ", "));Console.WriteLine();
+                Assert.That(chats[0].Key.text, Is.EqualTo("c5").Or.EqualTo("c4"));
+                Assert.That(chats[0].Key.text, Is.EqualTo("c4").Or.EqualTo("c5"));
+                Assert.That(chats[2].Key.text, Is.EqualTo("c3"));
+                Assert.That(chats[3].Key.text, Is.EqualTo("c2"));
+                Assert.That(chats[4].Key.text, Is.EqualTo("c1"));
+            }
+
+            //////////////////////////////////////////////////////////////////////
+
+            chatScores = new Dictionary<Chat, double>();
+
+            chatScores.Add(Chat.Create("c1").LastRunAt(Util.EpochMs()), 1);
+            chatScores.Add(Chat.Create("c2").LastRunAt(Util.EpochMs() - 1000), 1);
+            chatScores.Add(Chat.Create("c3").LastRunAt(Util.EpochMs() - 2000), 1);
+            chatScores.Add(Chat.Create("c4"), 0);
+            chatScores.Add(Chat.Create("c5"), 10);
+
+            chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            for (int i = 0; i < chats.Count; i++)
+            {
+                //Console.WriteLine(chats[i].Key + "(" + chats[i].Key.lastRunAt + ") -> " + chats[i].Value);
+                if (i + 1 < chats.Count) Assert.That(chats[i + 1].Value <= chats[i].Value, Is.True);
+            }
+
+            Assert.That(chats[0].Key.text, Is.EqualTo("c5"));
+            Assert.That(chats[1].Key.text, Is.EqualTo("c3"));
+            Assert.That(chats[2].Key.text, Is.EqualTo("c2"));
+            Assert.That(chats[3].Key.text, Is.EqualTo("c1"));
+            Assert.That(chats[4].Key.text, Is.EqualTo("c4"));
+        }
 
         [Test]
-        public void TestDescendingFreshnessSort()
+        public void DescendingStalenessSort()
         {
             var chatScores = new Dictionary<Chat, double>();
 
             Chat c = Chat.Create("c1");
-            c.lastRunAt = Util.EpochMs();
-            c.SetMeta("lastRun", c.lastRunAt);
+            c.Staleness(3.1);
             chatScores.Add(c, 1);
 
             c = Chat.Create("c2");
-            c.lastRunAt = Util.EpochMs() - 1000;
-            c.SetMeta("lastRun", c.lastRunAt);
+            c.Staleness(3);
             chatScores.Add(c, 1);
 
             c = Chat.Create("c3");
-            c.lastRunAt = Util.EpochMs() - 2000;
-            c.SetMeta("lastRun", c.lastRunAt);
+            c.Staleness(1.1);
             chatScores.Add(c, 1);
 
             c = Chat.Create("c4");
@@ -844,7 +931,7 @@ namespace Dialogic
             c = Chat.Create("c5");
             chatScores.Add(c, 10);
 
-            List<KeyValuePair<Chat, double>> list = FuzzySearch.DescendingFreshnessSort(chatScores);
+            var list = FuzzySearch.DescendingStalenessSort(chatScores);
             for (int i = 1; i < list.Count; i++)
             {
                 Assert.That(list[i].Value <= list[i - 1].Value, Is.True);

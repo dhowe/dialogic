@@ -19,6 +19,9 @@ namespace Dialogic
         /// If all hard constraints have been relaxed and nothing is found, then 
         /// unrelax hard constraints, lower the staleness threshold, and repeat.
         /// 
+        /// Break ties based on milliseconds since the Chat was last run. If there
+        /// are still ties, break them with coin-flip.
+        /// 
         /// Note that the Chat containing the Find object is never returned.
         /// </summary>
         /// <returns>Chat</returns>
@@ -76,7 +79,9 @@ namespace Dialogic
         /// <summary>
         /// Find all chats, ordered by score, which do not violate the specified
         /// constraints (no relaxation done here).
+        /// 
         /// Note that the Chat containing the Find object is never returned.
+        /// 
         /// </summary>
         /// <returns>List of chats ordered by score</returns>
         /// <param name="chats">Chats.</param>
@@ -137,7 +142,7 @@ namespace Dialogic
                 if (hits > -1) matches.Add(chats[i], ComputeScore(constraints, hits));
             }
 
-            List<KeyValuePair<Chat, double>> list = DescendingFreshnessSort(matches);
+            List<KeyValuePair<Chat, double>> list = DescendingScoreLastRunAtRandomizedSort(matches);
 
             if (DBUG) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
 
@@ -156,7 +161,7 @@ namespace Dialogic
 
         // --------------------------------------------------------------------
 
-        class SearchContext  // NEXT, then => GO
+        internal class SearchContext // TODO:
         {
             /*
              * 1. Try normal search
@@ -207,38 +212,76 @@ namespace Dialogic
             }
         }
 
-        /*
-         * Sort by points, highest first, break ties with a coin-flip
-         */
-        private static List<KeyValuePair<Chat, double>> DescendingRandomSort(Dictionary<Chat, double> d)
+        /// <summary>
+        /// Sort by points, highest first, break ties with a coin-flip
+        /// </summary>
+        internal static List<KeyValuePair<Chat, double>> DescendingRandomSort(Dictionary<Chat, double> d)
         {
             List<KeyValuePair<Chat, double>> list = d.ToList();
             list.Sort((p1, p2) => CompareRandomizeTies(p1.Value, p2.Value));
             return list;
         }
 
-        /*
-         * Sort by points, highest first, break ties with the fresher chat
-         */
-        internal static List<KeyValuePair<Chat, double>> DescendingFreshnessSort(Dictionary<Chat, double> d)
+        /// <summary>
+        /// Sort by points, highest first, break ties with the lastRunAt time, then coin-flip
+        /// </summary>
+        internal static List<KeyValuePair<Chat, double>> DescendingStalenessSort(Dictionary<Chat, double> d)
         {
-            // public for testing only
-            List<KeyValuePair<Chat, double>> list = d.ToList();
-            list.Sort(CompareFreshnessTies);
+            List<KeyValuePair<Chat, double>> list = d.ToList(); // TODO: needs tests
+            list.Sort(CompareStalenessTies);
             return list;
         }
 
-        // sort descending with ties based on freshness
-        private static int CompareFreshnessTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
+        /// <summary>
+        /// Sort by points, highest first, break ties with the lastRunAt time, then coin-flip
+        /// </summary>
+        internal static List<KeyValuePair<Chat, double>> DescendingScoreLastRunAtRandomizedSort(Dictionary<Chat, double> d)
         {
-            return Util.FloatingEquals(i.Value, j.Value) ? (i.Key.lastRunAt > j.Key.lastRunAt
-                ? 1 : -1) : j.Value.CompareTo(i.Value);
+            List<KeyValuePair<Chat, double>> list = d.ToList();
+            list.Sort(CompareLastRunAtTies);
+            return list;
         }
 
-        // sort descending with randomized ties
-        private static int CompareRandomizeTies(double i, double j)
+        /// <summary>
+        /// Sort descending based on score with ties decided by lastRunAt, then a coin-flip
+        /// </summary>
+        internal static int CompareLastRunAtTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
         {
-            return Util.FloatingEquals(i, j) ? (Util.Rand() < .5 ? 1 : -1) : j.CompareTo(i);
+            if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
+            {
+                // check staleness and randomize ties
+                return CompareRandomizeTies(i.Key.lastRunAt, j.Key.lastRunAt);
+            }
+            return j.Value.CompareTo(i.Value);
+        }
+
+        /// <summary>
+        /// Sort descending based on score with ties decided by lastRunAt, then a coin-flip
+        /// </summary>
+        internal static int CompareStalenessTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
+        {
+            if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
+            {
+                // check staleness and randomize ties
+                return CompareRandomizeTies(i.Key.Staleness(), j.Key.Staleness());
+            }
+            return j.Value.CompareTo(i.Value);
+        }
+
+        /// <summary>
+        /// Sort int with ties decided by coin-flip
+        /// </summary> 
+        internal static int CompareRandomizeTies(int i, int j)
+        {
+            return i == j ? (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
+        }
+
+        /// <summary>
+        /// Sort int with ties decided by coin-flip
+        /// </summary> 
+        internal static int CompareRandomizeTies(double i, double j)
+        {
+            return Util.FloatingEquals(i, j) ? (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
         }
     }
 }

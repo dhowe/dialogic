@@ -154,10 +154,16 @@ namespace Dialogic
             // Q: Do we reset this stuff on resume ?
             // Prob not in case of staleness
 
-            lastRunAt = Util.EpochMs();
+            LastRunAt(Util.EpochMs());
 
             // Q: what about (No-Label) WAIT events ?
             IncrementStaleness();
+        }
+
+        internal Chat LastRunAt(int ms)
+        {
+            this.lastRunAt = ms;
+            return this;
         }
     }
 }
