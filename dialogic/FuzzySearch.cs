@@ -215,19 +215,19 @@ namespace Dialogic
         /// <summary>
         /// Sort by points, highest first, break ties with a coin-flip
         /// </summary>
-        internal static List<KeyValuePair<Chat, double>> DescendingRandomSort(Dictionary<Chat, double> d)
+        internal static List<KeyValuePair<Chat, double>> DescendingRandomizedSort(Dictionary<Chat, double> d)
         {
             List<KeyValuePair<Chat, double>> list = d.ToList();
-            list.Sort((p1, p2) => CompareRandomizeTies(p1.Value, p2.Value));
+            list.Sort((p1, p2) => CompareWithRandomizedTies(p1.Value, p2.Value));
             return list;
         }
 
         /// <summary>
-        /// Sort by points, highest first, break ties with the lastRunAt time, then coin-flip
+        /// Sort by points, highest first, break ties with Chat.Staleness(), then coin-flip
         /// </summary>
-        internal static List<KeyValuePair<Chat, double>> DescendingStalenessSort(Dictionary<Chat, double> d)
+        internal static List<KeyValuePair<Chat, double>> DescendingStalenessRandomizedSort(Dictionary<Chat, double> d)
         {
-            List<KeyValuePair<Chat, double>> list = d.ToList(); // TODO: needs tests
+            List<KeyValuePair<Chat, double>> list = d.ToList();
             list.Sort(CompareStalenessTies);
             return list;
         }
@@ -250,7 +250,7 @@ namespace Dialogic
             if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
             {
                 // check staleness and randomize ties
-                return CompareRandomizeTies(i.Key.lastRunAt, j.Key.lastRunAt);
+                return CompareWithRandomizedTies(i.Key.lastRunAt, j.Key.lastRunAt);
             }
             return j.Value.CompareTo(i.Value);
         }
@@ -263,7 +263,7 @@ namespace Dialogic
             if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
             {
                 // check staleness and randomize ties
-                return CompareRandomizeTies(i.Key.Staleness(), j.Key.Staleness());
+                return CompareWithRandomizedTies(i.Key.Staleness(), j.Key.Staleness());
             }
             return j.Value.CompareTo(i.Value);
         }
@@ -271,7 +271,7 @@ namespace Dialogic
         /// <summary>
         /// Sort int with ties decided by coin-flip
         /// </summary> 
-        internal static int CompareRandomizeTies(int i, int j)
+        internal static int CompareWithRandomizedTies(int i, int j)
         {
             return i == j ? (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
         }
@@ -279,7 +279,7 @@ namespace Dialogic
         /// <summary>
         /// Sort int with ties decided by coin-flip
         /// </summary> 
-        internal static int CompareRandomizeTies(double i, double j)
+        internal static int CompareWithRandomizedTies(double i, double j)
         {
             return Util.FloatingEquals(i, j) ? (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
         }

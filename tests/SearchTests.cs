@@ -828,7 +828,7 @@ namespace Dialogic
             chatScores.Add(Chat.Create("c4").LastRunAt(Util.EpochMs()), 4);
             chatScores.Add(Chat.Create("c5").LastRunAt(Util.EpochMs()), 5);
 
-            var chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            var chats = FuzzySearch.DescendingScoreLastRunAtRandomizedSort(chatScores);
             //chats.ForEach((obj) => Console.WriteLine(obj.Key.text));
 
             for (int i = 0; i < 5; i++)
@@ -843,7 +843,7 @@ namespace Dialogic
             chatScores.Add(Chat.Create("c4").LastRunAt(Util.EpochMs()), 5);
             chatScores.Add(Chat.Create("c5").LastRunAt(Util.EpochMs() - 1), 5);
 
-            chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            chats = FuzzySearch.DescendingScoreLastRunAtRandomizedSort(chatScores);
             //chats.ForEach((obj) => Console.WriteLine(obj.Key.text));
 
             for (int i = 0; i < 5; i++)
@@ -858,7 +858,7 @@ namespace Dialogic
             chatScores.Add(Chat.Create("c4").LastRunAt(Util.EpochMs()), 5);
             chatScores.Add(Chat.Create("c5").LastRunAt(-1), 5);
 
-            chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            chats = FuzzySearch.DescendingScoreLastRunAtRandomizedSort(chatScores);
             //chats.ForEach((obj) => Console.WriteLine(obj.Key.text));
 
             for (int i = 0; i < 5; i++)
@@ -875,7 +875,7 @@ namespace Dialogic
 
             for (int j = 0; j < 10; j++) // repeat a few times
             {
-                chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+                chats = FuzzySearch.DescendingScoreLastRunAtRandomizedSort(chatScores);
                 //chats.ForEach(obj => Console.Write(obj.Key.text+ ", "));Console.WriteLine();
                 Assert.That(chats[0].Key.text, Is.EqualTo("c5").Or.EqualTo("c4"));
                 Assert.That(chats[0].Key.text, Is.EqualTo("c4").Or.EqualTo("c5"));
@@ -894,7 +894,7 @@ namespace Dialogic
             chatScores.Add(Chat.Create("c4"), 0);
             chatScores.Add(Chat.Create("c5"), 10);
 
-            chats = FuzzySearch.DescendingLastRunAtSort(chatScores);
+            chats = FuzzySearch.DescendingScoreLastRunAtRandomizedSort(chatScores);
             for (int i = 0; i < chats.Count; i++)
             {
                 //Console.WriteLine(chats[i].Key + "(" + chats[i].Key.lastRunAt + ") -> " + chats[i].Value);
@@ -913,25 +913,13 @@ namespace Dialogic
         {
             var chatScores = new Dictionary<Chat, double>();
 
-            Chat c = Chat.Create("c1");
-            c.Staleness(3.1);
-            chatScores.Add(c, 1);
+            chatScores.Add(Chat.Create("c1").Staleness(3.1), 1);
+            chatScores.Add(Chat.Create("c2").Staleness(3), 1);
+            chatScores.Add(Chat.Create("c3").Staleness(1.1), 1);
+            chatScores.Add(Chat.Create("c4"), 0);
+            chatScores.Add(Chat.Create("c5"), 10);
 
-            c = Chat.Create("c2");
-            c.Staleness(3);
-            chatScores.Add(c, 1);
-
-            c = Chat.Create("c3");
-            c.Staleness(1.1);
-            chatScores.Add(c, 1);
-
-            c = Chat.Create("c4");
-            chatScores.Add(c, 0);
-
-            c = Chat.Create("c5");
-            chatScores.Add(c, 10);
-
-            var list = FuzzySearch.DescendingStalenessSort(chatScores);
+            var list = FuzzySearch.DescendingStalenessRandomizedSort(chatScores);
             for (int i = 1; i < list.Count; i++)
             {
                 Assert.That(list[i].Value <= list[i - 1].Value, Is.True);
