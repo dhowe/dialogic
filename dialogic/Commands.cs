@@ -55,8 +55,6 @@ namespace Dialogic
         {
             this.text = txt.Length > 0 ? txt : lbl;
             ParseMeta(metas);
-            //HandleMetaTiming();
-            //Validate();
         }
 
         protected void ValidateTextLabel()
@@ -69,6 +67,11 @@ namespace Dialogic
 
         public string Text(bool real = false)
         {
+            if (real && !realized.ContainsKey(Meta.TEXT))
+            {
+                throw new DialogicException("Text(true) called on " +
+                    "unrealized object: " + this + "\nCall Realize() first");
+            }
             return real ? (string)realized[Meta.TEXT] : text;
         }
 
@@ -81,9 +84,9 @@ namespace Dialogic
             return actor;
         }
 
-        protected internal Command Actor(IActor actor)
+        protected internal Command Actor(IActor theActor)
         {
-            this.actor = actor;
+            this.actor = theActor;
             return this;
         }
 
@@ -93,8 +96,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Validates this instance by verifying that (at least) it has all
-        /// required metadata values (no-op here)
+        /// Validates this instance by verifying that (at least) it has all required metadata values (no-op here)
         /// </summary>
         protected internal virtual Command Validate()
         {
@@ -114,11 +116,10 @@ namespace Dialogic
 
             if (this is ISendable)
             {
-                realized[Meta.TEXT] = Realizer.Do(text, globals);
+                realized[Meta.TEXT] = Realizer.Do(text, globals, parent);
                 realized[Meta.TYPE] = TypeName();
                 if (this is IAssignable)
                 {
-                    
                     realized[Meta.ACTOR] = Actor().Name();
                 }
             }
@@ -128,30 +129,18 @@ namespace Dialogic
         {
             if (HasMeta())
             {
-                IEnumerable sorted = null; // TODO: cache these key-sorts ?
-
                 foreach (KeyValuePair<string, object> pair in meta)
                 {
                     object val = pair.Value;
 
                     if (val is string)
                     {
-                        string tmp = (string)val;
-
-                        if (tmp.IndexOf('$') > -1)
-                        {
-                            if (sorted == null) sorted = Util.SortByLength(globals.Keys);
-                            foreach (string s in sorted)
-                            {
-                                tmp = tmp.Replace("$" + s, globals[s].ToString());
-                            }
-                        }
-
-                        val = tmp;
+                        val = Realizer.Do((string)val, globals);
                     }
-                    else if (!(val is Constraint))
+                    else if (!(val is Constraint)) // don't replace constraints
                     {
-                        throw new DialogicException("Unexpected meta-value: " + val + " " + val.GetType());
+                        throw new DialogicException("Unexpected meta-value type: "
+                            + val.GetType() + " -> " + val);
                     }
 
                     realized[pair.Key] = val;
@@ -208,10 +197,10 @@ namespace Dialogic
         {
             if (IsRecombinant()) // try to say something different than last time
             {
-                int tries = 0;
-                while (lastSpoken == Text(true) && ++tries < 100)
+                var iterations = 0;
+                while (lastSpoken == Text(true) && ++iterations < 100)
                 {
-                    realized[Meta.TEXT] = Realizer.Do(text, globals);
+                    realized[Meta.TEXT] = Realizer.Do(text, globals, parent);
                 }
             }
         }
@@ -316,12 +305,11 @@ namespace Dialogic
 
         protected internal override void Realize(IDictionary<string, object> globals)
         {
-            //String result = Regex.Replace(htmlDocument, @"<[^>]*>", String.Empty);
-
             string key = globals.ContainsKey(text) ? text : parent.text + "." + text;
 
-            if (value.IndexOf('<') > -1 && value.IndexOf('>') > -1) {
-                
+            if (value.IndexOf('<') > -1 && value.IndexOf('>') > -1)
+            {
+
                 string val = value;
                 //Console.WriteLine("CHECKING: " + val);
                 MatchCollection matches = RE.GrammarRules.Matches(val);
@@ -331,13 +319,15 @@ namespace Dialogic
                     rules.ForEach(rule => val = val.Replace("<" + rule + ">", "$" + rule));
                     //Console.WriteLine("GOT: " + matches.Count+" "+rules.Count+" "+rules.Stringify());
                     //Util.ShowMatches(matches);
-
                 }
 
-                value = val.Replace("$", "$" + parent.text + ".");;
+                value = val.Replace("$", "$" + parent.text + "."); ;
             }
-            //if (value.Contains(".")) Console.WriteLine("Adding global: " + value + " "+globals.Stringify());
-            globals[key] = value;// Realizer.DoVars(value, globals);
+
+            //if (value.Contains(".")) Console.WriteLine("Adding " + value 
+              //  + " to globals:\n  " + globals.Stringify());
+
+            globals[key] = value;//Realizer.Do(value, globals, parent);
         }
 
         protected string[] ParseSetArgs(string s)
@@ -538,6 +528,7 @@ namespace Dialogic
         protected internal override void Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
+
             RealizeMeta(globals); // only realized meta
         }
 

@@ -33,8 +33,9 @@ namespace Dialogic
             IDictionary<Constraint, bool> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
-            bool resetRequired = false; // opt
+            var resetRequired = false; // opt
             var clist = constraints.Keys;
+
             Chat chat = FindAll(chats, clist, parent, globals).FirstOrDefault();
 
             while (chat == null)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Dialogic
@@ -6,43 +7,84 @@ namespace Dialogic
     [TestFixture]
     class GrammarTests
     {
+        public static IDictionary<string, object> globals = new Dictionary<string, object>() {
+            { "obj.prop", "dog" },
+            { "animal", "dog" },
+            { "prep", "then" },
+            { "group", "(a|b)" },
+            { "cmplx", "($group | $prep)" },
+            { "count", 4 }
+        };
+
         [Test]
-        public void SetRules()
+        public void SetRulesWithOrs()
+        {
+            string[] lines = {
+                "CHAT c1 {type=a,stage=b,mode=grammar}",
+                "SET review <greeting>",
+                "SET greeting (Hello | Goodbye)",
+                "SAY $review",
+            };
+            var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
+            //Console.WriteLine(chat.ToTree());
+            var last = chat.commands[chat.commands.Count - 1];
+            Assert.That(last, Is.Not.Null);
+            Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));
+            chat.Realize(globals);
+
+            //Console.WriteLine("\nGLOBALS:");
+            //foreach (var k in globals.Keys)
+                //Console.WriteLine("  " + k + ": " + globals[k]);
+
+            Assert.That(globals.ContainsKey("c1.review"), Is.True);
+            Assert.That(globals.ContainsKey("c1.greeting"), Is.True);
+
+            Say say = (Dialogic.Say)last;
+            //Console.WriteLine("\n"+chat.ToTree());
+            //Console.WriteLine("\nSAY: " + say.Text(true));
+
+            for (int i = 0; i < 10; i++)
+            {
+                say.Realize(globals);
+                //Console.WriteLine(say.Text(true));
+                Assert.That(say.Text(true), Is.EqualTo("Hello").Or.EqualTo("Goodbye"));
+            }
+        }
+
+        [Test]
+        public void SetRules1()
         {
             string[] lines = {
                 "CHAT WineReview {type=a,stage=b,mode=grammar}",
                 "SET review <desc> <fortune> <ending>",
-                "SET ending <score> <end-phrase>",
                 //"SET ending <score> | <end-phrase>", // causes hang
                 "SET desc You look tasty: gushing blackberry into the rind of day-old ennui.",
                 "SET fortune Under your skin, tears undulate like a leaky eel.",
+                "SET ending And thats the end of the story...",
                 "SAY $WineReview.review",
             };
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
-            Console.WriteLine(chat.ToTree());
+            //Console.WriteLine(chat.ToTree());
           
             var last = chat.commands[chat.commands.Count-1];
             Assert.That(last, Is.Not.Null);
             Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));  
-            chat.Realize(RealizeTests.globals);
-            Console.WriteLine("GLOBALS:");
-            foreach (var k in RealizeTests.globals.Keys)
-            {
-                Console.WriteLine("  "+k+": "+RealizeTests.globals[k]);
-            }
+            //chat.Realize(globals);
+            chat.commands.ForEach(c => c.Realize(globals));
+
+            //Console.WriteLine("\nGLOBALS:");
+            //foreach (var k in globals.Keys)Console.WriteLine("  "+k+": "+globals[k]);
 
 
-            Assert.That(RealizeTests.globals.ContainsKey("WineReview.review"), Is.True);
-            Assert.That(RealizeTests.globals.ContainsKey("WineReview.ending"), Is.True);
+            Assert.That(globals.ContainsKey("WineReview.review"), Is.True);
+            Assert.That(globals.ContainsKey("WineReview.ending"), Is.True);
        
             Say say = (Dialogic.Say)last;
-            Console.WriteLine(chat.ToTree());
-            Console.WriteLine("SAY: "+say.Text(true));
+            //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
 
-            Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. $WineReview.score $WineReview.end-phrase"));
+            Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
 
             //CollectionAssert.Contains(new[]{"<score>","<end-phrase>"}, s);
-
         }
 
         [Test]

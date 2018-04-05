@@ -105,17 +105,16 @@ namespace Dialogic
 
         protected internal override void Realize(IDictionary<string, object> globals)
         {
-            Console.WriteLine("[WARN] Chats should not be realized, doing commands");
+            Console.WriteLine("[WARN] Chats need not be realized, doing commands instead");
+            //commands.ForEach(c => { Console.WriteLine(c.TypeName() + ".Realize("+c.text+")"); c.Realize(globals); });
             commands.ForEach(c => c.Realize(globals));
         }
 
         ///  All Chats must have a valid unique label, and a staleness value
         protected internal override Command Validate()
         {
-            if (Regex.IsMatch(text, @"\s+")) // OPT: compile
-            {
-                throw BadArg("CHAT name '" + text + "' contains spaces");
-            }
+            if (text.IndexOf(' ') > -1) throw BadArg
+                ("CHAT name '" + text + "' contains spaces");
 
             SetMeta(Meta.STALENESS, Defaults.CHAT_STALENESS.ToString(), true);
 
@@ -126,8 +125,6 @@ namespace Dialogic
         {
             this.text = txt;
             ParseMeta(metas);
-            //Validate();
-            //Console.WriteLine("Chat #"+text +" "+realized.Stringify());
         }
 
         public string ToTree()
@@ -136,6 +133,12 @@ namespace Dialogic
                 + text + (" " + MetaStr()).TrimEnd();
             commands.ForEach(c => s += "\n  " + c);
             return s;
+        }
+
+        internal Chat LastRunAt(int ms)
+        {
+            this.lastRunAt = ms;
+            return this;
         }
 
         internal Command Next()
@@ -150,21 +153,15 @@ namespace Dialogic
 
         internal void Run(bool resetCursor = true)
         {
-            if (resetCursor) this.cursor = 0;
-
-            // Q: Do we reset this stuff on resume ?
-            // Prob not in case of staleness
+            if (resetCursor)
+            {
+                this.cursor = 0;
+                IncrementStaleness(); // not on resume
+            }
 
             LastRunAt(Util.EpochMs());
-
-            // Q: what about (No-Label) WAIT events ?
-            IncrementStaleness();
         }
 
-        internal Chat LastRunAt(int ms)
-        {
-            this.lastRunAt = ms;
-            return this;
-        }
+ 
     }
 }
