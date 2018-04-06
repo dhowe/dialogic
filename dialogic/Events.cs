@@ -113,18 +113,18 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// Basic implementation of IUpdateEvent which wraps a string/object  dictionary containing relevant Command data with helper functions for extracting specific primitive types (double, bool, string, int, float)
+    /// Basic implementation of IUpdateEvent which wraps a string/object dictionary containing relevant Command data with helper functions for extracting specific primitive types (double, bool, string, int, float)
     /// </summary>
     public class UpdateEvent : IUpdateEvent
     {
-        private IDictionary<string, object> data;
+        private readonly IDictionary<string, object> data;
 
-        public UpdateEvent(Command c)
+        public UpdateEvent(ISendable c)
         {
-            this.data = c.realized;
+            this.data = c.GetRealized();
         }
 
-        public UpdateEvent(IDictionary<string, object> data)
+        protected internal UpdateEvent(IDictionary<string, object> data)
         {
             this.data = data;
         }

@@ -37,6 +37,8 @@ namespace Dialogic
 
             ea = null;
 
+            // TODO: Refactor with ResumeHandler
+
             if (String.IsNullOrEmpty(findBy)) // apply to all chats
             {
                 runtime.chats.ForEach(action);
@@ -95,7 +97,7 @@ namespace Dialogic
 
             ea = null;
 
-            if (String.IsNullOrEmpty(label))
+            if (String.IsNullOrEmpty(label)) // TODO: Refactor with ChatUpdateHandler
             {
                 scheduler.nextEventTime = scheduler.Resume();
             }
@@ -211,13 +213,13 @@ namespace Dialogic
             {
                 if (cmd.GetType() == typeof(Wait))
                 {
-                    // just pause internally, no event needs to be fired
-                    if (cmd.delay != Util.INFINITE)
+                    if (cmd.delay > Util.INFINITE) // non-infinite WAIT?
                     {
+                        // just pause internally, no event needs to be fired
                         ComputeNextEventTime(cmd);
                         return null;
                     }
-                    scheduler.Suspend();           // wait on infinite WAIT
+                    scheduler.Suspend();          // suspend on infinite WAIT
                 }
                 else if (cmd is Ask)
                 {
@@ -229,7 +231,7 @@ namespace Dialogic
                     ComputeNextEventTime(cmd); // compute delay for next cmd
                 }
 
-                return new UpdateEvent(cmd); // fire cmd event
+                return new UpdateEvent((Dialogic.ISendable)cmd); // fire cmd event
             }
             else if (cmd is Find)
             {

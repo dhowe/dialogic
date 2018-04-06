@@ -32,10 +32,8 @@ namespace Dialogic
 
             icu = new StalenessUpdate(100, "#c4");
             rt.Update(null, ref icu);
-            Assert.That(rt.FindChatByLabel("c1").Staleness(), Is.EqualTo(5));   
-            Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));   
-
-
+            Assert.That(rt.FindChatByLabel("c1").Staleness(), Is.EqualTo(5));
+            Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
 
             icu = new StalenessUpdate(10, "{!type=a}");
             rt.Update(null, ref icu);
@@ -46,8 +44,15 @@ namespace Dialogic
             Assert.That(rt.FindChatByLabel("c1").Staleness(), Is.EqualTo(10));
             Assert.That(rt.FindChatByLabel("c2").Staleness(), Is.EqualTo(10));
             Assert.That(rt.FindChatByLabel("c3").Staleness(), Is.EqualTo(5));
-            Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));   
+            Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
 
         }
+
+        [Test]
+        public void TestResumeEvent()
+        {
+            // pending
+        }
+
     }
 }

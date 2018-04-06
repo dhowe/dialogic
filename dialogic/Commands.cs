@@ -557,11 +557,13 @@ namespace Dialogic
                 if (String.IsNullOrEmpty(pairs[i])) throw new ParseException
                     ("Invalid query: {empty}");
 
-                Match match = RE.FindMeta.Match(pairs[i]);
+                var pair = pairs[i].Trim();
+
+                Match match = RE.FindMeta.Match(pair);
                 //Util.ShowMatch(match);
 
                 if (match.Groups.Count != 4) throw new ParseException
-                    ("Invalid query: '" + pairs[i] + "'");
+                    ("Invalid query: '" + pair + "'");
 
                 string key = match.Groups[1].Value;
                 ConstraintType ctype = ConstraintType.Soft;
@@ -668,6 +670,11 @@ namespace Dialogic
         protected internal object GetRealized(string key, object defaultVal = null)
         {
             return realized.ContainsKey(key) ? realized[key] : defaultVal;
+        }
+
+        public IDictionary<string, object> GetRealized()
+        {
+            return realized;
         }
 
         protected internal void SetMeta(Constraint constraint, bool onlyIfNotSet = false)

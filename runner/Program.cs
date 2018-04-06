@@ -35,7 +35,6 @@ namespace runner
                 { "var3", 2 }
             };
 
-
         ChatRuntime dialogic;
         EventArgs gameEvent;
 
@@ -60,6 +59,8 @@ namespace runner
         public void Run()
         {
             var now = Util.Millis();
+
+            // a 'Tap' event
             Timers.SetTimeout(Util.Rand(2000, 10000), () =>
              {
                  interrupted = true;
@@ -68,6 +69,17 @@ namespace runner
 
                  gameEvent = new UserEvent("Tap");
              });
+
+            // a 'Resume' event
+            /*Timers.SetTimeout(2000, () =>
+            {
+                interrupted = true;
+                var data = "{type = a}";
+                Console.WriteLine("\n<resume-event#"+data+">" +
+                    " after " + Util.Millis(now) + "ms\n");
+
+                gameEvent = new ResumeEvent(data);
+            });*/
 
             while (true)
             {

@@ -218,6 +218,69 @@ namespace Dialogic
         }
 
         [Test]
+        public void FindParameters()
+        {
+            Find f = new Find().Init("{ num = 1 }");
+            Assert.That(f, Is.Not.Null);
+            Assert.That(f.text, Is.Null);
+            Assert.That(f.GetMeta("num"), Is.Not.Null);
+            var meta = f.GetMeta("num");
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            Constraint constraint = (Dialogic.Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+
+            f = new Find().Init("{ num=1 }");
+            Assert.That(f, Is.Not.Null);
+            Assert.That(f.text, Is.Null);
+            Assert.That(f.GetMeta("num"), Is.Not.Null);
+            meta = f.GetMeta("num");
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            constraint = (Dialogic.Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+
+            f = new Find().Init("{num = 1}");
+            Assert.That(f, Is.Not.Null);
+            Assert.That(f.text, Is.Null);
+            Assert.That(f.GetMeta("num"), Is.Not.Null);
+            meta = f.GetMeta("num");
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            constraint = (Dialogic.Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+
+            f = new Find().Init("{num == 1}");
+            Assert.That(f, Is.Not.Null);
+            Assert.That(f.text, Is.Null);
+            Assert.That(f.GetMeta("num"), Is.Not.Null);
+            meta = f.GetMeta("num");
+            Assert.That(meta.GetType(), Is.EqualTo(typeof(Constraint)));
+            constraint = (Dialogic.Constraint)meta;
+            Assert.That(constraint.IsStrict(), Is.EqualTo(false));
+        }
+
+
+        [Test]
+        public void UpdateEventData()
+        {
+            List<Chat> chats;
+            chats = ChatParser.ParseText("SAY OK {stage=S1, type=hello, length=4}");
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].commands[0], Is.Not.Null);
+            Say say = (Say)chats[0].commands[0];
+            say.Realize(null);
+            var ue = new UpdateEvent(say);
+            Assert.That(ue, Is.Not.Null);
+            //Console.WriteLine(ue.Data().Stringify());
+            Assert.That(ue.Data(), Is.Not.Null);
+            Assert.That(ue.Get(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(ue.Get(Meta.TEXT), Is.EqualTo("OK"));
+            Assert.That(ue.Get(Meta.ACTOR), Is.EqualTo(Actor.Default.Name()));
+            Assert.That(ue.Get("length"), Is.EqualTo("4"));
+            Assert.That(ue.GetInt("length"), Is.EqualTo(4));
+            Assert.That(ue.GetFloat("length"), Is.EqualTo(4));
+            Assert.That(ue.GetDouble("length"), Is.EqualTo(4));
+        }
+
+        [Test]
         public void ChatStaleness()
         {
             List<Chat> chats;

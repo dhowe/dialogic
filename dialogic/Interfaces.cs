@@ -21,7 +21,10 @@ namespace Dialogic
     /// <summary>
     /// Tagging interface denoting Commands should be dispatched to clients
     /// </summary>
-    public interface ISendable { }
+    public interface ISendable {
+
+        IDictionary<string, object> GetRealized();
+    }
 
     /// <summary>
     /// Tagging interface denoting Commands that can be assigned an Actor

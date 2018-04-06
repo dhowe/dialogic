@@ -127,7 +127,10 @@ namespace Dialogic
         public Chat FindChatByLabel(string label)
         {
             Util.ValidateLabel(ref label);
-            return chats.FirstOrDefault(c => c.text == label);
+            var chat = chats.FirstOrDefault(c => c.text == label);
+            if (chat == null) throw new DialogicException
+                ("Unable to find Chat with label: '" + label + "'");
+            return chat;
         }
 
         public IActor FindActorByName(string name)
@@ -174,7 +177,11 @@ namespace Dialogic
 
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            scheduler.Completed(false); // Consider current chat finished on a FIND cmd
+            if (scheduler.chat != null)
+            {
+                // If there is a current chat, consider it finished on a FIND
+                scheduler.Completed(false); 
+            }
 
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
@@ -348,20 +355,20 @@ namespace Dialogic
 
         internal void Launch(string label)
         {
-            var next = runtime.FindChatByLabel(label);
-            if (next == null) throw new DialogicException
-                ("Unable to find Chat: '" + label + "'");
-            Launch(next);
+            Launch(runtime.FindChatByLabel(label));
         }
 
         internal void Launch(Chat next)
         {
             if (next == null) throw new DialogicException
                 ("Attempt to launch a null Chat");
+            
             chat = next;
             nextEventTime = Util.Millis();
             chat.Run();
 
+            // Chats are not ISendable, but its useful for the client to know 
+            // when a new Chat is started, so we send the minimal data here
             chatEvent = new UpdateEvent(new Dictionary<string, object>(){
                 { Meta.TYPE, chat.TypeName() },
                 { Meta.TEXT, chat.text },
