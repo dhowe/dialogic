@@ -22,11 +22,11 @@ namespace Dialogic
         {
             commands = new List<Command>();
 
-            realized = null; // not relevant for chats
             interruptable = true;
             resumeAfterInt = true;
             stalenessIncr = Defaults.CHAT_STALENESS_INCR;
             staleness = Defaults.CHAT_STALENESS;
+            realized = null; // not relevant for chats
         }
 
         internal static Chat Create(string name)
@@ -34,6 +34,11 @@ namespace Dialogic
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
             return c;
+        }
+
+        public IDictionary<string,object> Meta() // tmp: for debugging
+        {
+            return meta;
         }
 
         internal double Staleness()
