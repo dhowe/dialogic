@@ -21,9 +21,9 @@ namespace Dialogic
         public static char ASSIGN = '=';
         public static bool DBUG = false;
 
-        public JObject Rules;
+        protected JObject rules;
 
-        private Random Random = new Random();
+        private Random random = new Random();
 
         /// <summary>
         /// Regex for matching expansion symbols.
@@ -46,10 +46,8 @@ namespace Dialogic
         /// Load rules by deserializing the source as a json object
         /// </summary>
         /// <param name="source"></param>
-        public Grammar(string source)
+        public Grammar(string source = null)
         {
-            PopulateRules(source);
-
             // Set up the function table TODO: replace w' rita versions
             ModifierLookup = new Dictionary<string, Func<string, string>>
             {
@@ -64,23 +62,34 @@ namespace Dialogic
 
             // Initialize the save storage
             SaveData = new Dictionary<string, string>();
+
+            if (source != null) Rules(source);
         }
 
-        private void PopulateRules(string source)
+        public JObject Rules()
+        {
+            return rules;
+        }
+
+        public Grammar Rules(JObject rules)
+        {
+            this.rules = rules;
+            return this;
+        }
+
+        public Grammar Rules(string source)
         {
             if (IsValidJson(source))
             {
                 // Deserialize directly
-                Rules = JsonConvert.DeserializeObject<JObject>(source);
+                return Rules(JsonConvert.DeserializeObject<JObject>(source));
             }
             else if (IsValidYaml(source))
             {
-                Rules = DeserializeYaml(source);
+                // Deserialize via the YAML parser 
+                return Rules(DeserializeYaml(source));
             }
-            else
-            {
-                throw new Exception("Invalid JSON or YAML!");
-            }
+            throw new Exception("Invalid JSON or YAML!");
         }
 
         private JObject DeserializeYaml(string source)
@@ -89,8 +98,8 @@ namespace Dialogic
             var yamlObject = deserializer.Deserialize(new StringReader(source));
 
             // convert rules to json
-            var rules = JsonConvert.SerializeObject(yamlObject);
-            return JsonConvert.DeserializeObject<JObject>(rules);
+            var json = JsonConvert.SerializeObject(yamlObject);
+            return JsonConvert.DeserializeObject<JObject>(json);
         }
 
         /// <summary>
@@ -117,7 +126,7 @@ namespace Dialogic
 
             if (DBUG && expansionMatches.Count < 1 && (rule.Contains(OPEN_TAG) || rule.Contains(CLOSE_TAG)))
             {
-                throw new Exception("No matches for '" + rule + "' (" + ExpansionRegex + ") in\n" + Rules);
+                throw new Exception("No matches for '" + rule + "' (" + ExpansionRegex + ") in\n" + rules);
             }
 
             // If there are no expansion symbols then attempt to resolve any save symbols
@@ -157,7 +166,7 @@ namespace Dialogic
                 // Get the selected rule
                 try
                 {
-                    selectedRule = Rules[matchName] ?? SaveData[matchName] ?? matchName;
+                    selectedRule = rules[matchName] ?? SaveData[matchName] ?? matchName;
                 }
                 catch (Exception)
                 {
@@ -167,7 +176,7 @@ namespace Dialogic
                 // If the rule has any children then pick one at random
                 if (selectedRule.Type == JTokenType.Array)
                 {
-                    var index = Random.Next(0, ((JArray)selectedRule).Count);
+                    var index = random.Next(0, ((JArray)selectedRule).Count);
                     var chosen = selectedRule[index].ToString();
                     var resolved = Expand(chosen);
 
@@ -192,7 +201,7 @@ namespace Dialogic
         public override string ToString()
         {
             var s = "";
-            foreach (var kv in Rules)
+            foreach (var kv in rules)
             {
                 s += "  " + kv.Key + ": " + kv.Value + "\n";
             }
@@ -389,7 +398,7 @@ namespace Dialogic
         /// <returns>The modified string</returns>
         public static string Quotify(string str)
         {
-            return "\"" + str + "\""; ;
+            return "\"" + str + "\"";
         }
 
         /// <summary>
