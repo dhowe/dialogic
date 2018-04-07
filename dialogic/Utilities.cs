@@ -45,7 +45,7 @@ namespace Dialogic
         /// <summary>
         /// Default staleness-threshold for Find
         /// </summary>
-        public static double FIND_STALENESS = 4;
+        public static double FIND_STALENESS = 10;
 
         /// <summary>
         /// Max staleness-threshold to try for a Find
@@ -158,23 +158,23 @@ namespace Dialogic
         /// <param name="max">upper bound of the value's current range</param>
         /// <param name="targetMin">lower bound of the value's target range</param>
         /// <param name="targetMax">upper bound of the value's target range</param>
-        public static double Map(double n, 
+        public static double Map(double n,
             double min, double max, double targetMin, double targetMax)
         {
             return (n - min) / (max - min) * (targetMax - targetMin) + targetMin;
         }
 
         /// <summary> A version of Equals for floating point comparison </summary>
-        public static bool FloatingEquals(double a, double b, double epsilon=0.00001f)
+        public static bool FloatingEquals(double a, double b, double epsilon = 0.00001f)
         {
             double absA = Math.Abs(a);
             double absB = Math.Abs(b);
             double diff = Math.Abs(a - b);
 
             // shortcut, handles infinities
-            #pragma warning disable RECS0018 // floating point equality 
+#pragma warning disable RECS0018 // floating point equality 
             if (a == b)
-            { 
+            {
                 return true;
             }
             else if (a == 0 || b == 0 || diff < Double.Epsilon)
@@ -184,10 +184,10 @@ namespace Dialogic
                 return diff < epsilon;
             }
             else // use relative error
-            { 
+            {
                 return diff / (absA + absB) < epsilon;
             }
-            #pragma warning restore RECS0018 // floating point equality 
+#pragma warning restore RECS0018 // floating point equality 
 
         }
 
@@ -636,7 +636,7 @@ namespace Dialogic
             if (Double.TryParse(value, out dval))
             {
                 double newval = dval + incr;
-                value = (newval + incr).ToString();
+                value = newval.ToString();
                 if (newval < Defaults.FIND_MAX_STALENESS)
                 {
                     return true;

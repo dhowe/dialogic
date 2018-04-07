@@ -64,9 +64,10 @@ namespace Dialogic
                             resetRequired = false;
                             ResetConstraints(constraints);
                         }
-                        Constraint staleness = GetConstraint(constraints, Meta.STALENESS);
 
+                        Constraint staleness = GetConstraint(constraints, Meta.STALENESS);
                         if (!staleness.IncrementValue(.5)) return null;  // give up here
+
                         if (DBUG) Console.WriteLine("\nRelaxing staleness to " + staleness.value);
 
                         chat = FindAll(chats, clist, parent, globals).FirstOrDefault();
@@ -74,6 +75,7 @@ namespace Dialogic
                 }
             }
 
+            //Console.WriteLine("Find -> "+chat);
             return chat;
         }
 
@@ -96,6 +98,8 @@ namespace Dialogic
             Dictionary<Chat, double> matches = new Dictionary<Chat, double>();
 
             if (DBUG) Console.WriteLine("\nFIND: " + constraints.Stringify());
+
+            ValidateConstraints(constraints);
 
             for (int i = 0; i < chats.Count; i++)
             {
@@ -140,6 +144,7 @@ namespace Dialogic
                         Console.WriteLine("    NOKEY");
                     }
                 }
+
                 if (hits > -1) matches.Add(chats[i], ComputeScore(constraints, hits));
             }
 
@@ -148,6 +153,20 @@ namespace Dialogic
             if (DBUG) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
 
             return (from kvp in list select kvp.Key).ToList();
+        }
+
+        private static void ValidateConstraints(IEnumerable<Constraint> constraints)
+        {
+            bool hasStaleness = false;
+            foreach (var constraint in constraints)
+            {
+                if (constraint.name == Meta.STALENESS)
+                {
+                    hasStaleness = true;
+                }
+            }
+            if (!hasStaleness) throw new FindException
+                ("No staleness threshold: " + constraints.Stringify());
         }
 
         private static double ComputeScore(IEnumerable<Constraint> constraints, int hits)
@@ -195,6 +214,10 @@ namespace Dialogic
         {
             foreach (var constraint in constraints.Keys)
             {
+                // never relax staleness
+                if (constraint.name == Meta.STALENESS) continue;
+
+                // find a constraint that has not been relaxed
                 if (constraints[constraint])
                 {
                     constraints[constraint] = false;

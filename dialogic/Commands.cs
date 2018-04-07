@@ -325,7 +325,7 @@ namespace Dialogic
             }
 
             //if (value.Contains(".")) Console.WriteLine("Adding " + value 
-              //  + " to globals:\n  " + globals.Stringify());
+            //  + " to globals:\n  " + globals.Stringify());
 
             globals[key] = value;//Realizer.Do(value, globals, parent);
         }
@@ -512,8 +512,11 @@ namespace Dialogic
         internal Find Init(string metadata)
         {
             if (meta != null) meta.Clear();
+
             Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
-            return this;
+
+            // need to call Validate here as its not called by the parser
+            return (Find)Validate();
         }
 
         protected internal override void Init(string txt, string lbl, string[] metas)
@@ -526,15 +529,23 @@ namespace Dialogic
         protected internal override void Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
-
             RealizeMeta(globals); // only realized meta
         }
 
         ///  All Find commands must have a 'staleness' value
         protected internal override Command Validate()
         {
+            //Console.WriteLine("Find.Validate: "+this);
+
             SetMeta(new Constraint(Operator.LT, Meta.STALENESS,
                     Defaults.FIND_STALENESS.ToString()), true);
+
+            Constraint staleness = (Constraint)GetMeta(Meta.STALENESS);
+
+            if (staleness.op != Operator.LT && staleness.op != Operator.LTE)
+            {
+                throw new FindException("Find staleness op must be < or <=");
+            }
 
             return this;
         }

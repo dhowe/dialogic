@@ -95,6 +95,8 @@ namespace Dialogic
             IResume ir = (IResume)ea;
             var label = ir.ResumeWith();
 
+            //Console.WriteLine("ResumeHandler: "+label);
+
             ea = null;
 
             if (String.IsNullOrEmpty(label)) // TODO: Refactor with ChatUpdateHandler
