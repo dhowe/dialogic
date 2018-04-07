@@ -481,8 +481,6 @@ namespace Dialogic
 
             this.action = lbl.Length > 0 ?
                 Command.Create(typeof(Go), String.Empty, lbl, metas) : NOP;
-
-            //Validate();
         }
 
         protected internal override Command Validate()
@@ -645,6 +643,7 @@ namespace Dialogic
         public const string ACTOR = "actor";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
+        public const string ON_RESUME = "onResume";
         public const string STALENESS = "staleness";
         public const string INTERRUPTIBLE = "interruptible";
         public const string STALENESS_INCR = "stalenessIncr";

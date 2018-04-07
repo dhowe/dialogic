@@ -50,7 +50,7 @@ namespace runner
         {
             dialogic = new ChatRuntime(AppConfig.Actors);
             dialogic.ParseFile(fileOrFolder);
-            dialogic.Run("#GScriptTest");
+            dialogic.Run();
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace runner
             var now = Util.Millis();
 
             // a 'Tap' event
-            Timers.SetTimeout(Util.Rand(2000, 10000), () =>
+            if (true) Timers.SetTimeout(Util.Rand(2000, 10000), () =>
              {
                  interrupted = true;
                  Console.WriteLine("\n<user-event#tap>" +
@@ -71,15 +71,15 @@ namespace runner
              });
 
             // a 'Resume' event
-            /*Timers.SetTimeout(2000, () =>
+            if (false) Timers.SetTimeout(3000, () =>
             {
                 interrupted = true;
-                var data = "{type = a}";
+                var data = "{type = shake}";
                 Console.WriteLine("\n<resume-event#"+data+">" +
                     " after " + Util.Millis(now) + "ms\n");
 
                 gameEvent = new ResumeEvent(data);
-            });*/
+            });
 
             while (true)
             {
@@ -89,6 +89,28 @@ namespace runner
             }
         }
 
+        internal void RunInLoop() // repeated events
+        {
+            int ts = 0;
+            int count = 0;
+            while (true)
+            {
+                Thread.Sleep(30);
+                IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
+                if (ue != null) HandleEvent(ref ue);
+                if (Util.Millis(ts) > 1000)
+                {
+
+                    ts = Util.Millis();
+                    if (++count < 5)
+                    {
+                        FuzzySearch.DBUG = count == 4;
+                        gameEvent = new ResumeEvent("{type = test}");
+
+                    }
+                }
+            }
+        }
 
         ////////////////////////////////////////////////////////////////////////   
 

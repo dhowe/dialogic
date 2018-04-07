@@ -67,6 +67,11 @@ namespace Dialogic
         /// </summary>
         public static double CHAT_STALENESS_INCR = 1;
 
+        /// <summary>
+        /// Whether to auto-launch 'onResume' smoothing Chats when specified
+        /// </summary>
+        public static bool CHAT_ENABLE_SMOOTHING = true;
+
         // Default Timing fields for Say, Ask, Opt (?)
         public static double SAY_FAST_MULT = 0.5;
         public static double SAY_SLOW_MULT = 2.0;

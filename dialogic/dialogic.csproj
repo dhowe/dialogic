@@ -72,7 +72,7 @@
     <None Include="bin\Debug\dialogic.pdb" />
     <None Include="bin\Debug\dialogic.dll" />
     <None Include="data\gscript.gs" />
-    <None Include="data\tester.gs" />
+    <None Include="data\smooth.gs" />
     <None Include="data\gram.gs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

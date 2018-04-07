@@ -195,16 +195,16 @@ namespace Dialogic
                 {
                     // Here the Chat has completed without redirecting 
                     // so we check the stack for a chat to resume
+                    scheduler.Completed(true);
 
-                    int nextEventMs = scheduler.Completed(true);
-
-                    if (nextEventMs > -1)
-                    {
+                    /*int nextEventMs = scheduler.Completed(true);
+                    if (nextEventMs > -1) {
                         scheduler.Info("<#" + scheduler.chat.text + "-resumed>");
                         scheduler.nextEventTime = nextEventMs;
-                    }
+                    }*/
                 }
             }
+
             return null;
         }
 

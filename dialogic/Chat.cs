@@ -17,6 +17,7 @@ namespace Dialogic
         protected internal double stalenessIncr { get; protected set; }
 
         internal int cursor = 0, lastRunAt = -1;
+        internal bool allowSmoothingOnResume = true;
 
         public Chat() : base()
         {
@@ -156,12 +157,15 @@ namespace Dialogic
             if (resetCursor)
             {
                 this.cursor = 0;
-                IncrementStaleness(); // not on resume
+                IncrementStaleness();
+            }
+            else
+            {
+                // reset half the added staleness on resume
+                staleness -= (StalenessIncr() / 2.0);
             }
 
             LastRunAt(Util.EpochMs());
         }
-
- 
     }
 }

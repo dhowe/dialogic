@@ -77,12 +77,14 @@ namespace Dialogic
 
         public void ParseFile(string fileOrFolder, bool disableValidators = false)
         {
-            string[] files = Directory.Exists(fileOrFolder) ?
-                files = Directory.GetFiles(fileOrFolder, '*' + ChatRuntime.CHAT_FILE_EXT) :
-                files = new string[] { fileOrFolder };
+            var ext = "*" + (CHAT_FILE_EXT != null ? CHAT_FILE_EXT : "");
 
-            chats = new List<Chat>();
-            validatorsDisabled = disableValidators;
+            var files = Directory.Exists(fileOrFolder) ?
+                Directory.GetFiles(fileOrFolder, '*' + ext) :
+                new string[] { fileOrFolder };
+
+            this.chats = new List<Chat>();
+            this.validatorsDisabled = disableValidators;
 
             foreach (var f in files)
             {
@@ -91,7 +93,6 @@ namespace Dialogic
                 var parsed = parser.Parse(stripped);
                 parsed.ForEach(c => chats.Add(c));
             }
-
             //chats.ForEach(c => Console.WriteLine(c.ToTree()));
         }
 
@@ -107,7 +108,8 @@ namespace Dialogic
 
         public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
         {
-            return ge != null ? appEvents.OnEvent(ref ge, globals) : chatEvents.OnEvent(globals);
+            return ge != null ? appEvents.OnEvent
+                (ref ge, globals) : chatEvents.OnEvent(globals);
         }
 
         public void Run(string chatLabel = null)
@@ -138,6 +140,12 @@ namespace Dialogic
         {
             Util.ValidateLabel(ref name);
             return actors.FirstOrDefault(c => c.Name() == name);
+        }
+
+        public override string ToString()
+        {
+            return "{ context: " + CurrentContext() +
+                ", chats:" + chats.Stringify() + " }";
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -219,7 +227,32 @@ namespace Dialogic
             return iActors;
         }
 
-        // testing only ------------------------------------------
+        private bool Logging()
+        {
+            return LOG_FILE != null;
+        }
+
+        private static IDictionary<Constraint, bool> ToConstraintMap(Find f)
+        {
+            IDictionary<Constraint, bool> cdict;
+            cdict = new Dictionary<Constraint, bool>();
+            foreach (var val in f.realized.Values)
+            {
+                Constraint c = (Constraint)val;
+                cdict.Add(c, c.IsRelaxable());
+            }
+            return cdict;
+        }
+
+        private static IEnumerable<Constraint> ToList
+            (IDictionary<string, object> dict)
+        {
+            List<Constraint> ic = new List<Constraint>();
+            foreach (var val in dict.Values) ic.Add((Constraint)val);
+            return ic;
+        }
+
+        // for testing ------------------------------------------
 
         internal Chat DoFind(params Constraint[] constraints)
         {
@@ -256,58 +289,27 @@ namespace Dialogic
             f.Realize(globals);  // possibly redundant
             return FuzzySearch.FindAll(chats, ToList(f.realized), f.parent, globals);
         }
-
-        // end testing -------------------------------------------
-
-        private bool Logging()
-        {
-            return LOG_FILE != null;
-        }
-
-        private static IDictionary<Constraint, bool> ToConstraintMap(Find f)
-        {
-            IDictionary<Constraint, bool> cdict;
-            cdict = new Dictionary<Constraint, bool>();
-            foreach (var val in f.realized.Values)
-            {
-                Constraint c = (Constraint)val;
-                cdict.Add(c, c.IsRelaxable());
-            }
-            return cdict;
-        }
-
-        private static IEnumerable<Constraint> ToList
-            (IDictionary<string, object> dict)
-        {
-            List<Constraint> ic = new List<Constraint>();
-            foreach (var val in dict.Values) ic.Add((Constraint)val);
-            return ic;
-        }
-
-        public override string ToString()
-        {
-            return "{ context: " + CurrentContext() + ", chats:" + chats.Stringify() + " }";
-        }
     }
 
     /// <summary>
     /// Holds the current state of a ChatRuntime, either Running, Suspended, or Waiting
     /// </summary>
     /// States:
-    ///   Running:        chat != null, net > -1 -> running Chat commands
-    ///   Suspended:      chat != null, net = -1 -> waiting (either on a Wait or Prompt)
-    ///   Waiting:        chat  = null, net = -1 -> waiting (on a SuspendEvent, or all Chats done)
+    ///   Running:   chat != null, net > -1 -> running Chat commands
+    ///   Suspended: chat != null, net = -1 -> waiting (either on a Wait or Prompt)
+    ///   Waiting:   chat  = null, net = -1 -> waiting (on a SuspendEvent, or all Chats done)
     public enum RuntimeState { Running, Suspended, Waiting };
 
     /// <summary>
-    /// Holds the current context of a ChatRuntime including its RuntimeState, the current Chat, and the nextEventTime offset (in ms)
+    /// Holds the current context of a ChatRuntime including its RuntimeState, 
+    /// the current Chat, and the nextEventTime offset (in ms)
     /// </summary>
     public class RuntimeContext
     {
         private static RuntimeContext instance;
 
-        public RuntimeState State  { get; protected set; }
-		public int NextEventTime { get; protected set; }
+        public RuntimeState State { get; protected set; }
+        public int NextEventTime { get; protected set; }
         public Chat Chat { get; protected set; }
 
         private RuntimeContext() { }
@@ -352,19 +354,19 @@ namespace Dialogic
             this.resumables = new Stack<Chat>();
         }
 
-        internal void Launch(string label)
+        internal int Launch(string label, bool resetCursor = true)
         {
-            Launch(runtime.FindChatByLabel(label));
+            return Launch(runtime.FindChatByLabel(label), resetCursor);
         }
 
-        internal void Launch(Chat next)
+        internal int Launch(Chat next, bool resetCursor = true)
         {
             if (next == null) throw new DialogicException
                 ("Attempt to launch a null Chat");
 
             nextEventTime = Util.Millis();
             chat = next;
-            chat.Run();
+            chat.Run(resetCursor);
 
             // Chats are not ISendable, but its useful for the client to know 
             // when a new Chat is started, so we send the minimal data here
@@ -373,7 +375,9 @@ namespace Dialogic
                 { Meta.TEXT, chat.text },
             });
 
-            Info("\n<#" + chat.text + "-started>");
+            Info("\n<#" + chat.text + (resetCursor ? "-started>": "-resumed>"));
+
+            return nextEventTime;
         }
 
         internal void Suspend()
@@ -409,10 +413,15 @@ namespace Dialogic
             {
                 if (!resumables.IsNullOrEmpty())
                 {
-                    var last = resumables.Pop();
-                    chat = last;
-                    chat.Run(false);
-                    return Util.Millis();
+                    // grab top Chat on stack
+                    chat = resumables.Pop();
+
+                    // check for a smoothing Chat to run first
+                    var trans = FindTransitionChat();
+
+                    if (trans != null) chat = trans;
+
+                    return Launch(chat, trans != null);
                 }
                 else
                 {
@@ -424,7 +433,38 @@ namespace Dialogic
             return Util.Millis(); // unsuspend non-null current chat
         }
 
-        internal int Completed(bool allowResume)
+        // If a Chat has a Meta.ON_RESUME tag, then we will invoke the specified
+        // 'smoothing' Chat and re-schedule the resuming chat as next.
+        private Chat FindTransitionChat()
+        {
+            if (Defaults.CHAT_ENABLE_SMOOTHING)
+            {
+                if (chat.allowSmoothingOnResume)
+                {
+                    var onResume = chat.GetMeta(Meta.ON_RESUME);
+                    if (onResume != null)
+                    {
+                        var smoother = runtime.FindChatByLabel((string)onResume);
+                        if (smoother != null)
+                        {
+                            // avoid inifinite loop: disable smoothing next time
+                            chat.allowSmoothingOnResume = false;
+                            resumables.Push(chat);
+                            return smoother;
+                        }
+                    }
+                }
+                else
+                {
+                    // re-engage smoothing for the future
+                    chat.allowSmoothingOnResume = true;
+                }
+            }
+
+            return null;
+        }
+
+        internal void Completed(bool allowResume)
         {
             if (chat == null) throw new DialogicException
                 ("Attempt to complete a null Chat");
@@ -441,7 +481,7 @@ namespace Dialogic
 
             this.chat = null;
 
-            return resumesAfter ? this.Resume() : -1;
+            if (resumesAfter) this.Resume();
         }
 
         internal void Info(object msg)
