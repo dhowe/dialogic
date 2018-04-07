@@ -650,8 +650,7 @@ namespace Dialogic
         public const string STALENESS_INCR = "stalenessIncr";
         public const string RESUME_AFTER_INT = "resumeAfterInt";
 
-        public IDictionary<string, object> meta; // tmp: deubgging, should be p/i
-        protected internal IDictionary<string, object> realized;
+        protected internal IDictionary<string, object> meta, realized;
 
         protected internal virtual bool HasMeta()
         {

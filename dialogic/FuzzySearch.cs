@@ -143,7 +143,7 @@ namespace Dialogic
                 if (hits > -1) matches.Add(chats[i], ComputeScore(constraints, hits));
             }
 
-            List<KeyValuePair<Chat, double>> list = DescendingScoreLastRunAtRandomizedSort(matches);
+            List<KeyValuePair<Chat, double>> list = DescendingStalenessRandomizedSort(matches);
 
             if (DBUG) list.ForEach((kvp) => Console.Write("\n" + kvp.Key + " -> " + kvp.Value));
 

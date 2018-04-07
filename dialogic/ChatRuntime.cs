@@ -289,6 +289,10 @@ namespace Dialogic
             return ic;
         }
 
+        public override string ToString()
+        {
+            return "{ context: " + CurrentContext() + ", chats:" + chats.Stringify() + " }";
+        }
     }
 
     /// <summary>
