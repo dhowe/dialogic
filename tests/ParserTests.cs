@@ -9,6 +9,16 @@ namespace Dialogic
     {
         const bool NO_VALIDATORS = true;
 
+        public static IDictionary<string, object> globals
+             = new Dictionary<string, object>() {
+                { "obj.prop", "dog" },
+                { "animal", "dog" },
+                { "prep", "then" },
+                { "group", "(a|b)" },
+                { "cmplx", "($group | $prep)" },
+                { "count", 4 }
+         };
+
         [Test]
         public void ASimpleTest()
         {
@@ -25,7 +35,7 @@ namespace Dialogic
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Set set = (Dialogic.Set)chat.commands[0];
-            Assert.That(set.text,Is.EqualTo("a"));
+            Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(RealizeTests.globals);
             object outv = null;
@@ -83,6 +93,30 @@ namespace Dialogic
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(RealizeTests.globals);
             Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+        }
+
+        [Test]
+        public void SetLocalsWithVars()
+        {
+            var chat = ChatParser.ParseText("CHAT c1\nSET a $animal ", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Set set = (Set)chat.commands[0];
+            set.Realize(globals);
+            Assert.That(set.text, Is.EqualTo("a"));
+            //Assert.That(set.value, Is.EqualTo("dog"));
+            set.Realize(RealizeTests.globals);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("dog"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET a $obj.prop ", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Set)chat.commands[0];
+            set.Realize(globals);
+            Assert.That(set.text, Is.EqualTo("a"));
+            //Assert.That(set.value, Is.EqualTo("dog"));
+            set.Realize(RealizeTests.globals);
+            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("dog"));
         }
 
         [Test]
@@ -712,6 +746,63 @@ namespace Dialogic
             {
                 Assert.That(res[i], Is.EqualTo(exp[i]));
             }
+        }
+
+        [Test]
+        public void DynamicLabels()
+        {
+            var chats = ChatParser.ParseText("GO #Spin");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            Go go = (Dialogic.Go)chats[0].commands[0];
+            go.Realize(null);
+            Assert.That(go.Text(true), Is.EqualTo("Spin"));
+
+            chats = ChatParser.ParseText("GO Spin");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            go = (Dialogic.Go)chats[0].commands[0];
+            go.Realize(null);
+            Assert.That(go.Text(true), Is.EqualTo("Spin"));
+
+
+            chats = ChatParser.ParseText("GO #(Spin | Twirl)");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            go = (Dialogic.Go)chats[0].commands[0];
+            go.Realize(null);
+            Assert.That(go.Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
+
+            return;
+
+            chats = ChatParser.ParseText("GO (Spin | Twirl)");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            go = (Dialogic.Go)chats[0].commands[0];
+            go.Realize(null);
+            Assert.That(go.Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
+
+
+            chats = ChatParser.ParseText("DO #(Twirl | Spin)");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
         }
 
         [Test]

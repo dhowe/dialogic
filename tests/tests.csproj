@@ -41,6 +41,7 @@
     <Compile Include="RealizeTests.cs" />
     <Compile Include="SearchTests.cs" />
     <Compile Include="ParserTests.cs" />
+    <Compile Include="RegexTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

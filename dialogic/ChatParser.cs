@@ -17,10 +17,12 @@ namespace Dialogic
         /// </summary>
         public static bool PRESERVE_LINE_NUMBERS = true;
 
-        const string TXT = @"([^#}{]+)?\s*";
-        const string LBL = @"(#[A-Za-z][\S]*)?\s*";
-        const string MTD = @"(?:\{(.+?)\})?\s*";
-        const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
+        internal const string TXT = @"([^#}{]+)?\s*";
+        internal const string LBLL = @"(#[A-Za-z][\S]*)";
+        internal const string LBLG = @"(#\([^)]+\)\])";
+        internal const string LBL = @"(?:"+LBLL+"|"+LBLG+@")?\s*";
+        internal const string MTD = @"(?:\{(.+?)\})?\s*";
+        internal const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
 
         static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
@@ -29,11 +31,11 @@ namespace Dialogic
         protected ChatRuntime runtime;
         protected Stack<Command> parsedCommands;
         protected internal List<Chat> chats;
-        protected Regex LineParser;
+        protected internal Regex lineParser;
 
         internal ChatParser(ChatRuntime runtime)
         {
-            this.LineParser = new Regex(ACTR + TypesRegex() + TXT + LBL + MTD);
+            this.lineParser = new Regex(ACTR + TypesRegex() + TXT + LBL + MTD);
             this.parsedCommands = new Stack<Command>();
             this.chats = new List<Chat>();
             this.runtime = runtime;
@@ -98,7 +100,7 @@ namespace Dialogic
 
         private List<string> DoSubDivision(string line, int lineNo)
         {
-            Match match = LineParser.Match(line);
+            Match match = lineParser.Match(line);
 
             if (match.Groups.Count < 6)
             {
