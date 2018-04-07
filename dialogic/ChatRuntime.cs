@@ -244,7 +244,7 @@ namespace Dialogic
             return cdict;
         }
 
-        private static IEnumerable<Constraint> ToList
+        private static List<Constraint> ToList
             (IDictionary<string, object> dict)
         {
             List<Constraint> ic = new List<Constraint>();
@@ -281,7 +281,7 @@ namespace Dialogic
         internal List<Chat> DoFindAll(Chat parent,
             IDictionary<string, object> globals, params Constraint[] constraints)
         {
-            return FuzzySearch.FindAll(chats, constraints, parent, globals);
+            return FuzzySearch.FindAll(chats, constraints.ToList(), parent, globals);
         }
 
         internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals = null)

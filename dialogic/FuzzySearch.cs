@@ -34,7 +34,7 @@ namespace Dialogic
             Chat parent, IDictionary<string, object> globals)
         {
             var resetRequired = false; // opt
-            var clist = constraints.Keys;
+            var clist = constraints.Keys.ToList();
 
             Chat chat = FindAll(chats, clist, parent, globals).FirstOrDefault();
 
@@ -92,7 +92,7 @@ namespace Dialogic
         /// <param name="parent">Parent.</param>
         /// <param name="globals">Globals.</param>
         internal static List<Chat> FindAll(List<Chat> chats,
-            IEnumerable<Constraint> constraints,
+            List<Constraint> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
             Dictionary<Chat, double> matches = new Dictionary<Chat, double>();
@@ -155,7 +155,7 @@ namespace Dialogic
             return (from kvp in list select kvp.Key).ToList();
         }
 
-        private static void ValidateConstraints(IEnumerable<Constraint> constraints)
+        private static void ValidateConstraints(List<Constraint> constraints)
         {
             bool hasStaleness = false;
             foreach (var constraint in constraints)
@@ -165,8 +165,11 @@ namespace Dialogic
                     hasStaleness = true;
                 }
             }
-            if (!hasStaleness) throw new FindException
-                ("No staleness threshold: " + constraints.Stringify());
+            if (!hasStaleness) // TODO: tmp
+            {   //throw new FindException("No staleness threshold: " + constraints.Stringify());
+                constraints.Add(new Constraint(Operator.LT, Meta.STALENESS,
+                    Defaults.FIND_STALENESS.ToString()));
+            }
         }
 
         private static double ComputeScore(IEnumerable<Constraint> constraints, int hits)

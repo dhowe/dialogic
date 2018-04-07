@@ -678,7 +678,7 @@ namespace Dialogic
                 "SAY hay is for horses",
                 "ASK hay is for horses?",
                 "DO #hay",
-                "FIND {!a=b,staleness=5}",
+                "FIND {!a=b,staleness<=5}",
                 "WAIT",
                 "WAIT .5",
                 "WAIT {ForAnimation=true}",
