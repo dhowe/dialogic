@@ -48,6 +48,11 @@ namespace Dialogic
         public static double FIND_STALENESS = 10;
 
         /// <summary>
+        /// Amount to relax Find staleness threshold each time
+        /// </summary>
+        public static double FIND_RELAXATION_INCR = .5;
+
+        /// <summary>
         /// Max staleness-threshold to try for a Find
         /// </summary>
         public static double FIND_MAX_STALENESS = 50;

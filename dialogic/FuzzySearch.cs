@@ -66,7 +66,11 @@ namespace Dialogic
                         }
 
                         Constraint staleness = GetConstraint(constraints, Meta.STALENESS);
-                        if (!staleness.IncrementValue(.5)) return null;  // give up here
+
+                        if (!staleness.IncrementValue(Defaults.FIND_RELAXATION_INCR))
+                        {
+                            return null;  // give up here if we've hit maximum staleness
+                        }
 
                         if (DBUG) Console.WriteLine("\nRelaxing staleness to " + staleness.value);
 
