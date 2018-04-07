@@ -7,13 +7,14 @@ namespace Dialogic
     [TestFixture]
     public class RealizeTests
     {
-        public static IDictionary<string, object> globals = new Dictionary<string, object>() {
-            { "obj.prop", "dog" },
-            { "animal", "dog" },
-            { "prep", "then" },
-            { "group", "(a|b)" },
-            { "cmplx", "($group | $prep)" },
-            { "count", 4 }
+        public static IDictionary<string, object> globals 
+            = new Dictionary<string, object>() {
+                { "obj.prop", "dog" },
+                { "animal", "dog" },
+                { "prep", "then" },
+                { "group", "(a|b)" },
+                { "cmplx", "($group | $prep)" },
+                { "count", 4 }
         };
 
         [Test]

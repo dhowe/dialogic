@@ -30,7 +30,8 @@ namespace Dialogic
             var last = chat.commands[chat.commands.Count - 1];
             Assert.That(last, Is.Not.Null);
             Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));
-            chat.Realize(globals);
+            //chat.Realize(globals);
+            chat.commands.ForEach(c => c.Realize(globals));
 
             //Console.WriteLine("\nGLOBALS:");
             //foreach (var k in globals.Keys)

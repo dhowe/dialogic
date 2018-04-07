@@ -45,7 +45,7 @@ namespace Dialogic
 
         internal static Command Create(Type type, string txt, string lbl, string[] metas)
         {
-            //Console.WriteLine("'"+type + "' '"+text+ "' '"+ label+"' "+metas.Stringify());
+            //Console.WriteLine("'"+type + "' '"+txt+ "' '"+ lbl+"' "+metas.Stringify());
             Command cmd = (Command)Activator.CreateInstance(type);
             cmd.Init(txt, lbl, metas);
             return cmd;
@@ -59,8 +59,8 @@ namespace Dialogic
 
         protected void ValidateTextLabel()
         {
-            if (String.IsNullOrEmpty(text)) throw BadArg
-                (TypeName().ToUpper() + " requires a literal #Label");
+            if (String.IsNullOrEmpty(text)) throw BadArg(TypeName()
+                + " requires a literal #Label, got '"+text+"'");
 
             Util.ValidateLabel(ref text);
         }
@@ -274,6 +274,13 @@ namespace Dialogic
             return this;
         }
 
+        //protected internal override void Realize(IDictionary<string, object> globals)
+        //{
+        //    realized.Clear();
+        //    RealizeMeta(globals);
+        //    realized[Meta.TEXT] = Realizer.DoGroups(text);
+        //}
+
         public override string ToString()
         {
             return TypeName().ToUpper() + " #" + text;
@@ -282,7 +289,7 @@ namespace Dialogic
 
     /// <summary>
     /// The Set command is used to create or modify a variable. Variables  generally originate from the game environment itself, but can also be created, accessed or modified within Dialogic.
-    /// </summary>
+    /// </summary>d
     public class Set : Command // TODO: rethink
     {
         public string value;
@@ -307,10 +314,10 @@ namespace Dialogic
         {
             string key = globals.ContainsKey(text) ? text : parent.text + "." + text;
 
-            if (value.IndexOf('<') > -1 && value.IndexOf('>') > -1)
+            var val = Realizer.DoVars(value, globals, parent);
+                    
+            if (val.IndexOf('<') > -1 && val.IndexOf('>') > -1)
             {
-
-                string val = value;
                 //Console.WriteLine("CHECKING: " + val);
                 MatchCollection matches = RE.GrammarRules.Matches(val);
                 if (matches.Count > 0)
@@ -321,13 +328,13 @@ namespace Dialogic
                     //Util.ShowMatches(matches);
                 }
 
-                value = val.Replace("$", "$" + parent.text + "."); ;
+                val = val.Replace("$", "$" + parent.text + "."); ;
             }
 
             //if (value.Contains(".")) Console.WriteLine("Adding " + value 
             //  + " to globals:\n  " + globals.Stringify());
 
-            globals[key] = value;//Realizer.Do(value, globals, parent);
+            globals[key] = val;//Realizer.Do(value, globals, parent);
         }
 
         protected string[] ParseSetArgs(string s)
@@ -628,6 +635,14 @@ namespace Dialogic
         {
             Init(String.Empty, label, null);
             return this;
+        }
+
+        protected internal override void Realize(IDictionary<string, object> globals)
+        {
+            realized.Clear();
+            //RealizeMeta(globals); // no meta
+            realized[Meta.TYPE] = TypeName();
+            realized[Meta.TEXT] = Realizer.DoGroups(text);
         }
 
         protected internal override Command Validate()
