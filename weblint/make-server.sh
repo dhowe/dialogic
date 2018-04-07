@@ -1,0 +1,3 @@
+csc /noconfig /nowarn:1701,1702,2008 /langversion:4 /nostdlib+ /errorreport:prompt /warn:4 /define:DEBUG /errorendlocation /preferreduilang:en-US /highentropyva- /reference:/Users/dhowe/git/dialogic/dialogic/bin/Debug/Dialogic.dll /reference:/Library/Frameworks/Mono.framework/Versions/5.8.1/lib/mono/2.0-api/mscorlib.dll /reference:/Library/Frameworks/Mono.framework/Versions/5.8.1/lib/mono/2.0-api/System.Core.dll /reference:/Library/Frameworks/Mono.framework/Versions/5.8.1/lib/mono/2.0-api/System.dll /debug+ /debug:portable /optimize- /out:obj/Debug/weblint.exe /target:exe /utf8output /langversion:4 Properties/AssemblyInfo.cs LintServer.cs
+
+cp obj/Debug/weblint.* bin/Debug/
