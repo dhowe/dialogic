@@ -120,7 +120,8 @@ namespace Dialogic
 
         public List<Chat> FindChatByMeta(string key, string value)
         {
-            //foreach (var c in chats) Console.WriteLine(c.text + ": "+c.GetMeta(key)+ " " + ((string)c.GetMeta(key)==value));
+            //foreach (var c in chats) Console.WriteLine(c.text +
+            //  ": "+c.GetMeta(key)+ " " + ((string)c.GetMeta(key)==value));
             return chats.Where(c => ((string)c.GetMeta(key)) == value).ToList<Chat>();
         }
 
@@ -177,12 +178,6 @@ namespace Dialogic
 
         internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
         {
-            if (scheduler.chat != null)
-            {
-                // If there is a current chat, consider it finished on a FIND
-                scheduler.Completed(false); 
-            }
-
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
             {
@@ -366,9 +361,9 @@ namespace Dialogic
         {
             if (next == null) throw new DialogicException
                 ("Attempt to launch a null Chat");
-            
-            chat = next;
+
             nextEventTime = Util.Millis();
+            chat = next;
             chat.Run();
 
             // Chats are not ISendable, but its useful for the client to know 

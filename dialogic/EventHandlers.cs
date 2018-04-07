@@ -103,6 +103,7 @@ namespace Dialogic
             }
             else if (label.StartsWith(Util.LABEL_IDENT, Util.IC))
             {
+                scheduler.Suspend();
                 scheduler.Launch(label);
             }
             else // else, parse as FIND meta data
@@ -118,6 +119,7 @@ namespace Dialogic
                     throw new RuntimeParseException(e);
                 }
 
+                scheduler.Suspend();
                 runtime.FindAsync(findDelegate, globals);
             }
 
@@ -145,6 +147,7 @@ namespace Dialogic
                 if (opt.action != Command.NOP)
                 {
                     // We've gotten a response with a branch, so finish & take it
+                    scheduler.Completed(false); 
                     runtime.FindAsync((Find)opt.action); // find next
                 }
                 else
@@ -235,7 +238,8 @@ namespace Dialogic
             }
             else if (cmd is Find)
             {
-                runtime.FindAsync((Find)cmd);  // find next
+                scheduler.Completed(false); // finish 
+                runtime.FindAsync((Find)cmd);  // then do Find
             }
 
             return null;
