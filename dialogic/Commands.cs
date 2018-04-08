@@ -45,7 +45,7 @@ namespace Dialogic
 
         internal static Command Create(Type type, string txt, string lbl, string[] metas)
         {
-            Console.WriteLine("'"+type + "' '"+txt+ "' '"+ lbl+"' "+metas.Stringify());
+            //Console.WriteLine("'"+type + "' '"+txt+ "' '"+ lbl+"' "+metas.Stringify());
             Command cmd = (Command)Activator.CreateInstance(type);
             cmd.Init(txt, lbl, metas);
             return cmd;
@@ -54,8 +54,6 @@ namespace Dialogic
         protected internal virtual void Init(string txt, string lbl, string[] metas)
         {
             this.text = txt.Length > 0 ? txt : lbl;
-            Console.WriteLine(TypeName()+".text=" + text);
-
             ParseMeta(metas);
         }
 
@@ -272,17 +270,16 @@ namespace Dialogic
     {
         protected internal override Command Validate()
         {
-            Console.WriteLine("Do.text="+text);
             ValidateTextLabel();
             return this;
         }
 
-        protected internal override void Realize(IDictionary<string, object> globals)
-        {
-            realized.Clear();
-            RealizeMeta(globals);
-            realized[Meta.TEXT] = Realizer.DoGroups(text);
-        }
+        //protected internal override void Realize(IDictionary<string, object> globals)
+        //{
+        //    realized.Clear();
+        //    RealizeMeta(globals);
+        //    realized[Meta.TEXT] = Realizer.DoGroups(text);
+        //}
 
         public override string ToString()
         {
@@ -632,7 +629,8 @@ namespace Dialogic
         protected internal override void Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
-            //RealizeMeta(globals);
+            //RealizeMeta(globals); // no meta
+            realized[Meta.TYPE] = TypeName();
             realized[Meta.TEXT] = Realizer.DoGroups(text);
         }
 

@@ -386,6 +386,17 @@ namespace Dialogic
             Assert.That(doo.realized[Meta.TEXT], Is.EqualTo("HelloSpin"));
             Assert.That(doo.realized[Meta.ACTOR], Is.EqualTo("Guppy"));
 
+            chats = ChatParser.ParseText("GO #HelloSpin");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            Go go = (Dialogic.Go)chats[0].commands[0];
+            Assert.That(doo.text, Is.EqualTo("HelloSpin"));
+            go.Realize(null);
+            Assert.That(go.realized[Meta.TYPE], Is.EqualTo("Go"));
+            Assert.That(go.realized[Meta.TEXT], Is.EqualTo("HelloSpin"));
+
             chats = ChatParser.ParseText("Guppy: Hello from Guppy");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count(), Is.EqualTo(1));
@@ -782,7 +793,6 @@ namespace Dialogic
             go.Realize(null);
             Assert.That(go.Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
 
-            return;
 
             chats = ChatParser.ParseText("GO (Spin | Twirl)");
             //Console.WriteLine(chats[0].ToTree());
@@ -795,6 +805,8 @@ namespace Dialogic
             Assert.That(go.Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
 
 
+            ////////////////////////////////////////////////////////////////////
+             
             chats = ChatParser.ParseText("DO #(Twirl | Spin)");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -803,6 +815,33 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
             chats[0].commands[0].Realize(null);
             Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
+
+            chats = ChatParser.ParseText("DO (Twirl | Spin)");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
+
+            chats = ChatParser.ParseText("DO Spin");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("Spin"));
+
+            chats = ChatParser.ParseText("DO #Spin");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("Spin"));
         }
 
         [Test]

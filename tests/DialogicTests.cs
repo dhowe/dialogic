@@ -7,25 +7,8 @@ namespace Dialogic
     [TestFixture]
     public class DialogicTests
     {
-        /*[Test]
-        public void TestPostValidate()
-        {
-            Go g = new Go().Init("a");
-            g.PostValidate();
-            Assert.That(g.Text, Is.EqualTo("a"));
-
-            Opt c = new Opt("Yes");
-            c.PostValidate();
-            Assert.That(c.Text, Is.EqualTo("Yes"));
-
-            c = new Opt("Yes", new Go().Init("#a"));
-            c.PostValidate();
-            Assert.That(c.Text, Is.EqualTo("Yes"));
-            Assert.That(c.action.Text, Is.EqualTo("a"));
-        }*/
-
         [Test]
-        public void TestSecStrToMs()
+        public void SecStrToMsTest()
         {
             Assert.That(Util.SecStrToMs("1"), Is.EqualTo(1000));
             Assert.That(Util.SecStrToMs("1.5"), Is.EqualTo(1500));
@@ -36,7 +19,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestUpdateEvent()
+        public void UpdateEventTest()
         {
             var globals = new Dictionary<string, object>() {
                 { "animal", "dog" },
@@ -69,7 +52,7 @@ namespace Dialogic
         }
             
         [Test]
-        public void TestSimpleGrammar()
+        public void SimpleGrammarTest()
         {
             string[] lines = {
                 "grammar1: <sentence> <fortune> <ending>",
@@ -87,7 +70,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestRandItem()
+        public void RandItemTest()
         {
             string[] arr = { "0", "1", "2" };
             Dictionary<string, int> hits;
@@ -120,7 +103,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestCommandTiming()
+        public void CommandTimingTest()
         {
             Say fast = (Say)ChatParser.ParseText("SAY Thank you { speed=fast}")[0].commands[0];
             Say defa = (Say)ChatParser.ParseText("SAY Thank you")[0].commands[0];

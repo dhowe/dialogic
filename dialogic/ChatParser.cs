@@ -19,10 +19,12 @@ namespace Dialogic
 
         internal const string TXT = @"([^#}{]+)?\s*";
         internal const string LBLL = @"(#[A-Za-z][\S]*)";
-        internal const string LBLG = @"(#\([^)]+\)\])";
+        internal const string LBLG = @"(#\([^\)]+\s*)";
         internal const string LBL = @"(?:"+LBLL+"|"+LBLG+@")?\s*";
         internal const string MTD = @"(?:\{(.+?)\})?\s*";
         internal const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
+        internal const string DLBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
+
 
         static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
@@ -35,7 +37,7 @@ namespace Dialogic
 
         internal ChatParser(ChatRuntime runtime)
         {
-            this.lineParser = new Regex(ACTR + TypesRegex() + TXT + LBL + MTD);
+            this.lineParser = new Regex(ACTR + TypesRegex() + TXT + DLBL + MTD);
             this.parsedCommands = new Stack<Command>();
             this.chats = new List<Chat>();
             this.runtime = runtime;
@@ -67,7 +69,7 @@ namespace Dialogic
             return new Grammar(src);
         }
 
-        private static string TypesRegex()
+        internal static string TypesRegex()
         {
             string s = @"(";
             var cmds = ChatRuntime.TypeMap.Keys;
@@ -104,7 +106,7 @@ namespace Dialogic
 
             if (match.Groups.Count < 6)
             {
-                //Util.ShowMatch(match);
+                Util.ShowMatch(match);
                 throw new ParseException(line, lineNo, "cannot be parsed");
             }
 
