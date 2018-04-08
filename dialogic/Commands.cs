@@ -274,16 +274,10 @@ namespace Dialogic
             return this;
         }
 
-        //protected internal override void Realize(IDictionary<string, object> globals)
-        //{
-        //    realized.Clear();
-        //    RealizeMeta(globals);
-        //    realized[Meta.TEXT] = Realizer.DoGroups(text);
-        //}
-
         public override string ToString()
         {
-            return TypeName().ToUpper() + " #" + text;
+            return (TypeName().ToUpper() + " #" + text)
+                .Trim() + (" " + MetaStr()).TrimEnd();
         }
     }
 
@@ -322,19 +316,24 @@ namespace Dialogic
                 MatchCollection matches = RE.GrammarRules.Matches(val);
                 if (matches.Count > 0)
                 {
-                    var rules = matches.Cast<Match>().Select(match => match.Groups[1].Value).ToList();
-                    rules.ForEach(rule => val = val.Replace("<" + rule + ">", "$" + rule));
-                    //Console.WriteLine("GOT: " + matches.Count+" "+rules.Count+" "+rules.Stringify());
-                    //Util.ShowMatches(matches);
+                    var rules = matches.Cast<Match>()
+                        .Select(match => match.Groups[1].Value).ToList();
+
+                    rules.ForEach(rule => val = val.Replace("<" 
+                        + rule + ">", "$" + rule));
+                    
+                    //Console.WriteLine("GOT: " + matches.Count+" "
+                    //+rules.Count+" "+rules.Stringify()); 
+                    // Util.ShowMatches(matches);
                 }
 
-                val = val.Replace("$", "$" + parent.text + "."); ;
+                val = val.Replace("$", "$" + parent.text + ".");
             }
 
-            //if (value.Contains(".")) Console.WriteLine("Adding " + value 
-            //  + " to globals:\n  " + globals.Stringify());
+            //if (value.Contains(".")) Console.WriteLine("Adding "
+            //  + value + " to globals:\n  " + globals.Stringify());
 
-            globals[key] = val;//Realizer.Do(value, globals, parent);
+            globals[key] = val;
         }
 
         protected string[] ParseSetArgs(string s)
@@ -628,7 +627,8 @@ namespace Dialogic
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
             this.text = txt.Length > 0 ? txt : lbl;
-            //Validate();
+            if (!metas.IsNullOrEmpty()) throw new ParseException
+                ("GO does not accept metadata");
         }
 
         public new Go Init(string label)

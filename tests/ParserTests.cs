@@ -348,11 +348,11 @@ namespace Dialogic
             Assert.That(chats[0].staleness, Is.EqualTo(9));
             rt = new ChatRuntime(chats);
             for (int i = 0; i < 5; i++) rt.Run("#c1");
-            Assert.That(chats[0].staleness, Is.EqualTo(9+5*2).Within(.01));
+            Assert.That(chats[0].staleness, Is.EqualTo(9 + 5 * 2).Within(.01));
             chats[0].Staleness(0);
             chats[0].StalenessIncr(10);
             for (int i = 0; i < 5; i++) rt.Run("#c1");
-            Assert.That(chats[0].staleness, Is.EqualTo(0+5*10).Within(.01));
+            Assert.That(chats[0].staleness, Is.EqualTo(0 + 5 * 10).Within(.01));
         }
 
         [Test]
@@ -707,7 +707,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void ToScript()
+        public void ToGuppyScript()
         {
             string[] tests = {
 
@@ -723,6 +723,7 @@ namespace Dialogic
                 "SAY hay is for horses",
                 "ASK hay is for horses?",
                 "DO #hay",
+                "DO #hay {a=b}",
                 "FIND {!a=b,staleness<=5}",
                 "WAIT",
                 "WAIT .5",
@@ -800,13 +801,59 @@ namespace Dialogic
             Assert.That(chats[0].Count(), Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
-            go = (Dialogic.Go)chats[0].commands[0];
-            go.Realize(null);
-            Assert.That(go.Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("Twirl").Or.EqualTo("Spin"));
 
+
+            chats = ChatParser.ParseText("GO #(ChatA | ChatB)");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("ChatA").Or.EqualTo("ChatB"));
+
+            chats = ChatParser.ParseText("GO #(A | B | C) ");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("A").Or.EqualTo("B").Or.EqualTo("C"));
+
+            chats = ChatParser.ParseText("GO (A | B | C) ");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("A").Or.EqualTo("B").Or.EqualTo("C"));
+
+            chats = ChatParser.ParseText("DO #(MoveA | MoveB) {metatime=(.7|.9)}");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("MoveA").Or.EqualTo("MoveB"));
+            Assert.That(chats[0].commands[0].HasMeta("metatime"), Is.EqualTo(true));
+            Assert.That(chats[0].commands[0].GetMeta("metatime"), Is.EqualTo("(.7|.9)"));
+            Assert.That(chats[0].commands[0].GetRealized("metatime"), Is.EqualTo(".7").Or.EqualTo(".9"));
+
+            chats = ChatParser.ParseText("DO emote { type = (A|B)}");
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
+            chats[0].commands[0].Realize(null);
+            Assert.That(chats[0].commands[0].Text(true), Is.EqualTo("emote"));
+            Assert.That(chats[0].commands[0].HasMeta("type"), Is.EqualTo(true));
+            Assert.That(chats[0].commands[0].GetMeta("type"), Is.EqualTo("(A|B)"));
+            Assert.That(chats[0].commands[0].GetRealized("type"), Is.EqualTo("A").Or.EqualTo("B"));
 
             ////////////////////////////////////////////////////////////////////
-             
+
             chats = ChatParser.ParseText("DO #(Twirl | Spin)");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -1077,6 +1124,7 @@ namespace Dialogic
             //var ff = "FIND {a b=e}";
             //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].ToTree());
 
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("GO A {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT c1"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT x{t pe=a,stage=b}", NO_VALIDATORS));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT x{type=a b,stage=b}", NO_VALIDATORS));
