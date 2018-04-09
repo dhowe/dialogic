@@ -42,6 +42,8 @@
     <Compile Include="SearchTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="RegexTests.cs" />
+    <Compile Include="SetGramTests.cs" />
+    <Compile Include="SymbolScoping.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

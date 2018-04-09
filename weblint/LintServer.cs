@@ -19,8 +19,6 @@ namespace Dialogic.Server
         static Regex Brackets = new Regex(@"(\]|\[)");
         static string IndexPageContent;
 
-        static bool noValidators = false;
-
         readonly HttpListener listener = new HttpListener();
         readonly Func<HttpListenerRequest, string> responderFunc;
 
@@ -71,7 +69,9 @@ namespace Dialogic.Server
                                 ctx.Response.ContentLength64 = buf.Length;
                                 ctx.Response.OutputStream.Write(buf, 0, buf.Length);
                             }
-                            catch { /* ignored */ }
+                            catch(Exception e) { 
+                                Console.WriteLine("[WARN] "+e);
+                            }
                             finally
                             {
                                 // always close the stream
@@ -104,42 +104,63 @@ namespace Dialogic.Server
                 return html.Replace("%%CODE%%", "Enter your code here");
             }
 
-            html = html.Replace("%%CODE%%", code);
+            //Console.WriteLine("mode: " + mode+" code:\n" + code + "\n");
+
+            html = html.Replace("%%CODE%%", WebUtility.HtmlEncode(code));
             html = html.Replace("%%CCLASS%%", "shown");
 
             try
             {
-                string content = ParserText(code, noValidators);
-                runtime.chats.ForEach(c=>c.Realize(null));
+                string content = String.Empty;
+                runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+                runtime.ParseText(code, false); // true to disable validators
+
+                //Console.WriteLine(runtime);
+                runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
+        
                 if (mode == "execute")
                 {
+                    runtime.chats.ForEach(c => c.Realize(null));
                     var cmd = runtime.chats.Last().commands.Last();
-                    content += cmd.Text(false) + " -> " + cmd.Text(true);
+                    content += cmd.TypeName().ToUpper() + " " 
+                        + cmd.Text(false) + " -> " + cmd.Text(true);
                 }
 
-                html = html.Replace("%%RESULT%%", content);
+                html = html.Replace("%%RESULT%%", WebUtility.HtmlEncode(content));
                 html = html.Replace("%%RCLASS%%", "success");
             }
             catch (ParseException ex)
             {
-                html = html.Replace("%%RCLASS%%", "error");
-                html = html.Replace("%%RESULT%%", ex.Message);
-
-                var lineNo = ex.lineNumber;
-                html = html.Replace("%%ERRORLINE%%", lineNo + "");
+                OnError(ref html, ex, ex.lineNumber);
+            }
+            catch (DialogicException ex)
+            {
+                OnError(ref html, ex, -1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[ERROR] " + e);
             }
 
             return html;
         }
 
-        private static string ParserText(string code, bool noVal = false)
+        private static void OnError(ref string html, Exception ex, int lineno = -1)
         {
-            string content = String.Empty;
-            runtime = new ChatRuntime(Tendar.AppConfig.Actors);
-            runtime.ParseText(code, noVal);
-            runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
-            return content;
+            html = html.Replace("%%RCLASS%%", "error");
+            html = html.Replace("%%RESULT%%", ex.Message);
+            html = html.Replace("%%ERRORLINE%%", 
+                (lineno >= 0 ? lineno.ToString() : ""));
         }
+
+        //private static string ParserText(string code, bool noVal = false)
+        //{
+        //    string content = String.Empty;
+        //    runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+        //    runtime.ParseText(code, noVal);
+        //    runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
+        //    return content;
+        //}
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
         //private static string ParsePostData(HttpListenerRequest request)
@@ -156,14 +177,23 @@ namespace Dialogic.Server
                 if (request.ContentType == "application/x-www-form-urlencoded")
                 {
                     //string s = Uri.UnescapeDataString(reader.ReadToEnd());
-                    string s = WebUtility.UrlDecode(reader.ReadToEnd());
+                    string s = reader.ReadToEnd();
                     string[] pairs = s.Split('&');
+                    Console.WriteLine("Found " + pairs.Length + " kv-pairs");
+
                     foreach (var p in pairs)
                     {
                         var pair = p.Split('=');
                         if (pair.Length == 2)
                         {
-                            result.Add(pair[0], pair[1]);
+                            Console.WriteLine(pair[0] + ": " + pair[1]);
+                            //WebUtility.UrlDecode(pair[0]);
+                            result.Add(WebUtility.UrlDecode(pair[0]), WebUtility.UrlDecode(pair[1]));
+                        }
+                        else
+                        {
+                            Console.WriteLine("[WARN] BAD KV - PAIR: " + p);
+                            throw new Exception("BAD KV-PAIR: " + p);
                         }
                     }
                 }
@@ -174,6 +204,7 @@ namespace Dialogic.Server
 
             return result;
         }
+
 
         public static void Main()
         {

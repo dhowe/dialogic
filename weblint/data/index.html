@@ -72,6 +72,8 @@
         var qstr = $("#form").serialize() + "&mode="
           + (execute ? 'execute' : 'validate');
 
+        console.log(qstr);
+
         $.ajax({
           type: "POST",
           data: qstr,

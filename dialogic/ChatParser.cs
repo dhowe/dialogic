@@ -94,6 +94,7 @@ namespace Dialogic
                 RunInternalValidators(c);
             }
             catch (Exception ex)
+            //catch (ParseException ex)
             {
                 throw new ParseException(line, lineNo, ex.Message);
             }
@@ -148,8 +149,16 @@ namespace Dialogic
 
             parts.Apply((spkr, cmd, text, label, meta) =>
             {
-                Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] : typeof(Say);
-                c = Command.Create(type, text, label, SplitMeta(meta));
+                Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] 
+                    : Chat.DefaultCommandType(chats.LastOrDefault());
+
+                try
+                {
+                    c = Command.Create(type, text, label, SplitMeta(meta));
+                }
+                catch (Exception ex) {
+                    throw ex;
+                }
                 HandleActor(spkr, c, line, lineNo);
                 HandleCommand(c, line, lineNo);
             });
@@ -177,11 +186,18 @@ namespace Dialogic
             }
         }
 
+        private Chat AddChat(Chat c)
+        {
+            c.runtime = this.runtime;
+            chats.Add(c);
+            return c;
+        }
+
         private void HandleCommand(Command c, string line, int lineNo)
         {
             if (c is Chat)
             {
-                chats.Add((Chat)c);
+                AddChat((Chat)c);
                 return;
             }
 
@@ -189,12 +205,16 @@ namespace Dialogic
 
             if (c is Opt) // add option data to last Ask
             {
+                Opt opt = (Opt)c;
+ 
                 Command last = LastOfType(parsedCommands, typeof(Ask));
 
                 if (!(last is Ask)) throw new ParseException
                     (line, lineNo, "Opt must follow Ask");
-
-                ((Ask)last).AddOption((Opt)c);
+                
+                Ask ask = ((Ask)last);
+                opt.parent = ask.parent;
+                ask.AddOption(opt);
             }
             else  // add command to last Chat
             {
@@ -292,11 +312,7 @@ namespace Dialogic
 
         private void CreateDefaultChat()
         {
-            Chat def = Chat.Create("C" + Util.EpochMs());
-            chats.Add(def);
-            parsedCommands.Push(def);
+            parsedCommands.Push(AddChat(Chat.Create("C" + Util.EpochMs())));
         }
-
     }
-
 }

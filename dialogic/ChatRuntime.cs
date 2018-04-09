@@ -55,13 +55,14 @@ namespace Dialogic
         private ChatEventHandler chatEvents;
         private List<Func<Command, bool>> validators;
 
-        public ChatRuntime(List<IActor> actors) : this(null, actors) { }
+        public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
 
-        public ChatRuntime(List<Chat> chats, List<IActor> actors = null)
+        public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
         {
-            this.chats = chats;
-            this.actors = InitActors(actors);
+            this.actors = InitActors(theActors);
+            this.chats = theChats == null ? new List<Chat>() : theChats;
 
+            //this.realizer = new Realizer(this);
             this.parser = new ChatParser(this);
             this.scheduler = new ChatScheduler(this);
             this.appEvents = new AppEventHandler(this);
@@ -149,6 +150,15 @@ namespace Dialogic
         }
 
         ///////////////////////////////////////////////////////////////////////
+
+        internal Chat AddNewChat(string name)
+        {
+            Chat c = new Chat();
+            c.Init(name, String.Empty, new string[0]);
+            c.runtime = this;
+            this.chats.Add(c);
+            return c;
+        }
 
         internal List<Func<Command, bool>> Validators()
         {
@@ -254,9 +264,9 @@ namespace Dialogic
 
         // for testing ------------------------------------------
 
-        internal Chat DoFind(params Constraint[] constraints)
+        internal Chat DoFind(Chat parent, params Constraint[] constraints)
         {
-            return DoFind(null, null, constraints);
+            return DoFind(parent, null, constraints);
         }
 
         internal Chat DoFind(Chat parent,
@@ -273,9 +283,9 @@ namespace Dialogic
             return FuzzySearch.Find(chats, ToConstraintMap(f), f.parent, globals);
         }
 
-        internal List<Chat> DoFindAll(params Constraint[] constraints)
+        internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
         {
-            return DoFindAll(null, null, constraints);
+            return DoFindAll(parent, null, constraints);
         }
 
         internal List<Chat> DoFindAll(Chat parent,

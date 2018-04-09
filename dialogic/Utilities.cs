@@ -112,7 +112,7 @@ namespace Dialogic
     /// </summary>
     public static class RE
     {
-        internal const string OP1 = @"^(!?!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
+        internal const string OP1 = @"^(!?!?$?[a-zA-Z_][a-zA-Z0-9_-]*)";
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
@@ -120,9 +120,13 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        public static Regex MetaSplit = new Regex(@"\s*,\s*");
+        internal const string PV1 = @"\$([A-Za-z_][A-Za-z0-9_-]*";
+        internal const string PV2 = @"(?:\.[A-Za-z_][A-Za-z0-9_-]*)*)(?:[ .!;,:?()""']|$)";
+        public static Regex ParseVars = new Regex(PV1 + PV2);
 
+        public static Regex MetaSplit = new Regex(@"\s*,\s*");
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
+        public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
 
     /// <summary>
@@ -329,21 +333,54 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Trim the specified character if the string starts with it
+        /// First trims white-space, then trims the first character if the 
+        /// string starts with any of those specified
         /// </summary>
-        /// <returns><c>true</c>, if first was trimed, <c>false</c> otherwise.</returns>
         /// <param name="s">S.</param>
         /// <param name="c">C.</param>
-        public static bool TrimFirst(ref string s, char c)
+        /// <returns>true if the first char was removed, else false</returns>
+        public static bool TrimFirst(ref string s, params char[] c)
         {
-            if (s.IndexOf(c) == 0)
+            s = s.Trim();
+            for (int i = 0; i < c.Length; i++)
             {
-                s = s.Substring(1);
-                return true;
+                if (s.IndexOf(c[i]) == 0)
+                {
+                    s = s.Substring(1).Trim();
+                    return true;
+                }
             }
             return false;
         }
 
+        /// <summary>
+        /// First trims white-space, then trim the last character if the 
+        /// string ends with any of those specified
+        /// </summary>
+        /// <param name="s">S.</param>
+        /// <param name="c">C.</param>
+        /// <returns>true if the first char was removed, else false</returns>
+        public static bool TrimLast(ref string s, params char[] c)
+        {
+            s = s.Trim();
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (s.LastIndexOf(c[i]) == s.Length - 1)
+                {
+                    s = s.Substring(0, s.Length - 1).Trim();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        ////////////////////////////////////////////////////////////////////
+
+        internal static bool HasOpenGroup(string text)
+        {
+            return text.IndexOf('|') > -1 &&
+                (text.IndexOf('(') < 0 || text.IndexOf('(') < 0);
+        }
 
         internal static object ConvertTo(Type t, object val)
         {
@@ -580,8 +617,8 @@ namespace Dialogic
             string rval = value;
             if (globals != null)
             {
-                if (check.Contains('$')) check = Realizer.DoVars(check, globals);
-                if (value.Contains('$')) rval = Realizer.DoVars(value, globals);
+                if (check.Contains('$')) check = Realizer.ResolveSymbols(check, null, globals);
+                if (value.Contains('$')) rval = Realizer.ResolveSymbols(value, null, globals);
             }
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
@@ -677,19 +714,21 @@ namespace Dialogic
     /// </summary>
     public class Operator
     {
-        private enum OpType { EQUALITY, COMPARISON, MATCHING }
+        private enum OpType { EQUALITY, COMPARISON, MATCHING, ASSIGNMENT }
 
         public static Operator EQ = new Operator("=", OpType.EQUALITY);
-        public static Operator NEQ = new Operator("!=", OpType.EQUALITY);
+        public static Operator NE = new Operator("!=", OpType.EQUALITY);
+
         public static Operator SW = new Operator("^=", OpType.MATCHING);
         public static Operator EW = new Operator("$=", OpType.MATCHING);
         public static Operator RE = new Operator("*=", OpType.MATCHING);
+
         public static Operator GT = new Operator(">", OpType.COMPARISON);
         public static Operator LT = new Operator("<", OpType.COMPARISON);
-        public static Operator LTE = new Operator("<=", OpType.COMPARISON);
-        public static Operator GTE = new Operator(">=", OpType.COMPARISON);
+        public static Operator LE = new Operator("<=", OpType.COMPARISON);
+        public static Operator GE = new Operator(">=", OpType.COMPARISON);
 
-        public static Operator[] ALL = { GT, LT, EQ, NEQ, LTE, GTE, SW, EQ, RE };
+        public static Operator[] ALL = { GT, LT, EQ, NE, LE, GE, SW, EQ, RE };
 
         private readonly string value;
         private readonly OpType type;
@@ -715,9 +754,9 @@ namespace Dialogic
             {
                 case ">": return Operator.GT;
                 case "<": return Operator.LT;
-                case ">=": return Operator.GTE;
-                case "<=": return Operator.LTE;
-                case "!=": return Operator.NEQ;
+                case ">=": return Operator.GE;
+                case "<=": return Operator.LE;
+                case "!=": return Operator.NE;
                 case "^=": return Operator.SW;
                 case "$=": return Operator.EW;
                 case "*=": return Operator.RE;
@@ -739,7 +778,7 @@ namespace Dialogic
             if (this.type == OpType.EQUALITY)
             {
                 if (this == EQ) return Equals(s1, s2);
-                if (this == NEQ) return !Equals(s1, s2);
+                if (this == NE) return !Equals(s1, s2);
             }
             else if (this.type == OpType.MATCHING)
             {
@@ -756,8 +795,8 @@ namespace Dialogic
                     double o2 = (double)Convert.ChangeType(s2, typeof(double));
                     if (this == GT) return o1 > o2;
                     if (this == LT) return o1 < o2;
-                    if (this == GTE) return o1 >= o2;
-                    if (this == LTE) return o1 <= o2;
+                    if (this == GE) return o1 >= o2;
+                    if (this == LE) return o1 <= o2;
                 }
                 catch (FormatException)
                 {
@@ -773,168 +812,286 @@ namespace Dialogic
         }
     }
 
-    // adapted from:
-    //   https://codereview.stackexchange.com/questions/113596/writing-cs-analog-of-settimeout-setinterval-and-clearinterval
-    public static class Timers //@cond hidden
+    public class AssignOp
     {
-        static IInterruptable timer;
+        public static AssignOp EQ = new AssignOp("=");
+        public static AssignOp OE = new AssignOp("|=");
+        public static AssignOp PE = new AssignOp("+=");
+        /*public static AssignOp ME = new AssignOp("-=");
+        public static AssignOp TE = new AssignOp("*=");
+        public static AssignOp DE = new AssignOp("/=");*/
 
-        public static IInterruptable SetInterval(int ms, Action function)
+        public static AssignOp[] ALL = { EQ, OE, PE };//, ME, TE, DE };
+
+        private readonly string value;
+
+        private AssignOp(string v)
         {
-            return timer = ms > -1 ? StartTimer(ms, function, true) : null;
+            this.value = v;
         }
 
-        public static IInterruptable SetTimeout(int ms, Action function)
+        public static string FromOperator(AssignOp op)
         {
-            return timer = ms > -1 ? StartTimer(ms, function, false) : null;
+            for (int i = 0; i < ALL.Length; i++)
+            {
+                if (op == ALL[i]) return op.ToString();
+            }
+            throw new Exception("Invalid Operator: " + op);
         }
 
-        private static IInterruptable StartTimer(int interval, Action function, bool autoReset)
+        public static AssignOp FromString(string op)
         {
-            Action functionCopy = (Action)function.Clone();
-            Timer t = new Timer { Interval = interval, AutoReset = autoReset };
-            t.Elapsed += (sender, e) => functionCopy();
-            t.Start();
-
-            return new TimerInterrupter(t);
+            switch (op)
+            {
+                case "=": return AssignOp.EQ;
+                case "|=": return AssignOp.OE;
+                case "+=": return AssignOp.PE;
+                    /*case "-=": return AssignOp.ME;
+                    case "*=": return AssignOp.TE;
+                    case "/=": return AssignOp.DE;*/
+            }
+            throw new Exception("Invalid Operator: " + op);
         }
-    }//@endcond
 
-    public interface IInterruptable //@cond hidden
-    {
-        void Stop();
+        public override string ToString()
+        {
+            return this.value;
+        }
+
+        public bool Invoke(string s1, string s2, IDictionary<string, object> globals)
+        {
+            s1.TrimFirst('$');
+
+            string result = null;
+
+            if (this == EQ)
+            {
+                if (Util.HasOpenGroup(s2)) s2 = s2.Parenthify();
+                result = s2;
+            }
+            else if (this == OE)
+            {
+                if (!globals.ContainsKey(s1)) throw new ParseException
+                    ("Variable " + s1 + " not found in globals:\n  " + globals.Stringify());
+
+                //globals[s1] = globals[s1] + " " + s2;
+                //result = "(" + globals[s1] + " | " + s2 + ")";
+                var now = (string)globals[s1];
+                if (now.StartsWith('(') && now.EndsWith(')'))
+                {
+                    result = now.TrimLast(')') + " | " + s2 + ')';
+                }
+                else
+                {
+                    result = '(' + now + " | " + s2 + ')';
+                }
+            }
+            else if (this == PE)
+            {
+                if (!globals.ContainsKey(s1)) throw new ParseException
+                    ("Variable " + s1 + " not found in globals:\n  " + globals.Stringify());
+
+                result = globals[s1] + " " + s2;
+            }
+
+            globals[s1] = result;
+
+            return true;
+        }
     }
-    public class TimerInterrupter : IInterruptable
-    {
-        private readonly Timer t;
-
-        public TimerInterrupter(Timer timer)
-        {
-            if (timer == null) throw new ArgumentNullException();
-            t = timer;
-        }
-
-        public void Stop()
-        {
-            t.Stop();
-        }
-    }//@endcond
-
-    public class ObjectPool<T> //@cond unused
-    {
-        private Func<T> generator;
-        private Action<T> recycler;
-
-        private T[] pool;
-        private int cursor = 0;
-
-        public ObjectPool(int size, Func<T> generator, Action<T> recycler = null)
-        {
-            this.pool = new T[size];
-            this.recycler = recycler;
-            this.generator = generator;
-            for (int i = 0; i < size; i++)
-            {
-                pool[i] = generator();
-            }
-        }
-
-        public T Get()
-        {
-            T next = pool[cursor];
-            if (recycler != null) recycler(next);
-            cursor = ++cursor < pool.Length ? cursor : 0;
-            return next;
-        }
-    }//@endcond
-
-
-    public static class Exts //@cond unused
-    {
-        public delegate void Action<T1, T2, T3, T4, T5>
-            (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
-
-        public static void Apply<T>(this IList<T> il, Action<T, T, T, T, T> action)
-        {
-            action(il[0], il[1], il[2], il[3], il[4]);
-        }
-
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
-        {
-            if (ie == null) return true;
-            var coll = ie as ICollection<T>;
-            return (coll != null) ? coll.Count < 1 : !ie.Any();
-        }
-
-        public static bool IsNumber(this object value) // ext
-        {
-            return value is sbyte
-                    || value is byte
-                    || value is short
-                    || value is ushort
-                    || value is int
-                    || value is uint
-                    || value is long
-                    || value is ulong
-                    || value is float
-                    || value is double
-                    || value is decimal;
-        }
-
-        public static string TrimEnds(this string str, char start, char ends)
-        {
-            return str.TrimFirst(start).TrimLast(ends);
-        }
-
-        public static string TrimFirst(this string str, char c)
-        {
-            return (str[0] == c) ? str.Substring(1) : str;
-        }
-
-        public static string TrimLast(this string str, char c)
-        {
-            int last = str.Length - 1;
-            return (str[last] == c) ? str.Substring(0, last) : str;
-        }
-
-        public static string Stringify(this object o)
-        {
-            if (o == null) return "NULL";
-
-            string s = string.Empty;
-            if (o is IDictionary)
-            {
-                IDictionary id = (System.Collections.IDictionary)o;
-                if (id.Count > 0)
-                {
-                    s += "{";
-                    foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
-                    s = s.Substring(0, s.Length - 1) + "}";
-                }
-            }
-            else if (o is object[])
-            {
-                var arr = ((object[])o);
-                s = "[";
-                for (int i = 0; i < arr.Length; i++)
-                {
-                    s += arr[i];
-                    if (i < arr.Length - 1) s += ",";
-                }
-                s += "]";
-            }
-            else if (o is ICollection)
-            {
-                var coll = (ICollection)o;
-                s = "[";
-                foreach (var k in coll) s += k + ",";
-                s = (s.Substring(0, s.Length - 1) + "]");
-            }
-            else
-            {
-                s = o.ToString();
-            }
-            return s;
-        }
-    }//@endcond
 }
+
+// adapted from:
+//   https://codereview.stackexchange.com/questions/113596
+//   /writing-cs-analog-of-settimeout-setinterval-and-clearinterval
+public static class Timers //@cond hidden
+{
+    static IInterruptable timer;
+
+    public static IInterruptable SetInterval(int ms, Action function)
+    {
+        return timer = ms > -1 ? StartTimer(ms, function, true) : null;
+    }
+
+    public static IInterruptable SetTimeout(int ms, Action function)
+    {
+        return timer = ms > -1 ? StartTimer(ms, function, false) : null;
+    }
+
+    private static IInterruptable StartTimer(int interval, Action function, bool autoReset)
+    {
+        Action functionCopy = (Action)function.Clone();
+        Timer t = new Timer { Interval = interval, AutoReset = autoReset };
+        t.Elapsed += (sender, e) => functionCopy();
+        t.Start();
+
+        return new TimerInterrupter(t);
+    }
+}//@endcond
+
+public interface IInterruptable //@cond hidden
+{
+    void Stop();
+}
+public class TimerInterrupter : IInterruptable
+{
+    private readonly Timer t;
+
+    public TimerInterrupter(Timer timer)
+    {
+        if (timer == null) throw new ArgumentNullException();
+        t = timer;
+    }
+
+    public void Stop()
+    {
+        t.Stop();
+    }
+}//@endcond
+
+public class ObjectPool<T> //@cond unused
+{
+    private Func<T> generator;
+    private Action<T> recycler;
+
+    private T[] pool;
+    private int cursor = 0;
+
+    public ObjectPool(int size, Func<T> generator, Action<T> recycler = null)
+    {
+        this.pool = new T[size];
+        this.recycler = recycler;
+        this.generator = generator;
+        for (int i = 0; i < size; i++)
+        {
+            pool[i] = generator();
+        }
+    }
+
+    public T Get()
+    {
+        T next = pool[cursor];
+        if (recycler != null) recycler(next);
+        cursor = ++cursor < pool.Length ? cursor : 0;
+        return next;
+    }
+
+}//@endcond
+
+
+public static class Exts //@cond unused
+{
+    internal delegate void Action<T1, T2, T3, T4, T5>
+        (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+
+    internal static void Apply<T>(this IList<T> il, Action<T, T, T, T, T> action)
+    {
+        action(il[0], il[1], il[2], il[3], il[4]);
+    }
+
+    internal static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
+    {
+        if (ie == null) return true;
+        var coll = ie as ICollection<T>;
+        return (coll != null) ? coll.Count < 1 : !ie.Any();
+    }
+
+    internal static bool IsNumber(this object value) // ext
+    {
+        return value is sbyte
+                || value is byte
+                || value is short
+                || value is ushort
+                || value is int
+                || value is uint
+                || value is long
+                || value is ulong
+                || value is float
+                || value is double
+                || value is decimal;
+    }
+
+    internal static bool StartsWith(this string str, char c)
+    {
+        return !str.IsNullOrEmpty() && str[0] == c;
+    }
+
+    internal static bool EndsWith(this string str, char c)
+    {
+        return !str.IsNullOrEmpty() && str[str.Length - 1] == c;
+    }
+
+    internal static bool Contains(this string str, char c)
+    {
+        return !str.IsNullOrEmpty() && str.IndexOf(c) > -1;
+    }
+
+    internal static string TrimEnds(this string str, char start, char ends)
+    {
+        return str.TrimFirst(start).TrimLast(ends);
+    }
+
+    internal static string TrimFirst(this string str, char c)
+    {
+        return (str[0] == c) ? str.Substring(1) : str;
+    }
+
+    internal static string TrimLast(this string str, char c)
+    {
+        int last = str.Length - 1;
+        return (str[last] == c) ? str.Substring(0, last) : str;
+    }
+
+    internal static string Parenthify(this string str)
+    {
+        if (!(str.StartsWith('(') && str.EndsWith(')')))
+        {
+            str = '(' + str + ')';
+        }
+        return str;
+    }
+
+
+    public static string Stringify(this object o)
+    {
+        if (o == null) return "null";
+
+        string s = string.Empty;
+        if (o is IDictionary)
+        {
+            IDictionary id = (System.Collections.IDictionary)o;
+            if (id.Count > 0)
+            {
+                s += "{";
+                foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
+                s = s.Substring(0, s.Length - 1) + "}";
+            }
+        }
+        else if (o is object[])
+        {
+            var arr = ((object[])o);
+            s = "[";
+            for (int i = 0; i < arr.Length; i++)
+            {
+                s += arr[i];
+                if (i < arr.Length - 1) s += ",";
+            }
+            s += "]";
+        }
+        else if (o is ICollection)
+        {
+            var coll = (ICollection)o;
+            s = "[";
+            if (coll.Count < 1) s += "]";
+            foreach (var k in coll) s += k + ",";
+            s = (s.Substring(0, s.Length - 1) + "]");
+        }
+        else
+        {
+            s = o.ToString();
+        }
+        return s;
+    }
+
+}//@endcond
+

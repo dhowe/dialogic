@@ -11,7 +11,7 @@ namespace Dialogic
 
         public static IDictionary<string, object> globals
              = new Dictionary<string, object>() {
-                { "obj.prop", "dog" },
+                { "obj-prop", "dog" },
                 { "animal", "dog" },
                 { "prep", "then" },
                 { "group", "(a|b)" },
@@ -31,28 +31,16 @@ namespace Dialogic
         [Test]
         public void SetLocals()
         {
-            var chat = ChatParser.ParseText("CHAT c1\nSET a 4", NO_VALIDATORS)[0];
+            var chat = ChatParser.ParseText("CHAT c1\nSET a=the white dog", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
-            Set set = (Dialogic.Set)chat.commands[0];
-            Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.value, Is.EqualTo("4"));
-            set.Realize(RealizeTests.globals);
-            object outv = null;
-            RealizeTests.globals.TryGetValue("a", out outv);
-            Assert.That(outv, Is.Null);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
-
-            chat = ChatParser.ParseText("CHAT c1\nSET a the white dog", NO_VALIDATORS)[0];
-            Assert.That(chat, Is.Not.Null);
-            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
-            set = (Dialogic.Set)chat.commands[0];
+            var set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("the white dog"));
-            set.Realize(RealizeTests.globals);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("the white dog"));
+            set.Realize(globals);
+            Assert.That(chat.locals["a"], Is.EqualTo("the white dog"));
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a the white dog\nSET a 4", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET a=the white dog\nSET a=4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
@@ -61,28 +49,28 @@ namespace Dialogic
             set = (Dialogic.Set)chat.commands[1];
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("4"));
-            set.Realize(RealizeTests.globals);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+            set.Realize(globals);
+            Assert.That(chat.locals["a"], Is.EqualTo("4"));
 
-            chat = ChatParser.ParseText("CHAT c1\nSET $a 4", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET $a=4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("4"));
-            set.Realize(RealizeTests.globals);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+            set.Realize(globals);
+            Assert.That(globals["a"], Is.EqualTo("4"));
 
-            chat = ChatParser.ParseText("CHAT c1\nSET $a the white dog", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET $a=the white dog", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("the white dog"));
-            set.Realize(RealizeTests.globals);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("the white dog"));
+            set.Realize(globals);
+            Assert.That(globals["a"], Is.EqualTo("the white dog"));
 
-            chat = ChatParser.ParseText("CHAT c1\nSET $a the white dog\nSET $a 4", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET $a=the white dog\nSET $a=4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
@@ -91,54 +79,72 @@ namespace Dialogic
             set = (Dialogic.Set)chat.commands[1];
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("4"));
-            set.Realize(RealizeTests.globals);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("4"));
+            set.Realize(globals);
+            Assert.That(globals["a"], Is.EqualTo("4"));
         }
 
         [Test]
         public void SetLocalsWithVars()
         {
-            var chat = ChatParser.ParseText("CHAT c1\nSET a $animal ", NO_VALIDATORS)[0];
+            var chat = ChatParser.ParseText("CHAT c1\nSET a=$animal ", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Set set = (Set)chat.commands[0];
             set.Realize(globals);
             Assert.That(set.text, Is.EqualTo("a"));
             //Assert.That(set.value, Is.EqualTo("dog"));
-            set.Realize(RealizeTests.globals);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("dog"));
+            set.Realize(globals);
+            Assert.That(chat.locals["a"], Is.EqualTo("$animal"));
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a $obj.prop ", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET a=$obj-prop ", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Set)chat.commands[0];
             set.Realize(globals);
             Assert.That(set.text, Is.EqualTo("a"));
             //Assert.That(set.value, Is.EqualTo("dog"));
-            set.Realize(RealizeTests.globals);
-            Assert.That(RealizeTests.globals["c1.a"], Is.EqualTo("dog"));
+            set.Realize(globals);
+            Assert.That(chat.locals["a"], Is.EqualTo("$obj-prop"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET a=$animal\nSAY The $a barked ", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Set)chat.commands[0];
+            set.Realize(globals);
+            Assert.That(set.text, Is.EqualTo("a"));
+            Assert.That(set.value, Is.EqualTo("$animal"));
+            Assert.That(chat.locals["a"], Is.EqualTo("$animal"));
+            Assert.That(globals["animal"], Is.EqualTo("dog"));
+            chat.commands[1].Realize(globals);
+            Assert.That(chat.commands[1].Text(true), Is.EqualTo("The dog barked"));
+            //globals["animal"] = "cat";
+            //Assert.That(globals["animal"], Is.EqualTo("cat"));
+            //chat.commands[1].Realize(globals); // re-realize
+            //Assert.That(chat.commands[1].Text(true), Is.EqualTo("The cat barked"));
         }
 
         [Test]
         public void SetGlobals()
         {
-            Assert.That(RealizeTests.globals["animal"], Is.EqualTo("dog"));
-            var chat = ChatParser.ParseText("CHAT c1\nSET animal cat", NO_VALIDATORS)[0];
+            Assert.That(globals["animal"], Is.EqualTo("dog"));
+            Chat chat = ChatParser.ParseText("CHAT c1\nSET $animal=cat", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
-            var set = (Dialogic.Set)chat.commands[0];
+            Set set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("animal"));
             Assert.That(set.value, Is.EqualTo("cat"));
-
-
-            set.Realize(RealizeTests.globals);
+            /*
+             * 
+             * TODO: globals and locals
+            set.Realize(globals);
             object outv = null;
-            RealizeTests.globals.TryGetValue("c1.animal", out outv);
+            globals.TryGetValue("c1.animal", out outv);
             Assert.That(outv, Is.Null);
-            Assert.That(RealizeTests.globals["animal"], Is.EqualTo("cat"));
+            Assert.That(globals["animal"], Is.EqualTo("cat"));
 
-            RealizeTests.globals["animal"] = "dog";
-            Assert.That(RealizeTests.globals["animal"], Is.EqualTo("dog"));
+            globals["animal"] = "dog";
+            Assert.That(globals["animal"], Is.EqualTo("dog"));
+            */
         }
 
         [Test]
@@ -604,7 +610,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].text, Is.Null);
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
 
-            chats[0].commands[0].Realize(RealizeTests.globals);
+            chats[0].commands[0].Realize(globals);
 
             Assert.That(chats[0].commands[0].GetMeta("num"), Is.Not.Null);
             var meta = chats[0].commands[0].GetMeta("num");
@@ -621,7 +627,7 @@ namespace Dialogic
             // "FIND {a*=(hot|cool)}" in regex, means hot OR cool, no subs
             var chats = ChatParser.ParseText("FIND {a*=(hot|cool)}");
             var find = chats[0].commands[0];
-            find.Realize(RealizeTests.globals);
+            find.Realize(globals);
 
             Assert.That(find.GetType(), Is.EqualTo(typeof(Find)));
             Assert.That(chats[0].commands[0].text, Is.Null);
@@ -746,7 +752,7 @@ namespace Dialogic
             Assert.That(ChatParser.ParseText(s)[0].commands[0].ToString(), Is.EqualTo(s));
             Assert.That(ChatParser.ParseText("DO hay")[0].commands[0].ToString(), Is.EqualTo(s));
 
-            s = "SET a 4";
+            s = "SET $a = 4";
             Assert.That(ChatParser.ParseText(s)[0].commands[0].ToString(), Is.EqualTo(s));
 
             s = "ASK hay is for horses?\nOPT Yes? #Yes\nOPT No? #No";
@@ -1124,6 +1130,15 @@ namespace Dialogic
             //var ff = "FIND {a b=e}";
             //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].ToTree());
 
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A ="));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A 3"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A: 3"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A:"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A="));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A :"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A c | d"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("GO A {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT c1"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("CHAT x{t pe=a,stage=b}", NO_VALIDATORS));

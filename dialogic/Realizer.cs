@@ -10,38 +10,95 @@ namespace Dialogic
     /// </summary>
     public static class Realizer
     {
-        internal static int maxIterations = 99;
+        //private ChatRuntime runtime;
+        //internal Realizer(ChatRuntime rt) {
+        //    this.runtime = rt;
+        //}
 
-        public static string Do(string text, IDictionary<string, object> globals, Chat parent = null)
+        public static string Resolve(string text, Chat parent, IDictionary<string, object> globals)
         {
             var DBUG = false;
 
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (globals.IsNullOrEmpty()) return DoGroups(text);
+            if (globals.IsNullOrEmpty() && parent == null) return ResolveGroups(text);
 
             if (DBUG) Console.WriteLine("Do#0.0: " + text + " " + globals.Stringify());
 
             var original = text;
-            var iterations = 0;
+            int iterations = 0, maxIterations = 2;
 
             do
             {
-                text = DoVars(text, globals, parent);
-                if (DBUG) Console.WriteLine("Do#"+iterations + ".1: " + text);
+                text = ResolveSymbols(text, parent, globals);
+                if (DBUG) Console.WriteLine("Do#" + iterations + ".1: " + text);
 
-                text = DoGroups(text);
-                if (DBUG) Console.WriteLine("Do#"+iterations + ".2: " + text);
+                text = ResolveGroups(text);
+                if (DBUG) Console.WriteLine("Do#" + iterations + ".2: " + text);
 
                 if (++iterations > maxIterations) throw new RealizeException
                     ("Infinite loop in realizer: " + original);
 
             } while (IsDynamic(text));
 
+            //Console.WriteLine("  " + original + " -> " + text);
+
             return text;
         }
 
-        public static string DoGroups(string text)
+        public static string ResolveSymbols(string text, Chat context, IDictionary<string, object> globals)
+        {
+            int iterations = 0, maxIterations = 5;
+            while (text.Contains('$'))
+            {
+                var matches = RE.ParseVars.Matches(text);
+                if (matches.Count == 0) return text;
+
+                // we have some variables to deal with 
+                List<string> symbols = new List<string>();
+                foreach (Match match in matches)
+                {
+                    if (match.Groups.Count != 2)
+                        throw new DialogicException("Bad RE in " + text);
+
+                    var symbol = match.Groups[1].Value;
+
+                    if (symbol.Contains('.'))
+                    {
+                        if (context == null) throw new RealizeException
+                            ("Null context for chat-scoped symbol: " + symbol);
+
+                        // need to process a chat-scoped symbol
+                        var parts = symbol.Split('.');
+                        if (parts.Length > 2)
+                        {
+                            throw new RealizeException("Unexpected variable format: " + symbol);
+                        }
+                        var chat = context.runtime.FindChatByLabel(parts[0]);
+                        if (chat == null)
+                        {
+                            throw new RealizeException("No Chat found with label #" + parts[0]);
+                        }
+
+                        // use the new context from now on, or until another switch
+                        context = chat; 
+
+                        text = text.Replace('$' + symbol, RealizeSymbol(parts[1], context, globals));
+                    }
+                    else // process a local or global-scoped symbol
+                    {
+                        text = text.Replace('$' + symbol, RealizeSymbol(symbol, context, globals));
+                    }
+                }
+
+                if (++iterations >= maxIterations) throw new RealizeException
+                    ("Max recursion depth hit for: " + text);
+
+            }
+            return text;
+        }
+
+        public static string ResolveGroups(string text)
         {
             var DBUG = false;
 
@@ -49,19 +106,22 @@ namespace Dialogic
             {
                 if (DBUG) Console.WriteLine("DoGroups: " + text);
 
-                var iterations = 0;
+                int iterations = 0, maxIterations = 2;
                 var original = text;
-                while (text.IndexOf('|') > -1)
+                while (text.Contains('|'))
                 {
-                    if (text.IndexOf('(') < 0 || text.IndexOf('(') < 0)
+                    if (!(text.Contains('(') && text.Contains(')')))
                     {
                         text = '(' + text + ')';
-                        Console.WriteLine("[WARN] added parens to: " + text);
+                        Console.WriteLine("[WARN] RealizeGroups added parens to: " + text);
                     }
 
-                    List<string> result = new List<string>();
-                    ParseGroups(text, result);
-                    foreach (var opt in result)
+                    List<string> groups = new List<string>();
+                    ParseGroups(text, groups);
+
+                    if (DBUG) Console.WriteLine("  groups: " + groups.Stringify());
+
+                    foreach (var opt in groups)
                     {
                         var pick = DoReplace(opt);
                         text = text.Replace(opt, pick);
@@ -75,88 +135,29 @@ namespace Dialogic
             return text;
         }
 
-        public static string DoVars(string text, IDictionary<string, object> globals, Chat parent = null)
+
+        /// <summary>
+        /// First do local lookup from Chat context, then if not found, try global lookup
+        /// </summary>
+        private static string RealizeSymbol(string symbol, Chat context, IDictionary<string, object> globals)
         {
-            var DBUG = false;
+            //Console.WriteLine("RealizeSymbol: "+symbol+" in chat#"+(context!=null?context.text:"null"));
 
-            if (!String.IsNullOrEmpty(text))
+            // check locals
+            if (context != null && context.locals.ContainsKey(symbol))
             {
-                if (DBUG) Console.WriteLine("DoVars: " + text + " " + globals.Stringify());
-
-                string original = text;
-                int recursions = 0, maxRecursionDepth = 9;
-
-                while (text.IndexOf('$') > -1 && text == original)
-                {
-                    var check = ReplaceGlobals(text, globals);
-                    if (check == null)
-                    {
-                        if (parent != null)
-                        {
-                            check = text.Replace("$", '$' + parent.text + '.');
-                            if (DBUG) Console.WriteLine("DoVars failed to match variable " +
-                                "in '" + original + "' trying with parent: '" + check + "'");
-
-                            check = ReplaceGlobals(check, globals);
-                        }
-
-                        if (check == null) throw new RealizeException
-                            ("Failed to match variable(s) in '" + text
-                                + "' with globals:\n  " + globals.Stringify());
-                    }
-                    text = check;
-
-                    //if (DBUG) Console.WriteLine("#" + recursions + ": " + text);
-
-                    if (++recursions > maxRecursionDepth)
-                    {
-                        throw new RealizeException("Possible infinite recursion" +
-                            " in DoVars(" + original + ", " + globals.Stringify() + ")");
-                    }
-                }
+                return context.locals[symbol].ToString();
             }
 
-            return text;
-        }
-
-
-        ////////////////////////////////////////////////////////////////////////
-
-
-        // attempt to replace each global in the string, starting with the longest first
-        private static string ReplaceGlobals(string text, IDictionary<string, object> globals)
-        {
-            IEnumerable sorted = null; // OPT: cache these sorts ?
-
-            if (text.IndexOf('$') > -1)
+            // check globals
+            if (globals != null && globals.ContainsKey(symbol))
             {
-                var original = text;
-
-                // do replacements in order of length, longest first
-                if (sorted == null) sorted = Util.SortByLength(globals.Keys);
-
-                var matched = false;
-                foreach (string s in sorted)
-                {
-                    var tmp = text.Replace("$" + s, globals[s].ToString());
-                    if (tmp != text)
-                    {
-                        matched = true;
-                        text = tmp;
-                        //Console.WriteLine("ReplaceGlobals(" + s + ")=" + tmp);
-                    }
-                }
-
-                // return null if text hasn't matched anything
-                if (!matched) return null;
+                return globals[symbol].ToString();
             }
-            return text;
-        }
 
-        private static bool OrWithoutParensX(string text)
-        {
-            return text != null && text.IndexOf('|') > -1 &&
-                (text.IndexOf('(') < 0 || text.IndexOf(')') < 0);
+            var cstr = "Unable to realize symbol: '$" + symbol + "'\nglobals: " + globals.Stringify();
+            if (context != null) cstr += "\nchat#" + context.text + ".locals:" + context.locals.Stringify();
+            throw new RealizeException(cstr);
         }
 
         private static string DoReplace(string sub)
