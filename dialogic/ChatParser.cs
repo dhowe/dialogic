@@ -93,6 +93,7 @@ namespace Dialogic
                 RunInternalValidators(c);
             }
             catch (Exception ex)
+            //catch (ParseException ex)
             {
                 throw new ParseException(line, lineNo, ex.Message);
             }
@@ -147,8 +148,17 @@ namespace Dialogic
 
             parts.Apply((spkr, cmd, text, label, meta) =>
             {
-                Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] : typeof(Say);
-                c = Command.Create(type, text, label, SplitMeta(meta));
+                // TODO: allow metadata for Chat to specify default Type
+                Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] 
+                    : Chat.DefaultCommandType(chats.LastOrDefault());
+
+                try
+                {
+                    c = Command.Create(type, text, label, SplitMeta(meta));
+                }
+                catch (Exception ex) {
+                    throw ex;
+                }
                 HandleActor(spkr, c, line, lineNo);
                 HandleCommand(c, line, lineNo);
             });

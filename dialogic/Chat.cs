@@ -167,5 +167,35 @@ namespace Dialogic
 
             LastRunAt(Util.EpochMs());
         }
+
+        internal static Type DefaultCommandType(Chat chat)
+        {
+            if (chat != null)
+            {
+                if (chat.HasMeta(Meta.DEFAULT_CMD))
+                {
+                    var type = (string)chat.GetMeta(Meta.DEFAULT_CMD);
+                    if (!ChatRuntime.TypeMap.ContainsKey(type))
+                    {
+                        throw new ParseException("Invalid defaultCmd value" +
+                            " in Chat#" + chat.text);
+                    }
+
+                    return ChatRuntime.TypeMap[type];
+                }
+                else if (chat.HasMeta(Meta.CHAT_MODE))
+                {
+                    var mode = (string)chat.GetMeta(Meta.CHAT_MODE);
+                    if (mode != "grammar")
+                    {
+                        throw new ParseException("Invalid 'mode' value"
+                            + " in Chat#" + chat.text);
+                    }
+                    return typeof(Set);
+                }
+            }
+
+            return typeof(Say);
+        }
     }
 }

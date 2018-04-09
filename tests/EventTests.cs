@@ -11,7 +11,7 @@ namespace Dialogic
         const bool NO_VALIDATORS = true;
 
         [Test]
-        public void TestStalenessEvent()
+        public void StalenessEventTest()
         {
             string[] lines = {
                 "CHAT c1 {type=a}",
@@ -49,7 +49,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void TestResumeEvent()
+        public void ResumeEventTest()
         {
             // pending
         }

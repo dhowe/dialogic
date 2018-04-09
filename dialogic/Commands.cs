@@ -60,7 +60,7 @@ namespace Dialogic
         protected void ValidateTextLabel()
         {
             if (String.IsNullOrEmpty(text)) throw BadArg(TypeName()
-                + " requires a literal #Label, got '"+text+"'");
+                + " requires a literal #Label, got '" + text + "'");
 
             Util.ValidateLabel(ref text);
         }
@@ -284,77 +284,72 @@ namespace Dialogic
     /// <summary>
     /// The Set command is used to create or modify a variable. Variables  generally originate from the game environment itself, but can also be created, accessed or modified within Dialogic.
     /// </summary>d
-    public class Set : Command // TODO: rethink
+    public class Set : Command
     {
         public string value;
+        public AssignOp op;
 
         public Set() : base() { }
 
-        internal Set(string name, string value) : base() // tests only
-        {
-            this.text = name;
-            this.value = value;
-            this.realized = null; // not used
-        }
-
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            string[] parts = ParseSetArgs(txt);
-            this.text = parts[0];
-            this.value = parts[1];
+            var match = RE.ParseSet.Match(txt);
+            if (match.Groups.Count != 4) throw new ParseException
+                ("Invalid query: '" + txt + "'");
+
+            this.text = match.Groups[1].Value.Trim();
+            this.value = match.Groups[3].Value.Trim();
+            this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
+
+            //if (value.IndexOf('|') > -1 && (value.IndexOf('(') < 0
+                //|| value.IndexOf(')') < 0)) throw new ParseException
+                    //("Grouping operator without parens: '" + value + "'");
         }
 
         protected internal override void Realize(IDictionary<string, object> globals)
         {
+            if (globals == null) throw new DialogicException
+                ("Invalid call to Set.Realize() with null argument");
+            
             string key = globals.ContainsKey(text) ? text : parent.text + "." + text;
 
-            var val = Realizer.DoVars(value, globals, parent);
-                    
+            // Note: no Realizer here as we need to bind at last moment
+            var val = value;
             if (val.IndexOf('<') > -1 && val.IndexOf('>') > -1)
             {
-                //Console.WriteLine("CHECKING: " + val);
-                MatchCollection matches = RE.GrammarRules.Matches(val);
-                if (matches.Count > 0)
-                {
-                    var rules = matches.Cast<Match>()
-                        .Select(match => match.Groups[1].Value).ToList();
-
-                    rules.ForEach(rule => val = val.Replace("<" 
-                        + rule + ">", "$" + rule));
-                    
-                    //Console.WriteLine("GOT: " + matches.Count+" "
-                    //+rules.Count+" "+rules.Stringify()); 
-                    // Util.ShowMatches(matches);
-                }
-
-                val = val.Replace("$", "$" + parent.text + ".");
+                val = HandleGrammarTag(val);
             }
+
+            op.Invoke(key, val, globals);
+        }
+
+        private string HandleGrammarTag(string val)
+        {
+            //Console.WriteLine("CHECKING: " + val);
+            MatchCollection matches = RE.GrammarRules.Matches(val);
+            if (matches.Count > 0)
+            {
+                var rules = matches.Cast<Match>()
+                    .Select(match => match.Groups[1].Value).ToList();
+
+                rules.ForEach(rule => val = val.Replace("<"
+                    + rule + ">", "$" + rule));
+
+                //Console.WriteLine("GOT: " + matches.Count+" "
+                //+rules.Count+" "+rules.Stringify()); 
+                // Util.ShowMatches(matches);
+            }
+
+            val = val.Replace("$", "$" + parent.text + ".");
 
             //if (value.Contains(".")) Console.WriteLine("Adding "
             //  + value + " to globals:\n  " + globals.Stringify());
-
-            globals[key] = val;
-        }
-
-        protected string[] ParseSetArgs(string s)
-        {
-            if (s.Length < 1) throw BadArg("ParseSetArgs");
-
-            string[] pair = s.Split(new[] { ' ' }, 2);
-
-            if (pair.Length != 2) throw BadArg
-                ("SET requires NAME and VALUE [" + pair.Length + "]");
-
-            //Console.WriteLine("'" + pair[0] + "' '" + pair[1]  + "'");
-
-            Util.TrimFirst(ref pair[0], '$'); // tmp: leading $ is optional}
-
-            return pair;
+            return val;
         }
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + ' ' + text + ' ' + value;
+            return TypeName().ToUpper() + " $" + text + " = " + value;
         }
     }
 
@@ -548,7 +543,7 @@ namespace Dialogic
 
             Constraint staleness = (Constraint)GetMeta(Meta.STALENESS);
 
-            if (staleness.op != Operator.LT && staleness.op != Operator.LTE)
+            if (staleness.op != Operator.LT && staleness.op != Operator.LE)
             {
                 throw new FindException("Find staleness op must be < or <=");
             }
@@ -666,11 +661,14 @@ namespace Dialogic
         public const string TEXT = "__text__";
         public const string OPTS = "__opts__";
 
+
         public const string ACTOR = "actor";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
         public const string ON_RESUME = "onResume";
+        public const string CHAT_MODE = "chatMode";
         public const string STALENESS = "staleness";
+        public const string DEFAULT_CMD = "defaultCmd";
         public const string INTERRUPTIBLE = "interruptible";
         public const string STALENESS_INCR = "stalenessIncr";
         public const string RESUME_AFTER_INT = "resumeAfterInt";

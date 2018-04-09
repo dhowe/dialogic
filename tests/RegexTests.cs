@@ -8,6 +8,19 @@ namespace Dialogic
     [TestFixture]
     public class RegexTests
     {
+        const bool NO_VALIDATORS = true;
+
+        static IDictionary<string, object> globals
+            = new Dictionary<string, object>
+        {
+            { "obj.prop", "dog" },
+            { "animal", "dog" },
+            { "prep", "then" },
+            { "group", "(a|b)" },
+            { "cmplx", "($group | $prep)" },
+            { "count", 4 }
+        };
+
         [Test]
         public void CommandAndText()
         {
@@ -104,6 +117,57 @@ namespace Dialogic
             Assert.That(parts[2], Is.EqualTo(""));
             Assert.That(parts[3], Is.EqualTo("#(Hello | Goodbye)"));
             Assert.That(parts[4], Is.EqualTo(""));
+        }
+
+        [Test]
+        public void SetParsing()
+        {
+            string[] tests = {
+
+                "SET $foo=4", "foo", "=", "4",
+                "SET $foo= 4", "foo", "=", "4",
+                "SET $foo =4", "foo", "=", "4",
+                "SET $foo = 4", "foo", "=", "4",
+                "SET foo=4", "foo", "=", "4",
+                "SET foo= 4", "foo", "=", "4",
+                "SET foo =4", "foo", "=", "4",
+                "SET foo = 4", "foo", "=", "4",
+                "SET $a = 4", "a","=",  "4",
+                "SET a+= 4", "a", "+=", "4",
+                "SET $a += 4", "a", "+=","4",
+                "SET a += 4", "a", "+=","4",
+                "SET $a +=4", "a", "+=","4",
+                "SET a+= 4 ", "a", "+=", "4",
+                "SET $a += 4 ", "a", "+=","4",
+                "SET a += 4 ", "a", "+=","4",
+                "SET $a +=4  ", "a", "+=","4",
+
+                "SET a= $obj.prop", "a", "=", "$obj.prop",
+                "SET a += $obj.prop", "a", "+=","$obj.prop",
+                "SET a= $obj.prop", "a", "=", "$obj.prop",
+                "SET a+= $obj.prop","a", "+=","$obj.prop",
+
+                "SET $a =(4 | 5)","a", "=","(4 | 5)",
+                "SET $a +=(4 | 5)", "a", "+=","(4 | 5)",
+                "SET a += (4 | 5)", "a", "+=","(4 | 5)",
+                "SET $a += (4 | 5)", "a", "+=","(4 | 5)"
+            };
+
+            var SETP = @"\$?([A-Za-z_][^ +=]*)\s*(\+?=)\s*(.+)";
+            var re = new Regex(SETP);
+
+            for (int i = 0; i < tests.Length; i += 4)
+            {
+                //Console.WriteLine(tests[i]);
+                var match = re.Match(tests[i].Replace("SET ", ""));
+                var name = match.Groups[1].Value.Trim();
+                var op = match.Groups[2].Value.Trim();
+                var value = match.Groups[3].Value.Trim();
+                Assert.That(name, Is.EqualTo(tests[i + 1]));
+                Assert.That(op, Is.EqualTo(tests[i + 2]));
+                Assert.That(value, Is.EqualTo(tests[i + 3]));
+                //Util.ShowMatch(match); break;
+            }
         }
 
         private static List<string> GetParts(Match match)

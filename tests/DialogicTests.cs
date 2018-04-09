@@ -70,6 +70,48 @@ namespace Dialogic
         }
 
         [Test]
+        public void TrimFirstLast()
+        {
+            string a;
+
+            a = "a=";
+            Util.TrimFirst(ref a, '=');
+            Assert.That(a, Is.EqualTo("a="));
+
+            Util.TrimLast(ref a, '=');
+            Assert.That(a, Is.EqualTo("a"));
+
+            a = "=a";
+            Util.TrimLast(ref a, '=');
+            Assert.That(a, Is.EqualTo("=a"));
+
+            Util.TrimFirst(ref a, '=');
+            Assert.That(a, Is.EqualTo("a"));
+
+            a = "=a";
+            Util.TrimLast(ref a, '=', ':');
+            Assert.That(a, Is.EqualTo("=a"));
+
+            a = "a=:";
+            Util.TrimLast(ref a, '=', ':');
+            Assert.That(a, Is.EqualTo("a="));
+
+            a = "a:=";
+            Util.TrimLast(ref a, '=', ':');
+            Assert.That(a, Is.EqualTo("a:"));
+
+            a = "a:=";
+            Util.TrimLast(ref a, '=', ':');
+            Util.TrimLast(ref a, '=', ':');
+            Assert.That(a, Is.EqualTo("a"));
+
+            a = "a:==:====";
+            do { } while (Util.TrimLast(ref a, '=', ':'));
+            Assert.That(a, Is.EqualTo("a"));
+        }
+
+
+        [Test]
         public void RandItemTest()
         {
             string[] arr = { "0", "1", "2" };

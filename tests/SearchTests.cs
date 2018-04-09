@@ -10,6 +10,16 @@ namespace Dialogic
     {
         const bool NO_VALIDATORS = true;
 
+        public static IDictionary<string, object> globals
+             = new Dictionary<string, object>() {
+                { "obj.prop", "dog" },
+                { "animal", "dog" },
+                { "prep", "then" },
+                { "group", "(a|b)" },
+                { "cmplx", "($group | $prep)" },
+                { "count", 4 }
+         };
+
         [Test]
         public void FindChatByMeta()
         {
@@ -213,7 +223,7 @@ namespace Dialogic
             string contents = String.Join("\n", lines);
             List<Chat> chats = ChatParser.ParseText(contents, NO_VALIDATORS);
             List<Chat> result = new ChatRuntime(chats).DoFindAll
-                (null, RealizeTests.globals, new Constraint("dev", "$count"));
+                (null, globals, new Constraint("dev", "$count"));
             //chats.ForEach((obj) => Console.WriteLine(obj.text));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(3));

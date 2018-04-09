@@ -101,8 +101,8 @@ namespace Dialogic
                         }
 
                         if (check == null) throw new RealizeException
-                            ("Failed to match variable(s) in '" + text
-                                + "' with globals:\n  " + globals.Stringify());
+                            ("Failed to match variable '" + text
+                                + "' in globals:\n  " + globals.Stringify());
                     }
                     text = check;
 
