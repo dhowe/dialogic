@@ -971,10 +971,11 @@ public class ObjectPool<T> //@cond unused
         cursor = ++cursor < pool.Length ? cursor : 0;
         return next;
     }
+
 }//@endcond
 
 
-internal static class Exts //@cond unused
+public static class Exts //@cond unused
 {
     internal delegate void Action<T1, T2, T3, T4, T5>
         (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
@@ -1032,7 +1033,7 @@ internal static class Exts //@cond unused
         return (str[last] == c) ? str.Substring(0, last) : str;
     }
 
-    internal static string Stringify(this object o)
+    public static string Stringify(this object o)
     {
         if (o == null) return "NULL";
 

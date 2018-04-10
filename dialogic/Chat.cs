@@ -108,8 +108,7 @@ namespace Dialogic
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
-            Console.WriteLine("[WARN] Chats need not be realized, doing commands instead");
-            //commands.ForEach(c => { Console.WriteLine(c.TypeName() + ".Realize("+c.text+")"); c.Realize(globals); });
+            //Console.WriteLine("[WARN] Chats need not be realized, doing commands instead");
             commands.ForEach(c => c.Realize(globals));
             return this;
         }

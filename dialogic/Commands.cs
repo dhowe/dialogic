@@ -175,7 +175,7 @@ namespace Dialogic
     public class Say : Command, ISendable, IAssignable
     {
         protected string lastSpoken;
-        protected bool disableUniqueness = true;
+        protected bool disableUniqueness = false;
 
         public Say() : base()
         {
@@ -308,12 +308,6 @@ namespace Dialogic
             this.text = match.Groups[1].Value.Trim();
             this.value = match.Groups[3].Value.Trim();
             this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
-
-            //if (false && Util.HasOpenGroup(value))
-            //{
-            //    value = "(" + value + ")";
-            //    Console.WriteLine("Set.Init added parens to: "+value);
-            //}
         }
 
         protected internal override Command Realize(IDictionary<string, object> globals)
@@ -330,12 +324,6 @@ namespace Dialogic
                 varValue = HandleGrammarTag(varValue);
             }
 
-            //if (Util.HasOpenGroup(value))
-            //{
-            //    varValue = "(" + varValue + ")";
-            //    Console.WriteLine("Set.Realize added parens to: " + varValue);
-            //}
-
             op.Invoke(varName, varValue, globals);
 
             return this;
@@ -343,7 +331,6 @@ namespace Dialogic
 
         private string HandleGrammarTag(string val)
         {
-            //Console.WriteLine("CHECKING: " + val);
             MatchCollection matches = RE.GrammarRules.Matches(val);
 
             if (matches.Count > 0)
@@ -353,16 +340,13 @@ namespace Dialogic
 
                 rules.ForEach(rule => val = val.Replace("<"
                     + rule + ">", "$" + rule));
-
-                //Console.WriteLine("GOT: " + matches.Count+" "
-                //+rules.Count+" "+rules.Stringify()); 
-                // Util.ShowMatches(matches);
             }
 
             val = val.Replace("$", "$" + parent.text + ".");
 
             //if (value.Contains(".")) Console.WriteLine("Adding "
             //  + value + " to globals:\n  " + globals.Stringify());
+
             return val;
         }
 

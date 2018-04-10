@@ -134,7 +134,6 @@ namespace Dialogic
             string[] lines = {
                 "CHAT WineReview {type=a,stage=b}",
                 "SET review=<desc> <fortune> <ending>",
-                //"SET ending <score> | <end-phrase>", // causes hang
                 "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
                 "SET fortune=Under your skin, tears undulate like a leaky eel.",
                 "SET ending=And thats the end of the story...",
@@ -155,6 +154,66 @@ namespace Dialogic
             //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
 
             Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
+        }
+
+        [Test]
+        public void SetRules2()
+        {
+            string[] lines = {
+                "CHAT WineReview {type=a,stage=b}",
+                "SET review=<desc> <fortune> <ending>",
+                "SET ending=(<score> | <end-phrase>) Goodbye!",
+                "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
+                "SET score=The judges give that a 1.",
+                "SET fortune=You will live a short life in poverty.",
+                "SET end-phrase=And thats the end of the story...",
+                "SAY $WineReview.review",
+            };
+            var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
+
+            var last = chat.commands[chat.commands.Count - 1];
+            Assert.That(last, Is.Not.Null);
+            Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.commands.ForEach(c => c.Realize(globals));
+
+            Assert.That(globals.ContainsKey("WineReview.review"), Is.True);
+            Assert.That(globals.ContainsKey("WineReview.ending"), Is.True);
+
+            Say say = (Dialogic.Say)last;
+            var text = say.Text(true);
+            Assert.That(text.StartsWith("You look tasty: gushing", Util.IC), Is.True);
+            Assert.That(text.EndsWith("Goodbye!", Util.IC), Is.True);
+        }
+
+        [Test]
+        public void SetRules3()
+        {
+            string[] lines = {
+                "CHAT WineReview {type=a,stage=b}",
+                "SET review=<desc> <fortune> <ending>",
+                "SET ending=<score> | <end-phrase>",
+                "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
+                "SET score=The judges give that a 1; good luck with poverty.",
+                "SET fortune=You will live a short life in dismal poverty.",
+                "SET end-phrase=And thats the end of the story...",
+                "SAY $WineReview.review",
+            };
+            var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
+
+            var last = chat.commands[chat.commands.Count - 1];
+            Assert.That(last, Is.Not.Null);
+            Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.commands.ForEach(c => c.Realize(globals));
+
+            Assert.That(globals.ContainsKey("WineReview.review"), Is.True);
+            Assert.That(globals.ContainsKey("WineReview.ending"), Is.True);
+
+            Say say = (Dialogic.Say)last;
+            var text = say.Text(true);
+            Assert.That(text.StartsWith("You look tasty", Util.IC), Is.True);
+            Assert.That(text.EndsWith("poverty.", Util.IC), Is.True);
         }
 
         [Test]
@@ -255,7 +314,7 @@ namespace Dialogic
             Assert.That(globals.ContainsKey("c1.review"), Is.True);
             Assert.That(globals.ContainsKey("c1.greeting"), Is.True);
             Assert.That(globals["c1.greeting"],
-                        Is.EqualTo("Hello | Goodbye | See you later"));
+                        Is.EqualTo("(Hello | Goodbye | See you later)"));
 
             Say say = (Dialogic.Say)last;
 
@@ -332,14 +391,14 @@ namespace Dialogic
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
 
             chat.commands.ForEach(c => c.Realize(globals));
-            Console.WriteLine(chat.AsGrammar(globals), false);
+            //Console.WriteLine(chat.AsGrammar(globals), false);
 
             Say say = (Say)chat.commands.Last();//.Realize()
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 10; i++)
             {
                 var said = say.Realize(globals).Text(true);
-                Console.WriteLine(i + ") " + said);
+                //Console.WriteLine(i + ") " + said);
                 Assert.That(said.StartsWith("Your expression is a", Util.IC), Is.True);
                 Assert.That
                       (said.EndsWith("Try again with 'feeling'...", Util.IC)
@@ -361,21 +420,15 @@ namespace Dialogic
                 "SAY $start"
             };
 
-            // NEXT: move last paren in invoke
-
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
-
             chat.commands.ForEach(c => {if (!(c is Say)) c.Realize(globals);});
-            Console.WriteLine(chat.AsGrammar(globals, false));
-            Console.WriteLine(chat.Expand(globals, "$start"));
-            return;
-            Say say = (Say)chat.commands.Last();//.Realize()
+            Say say = (Say)chat.commands.Last();
 
             for (int i = 0; i < 10; i++)
             {
                 var said = say.Realize(globals).Text(true);
-                Console.WriteLine(i + ") " + said);
-                //Assert.That(said, Is.EqualTo("A B C"));
+                //Console.WriteLine(i + ") " + said);
+                Assert.That(said, Is.EqualTo("A B D").Or.EqualTo("A B E"));
             }
         }
 
@@ -458,7 +511,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B C | D"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B C | D"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -468,7 +521,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (C | D)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -479,7 +532,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B C D"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B C D"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -490,7 +543,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B C | D"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B C | D"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -501,7 +554,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (C | D)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -513,7 +566,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
 
             lines = new[] {
                 "start =  <a> (<b> <c>)",
@@ -523,7 +576,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A (B (C | D))"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A (B (C | D))"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -533,8 +586,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Console.WriteLine(chat.Expand(globals, "$start"));
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (A | B)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (A | B)"));
 
             /* infinite loop
             lines = new[] {
@@ -546,7 +598,7 @@ namespace Dialogic
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Console.WriteLine(chat.Expand(globals, "$start"));
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (A | B)")); */
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (A | B)")); */
         }
 
         [Test]
@@ -565,7 +617,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (C | D)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -576,7 +628,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -587,7 +639,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
 
             lines = new[] {
                 "start =  <a> <b> <c>",
@@ -598,7 +650,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.Expand(globals, "$start"), Is.EqualTo("A B (C (C | D) | E)"));
+            Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C (C | D) | E)"));
         }
 
         [Test]
