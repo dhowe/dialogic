@@ -613,6 +613,25 @@ namespace Dialogic
         }
 
         [Test]
+        public void GrammarToJSON()
+        {
+            string[] lines;
+            string text;
+            Chat chat;
+
+            lines = new[] {
+                "start =  <a> <b> <c>",
+                "a = A",
+                "b = B",
+                "c = C | D",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Console.WriteLine(chat.AsGrammar(globals));
+            Console.WriteLine(chat.GrammarToJson(globals));
+        }
+
+        [Test]
         public void GrammarExpandWithOrEquals()
         {
             string[] lines;

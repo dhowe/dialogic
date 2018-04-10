@@ -123,7 +123,7 @@ namespace Dialogic
 
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
 
-        public static Regex ParseSetArgs = new Regex(@"\$?([A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
 
     /// <summary>

@@ -20,16 +20,18 @@ namespace Dialogic
 
         internal int cursor = 0, lastRunAt = -1;
         internal bool allowSmoothingOnResume = true;
+        internal IDictionary<string, object> locals;
 
         public Chat() : base()
         {
             commands = new List<Command>();
 
-            realized = null; // not relevant for chats
+            realized = null; // not relevant for chats (use for locals?)
             interruptable = true;
             resumeAfterInt = true;
             stalenessIncr = Defaults.CHAT_STALENESS_INCR;
             staleness = Defaults.CHAT_STALENESS;
+            locals = new Dictionary<string, object>();
         }
 
         internal static Chat Create(string name)
@@ -264,10 +266,10 @@ namespace Dialogic
                         val = val.Replace("$" + sub, "<" + sub + ">");
                     }
 
-                    g += "\"" + key + "\": \"" + val + "\",\n";
+                    g += "  \"" + key + "\": \"" + val + "\",\n";
                 }
             }
-            return g;
+            return g.Substring(0, g.Length-2) + "\n}";
         }
 
         internal static Type DefaultCommandType(Chat chat)

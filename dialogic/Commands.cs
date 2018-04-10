@@ -292,6 +292,7 @@ namespace Dialogic
     {
         public string value;
         public AssignOp op;
+        //public bool global;
 
         public Set() : base() { }
 
@@ -305,7 +306,7 @@ namespace Dialogic
                     ("Invalid SET args: '" + txt + "'");
             }
 
-            this.text = match.Groups[1].Value.Trim();
+            this.text = match.Groups[1].Value.Trim().TrimFirst('$');
             this.value = match.Groups[3].Value.Trim();
             this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
         }
@@ -314,8 +315,9 @@ namespace Dialogic
         {
             if (globals == null) throw new DialogicException
                 ("Invalid call to Set.Realize() with null argument");
-            
-            string varName = globals.ContainsKey(text) ? text : parent.text + "." + text;
+
+            string varName = text.StartsWith(parent.text + ".", Util.IC)
+                ? text : parent.text + "." + text;
 
             // Note: no Realizer here as we need to late-bind the variable
             var varValue = value;

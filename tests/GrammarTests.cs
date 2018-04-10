@@ -120,6 +120,31 @@ namespace Dialogic
         }
 
         [Test]
+        public void SetExpandExpandSymbolAnimal()
+        {
+            var json = "{" +
+                       "    'origin': 'hello <animal>'," +
+                       "    'animal': 'cat'" +
+                       "}";
+            var grammar = new Grammar(json);
+            var output = grammar.Expand("<origin>");
+            Assert.AreEqual(output, "hello cat");
+
+            string[] lines;
+            string text;
+            Chat chat;
+
+            lines = new[] {
+                "origin = hello <animal>",
+                "animal = cat",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Console.WriteLine(chat.AsGrammar(globals, false)+"\n"+globals.Stringify());
+            Assert.That(chat.Expand(globals, "$origin"), Is.EqualTo(output));
+        }
+
+        [Test]
         public void ExpandCapitalizeFirstLetterCapitalized()
         {
 
