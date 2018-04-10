@@ -30,3 +30,9 @@ Bye! {speed=fast}
 CHAT OnTapEvent {noStart=true,resumeAfter=true}
 DO #TapResponse
 SAY Ok, I see you!
+
+
+CHAT MyWorld {noStart=true,chatMode=grammar}
+start = My world is a <adj>, <adj> place
+adj = creepy | lonely | dark | forgotten | crepuscular
+SAY $start

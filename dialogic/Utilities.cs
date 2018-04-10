@@ -863,6 +863,7 @@ namespace Dialogic
 
             if (this == EQ)
             {
+                if (Util.HasOpenGroup(s2)) s2 = s2.Parenthify();
                 result = s2;
             }
             else if (this == OE)
@@ -1014,7 +1015,7 @@ public static class Exts //@cond unused
 
     internal static bool EndsWith(this string str, char c)
     {
-        return !str.IsNullOrEmpty() && str[str.Length-1] == c;
+        return !str.IsNullOrEmpty() && str[str.Length - 1] == c;
     }
 
     internal static string TrimEnds(this string str, char start, char ends)
@@ -1032,6 +1033,16 @@ public static class Exts //@cond unused
         int last = str.Length - 1;
         return (str[last] == c) ? str.Substring(0, last) : str;
     }
+
+    internal static string Parenthify(this string str)
+    {
+        if (!(str.StartsWith('(') && str.EndsWith(')')))
+        {
+            str = '(' + str + ')';
+        }
+        return str;
+    }
+
 
     public static string Stringify(this object o)
     {
