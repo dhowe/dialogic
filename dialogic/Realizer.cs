@@ -8,11 +8,17 @@ namespace Dialogic
     /// <summary>
     /// Handles realization of variables, probabilistic groups, and grammar rules
     /// </summary>
-    public static class Realizer
+    internal class Realizer
     {
-        internal static int maxIterations = 99;
+        private int maxIterations = 99;
+        private ChatRuntime runtime;
 
-        public static string Do(string text, IDictionary<string, object> globals, Chat parent = null)
+        internal Realizer(ChatRuntime rt)
+        {
+            this.runtime = rt;
+        }
+
+        public string Do(string text, IDictionary<string, object> globals, Chat parent = null)
         {
             var DBUG = false;
 
@@ -43,7 +49,7 @@ namespace Dialogic
             return text;
         }
 
-        public static string DoGroups(string text)
+        public string DoGroups(string text)
         {
             var DBUG = false;
 
@@ -77,7 +83,50 @@ namespace Dialogic
             return text;
         }
 
-        public static string DoVars(string text, IDictionary<string, object>
+        public string DoVars(string text, IDictionary<string, object>
+            globals, Chat parent = null)
+        {
+            var locals = parent != null ? parent.locals : null;
+
+            if (!String.IsNullOrEmpty(text) && text.Contains('$'))
+            {
+                var vars = ParseVars(text);
+                vars.ForEach(v =>
+                {
+                    string tmp = null;
+                    if (locals != null && locals.ContainsKey(v))
+                    {
+                        tmp = text.Replace("$" + v, locals[v].ToString());
+                    }
+
+                    if (tmp == null && globals.ContainsKey(v))
+                    {
+                        Console.WriteLine(globals[v]);
+                        tmp = text.Replace("$" + v, globals[v].ToString());
+                    }
+
+                    if (tmp != null) text = tmp;
+                });
+
+            }
+
+            return text;
+        }
+
+        private List<string> ParseVars(string text)
+        {
+            var matches = RE.ParseVars.Matches(text);
+            var vars = new List<string>();
+            foreach (Match match in matches)
+            {
+                if (match.Groups.Count != 2)
+                    throw new DialogicException("Bad RE in " + text);
+                vars.Add(match.Groups[1].Value);
+            }
+            return vars;
+        }
+
+        public string DoVarsOrig(string text, IDictionary<string, object>
             globals, Chat parent = null)
         {
             var DBUG = false;
@@ -91,21 +140,39 @@ namespace Dialogic
 
                 while (text.IndexOf('$') > -1 && text == original)
                 {
-                    var check = ReplaceGlobals(text, globals);
-                    if (check == null)
+                    string check = null;
+                    if (parent != null) // first try locals
+                    {
+                        check = ReplaceVars(text, parent.locals);
+                    }
+
+                    if (check == null) // then try globals
                     {
                         if (parent != null)
+                        {
+                            Console.WriteLine("Failed to match variable '" + text
+                                + "' in locals:\n  " + parent.locals.Stringify());
+                        }
+                        else
+                        {
+                            Console.WriteLine("NULL PARENT! " + text);
+                        }
+
+                        check = ReplaceVars(text, globals);
+
+                        /*if (parent != null)
                         {
                             check = text.Replace("$", '$' + parent.text + '.');
                             if (DBUG) Console.WriteLine("DoVars failed to match variable " +
                                 "in '" + original + "' trying with parent: '" + check + "'");
 
                             check = ReplaceGlobals(check, globals);
-                        }
+                        }*/
 
                         if (check == null) throw new RealizeException
                             ("Failed to match variable '" + text
-                                + "' in globals:\n  " + globals.Stringify());
+                             + "' in globals:\n  " + globals.Stringify() + (parent != null
+                             ? "\n" + parent.locals.Stringify() : string.Empty));
                     }
                     text = check;
 
@@ -127,7 +194,7 @@ namespace Dialogic
 
 
         // attempt to replace each global in the string, starting with the longest first
-        private static string ReplaceGlobals(string text, IDictionary<string, object> globals)
+        private string ReplaceVars(string text, IDictionary<string, object> lookup)
         {
             IEnumerable sorted = null; // OPT: cache these sorts ?
 
@@ -136,12 +203,12 @@ namespace Dialogic
                 var original = text;
 
                 // do replacements in order of length, longest first
-                if (sorted == null) sorted = Util.SortByLength(globals.Keys);
+                if (sorted == null) sorted = Util.SortByLength(lookup.Keys);
 
                 var matched = false;
                 foreach (string s in sorted)
                 {
-                    var tmp = text.Replace("$" + s, globals[s].ToString());
+                    var tmp = text.Replace("$" + s, lookup[s].ToString());
                     if (tmp != text)
                     {
                         matched = true;
@@ -156,7 +223,7 @@ namespace Dialogic
             return text;
         }
 
-        private static string DoReplace(string sub)
+        private string DoReplace(string sub)
         {
             if (!Regex.IsMatch(sub, @"\([^)]+|[^)]+\)")) throw InvalidState(sub);
 
@@ -168,18 +235,18 @@ namespace Dialogic
             return (string)Util.RandItem(opts);
         }
 
-        private static bool IsDynamic(string text)
+        private bool IsDynamic(string text)
         {
             return text != null &&
                 (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
         }
 
-        private static Exception InvalidState(string sub)
+        private Exception InvalidState(string sub)
         {
             return new RealizeException("Invalid State: '" + sub + "'");
         }
 
-        private static void ParseGroups(string input, List<string> results)
+        private void ParseGroups(string input, List<string> results)
         {
             foreach (Match m in RE.MatchParens.Matches(input))
             {

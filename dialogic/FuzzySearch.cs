@@ -125,7 +125,7 @@ namespace Dialogic
                     {
                         var chatPropVal = (string)chatMeta[key];
 
-                        if (!(constraint.Check(chatPropVal, globals)))
+                        if (!(constraint.Check(parent, chatPropVal, globals)))
                         {
                             if (DBUG) Console.WriteLine("    FAIL: " + constraint);
                             hits = -1;

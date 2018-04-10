@@ -124,7 +124,7 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
 
         public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
-        public static Regex ParseVars = new Regex(@"\$([A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)?)[ .!;,:]");
+        public static Regex ParseVars = new Regex(@"\$([A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)?)(?:[ .!;,:]|$)");
     }
 
     /// <summary>
@@ -610,13 +610,13 @@ namespace Dialogic
             }
         }
 
-        public bool Check(string check, IDictionary<string, object> globals = null)
+        public bool Check(Chat c, string check, IDictionary<string, object> globals = null)
         {
             string rval = value;
             if (globals != null)
             {
-                if (check.Contains('$')) check = Realizer.DoVars(check, globals);
-                if (value.Contains('$')) rval = Realizer.DoVars(value, globals);
+                if (check.Contains('$')) check = c.Realizer().DoVars(check, globals);
+                if (value.Contains('$')) rval = c.Realizer().DoVars(value, globals);
             }
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);

@@ -20,9 +20,11 @@ namespace Dialogic
 
         internal int cursor = 0, lastRunAt = -1;
         internal bool allowSmoothingOnResume = true;
-        internal IDictionary<string, object> locals; // use as indexer?
 
-        public object this[string key]
+        internal IDictionary<string, object> locals;
+        protected internal ChatRuntime runtime;
+
+        public object this[string key] // use locals as indexer?
         {
             get
             {
@@ -154,6 +156,15 @@ namespace Dialogic
             return this;
         }
 
+        internal Realizer Realizer()
+        {
+            if (runtime == null || runtime.realizer == null)
+            {
+                throw new DialogicException("Null realizer in: " + this);
+            }
+            return this.runtime.realizer;
+        }
+
         internal Command Next()
         {
             return HasNext() ? commands[cursor++] : null;
@@ -205,15 +216,15 @@ namespace Dialogic
                 {
                     var v = match.Groups[1].Value;
                     if (!locals.ContainsKey(v)) throw new DialogicException
-                        ("No match for "+v+" in: "+locals.Stringify());
+                        ("No match for " + v + " in: " + locals.Stringify());
                     sofar = sofar.Replace('$' + v, (string)locals[v]);
                 }
 
-                if (sofar.IndexOf('$') < 0) break; 
+                if (sofar.IndexOf('$') < 0) break;
             }
 
             if (recursions >= 10) Console.WriteLine("[WARN] Max recursion level"
-                + " reached: "+start +" -> "+sofar);
+                + " reached: " + start + " -> " + sofar);
 
             //if (doGroups) sofar = Realizer.DoGroups(sofar);
 
@@ -279,7 +290,7 @@ namespace Dialogic
                     g += "  \"" + key + "\": \"" + val + "\",\n";
                 }
             }
-            return g.Substring(0, g.Length-2) + "\n}";
+            return g.Substring(0, g.Length - 2) + "\n}";
         }
 
         internal static Type DefaultCommandType(Chat chat)

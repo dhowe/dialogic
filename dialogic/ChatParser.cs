@@ -148,7 +148,6 @@ namespace Dialogic
 
             parts.Apply((spkr, cmd, text, label, meta) =>
             {
-                // TODO: allow metadata for Chat to specify default Type
                 Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] 
                     : Chat.DefaultCommandType(chats.LastOrDefault());
 
@@ -186,11 +185,17 @@ namespace Dialogic
             }
         }
 
+        private void AddChat(Chat c)
+        {
+            c.runtime = this.runtime;
+            chats.Add(c);
+        }
+
         private void HandleCommand(Command c, string line, int lineNo)
         {
             if (c is Chat)
             {
-                chats.Add((Chat)c);
+                AddChat((Chat)c);
                 return;
             }
 
@@ -301,9 +306,9 @@ namespace Dialogic
 
         private void CreateDefaultChat()
         {
-            Chat def = Chat.Create("C" + Util.EpochMs());
-            chats.Add(def);
-            parsedCommands.Push(def);
+            Chat c = Chat.Create("C" + Util.EpochMs());
+            AddChat(c);
+            parsedCommands.Push(c);
         }
 
     }

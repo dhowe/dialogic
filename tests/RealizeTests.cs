@@ -7,7 +7,7 @@ namespace Dialogic
     [TestFixture]
     public class RealizeTests
     {
-        public static IDictionary<string, object> globals 
+        public static IDictionary<string, object> globals
             = new Dictionary<string, object>() {
                 { "obj.prop", "dog" },
                 { "animal", "dog" },
@@ -17,14 +17,44 @@ namespace Dialogic
                 { "count", 4 }
         };
 
+        internal static Realizer realizer;
+
+        public RealizeTests()
+        {
+            if (RealizeTests.realizer == null)
+            {
+                RealizeTests.realizer = new ChatRuntime(null).realizer;
+            }
+        }
+
+        [Test]
+        public void ASimpleVar()
+        {
+            var res = realizer.DoVars("$a", new Dictionary<string, object>()
+                {{ "a", "hello" }, { "b", "32" }});
+            Assert.That(res, Is.EqualTo("hello"));
+        }
+
+        [Test]
+        public void ParsedVar()
+        {
+            Chat chat = ChatParser.ParseText("SAY Thank $count")[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Command say = chat.commands[0];
+            Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
+            say.Realize(globals);
+            Assert.That(say.Text(true), Is.EqualTo("Thank 4"));
+            Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
+        }
+
         [Test]
         public void DoVarsAndGroups()
         {
-            var res = Realizer.DoVars("$a", new Dictionary<string, object>()
+            var res = realizer.DoVars("$a", new Dictionary<string, object>()
                 {{ "a", "($a | $b)" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("($a | 32)"));
 
-            res = Realizer.Do("$a", new Dictionary<string, object>()
+            res = realizer.Do("$a", new Dictionary<string, object>()
                 {{ "a", "($a | $b)" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("32"));
         }
@@ -33,17 +63,17 @@ namespace Dialogic
         public void Exceptions()
         {
             // no replace to be made
-            Assert.Throws<RealizeException>(() => Realizer.DoVars("$a", globals));
+            Assert.Throws<RealizeException>(() => realizer.DoVars("$a", globals));
 
             // replacement leads to infinite loop
-            Assert.Throws<RealizeException>(() => Realizer.Do("$a",
+            Assert.Throws<RealizeException>(() => realizer.Do("$a",
                 new Dictionary<string, object>() {
                      { "a", "$bb" },
                      { "bb", "$a" }
             }));
 
             // replacement leads to infinite loop
-            Assert.Throws<RealizeException>(() => Realizer.Do("$a",
+            Assert.Throws<RealizeException>(() => realizer.Do("$a",
                 new Dictionary<string, object>() {
                      { "a", "($a | $b)" },
                      { "b", "$a" },
@@ -137,14 +167,14 @@ namespace Dialogic
             string[] ok = { "The boy was sad", "The boy was happy" };
             for (int i = 0; i < 10; i++)
             {
-                CollectionAssert.Contains(ok, Realizer.DoGroups(txt));
+                CollectionAssert.Contains(ok, realizer.DoGroups(txt));
             }
 
             txt = "The boy was (sad | happy | dead)";
             ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
             for (int i = 0; i < 10; i++)
             {
-                string s = Realizer.DoGroups(txt);
+                string s = realizer.DoGroups(txt);
                 //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
@@ -176,14 +206,14 @@ namespace Dialogic
         public void ReplaceVars()
         {
             var s = @"SAY The $animal woke $count times";
-            s = Realizer.DoVars(s, globals);
+            s = realizer.DoVars(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
 
             s = @"SAY The $obj.prop woke $count times";
-            s = Realizer.DoVars(s, globals);
+            s = realizer.DoVars(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
 
-            s = Realizer.DoVars("$a", new Dictionary<string, object>()
+            s = realizer.DoVars("$a", new Dictionary<string, object>()
                 {{ "a", "($a | $b)" }, { "b", "32" }});
             Assert.That(s, Is.EqualTo("($a | 32)"));
         }
@@ -192,18 +222,18 @@ namespace Dialogic
         public void ReplaceVarsGroups()
         {
             var s = @"SAY The $animal woke and $prep (ate|ate)";
-            s = Realizer.Do(s, globals);
+            s = realizer.Do(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             s = @"SAY The $obj.prop woke and $prep (ate|ate)";
-            s = Realizer.Do(s, globals);
+            s = realizer.Do(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
 
             string txt = "letter $group";
             for (int i = 0; i < 10; i++)
             {
-                Assert.That(Realizer.Do(txt, globals),
+                Assert.That(realizer.Do(txt, globals),
                     Is.EqualTo("letter a").Or.EqualTo("letter b"));
             }
 
@@ -212,7 +242,7 @@ namespace Dialogic
             string[] res = new string[10];
             for (int i = 0; i < res.Length; i++)
             {
-                res[i] = Realizer.Do(txt2, globals);
+                res[i] = realizer.Do(txt2, globals);
             }
             for (int i = 0; i < res.Length; i++)
             {
@@ -272,6 +302,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
 
             Ask ask = (Ask)chats[0].commands[0];
+            Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
             ask.Realize(globals);
             Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
             Assert.That(ask.Text(true), Is.EqualTo("Want a dog?"));

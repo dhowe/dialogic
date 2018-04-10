@@ -20,7 +20,6 @@ namespace Dialogic
         protected internal double delay { get; protected set; }
 
         protected internal string text;
-
         protected internal readonly int id;
         protected internal Chat parent;
 
@@ -116,7 +115,7 @@ namespace Dialogic
 
             if (this is ISendable)
             {
-                realized[Meta.TEXT] = Realizer.Do(text, globals, parent);
+                realized[Meta.TEXT] = parent.Realizer().Do(text, globals, parent);
                 realized[Meta.TYPE] = TypeName();
                 if (this is IAssignable)
                 {
@@ -136,7 +135,7 @@ namespace Dialogic
 
                     if (val is string)
                     {
-                        val = Realizer.Do((string)val, globals);
+                        val = parent.Realizer().Do((string)val, globals);
                     }
                     else if (!(val is Constraint)) // don't replace constraints
                     {
@@ -204,7 +203,7 @@ namespace Dialogic
                 var iterations = 0;
                 while (lastSpoken == Text(true) && ++iterations < 100)
                 {
-                    realized[Meta.TEXT] = Realizer.Do(text, globals, parent);
+                    realized[Meta.TEXT] = parent.Realizer().Do(text, globals, parent);
                 }
             }
         }
@@ -301,7 +300,7 @@ namespace Dialogic
             var match = RE.ParseSetArgs.Match(txt);
             if (match.Groups.Count != 4)
             {
-                Util.ShowMatch(match);
+                //Util.ShowMatch(match);
                 throw new ParseException
                     ("Invalid SET args: '" + txt + "'");
             }
@@ -359,7 +358,7 @@ namespace Dialogic
         {
             var txt = this.text;
             if (global) txt = '$' + txt;
-            return TypeName().ToUpper() + " " + text + " = " + value;
+            return TypeName().ToUpper() + " " + txt + " = " + value;
         }
     }
 
@@ -649,7 +648,7 @@ namespace Dialogic
             realized.Clear();
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
-            realized[Meta.TEXT] = Realizer.DoGroups(text);
+            realized[Meta.TEXT] = parent.Realizer().DoGroups(text);
             return this;
         }
 

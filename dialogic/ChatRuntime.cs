@@ -47,6 +47,7 @@ namespace Dialogic
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
         internal List<Chat> chats;
+        internal Realizer realizer;
 
         private Thread searchThread;
         private ChatParser parser;
@@ -62,6 +63,7 @@ namespace Dialogic
             this.chats = chats;
             this.actors = InitActors(actors);
 
+            this.realizer = new Realizer(this);
             this.parser = new ChatParser(this);
             this.scheduler = new ChatScheduler(this);
             this.appEvents = new AppEventHandler(this);

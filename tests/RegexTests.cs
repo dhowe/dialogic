@@ -26,6 +26,7 @@ namespace Dialogic
         {
             string text = "Hello $name, nice to $verb you $chat1.time.";
             var matches = RE.ParseVars.Matches(text);
+            Assert.That(matches.Count, Is.EqualTo(3));
             var vars = new List<string>();
             foreach (Match match in matches)
             {
@@ -39,10 +40,27 @@ namespace Dialogic
             Assert.That(vars[0], Is.EqualTo("name"));
             Assert.That(vars[1], Is.EqualTo("verb"));
             Assert.That(vars[2], Is.EqualTo("chat1.time"));
+
+
+
+            text = "$a";
+            matches = RE.ParseVars.Matches(text);
+            Assert.That(matches.Count, Is.EqualTo(1));
+            vars = new List<string>();
+            foreach (Match match in matches)
+            {
+                if (match.Groups.Count != 2)
+                    throw new DialogicException("Bad RE in " + text);
+                vars.Add(match.Groups[1].Value);
+            }
+            vars.ForEach(Console.WriteLine);
+            Util.ShowMatches(matches);
+            Assert.That(vars.Count, Is.EqualTo(1));
+            Assert.That(vars[0], Is.EqualTo("a"));
         }
 
         [Test]
-        public void CommandAndText()
+        public void ChatLabels()
         {
             string RE = ChatParser.TypesRegex() + ChatParser.TXT;
             //Console.WriteLine(RE);
