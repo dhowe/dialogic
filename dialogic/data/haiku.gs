@@ -1,3 +1,3 @@
-﻿CHAT WineReview {type=a,stage=b,mode=grammar}
+﻿CHAT WineReview {type=noStart,chatMode=grammar}
 SET review <desc> <fortune> <ending>
 SET ending <score> | <end-phrase>

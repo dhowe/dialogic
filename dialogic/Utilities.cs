@@ -119,11 +119,11 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        public static Regex ParseSet = new Regex(@"\$?([A-Za-z_][^ +=]*)\s*(\+?=)\s*(.+)");
-
         public static Regex MetaSplit = new Regex(@"\s*,\s*");
 
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
+
+        public static Regex ParseSetArgs = new Regex(@"\$?([A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
 
     /// <summary>
@@ -372,6 +372,12 @@ namespace Dialogic
         }
 
         ////////////////////////////////////////////////////////////////////
+
+        internal static bool HasOpenGroup(string text)
+        {
+            return text.IndexOf('|') > -1 &&
+                (text.IndexOf('(') < 0 || text.IndexOf('(') < 0);
+        }
 
         internal static object ConvertTo(Type t, object val)
         {
@@ -805,14 +811,14 @@ namespace Dialogic
 
     public class AssignOp
     {
-
         public static AssignOp EQ = new AssignOp("=");
+        public static AssignOp OE = new AssignOp("|=");
         public static AssignOp PE = new AssignOp("+=");
         /*public static AssignOp ME = new AssignOp("-=");
         public static AssignOp TE = new AssignOp("*=");
         public static AssignOp DE = new AssignOp("/=");*/
 
-        public static AssignOp[] ALL = { EQ, PE };//, ME, TE, DE };
+        public static AssignOp[] ALL = { EQ, OE, PE };//, ME, TE, DE };
 
         private readonly string value;
 
@@ -835,10 +841,11 @@ namespace Dialogic
             switch (op)
             {
                 case "=": return AssignOp.EQ;
+                case "|=": return AssignOp.OE;
                 case "+=": return AssignOp.PE;
-                /*case "-=": return AssignOp.ME;
-                case "*=": return AssignOp.TE;
-                case "/=": return AssignOp.DE;*/
+                    /*case "-=": return AssignOp.ME;
+                    case "*=": return AssignOp.TE;
+                    case "/=": return AssignOp.DE;*/
             }
             throw new Exception("Invalid Operator: " + op);
         }
@@ -852,18 +859,39 @@ namespace Dialogic
         {
             s1.TrimFirst('$');
 
+            string result = null;
+
             if (this == EQ)
             {
-                globals[s1] = s2;
+                result = s2;
+            }
+            else if (this == OE)
+            {
+                if (!globals.ContainsKey(s1)) throw new ParseException
+                    ("Variable " + s1 + " not found in globals:\n  " + globals.Stringify());
+
+                //globals[s1] = globals[s1] + " " + s2;
+                //result = "(" + globals[s1] + " | " + s2 + ")";
+                var now = (string)globals[s1];
+                if (now.StartsWith('(') && now.EndsWith(')'))
+                {
+                    result = now.TrimLast(')') + " | " + s2 + ')';
+                }
+                else
+                {
+                    result = '(' + now + " | " + s2 + ')';
+                }
             }
             else if (this == PE)
             {
                 if (!globals.ContainsKey(s1)) throw new ParseException
-                    ("Variable "+s1+" not found in globals:\n  "+globals.Stringify());
-                
-                //globals[s1] = globals[s1] + " " + s2;
-                globals[s1] = globals[s1] + " | " + s2;
+                    ("Variable " + s1 + " not found in globals:\n  " + globals.Stringify());
+
+                result = globals[s1] + " " + s2;
             }
+
+            globals[s1] = result;
+
             return true;
         }
     }
@@ -946,24 +974,24 @@ public class ObjectPool<T> //@cond unused
 }//@endcond
 
 
-public static class Exts //@cond unused
+internal static class Exts //@cond unused
 {
-    public delegate void Action<T1, T2, T3, T4, T5>
+    internal delegate void Action<T1, T2, T3, T4, T5>
         (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
 
-    public static void Apply<T>(this IList<T> il, Action<T, T, T, T, T> action)
+    internal static void Apply<T>(this IList<T> il, Action<T, T, T, T, T> action)
     {
         action(il[0], il[1], il[2], il[3], il[4]);
     }
 
-    public static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
+    internal static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
     {
         if (ie == null) return true;
         var coll = ie as ICollection<T>;
         return (coll != null) ? coll.Count < 1 : !ie.Any();
     }
 
-    public static bool IsNumber(this object value) // ext
+    internal static bool IsNumber(this object value) // ext
     {
         return value is sbyte
                 || value is byte
@@ -978,23 +1006,33 @@ public static class Exts //@cond unused
                 || value is decimal;
     }
 
-    public static string TrimEnds(this string str, char start, char ends)
+    internal static bool StartsWith(this string str, char c)
+    {
+        return !str.IsNullOrEmpty() && str[0] == c;
+    }
+
+    internal static bool EndsWith(this string str, char c)
+    {
+        return !str.IsNullOrEmpty() && str[str.Length-1] == c;
+    }
+
+    internal static string TrimEnds(this string str, char start, char ends)
     {
         return str.TrimFirst(start).TrimLast(ends);
     }
 
-    public static string TrimFirst(this string str, char c)
+    internal static string TrimFirst(this string str, char c)
     {
         return (str[0] == c) ? str.Substring(1) : str;
     }
 
-    public static string TrimLast(this string str, char c)
+    internal static string TrimLast(this string str, char c)
     {
         int last = str.Length - 1;
         return (str[last] == c) ? str.Substring(0, last) : str;
     }
 
-    public static string Stringify(this object o)
+    internal static string Stringify(this object o)
     {
         if (o == null) return "NULL";
 
@@ -1033,5 +1071,6 @@ public static class Exts //@cond unused
         }
         return s;
     }
+
 }//@endcond
 

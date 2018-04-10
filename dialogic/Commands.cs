@@ -108,7 +108,7 @@ namespace Dialogic
             return this.GetType().Name;
         }
 
-        protected internal virtual void Realize(IDictionary<string, object> globals)
+        protected internal virtual Command Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
 
@@ -123,6 +123,7 @@ namespace Dialogic
                     realized[Meta.ACTOR] = Actor().Name();
                 }
             }
+            return this;
         }
 
         protected virtual void RealizeMeta(IDictionary<string, object> globals)
@@ -174,6 +175,7 @@ namespace Dialogic
     public class Say : Command, ISendable, IAssignable
     {
         protected string lastSpoken;
+        protected bool disableUniqueness = true;
 
         public Say() : base()
         {
@@ -186,11 +188,13 @@ namespace Dialogic
             return this;
         }
 
-        protected internal override void Realize(IDictionary<string, object> globals)
+        protected internal override Command Realize(IDictionary<string, object> globals)
         {
+            //Console.WriteLine("<start>: "+text);
             base.Realize(globals);
             Recombine(globals);
             lastSpoken = Text(true);
+            return this;
         }
 
         private void Recombine(IDictionary<string, object> globals)
@@ -207,7 +211,7 @@ namespace Dialogic
 
         protected bool IsRecombinant()
         {
-            return text.IndexOf('|') > -1;
+            return !disableUniqueness && text.IndexOf('|') > -1;
         }
 
         /**
@@ -282,7 +286,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// The Set command is used to create or modify a variable. Variables  generally originate from the game environment itself, but can also be created, accessed or modified within Dialogic.
+    /// The Set command is used to create or modify a variable. Variables generally originate from the game environment itself, but can also be created, accessed or modified within Dialogic.
     /// </summary>d
     public class Set : Command
     {
@@ -293,40 +297,55 @@ namespace Dialogic
 
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            var match = RE.ParseSet.Match(txt);
-            if (match.Groups.Count != 4) throw new ParseException
-                ("Invalid query: '" + txt + "'");
+            var match = RE.ParseSetArgs.Match(txt);
+            if (match.Groups.Count != 4)
+            {
+                Util.ShowMatch(match);
+                throw new ParseException
+                    ("Invalid SET args: '" + txt + "'");
+            }
 
             this.text = match.Groups[1].Value.Trim();
             this.value = match.Groups[3].Value.Trim();
             this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
 
-            //if (value.IndexOf('|') > -1 && (value.IndexOf('(') < 0
-                //|| value.IndexOf(')') < 0)) throw new ParseException
-                    //("Grouping operator without parens: '" + value + "'");
+            //if (false && Util.HasOpenGroup(value))
+            //{
+            //    value = "(" + value + ")";
+            //    Console.WriteLine("Set.Init added parens to: "+value);
+            //}
         }
 
-        protected internal override void Realize(IDictionary<string, object> globals)
+        protected internal override Command Realize(IDictionary<string, object> globals)
         {
             if (globals == null) throw new DialogicException
                 ("Invalid call to Set.Realize() with null argument");
             
-            string key = globals.ContainsKey(text) ? text : parent.text + "." + text;
+            string varName = globals.ContainsKey(text) ? text : parent.text + "." + text;
 
-            // Note: no Realizer here as we need to bind at last moment
-            var val = value;
-            if (val.IndexOf('<') > -1 && val.IndexOf('>') > -1)
+            // Note: no Realizer here as we need to late-bind the variable
+            var varValue = value;
+            if (varValue.IndexOf('<') > -1 && varValue.IndexOf('>') > -1)
             {
-                val = HandleGrammarTag(val);
+                varValue = HandleGrammarTag(varValue);
             }
 
-            op.Invoke(key, val, globals);
+            //if (Util.HasOpenGroup(value))
+            //{
+            //    varValue = "(" + varValue + ")";
+            //    Console.WriteLine("Set.Realize added parens to: " + varValue);
+            //}
+
+            op.Invoke(varName, varValue, globals);
+
+            return this;
         }
 
         private string HandleGrammarTag(string val)
         {
             //Console.WriteLine("CHECKING: " + val);
             MatchCollection matches = RE.GrammarRules.Matches(val);
+
             if (matches.Count > 0)
             {
                 var rules = matches.Cast<Match>()
@@ -439,12 +458,13 @@ namespace Dialogic
         }
 
         // Call Realize() on text and options, then add both to realized
-        protected internal override void Realize(IDictionary<string, object> globals)
+        protected internal override Command Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
             Options().ForEach(o => o.Realize(globals));
             realized[Meta.TIMEOUT] = timeout.ToString();
             realized[Meta.OPTS] = JoinOptions();
+            return this;
         }
 
         public override string ToString()
@@ -527,10 +547,11 @@ namespace Dialogic
             ParseMeta(metas);
         }
 
-        protected internal override void Realize(IDictionary<string, object> globals)
+        protected internal override Command Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
             RealizeMeta(globals); // only realized meta
+            return this;
         }
 
         ///  All Find commands must have a 'staleness' value
@@ -632,12 +653,13 @@ namespace Dialogic
             return this;
         }
 
-        protected internal override void Realize(IDictionary<string, object> globals)
+        protected internal override Command Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
             realized[Meta.TEXT] = Realizer.DoGroups(text);
+            return this;
         }
 
         protected internal override Command Validate()

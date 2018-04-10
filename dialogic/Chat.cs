@@ -15,6 +15,8 @@ namespace Dialogic
         protected internal bool interruptable { get; protected set; }
         protected internal bool resumeAfterInt { get; protected set; }
         protected internal double stalenessIncr { get; protected set; }
+        //protected internal string chatMode { get; protected set; }
+        //private enum Mode { DEFAULT, GRAMMAR };
 
         internal int cursor = 0, lastRunAt = -1;
         internal bool allowSmoothingOnResume = true;
@@ -104,11 +106,12 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        protected internal override void Realize(IDictionary<string, object> globals)
+        protected internal override Command Realize(IDictionary<string, object> globals)
         {
             Console.WriteLine("[WARN] Chats need not be realized, doing commands instead");
             //commands.ForEach(c => { Console.WriteLine(c.TypeName() + ".Realize("+c.text+")"); c.Realize(globals); });
             commands.ForEach(c => c.Realize(globals));
+            return this;
         }
 
         ///  All Chats must have a valid unique label, and a staleness value
@@ -166,6 +169,106 @@ namespace Dialogic
             }
 
             LastRunAt(Util.EpochMs());
+        }
+
+        protected internal string Expand(IDictionary<string, object> globals, string start)
+        {
+            start = '$' + text + "." + start.TrimFirst('$');
+            Say s = new Say();
+            s.Init(start, "", new string[0]);
+            s.Actor(Dialogic.Actor.Default);
+            s.Realize(globals);
+            return s.Text(true);
+        }
+
+        protected internal string ExpandNoGroups(IDictionary<string, object> globals, string start)//, bool doGroups = false)
+        {
+            start = text + "." + start.TrimFirst('$');
+            var re = new Regex(@"\$([^ \(\)]+)");
+            string sofar = (string)globals[start];
+            //var theVars = new List<string>();
+            var recursions = 0;
+            while (++recursions < 10)
+            {
+                foreach (Match match in re.Matches(sofar))
+                {
+                    var v = match.Groups[1].Value;
+                    if (!globals.ContainsKey(v)) throw new DialogicException
+                        ("No match for "+v+" in: "+globals.Stringify());
+                    sofar = sofar.Replace('$' + v, (string)globals[v]);
+                }
+
+                if (sofar.IndexOf('$') < 0) break; 
+            }
+
+            if (recursions >= 10) Console.WriteLine("[WARN] Max recursion level"
+                + " reached: "+start +" -> "+sofar);
+
+            //if (doGroups) sofar = Realizer.DoGroups(sofar);
+
+            return sofar;
+        }
+
+        protected internal string AsGrammar(IDictionary<string, object> globals, bool localize = true)
+        {
+            var name = text + ".";
+            var re = new Regex(@"\$([^ \(\)]+)");
+            var g = "Grammar#" + text + "\n";
+
+            foreach (var k in globals.Keys)
+            {
+                if (k.StartsWith(name, Util.IC))
+                {
+                    string key = k;
+                    string val = (string)globals[k];
+
+                    if (localize)
+                    {
+                        key = key.Replace(name, "");
+                        val = val.Replace(name, "");
+                    }
+
+                    foreach (Match match in re.Matches(val))
+                    {
+                        var sub = match.Groups[1].Value;
+                        val = val.Replace("$" + sub, "<" + sub + ">");
+                    }
+
+                    g += "  " + key + ": " + val + "\n";
+                }
+            }
+            return g;
+        }
+
+        protected internal string GrammarToJson(IDictionary<string, object> globals, bool localize = true)
+        {
+            var name = text + ".";
+            var re = new Regex(@"\$([^ \(\)]+)");
+            var g = "{\n";
+
+            foreach (var k in globals.Keys)
+            {
+                if (k.StartsWith(name, Util.IC))
+                {
+                    string key = k;
+                    string val = (string)globals[k];
+
+                    if (localize)
+                    {
+                        key = k.Replace(name, "");
+                        val = val.Replace(name, "");
+                    }
+
+                    foreach (Match match in re.Matches(val))
+                    {
+                        var sub = match.Groups[1].Value;
+                        val = val.Replace("$" + sub, "<" + sub + ">");
+                    }
+
+                    g += "\"" + key + "\": \"" + val + "\",\n";
+                }
+            }
+            return g;
         }
 
         internal static Type DefaultCommandType(Chat chat)

@@ -28,15 +28,17 @@ namespace Dialogic
             do
             {
                 text = DoVars(text, globals, parent);
-                if (DBUG) Console.WriteLine("Do#"+iterations + ".1: " + text);
+                if (DBUG) Console.WriteLine("Do#" + iterations + ".1: " + text);
 
                 text = DoGroups(text);
-                if (DBUG) Console.WriteLine("Do#"+iterations + ".2: " + text);
+                if (DBUG) Console.WriteLine("Do#" + iterations + ".2: " + text);
 
                 if (++iterations > maxIterations) throw new RealizeException
                     ("Infinite loop in realizer: " + original);
 
             } while (IsDynamic(text));
+
+            //Console.WriteLine("  " + original + " -> " + text);
 
             return text;
         }
@@ -56,7 +58,7 @@ namespace Dialogic
                     if (text.IndexOf('(') < 0 || text.IndexOf('(') < 0)
                     {
                         text = '(' + text + ')';
-                        Console.WriteLine("[WARN] added parens to: " + text);
+                        Console.WriteLine("[WARN] DoGroups added parens to: " + text);
                     }
 
                     List<string> result = new List<string>();
@@ -75,7 +77,8 @@ namespace Dialogic
             return text;
         }
 
-        public static string DoVars(string text, IDictionary<string, object> globals, Chat parent = null)
+        public static string DoVars(string text, IDictionary<string, object>
+            globals, Chat parent = null)
         {
             var DBUG = false;
 
@@ -151,12 +154,6 @@ namespace Dialogic
                 if (!matched) return null;
             }
             return text;
-        }
-
-        private static bool OrWithoutParensX(string text)
-        {
-            return text != null && text.IndexOf('|') > -1 &&
-                (text.IndexOf('(') < 0 || text.IndexOf(')') < 0);
         }
 
         private static string DoReplace(string sub)
