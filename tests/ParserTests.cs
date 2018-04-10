@@ -38,7 +38,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("the white dog"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("the white dog"));
+            Assert.That(chat.locals["a"], Is.EqualTo("the white dog"));
 
             chat = ChatParser.ParseText("CHAT c1\nSET a=the white dog\nSET a=4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
@@ -50,7 +50,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("4"));
+            Assert.That(chat.locals["a"], Is.EqualTo("4"));
 
             chat = ChatParser.ParseText("CHAT c1\nSET $a=4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
@@ -59,7 +59,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("4"));
+            Assert.That(globals["a"], Is.EqualTo("4"));
 
             chat = ChatParser.ParseText("CHAT c1\nSET $a=the white dog", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
@@ -68,7 +68,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("the white dog"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("the white dog"));
+            Assert.That(globals["a"], Is.EqualTo("the white dog"));
 
             chat = ChatParser.ParseText("CHAT c1\nSET $a=the white dog\nSET $a=4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
@@ -80,7 +80,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("4"));
+            Assert.That(globals["a"], Is.EqualTo("4"));
         }
 
         [Test]
@@ -94,7 +94,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             //Assert.That(set.value, Is.EqualTo("dog"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("$animal"));
+            Assert.That(chat.locals["a"], Is.EqualTo("$animal"));
 
             chat = ChatParser.ParseText("CHAT c1\nSET a=$obj.prop ", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
@@ -104,7 +104,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             //Assert.That(set.value, Is.EqualTo("dog"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("$obj.prop"));
+            Assert.That(chat.locals["a"], Is.EqualTo("$obj.prop"));
 
             chat = ChatParser.ParseText("CHAT c1\nSET a=$animal\nSAY The $a barked ", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
@@ -113,14 +113,14 @@ namespace Dialogic
             set.Realize(globals);
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("$animal"));
-            Assert.That(globals["c1.a"], Is.EqualTo("$animal"));
+            Assert.That(chat.locals["a"], Is.EqualTo("$animal"));
             Assert.That(globals["animal"], Is.EqualTo("dog"));
             chat.commands[1].Realize(globals);
             Assert.That(chat.commands[1].Text(true), Is.EqualTo("The dog barked"));
-            globals["animal"] = "cat";
-            Assert.That(globals["animal"], Is.EqualTo("cat"));
-            chat.commands[1].Realize(globals); // re-realize
-            Assert.That(chat.commands[1].Text(true), Is.EqualTo("The cat barked"));
+            //globals["animal"] = "cat";
+            //Assert.That(globals["animal"], Is.EqualTo("cat"));
+            //chat.commands[1].Realize(globals); // re-realize
+            //Assert.That(chat.commands[1].Text(true), Is.EqualTo("The cat barked"));
         }
 
         [Test]

@@ -20,7 +20,15 @@ namespace Dialogic
 
         internal int cursor = 0, lastRunAt = -1;
         internal bool allowSmoothingOnResume = true;
-        internal IDictionary<string, object> locals;
+        internal IDictionary<string, object> locals; // use as indexer?
+
+        public object this[string key]
+        {
+            get
+            {
+                return this.locals[key];
+            }
+        }
 
         public Chat() : base()
         {
@@ -174,19 +182,21 @@ namespace Dialogic
 
         protected internal string Expand(IDictionary<string, object> globals, string start)
         {
-            start = '$' + text + "." + start.TrimFirst('$');
+            //start = '$' + text + "." + start.TrimFirst('$');
+            //start = start.TrimFirst('$');
             Say s = new Say();
             s.Init(start, "", new string[0]);
             s.Actor(Dialogic.Actor.Default);
+            s.parent = this;
             s.Realize(globals);
             return s.Text(true);
         }
 
         protected internal string ExpandNoGroups(IDictionary<string, object> globals, string start)//, bool doGroups = false)
         {
-            start = text + "." + start.TrimFirst('$');
+            start = start.TrimFirst('$');
             var re = new Regex(@"\$([^ \(\)]+)");
-            string sofar = (string)globals[start];
+            string sofar = (string)locals[start];
             //var theVars = new List<string>();
             var recursions = 0;
             while (++recursions < 10)
@@ -194,9 +204,9 @@ namespace Dialogic
                 foreach (Match match in re.Matches(sofar))
                 {
                     var v = match.Groups[1].Value;
-                    if (!globals.ContainsKey(v)) throw new DialogicException
-                        ("No match for "+v+" in: "+globals.Stringify());
-                    sofar = sofar.Replace('$' + v, (string)globals[v]);
+                    if (!locals.ContainsKey(v)) throw new DialogicException
+                        ("No match for "+v+" in: "+locals.Stringify());
+                    sofar = sofar.Replace('$' + v, (string)locals[v]);
                 }
 
                 if (sofar.IndexOf('$') < 0) break; 

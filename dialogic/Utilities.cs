@@ -124,6 +124,7 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
 
         public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        public static Regex ParseVars = new Regex(@"\$([A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)?)[ .!;,:]");
     }
 
     /// <summary>
@@ -1016,6 +1017,11 @@ public static class Exts //@cond unused
     internal static bool EndsWith(this string str, char c)
     {
         return !str.IsNullOrEmpty() && str[str.Length - 1] == c;
+    }
+
+    internal static bool Contains(this string str, char c)
+    {
+        return !str.IsNullOrEmpty() && str.IndexOf(c) > -1;
     }
 
     internal static string TrimEnds(this string str, char start, char ends)

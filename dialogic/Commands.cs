@@ -287,12 +287,12 @@ namespace Dialogic
 
     /// <summary>
     /// The Set command is used to create or modify a variable. Variables generally originate from the game environment itself, but can also be created, accessed or modified within Dialogic.
-    /// </summary>d
+    /// </summary>
     public class Set : Command
     {
-        public string value;
-        public AssignOp op;
-        //public bool global;
+        protected internal string value;
+        protected internal AssignOp op;
+        protected internal bool global;
 
         public Set() : base() { }
 
@@ -306,18 +306,20 @@ namespace Dialogic
                     ("Invalid SET args: '" + txt + "'");
             }
 
-            this.text = match.Groups[1].Value.Trim().TrimFirst('$');
+            var tmp = match.Groups[1].Value.Trim();
+            this.text = tmp.TrimFirst('$');
+            this.global = (tmp != text);
             this.value = match.Groups[3].Value.Trim();
             this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
         }
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
-            if (globals == null) throw new DialogicException
+            if (global && globals == null) throw new DialogicException
                 ("Invalid call to Set.Realize() with null argument");
 
-            string varName = text.StartsWith(parent.text + ".", Util.IC)
-                ? text : parent.text + "." + text;
+            //string varName = text.StartsWith(parent.text + ".", Util.IC)
+              //  ? text : parent.text + "." + text;
 
             // Note: no Realizer here as we need to late-bind the variable
             var varValue = value;
@@ -326,7 +328,8 @@ namespace Dialogic
                 varValue = HandleGrammarTag(varValue);
             }
 
-            op.Invoke(varName, varValue, globals);
+            var state = global ? globals : parent.locals;
+            op.Invoke(text, varValue, state);
 
             return this;
         }
@@ -344,7 +347,7 @@ namespace Dialogic
                     + rule + ">", "$" + rule));
             }
 
-            val = val.Replace("$", "$" + parent.text + ".");
+            // val = val.Replace("$", "$" + parent.text + ".");
 
             //if (value.Contains(".")) Console.WriteLine("Adding "
             //  + value + " to globals:\n  " + globals.Stringify());
@@ -354,7 +357,9 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + " $" + text + " = " + value;
+            var txt = this.text;
+            if (global) txt = '$' + txt;
+            return TypeName().ToUpper() + " " + text + " = " + value;
         }
     }
 

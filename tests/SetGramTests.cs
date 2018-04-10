@@ -29,15 +29,6 @@ namespace Dialogic
             Chat chat;
             Set set;
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a= 4", NO_VALIDATORS)[0];
-            Assert.That(chat, Is.Not.Null);
-            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
-            set = (Dialogic.Set)chat.commands[0];
-            Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
-            Assert.That(set.value, Is.EqualTo("4"));
-            //set.Realize(globals);
-
             chat = ChatParser.ParseText("CHAT c1\nSET $a = 4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
@@ -46,6 +37,11 @@ namespace Dialogic
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
+            object outv = null;
+            chat.locals.TryGetValue("a", out outv);
+            Assert.That(outv, Is.Null);
+            Assert.That(globals["a"], Is.EqualTo("4"));
+            globals.Remove("a");
 
             chat = ChatParser.ParseText("CHAT c1\nSET a =4", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
@@ -55,19 +51,10 @@ namespace Dialogic
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
-            object outv = null;
+            outv = null;
             globals.TryGetValue("a", out outv);
             Assert.That(outv, Is.Null);
-            Assert.That(globals["c1.a"], Is.EqualTo("4"));
-
-            chat = ChatParser.ParseText("CHAT c1\nSET $a = 4", NO_VALIDATORS)[0];
-            Assert.That(chat, Is.Not.Null);
-            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
-            set = (Dialogic.Set)chat.commands[0];
-            Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
-            Assert.That(set.value, Is.EqualTo("4"));
-            set.Realize(globals);
+            Assert.That(chat.locals["a"], Is.EqualTo("4"));
         }
 
         [Test]
@@ -84,9 +71,10 @@ namespace Dialogic
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
             Assert.That(set.value, Is.EqualTo("$obj.prop"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("$obj.prop"));
+            Assert.That(chat.locals["a"], Is.EqualTo("$obj.prop"));
         }
 
+        [Test]
         public void SimpleSetsWithOr()
         {
             Chat chat;
@@ -100,9 +88,11 @@ namespace Dialogic
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
             Assert.That(set.value, Is.EqualTo("(4 | 5)"));
             set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("4").Or.EqualTo("5"));
+            //Assert.That(globals["a"], Is.EqualTo("4").Or.EqualTo("5"));
+            Assert.That(globals["a"], Is.EqualTo("(4 | 5)"));
+            globals.Remove("a");
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a ( 4 | 5 )", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET a = ( 4 | 5 )", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
@@ -113,19 +103,37 @@ namespace Dialogic
             object outv = null;
             globals.TryGetValue("a", out outv);
             Assert.That(outv, Is.Null);
-            Assert.That(globals["c1.a"], Is.EqualTo("4").Or.EqualTo("5"));
+            Assert.That(chat.locals["a"], Is.EqualTo("( 4 | 5 )"));
+        }
 
-            chat = ChatParser.ParseText("CHAT c1\nSET $a (4 |5 )", NO_VALIDATORS)[0];
-            Assert.That(chat, Is.Not.Null);
-            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
-            set = (Dialogic.Set)chat.commands[0];
-            Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+        [Test]
+        public void SetFromExternal()
+        {
+            string[] lines = {
+                "CHAT WineReview {type=a,stage=b}",
+                "SET review=<desc> <fortune> <ending>",
+                "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
+                "SET fortune=Under your skin, tears undulate like a leaky eel.",
+                "SET ending=And thats the end of the story...",
+                "CHAT c {type=a,stage=b}",
+                "SAY $WineReview.review",
+            };
+            ChatRuntime rt = new ChatRuntime(null);
+            rt.ParseText(String.Join("\n", lines));
+            var chats = rt.chats;//ChatParser.ParseText(String.Join("\n", lines));
+            //Console.WriteLine(rt);
+            Chat chat1 = chats[0], chat2 = chats[1];
 
-            Assert.That(set.value, Is.EqualTo("(4 |5 )"));
-            set.Realize(globals);
-            Assert.That(globals["c1.a"], Is.EqualTo("4").Or.EqualTo("5"));
+            chat1.commands.ForEach(c => c.Realize(globals));
+            chat2.commands.ForEach(c => c.Realize(globals));
 
+            Assert.That(chat1.locals.ContainsKey("review"), Is.True);
+            Assert.That(chat1.locals.ContainsKey("ending"), Is.True);
+
+            Say say = (Dialogic.Say)chat2.commands.Last();
+            //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
+
+            Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
 
         [Test]
@@ -137,7 +145,7 @@ namespace Dialogic
                 "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
                 "SET fortune=Under your skin, tears undulate like a leaky eel.",
                 "SET ending=And thats the end of the story...",
-                "SAY $WineReview.review",
+                "SAY $review",
             };
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
 
@@ -147,11 +155,11 @@ namespace Dialogic
 
             chat.commands.ForEach(c => c.Realize(globals));
 
-            Assert.That(globals.ContainsKey("WineReview.review"), Is.True);
-            Assert.That(globals.ContainsKey("WineReview.ending"), Is.True);
+            Assert.That(chat.locals.ContainsKey("review"), Is.True);
+            Assert.That(chat.locals.ContainsKey("ending"), Is.True);
 
             Say say = (Dialogic.Say)last;
-            //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
+            Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
 
             Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
@@ -167,7 +175,7 @@ namespace Dialogic
                 "SET score=The judges give that a 1.",
                 "SET fortune=You will live a short life in poverty.",
                 "SET end-phrase=And thats the end of the story...",
-                "SAY $WineReview.review",
+                "SAY $review",
             };
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
 
@@ -177,8 +185,10 @@ namespace Dialogic
 
             chat.commands.ForEach(c => c.Realize(globals));
 
-            Assert.That(globals.ContainsKey("WineReview.review"), Is.True);
-            Assert.That(globals.ContainsKey("WineReview.ending"), Is.True);
+            Assert.That(globals.ContainsKey("WineReview.review"), Is.False);
+            Assert.That(globals.ContainsKey("WineReview.ending"), Is.False);
+            Assert.That(chat.locals.ContainsKey("review"), Is.True);
+            Assert.That(chat.locals.ContainsKey("ending"), Is.True);
 
             Say say = (Dialogic.Say)last;
             var text = say.Text(true);
@@ -197,7 +207,7 @@ namespace Dialogic
                 "SET score=The judges give that a 1; good luck with the poverty.",
                 "SET fortune=You will live a short life with dismal hygiene.",
                 "SET end-phrase=And thats the end of the story. Good luck with the poverty.",
-                "SAY $WineReview.review",
+                "SAY $review",
             };
             var chat = (Chat)ChatParser.ParseText(String.Join("\n", lines))[0];
             var last = chat.commands[chat.commands.Count - 1];
@@ -213,8 +223,10 @@ namespace Dialogic
             Console.WriteLine(chat.ExpandNoGroups(globals,"review"));
             Console.WriteLine("------------------------------------");
 
-            Assert.That(globals.ContainsKey("WineReview.review"), Is.True);
-            Assert.That(globals.ContainsKey("WineReview.ending"), Is.True);
+            Assert.That(globals.ContainsKey("WineReview.review"), Is.False);
+            Assert.That(globals.ContainsKey("WineReview.ending"), Is.False);
+            Assert.That(chat.locals.ContainsKey("review"), Is.True);
+            Assert.That(chat.locals.ContainsKey("ending"), Is.True);
 
             Say say = (Dialogic.Say)last;
 
@@ -244,9 +256,10 @@ namespace Dialogic
 
             chat.commands.ForEach(c => c.Realize(globals));
 
-            Assert.That(globals.ContainsKey("c1.review"), Is.True);
-            Assert.That(globals.ContainsKey("c1.greeting"), Is.True);
-
+            Assert.That(globals.ContainsKey("c1.review"), Is.False);
+            Assert.That(globals.ContainsKey("c1.greeting"), Is.False);
+            Assert.That(chat.locals.ContainsKey("review"), Is.True);
+            Assert.That(chat.locals.ContainsKey("greeting"), Is.True);
             Say say = (Dialogic.Say)last;
 
             for (int i = 0; i < 10; i++)
@@ -292,16 +305,9 @@ namespace Dialogic
             };
 
             var chats = ChatParser.ParseText(String.Join("\n", lines), true);
-            chats[0].commands.ForEach(c => c.Realize(globals));
-
-            for (int i = 0; i < 10; i++)
-            {
-                chats[1].commands.ForEach(c => c.Realize(globals));
-                var txt = chats[1].commands.Last().Text(true);
-                Assert.That(txt, Is.EqualTo("Hello").Or.EqualTo("Goodbye"));
-                //Console.WriteLine(i+") "+txt);
-            }
-
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chats[1].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            //chats[0].commands.ForEach(c => c.Realize(globals));
         }
 
         [Test]
@@ -322,9 +328,9 @@ namespace Dialogic
             //chat.Realize(globals);
             chat.commands.ForEach(c => c.Realize(globals));
 
-            Assert.That(globals.ContainsKey("c1.review"), Is.True);
-            Assert.That(globals.ContainsKey("c1.greeting"), Is.True);
-            Assert.That(globals["c1.greeting"],
+            Assert.That(chat.locals.ContainsKey("review"), Is.True);
+            Assert.That(chat.locals.ContainsKey("greeting"), Is.True);
+            Assert.That(chat.locals["greeting"],
                         Is.EqualTo("(Hello | Goodbye | See you later)"));
 
             Say say = (Dialogic.Say)last;
@@ -359,9 +365,9 @@ namespace Dialogic
 
             //DumpGlobals();
 
-            Assert.That(globals.ContainsKey("c1.review"), Is.True);
-            Assert.That(globals.ContainsKey("c1.greeting"), Is.True);
-            Assert.That(globals["c1.greeting"], Is.EqualTo("(Hello | Goodbye) Fred"));
+            Assert.That(chat.locals.ContainsKey("review"), Is.True);
+            Assert.That(chat.locals.ContainsKey("greeting"), Is.True);
+            Assert.That(chat.locals["greeting"], Is.EqualTo("(Hello | Goodbye) Fred"));
 
             Say say = (Dialogic.Say)last;
             for (int i = 0; i < 10; i++)
@@ -523,7 +529,7 @@ namespace Dialogic
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
-
+        
             lines = new[] {
                 "start =  <a> <b> <c>",
                 "a = A",
