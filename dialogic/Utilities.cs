@@ -120,12 +120,15 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
+        internal const string PV1 = @"\$([A-Za-z_][A-Za-z_0-9]*";
+        internal const string PV2 = @"(?:\.[A-Za-z_][A-Za-z_0-9]*)?)(?:[ .!;,:?]|$)";
+        public static Regex ParseVars = new Regex(PV1 + PV2);
+
         public static Regex MetaSplit = new Regex(@"\s*,\s*");
 
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
 
         public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
-        public static Regex ParseVars = new Regex(@"\$([A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)?)(?:[ .!;,:]|$)");
     }
 
     /// <summary>
@@ -611,13 +614,13 @@ namespace Dialogic
             }
         }
 
-        public bool Check(Chat c, string check, IDictionary<string, object> globals = null)
+        public bool Check(Realizer r, string check, IDictionary<string, object> globals = null)
         {
             string rval = value;
-            if (globals != null)
+            if (globals != null && r != null)
             {
-                if (check.Contains('$')) check = c.Realizer().DoVars(check, globals);
-                if (value.Contains('$')) rval = c.Realizer().DoVars(value, globals);
+                if (check.Contains('$')) check = r.DoVars(check, globals);
+                if (value.Contains('$')) rval = r.DoVars(value, globals);
             }
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);

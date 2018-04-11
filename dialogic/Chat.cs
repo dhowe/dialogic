@@ -162,7 +162,7 @@ namespace Dialogic
             {
                 throw new DialogicException("Null realizer in: " + this);
             }
-            return this.runtime.realizer;
+            return runtime.realizer;
         }
 
         internal Command Next()
@@ -191,10 +191,9 @@ namespace Dialogic
             LastRunAt(Util.EpochMs());
         }
 
-        protected internal string Expand(IDictionary<string, object> globals, string start)
+        // testing
+        internal string Expand(IDictionary<string, object> globals, string start)
         {
-            //start = '$' + text + "." + start.TrimFirst('$');
-            //start = start.TrimFirst('$');
             Say s = new Say();
             s.Init(start, "", new string[0]);
             s.Actor(Dialogic.Actor.Default);
@@ -203,12 +202,13 @@ namespace Dialogic
             return s.Text(true);
         }
 
-        protected internal string ExpandNoGroups(IDictionary<string, object> globals, string start)//, bool doGroups = false)
+        // testing
+        internal string ExpandNoGroups(IDictionary<string, object> globals, string start)//, bool doGroups = false)
         {
             start = start.TrimFirst('$');
             var re = new Regex(@"\$([^ \(\)]+)");
             string sofar = (string)locals[start];
-            //var theVars = new List<string>();
+
             var recursions = 0;
             while (++recursions < 10)
             {

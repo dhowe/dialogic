@@ -186,10 +186,11 @@ namespace Dialogic
             }
         }
 
-        private void AddChat(Chat c)
+        private Chat AddChat(Chat c)
         {
             c.runtime = this.runtime;
             chats.Add(c);
+            return c;
         }
 
         private void HandleCommand(Command c, string line, int lineNo)
@@ -204,12 +205,16 @@ namespace Dialogic
 
             if (c is Opt) // add option data to last Ask
             {
+                Opt opt = (Opt)c;
+ 
                 Command last = LastOfType(parsedCommands, typeof(Ask));
 
                 if (!(last is Ask)) throw new ParseException
                     (line, lineNo, "Opt must follow Ask");
-
-                ((Ask)last).AddOption((Opt)c);
+                
+                Ask ask = ((Ask)last);
+                opt.parent = ask.parent;
+                ask.AddOption(opt);
             }
             else  // add command to last Chat
             {
@@ -307,11 +312,7 @@ namespace Dialogic
 
         private void CreateDefaultChat()
         {
-            Chat c = Chat.Create("C" + Util.EpochMs());
-            AddChat(c);
-            parsedCommands.Push(c);
+            parsedCommands.Push(AddChat(Chat.Create("C" + Util.EpochMs())));
         }
-
     }
-
 }

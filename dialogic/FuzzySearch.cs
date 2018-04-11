@@ -103,7 +103,7 @@ namespace Dialogic
 
             if (DBUG) Console.WriteLine("\nFIND: " + constraints.Stringify());
 
-            ValidateConstraints(constraints);
+            ValidateConstraints(parent, constraints);
 
             for (int i = 0; i < chats.Count; i++)
             {
@@ -124,8 +124,8 @@ namespace Dialogic
                     if (chatMeta != null && chatMeta.ContainsKey(key)) // has-key
                     {
                         var chatPropVal = (string)chatMeta[key];
-
-                        if (!(constraint.Check(parent, chatPropVal, globals)))
+                        var realizer = parent != null ? parent.Realizer() : null;
+                        if (!(constraint.Check(realizer, chatPropVal, globals)))
                         {
                             if (DBUG) Console.WriteLine("    FAIL: " + constraint);
                             hits = -1;
@@ -159,8 +159,11 @@ namespace Dialogic
             return (from kvp in list select kvp.Key).ToList();
         }
 
-        private static void ValidateConstraints(List<Constraint> constraints)
+        private static void ValidateConstraints(Chat parent, List<Constraint> constraints)
         {
+            //if (parent == null) throw new FindException
+                //("Null Chat parent in Find: " + constraints.Stringify());
+
             bool hasStaleness = false;
             foreach (var constraint in constraints)
             {
@@ -169,6 +172,7 @@ namespace Dialogic
                     hasStaleness = true;
                 }
             }
+
             if (!hasStaleness) // TODO: tmp
             {   //throw new FindException("No staleness threshold: " + constraints.Stringify());
                 constraints.Add(new Constraint(Operator.LT, Meta.STALENESS,

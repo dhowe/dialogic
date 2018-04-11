@@ -45,7 +45,6 @@ namespace Dialogic
             Assert.That(rt.FindChatByLabel("c2").Staleness(), Is.EqualTo(10));
             Assert.That(rt.FindChatByLabel("c3").Staleness(), Is.EqualTo(5));
             Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
-
         }
 
         [Test]

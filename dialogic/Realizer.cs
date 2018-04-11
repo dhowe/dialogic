@@ -8,7 +8,7 @@ namespace Dialogic
     /// <summary>
     /// Handles realization of variables, probabilistic groups, and grammar rules
     /// </summary>
-    internal class Realizer
+    public class Realizer
     {
         private int maxIterations = 99;
         private ChatRuntime runtime;
@@ -86,29 +86,52 @@ namespace Dialogic
         public string DoVars(string text, IDictionary<string, object>
             globals, Chat parent = null)
         {
+            if (String.IsNullOrEmpty(text) || !text.Contains('$'))
+            {
+                return text;
+            }
+
             var locals = parent != null ? parent.locals : null;
 
-            if (!String.IsNullOrEmpty(text) && text.Contains('$'))
+            int recursions = 0, maxRecursions = 3;
+            List<string> vars = ParseVars(text);
+
+            while (text.Contains('$'))
             {
-                var vars = ParseVars(text);
                 vars.ForEach(v =>
                 {
-                    string tmp = null;
+                    string replaced = null;
+
                     if (locals != null && locals.ContainsKey(v))
                     {
-                        tmp = text.Replace("$" + v, locals[v].ToString());
+                        replaced = text.Replace("$" + v, locals[v].ToString());
                     }
 
-                    if (tmp == null && globals.ContainsKey(v))
+                    if (replaced == null && globals.ContainsKey(v))
                     {
-                        Console.WriteLine(globals[v]);
-                        tmp = text.Replace("$" + v, globals[v].ToString());
+                        replaced = text.Replace("$" + v, globals[v].ToString());
                     }
 
-                    if (tmp != null) text = tmp;
+                    if (replaced == null) throw new RealizeException
+                        ("Unable to replace $" + v + " in: \n  " + globals.Stringify() +
+                         (parent != null ? "\n  " + parent.locals.Stringify() : ""));
+
+                    text = replaced;
                 });
 
+                //if (replaced == null) throw new RealizeException
+                //("Unable to replace " + vars.Stringify() + " in " + text);
+
+                if (++recursions >= maxRecursions)
+                {
+                    Console.WriteLine("[WARN] Max recursion level" +
+                        " reached(" + maxRecursions + "): '" + text + "'");
+                    break;
+                }
             }
+
+            //if (replaced == null) throw new RealizeException
+            //("Unable to replace " + vars.Stringify() + " in " + text);
 
             return text;
         }

@@ -115,6 +115,9 @@ namespace Dialogic
 
             if (this is ISendable)
             {
+                if (parent == null) throw new DialogicException
+                    ("Null Chat parent for: "+this);
+                
                 realized[Meta.TEXT] = parent.Realizer().Do(text, globals, parent);
                 realized[Meta.TYPE] = TypeName();
                 if (this is IAssignable)
@@ -189,7 +192,6 @@ namespace Dialogic
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
-            //Console.WriteLine("<start>: "+text);
             base.Realize(globals);
             Recombine(globals);
             lastSpoken = Text(true);
@@ -444,6 +446,7 @@ namespace Dialogic
 
         protected internal void AddOption(Opt o)
         {
+            o.parent = this.parent;
             options.Add(o);
         }
 
@@ -475,7 +478,7 @@ namespace Dialogic
 
         public Opt() : this(String.Empty, NOP) { }
 
-        public Opt(string text, Command action) : base()
+        protected internal Opt(string text, Command action) : base()
         {
             this.text = text;
             this.action = action;

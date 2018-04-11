@@ -256,9 +256,9 @@ namespace Dialogic
 
         // for testing ------------------------------------------
 
-        internal Chat DoFind(params Constraint[] constraints)
+        internal Chat DoFind(Chat parent, params Constraint[] constraints)
         {
-            return DoFind(null, null, constraints);
+            return DoFind(parent, null, constraints);
         }
 
         internal Chat DoFind(Chat parent,
@@ -275,9 +275,9 @@ namespace Dialogic
             return FuzzySearch.Find(chats, ToConstraintMap(f), f.parent, globals);
         }
 
-        internal List<Chat> DoFindAll(params Constraint[] constraints)
+        internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
         {
-            return DoFindAll(null, null, constraints);
+            return DoFindAll(parent, null, constraints);
         }
 
         internal List<Chat> DoFindAll(Chat parent,

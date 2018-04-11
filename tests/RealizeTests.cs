@@ -54,7 +54,7 @@ namespace Dialogic
                 {{ "a", "($a | $b)" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("($a | 32)"));
 
-            res = realizer.Do("$a", new Dictionary<string, object>()
+            res = realizer.DoVars("$a", new Dictionary<string, object>()
                 {{ "a", "($a | $b)" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("32"));
         }
@@ -63,6 +63,7 @@ namespace Dialogic
         public void Exceptions()
         {
             // no replace to be made
+            Assert.That(globals.ContainsKey("a"), Is.False);
             Assert.Throws<RealizeException>(() => realizer.DoVars("$a", globals));
 
             // replacement leads to infinite loop
@@ -212,16 +213,14 @@ namespace Dialogic
             s = @"SAY The $obj.prop woke $count times";
             s = realizer.DoVars(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
-
-            s = realizer.DoVars("$a", new Dictionary<string, object>()
-                {{ "a", "($a | $b)" }, { "b", "32" }});
-            Assert.That(s, Is.EqualTo("($a | 32)"));
         }
 
         [Test]
         public void ReplaceVarsGroups()
         {
-            var s = @"SAY The $animal woke and $prep (ate|ate)";
+            string s;
+   
+            s = @"SAY The $animal woke and $prep (ate|ate)";
             s = realizer.Do(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
@@ -229,6 +228,9 @@ namespace Dialogic
             s = realizer.Do(s, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
+            s = realizer.Do("$a", new Dictionary<string, object>()
+                {{ "a", "($a | $b)" }, { "b", "32" }});
+            Assert.That(s, Is.EqualTo("32"));
 
             string txt = "letter $group";
             for (int i = 0; i < 10; i++)
@@ -304,9 +306,9 @@ namespace Dialogic
             Ask ask = (Ask)chats[0].commands[0];
             Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
             ask.Realize(globals);
+
             Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
             Assert.That(ask.Text(true), Is.EqualTo("Want a dog?"));
-
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
             var options = ask.Options();

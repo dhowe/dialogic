@@ -42,7 +42,6 @@ namespace Dialogic
             Assert.That(vars[2], Is.EqualTo("chat1.time"));
 
 
-
             text = "$a";
             matches = RE.ParseVars.Matches(text);
             Assert.That(matches.Count, Is.EqualTo(1));
@@ -57,6 +56,21 @@ namespace Dialogic
             Util.ShowMatches(matches);
             Assert.That(vars.Count, Is.EqualTo(1));
             Assert.That(vars[0], Is.EqualTo("a"));
+
+            text = "Want a $animal?";
+            matches = RE.ParseVars.Matches(text);
+            Assert.That(matches.Count, Is.EqualTo(1));
+            vars = new List<string>();
+            foreach (Match match in matches)
+            {
+                if (match.Groups.Count != 2)
+                    throw new DialogicException("Bad RE in " + text);
+                vars.Add(match.Groups[1].Value);
+            }
+            vars.ForEach(Console.WriteLine);
+            Util.ShowMatches(matches);
+            Assert.That(vars.Count, Is.EqualTo(1));
+            Assert.That(vars[0], Is.EqualTo("animal"));
         }
 
         [Test]
