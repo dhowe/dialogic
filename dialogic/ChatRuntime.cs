@@ -70,11 +70,11 @@ namespace Dialogic
             this.chatEvents = new ChatEventHandler(this);
         }
 
-        public List<Chat> ParseText(string text, bool disableValidators = false)
+        public void ParseText(string text, bool disableValidators = false)
         {
             this.validatorsDisabled = disableValidators;
             var lines = text.Split(ChatParser.LineBreaks, StringSplitOptions.None);
-            return (chats = parser.Parse(lines));
+            chats = parser.Parse(lines);
         }
 
         public void ParseFile(string fileOrFolder, bool disableValidators = false)

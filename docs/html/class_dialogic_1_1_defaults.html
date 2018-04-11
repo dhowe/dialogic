@@ -96,9 +96,12 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:ac17b48daf64a1a3f62b52a2966cd7611"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#ac17b48daf64a1a3f62b52a2966cd7611">ASK_TIMEOUT</a> = 5.0</td></tr>
 <tr class="memdesc:ac17b48daf64a1a3f62b52a2966cd7611"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Timeout for <a class="el" href="class_dialogic_1_1_ask.html" title="The ASK command is for prompting the user, and is generally followed by one or more OPT commands...">Ask</a>  <a href="#ac17b48daf64a1a3f62b52a2966cd7611">More...</a><br /></td></tr>
 <tr class="separator:ac17b48daf64a1a3f62b52a2966cd7611"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fbad28c55447a0f8c3c5fb18b4bd227"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#a0fbad28c55447a0f8c3c5fb18b4bd227">FIND_STALENESS</a> = 4</td></tr>
+<tr class="memitem:a0fbad28c55447a0f8c3c5fb18b4bd227"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#a0fbad28c55447a0f8c3c5fb18b4bd227">FIND_STALENESS</a> = 10</td></tr>
 <tr class="memdesc:a0fbad28c55447a0f8c3c5fb18b4bd227"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default staleness-threshold for <a class="el" href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply...">Find</a>  <a href="#a0fbad28c55447a0f8c3c5fb18b4bd227">More...</a><br /></td></tr>
 <tr class="separator:a0fbad28c55447a0f8c3c5fb18b4bd227"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45ccbaa7895aeebc49a49acfa74578f1"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#a45ccbaa7895aeebc49a49acfa74578f1">FIND_RELAXATION_INCR</a> = .5</td></tr>
+<tr class="memdesc:a45ccbaa7895aeebc49a49acfa74578f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amount to relax <a class="el" href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply...">Find</a> staleness threshold each time  <a href="#a45ccbaa7895aeebc49a49acfa74578f1">More...</a><br /></td></tr>
+<tr class="separator:a45ccbaa7895aeebc49a49acfa74578f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab56fd4a024e341edeae89f4fe382d1d9"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#ab56fd4a024e341edeae89f4fe382d1d9">FIND_MAX_STALENESS</a> = 50</td></tr>
 <tr class="memdesc:ab56fd4a024e341edeae89f4fe382d1d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max staleness-threshold to try for a <a class="el" href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply...">Find</a>  <a href="#ab56fd4a024e341edeae89f4fe382d1d9">More...</a><br /></td></tr>
 <tr class="separator:ab56fd4a024e341edeae89f4fe382d1d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -111,6 +114,9 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:af715b12c9d2b7ca800bd8e09984a58d3"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#af715b12c9d2b7ca800bd8e09984a58d3">CHAT_STALENESS_INCR</a> = 1</td></tr>
 <tr class="memdesc:af715b12c9d2b7ca800bd8e09984a58d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default increment each time <a class="el" href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai...">Chat</a> is run  <a href="#af715b12c9d2b7ca800bd8e09984a58d3">More...</a><br /></td></tr>
 <tr class="separator:af715b12c9d2b7ca800bd8e09984a58d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0d6214e5d44c308d05417609cad194e"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#ac0d6214e5d44c308d05417609cad194e">CHAT_ENABLE_SMOOTHING</a> = true</td></tr>
+<tr class="memdesc:ac0d6214e5d44c308d05417609cad194e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to auto-launch 'onResume' smoothing Chats when specified  <a href="#ac0d6214e5d44c308d05417609cad194e">More...</a><br /></td></tr>
+<tr class="separator:ac0d6214e5d44c308d05417609cad194e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e1efc14c32dfb55082833945fae7cac"><td class="memItemLeft" align="right" valign="top"><a id="a1e1efc14c32dfb55082833945fae7cac"></a>
 static double&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_FAST_MULT</b> = 0.5</td></tr>
 <tr class="separator:a1e1efc14c32dfb55082833945fae7cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -178,6 +184,30 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
 </div><div class="memdoc">
 
 <p>Default Timeout for <a class="el" href="class_dialogic_1_1_ask.html" title="The ASK command is for prompting the user, and is generally followed by one or more OPT commands...">Ask</a> </p>
+
+</div>
+</div>
+<a id="ac0d6214e5d44c308d05417609cad194e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0d6214e5d44c308d05417609cad194e">&#9670;&nbsp;</a></span>CHAT_ENABLE_SMOOTHING</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Dialogic.Defaults.CHAT_ENABLE_SMOOTHING = true</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether to auto-launch 'onResume' smoothing Chats when specified </p>
 
 </div>
 </div>
@@ -301,6 +331,30 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
 
 </div>
 </div>
+<a id="a45ccbaa7895aeebc49a49acfa74578f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45ccbaa7895aeebc49a49acfa74578f1">&#9670;&nbsp;</a></span>FIND_RELAXATION_INCR</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double Dialogic.Defaults.FIND_RELAXATION_INCR = .5</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Amount to relax <a class="el" href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply...">Find</a> staleness threshold each time </p>
+
+</div>
+</div>
 <a id="a0fbad28c55447a0f8c3c5fb18b4bd227"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0fbad28c55447a0f8c3c5fb18b4bd227">&#9670;&nbsp;</a></span>FIND_STALENESS</h2>
 
@@ -311,7 +365,7 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">double Dialogic.Defaults.FIND_STALENESS = 4</td>
+          <td class="memname">double Dialogic.Defaults.FIND_STALENESS = 10</td>
         </tr>
       </table>
   </td>
