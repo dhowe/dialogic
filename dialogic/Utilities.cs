@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("tests")]
+[assembly: InternalsVisibleTo("weblint")]
 
 namespace Dialogic
 {

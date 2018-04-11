@@ -46,7 +46,8 @@ namespace Dialogic
         internal static List<Chat> ParseText(string s, bool noValidators = false)
         {
             ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors); // tmp: testing
-            return rt.ParseText(s, noValidators);
+            rt.ParseText(s, noValidators);
+            return rt.chats;
         }
 
         internal List<Chat> Parse(string[] lines)

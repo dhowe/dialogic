@@ -6,46 +6,47 @@
     <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
     <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
     <style>
-     body {
-        padding: 0 2em;
-     }
-    .line-error {
-        position: absolute;
-        width: 600px;
-        height:14px;
-        margin-top: -14px;
-        padding-right: 557px !important;
-        z-index: -1;
-        pointer-events: none;
-     }
-     .linedtextarea textarea{
-        outline: none !important;
-        background-color: transparent !important;
-     }
-     .sub-title{
-        line-height: 42px;
-        font-size: 20px;
-     }
-     .input-area{
-        margin-top: 5px !important;
-     }
-
+         body {
+            padding: 0 2em;
+         }
+        .line-error {
+            position: absolute;
+            width: 600px;
+            height:14px;
+            margin-top: -14px;
+            padding-right: 557px !important;
+            z-index: -1;
+            pointer-events: none;
+         }
+         .linedtextarea textarea{
+            outline: none !important;
+            background-color: transparent !important;
+         }
+         .sub-title{
+            line-height: 42px;
+            font-size: 20px;
+         }
+         .input-area{
+            margin-top: 5px !important;
+         }
     </style>
 </head>
 </head>
 <body>
-    <span class="sub-title"><img style="margin-top: 5px;" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
-    <b>GuppyLint</b></span></h2>
-    <div class="input-area">
-        <textarea id="main" class="lined" rows="29" cols="100">%%CODE%%</textarea>
-    </div>
+    <span class="sub-title">
+        <img style="margin-top: 5px;" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
+        <b>GuppyLint</b>
+    </span></h2>
+
     <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
-    <form name="main">
+    <form name="main" id="form">
+        <div class="input-area">
+            <textarea id="main" name="code" class="lined" rows="29" cols="100">%%CODE%%</textarea>
+        </div>
         <div class="validate">
             &nbsp; &nbsp; <button type="submit" id="validate">Validate</button>
+            <button type="submit" id="execute">Execute</button>
             <button type="reset" id="clear">Clear</button>
-            <!--button type="reset" id="reload">Reload</button-->
-            <button class="copy" id="copy">Copy</button>
         </div>
     </form>
     <section id="result-container" class="%%CCLASS%%">
@@ -58,20 +59,23 @@
 
     $(document).ready(function () {
 
-      $("#clear").click(function () {
+      $("#clear").click(function () { $("#main").empty(); });
+      $("#execute").click(function () { onButtonClicked(true); });
+      $("#validate").click(function () { onButtonClicked(false); });
 
-        $("#main").val('');
-      });
-
-      $("#validate").click(function () {
+      function onButtonClicked(execute) {
 
         event.preventDefault();
+
         if ($("#main").val() === "Enter your code here") return;
-        var code = encodeURIComponent($("#main").val());
+
+        var qstr = $("#form").serialize() + "&mode="
+          + (execute ? 'execute' : 'validate');
+
         $.ajax({
           type: "POST",
+          data: qstr,
           url: "%%URL%%",
-          data: code,
           contentType: 'application/x-www-form-urlencoded',
           success: function(data){
             document.open();
@@ -79,10 +83,11 @@
             document.close();
           }
         });
-      });
+      }
 
-      // Highlight error
+      // highlight line on which error happened
       if (!$("#errorLine").text().includes("ERRORLINE")) {
+        
         var idx = $("#errorLine").text() - 1;
         $(".lineno:eq(" + idx  + ")").append("<div class='line-error'></div>");
       }

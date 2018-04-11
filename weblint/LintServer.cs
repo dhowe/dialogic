@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Linq;
+
 using Dialogic;
 
 namespace Dialogic.Server
@@ -22,6 +24,7 @@ namespace Dialogic.Server
         readonly HttpListener listener = new HttpListener();
         readonly Func<HttpListenerRequest, string> responderFunc;
 
+        static ChatRuntime runtime;
 
         public LintServer(Func<HttpListenerRequest, string> func, params string[] prefixes)
         {
@@ -68,22 +71,16 @@ namespace Dialogic.Server
                                 ctx.Response.ContentLength64 = buf.Length;
                                 ctx.Response.OutputStream.Write(buf, 0, buf.Length);
                             }
-                            catch
-                            {
-                                // ignored
-                            }
+                            catch { /* ignored */ }
                             finally
                             {
                                 // always close the stream
-                                if (ctx != null)
-                                {
-                                    ctx.Response.OutputStream.Close();
-                                }
+                                if (ctx != null) ctx.Response.OutputStream.Close();
                             }
                         }, listener.GetContext());
                     }
                 }
-                catch (Exception) { }
+                catch (Exception) { /* ignored */ }
             });
         }
 
@@ -97,7 +94,10 @@ namespace Dialogic.Server
         {
             var html = IndexPageContent.Replace("%%URL%%", SERVER_URL);
 
-            var code = ParsePostData(request);
+            var kvs = ParsePostData(request);
+
+            var code = kvs.ContainsKey("code") ? kvs["code"] : null;
+            var mode = kvs.ContainsKey("mode") ? kvs["mode"] : "validate";
 
             if (String.IsNullOrEmpty(code))
             {
@@ -110,6 +110,12 @@ namespace Dialogic.Server
             try
             {
                 string content = ParserText(code, noValidators);
+                runtime.chats.ForEach(c=>c.Realize(null));
+                if (mode == "execute")
+                {
+                    var cmd = runtime.chats.Last().commands.Last();
+                    content += cmd.Text(false) + " -> " + cmd.Text(true);
+                }
 
                 html = html.Replace("%%RESULT%%", content);
                 html = html.Replace("%%RCLASS%%", "success");
@@ -129,19 +135,17 @@ namespace Dialogic.Server
         private static string ParserText(string code, bool noVal = false)
         {
             string content = String.Empty;
-            new ChatRuntime(Tendar.AppConfig.Actors).ParseText(code, noVal)
-                .ForEach(c => { content += c.ToTree() + "\n\n"; });
+            runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+            runtime.ParseText(code, noVal);
+            runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
             return content;
         }
 
-        //private static IDictionary<string,string> ParsePostData(HttpListenerRequest request)
-        private static string ParsePostData(HttpListenerRequest request)
+        private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
+        //private static string ParsePostData(HttpListenerRequest request)
         {
-            string s="";
-            //IDictionary<string, string> result = new Dictionary<string, string>();
 
-            // TODO: need to return key-value pairs here as we will have more than one; 
-            // in c# a Dictionary, in Java a HashMap
+            IDictionary<string, string> result = new Dictionary<string, string>();
 
             if (request.HasEntityBody)
             {
@@ -151,16 +155,24 @@ namespace Dialogic.Server
 
                 if (request.ContentType == "application/x-www-form-urlencoded")
                 {
-                    s = Uri.UnescapeDataString(reader.ReadToEnd());      
+                    //string s = Uri.UnescapeDataString(reader.ReadToEnd());
+                    string s = WebUtility.UrlDecode(reader.ReadToEnd());
+                    string[] pairs = s.Split('&');
+                    foreach (var p in pairs)
+                    {
+                        var pair = p.Split('=');
+                        if (pair.Length == 2)
+                        {
+                            result.Add(pair[0], pair[1]);
+                        }
+                    }
                 }
 
                 body.Close();
                 reader.Close();
             }
 
-            //return result;
-
-            return s;
+            return result;
         }
 
         public static void Main()
