@@ -112,7 +112,7 @@ namespace Dialogic
     /// </summary>
     public static class RE
     {
-        internal const string OP1 = @"^(!?!?$?[a-zA-Z_][a-zA-Z0-9_]*)";
+        internal const string OP1 = @"^(!?!?$?[a-zA-Z_][a-zA-Z0-9_-]*)";
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
@@ -120,14 +120,12 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        internal const string PV1 = @"\$([A-Za-z_][A-Za-z_0-9]*";
-        internal const string PV2 = @"(?:\.[A-Za-z_][A-Za-z_0-9]*)?)(?:[ .!;,:?]|$)";
+        internal const string PV1 = @"\$([A-Za-z_][A-Za-z0-9_-]*";
+        internal const string PV2 = @"(?:\.[A-Za-z_][A-Za-z0-9_-]*)*)(?:[ .!;,:?()""']|$)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
         public static Regex MetaSplit = new Regex(@"\s*,\s*");
-
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
-
         public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
 
@@ -614,13 +612,13 @@ namespace Dialogic
             }
         }
 
-        public bool Check(Realizer r, string check, IDictionary<string, object> globals = null)
+        public bool Check(string check, IDictionary<string, object> globals = null)
         {
             string rval = value;
-            if (globals != null && r != null)
+            if (globals != null)
             {
-                if (check.Contains('$')) check = r.DoVars(check, globals);
-                if (value.Contains('$')) rval = r.DoVars(value, globals);
+                if (check.Contains('$')) check = Realizer.RealizeSymbols(check, null, globals);
+                if (value.Contains('$')) rval = Realizer.RealizeSymbols(value, null, globals);
             }
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
@@ -1084,6 +1082,7 @@ public static class Exts //@cond unused
         {
             var coll = (ICollection)o;
             s = "[";
+            if (coll.Count < 1) s += "]";
             foreach (var k in coll) s += k + ",";
             s = (s.Substring(0, s.Length - 1) + "]");
         }

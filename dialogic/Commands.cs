@@ -116,11 +116,11 @@ namespace Dialogic
             if (this is ISendable)
             {
                 if (parent == null) throw new DialogicException
-                    ("Null Chat parent for: "+this);
-                
-                realized[Meta.TEXT] = parent.Realizer().Do(text, globals, parent);
+                    ("Null Chat parent for: " + this);
+
+                realized[Meta.TEXT] = Realizer.Do(text, parent, globals);
                 realized[Meta.TYPE] = TypeName();
-                if (this is IAssignable)
+                if (this is IAssignable && actor != null)
                 {
                     realized[Meta.ACTOR] = Actor().Name();
                 }
@@ -138,7 +138,7 @@ namespace Dialogic
 
                     if (val is string)
                     {
-                        val = parent.Realizer().Do((string)val, globals);
+                        val = Realizer.Do((string)val, null, globals);
                     }
                     else if (!(val is Constraint)) // don't replace constraints
                     {
@@ -203,9 +203,9 @@ namespace Dialogic
             if (IsRecombinant()) // try to say something different than last time
             {
                 var iterations = 0;
-                while (lastSpoken == Text(true) && ++iterations < 100)
+                while (lastSpoken == Text(true) && ++iterations < 10)
                 {
-                    realized[Meta.TEXT] = parent.Realizer().Do(text, globals, parent);
+                    realized[Meta.TEXT] = Realizer.Do(text, parent, globals);
                 }
             }
         }
@@ -320,7 +320,7 @@ namespace Dialogic
                 ("Invalid call to Set.Realize() with null argument");
 
             //string varName = text.StartsWith(parent.text + ".", Util.IC)
-              //  ? text : parent.text + "." + text;
+            //  ? text : parent.text + "." + text;
 
             // Note: no Realizer here as we need to late-bind the variable
             var varValue = value;
@@ -651,7 +651,7 @@ namespace Dialogic
             realized.Clear();
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
-            realized[Meta.TEXT] = parent.Realizer().DoGroups(text);
+            realized[Meta.TEXT] = Realizer.RealizeGroups(text);
             return this;
         }
 

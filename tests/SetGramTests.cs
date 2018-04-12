@@ -15,7 +15,7 @@ namespace Dialogic
         static IDictionary<string, object> globals
             = new Dictionary<string, object>
         {
-            { "obj.prop", "dog" },
+            { "obj-prop", "dog" },
             { "animal", "dog" },
             { "prep", "then" },
             { "group", "(a|b)" },
@@ -63,15 +63,15 @@ namespace Dialogic
             Chat chat;
             Set set;
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a= $obj.prop", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET a= $obj-prop", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
-            Assert.That(set.value, Is.EqualTo("$obj.prop"));
+            Assert.That(set.value, Is.EqualTo("$obj-prop"));
             set.Realize(globals);
-            Assert.That(chat.locals["a"], Is.EqualTo("$obj.prop"));
+            Assert.That(chat.locals["a"], Is.EqualTo("$obj-prop"));
         }
 
         [Test]
@@ -115,23 +115,22 @@ namespace Dialogic
                 "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
                 "SET fortune=Under your skin, tears undulate like a leaky eel.",
                 "SET ending=And thats the end of the story...",
-                "CHAT c {type=a,stage=b}",
+                "CHAT External {type=a,stage=b}",
                 "SAY $WineReview.review",
             };
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
             rt.ParseText(String.Join("\n", lines));
-            var chats = rt.chats;//ChatParser.ParseText(String.Join("\n", lines));
+            var chats = rt.chats;
             //Console.WriteLine(rt);
+
             Chat chat1 = chats[0], chat2 = chats[1];
+            Say say = (Dialogic.Say)chat2.commands.Last();
 
             chat1.commands.ForEach(c => c.Realize(globals));
             chat2.commands.ForEach(c => c.Realize(globals));
 
             Assert.That(chat1.locals.ContainsKey("review"), Is.True);
             Assert.That(chat1.locals.ContainsKey("ending"), Is.True);
-
-            Say say = (Dialogic.Say)chat2.commands.Last();
-            //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
 
             Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
@@ -159,7 +158,7 @@ namespace Dialogic
             Assert.That(chat.locals.ContainsKey("ending"), Is.True);
 
             Say say = (Dialogic.Say)last;
-            Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
+            //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
 
             Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
@@ -218,10 +217,10 @@ namespace Dialogic
 
             chat.commands.ForEach(c => c.Realize(globals));
 
-            Console.WriteLine(chat.AsGrammar(globals));
-            Console.WriteLine("------------------------------------");
-            Console.WriteLine(chat.ExpandNoGroups(globals,"review"));
-            Console.WriteLine("------------------------------------");
+            //Console.WriteLine(chat.AsGrammar(globals));
+            //Console.WriteLine("------------------------------------");
+            //Console.WriteLine(chat.ExpandNoGroups(globals,"review"));
+            //Console.WriteLine("------------------------------------");
 
             Assert.That(globals.ContainsKey("WineReview.review"), Is.False);
             Assert.That(globals.ContainsKey("WineReview.ending"), Is.False);
@@ -233,7 +232,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 var text = say.Realize(globals).Text(true);
-                Console.WriteLine(i+") "+text);
+                //Console.WriteLine(i+") "+text);
                 Assert.That(text.StartsWith("You look tasty", Util.IC), Is.True);
                 Assert.That(text.EndsWith("with the poverty.", Util.IC), Is.True);
             }
@@ -616,25 +615,6 @@ namespace Dialogic
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Console.WriteLine(chat.Expand(globals, "$start"));
             Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (A | B)")); */
-        }
-
-        [Test]
-        public void GrammarToJSON()
-        {
-            string[] lines;
-            string text;
-            Chat chat;
-
-            lines = new[] {
-                "start =  <a> <b> <c>",
-                "a = A",
-                "b = B",
-                "c = C | D",
-            };
-            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Console.WriteLine(chat.AsGrammar(globals));
-            Console.WriteLine(chat.GrammarToJson(globals));
         }
 
         [Test]

@@ -8,7 +8,7 @@ namespace Dialogic
     class GrammarTests
     {
         public static IDictionary<string, object> globals = new Dictionary<string, object>() {
-            { "obj.prop", "dog" },
+            { "obj-prop", "dog" },
             { "animal", "dog" },
             { "prep", "then" },
             { "group", "(a|b)" },

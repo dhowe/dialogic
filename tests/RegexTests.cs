@@ -13,7 +13,7 @@ namespace Dialogic
         static IDictionary<string, object> globals
             = new Dictionary<string, object>
         {
-            { "obj.prop", "dog" },
+            { "obj-prop", "dog" },
             { "animal", "dog" },
             { "prep", "then" },
             { "group", "(a|b)" },
@@ -31,46 +31,43 @@ namespace Dialogic
             foreach (Match match in matches)
             {
                 if (match.Groups.Count != 2)
-                    throw new DialogicException("Bad RE in "+text);
+                    throw new DialogicException("Bad RE in " + text);
                 vars.Add(match.Groups[1].Value);
             }
-            //vars.ForEach(Console.WriteLine);
-            //Util.ShowMatches(matches);
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
             Assert.That(vars[1], Is.EqualTo("verb"));
             Assert.That(vars[2], Is.EqualTo("chat1.time"));
 
+            ParseOneVar("$a","a");
+            ParseOneVar("$end-phrase","end-phrase");
+            ParseOneVar("(a | $end-phrase)","end-phrase");
+            ParseOneVar("Want a $animal?","animal");
+            ParseOneVar("$a", "a");
+            ParseOneVar("$end-phrase", "end-phrase");
+            ParseOneVar("(a | $end-phrase)", "end-phrase");
+            ParseOneVar("What an $animal!", "animal");
+            ParseOneVar("Want an $animal!", "animal");
+            ParseOneVar("\"Want an $animal,\" he asked", "animal");
+            ParseOneVar("\"Want an $animal\" he asked", "animal");
+            ParseOneVar("It was an $animal; he said", "animal");
+        }
 
-            text = "$a";
-            matches = RE.ParseVars.Matches(text);
-            Assert.That(matches.Count, Is.EqualTo(1));
-            vars = new List<string>();
+        private static void ParseOneVar(string text, string expected)
+        {
+            var matches = RE.ParseVars.Matches(text);
+            //Assert.That(matches.Count, Is.EqualTo(1));
+            var vars = new List<string>();
             foreach (Match match in matches)
             {
                 if (match.Groups.Count != 2)
                     throw new DialogicException("Bad RE in " + text);
                 vars.Add(match.Groups[1].Value);
             }
-            vars.ForEach(Console.WriteLine);
-            Util.ShowMatches(matches);
-            Assert.That(vars.Count, Is.EqualTo(1));
-            Assert.That(vars[0], Is.EqualTo("a"));
-
-            text = "Want a $animal?";
-            matches = RE.ParseVars.Matches(text);
-            Assert.That(matches.Count, Is.EqualTo(1));
-            vars = new List<string>();
-            foreach (Match match in matches)
-            {
-                if (match.Groups.Count != 2)
-                    throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[1].Value);
-            }
-            vars.ForEach(Console.WriteLine);
-            Util.ShowMatches(matches);
-            Assert.That(vars.Count, Is.EqualTo(1));
-            Assert.That(vars[0], Is.EqualTo("animal"));
+            //vars.ForEach(Console.WriteLine);
+            //Util.ShowMatches(matches);
+            Assert.That(vars.Count, Is.EqualTo(1), "FAIL: "+text);
+            Assert.That(vars[0], Is.EqualTo(expected));
         }
 
         [Test]
@@ -194,10 +191,10 @@ namespace Dialogic
                 "SET a += 4 ", "a", "+=","4",
                 "SET $a +=4  ", "a", "+=","4",
 
-                "SET a= $obj.prop", "a", "=", "$obj.prop",
-                "SET a += $obj.prop", "a", "+=","$obj.prop",
-                "SET a= $obj.prop", "a", "=", "$obj.prop",
-                "SET a+= $obj.prop","a", "+=","$obj.prop",
+                "SET a= $obj-prop", "a", "=", "$obj-prop",
+                "SET a += $obj-prop", "a", "+=","$obj-prop",
+                "SET a= $obj-prop", "a", "=", "$obj-prop",
+                "SET a+= $obj-prop","a", "+=","$obj-prop",
 
                 "SET $a =(4 | 5)","a", "=","(4 | 5)",
                 "SET $a +=(4 | 5)", "a", "+=","(4 | 5)",

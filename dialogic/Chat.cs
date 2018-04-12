@@ -156,14 +156,14 @@ namespace Dialogic
             return this;
         }
 
-        internal Realizer Realizer()
-        {
-            if (runtime == null || runtime.realizer == null)
-            {
-                throw new DialogicException("Null realizer in: " + this);
-            }
-            return runtime.realizer;
-        }
+        //internal Realizer Realizer()
+        //{
+        //    if (runtime == null || runtime.realizer == null)
+        //    {
+        //        throw new DialogicException("Null realizer in: " + this);
+        //    }
+        //    return runtime.realizer;
+        //}
 
         internal Command Next()
         {

@@ -11,7 +11,7 @@ namespace Dialogic
 
         public static IDictionary<string, object> globals
              = new Dictionary<string, object>() {
-                { "obj.prop", "dog" },
+                { "obj-prop", "dog" },
                 { "animal", "dog" },
                 { "prep", "then" },
                 { "group", "(a|b)" },
@@ -96,7 +96,7 @@ namespace Dialogic
             set.Realize(globals);
             Assert.That(chat.locals["a"], Is.EqualTo("$animal"));
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a=$obj.prop ", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET a=$obj-prop ", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Set)chat.commands[0];
@@ -104,7 +104,7 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             //Assert.That(set.value, Is.EqualTo("dog"));
             set.Realize(globals);
-            Assert.That(chat.locals["a"], Is.EqualTo("$obj.prop"));
+            Assert.That(chat.locals["a"], Is.EqualTo("$obj-prop"));
 
             chat = ChatParser.ParseText("CHAT c1\nSET a=$animal\nSAY The $a barked ", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);

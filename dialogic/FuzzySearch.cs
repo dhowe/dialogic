@@ -124,8 +124,7 @@ namespace Dialogic
                     if (chatMeta != null && chatMeta.ContainsKey(key)) // has-key
                     {
                         var chatPropVal = (string)chatMeta[key];
-                        var realizer = parent != null ? parent.Realizer() : null;
-                        if (!(constraint.Check(realizer, chatPropVal, globals)))
+                        if (!(constraint.Check(chatPropVal, globals)))
                         {
                             if (DBUG) Console.WriteLine("    FAIL: " + constraint);
                             hits = -1;

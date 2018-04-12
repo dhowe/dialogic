@@ -12,7 +12,7 @@ namespace Dialogic
 
         public static IDictionary<string, object> globals
              = new Dictionary<string, object>() {
-                { "obj.prop", "dog" },
+                { "obj-prop", "dog" },
                 { "animal", "dog" },
                 { "prep", "then" },
                 { "group", "(a|b)" },
@@ -223,7 +223,7 @@ namespace Dialogic
             Assert.That(globals["count"], Is.EqualTo(4));
             List<Chat> result = new ChatRuntime(chats).DoFindAll
                 (chats[0], globals, new Constraint("dev", "$count"));
-            chats.ForEach((obj) => Console.WriteLine(obj.text));
+            //chats.ForEach((obj) => Console.WriteLine(obj.text));
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].text, Is.EqualTo("c2"));
