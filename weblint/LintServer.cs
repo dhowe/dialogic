@@ -7,7 +7,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Linq;
-
 using Dialogic;
 
 namespace Dialogic.Server
@@ -95,9 +94,18 @@ namespace Dialogic.Server
             var html = IndexPageContent.Replace("%%URL%%", SERVER_URL);
 
             var kvs = ParsePostData(request);
-
+            var path = kvs.ContainsKey("path") ? kvs["path"] : null;
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
             var mode = kvs.ContainsKey("mode") ? kvs["mode"] : "validate";
+
+            if (!String.IsNullOrEmpty(path))
+            {
+                // get code from file
+                using (var wb = new WebClient())
+                {
+                    code = wb.DownloadString(path);
+                }
+            }
 
             if (String.IsNullOrEmpty(code))
             {
