@@ -118,7 +118,7 @@ namespace Dialogic
                 if (parent == null) throw new DialogicException
                     ("Null Chat parent for: " + this);
 
-                realized[Meta.TEXT] = Realizer.Do(text, parent, globals);
+                realized[Meta.TEXT] = Realizer.Resolve(text, parent, globals);
                 realized[Meta.TYPE] = TypeName();
                 if (this is IAssignable && actor != null)
                 {
@@ -138,7 +138,7 @@ namespace Dialogic
 
                     if (val is string)
                     {
-                        val = Realizer.Do((string)val, null, globals);
+                        val = Realizer.Resolve((string)val, null, globals);
                     }
                     else if (!(val is Constraint)) // don't replace constraints
                     {
@@ -205,7 +205,7 @@ namespace Dialogic
                 var iterations = 0;
                 while (lastSpoken == Text(true) && ++iterations < 10)
                 {
-                    realized[Meta.TEXT] = Realizer.Do(text, parent, globals);
+                    realized[Meta.TEXT] = Realizer.Resolve(text, parent, globals);
                 }
             }
         }
@@ -651,7 +651,7 @@ namespace Dialogic
             realized.Clear();
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
-            realized[Meta.TEXT] = Realizer.RealizeGroups(text);
+            realized[Meta.TEXT] = Realizer.ResolveGroups(text);
             return this;
         }
 

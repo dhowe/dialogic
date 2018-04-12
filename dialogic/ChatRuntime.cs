@@ -47,7 +47,6 @@ namespace Dialogic
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
         internal List<Chat> chats;
-        internal Realizer realizer;
 
         private Thread searchThread;
         private ChatParser parser;

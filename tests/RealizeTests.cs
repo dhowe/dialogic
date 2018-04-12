@@ -17,20 +17,10 @@ namespace Dialogic
                 { "count", 4 }
         };
 
-        internal static Realizer realizer;
-
-        public RealizeTests()
-        {
-            if (RealizeTests.realizer == null)
-            {
-                RealizeTests.realizer = new ChatRuntime(null).realizer;
-            }
-        }
-
         [Test]
         public void ASimpleVar()
         {
-            var res = Realizer.RealizeSymbols("$a", null, new Dictionary<string, object>()
+            var res = Realizer.ResolveSymbols("$a", null, new Dictionary<string, object>()
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello"));
         }
@@ -48,24 +38,11 @@ namespace Dialogic
         }
 
         [Test]
-        public void DoVarsAndGroups()
-        {
-            // TODO
-            //var res = realizer.DoVars("$a", new Dictionary<string, object>()
-            //    {{ "a", "($a | $b)" }, { "b", "32" }});
-            //Assert.That(res, Is.EqualTo("($a | 32)"));
-
-            //res = realizer.DoVars("$a", new Dictionary<string, object>()
-            //    {{ "a", "($a | $b)" }, { "b", "32" }});
-            //Assert.That(res, Is.EqualTo("32"));
-        }
-
-        [Test]
         public void Exceptions()
         {
             //// no replace to be made
             Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<RealizeException>(() => Realizer.RealizeSymbols("$a", null, globals));
+            Assert.Throws<RealizeException>(() => Realizer.ResolveSymbols("$a", null, globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",
@@ -174,14 +151,14 @@ namespace Dialogic
             string[] ok = { "The boy was sad", "The boy was happy" };
             for (int i = 0; i < 10; i++)
             {
-                CollectionAssert.Contains(ok, Realizer.RealizeGroups(txt));
+                CollectionAssert.Contains(ok, Realizer.ResolveGroups(txt));
             }
 
             txt = "The boy was (sad | happy | dead)";
             ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
             for (int i = 0; i < 10; i++)
             {
-                string s = Realizer.RealizeGroups(txt);
+                string s = Realizer.ResolveGroups(txt);
                 //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
@@ -213,11 +190,11 @@ namespace Dialogic
         public void ReplaceVars()
         {
             var s = @"SAY The $animal woke $count times";
-            s = Realizer.RealizeSymbols(s, null, globals);
+            s = Realizer.ResolveSymbols(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
 
             s = @"SAY The $obj-prop woke $count times";
-            s = Realizer.RealizeSymbols(s, null, globals);
+            s = Realizer.ResolveSymbols(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
         }
 
@@ -227,11 +204,11 @@ namespace Dialogic
             string s;
    
             s = @"SAY The $animal woke and $prep (ate|ate)";
-            s = Realizer.Do(s, null, globals);
+            s = Realizer.Resolve(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             s = @"SAY The $obj-prop woke and $prep (ate|ate)";
-            s = Realizer.Do(s, null, globals);
+            s = Realizer.Resolve(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             //s = realizer.Do("$a", new Dictionary<string, object>()
@@ -241,7 +218,7 @@ namespace Dialogic
             string txt = "letter $group";
             for (int i = 0; i < 10; i++)
             {
-                Assert.That(Realizer.Do(txt, null, globals),
+                Assert.That(Realizer.Resolve(txt, null, globals),
                     Is.EqualTo("letter a").Or.EqualTo("letter b"));
             }
 
@@ -250,7 +227,7 @@ namespace Dialogic
             string[] res = new string[10];
             for (int i = 0; i < res.Length; i++)
             {
-                res[i] = Realizer.Do(txt2, null, globals);
+                res[i] = Realizer.Resolve(txt2, null, globals);
             }
             for (int i = 0; i < res.Length; i++)
             {

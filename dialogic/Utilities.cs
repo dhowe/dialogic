@@ -617,8 +617,8 @@ namespace Dialogic
             string rval = value;
             if (globals != null)
             {
-                if (check.Contains('$')) check = Realizer.RealizeSymbols(check, null, globals);
-                if (value.Contains('$')) rval = Realizer.RealizeSymbols(value, null, globals);
+                if (check.Contains('$')) check = Realizer.ResolveSymbols(check, null, globals);
+                if (value.Contains('$')) rval = Realizer.ResolveSymbols(value, null, globals);
             }
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
