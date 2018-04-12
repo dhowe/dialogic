@@ -119,6 +119,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a16dd635a735fd8dfeccb3e357081f934"><td class="memItemLeft" align="right" valign="top"><a id="a16dd635a735fd8dfeccb3e357081f934"></a>
 string&#160;</td><td class="memItemRight" valign="bottom"><b>lastSpoken</b></td></tr>
 <tr class="separator:a16dd635a735fd8dfeccb3e357081f934"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1abf80ad718b2bda24322fba9c9b05a0"><td class="memItemLeft" align="right" valign="top"><a id="a1abf80ad718b2bda24322fba9c9b05a0"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>disableUniqueness</b> = false</td></tr>
+<tr class="separator:a1abf80ad718b2bda24322fba9c9b05a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The Say command allows a character to speak. It is the default command. If a line does not start with a command, than it is assumed to be a Say command. It accepts free text, optionally followed by metadata, which can be used to control various display parameters. In multi-speaker environments, Say commands (also <a class="el" href="class_dialogic_1_1_ask.html" title="The ASK command is for prompting the user, and is generally followed by one or more OPT commands...">Ask</a>, Do, and other IAssignables) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command. </p>

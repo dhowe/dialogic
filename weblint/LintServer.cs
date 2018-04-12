@@ -153,15 +153,6 @@ namespace Dialogic.Server
                 (lineno >= 0 ? lineno.ToString() : ""));
         }
 
-        //private static string ParserText(string code, bool noVal = false)
-        //{
-        //    string content = String.Empty;
-        //    runtime = new ChatRuntime(Tendar.AppConfig.Actors);
-        //    runtime.ParseText(code, noVal);
-        //    runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
-        //    return content;
-        //}
-
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
         //private static string ParsePostData(HttpListenerRequest request)
         {
@@ -179,16 +170,16 @@ namespace Dialogic.Server
                     //string s = Uri.UnescapeDataString(reader.ReadToEnd());
                     string s = reader.ReadToEnd();
                     string[] pairs = s.Split('&');
-                    Console.WriteLine("Found " + pairs.Length + " kv-pairs");
+                    //Console.WriteLine("Found " + pairs.Length + " kv-pairs");
 
                     foreach (var p in pairs)
                     {
                         var pair = p.Split('=');
                         if (pair.Length == 2)
                         {
-                            Console.WriteLine(pair[0] + ": " + pair[1]);
-                            //WebUtility.UrlDecode(pair[0]);
-                            result.Add(WebUtility.UrlDecode(pair[0]), WebUtility.UrlDecode(pair[1]));
+                            //Console.WriteLine(pair[0] + ": " + pair[1]);
+                            result.Add(WebUtility.UrlDecode(pair[0]), 
+                                WebUtility.UrlDecode(pair[1]));
                         }
                         else
                         {
@@ -204,7 +195,6 @@ namespace Dialogic.Server
 
             return result;
         }
-
 
         public static void Main()
         {

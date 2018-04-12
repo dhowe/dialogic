@@ -130,9 +130,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a751f2c3ec959c4d67e13c388f04f0642"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a751f2c3ec959c4d67e13c388f04f0642">ToSec</a> (int millis)</td></tr>
 <tr class="memdesc:a751f2c3ec959c4d67e13c388f04f0642"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts milliseconds to seconds  <a href="#a751f2c3ec959c4d67e13c388f04f0642">More...</a><br /></td></tr>
 <tr class="separator:a751f2c3ec959c4d67e13c388f04f0642"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d7be3f803ce0f2807d3a72590f16191"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a6d7be3f803ce0f2807d3a72590f16191">TrimFirst</a> (ref string s, char c)</td></tr>
-<tr class="memdesc:a6d7be3f803ce0f2807d3a72590f16191"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trim the specified character if the string starts with it  <a href="#a6d7be3f803ce0f2807d3a72590f16191">More...</a><br /></td></tr>
-<tr class="separator:a6d7be3f803ce0f2807d3a72590f16191"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d692b014000f14242bbac95c8ae9bc"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#aa5d692b014000f14242bbac95c8ae9bc">TrimFirst</a> (ref string s, params char[] c)</td></tr>
+<tr class="memdesc:aa5d692b014000f14242bbac95c8ae9bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">First trims white-space, then trims the first character if the string starts with any of those specified  <a href="#aa5d692b014000f14242bbac95c8ae9bc">More...</a><br /></td></tr>
+<tr class="separator:aa5d692b014000f14242bbac95c8ae9bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a913c5e22d8656af9263c9fb442e4d351"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a913c5e22d8656af9263c9fb442e4d351">TrimLast</a> (ref string s, params char[] c)</td></tr>
+<tr class="memdesc:a913c5e22d8656af9263c9fb442e4d351"><td class="mdescLeft">&#160;</td><td class="mdescRight">First trims white-space, then trim the last character if the string ends with any of those specified  <a href="#a913c5e22d8656af9263c9fb442e4d351">More...</a><br /></td></tr>
+<tr class="separator:a913c5e22d8656af9263c9fb442e4d351"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -772,8 +775,8 @@ static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC
 
 </div>
 </div>
-<a id="a6d7be3f803ce0f2807d3a72590f16191"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d7be3f803ce0f2807d3a72590f16191">&#9670;&nbsp;</a></span>TrimFirst()</h2>
+<a id="aa5d692b014000f14242bbac95c8ae9bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5d692b014000f14242bbac95c8ae9bc">&#9670;&nbsp;</a></span>TrimFirst()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -790,7 +793,7 @@ static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">char&#160;</td>
+          <td class="paramtype">params char []&#160;</td>
           <td class="paramname"><em>c</em>&#160;</td>
         </tr>
         <tr>
@@ -806,8 +809,7 @@ static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC
 </table>
 </div><div class="memdoc">
 
-<p>Trim the specified character if the string starts with it </p>
-<dl class="section return"><dt>Returns</dt><dd><code>true</code>, if first was trimed, <code>false</code> otherwise.</dd></dl>
+<p>First trims white-space, then trims the first character if the string starts with any of those specified </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>S.</td></tr>
@@ -815,6 +817,53 @@ static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the first char was removed, else false</dd></dl>
+
+</div>
+</div>
+<a id="a913c5e22d8656af9263c9fb442e4d351"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a913c5e22d8656af9263c9fb442e4d351">&#9670;&nbsp;</a></span>TrimLast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool Dialogic.Util.TrimLast </td>
+          <td>(</td>
+          <td class="paramtype">ref string&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">params char []&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>First trims white-space, then trim the last character if the string ends with any of those specified </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>S.</td></tr>
+    <tr><td class="paramname">c</td><td>C.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the first char was removed, else false</dd></dl>
 
 </div>
 </div>
