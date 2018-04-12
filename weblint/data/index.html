@@ -29,6 +29,24 @@
          .input-area{
             margin-top: 5px !important;
          }
+         #executeResult {
+            border: 1px solid transparent;
+            margin: 1.6em 0;
+            padding: 0.8em;
+         }
+         #executeResult:empty {
+            display: none;
+         }
+         #executeResult.success {
+            background: #c3d4ef;
+            color: #144594;
+            border-color: #7ea0d7;
+         }
+         #executeResult.error {
+           background: #FBE3E4;
+           color: #D12F19;
+           border-color: #FBC2C4;
+        }
     </style>
 </head>
 
@@ -50,6 +68,7 @@
         </div>
     </form>
     <section id="result-container" class="%%CCLASS%%">
+        <pre id="executeResult" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
         <pre id="result" class="%%RCLASS%%">%%RESULT%%</pre>
     </section>
     </div>
