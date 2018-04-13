@@ -44,6 +44,7 @@
     <Compile Include="RegexTests.cs" />
     <Compile Include="SetGramTests.cs" />
     <Compile Include="SymbolScoping.cs" />
+    <Compile Include="DollarGrammars.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
