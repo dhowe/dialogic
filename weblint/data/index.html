@@ -1,7 +1,7 @@
 <html>
 <head>
     <title>GuppyLint</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.js"></script>
     <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
     <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
@@ -29,6 +29,64 @@
          .input-area{
             margin-top: 5px !important;
          }
+         #executeResult {
+            border: 1px solid transparent;
+            margin: 1.6em 0;
+            padding: 0.8em;
+         }
+         #executeResult:empty {
+            display: none;
+         }
+         #executeResult.success {
+            background: #c3d4ef;
+            color: #144594;
+            border-color: #7ea0d7;
+         }
+         #executeResult.error {
+           background: #FBE3E4;
+           color: #D12F19;
+           border-color: #FBC2C4;
+        }
+        pre.executeResult {
+            white-space: pre-wrap;       /* Since CSS 2.1 */
+            white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        }
+        #loadURLDialog{
+            width:500px;
+            border: 1px solid #c0c0c0;
+            margin: auto;
+            top: 200px;
+            display:none;
+        }
+        button[type="button"] {
+            background-color: #fff;
+            padding: 10px 15px;
+            text-decoration: none;
+            border: 1px solid #e1e1e1;
+            font-size: 14px;
+            font-family: Open Sans, sans-serif;
+            font-weight: 700;
+            color: #333;
+            margin: 10px 10px 0 0;
+        }
+        #closeDialog{
+            float:right;
+        }
+        #loadUrlPathDiv input {
+            margin:10px 0;
+            font-size:14px;
+            width: 100% !important;
+        }
+        button:disabled {
+            opacity:.5;
+        }
+        button:disabled:hover {
+            background:white !important;
+            cursor:pointer;
+        }
     </style>
 </head>
 
@@ -44,14 +102,33 @@
             <textarea id="main" name="code" class="lined" rows="29" cols="100">%%CODE%%</textarea>
         </div>
         <div class="validate">
-            &nbsp; &nbsp; <button type="submit" id="validate">Validate</button>
-            <button type="submit" id="execute">Execute</button>
+            &nbsp; &nbsp; <button type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
+            <button type="submit" id="execute" disabled title="print the output of the last command above">Execute</button>
+            <button type="button" id="showDialog" title="Load from Url">Load URL</button>
             <button type="reset" id="clear">Clear</button>
         </div>
+       
     </form>
     <section id="result-container" class="%%CCLASS%%">
+        <pre id="executeResult" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
         <pre id="result" class="%%RCLASS%%">%%RESULT%%</pre>
     </section>
+    </div>
+
+    <div class="CodeMirror-dialog" id="loadURLDialog">
+        <div class="CodeMirror-dialog-top">
+        <h4>Enter Url</h4>
+        </div>
+        <form id="loadUrlPathDiv" class="dialog-content">
+            <input type="text" name="path" id="urlPath"  placeholder="Paste your url">
+        </form>
+        <div class="CodeMirror-dialog-bottom">
+            <div class="buttonset">
+                <button type="button" id="loadURL">Load</button>
+                <button type="button" id="clearURL">Clear</button>
+                <button type="button" id="closeDialog">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -63,20 +140,50 @@
       $("#execute").click(function () { onButtonClicked(true); });
       $("#validate").click(function () { onButtonClicked(false); });
 
+      // loadURL Dialog Box
+      $("#loadURL").click(onLoadURLClicked);
+      $("#clearURL").click(function () {$("#urlPath").val(''); });
+      $("#closeDialog").click(closeUrlDialog);
+      $("#showDialog").click(function () {
+        $("#loadURLDialog").show();
+      });
+
+      toggleValidateButtons();
+      $("#main").on('input', toggleValidateButtons);
+
+      function toggleValidateButtons(){
+         var input = $("#main").val();
+         if( input != '' && input != 'Enter your code here'){
+             //enable buttons
+             $("#execute").prop("disabled",false);
+             $("#validate").prop("disabled",false);
+         }
+      }
+
+      function closeUrlDialog() {
+         $("#loadURLDialog").hide();
+         $("#urlPath").html("Paste your url");
+      }
+
       function onButtonClicked(execute) {
-
         event.preventDefault();
-
-        if ($("#main").val() === "Enter your code here") return;
 
         var qstr = $("#form").serialize() + "&mode="
           + (execute ? 'execute' : 'validate');
 
-        console.log(qstr);
+        // console.log(qstr);
+        sendRequest(qstr);
+      }
 
-        $.ajax({
+      function onLoadURLClicked() {
+        var qstr = $("#loadUrlPathDiv").serialize();
+        sendRequest(qstr);
+      }
+
+      function sendRequest(data) {
+         $.ajax({
           type: "POST",
-          data: qstr,
+          data: data,
           url: "%%URL%%",
           contentType: 'application/x-www-form-urlencoded',
           success: function(data){
@@ -89,12 +196,13 @@
 
       // highlight line on which error happened
       if (!$("#errorLine").text().includes("ERRORLINE")) {
-        
         var idx = $("#errorLine").text() - 1;
         $(".lineno:eq(" + idx  + ")").append("<div class='line-error'></div>");
       }
 
     });
+
+
     </script>
 </body>
 </html>
