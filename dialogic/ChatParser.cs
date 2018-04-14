@@ -20,7 +20,7 @@ namespace Dialogic
         internal const string TXT = @"([^#}{]+)?\s*";
         internal const string LBLL = @"(#[A-Za-z][\S]*)";
         internal const string LBLG = @"(#\([^\)]+\s*)";
-        internal const string LBL = @"(?:"+LBLL+"|"+LBLG+@")?\s*";
+        internal const string LBL = @"(?:" + LBLL + "|" + LBLG + @")?\s*";
         internal const string MTD = @"(?:\{(.+?)\})?\s*";
         internal const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
         internal const string DLBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
@@ -121,7 +121,7 @@ namespace Dialogic
             if (runtime == null || runtime.validatorsDisabled) return;
 
             var validators = runtime.Validators();
-            
+
             if (!validators.IsNullOrEmpty())
             {
                 foreach (var check in validators)
@@ -144,14 +144,15 @@ namespace Dialogic
 
             parts.Apply((spkr, cmd, text, label, meta) =>
             {
-                Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd] 
+                Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd]
                     : Chat.DefaultCommandType(chats.LastOrDefault());
 
                 try
                 {
                     c = Command.Create(type, text, label, SplitMeta(meta));
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     throw ex;
                 }
                 HandleActor(spkr, c, line, lineNo);
@@ -176,7 +177,7 @@ namespace Dialogic
 
                 if (c.actor == null) throw new ParseException
                     (line, lineNo, "Unknown actor: '" + spkr + "'");
-                
+
                 if (!Equals(c.actor, Actor.Default)) c.SetMeta(Meta.ACTOR, c.actor.Name());
             }
         }
@@ -201,12 +202,12 @@ namespace Dialogic
             if (c is Opt) // add option data to last Ask
             {
                 Opt opt = (Opt)c;
- 
+
                 Command last = LastOfType(parsedCommands, typeof(Ask));
 
                 if (!(last is Ask)) throw new ParseException
                     (line, lineNo, "Opt must follow Ask");
-                
+
                 Ask ask = ((Ask)last);
                 opt.parent = ask.parent;
                 ask.AddOption(opt);
@@ -230,9 +231,11 @@ namespace Dialogic
         {
             var type = c.GetType();
 
-            if (!metameta.ContainsKey(type))
+            var mmeta = ChatRuntime.MetaMeta;
+
+            if (!mmeta.ContainsKey(type))
             {
-                metameta.Add(type, new Dictionary<string, PropertyInfo>());
+                mmeta.Add(type, new Dictionary<string, PropertyInfo>());
                 // Console.WriteLine(type+":");
 
                 var props = type.GetProperties(BindingFlags.Instance
@@ -240,7 +243,7 @@ namespace Dialogic
 
                 foreach (var pi in props)
                 {
-                    metameta[type].Add(pi.Name, pi);
+                    mmeta[type].Add(pi.Name, pi);
                     // Console.WriteLine("  "+pi.Name);
                 }
             }
@@ -249,34 +252,33 @@ namespace Dialogic
         /// Updates any property values that have been set in metadata
         protected internal void SetPropValuesFromMeta(Command c)
         {
+            if (!ChatRuntime.MetaMeta.ContainsKey(c.GetType())) ExtractMetaMeta(c);
+
             if (c.HasMeta())
             {
-                if (!metameta.ContainsKey(c.GetType())) ExtractMetaMeta(c);
-
-                var cmetameta = metameta[c.GetType()];
+                var mmeta = ChatRuntime.MetaMeta[c.GetType()];
 
                 foreach (KeyValuePair<string, object> pair in c.meta)
                 {
                     object val = pair.Value;
-                    if (cmetameta.ContainsKey(pair.Key))
+                    if (mmeta.ContainsKey(pair.Key))
                     {
-                        if (pair.Key == Meta.ACTOR) // special case
+                        if (pair.Key == Meta.ACTOR) // hrmm, ugly special case
                         {
-                            c.Actor(runtime, (string)val); // hrmm
+                            c.Actor(runtime, (string)val);
                         }
                         else
                         {
-                            var propInfo = cmetameta[pair.Key];
-                            val = Util.ConvertTo(propInfo.PropertyType, val);
-                            propInfo.SetValue(c, val, null);
+                            //var propInfo = mmeta[pair.Key];
+                            //val = Util.ConvertTo(propInfo.PropertyType, val);
+                            //propInfo.SetValue(c, val, null);
+
+                            c.DynamicSet(mmeta[pair.Key], val, false);
                         }
                     }
                 }
             }
         }
-
-        static internal IDictionary<Type, IDictionary<string,PropertyInfo>> metameta =
-            new Dictionary<Type, IDictionary<string, PropertyInfo>>();
 
         internal static string[] StripComments(string text)
         {

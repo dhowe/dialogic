@@ -202,7 +202,6 @@ namespace Dialogic
                 return diff / (absA + absB) < epsilon;
             }
 #pragma warning restore RECS0018 // floating point equality 
-
         }
 
         /// <summary>
@@ -968,8 +967,6 @@ namespace Dialogic
                 if (!globals.ContainsKey(s1)) throw new ParseException
                     ("Variable " + s1 + " not found in globals:\n  " + globals.Stringify());
 
-                //globals[s1] = globals[s1] + " " + s2;
-                //result = "(" + globals[s1] + " | " + s2 + ")";
                 var now = (string)globals[s1];
                 if (now.StartsWith('(') && now.EndsWith(')'))
                 {

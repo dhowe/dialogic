@@ -10,6 +10,10 @@ namespace Dialogic
     /// </summary>
     public static class Realizer
     {
+        /// <summary>
+        /// Iteratively resolve any variables or groups in the specified text 
+        /// in the appropriate context
+        /// </summary>
         public static string Resolve(string text, Chat parent, IDictionary<string, object> globals)
         {
             var DBUG = false;
@@ -41,6 +45,38 @@ namespace Dialogic
             return text;
         }
 
+        /// <summary>
+        /// Handles Chat-scoping of variables by updating symbol name and switching to specified context
+        /// </summary>
+        public static void ContextifySymbol(ref string symbol, ref Chat context)
+        {
+            if (symbol.Contains('.'))
+            {
+                if (context == null) throw new RealizeException
+                    ("Null context for chat-scoped symbol: " + symbol);
+
+                // need to process a chat-scoped symbol
+                var parts = symbol.Split('.');
+                if (parts.Length > 2)
+                {
+                    throw new RealizeException("Unexpected variable format: " + symbol);
+                }
+
+                var chat = context.runtime.FindChatByLabel(parts[0]);
+                if (chat == null)
+                {
+                    throw new RealizeException("No Chat found with label #" + parts[0]);
+                }
+
+                symbol = parts[1];
+                context = chat;
+            }
+        }
+
+        /// <summary>
+        /// Iteratively resolve any variables in the specified text 
+        /// in the appropriate context
+        /// </summary>
         public static string ResolveSymbols(string text, Chat context, IDictionary<string, object> globals)
         {
             int iterations = 0, maxIterations = 5;
@@ -50,39 +86,9 @@ namespace Dialogic
                 {
                     var dollarsym = Defaults.SYMBOL + symbol;
 
-                    if (symbol.Contains('.'))
-                    {
-                        if (context == null) throw new RealizeException
-                            ("Null context for chat-scoped symbol: " + symbol);
-
-                        // need to process a chat-scoped symbol
-                        var parts = symbol.Split('.');
-                        if (parts.Length > 2)
-                        {
-                            throw new RealizeException("Unexpected variable format: " + symbol);
-                        }
-                        var chat = context.runtime.FindChatByLabel(parts[0]);
-                        if (chat == null)
-                        {
-                            throw new RealizeException("No Chat found with label #" + parts[0]);
-                        }
-
-                        // use the new context from now on, or until another switch
-                        context = chat;
-
-                        text = text.Replace(dollarsym, ResolveSymbol(parts[1], context, globals));
-                    }
-                    else // process a local or global-scoped symbol
-                    {
-                        //Console.WriteLine("Text0: "+text);
-                        text = text.Replace(dollarsym, ResolveSymbol(symbol, context, globals));
-                        //Console.WriteLine("Text1: " + text);
-                        //while (text.IndexOf(dollarsym, Util.IC) > -1)
-                        //{
-                        //    //Console.WriteLine("Text2: " + text);
-                        //    text = text.ReplaceFirst(dollarsym, ResolveSymbol(symbol, context, globals));
-                        //}
-                    }
+                    var theSymbol = symbol;
+                    ContextifySymbol(ref theSymbol, ref context);
+                    text = text.Replace(dollarsym, ResolveSymbol(theSymbol, context, globals));
                 }
 
                 if (++iterations >= maxIterations) throw new RealizeException
@@ -91,6 +97,11 @@ namespace Dialogic
             return text;
         }
 
+        /// <summary>
+        /// Iteratively resolve any groups in the specified text 
+        /// in the appropriate context, creating and caching Resolution
+        /// objects as necessary
+        /// </summary>
         public static string ResolveGroups(string text)
         {
             var DBUG = false;
@@ -128,7 +139,6 @@ namespace Dialogic
             return text;
         }
 
-
         /// <summary>
         /// First do local lookup from Chat context, then if not found, try global lookup
         /// </summary>
@@ -137,9 +147,9 @@ namespace Dialogic
             //Console.WriteLine("RealizeSymbol: "+symbol+" in chat#"+(context!=null?context.text:"null"));
 
             // check locals
-            if (context != null && context.locals.ContainsKey(symbol))
+            if (context != null && context.scope.ContainsKey(symbol))
             {
-                return context.locals[symbol].ToString();
+                return context.scope[symbol].ToString();
             }
 
             // check globals
@@ -149,17 +159,11 @@ namespace Dialogic
             }
 
             var cstr = "Unable to realize symbol: '$" + symbol + "'\nglobals: " + globals.Stringify();
-            if (context != null) cstr += "\nchat#" + context.text + ".locals:" + context.locals.Stringify();
+            if (context != null) cstr += "\nchat#" + context.text + ".locals:" + context.scope.Stringify();
             throw new RealizeException(cstr);
         }
 
-        private static bool IsDynamic(string text)
-        {
-            return text != null &&
-                (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
-        }
-
-        public static IEnumerable<string> ParseSymbols(string text)
+        private static IEnumerable<string> ParseSymbols(string text)
         {
             List<string> symbols = new List<string>();
             var matches = RE.ParseVars.Matches(text);
@@ -201,5 +205,11 @@ namespace Dialogic
                 }
             }
         }
+        private static bool IsDynamic(string text)
+        {
+            return text != null &&
+                (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
+        }
+
     }
 }

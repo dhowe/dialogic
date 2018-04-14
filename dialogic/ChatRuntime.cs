@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Dialogic
@@ -42,6 +43,9 @@ namespace Dialogic
             { "WAIT",   typeof(Wait) },
             { "FIND",   typeof(Find) },
         };
+
+        internal static IDictionary<Type, IDictionary<string, PropertyInfo>>
+            MetaMeta = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
 
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
@@ -383,7 +387,7 @@ namespace Dialogic
                 { Meta.TEXT, chat.text },
             });
 
-            Info("\n<#" + chat.text + (resetCursor ? "-started>": "-resumed>"));
+            Info("\n<#" + chat.text + (resetCursor ? "-started>" : "-resumed>"));
 
             return nextEventTime;
         }

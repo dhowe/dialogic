@@ -35,7 +35,7 @@ namespace Dialogic
             Command say = chat.commands[0];
             Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
             say.Realize(globals);
-            Assert.That(say.Text(true), Is.EqualTo("Thank 4"));
+            Assert.That(say.Text(), Is.EqualTo("Thank 4"));
             Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
         }
 
@@ -71,7 +71,7 @@ namespace Dialogic
             c.Realize(globals);
             c.SetMeta("pace", "slow");
 
-            Assert.That(c.Text(true), Is.EqualTo("Thank you"));
+            Assert.That(c.Text(), Is.EqualTo("Thank you"));
             Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
             Assert.That(c.realized["pace"], Is.EqualTo("fast"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
@@ -82,9 +82,9 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             c.SetMeta("pace", "slow");
-            Assert.That(c.GetRealized(Meta.TEXT), Is.EqualTo("Thank you"));
-            Assert.That(c.GetRealized(Meta.TYPE), Is.EqualTo("Say"));
-            Assert.That(c.GetRealized("pace"), Is.EqualTo("dog"));
+            Assert.That(c.Realized(Meta.TEXT), Is.EqualTo("Thank you"));
+            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.Realized("pace"), Is.EqualTo("dog"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
 
             chat = ChatParser.ParseText("SAY Thank you { pace=$obj-prop}")[0];
@@ -93,9 +93,9 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             c.SetMeta("pace", "slow");
-            Assert.That(c.GetRealized(Meta.TEXT), Is.EqualTo("Thank you"));
-            Assert.That(c.GetRealized(Meta.TYPE), Is.EqualTo("Say"));
-            Assert.That(c.GetRealized("pace"), Is.EqualTo("dog"));
+            Assert.That(c.Realized(Meta.TEXT), Is.EqualTo("Thank you"));
+            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.Realized("pace"), Is.EqualTo("dog"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
         }
 
@@ -107,7 +107,7 @@ namespace Dialogic
             Command say = chat.commands[0];
             Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
             say.Realize(globals);
-            Assert.That(say.Text(true), Is.EqualTo("Thank 4"));
+            Assert.That(say.Text(), Is.EqualTo("Thank 4"));
             say.text = "Thank you";
             Assert.That(say.text, Is.EqualTo("Thank you"));
             Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
@@ -124,7 +124,7 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
             Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
-            CollectionAssert.Contains(ok, c.Text(true));
+            CollectionAssert.Contains(ok, c.Text());
         }
 
         [Test]
@@ -140,7 +140,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 c.Realize(globals);
-                var txt = c.Text(true);
+                var txt = c.Text();
                 //Console.WriteLine(i+") "+txt);
                 CollectionAssert.Contains(ok, txt);
             }
@@ -175,16 +175,16 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
             Do doo = (Do)chats[0].commands[0];
-            Assert.That(doo.Text(false), Is.EqualTo("emote"));
+            Assert.That(doo.text, Is.EqualTo("emote"));
             Assert.That(doo.HasMeta("type"), Is.EqualTo(true));
             Assert.That(doo.GetMeta("type"), Is.EqualTo("(A|B)"));
 
             for (int i = 0; i < 10; i++)
             {
                 doo.Realize(globals);
-                Assert.That(doo.Text(true), Is.EqualTo("emote"));
+                Assert.That(doo.Text(), Is.EqualTo("emote"));
                 //Console.WriteLine(doo.GetRealized("type"));
-                Assert.That(doo.GetRealized("type"), Is.EqualTo("A").Or.EqualTo("B"));
+                Assert.That(doo.Realized("type"), Is.EqualTo("A").Or.EqualTo("B"));
             }
         }
 
@@ -264,7 +264,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 say.Realize(globals);
-                string said = say.Text(true);
+                string said = say.Text();
                 Assert.That(said, Is.Not.EqualTo(last));
                 last = said;
             }
@@ -283,7 +283,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 ask.Realize(globals);
-                string asked = ask.Text(true);
+                string asked = ask.Text();
                 string opts = ask.JoinOptions();
                 //Console.WriteLine(i+") "+asked+" "+opts);
                 Assert.That(asked, Is.Not.EqualTo(last));
@@ -307,16 +307,16 @@ namespace Dialogic
             ask.Realize(globals);
 
             Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
-            Assert.That(ask.Text(true), Is.EqualTo("Want a dog?"));
+            Assert.That(ask.Text(), Is.EqualTo("Want a dog?"));
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
             var options = ask.Options();
             Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
             //Assert.That(options[0].Text, Is.EqualTo("Y").Or.);
-            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].Text(true));
+            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].Text());
             Assert.That(options[0].action.GetType(), Is.EqualTo(typeof(Go)));
             Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
-            Assert.That(options[1].Text(true), Is.EqualTo("4"));
+            Assert.That(options[1].Text(), Is.EqualTo("4"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
 
 
@@ -329,17 +329,17 @@ namespace Dialogic
             ask = (Ask)chats[0].commands[0];
             ask.Realize(globals);
             Assert.That(ask.text, Is.EqualTo("Want a $obj-prop?"));
-            Assert.That(ask.Text(true), Is.EqualTo("Want a dog?"));
+            Assert.That(ask.Text(), Is.EqualTo("Want a dog?"));
 
             Assert.That(ask.Options().Count, Is.EqualTo(2));
 
             options = ask.Options();
             Assert.That(options[0].GetType(), Is.EqualTo(typeof(Opt)));
             //Assert.That(options[0].Text, Is.EqualTo("Y").Or.);
-            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].Text(true));
+            CollectionAssert.Contains(new string[] { "a", "b" }, options[0].Text());
             Assert.That(options[0].action.GetType(), Is.EqualTo(typeof(Go)));
             Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
-            Assert.That(options[1].Text(true), Is.EqualTo("4"));
+            Assert.That(options[1].Text(), Is.EqualTo("4"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
         }
     }

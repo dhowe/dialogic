@@ -38,7 +38,7 @@ namespace Dialogic
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
             object outv = null;
-            chat.locals.TryGetValue("a", out outv);
+            chat.scope.TryGetValue("a", out outv);
             Assert.That(outv, Is.Null);
             Assert.That(globals["a"], Is.EqualTo("4"));
             globals.Remove("a");
@@ -54,7 +54,7 @@ namespace Dialogic
             outv = null;
             globals.TryGetValue("a", out outv);
             Assert.That(outv, Is.Null);
-            Assert.That(chat.locals["a"], Is.EqualTo("4"));
+            Assert.That(chat.scope["a"], Is.EqualTo("4"));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace Dialogic
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
             Assert.That(set.value, Is.EqualTo("$obj-prop"));
             set.Realize(globals);
-            Assert.That(chat.locals["a"], Is.EqualTo("$obj-prop"));
+            Assert.That(chat.scope["a"], Is.EqualTo("$obj-prop"));
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace Dialogic
             object outv = null;
             globals.TryGetValue("a", out outv);
             Assert.That(outv, Is.Null);
-            Assert.That(chat.locals["a"], Is.EqualTo("( 4 | 5 )"));
+            Assert.That(chat.scope["a"], Is.EqualTo("( 4 | 5 )"));
         }
 
         [Test]
@@ -129,10 +129,10 @@ namespace Dialogic
             chat1.commands.ForEach(c => c.Realize(globals));
             chat2.commands.ForEach(c => c.Realize(globals));
 
-            Assert.That(chat1.locals.ContainsKey("review"), Is.True);
-            Assert.That(chat1.locals.ContainsKey("ending"), Is.True);
+            Assert.That(chat1.scope.ContainsKey("review"), Is.True);
+            Assert.That(chat1.scope.ContainsKey("ending"), Is.True);
 
-            Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
+            Assert.That(say.Text(), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
 
         [Test]
@@ -154,13 +154,13 @@ namespace Dialogic
 
             chat.commands.ForEach(c => c.Realize(globals));
 
-            Assert.That(chat.locals.ContainsKey("review"), Is.True);
-            Assert.That(chat.locals.ContainsKey("ending"), Is.True);
+            Assert.That(chat.scope.ContainsKey("review"), Is.True);
+            Assert.That(chat.scope.ContainsKey("ending"), Is.True);
 
             Say say = (Dialogic.Say)last;
-            //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text(true));
+            //Console.WriteLine(chat.ToTree()+"\nSAY: "+say.Text());
 
-            Assert.That(say.Text(true), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
+            Assert.That(say.Text(), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
 
         [Test]
@@ -186,11 +186,11 @@ namespace Dialogic
 
             Assert.That(globals.ContainsKey("WineReview.review"), Is.False);
             Assert.That(globals.ContainsKey("WineReview.ending"), Is.False);
-            Assert.That(chat.locals.ContainsKey("review"), Is.True);
-            Assert.That(chat.locals.ContainsKey("ending"), Is.True);
+            Assert.That(chat.scope.ContainsKey("review"), Is.True);
+            Assert.That(chat.scope.ContainsKey("ending"), Is.True);
 
             Say say = (Dialogic.Say)last;
-            var text = say.Text(true);
+            var text = say.Text();
             Assert.That(text.StartsWith("You look tasty: gushing", Util.IC), Is.True);
             Assert.That(text.EndsWith("Goodbye!", Util.IC), Is.True);
         }
@@ -224,14 +224,14 @@ namespace Dialogic
 
             Assert.That(globals.ContainsKey("WineReview.review"), Is.False);
             Assert.That(globals.ContainsKey("WineReview.ending"), Is.False);
-            Assert.That(chat.locals.ContainsKey("review"), Is.True);
-            Assert.That(chat.locals.ContainsKey("ending"), Is.True);
+            Assert.That(chat.scope.ContainsKey("review"), Is.True);
+            Assert.That(chat.scope.ContainsKey("ending"), Is.True);
 
             Say say = (Dialogic.Say)last;
 
             for (int i = 0; i < 10; i++)
             {
-                var text = say.Realize(globals).Text(true);
+                var text = say.Realize(globals).Text();
                 //Console.WriteLine(i+") "+text);
                 Assert.That(text.StartsWith("You look tasty", Util.IC), Is.True);
                 Assert.That(text.EndsWith("with the poverty.", Util.IC), Is.True);
@@ -257,15 +257,15 @@ namespace Dialogic
 
             Assert.That(globals.ContainsKey("c1.review"), Is.False);
             Assert.That(globals.ContainsKey("c1.greeting"), Is.False);
-            Assert.That(chat.locals.ContainsKey("review"), Is.True);
-            Assert.That(chat.locals.ContainsKey("greeting"), Is.True);
+            Assert.That(chat.scope.ContainsKey("review"), Is.True);
+            Assert.That(chat.scope.ContainsKey("greeting"), Is.True);
             Say say = (Dialogic.Say)last;
 
             for (int i = 0; i < 10; i++)
             {
                 say.Realize(globals);
-                //Console.WriteLine(say.Text(true));
-                Assert.That(say.Text(true), Is.EqualTo("Hello").Or.EqualTo("Goodbye"));
+                //Console.WriteLine(say.Text());
+                Assert.That(say.Text(), Is.EqualTo("Hello").Or.EqualTo("Goodbye"));
             }
         }
 
@@ -285,7 +285,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 chat.commands.ForEach(c => c.Realize(globals));
-                Assert.That(((Dialogic.Say)chat.commands.Last()).Text(true),
+                Assert.That(((Dialogic.Say)chat.commands.Last()).Text(),
                     Is.EqualTo("Hello").Or.EqualTo("Goodbye"));
                 //Console.WriteLine(i+")" + );
             }
@@ -306,7 +306,7 @@ namespace Dialogic
             //runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
             runtime.chats.ForEach(c => c.Realize(null));
             var cmd = runtime.chats.Last().commands.Last();
-            var result = cmd.Text(true);
+            var result = cmd.Text();
             Assert.That(result, Is.EqualTo("c"));
         }
 
@@ -346,9 +346,9 @@ namespace Dialogic
             //chat.Realize(globals);
             chat.commands.ForEach(c => c.Realize(globals));
 
-            Assert.That(chat.locals.ContainsKey("review"), Is.True);
-            Assert.That(chat.locals.ContainsKey("greeting"), Is.True);
-            Assert.That(chat.locals["greeting"],
+            Assert.That(chat.scope.ContainsKey("review"), Is.True);
+            Assert.That(chat.scope.ContainsKey("greeting"), Is.True);
+            Assert.That(chat.scope["greeting"],
                         Is.EqualTo("(Hello | Goodbye | See you later)"));
 
             Say say = (Dialogic.Say)last;
@@ -356,7 +356,7 @@ namespace Dialogic
             for (int i = 0; i < 10; i++)
             {
                 say.Realize(globals);
-                var said = say.Text(true);
+                var said = say.Text();
                 //Console.WriteLine(i+") "+said);
                 Assert.That(said, Is.EqualTo("Hello")
                     .Or.EqualTo("Goodbye").Or.EqualTo("See you later"));
@@ -383,15 +383,15 @@ namespace Dialogic
 
             //DumpGlobals();
 
-            Assert.That(chat.locals.ContainsKey("review"), Is.True);
-            Assert.That(chat.locals.ContainsKey("greeting"), Is.True);
-            Assert.That(chat.locals["greeting"], Is.EqualTo("(Hello | Goodbye) Fred"));
+            Assert.That(chat.scope.ContainsKey("review"), Is.True);
+            Assert.That(chat.scope.ContainsKey("greeting"), Is.True);
+            Assert.That(chat.scope["greeting"], Is.EqualTo("(Hello | Goodbye) Fred"));
 
             Say say = (Dialogic.Say)last;
             for (int i = 0; i < 10; i++)
             {
                 say.Realize(globals);
-                var said = say.Text(true);
+                var said = say.Text();
                 //Console.WriteLine(i + ") " + said);
                 Assert.That(said, Is.EqualTo("Hello Fred")
                     .Or.EqualTo("Goodbye Fred"));
@@ -432,7 +432,7 @@ namespace Dialogic
 
             for (int i = 0; i < 10; i++)
             {
-                var said = say.Realize(globals).Text(true);
+                var said = say.Realize(globals).Text();
                 //Console.WriteLine(i + ") " + said);
                 Assert.That(said.StartsWith("Your expression is a", Util.IC), Is.True);
                 Assert.That
@@ -461,7 +461,7 @@ namespace Dialogic
 
             for (int i = 0; i < 10; i++)
             {
-                var said = say.Realize(globals).Text(true);
+                var said = say.Realize(globals).Text();
                 //Console.WriteLine(i + ") " + said);
                 Assert.That(said, Is.EqualTo("A B D").Or.EqualTo("A B E"));
             }

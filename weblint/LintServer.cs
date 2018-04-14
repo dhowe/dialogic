@@ -131,7 +131,7 @@ namespace Dialogic.Server
                     runtime.chats.ForEach(c => c.Realize(null));
                     var cmd = runtime.chats.Last().commands.Last();
                     var executeContent = cmd.TypeName().ToUpper() + " " 
-                        + cmd.Text(false) + " -> " + cmd.Text(true);
+                        + cmd.text + " -> " + cmd.Text();
                     html = html.Replace("%%EXECUTE%%", WebUtility.HtmlEncode(executeContent));
                 } else {
                     html = html.Replace("%%EXECUTE%%", "");

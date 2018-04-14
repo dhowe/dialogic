@@ -23,7 +23,7 @@ namespace Dialogic
     /// </summary>
     public interface ISendable {
 
-        IDictionary<string, object> GetRealized();
+        IDictionary<string, object> Realized();
     }
 
     /// <summary>

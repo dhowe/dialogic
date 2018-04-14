@@ -121,7 +121,7 @@ namespace Dialogic
 
         public UpdateEvent(ISendable c)
         {
-            this.data = c.GetRealized();
+            this.data = c.Realized();
         }
 
         protected internal UpdateEvent(IDictionary<string, object> data)

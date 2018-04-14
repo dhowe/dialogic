@@ -21,14 +21,14 @@ namespace Dialogic
         internal int cursor = 0, lastRunAt = -1;
         internal bool allowSmoothingOnResume = true;
 
-        internal IDictionary<string, object> locals;
+        internal IDictionary<string, object> scope;
         protected internal ChatRuntime runtime;
 
         public object this[string key] // use locals as indexer?
         {
             get
             {
-                return this.locals[key];
+                return this.scope[key];
             }
         }
 
@@ -41,7 +41,7 @@ namespace Dialogic
             resumeAfterInt = true;
             stalenessIncr = Defaults.CHAT_STALENESS_INCR;
             staleness = Defaults.CHAT_STALENESS;
-            locals = new Dictionary<string, object>();
+            scope = new Dictionary<string, object>();
         }
 
         internal static Chat Create(string name)
@@ -155,20 +155,21 @@ namespace Dialogic
             string s = String.Empty;
             if (HasMeta())
             {
-                s += "{";
+                s += '{';
                 foreach (var key in meta.Keys)
                 {
                     // no need to show the default staleness
                     if (key == Meta.STALENESS && 
-                        Staleness() == Defaults.CHAT_STALENESS)
+                        Util.FloatingEquals(Staleness(), Defaults.CHAT_STALENESS))
                     {
                         continue;
                     }
-                    s += key + "=" + meta[key] + ",";
+
+                    s += key + '=' + meta[key] + ',';
                 }
-                s = s.Substring(0, s.Length - 1) + "}";
+                s = s.TrimLast(',') + "}";
             }
-            return s;
+            return s.ReplaceFirst("{}", string.Empty);
         }
 
         internal Chat LastRunAt(int ms)
@@ -202,8 +203,6 @@ namespace Dialogic
 
             LastRunAt(Util.EpochMs());
         }
-
-    
 
         internal static Type DefaultCommandType(Chat chat)
         {
@@ -244,7 +243,7 @@ namespace Dialogic
             s.Actor(Dialogic.Actor.Default);
             s.parent = this;
             s.Realize(globals);
-            return s.Text(true);
+            return s.Text();
         }
 
         internal string ExpandNoGroups(IDictionary<string, object> globals, 
@@ -252,7 +251,7 @@ namespace Dialogic
         {
             start = start.TrimFirst(Defaults.SYMBOL);
             var re = new Regex(@"\$([^ \(\)]+)");
-            string sofar = (string)locals[start];
+            string sofar = (string)scope[start];
 
             var recursions = 0;
             while (++recursions < 10)
@@ -260,9 +259,9 @@ namespace Dialogic
                 foreach (Match match in re.Matches(sofar))
                 {
                     var v = match.Groups[1].Value;
-                    if (!locals.ContainsKey(v)) throw new DialogicException
-                        ("No match for " + v + " in: " + locals.Stringify());
-                    sofar = sofar.Replace(Defaults.SYMBOL + v, (string)locals[v]);
+                    if (!scope.ContainsKey(v)) throw new DialogicException
+                        ("No match for " + v + " in: " + scope.Stringify());
+                    sofar = sofar.Replace(Defaults.SYMBOL + v, (string)scope[v]);
                 }
 
                 if (sofar.IndexOf(Defaults.SYMBOL) < 0) break;

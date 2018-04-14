@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +35,20 @@ namespace Dialogic
             return delay;
         }
 
+        // Set a Command property by name
+        protected internal void DynamicSet(PropertyInfo propInfo, 
+            object val, bool syncMeta = true)
+        {
+            val = Util.ConvertTo(propInfo.PropertyType, val);
+            propInfo.SetValue(this, val, null);
+
+            // check if we need to sync metadata as well
+            if (syncMeta && HasMeta(propInfo.Name))
+            {
+                SetMeta(propInfo.Name, val.ToString());
+            }
+        }
+
         protected Command Delay(double seconds)
         {
             delay = seconds;
@@ -64,14 +78,18 @@ namespace Dialogic
             Util.ValidateLabel(ref text);
         }
 
-        public string Text(bool real = false)
+        /// <summary>
+        ///  REturns realized text for this object, equivalent to this.Realized(Meta.TEXT);
+        /// </summary>
+        /// <returns>The text.</returns>
+        public string Text()
         {
-            if (real && !realized.ContainsKey(Meta.TEXT))
+            if (!realized.ContainsKey(Meta.TEXT))
             {
-                throw new DialogicException("Text(true) called on " +
-                    "unrealized object: " + this + "\nCall Realize() first");
+                throw new DialogicException("Text() called on unrealized cmd: "
+                    + this + "\nCall Realize() first");
             }
-            return real ? (string)realized[Meta.TEXT] : text;
+            return (string)realized[Meta.TEXT];
         }
 
         /// <summary>
@@ -138,7 +156,8 @@ namespace Dialogic
 
                     if (val is string)
                     {
-                        val = Realizer.Resolve((string)val, null, globals);
+                        // Q: should we resolve on parent for meta ?
+                        val = Realizer.Resolve((string)val, parent, globals);
                     }
                     else if (!(val is Constraint)) // don't replace constraints
                     {
@@ -263,13 +282,12 @@ namespace Dialogic
             if (match.Groups.Count != 4)
             {
                 //Util.ShowMatch(match);
-                throw new ParseException
-                    ("Invalid SET args: '" + txt + "'");
+                throw new ParseException("Invalid SET args: '" + txt + "'");
             }
 
             var tmp = match.Groups[1].Value.Trim();
             this.text = tmp.TrimFirst(Defaults.SYMBOL);
-            this.global = (tmp != text);
+            this.global = (tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();
             this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
         }
@@ -279,19 +297,26 @@ namespace Dialogic
             if (global && globals == null) throw new DialogicException
                 ("Invalid call to Set.Realize() with null argument");
 
-            //string varName = text.StartsWith(parent.text + ".", Util.IC)
-            //  ? text : parent.text + "." + text;
+            var symbol = text;
+            var context = parent;
 
-            // Note: no Realizer here as we need to late-bind the variable
-            var varValue = value;
-            if (varValue.Contains('<') && varValue.Contains('>'))
+            Realizer.ContextifySymbol(ref symbol, ref context);
+
+            // Here we check if the set matches a dynamic parent property
+            if (context != null)
             {
-                varValue = HandleGrammarTag(varValue);
+                IDictionary<string, PropertyInfo> mm = ChatRuntime.MetaMeta[typeof(Chat)];
+
+                // If so, we don't create a new symbol, but instead set the property
+                if (mm.ContainsKey(symbol))
+                {
+                    context.DynamicSet(mm[symbol], value);
+                    return this;
+                }
             }
 
-            var state = global ? globals : parent.locals;
-            if (text == null) throw new Exception("NULL text in: " + this);
-            op.Invoke(text, varValue, state);
+            // Invoke the assignment in the correct scope
+            op.Invoke(symbol, value, (global ? globals : context.scope));
 
             return this;
         }
@@ -308,11 +333,6 @@ namespace Dialogic
                 rules.ForEach(rule => val = val.Replace("<"
                     + rule + ">", "$" + rule));
             }
-
-            // val = val.Replace("$", "$" + parent.text + ".");
-
-            //if (value.Contains(".")) Console.WriteLine("Adding "
-            //  + value + " to globals:\n  " + globals.Stringify());
 
             return val;
         }
@@ -387,7 +407,7 @@ namespace Dialogic
             var opts = Options();
             for (int i = 0; i < opts.Count; i++)
             {
-                s += opts[i].Text(true);
+                s += opts[i].Text();
                 if (i < opts.Count - 1) s += delim;
             }
             return s;
@@ -637,7 +657,6 @@ namespace Dialogic
         public const string TEXT = "__text__";
         public const string OPTS = "__opts__";
 
-
         public const string ACTOR = "actor";
         public const string DELAY = "delay";
         public const string TIMEOUT = "timeout";
@@ -666,12 +685,12 @@ namespace Dialogic
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
         }
 
-        protected internal object GetRealized(string key, object defaultVal = null)
+        protected internal object Realized(string key, object defaultVal = null)
         {
             return realized.ContainsKey(key) ? realized[key] : defaultVal;
         }
 
-        public IDictionary<string, object> GetRealized()
+        public IDictionary<string, object> Realized()
         {
             return realized;
         }
@@ -695,7 +714,7 @@ namespace Dialogic
             {
                 s += "{";
                 foreach (var key in meta.Keys) s += key + "=" + meta[key] + ",";
-                s = s.Substring(0, s.Length - 1) + "}";
+                s = s.TrimLast(',') + '}';
             }
             return s;
         }

@@ -65,7 +65,7 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
-            c1.locals.Add("a", "b");
+            c1.scope.Add("a", "b");
             var res = Realizer.ResolveSymbols("$a", c1, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
@@ -75,8 +75,8 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
-            c1.locals.Add("a", "$b");
-            c1.locals.Add("b", "c");
+            c1.scope.Add("a", "$b");
+            c1.scope.Add("b", "c");
             var res = Realizer.ResolveSymbols("$a", c1, globals);
             Assert.That(res, Is.EqualTo("c"));
         }
@@ -87,7 +87,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
-            c1.locals.Add("a", "b");
+            c1.scope.Add("a", "b");
             //var res = c2.Realizer().Do("$c1.a", globals, c2);
             var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("b"));
@@ -99,7 +99,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
-            c1.locals.Add("a", "$animal");
+            c1.scope.Add("a", "$animal");
             var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("dog"));
         }
@@ -110,7 +110,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
-            c1.locals.Add("a", "The $animal ate");
+            c1.scope.Add("a", "The $animal ate");
             var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("The dog ate"));
         }
@@ -121,7 +121,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
-            c1.locals.Add("a", "The $animal ate $prep");
+            c1.scope.Add("a", "The $animal ate $prep");
             var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("The dog ate then"));
         }
@@ -131,9 +131,9 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
-            c1.locals.Add("a", "$c2.a");
+            c1.scope.Add("a", "$c2.a");
             Chat c2 = rt.AddNewChat("c2");
-            c2.locals.Add("a", "b");
+            c2.scope.Add("a", "b");
             var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
