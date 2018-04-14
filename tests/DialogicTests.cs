@@ -73,24 +73,6 @@ namespace Dialogic
             Assert.That(ue.GetBool("MISS1"), Is.EqualTo(false));
             Assert.That(ue.GetBool("MISS2", true), Is.EqualTo(true));
         }
-            
-        [Test]
-        public void SimpleGrammarTest()
-        {
-            string[] lines = {
-                "grammar1: <sentence> <fortune> <ending>",
-                "sentence: You look <adj>.", "adj: juicy",
-                "fortune: I see big things in your future. But also small ones.",
-                "ending: The judges agree, 3.5 of 10. Try again, this time with feeling." 
-            };
-            string exp = "You look juicy. I see big things in your future. " +
-                "But also small ones. The judges agree, 3.5 of 10. Try again, " +
-                "this time with feeling.";
-            var gram = ChatParser.ParseGrammar(String.Join("\n", lines));
-            var outp = gram.Expand("<grammar1>");
-            //Console.WriteLine(outp);
-            Assert.That(outp, Is.EqualTo(exp));
-        }
 
         [Test]
         public void TrimFirstLast()

@@ -126,7 +126,9 @@ namespace Dialogic
         internal const string PV2 = @"(?:\.[A-Za-z_][A-Za-z0-9_-]*)*)(?:[ .!;,:?()""']|$)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
+        public static Regex SplitOr = new Regex(@"\s*\|\s*");
         public static Regex MetaSplit = new Regex(@"\s*,\s*");
+        public static Regex ValidGroup = new Regex(@"\([^)]+|[^)]+\)");
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
@@ -737,10 +739,10 @@ namespace Dialogic
 
         private static string ResolveGroup(string sub)
         {
-            if (!Regex.IsMatch(sub, @"\([^)]+|[^)]+\)")) throw InvalidState(sub);
+            if (!RE.ValidGroup.IsMatch(sub)) throw InvalidState(sub);
 
             sub = sub.Substring(1, sub.Length - 2);
-            string[] opts = Regex.Split(sub, @"\s*\|\s*");
+            string[] opts = RE.SplitOr.Split(sub);
 
             if (opts.Length < 2) throw InvalidState(sub);
 

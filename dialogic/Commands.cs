@@ -228,22 +228,6 @@ namespace Dialogic
         }
     }
 
-    public class Gram : Command //@cond unused
-    {
-        public Grammar grammar;
-
-        protected internal override void Init(string txt, string lbl, string[] metas)
-        {
-            //Console.WriteLine("Gram.init: " + Util.Stringify(meta)+"\n"+String.Join("\n", meta));
-            grammar = new Grammar(String.Join("\n", metas));
-        }
-
-        public override string ToString()
-        {
-            return "[" + TypeName().ToUpper() + "] >\n" + grammar;
-        }
-    }//@endcond
-
     /// <summary>
     /// The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environment. It accepts a label, optionally followed by metadata, which can be used to supply arguments to the triggered action.
     /// </summary>

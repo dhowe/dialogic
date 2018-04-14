@@ -42,12 +42,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net35\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="YamlDotNet">
-      <HintPath>..\packages\YamlDotNet.4.3.1\lib\net35\YamlDotNet.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,7 +51,6 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="Realizer.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="Grammar.cs" />
     <Compile Include="ChatRuntime.cs" />
     <Compile Include="ChatParser.cs" />
     <Compile Include="Actor.cs" />

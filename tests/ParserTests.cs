@@ -1093,19 +1093,6 @@ namespace Dialogic
             }
         }
 
-
-        [Test]
-        public void Grammars()
-        {
-            List<Chat> chats = ChatParser.ParseText("GRAM { start: 'The <item>', item: cat }");
-            Command gram = chats[0].commands[0];
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count(), Is.EqualTo(1));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(gram.text, Is.Null);
-            Assert.That(gram.GetType(), Is.EqualTo(typeof(Gram)));
-        }
-
         [Test]
         public void ChatParsing()
         {

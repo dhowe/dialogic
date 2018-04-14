@@ -37,7 +37,6 @@
     <Compile Include="DialogicTests.cs" />
     <Compile Include="EventTests.cs" />
     <Compile Include="OperatorTests.cs" />
-    <Compile Include="GrammarTests.cs" />
     <Compile Include="RealizeTests.cs" />
     <Compile Include="SearchTests.cs" />
     <Compile Include="ParserTests.cs" />

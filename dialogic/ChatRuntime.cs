@@ -41,7 +41,6 @@ namespace Dialogic
             { "GO",     typeof(Go)   },
             { "WAIT",   typeof(Wait) },
             { "FIND",   typeof(Find) },
-            { "GRAM",   typeof(Gram) },
         };
 
         internal bool validatorsDisabled;
@@ -62,7 +61,6 @@ namespace Dialogic
             this.actors = InitActors(theActors);
             this.chats = theChats == null ? new List<Chat>() : theChats;
 
-            //this.realizer = new Realizer(this);
             this.parser = new ChatParser(this);
             this.scheduler = new ChatScheduler(this);
             this.appEvents = new AppEventHandler(this);

@@ -65,11 +65,6 @@ namespace Dialogic
             return chats;
         }
 
-        internal static Grammar ParseGrammar(string src) // TODO:
-        {
-            return new Grammar(src);
-        }
-
         internal static string TypesRegex()
         {
             string s = @"(";
