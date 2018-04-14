@@ -10,11 +10,6 @@ namespace Dialogic
     /// </summary>
     public static class Realizer
     {
-        //private ChatRuntime runtime;
-        //internal Realizer(ChatRuntime rt) {
-        //    this.runtime = rt;
-        //}
-
         public static string Resolve(string text, Chat parent, IDictionary<string, object> globals)
         {
             var DBUG = false;
@@ -49,19 +44,11 @@ namespace Dialogic
         public static string ResolveSymbols(string text, Chat context, IDictionary<string, object> globals)
         {
             int iterations = 0, maxIterations = 5;
-            while (text.Contains('$'))
+            while (text.Contains(Defaults.SYMBOL))
             {
-                var matches = RE.ParseVars.Matches(text);
-                if (matches.Count == 0) return text;
-
-                // we have some variables to deal with 
-                List<string> symbols = new List<string>();
-                foreach (Match match in matches)
+                foreach (var symbol in ParseSymbols(text))
                 {
-                    if (match.Groups.Count != 2)
-                        throw new DialogicException("Bad RE in " + text);
-
-                    var symbol = match.Groups[1].Value;
+                    var dollarsym = Defaults.SYMBOL + symbol;
 
                     if (symbol.Contains('.'))
                     {
@@ -81,19 +68,25 @@ namespace Dialogic
                         }
 
                         // use the new context from now on, or until another switch
-                        context = chat; 
+                        context = chat;
 
-                        text = text.Replace('$' + symbol, RealizeSymbol(parts[1], context, globals));
+                        text = text.Replace(dollarsym, ResolveSymbol(parts[1], context, globals));
                     }
                     else // process a local or global-scoped symbol
                     {
-                        text = text.Replace('$' + symbol, RealizeSymbol(symbol, context, globals));
+                        //Console.WriteLine("Text0: "+text);
+                        text = text.Replace(dollarsym, ResolveSymbol(symbol, context, globals));
+                        //Console.WriteLine("Text1: " + text);
+                        //while (text.IndexOf(dollarsym, Util.IC) > -1)
+                        //{
+                        //    //Console.WriteLine("Text2: " + text);
+                        //    text = text.ReplaceFirst(dollarsym, ResolveSymbol(symbol, context, globals));
+                        //}
                     }
                 }
 
                 if (++iterations >= maxIterations) throw new RealizeException
                     ("Max recursion depth hit for: " + text);
-
             }
             return text;
         }
@@ -123,8 +116,8 @@ namespace Dialogic
 
                     foreach (var opt in groups)
                     {
-                        var pick = DoReplace(opt);
-                        text = text.Replace(opt, pick);
+                        var pick = Resolution.Choose(opt);
+                        text = text.ReplaceFirst(opt, pick);
                     }
 
                     if (++iterations > maxIterations) throw new RealizeException
@@ -139,7 +132,7 @@ namespace Dialogic
         /// <summary>
         /// First do local lookup from Chat context, then if not found, try global lookup
         /// </summary>
-        private static string RealizeSymbol(string symbol, Chat context, IDictionary<string, object> globals)
+        private static string ResolveSymbol(string symbol, Chat context, IDictionary<string, object> globals)
         {
             //Console.WriteLine("RealizeSymbol: "+symbol+" in chat#"+(context!=null?context.text:"null"));
 
@@ -160,29 +153,38 @@ namespace Dialogic
             throw new RealizeException(cstr);
         }
 
-        private static string DoReplace(string sub)
-        {
-            if (!Regex.IsMatch(sub, @"\([^)]+|[^)]+\)")) throw InvalidState(sub);
-
-            sub = sub.Substring(1, sub.Length - 2);
-            string[] opts = Regex.Split(sub, @"\s*\|\s*");
-
-            if (opts.Length < 2) throw InvalidState(sub);
-
-            return (string)Util.RandItem(opts);
-        }
-
         private static bool IsDynamic(string text)
         {
             return text != null &&
                 (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
         }
 
-        private static Exception InvalidState(string sub)
+        public static IEnumerable<string> ParseSymbols(string text)
         {
-            return new RealizeException("Invalid State: '" + sub + "'");
+            List<string> symbols = new List<string>();
+            var matches = RE.ParseVars.Matches(text);
+            if (matches.Count == 0) return symbols;
+
+            foreach (Match match in matches)
+            {
+                if (match.Groups.Count != 2)
+                    throw new DialogicException("Bad RE in " + text);
+
+                var symbol = match.Groups[1].Value;
+
+                // Q: do we want to allow multiple identical symbols here?
+                // if (!symbols.Contains(symbol)) 
+                symbols.Add(symbol);
+            }
+
+            // OPT: we sort here to avoid symbols which are substrings of another
+            // symbol causing incorrect replacements ($a being replaced in $ant, 
+            // for example), however this can be avoided by correctly using Regex.Replace
+            // instead of String.Replace() in ResolveSymbols below
+            return Util.SortByLength(symbols);
         }
 
+        // TODO: redo iteratively
         private static void ParseGroups(string input, List<string> results)
         {
             foreach (Match m in RE.MatchParens.Matches(input))
@@ -199,6 +201,5 @@ namespace Dialogic
                 }
             }
         }
-
     }
 }

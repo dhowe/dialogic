@@ -176,8 +176,8 @@ namespace Dialogic
     /// </summary>
     public class Say : Command, ISendable, IAssignable
     {
-        protected string lastSpoken;
-        protected bool disableUniqueness = false;
+        //protected string lastSpoken;
+        //protected bool disableUniqueness = false;
 
         public Say() : base()
         {
@@ -190,37 +190,13 @@ namespace Dialogic
             return this;
         }
 
-        protected internal override Command Realize(IDictionary<string, object> globals)
-        {
-            base.Realize(globals);
-            Recombine(globals);
-            lastSpoken = Text(true);
-            return this;
-        }
-
-        private void Recombine(IDictionary<string, object> globals)
-        {
-            if (IsRecombinant()) // try to say something different than last time
-            {
-                var iterations = 0;
-                while (lastSpoken == Text(true) && ++iterations < 10)
-                {
-                    realized[Meta.TEXT] = Realizer.Resolve(text, parent, globals);
-                }
-            }
-        }
-
-        protected bool IsRecombinant()
-        {
-            return !disableUniqueness && text.IndexOf('|') > -1;
-        }
-
-        /**
-         * Determine milliseconds to wait after sending the event, using:
-         *      a. Line-length
-         *      b. Meta-data modifiers
-         *      c. Character mood (TODO)
-         */
+        /// <summary>
+        /// Determine milliseconds to wait after sending the event, using:
+        ///     a. Line-length
+        ///     b. Meta-data modifiers
+        ///     c. Character mood (TODO)
+        /// </summary>
+        /// <returns>The duration.</returns>
         protected internal override int ComputeDuration() // Config?
         {
             return Util.Round(GetTextLenScale() * GetMetaSpeedScale() * delay);
@@ -308,7 +284,7 @@ namespace Dialogic
             }
 
             var tmp = match.Groups[1].Value.Trim();
-            this.text = tmp.TrimFirst('$');
+            this.text = tmp.TrimFirst(Defaults.SYMBOL);
             this.global = (tmp != text);
             this.value = match.Groups[3].Value.Trim();
             this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
@@ -324,12 +300,13 @@ namespace Dialogic
 
             // Note: no Realizer here as we need to late-bind the variable
             var varValue = value;
-            if (varValue.IndexOf('<') > -1 && varValue.IndexOf('>') > -1)
+            if (varValue.Contains('<') && varValue.Contains('>'))
             {
                 varValue = HandleGrammarTag(varValue);
             }
 
             var state = global ? globals : parent.locals;
+            if (text == null) throw new Exception("NULL text in: " + this);
             op.Invoke(text, varValue, state);
 
             return this;
@@ -359,7 +336,7 @@ namespace Dialogic
         public override string ToString()
         {
             var txt = this.text;
-            if (global) txt = '$' + txt;
+            if (global) txt = Defaults.SYMBOL + txt;
             return TypeName().ToUpper() + " " + txt + " = " + value;
         }
     }

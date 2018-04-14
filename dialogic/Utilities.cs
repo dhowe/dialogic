@@ -18,6 +18,8 @@ namespace Dialogic
     /// </summary>
     public static class Defaults
     {
+        internal static readonly char SYMBOL = '$';
+
         /// <summary>
         /// Default Command duration for Say
         /// </summary>
@@ -617,8 +619,8 @@ namespace Dialogic
             string rval = value;
             if (globals != null)
             {
-                if (check.Contains('$')) check = Realizer.ResolveSymbols(check, null, globals);
-                if (value.Contains('$')) rval = Realizer.ResolveSymbols(value, null, globals);
+                if (check.Contains(Defaults.SYMBOL)) check = Realizer.ResolveSymbols(check, null, globals);
+                if (value.Contains(Defaults.SYMBOL)) rval = Realizer.ResolveSymbols(value, null, globals);
             }
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
@@ -706,6 +708,96 @@ namespace Dialogic
         internal void Relax()
         {
             if (IsRelaxable()) type = ConstraintType.Soft;
+        }
+    }
+
+    public class Resolution
+    {
+        static IDictionary<string, Resolution> resolveCache
+            = new Dictionary<string, Resolution>();
+
+        readonly string[] options;
+        string lastResolved;
+
+        private Resolution(string text)
+        {
+            //Console.WriteLine("new Resolution: '" + text + "'");
+            this.options = ParseGroup(text);
+        }
+
+        public static string Choose(string text)
+        {
+            if (!resolveCache.ContainsKey(text))
+            {
+                resolveCache.Add(text, new Resolution(text));
+            }
+
+            return resolveCache[text].Choose();
+        }
+
+        private static string ResolveGroup(string sub)
+        {
+            if (!Regex.IsMatch(sub, @"\([^)]+|[^)]+\)")) throw InvalidState(sub);
+
+            sub = sub.Substring(1, sub.Length - 2);
+            string[] opts = Regex.Split(sub, @"\s*\|\s*");
+
+            if (opts.Length < 2) throw InvalidState(sub);
+
+            return (string)Util.RandItem(opts);
+        }
+
+        public override string ToString()
+        {
+            return "(" + string.Join("|", options) + ")";
+        }
+
+        private string Choose()
+        {
+            string resolved = null;
+
+            switch (options.Length)
+            {
+                // degenerate single option case
+                case 1:
+                    resolved = options[0];
+                    break;
+
+                // avoid oscillators, just choose random
+                case 2:
+                    resolved = (string)Util.RandItem(options);
+                    break;
+
+                default: // choose something different than last time
+                    int iterations = 0, maxIterations = 100;
+                    do
+                    {
+                        if (++iterations > maxIterations) // should never happen
+                        {
+                            throw new RealizeException("Max limit: " + this);
+                        }
+                        resolved = (string)Util.RandItem(options);
+                    }
+                    while (Equals(lastResolved, resolved));
+                    break;
+            }
+            return (lastResolved = resolved);
+        }
+
+        private static string[] ParseGroup(string sub)
+        {
+            if (!Regex.IsMatch(sub, @"\([^)]+|[^)]+\)")) throw InvalidState(sub);
+
+            // trim (,) from ends
+            sub = sub.TrimFirst('(').TrimLast(')');
+
+            // parse unique choices only
+            return Regex.Split(sub, @"\s*\|\s*").Distinct().ToArray(); ;
+        }
+
+        private static Exception InvalidState(string sub)
+        {
+            return new RealizeException("Invalid State: '" + sub + "'");
         }
     }
 
@@ -860,7 +952,7 @@ namespace Dialogic
 
         public bool Invoke(string s1, string s2, IDictionary<string, object> globals)
         {
-            s1.TrimFirst('$');
+            s1 = s1.TrimFirst(Defaults.SYMBOL);
 
             string result = null;
 
@@ -933,6 +1025,7 @@ public interface IInterruptable //@cond hidden
 {
     void Stop();
 }
+
 public class TimerInterrupter : IInterruptable
 {
     private readonly Timer t;
@@ -1011,6 +1104,13 @@ public static class Exts //@cond unused
                 || value is decimal;
     }
 
+    internal static string ReplaceFirst(this string text, string search, string replace)
+    {
+        int pos = text.IndexOf(search);
+        if (pos < 0) return text;
+        return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+    }
+
     internal static bool StartsWith(this string str, char c)
     {
         return !str.IsNullOrEmpty() && str[0] == c;
@@ -1026,20 +1126,22 @@ public static class Exts //@cond unused
         return !str.IsNullOrEmpty() && str.IndexOf(c) > -1;
     }
 
-    internal static string TrimEnds(this string str, char start, char ends)
+    internal static string TrimEnds(this string str, char start, char end)
     {
-        return str.TrimFirst(start).TrimLast(ends);
+        str = str.TrimFirst(start);
+        str = str.TrimLast(end);
+        return str;
     }
 
     internal static string TrimFirst(this string str, char c)
     {
-        return (str[0] == c) ? str.Substring(1) : str;
+        return (!str.IsNullOrEmpty() && str[0] == c) ? str.Substring(1) : str;
     }
 
     internal static string TrimLast(this string str, char c)
     {
         int last = str.Length - 1;
-        return (str[last] == c) ? str.Substring(0, last) : str;
+        return (!str.IsNullOrEmpty() && str[last] == c) ? str.Substring(0, last) : str;
     }
 
     internal static string Parenthify(this string str)
@@ -1050,7 +1152,6 @@ public static class Exts //@cond unused
         }
         return str;
     }
-
 
     public static string Stringify(this object o)
     {
@@ -1066,6 +1167,14 @@ public static class Exts //@cond unused
                 foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
                 s = s.Substring(0, s.Length - 1) + "}";
             }
+        }
+        else if (o is HashSet<string>)
+        {
+            s = "[";
+            var coll = (ICollection<string>)o;
+            if (coll.Count < 1) s += "]";
+            foreach (var k in coll) s += k + ",";
+            s = (s.Substring(0, s.Length - 1) + "]");
         }
         else if (o is object[])
         {
@@ -1091,6 +1200,22 @@ public static class Exts //@cond unused
             s = o.ToString();
         }
         return s;
+    }
+
+    internal static bool IsGenType(object obj, Type genericType)
+    {
+        if (obj == null)
+            return false;
+
+        var type = obj.GetType();
+        while (type != null)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == genericType)
+                return true;
+
+            type = type.BaseType;
+        }
+        return false;
     }
 
 }//@endcond

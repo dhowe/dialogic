@@ -250,7 +250,7 @@ namespace Dialogic
         internal string ExpandNoGroups(IDictionary<string, object> globals, 
             string start)//, bool doGroups = false)
         {
-            start = start.TrimFirst('$');
+            start = start.TrimFirst(Defaults.SYMBOL);
             var re = new Regex(@"\$([^ \(\)]+)");
             string sofar = (string)locals[start];
 
@@ -262,10 +262,10 @@ namespace Dialogic
                     var v = match.Groups[1].Value;
                     if (!locals.ContainsKey(v)) throw new DialogicException
                         ("No match for " + v + " in: " + locals.Stringify());
-                    sofar = sofar.Replace('$' + v, (string)locals[v]);
+                    sofar = sofar.Replace(Defaults.SYMBOL + v, (string)locals[v]);
                 }
 
-                if (sofar.IndexOf('$') < 0) break;
+                if (sofar.IndexOf(Defaults.SYMBOL) < 0) break;
             }
 
             if (recursions >= 10) Console.WriteLine("[WARN] Max recursion level"

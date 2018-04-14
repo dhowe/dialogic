@@ -189,6 +189,20 @@ namespace Dialogic
         }
 
         [Test]
+        public void ReplaceVarsBug()
+        {
+            var globs = new Dictionary<string, object>() {
+                { "a", "$a2" },
+                { "a2", "C" },
+             };
+
+            var s = @"SAY $a $a2";
+            s = Realizer.ResolveSymbols(s, null, globs);
+            Assert.That(s, Is.EqualTo("SAY C C"));
+        }
+
+
+        [Test]
         public void ReplaceVars()
         {
             var s = @"SAY The $animal woke $count times";
@@ -240,7 +254,7 @@ namespace Dialogic
         [Test]
         public void SayNonRepeatingRecomb()
         {
-            List<Chat> chats = ChatParser.ParseText("SAY (a|b)");
+            List<Chat> chats = ChatParser.ParseText("SAY (a|b|c)");
             Assert.That(chats.Count, Is.EqualTo(1));
             Assert.That(chats[0].Count, Is.EqualTo(1));
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
@@ -259,7 +273,7 @@ namespace Dialogic
         [Test]
         public void AskNonRepeatingRecomb()
         {
-            List<Chat> chats = ChatParser.ParseText("ASK (a|b)?\nOPT (c|d|e) #f");
+            List<Chat> chats = ChatParser.ParseText("ASK (a|b|c)?\nOPT (c|d|e) #f");
             Assert.That(chats.Count, Is.EqualTo(1));
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));

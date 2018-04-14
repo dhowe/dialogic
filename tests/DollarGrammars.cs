@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Dialogic
 {
     [TestFixture]
-    class DollarGrammarTests
+    class DollarGrammars
     {
         const bool NO_VALIDATORS = true;
 
@@ -22,6 +22,88 @@ namespace Dialogic
             { "cmplx", "($group | $prep)" },
             { "count", 4 }
         };
+
+        [Test]
+        public void RealizeSubstringSymbols()
+        {
+            var lines = new[] {
+                "CHAT wine1 {noStart=true}",
+                "SET a = $a2",
+                "SET a2 = C",
+                "SAY $a $a2"
+            };
+            ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+            runtime.ParseText(string.Join("\n", lines), false);
+            var chat = runtime.chats[0];
+
+            runtime.chats.ForEach(c => c.Realize(null));
+
+            //Console.WriteLine(chat.ToTree() + "\n" + chat.locals.Stringify());
+
+            Say say = (Dialogic.Say)runtime.chats.Last().commands.Last();
+            var result = say.Text(true);
+            Assert.That(result, Is.EqualTo("C C"));
+        }
+
+
+        [Test]
+        public void RepeatedExpand()
+        {
+            string[] lines = {
+                "CHAT myGrammar {defaultCmd=SET}",
+                "start = <subject> <verb> <object>.",
+                "subject = I | You | They",
+                "object = coffee | bread | milk",
+                "verb = want | hate | like | love",
+                "SAY $start",
+
+            };
+            ChatRuntime rt = new ChatRuntime(null);
+            rt.ParseText(String.Join("\n", lines));
+            Chat chat = rt.chats[0];
+
+            Say say = (Dialogic.Say)chat.commands.Last();
+
+            chat.commands.ForEach(c => c.Realize(globals));
+
+            var results = new HashSet<string>();
+            for (int i = 0; i < 10; i++)
+            {
+                results.Add(say.Realize(globals).Text(true));
+            }
+
+            Assert.That(results.Count, Is.GreaterThan(1));
+        }
+
+        [Test]
+        public void RepeatedSymbolTest()
+        {
+            string[] lines = {
+                "CHAT myGrammar {defaultCmd=SET}",
+                "start = <subject> <verb> <object>.",
+                "subject = I | You | They",
+                "object = coffee | bread | milk",
+                "verb = want | hate | like | love",
+                "SAY $start $start $start $start $start $start $start $start",
+            };
+            ChatRuntime rt = new ChatRuntime(null);
+            rt.ParseText(String.Join("\n", lines));
+
+            rt.chats[0].commands.ForEach(c => c.Realize(globals));
+            var all = rt.chats[0].commands.Last().Text(true);
+            var says = all.Split('.');
+
+            var results = new HashSet<string>();
+            for (int i = 0; i < says.Length; i++)
+            {
+                if (says[i].IsNullOrEmpty()) continue;
+                results.Add(says[i].Trim());
+            
+            }
+
+            Assert.That(results.Count, Is.GreaterThan(1));
+        }
+
 
         [Test]
         public void SimpleSets()
@@ -72,6 +154,17 @@ namespace Dialogic
             Assert.That(set.value, Is.EqualTo("$obj-prop"));
             set.Realize(globals);
             Assert.That(chat.locals["a"], Is.EqualTo("$obj-prop"));
+
+
+            chat = ChatParser.ParseText("CHAT c1\nSET a2 = $obj-prop", NO_VALIDATORS)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("a2"));
+            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.value, Is.EqualTo("$obj-prop"));
+            set.Realize(globals);
+            Assert.That(chat.locals["a2"], Is.EqualTo("$obj-prop"));
         }
 
         [Test]
@@ -300,9 +393,9 @@ namespace Dialogic
                 "SET b = c",
                 "SAY $a"
             };
-            string content = "";
             ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
             runtime.ParseText(string.Join("\n", lines), false);
+            //string content = "";
             //runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
             runtime.chats.ForEach(c => c.Realize(null));
             var cmd = runtime.chats.Last().commands.Last();
@@ -456,7 +549,7 @@ namespace Dialogic
             };
 
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
-            chat.commands.ForEach(c => { if (!(c is Say)) c.Realize(globals); });
+            chat.commands.ForEach(c => c.Realize(globals));
             Say say = (Say)chat.commands.Last();
 
             for (int i = 0; i < 10; i++)
