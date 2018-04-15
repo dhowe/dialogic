@@ -32,13 +32,13 @@ namespace Dialogic
             };
             ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
             runtime.ParseText(string.Join("\n", lines), false);
-            var chat = runtime.chats[0];
+            var chat = runtime.Chats()[0];
 
-            runtime.chats.ForEach(c => c.Realize(null));
+            runtime.Chats().ForEach(c => c.Realize(null));
 
             //Console.WriteLine(chat.ToTree() + "\n" + chat.locals.Stringify());
 
-            Say say = (Dialogic.Say)runtime.chats.Last().commands.Last();
+            Say say = (Dialogic.Say)runtime.Chats().Last().commands.Last();
             var result = say.Text();
             Assert.That(result, Is.EqualTo("C C"));
         }
@@ -58,7 +58,7 @@ namespace Dialogic
             };
             ChatRuntime rt = new ChatRuntime(null);
             rt.ParseText(String.Join("\n", lines));
-            Chat chat = rt.chats[0];
+            Chat chat = rt.Chats()[0];
 
             Say say = (Dialogic.Say)chat.commands.Last();
 
@@ -87,8 +87,8 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             rt.ParseText(String.Join("\n", lines));
 
-            rt.chats[0].commands.ForEach(c => c.Realize(globals));
-            var all = rt.chats[0].commands.Last().Text();
+            rt.Chats()[0].commands.ForEach(c => c.Realize(globals));
+            var all = rt.Chats()[0].commands.Last().Text();
             var says = all.Split('.');
 
             var results = new HashSet<string>();
@@ -232,7 +232,7 @@ namespace Dialogic
             };
             ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
             rt.ParseText(String.Join("\n", lines));
-            var chats = rt.chats;
+            var chats = rt.Chats();
             //Console.WriteLine(rt);
 
             Chat chat1 = chats[0], chat2 = chats[1];
@@ -415,9 +415,9 @@ namespace Dialogic
             ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
             runtime.ParseText(string.Join("\n", lines), false);
             //string content = "";
-            //runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
-            runtime.chats.ForEach(c => c.Realize(null));
-            var cmd = runtime.chats.Last().commands.Last();
+            //runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
+            runtime.Chats().ForEach(c => c.Realize(null));
+            var cmd = runtime.Chats().Last().commands.Last();
             var result = cmd.Text();
             Assert.That(result, Is.EqualTo("c"));
         }

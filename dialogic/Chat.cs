@@ -240,7 +240,7 @@ namespace Dialogic
         {
             Say s = new Say();
             s.Init(start, "", new string[0]);
-            s.Actor(Dialogic.Actor.Default);
+            s.SetActor(Dialogic.Actor.Default);
             s.parent = this;
             s.Realize(globals);
             return s.Text();

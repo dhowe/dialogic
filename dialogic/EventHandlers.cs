@@ -39,7 +39,7 @@ namespace Dialogic
 
             if (String.IsNullOrEmpty(findBy))        // apply action to all chats
             {
-                runtime.chats.ForEach(action);
+                runtime.Chats().ForEach(action);
             }
             else if (findBy.StartsWith(Util.LABEL_IDENT, Util.IC)) // to one chat
             {

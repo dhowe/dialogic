@@ -124,12 +124,12 @@ namespace Dialogic.Server
                 runtime.ParseText(code, false); // true to disable validators
 
                 //Console.WriteLine(runtime);
-                runtime.chats.ForEach(c => { content += c.ToTree() + "\n\n"; });
+                runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
         
                 if (mode == "execute")
                 {
-                    runtime.chats.ForEach(c => c.Realize(null));
-                    var cmd = runtime.chats.Last().commands.Last();
+                    runtime.Chats().ForEach(c => c.Realize(null));
+                    var cmd = runtime.Chats().Last().commands.Last();
                     var executeContent = cmd.TypeName().ToUpper() + " " 
                         + cmd.text + " -> " + cmd.Text();
                     html = html.Replace("%%EXECUTE%%", WebUtility.HtmlEncode(executeContent));

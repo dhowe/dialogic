@@ -96,20 +96,20 @@ namespace Dialogic
         /// In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific Actor, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.
         /// </summary>
         /// <returns>The actor.</returns>
-        public IActor Actor()
+        public IActor GetActor()
         {
             return actor;
         }
 
-        protected internal Command Actor(IActor theActor)
+        protected internal Command SetActor(IActor theActor)
         {
             this.actor = theActor;
             return this;
         }
 
-        protected internal Command Actor(ChatRuntime rt, string actorName)
+        protected internal Command SetActor(ChatRuntime rt, string actorName)
         {
-            return Actor(rt.FindActorByName(actorName));
+            return SetActor(rt.FindActorByName(actorName));
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Dialogic
                 realized[Meta.TYPE] = TypeName();
                 if (this is IAssignable && actor != null)
                 {
-                    realized[Meta.ACTOR] = Actor().Name();
+                    realized[Meta.ACTOR] = GetActor().Name();
                 }
             }
             return this;

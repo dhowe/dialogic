@@ -47,9 +47,15 @@ namespace Dialogic
         internal static IDictionary<Type, IDictionary<string, PropertyInfo>>
             MetaMeta = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
 
+        internal List<Chat> Chats()
+        {
+            return chats;
+        }
+
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
-        internal List<Chat> chats;
+
+        private readonly List<Chat> chats;
 
         private Thread searchThread;
         private ChatParser parser;
@@ -75,26 +81,23 @@ namespace Dialogic
         {
             this.validatorsDisabled = disableValidators;
             var lines = text.Split(ChatParser.LineBreaks, StringSplitOptions.None);
-            chats = parser.Parse(lines);
+            parser.Parse(lines);
         }
 
         public void ParseFile(string fileOrFolder, bool disableValidators = false)
         {
-            var ext = "*" + (CHAT_FILE_EXT != null ? CHAT_FILE_EXT : "");
+            var ext = '*' + (CHAT_FILE_EXT != null ? CHAT_FILE_EXT : string.Empty);
 
             var files = Directory.Exists(fileOrFolder) ?
                 Directory.GetFiles(fileOrFolder, '*' + ext) :
                 new string[] { fileOrFolder };
 
-            this.chats = new List<Chat>();
             this.validatorsDisabled = disableValidators;
 
             foreach (var f in files)
             {
                 var text = File.ReadAllText(f);
-                var stripped = ChatParser.StripComments(text);
-                var parsed = parser.Parse(stripped);
-                parsed.ForEach(c => chats.Add(c));
+                parser.Parse(ChatParser.StripComments(text));
             }
             //chats.ForEach(c => Console.WriteLine(c.ToTree()));
         }
@@ -123,13 +126,6 @@ namespace Dialogic
             scheduler.Launch(first);
         }
 
-        public List<Chat> FindChatByMeta(string key, string value)
-        {
-            //foreach (var c in chats) Console.WriteLine(c.text +
-            //  ": "+c.GetMeta(key)+ " " + ((string)c.GetMeta(key)==value));
-            return chats.Where(c => ((string)c.GetMeta(key)) == value).ToList<Chat>();
-        }
-
         public Chat FindChatByLabel(string label)
         {
             Util.ValidateLabel(ref label);
@@ -152,6 +148,18 @@ namespace Dialogic
         }
 
         ///////////////////////////////////////////////////////////////////////
+
+        internal void AddChat(Chat c)
+        {
+            c.runtime = this;
+            chats.Add(c);
+        }
+
+        internal List<Chat> FindChatByMeta(string key, string value) // used?
+        {
+            return chats.Where(c => ((string)c.GetMeta(key))
+                == value).ToList<Chat>();
+        }
 
         internal Chat AddNewChat(string name)
         {
