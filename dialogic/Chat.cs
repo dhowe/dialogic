@@ -121,6 +121,7 @@ namespace Dialogic
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
             //Console.WriteLine("[WARN] Chats need not be realized, doing commands instead");
+            if (globals == null) globals = new Dictionary<string, object>();
             commands.ForEach(c => c.Realize(globals));
             return this;
         }
@@ -159,7 +160,7 @@ namespace Dialogic
                 foreach (var key in meta.Keys)
                 {
                     // no need to show the default staleness
-                    if (key == Meta.STALENESS && 
+                    if (key == Meta.STALENESS &&
                         Util.FloatingEquals(Staleness(), Defaults.CHAT_STALENESS))
                     {
                         continue;
@@ -246,7 +247,7 @@ namespace Dialogic
             return s.Text();
         }
 
-        internal string ExpandNoGroups(IDictionary<string, object> globals, 
+        internal string ExpandNoGroups(IDictionary<string, object> globals,
             string start)//, bool doGroups = false)
         {
             start = start.TrimFirst(Defaults.SYMBOL);

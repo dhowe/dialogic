@@ -28,6 +28,20 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
         }
 
+
+        [Test]
+        public void SetNoGlobals()
+        {
+            var chat = ChatParser.ParseText("CHAT c1\nSET $a = hello\nSAY $a", NO_VALIDATORS)[0];
+            //Console.WriteLine(chat.ToTree());
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            chat.Realize(null);
+            var s = chat.commands[1].Text();
+            Assert.That(s, Is.EqualTo("hello"));
+
+        }
+
         [Test]
         public void SetLocals()
         {

@@ -129,7 +129,8 @@ namespace Dialogic.Server
 
                 if (mode == "execute")
                 {
-                    runtime.Chats().ForEach(c => c.Realize(null));
+                    var globals = new Dictionary<string, object>();
+                    runtime.Chats().ForEach(c => c.Realize(globals));
                     var cmd = runtime.Chats().Last().commands.Last();
                     var executeContent = cmd.TypeName().ToUpper() + " "
                         + cmd.text + " -> " + cmd.Text();
@@ -161,6 +162,7 @@ namespace Dialogic.Server
 
         private static void OnError(ref string html, Exception ex, int lineno = -1)
         {
+            html = html.Replace("%%EXECUTE%%", "");
             html = html.Replace("%%RCLASS%%", "error");
             html = html.Replace("%%RESULT%%", ex.Message);
             html = html.Replace("%%ERRORLINE%%",
@@ -219,7 +221,7 @@ namespace Dialogic.Server
             Console.WriteLine("LintServer running on "
                 + SERVER_URL + " - press any key to quit");
             Console.ReadKey();
-            ws.Stop();
+            //ws.Stop();
         }
     }
 }
