@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Dialogic
 {
     [TestFixture]
-    class SymbolScoping
+    class BindContextTests
     {
         const bool NO_VALIDATORS = true;
 
