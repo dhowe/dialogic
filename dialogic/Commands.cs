@@ -136,7 +136,7 @@ namespace Dialogic
                 if (parent == null) throw new DialogicException
                     ("Null Chat parent for: " + this);
 
-                realized[Meta.TEXT] = Realizer.Resolve(text, parent, globals);
+                realized[Meta.TEXT] = Resolver.Bind(text, parent, globals);
                 realized[Meta.TYPE] = TypeName();
                 if (this is IAssignable && actor != null)
                 {
@@ -157,7 +157,7 @@ namespace Dialogic
                     if (val is string)
                     {
                         // Q: should we resolve on parent for meta ?
-                        val = Realizer.Resolve((string)val, parent, globals);
+                        val = Resolver.Bind((string)val, parent, globals);
                     }
                     else if (!(val is Constraint)) // don't replace constraints
                     {
@@ -300,7 +300,7 @@ namespace Dialogic
             var symbol = text;
             var context = parent;
 
-            Realizer.ContextifySymbol(ref symbol, ref context);
+            Resolver.BindToContext(ref symbol, ref context);
 
             // Here we check if the set matches a dynamic parent property
             if (context != null)
@@ -632,7 +632,7 @@ namespace Dialogic
             realized.Clear();
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
-            realized[Meta.TEXT] = Realizer.ResolveGroups(text);
+            realized[Meta.TEXT] = Resolver.BindGroups(text);
             return this;
         }
 

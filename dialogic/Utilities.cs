@@ -624,8 +624,8 @@ namespace Dialogic
             string rval = value;
             if (globals != null)
             {
-                if (check.Contains(Defaults.SYMBOL)) check = Realizer.ResolveSymbols(check, null, globals);
-                if (value.Contains(Defaults.SYMBOL)) rval = Realizer.ResolveSymbols(value, null, globals);
+                if (check.Contains(Defaults.SYMBOL)) check = Resolver.BindSymbols(check, null, globals);
+                if (value.Contains(Defaults.SYMBOL)) rval = Resolver.BindSymbols(value, null, globals);
             }
             var passed = op.Invoke(check, rval);
             //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);

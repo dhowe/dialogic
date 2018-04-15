@@ -49,7 +49,7 @@
     <Compile Include="Commands.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="Realizer.cs" />
+    <Compile Include="Resolver.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="ChatRuntime.cs" />
     <Compile Include="ChatParser.cs" />

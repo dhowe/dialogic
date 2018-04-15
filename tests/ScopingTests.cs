@@ -29,7 +29,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
             Assert.Throws<RealizeException>(() => 
-                Realizer.ResolveSymbols("$animal", c1, null));
+                Resolver.BindSymbols("$animal", c1, null));
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
             Assert.Throws<RealizeException>(() => 
-                Realizer.ResolveSymbols("$animal", null, null));
+                Resolver.BindSymbols("$animal", null, null));
         }
 
         [Test]
@@ -46,7 +46,7 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
-            var res = Realizer.ResolveSymbols("$animal", c1, globals);
+            var res = Resolver.BindSymbols("$animal", c1, globals);
             Assert.That(res, Is.EqualTo("dog"));
         }
 
@@ -55,7 +55,7 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
-            var res = Realizer.ResolveSymbols("$cmplx", c1, globals);
+            var res = Resolver.BindSymbols("$cmplx", c1, globals);
             Assert.That(res, Is.EqualTo("((a|b) | then)"));
             //Assert.That(res, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("then"));
         }
@@ -66,7 +66,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime(null);
             Chat c1 = rt.AddNewChat("c1");
             c1.scope.Add("a", "b");
-            var res = Realizer.ResolveSymbols("$a", c1, globals);
+            var res = Resolver.BindSymbols("$a", c1, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
 
@@ -77,7 +77,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             c1.scope.Add("a", "$b");
             c1.scope.Add("b", "c");
-            var res = Realizer.ResolveSymbols("$a", c1, globals);
+            var res = Resolver.BindSymbols("$a", c1, globals);
             Assert.That(res, Is.EqualTo("c"));
         }
 
@@ -89,7 +89,7 @@ namespace Dialogic
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "b");
             //var res = c2.Realizer().Do("$c1.a", globals, c2);
-            var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
+            var res = Resolver.BindSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
 
@@ -100,7 +100,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "$animal");
-            var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
+            var res = Resolver.BindSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("dog"));
         }
 
@@ -111,7 +111,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "The $animal ate");
-            var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
+            var res = Resolver.BindSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("The dog ate"));
         }
 
@@ -122,7 +122,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "The $animal ate $prep");
-            var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
+            var res = Resolver.BindSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("The dog ate then"));
         }
 
@@ -134,7 +134,7 @@ namespace Dialogic
             c1.scope.Add("a", "$c2.a");
             Chat c2 = rt.AddNewChat("c2");
             c2.scope.Add("a", "b");
-            var res = Realizer.ResolveSymbols("$c1.a", c2, globals);
+            var res = Resolver.BindSymbols("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
 

@@ -7,8 +7,10 @@ using System.Linq;
 namespace Dialogic
 {
     [TestFixture]
-    public class RealizeTests
+    public class ResolverTests
     {
+        const bool NO_VALIDATORS = true;
+
         public static IDictionary<string, object> globals
             = new Dictionary<string, object>() {
                 { "obj-prop", "dog" },
@@ -22,9 +24,21 @@ namespace Dialogic
         [Test]
         public void ASimpleVar()
         {
-            var res = Realizer.ResolveSymbols("$a", null, new Dictionary<string, object>()
+            var res = Resolver.BindSymbols("$a", null, new Dictionary<string, object>()
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello"));
+        }
+
+        [Test]
+        public void GroupRecursionDepth()
+        {
+            var str = "CHAT c\n(I | (You | (doh | why | no) | ouY) | They)(want | hate | like | love)(coffee | bread | milk)";
+            Chat chat = ChatParser.ParseText(str, NO_VALIDATORS)[0];
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Say say = (Dialogic.Say)chat.commands[0];
+            say.Realize(null);
+            var s = say.Text();
+            Assert.That(s, Is.Not.EqualTo(""));
         }
 
         [Test]
@@ -44,7 +58,7 @@ namespace Dialogic
         {
             //// no replace to be made
             Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<RealizeException>(() => Realizer.ResolveSymbols("$a", null, globals));
+            Assert.Throws<RealizeException>(() => Resolver.BindSymbols("$a", null, globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",
@@ -153,14 +167,14 @@ namespace Dialogic
             string[] ok = { "The boy was sad", "The boy was happy" };
             for (int i = 0; i < 10; i++)
             {
-                CollectionAssert.Contains(ok, Realizer.ResolveGroups(txt));
+                CollectionAssert.Contains(ok, Resolver.BindGroups(txt));
             }
 
             txt = "The boy was (sad | happy | dead)";
             ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
             for (int i = 0; i < 10; i++)
             {
-                string s = Realizer.ResolveGroups(txt);
+                string s = Resolver.BindGroups(txt);
                 //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
@@ -197,7 +211,7 @@ namespace Dialogic
              };
 
             var s = @"SAY $a $a2";
-            s = Realizer.ResolveSymbols(s, null, globs);
+            s = Resolver.BindSymbols(s, null, globs);
             Assert.That(s, Is.EqualTo("SAY C C"));
         }
 
@@ -206,11 +220,11 @@ namespace Dialogic
         public void ReplaceVars()
         {
             var s = @"SAY The $animal woke $count times";
-            s = Realizer.ResolveSymbols(s, null, globals);
+            s = Resolver.BindSymbols(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
 
             s = @"SAY The $obj-prop woke $count times";
-            s = Realizer.ResolveSymbols(s, null, globals);
+            s = Resolver.BindSymbols(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
         }
 
@@ -220,11 +234,11 @@ namespace Dialogic
             string s;
    
             s = @"SAY The $animal woke and $prep (ate|ate)";
-            s = Realizer.Resolve(s, null, globals);
+            s = Resolver.Bind(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             s = @"SAY The $obj-prop woke and $prep (ate|ate)";
-            s = Realizer.Resolve(s, null, globals);
+            s = Resolver.Bind(s, null, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             //s = realizer.Do("$a", new Dictionary<string, object>()
@@ -234,7 +248,7 @@ namespace Dialogic
             string txt = "letter $group";
             for (int i = 0; i < 10; i++)
             {
-                Assert.That(Realizer.Resolve(txt, null, globals),
+                Assert.That(Resolver.Bind(txt, null, globals),
                     Is.EqualTo("letter a").Or.EqualTo("letter b"));
             }
 
@@ -243,7 +257,7 @@ namespace Dialogic
             string[] res = new string[10];
             for (int i = 0; i < res.Length; i++)
             {
-                res[i] = Realizer.Resolve(txt2, null, globals);
+                res[i] = Resolver.Bind(txt2, null, globals);
             }
             for (int i = 0; i < res.Length; i++)
             {

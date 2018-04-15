@@ -8,35 +8,35 @@ namespace Dialogic
     /// <summary>
     /// Handles realization of variables, probabilistic groups, and grammar rules
     /// </summary>
-    public static class Realizer
+    public static class Resolver
     {
         /// <summary>
         /// Iteratively resolve any variables or groups in the specified text 
         /// in the appropriate context
         /// </summary>
-        public static string Resolve(string text, Chat parent, IDictionary<string, object> globals)
+        public static string Bind(string text, Chat parent, IDictionary<string, object> globals)
         {
             var DBUG = false;
 
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (globals.IsNullOrEmpty() && parent == null) return ResolveGroups(text);
+            if (globals.IsNullOrEmpty() && parent == null) return BindGroups(text);
 
             if (DBUG) Console.WriteLine("Do#0.0: " + text + " " + globals.Stringify());
 
             var original = text;
-            int iterations = 0, maxIterations = 2;
+            int depth = 0, maxRecursionDepth = 10;
 
             do
             {
-                text = ResolveSymbols(text, parent, globals);
-                if (DBUG) Console.WriteLine("Do#" + iterations + ".1: " + text);
+                text = BindSymbols(text, parent, globals);
+                if (DBUG) Console.WriteLine("Do#" + depth + ".1: " + text);
 
-                text = ResolveGroups(text);
-                if (DBUG) Console.WriteLine("Do#" + iterations + ".2: " + text);
+                text = BindGroups(text);
+                if (DBUG) Console.WriteLine("Do#" + depth + ".2: " + text);
 
-                if (++iterations > maxIterations) throw new RealizeException
-                    ("Infinite loop in realizer: " + original);
+                if (++depth > maxRecursionDepth) throw new RealizeException
+                    ("Bind hit maxRecursionDepth for: " + original);
 
             } while (IsDynamic(text));
 
@@ -48,7 +48,7 @@ namespace Dialogic
         /// <summary>
         /// Handles Chat-scoping of variables by updating symbol name and switching to specified context
         /// </summary>
-        public static void ContextifySymbol(ref string symbol, ref Chat context)
+        internal static void BindToContext(ref string symbol, ref Chat context)
         {
             if (symbol.Contains('.'))
             {
@@ -77,9 +77,10 @@ namespace Dialogic
         /// Iteratively resolve any variables in the specified text 
         /// in the appropriate context
         /// </summary>
-        public static string ResolveSymbols(string text, Chat context, IDictionary<string, object> globals)
+        public static string BindSymbols(string text, Chat context, IDictionary<string, object> globals)
         {
-            int iterations = 0, maxIterations = 5;
+            int depth = 0, maxRecursionDepth = 10;
+
             while (text.Contains(Defaults.SYMBOL))
             {
                 foreach (var symbol in ParseSymbols(text))
@@ -87,12 +88,13 @@ namespace Dialogic
                     var dollarsym = Defaults.SYMBOL + symbol;
 
                     var theSymbol = symbol;
-                    ContextifySymbol(ref theSymbol, ref context);
+                    BindToContext(ref theSymbol, ref context);
                     text = text.Replace(dollarsym, ResolveSymbol(theSymbol, context, globals));
                 }
 
-                if (++iterations >= maxIterations) throw new RealizeException
-                    ("Max recursion depth hit for: " + text);
+                if (++depth >= maxRecursionDepth) throw new RealizeException
+                    ("BindSymbols hit maxRecursionDepth for: " + text);
+    
             }
             return text;
         }
@@ -102,7 +104,7 @@ namespace Dialogic
         /// in the appropriate context, creating and caching Resolution
         /// objects as necessary
         /// </summary>
-        public static string ResolveGroups(string text)
+        public static string BindGroups(string text)
         {
             var DBUG = false;
 
@@ -110,7 +112,7 @@ namespace Dialogic
             {
                 if (DBUG) Console.WriteLine("DoGroups: " + text);
 
-                int iterations = 0, maxIterations = 2;
+                int depth = 0, maxRecursionDepth = 10;
                 var original = text;
                 while (text.Contains('|'))
                 {
@@ -131,8 +133,9 @@ namespace Dialogic
                         text = text.ReplaceFirst(opt, pick);
                     }
 
-                    if (++iterations > maxIterations) throw new RealizeException
-                        ("DoGroups: Possible infinite loop in " + original);
+                    if (++depth > maxRecursionDepth) throw new RealizeException
+                        ("BindGroups hit maxRecursionDepth for: " + original);
+
                 }
             }
 
@@ -146,14 +149,12 @@ namespace Dialogic
         {
             //Console.WriteLine("RealizeSymbol: "+symbol+" in chat#"+(context!=null?context.text:"null"));
 
-            // check locals
-            if (context != null && context.scope.ContainsKey(symbol))
+            if (context != null && context.scope.ContainsKey(symbol)) // check locals
             {
                 return context.scope[symbol].ToString();
             }
 
-            // check globals
-            if (globals != null && globals.ContainsKey(symbol))
+            if (globals != null && globals.ContainsKey(symbol))   // check globals
             {
                 return globals[symbol].ToString();
             }
@@ -188,7 +189,7 @@ namespace Dialogic
             return Util.SortByLength(symbols);
         }
 
-        // TODO: redo iteratively
+        // TODO: redo iteratively?
         private static void ParseGroups(string input, List<string> results)
         {
             foreach (Match m in RE.MatchParens.Matches(input))
@@ -205,6 +206,7 @@ namespace Dialogic
                 }
             }
         }
+
         private static bool IsDynamic(string text)
         {
             return text != null &&
