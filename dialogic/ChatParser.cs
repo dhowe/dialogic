@@ -17,30 +17,57 @@ namespace Dialogic
         /// </summary>
         public static bool PRESERVE_LINE_NUMBERS = true;
 
-        internal const string TXT = @"([^#}{]+)?\s*";
+        //internal const string TXT = @"([^#}{]+)?\s*";
+
+        //internal const string TXT = @"((?:[^HERE])|(?:[^#}{]+))?\s*";
+        //internal const string TXT = @"([^{#]+)?\s*";
+        //internal const string TXT = @"((?:\w|\$(?=\})?\s*";
+        //internal const string TXT = @"([^#]+)?\s*";
+
+        //public const string TXT1 = @"(?:[^#}{]+)?\s*";
+        //public const string TXT2 = @"(?:[^$]*|\$\{?[^}]+\}?)*";
+
+        //// match up to # or a { unless preceded by a $
+        ////internal const string TXT = TXT1 + "|" + TXT2;
+        //internal const string TXT = @"(" + TXT1 + "|" + TXT2 + @")?\s*";
+        internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
+
+
+        //internal const string TXT = @"((?:(?:\$\{[^}]+\})|(?:[^#{]+)))?\s*";
+        //internal const string TXT = @"((?:[^#}]|\$\{)+)?\s*";
+       
         internal const string LBLL = @"(#[A-Za-z][\S]*)";
         internal const string LBLG = @"(#\([^\)]+\s*)";
         internal const string LBL = @"(?:" + LBLL + "|" + LBLG + @")?\s*";
         internal const string MTD = @"(?:\{(.+?)\})?\s*";
         internal const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
-        internal const string DLBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
-
+        internal const string DLBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\"
+            + @"(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
 
         static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
+        private static Regex lineParser;
+
         protected ChatRuntime runtime;
         protected Stack<Command> parsedCommands;
         protected internal List<Chat> chats;
-        protected internal Regex lineParser;
 
         internal ChatParser(ChatRuntime runtime)
         {
-            this.lineParser = new Regex(ACTR + TypesRegex() + TXT + DLBL + MTD);
             this.parsedCommands = new Stack<Command>();
             this.chats = new List<Chat>();
             this.runtime = runtime;
+        }
+
+        internal static Regex LineParser()
+        {
+            if (lineParser == null)
+            {
+                lineParser = new Regex(ACTR + TypesRegex() + TXT + DLBL + MTD);
+            }
+            return lineParser;
         }
 
         internal static List<Chat> ParseText(string s, bool noValidators = false)
@@ -83,8 +110,9 @@ namespace Dialogic
 
             try
             {
-                List<string> parts = DoSubDivision(line, lineNo);
-                c = ParseCommand(parts, line, lineNo);
+                //List<string> parts = DoSubDivision(line, lineNo);
+                //c = ParseCommand(parts, line, lineNo);
+                c = ParseCommand(new LineContext(line, lineNo));
                 RunExternalValidators(c);
                 RunInternalValidators(c);
             }
@@ -95,25 +123,6 @@ namespace Dialogic
             }
 
             return c;
-        }
-
-        private List<string> DoSubDivision(string line, int lineNo)
-        {
-            Match match = lineParser.Match(line);
-
-            if (match.Groups.Count < 6)
-            {
-                Util.ShowMatch(match);
-                throw new ParseException(line, lineNo, "cannot be parsed");
-            }
-
-            var parts = new List<string>();
-            for (int j = 1; j < 6; j++)
-            {
-                parts.Add(match.Groups[j].Value.Trim());
-            }
-
-            return parts;
         }
 
         private void RunExternalValidators(Command c)
@@ -138,7 +147,30 @@ namespace Dialogic
             }
         }
 
-        private Command ParseCommand(List<string> parts, string line, int lineNo)
+        private Command ParseCommand(LineContext lc)
+        {
+            var cmd = lc.command;
+            Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd]
+                : Chat.DefaultCommandType(chats.LastOrDefault());
+
+            Command c = null;
+            try
+            {
+                c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            HandleActor(lc.actor, c, lc.line, lc.lineNo);
+            HandleCommand(c, lc.line, lc.lineNo);
+
+            return c;
+        }
+
+        // remove
+        private Command ParseCommandOld(List<string> parts, string line, int lineNo)
         {
             Command c = null;
 
@@ -310,6 +342,40 @@ namespace Dialogic
         private void CreateDefaultChat()
         {
             parsedCommands.Push(AddChat(Chat.Create("C" + Util.EpochMs())));
+        }
+    }
+
+    internal class LineContext
+    {
+        internal string actor, command, text, label, meta;
+
+        internal readonly string line;
+        internal readonly int lineNo;
+
+        public LineContext(string line, int lineNo = -1, bool showMatch = false)
+        {
+            this.line = line;
+            this.lineNo = lineNo;
+            ParseLine(showMatch);
+        }
+
+        private void ParseLine(bool showMatch = false)
+        {
+            Match match = ChatParser.LineParser().Match(line);
+
+            if (showMatch) Util.ShowMatch(match);
+
+            if (match.Groups.Count < 6)
+            {
+                Util.ShowMatch(match);
+                throw new ParseException(line, lineNo, "cannot be parsed");
+            }
+
+            this.actor = match.Groups[1].Value.Trim();
+            this.command = match.Groups[2].Value.Trim();
+            this.text = match.Groups[3].Value.Trim();
+            this.label = match.Groups[4].Value.Trim();
+            this.meta = match.Groups[5].Value.Trim();
         }
     }
 }

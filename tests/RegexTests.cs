@@ -21,6 +21,104 @@ namespace Dialogic
             { "count", 4 }
         };
 
+        [Test]
+        public void MatchValidText()
+        {
+            Match match;
+
+            Regex regex = new Regex(ChatParser.TXT);
+            //var TXT2 = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
+            //regex = new Regex(TXT2);
+            Assert.That(regex.Match("a = b {").Value.Trim(), Is.EqualTo("a = b"));
+            Assert.That(regex.Match("a = b {a=b}").Value.Trim(), Is.EqualTo("a = b"));
+            Assert.That(regex.Match("a = $b").Value.Trim(), Is.EqualTo("a = $b"));
+            Assert.That(regex.Match("a = $b{").Value.Trim(), Is.EqualTo("a = $b"));
+            Assert.That(regex.Match("a=b{").Value.Trim(), Is.EqualTo("a=b"));
+            Assert.That(regex.Match("a=b{a=b}").Value.Trim(), Is.EqualTo("a=b"));
+            Assert.That(regex.Match("a=$b").Value.Trim(), Is.EqualTo("a=$b"));
+            Assert.That(regex.Match("a=$b{").Value.Trim(), Is.EqualTo("a=$b"));
+            Assert.That(regex.Match("$a=b{").Value.Trim(), Is.EqualTo("$a=b"));
+            Assert.That(regex.Match("$a=b{a=b}").Value.Trim(), Is.EqualTo("$a=b"));
+            Assert.That(regex.Match("$a=$b").Value.Trim(), Is.EqualTo("$a=$b"));
+            Assert.That(regex.Match("$a=$b{").Value.Trim(), Is.EqualTo("$a=$b"));
+
+            match = regex.Match("a=$b");
+            Assert.That(match.Value.Trim(), Is.EqualTo("a=$b"));
+            match = regex.Match("a=$b{");
+            Assert.That(match.Value.Trim(), Is.EqualTo("a=$b"));
+
+            match = regex.Match("a=${b}");
+            Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
+            match = regex.Match("a=${b} {}");
+            Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
+            match = regex.Match("a=${b.c} {}");
+            Assert.That(match.Value.Trim(), Is.EqualTo("a=${b.c}"));
+            match = regex.Match("a=${b->c} {");
+            Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
+            match = regex.Match("a=${b->c} #");
+            Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
+
+            match = regex.Match("$a=$b");
+            //Util.ShowMatch(match);
+            Assert.That(match.Value.Trim(), Is.EqualTo("$a=$b"));
+
+        }
+
+        [Test]
+        public void EnclosedVarText()
+        {
+            string text;
+            text = "SET a=$b";
+            LineContext lc;
+
+            lc = new LineContext(text);
+            Assert.That(lc, Is.Not.Null);
+            Assert.That(lc.command, Is.EqualTo("SET"));
+            Assert.That(lc.text, Is.EqualTo("a=$b"));
+            Assert.That(lc.meta, Is.EqualTo(""));
+
+            text = "SET a=${b}";
+            lc = new LineContext(text);
+            Assert.That(lc, Is.Not.Null);
+            Assert.That(lc.command, Is.EqualTo("SET"));
+            Assert.That(lc.text, Is.EqualTo("a=${b}"));
+            Assert.That(lc.meta, Is.EqualTo(""));
+
+            text = "SET a=${b} {meta=val}";
+            lc = new LineContext(text);
+            Assert.That(lc, Is.Not.Null);
+            Assert.That(lc.command, Is.EqualTo("SET"));
+            Assert.That(lc.text, Is.EqualTo("a=${b}"));
+            Assert.That(lc.meta, Is.EqualTo("meta=val"));
+
+            text = "SET a=${b.c} {meta=val}";
+            lc = new LineContext(text);
+            Assert.That(lc, Is.Not.Null);
+            Assert.That(lc.command, Is.EqualTo("SET"));
+            Assert.That(lc.text, Is.EqualTo("a=${b.c}"));
+            Assert.That(lc.meta, Is.EqualTo("meta=val"));
+
+            text = "SET a=${b->c} {meta=val}";
+            lc = new LineContext(text);
+            Assert.That(lc, Is.Not.Null);
+            Assert.That(lc.command, Is.EqualTo("SET"));
+            Assert.That(lc.text, Is.EqualTo("a=${b->c}"));
+            Assert.That(lc.meta, Is.EqualTo("meta=val"));
+
+            text = "SET a=${b->c->d} {meta=val}";
+            lc = new LineContext(text);
+            Assert.That(lc, Is.Not.Null);
+            Assert.That(lc.command, Is.EqualTo("SET"));
+            Assert.That(lc.text, Is.EqualTo("a=${b->c->d}"));
+            Assert.That(lc.meta, Is.EqualTo("meta=val"));
+
+            text = "SET a=${b&c&d} {meta=val}";
+            lc = new LineContext(text);
+            Assert.That(lc, Is.Not.Null);
+            Assert.That(lc.command, Is.EqualTo("SET"));
+            Assert.That(lc.text, Is.EqualTo("a=${b&c&d}"));
+            Assert.That(lc.meta, Is.EqualTo("meta=val"));
+        }
 
         [Test]
         public void DollarVars()
@@ -161,7 +259,7 @@ namespace Dialogic
         [Test]
         public void TestLines()
         {
-            var re = new ChatParser(null).lineParser;
+            var re = ChatParser.LineParser();
             Match match = re.Match("DO #Hello");
             //Util.ShowMatch(match);
             Assert.That(match.Groups.Count, Is.GreaterThanOrEqualTo(5));
@@ -174,7 +272,7 @@ namespace Dialogic
 
             //for (int i = 0; i < parts.Count; i++)Console.WriteLine(i+") "+parts[i]);
 
-            re = new ChatParser(null).lineParser;
+            re = ChatParser.LineParser();
             match = re.Match("DO #(Hello | Goodbye)");
             Assert.That(match.Groups.Count, Is.GreaterThanOrEqualTo(5));
 

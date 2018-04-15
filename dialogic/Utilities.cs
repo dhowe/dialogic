@@ -126,8 +126,8 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        internal const string PV1 = @"\$([A-Za-z_][A-Za-z0-9_-]*";
-        internal const string PV2 = @"(?:\.[A-Za-z_][A-Za-z0-9_-]*)*)(?:[ .!;,:?()""']|$)";
+        internal const string PV1 = @"\$\{?([A-Za-z_][A-Za-z0-9_-]*";
+        internal const string PV2 = @"(?:\.[A-Za-z_][A-Za-z0-9_-]*)*)(?:[ .!;,:?()}""']|$)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
         public static Regex SplitOr = new Regex(@"\s*\|\s*");

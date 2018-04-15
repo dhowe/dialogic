@@ -145,26 +145,47 @@ namespace Dialogic
             Chat chat;
             Set set;
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a= $obj-prop", NO_VALIDATORS)[0];
+            //chat = ChatParser.ParseText("CHAT c1\nSET a= $obj-prop", NO_VALIDATORS)[0];
+            //Assert.That(chat, Is.Not.Null);
+            //Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            //set = (Dialogic.Set)chat.commands[0];
+            //Assert.That(set.text, Is.EqualTo("a"));
+            //Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            //Assert.That(set.value, Is.EqualTo("$obj-prop"));
+            //set.Realize(globals);
+            //Assert.That(chat.scope["a"], Is.EqualTo("$obj-prop"));
+
+
+            //chat = ChatParser.ParseText("CHAT c1\nSET a2 = $obj-prop", NO_VALIDATORS)[0];
+            //Assert.That(chat, Is.Not.Null);
+            //Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            //set = (Dialogic.Set)chat.commands[0];
+            //Assert.That(set.text, Is.EqualTo("a2"));
+            //Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            //Assert.That(set.value, Is.EqualTo("$obj-prop"));
+            //set.Realize(globals);
+            //Assert.That(chat.scope["a2"], Is.EqualTo("$obj-prop"));
+
+            chat = ChatParser.ParseText("CHAT c1\nSET a= ${obj-prop}", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
-            Assert.That(set.value, Is.EqualTo("$obj-prop"));
+            Assert.That(set.value, Is.EqualTo("${obj-prop}"));
             set.Realize(globals);
-            Assert.That(chat.scope["a"], Is.EqualTo("$obj-prop"));
+            Assert.That(chat.scope["a"], Is.EqualTo("${obj-prop}"));
 
 
-            chat = ChatParser.ParseText("CHAT c1\nSET a2 = $obj-prop", NO_VALIDATORS)[0];
+            chat = ChatParser.ParseText("CHAT c1\nSET a2 = ${obj-prop}", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a2"));
             Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
-            Assert.That(set.value, Is.EqualTo("$obj-prop"));
+            Assert.That(set.value, Is.EqualTo("${obj-prop}"));
             set.Realize(globals);
-            Assert.That(chat.scope["a2"], Is.EqualTo("$obj-prop"));
+            Assert.That(chat.scope["a2"], Is.EqualTo("${obj-prop}"));
         }
 
         [Test]

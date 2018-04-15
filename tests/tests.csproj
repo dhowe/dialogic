@@ -41,7 +41,7 @@
     <Compile Include="SearchTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="RegexTests.cs" />
-    <Compile Include="SymbolScoping.cs" />
+    <Compile Include="ScopingTests.cs" />
     <Compile Include="GrammarTests.cs" />
   </ItemGroup>
   <ItemGroup>
