@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['elapsedsec',['ElapsedSec',['../class_dialogic_1_1_util.html#a9caeba26563fcac97460d2116db8423a',1,'Dialogic::Util']]],
-  ['epochms',['EpochMs',['../class_dialogic_1_1_util.html#ab26f819067b642f2da46367af7580caf',1,'Dialogic::Util']]],
-  ['extractmetameta',['ExtractMetaMeta',['../class_dialogic_1_1_chat_parser.html#af660b35b1543a8cee35510d84932482c',1,'Dialogic::ChatParser']]]
+  ['capitalize',['Capitalize',['../class_dialogic_1_1_modifiers.html#acff1c57c79cbf4b3af0084413771d092',1,'Dialogic::Modifiers']]],
+  ['constrain',['Constrain',['../class_dialogic_1_1_util.html#a62bf6e95d663b41267ba58f4e2176dad',1,'Dialogic::Util']]],
+  ['currentcontext',['CurrentContext',['../class_dialogic_1_1_chat_runtime.html#a888dd1a2375de0d74d6315414d9e3c9a',1,'Dialogic::ChatRuntime']]]
 ];

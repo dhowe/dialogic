@@ -1,10 +1,6 @@
 var searchData=
 [
-  ['find',['Find',['../class_dialogic_1_1_find.html',1,'Dialogic.Find'],['../class_dialogic_1_1_fuzzy_search.html#ab6e76cec5cbc0bce540b8428e0d0fe08',1,'Dialogic.FuzzySearch.Find()']]],
-  ['find_5fmax_5fstaleness',['FIND_MAX_STALENESS',['../class_dialogic_1_1_defaults.html#ab56fd4a024e341edeae89f4fe382d1d9',1,'Dialogic::Defaults']]],
-  ['find_5fnormalize_5fscores',['FIND_NORMALIZE_SCORES',['../class_dialogic_1_1_defaults.html#a2617e2e2d427a1c553717033cf10b323',1,'Dialogic::Defaults']]],
-  ['find_5frelaxation_5fincr',['FIND_RELAXATION_INCR',['../class_dialogic_1_1_defaults.html#a45ccbaa7895aeebc49a49acfa74578f1',1,'Dialogic::Defaults']]],
-  ['find_5fstaleness',['FIND_STALENESS',['../class_dialogic_1_1_defaults.html#a0fbad28c55447a0f8c3c5fb18b4bd227',1,'Dialogic::Defaults']]],
-  ['floatingequals',['FloatingEquals',['../class_dialogic_1_1_util.html#ad32881d5b54aa70a4bb52c53475ecf02',1,'Dialogic::Util']]],
-  ['fuzzysearch',['FuzzySearch',['../class_dialogic_1_1_fuzzy_search.html',1,'Dialogic']]]
+  ['elapsedsec',['ElapsedSec',['../class_dialogic_1_1_util.html#a9caeba26563fcac97460d2116db8423a',1,'Dialogic::Util']]],
+  ['epochms',['EpochMs',['../class_dialogic_1_1_util.html#ab26f819067b642f2da46367af7580caf',1,'Dialogic::Util']]],
+  ['extractmetameta',['ExtractMetaMeta',['../class_dialogic_1_1_chat_parser.html#af660b35b1543a8cee35510d84932482c',1,'Dialogic::ChatParser']]]
 ];

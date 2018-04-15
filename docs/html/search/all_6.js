@@ -1,14 +1,7 @@
 var searchData=
 [
-  ['iactor',['IActor',['../interface_dialogic_1_1_i_actor.html',1,'Dialogic']]],
-  ['iassignable',['IAssignable',['../interface_dialogic_1_1_i_assignable.html',1,'Dialogic']]],
-  ['ichatupdate',['IChatUpdate',['../interface_dialogic_1_1_i_chat_update.html',1,'Dialogic']]],
-  ['ichoice',['IChoice',['../interface_dialogic_1_1_i_choice.html',1,'Dialogic']]],
-  ['iclear',['IClear',['../interface_dialogic_1_1_i_clear.html',1,'Dialogic']]],
-  ['iconfigevent',['IConfigEvent',['../interface_dialogic_1_1_i_config_event.html',1,'Dialogic']]],
-  ['iresume',['IResume',['../interface_dialogic_1_1_i_resume.html',1,'Dialogic']]],
-  ['isendable',['ISendable',['../interface_dialogic_1_1_i_sendable.html',1,'Dialogic']]],
-  ['isuspend',['ISuspend',['../interface_dialogic_1_1_i_suspend.html',1,'Dialogic']]],
-  ['iupdateevent',['IUpdateEvent',['../interface_dialogic_1_1_i_update_event.html',1,'Dialogic']]],
-  ['iuserevent',['IUserEvent',['../interface_dialogic_1_1_i_user_event.html',1,'Dialogic']]]
+  ['gameevent',['GameEvent',['../class_dialogic_1_1_game_event.html',1,'Dialogic']]],
+  ['getactor',['GetActor',['../class_dialogic_1_1_command.html#a081051f09320a3f4500a829eb527eb80',1,'Dialogic::Command']]],
+  ['global_5ftime_5fscale',['GLOBAL_TIME_SCALE',['../class_dialogic_1_1_defaults.html#a625ba1186a50240c02fce8be058a1a42',1,'Dialogic::Defaults']]],
+  ['go',['Go',['../class_dialogic_1_1_go.html',1,'Dialogic']]]
 ];

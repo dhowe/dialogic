@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['elapsedsec',['ElapsedSec',['../class_dialogic_1_1_util.html#a9caeba26563fcac97460d2116db8423a',1,'Dialogic::Util']]],
-  ['epochms',['EpochMs',['../class_dialogic_1_1_util.html#ab26f819067b642f2da46367af7580caf',1,'Dialogic::Util']]],
-  ['extractmetameta',['ExtractMetaMeta',['../class_dialogic_1_1_chat_parser.html#af660b35b1543a8cee35510d84932482c',1,'Dialogic::ChatParser']]]
+  ['defaults',['Defaults',['../class_dialogic_1_1_defaults.html',1,'Dialogic']]],
+  ['dialogic',['Dialogic',['../namespace_dialogic.html',1,'']]],
+  ['do',['Do',['../class_dialogic_1_1_do.html',1,'Dialogic']]],
+  ['do_5fduration',['DO_DURATION',['../class_dialogic_1_1_defaults.html#a27d15e8a7b4210db4f66d336e7d100d1',1,'Dialogic::Defaults']]],
+  ['dialogic',['Dialogic',['../index.html',1,'']]]
 ];

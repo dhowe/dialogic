@@ -1,6 +1,14 @@
 var searchData=
 [
-  ['map',['Map',['../class_dialogic_1_1_util.html#a0d6ff682b0a8b29f08e477b462e15c92',1,'Dialogic::Util']]],
-  ['meta',['Meta',['../class_dialogic_1_1_meta.html',1,'Dialogic']]],
-  ['millis',['Millis',['../class_dialogic_1_1_util.html#ad26c864be4ade63717dc822d7d93aae7',1,'Dialogic.Util.Millis()'],['../class_dialogic_1_1_util.html#ada380e5d3eef7d8d7412d38f504458eb',1,'Dialogic.Util.Millis(int since)']]]
+  ['iactor',['IActor',['../interface_dialogic_1_1_i_actor.html',1,'Dialogic']]],
+  ['iassignable',['IAssignable',['../interface_dialogic_1_1_i_assignable.html',1,'Dialogic']]],
+  ['ichatupdate',['IChatUpdate',['../interface_dialogic_1_1_i_chat_update.html',1,'Dialogic']]],
+  ['ichoice',['IChoice',['../interface_dialogic_1_1_i_choice.html',1,'Dialogic']]],
+  ['iclear',['IClear',['../interface_dialogic_1_1_i_clear.html',1,'Dialogic']]],
+  ['iconfigevent',['IConfigEvent',['../interface_dialogic_1_1_i_config_event.html',1,'Dialogic']]],
+  ['iresume',['IResume',['../interface_dialogic_1_1_i_resume.html',1,'Dialogic']]],
+  ['isendable',['ISendable',['../interface_dialogic_1_1_i_sendable.html',1,'Dialogic']]],
+  ['isuspend',['ISuspend',['../interface_dialogic_1_1_i_suspend.html',1,'Dialogic']]],
+  ['iupdateevent',['IUpdateEvent',['../interface_dialogic_1_1_i_update_event.html',1,'Dialogic']]],
+  ['iuserevent',['IUserEvent',['../interface_dialogic_1_1_i_user_event.html',1,'Dialogic']]]
 ];

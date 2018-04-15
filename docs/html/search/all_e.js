@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['updateevent',['UpdateEvent',['../class_dialogic_1_1_update_event.html',1,'Dialogic']]],
-  ['userevent',['UserEvent',['../class_dialogic_1_1_user_event.html',1,'Dialogic']]],
-  ['util',['Util',['../class_dialogic_1_1_util.html',1,'Dialogic']]]
+  ['say_5fduration',['SAY_DURATION',['../class_dialogic_1_1_defaults.html#ad8ef6a7453dcac7a87b5304c3590a3fa',1,'Dialogic::Defaults']]],
+  ['set',['Set',['../class_dialogic_1_1_set.html',1,'Dialogic']]],
+  ['stalenessupdate',['StalenessUpdate',['../class_dialogic_1_1_staleness_update.html',1,'Dialogic']]],
+  ['suspendevent',['SuspendEvent',['../class_dialogic_1_1_suspend_event.html',1,'Dialogic']]]
 ];

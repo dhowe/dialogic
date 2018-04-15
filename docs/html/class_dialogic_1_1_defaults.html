@@ -76,16 +76,19 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>A (temporary) container for <a class="el" href="namespace_dialogic.html">Dialogic</a> defaults that can be changed at runtime.  
+<p>A (temporary) container for runtime-settable defaults  
  <a href="class_dialogic_1_1_defaults.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
+<tr class="memitem:a625ba1186a50240c02fce8be058a1a42"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#a625ba1186a50240c02fce8be058a1a42">GLOBAL_TIME_SCALE</a> = 1.0</td></tr>
+<tr class="memdesc:a625ba1186a50240c02fce8be058a1a42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default scale for all <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> durations  <a href="#a625ba1186a50240c02fce8be058a1a42">More...</a><br /></td></tr>
+<tr class="separator:a625ba1186a50240c02fce8be058a1a42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8ef6a7453dcac7a87b5304c3590a3fa"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#ad8ef6a7453dcac7a87b5304c3590a3fa">SAY_DURATION</a> = 2.0</td></tr>
 <tr class="memdesc:ad8ef6a7453dcac7a87b5304c3590a3fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> duration for Say  <a href="#ad8ef6a7453dcac7a87b5304c3590a3fa">More...</a><br /></td></tr>
 <tr class="separator:ad8ef6a7453dcac7a87b5304c3590a3fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27d15e8a7b4210db4f66d336e7d100d1"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#a27d15e8a7b4210db4f66d336e7d100d1">DO_DURATION</a> = 0.02</td></tr>
-<tr class="memdesc:a27d15e8a7b4210db4f66d336e7d100d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> duration for Do  <a href="#a27d15e8a7b4210db4f66d336e7d100d1">More...</a><br /></td></tr>
+<tr class="memdesc:a27d15e8a7b4210db4f66d336e7d100d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> duration for <a class="el" href="class_dialogic_1_1_do.html" title="The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environ...">Do</a>  <a href="#a27d15e8a7b4210db4f66d336e7d100d1">More...</a><br /></td></tr>
 <tr class="separator:a27d15e8a7b4210db4f66d336e7d100d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d936bec8191255621f7cabb06c7b001"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#a5d936bec8191255621f7cabb06c7b001">ASK_DURATION</a> = Util.INFINITE</td></tr>
 <tr class="memdesc:a5d936bec8191255621f7cabb06c7b001"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> duration for <a class="el" href="class_dialogic_1_1_ask.html" title="The ASK command is for prompting the user, and is generally followed by one or more OPT commands...">Ask</a>  <a href="#a5d936bec8191255621f7cabb06c7b001">More...</a><br /></td></tr>
@@ -137,7 +140,7 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
 <tr class="separator:ab095c80f657409e95aaef8e9d723bd6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A (temporary) container for <a class="el" href="namespace_dialogic.html">Dialogic</a> defaults that can be changed at runtime. </p>
+<div class="textblock"><p>A (temporary) container for runtime-settable defaults </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a5d936bec8191255621f7cabb06c7b001"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5d936bec8191255621f7cabb06c7b001">&#9670;&nbsp;</a></span>ASK_DURATION</h2>
@@ -279,7 +282,7 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
 </table>
 </div><div class="memdoc">
 
-<p>Default <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> duration for Do </p>
+<p>Default <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> duration for <a class="el" href="class_dialogic_1_1_do.html" title="The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environ...">Do</a> </p>
 
 </div>
 </div>
@@ -376,6 +379,30 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
 </div><div class="memdoc">
 
 <p>Default staleness-threshold for <a class="el" href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply...">Find</a> </p>
+
+</div>
+</div>
+<a id="a625ba1186a50240c02fce8be058a1a42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a625ba1186a50240c02fce8be058a1a42">&#9670;&nbsp;</a></span>GLOBAL_TIME_SCALE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double Dialogic.Defaults.GLOBAL_TIME_SCALE = 1.0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Default scale for all <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> durations </p>
 
 </div>
 </div>

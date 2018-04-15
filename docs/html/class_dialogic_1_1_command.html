@@ -86,31 +86,32 @@ Inheritance diagram for Dialogic.Command:</div>
  <div class="center">
   <img src="class_dialogic_1_1_command.png" usemap="#Dialogic.Command_map" alt=""/>
   <map id="Dialogic.Command_map" name="Dialogic.Command_map">
-<area href="class_dialogic_1_1_meta.html" title="Superclass for all Commands that may be assigned metadata " alt="Dialogic.Meta" shape="rect" coords="254,0,371,24"/>
+<area href="class_dialogic_1_1_meta.html" title="Superclass for all Commands that may be assigned metadata " alt="Dialogic.Meta" shape="rect" coords="317,0,434,24"/>
 <area href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai..." alt="Dialogic.Chat" shape="rect" coords="0,112,117,136"/>
-<area href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply..." alt="Dialogic.Find" shape="rect" coords="127,112,244,136"/>
-<area href="class_dialogic_1_1_set.html" title="The Set command is used to create or modify a variable. Variables generally originate from the game e..." alt="Dialogic.Set" shape="rect" coords="254,112,371,136"/>
-<area href="class_dialogic_1_1_wait.html" title="The Wait command is used to pause the runtime for a period of time. It accepts a single number specif..." alt="Dialogic.Wait" shape="rect" coords="381,112,498,136"/>
-<area href="class_tendar_1_1_nvm.html" alt="Tendar.Nvm" shape="rect" coords="508,112,625,136"/>
-<area href="class_dialogic_1_1_go.html" title="The Go command accepts a single label used to specify the next Chat to jump to. When a Go command is ..." alt="Dialogic.Go" shape="rect" coords="127,168,244,192"/>
+<area href="class_dialogic_1_1_do.html" title="The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environ..." alt="Dialogic.Do" shape="rect" coords="127,112,244,136"/>
+<area href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply..." alt="Dialogic.Find" shape="rect" coords="254,112,371,136"/>
+<area href="class_dialogic_1_1_set.html" title="The Set command is used to create or modify a variable. Variables generally originate from the game e..." alt="Dialogic.Set" shape="rect" coords="381,112,498,136"/>
+<area href="class_dialogic_1_1_wait.html" title="The Wait command is used to pause the runtime for a period of time. It accepts a single number specif..." alt="Dialogic.Wait" shape="rect" coords="508,112,625,136"/>
+<area href="class_tendar_1_1_nvm.html" alt="Tendar.Nvm" shape="rect" coords="635,112,752,136"/>
+<area href="class_dialogic_1_1_go.html" title="The Go command accepts a single label used to specify the next Chat to jump to. When a Go command is ..." alt="Dialogic.Go" shape="rect" coords="254,168,371,192"/>
 </map>
  </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa3a6e009e28e5b200af1f22e656b4572"><td class="memItemLeft" align="right" valign="top"><a id="aa3a6e009e28e5b200af1f22e656b4572"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>Text</b> (bool real=false)</td></tr>
-<tr class="separator:aa3a6e009e28e5b200af1f22e656b4572"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa52631fe6e10c84be0e32f58c856fa14"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#aa52631fe6e10c84be0e32f58c856fa14">Actor</a> ()</td></tr>
-<tr class="memdesc:aa52631fe6e10c84be0e32f58c856fa14"><td class="mdescLeft">&#160;</td><td class="mdescRight">In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.  <a href="#aa52631fe6e10c84be0e32f58c856fa14">More...</a><br /></td></tr>
-<tr class="separator:aa52631fe6e10c84be0e32f58c856fa14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefd691e636e6cfcf2e7973687cbbffbf"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#aefd691e636e6cfcf2e7973687cbbffbf">Text</a> ()</td></tr>
+<tr class="memdesc:aefd691e636e6cfcf2e7973687cbbffbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">REturns realized text for this object, equivalent to this.Realized(Meta.TEXT);  <a href="#aefd691e636e6cfcf2e7973687cbbffbf">More...</a><br /></td></tr>
+<tr class="separator:aefd691e636e6cfcf2e7973687cbbffbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a081051f09320a3f4500a829eb527eb80"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a081051f09320a3f4500a829eb527eb80">GetActor</a> ()</td></tr>
+<tr class="memdesc:a081051f09320a3f4500a829eb527eb80"><td class="mdescLeft">&#160;</td><td class="mdescRight">In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.  <a href="#a081051f09320a3f4500a829eb527eb80">More...</a><br /></td></tr>
+<tr class="separator:a081051f09320a3f4500a829eb527eb80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14b619fbe3a23f3578912c7fc05f7fc0"><td class="memItemLeft" align="right" valign="top"><a id="a14b619fbe3a23f3578912c7fc05f7fc0"></a>
 override string&#160;</td><td class="memItemRight" valign="bottom"><b>ToString</b> ()</td></tr>
 <tr class="separator:a14b619fbe3a23f3578912c7fc05f7fc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_dialogic_1_1_meta"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_dialogic_1_1_meta')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_dialogic_1_1_meta.html">Dialogic.Meta</a></td></tr>
-<tr class="memitem:ad1f3f7681c890761e70a87c67659e4bf inherit pub_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="ad1f3f7681c890761e70a87c67659e4bf"></a>
-IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetRealized</b> ()</td></tr>
-<tr class="separator:ad1f3f7681c890761e70a87c67659e4bf inherit pub_methods_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c0cb5cc1894fc184e2e5618e59bb022 inherit pub_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a0c0cb5cc1894fc184e2e5618e59bb022"></a>
+IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Realized</b> ()</td></tr>
+<tr class="separator:a0c0cb5cc1894fc184e2e5618e59bb022 inherit pub_methods_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -192,8 +193,8 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Superclass for all Commands. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by Validate(). </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="aa52631fe6e10c84be0e32f58c856fa14"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa52631fe6e10c84be0e32f58c856fa14">&#9670;&nbsp;</a></span>Actor()</h2>
+<a id="a081051f09320a3f4500a829eb527eb80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a081051f09320a3f4500a829eb527eb80">&#9670;&nbsp;</a></span>GetActor()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -202,7 +203,7 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> Dialogic.Command.Actor </td>
+          <td class="memname"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> Dialogic.Command.GetActor </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -217,6 +218,34 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_
 
 <p>In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command. </p>
 <dl class="section return"><dt>Returns</dt><dd>The actor.</dd></dl>
+
+</div>
+</div>
+<a id="aefd691e636e6cfcf2e7973687cbbffbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefd691e636e6cfcf2e7973687cbbffbf">&#9670;&nbsp;</a></span>Text()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">string Dialogic.Command.Text </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>REturns realized text for this object, equivalent to this.Realized(Meta.TEXT); </p>
+<dl class="section return"><dt>Returns</dt><dd>The text.</dd></dl>
 
 </div>
 </div>

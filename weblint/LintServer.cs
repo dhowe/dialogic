@@ -68,8 +68,9 @@ namespace Dialogic.Server
                                 ctx.Response.ContentLength64 = buf.Length;
                                 ctx.Response.OutputStream.Write(buf, 0, buf.Length);
                             }
-                            catch(Exception e) { 
-                                Console.WriteLine("[WARN] "+e);
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("[WARN] " + e);
                             }
                             finally
                             {
@@ -125,15 +126,17 @@ namespace Dialogic.Server
 
                 //Console.WriteLine(runtime);
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
-        
+
                 if (mode == "execute")
                 {
                     runtime.Chats().ForEach(c => c.Realize(null));
                     var cmd = runtime.Chats().Last().commands.Last();
-                    var executeContent = cmd.TypeName().ToUpper() + " " 
+                    var executeContent = cmd.TypeName().ToUpper() + " "
                         + cmd.text + " -> " + cmd.Text();
                     html = html.Replace("%%EXECUTE%%", WebUtility.HtmlEncode(executeContent));
-                } else {
+                }
+                else
+                {
                     html = html.Replace("%%EXECUTE%%", "");
                 }
 
@@ -160,12 +163,11 @@ namespace Dialogic.Server
         {
             html = html.Replace("%%RCLASS%%", "error");
             html = html.Replace("%%RESULT%%", ex.Message);
-            html = html.Replace("%%ERRORLINE%%", 
+            html = html.Replace("%%ERRORLINE%%",
                 (lineno >= 0 ? lineno.ToString() : ""));
         }
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
-        //private static string ParsePostData(HttpListenerRequest request)
         {
 
             IDictionary<string, string> result = new Dictionary<string, string>();
@@ -178,10 +180,8 @@ namespace Dialogic.Server
 
                 if (request.ContentType == "application/x-www-form-urlencoded")
                 {
-                    //string s = Uri.UnescapeDataString(reader.ReadToEnd());
                     string s = reader.ReadToEnd();
                     string[] pairs = s.Split('&');
-                    //Console.WriteLine("Found " + pairs.Length + " kv-pairs");
 
                     foreach (var p in pairs)
                     {
@@ -189,7 +189,7 @@ namespace Dialogic.Server
                         if (pair.Length == 2)
                         {
                             //Console.WriteLine(pair[0] + ": " + pair[1]);
-                            result.Add(WebUtility.UrlDecode(pair[0]), 
+                            result.Add(WebUtility.UrlDecode(pair[0]),
                                 WebUtility.UrlDecode(pair[1]));
                         }
                         else

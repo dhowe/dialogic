@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['tomillis',['ToMillis',['../class_dialogic_1_1_util.html#a37840bebacbbc886a2f8aa4e61022aec',1,'Dialogic::Util']]],
-  ['tosec',['ToSec',['../class_dialogic_1_1_util.html#a751f2c3ec959c4d67e13c388f04f0642',1,'Dialogic::Util']]],
-  ['trimfirst',['TrimFirst',['../class_dialogic_1_1_util.html#aa5d692b014000f14242bbac95c8ae9bc',1,'Dialogic::Util']]],
-  ['trimlast',['TrimLast',['../class_dialogic_1_1_util.html#a913c5e22d8656af9263c9fb442e4d351',1,'Dialogic::Util']]]
+  ['map',['Map',['../class_dialogic_1_1_util.html#a0d6ff682b0a8b29f08e477b462e15c92',1,'Dialogic::Util']]],
+  ['millis',['Millis',['../class_dialogic_1_1_util.html#ad26c864be4ade63717dc822d7d93aae7',1,'Dialogic.Util.Millis()'],['../class_dialogic_1_1_util.html#ada380e5d3eef7d8d7412d38f504458eb',1,'Dialogic.Util.Millis(int since)']]]
 ];
