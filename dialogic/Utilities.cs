@@ -135,6 +135,8 @@ namespace Dialogic
         public static Regex ValidGroup = new Regex(@"\([^)]+|[^)]+\)");
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
+        public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
     }
 
     /// <summary>

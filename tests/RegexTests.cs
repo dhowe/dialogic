@@ -26,8 +26,7 @@ namespace Dialogic
             Match match;
 
             Regex regex = new Regex(ChatParser.TXT);
-            //var TXT2 = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
-            //regex = new Regex(TXT2);
+
             Assert.That(regex.Match("a = b {").Value.Trim(), Is.EqualTo("a = b"));
             Assert.That(regex.Match("a = b {a=b}").Value.Trim(), Is.EqualTo("a = b"));
             Assert.That(regex.Match("a = $b").Value.Trim(), Is.EqualTo("a = $b"));

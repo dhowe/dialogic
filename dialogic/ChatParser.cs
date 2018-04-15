@@ -17,35 +17,12 @@ namespace Dialogic
         /// </summary>
         public static bool PRESERVE_LINE_NUMBERS = true;
 
-        //internal const string TXT = @"([^#}{]+)?\s*";
-
-        //internal const string TXT = @"((?:[^HERE])|(?:[^#}{]+))?\s*";
-        //internal const string TXT = @"([^{#]+)?\s*";
-        //internal const string TXT = @"((?:\w|\$(?=\})?\s*";
-        //internal const string TXT = @"([^#]+)?\s*";
-
-        //public const string TXT1 = @"(?:[^#}{]+)?\s*";
-        //public const string TXT2 = @"(?:[^$]*|\$\{?[^}]+\}?)*";
-
-        //// match up to # or a { unless preceded by a $
-        ////internal const string TXT = TXT1 + "|" + TXT2;
-        //internal const string TXT = @"(" + TXT1 + "|" + TXT2 + @")?\s*";
-        internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
-
-
-        //internal const string TXT = @"((?:(?:\$\{[^}]+\})|(?:[^#{]+)))?\s*";
-        //internal const string TXT = @"((?:[^#}]|\$\{)+)?\s*";
-       
-        internal const string LBLL = @"(#[A-Za-z][\S]*)";
-        internal const string LBLG = @"(#\([^\)]+\s*)";
-        internal const string LBL = @"(?:" + LBLL + "|" + LBLG + @")?\s*";
-        internal const string MTD = @"(?:\{(.+?)\})?\s*";
-        internal const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
+        internal const string TXT = @"((?:(?:[^$}{#])*"
+            + @"(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
         internal const string DLBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\"
             + @"(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
-
-        static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
-        static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
+        internal const string MTD = @"(?:\{(.+?)\})?\s*";
+        internal const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
         private static Regex lineParser;
@@ -316,7 +293,7 @@ namespace Dialogic
         {
             if (text == null) throw new ParseException("Null input");
 
-            if (PRESERVE_LINE_NUMBERS)  // slow two-pass
+            if (PRESERVE_LINE_NUMBERS)  // slower two-pass
             {
                 var lines = text.Split(LineBreaks, StringSplitOptions.None);
                 lines = Util.StripMultiLineComments(lines);
@@ -324,8 +301,8 @@ namespace Dialogic
             }
             else                       // faster one-pass
             {
-                text = MultiComment.Replace(text, String.Empty);
-                text = SingleComment.Replace(text, String.Empty);
+                text = RE.MultiComment.Replace(text, String.Empty);
+                text = RE.SingleComment.Replace(text, String.Empty);
                 return text.Split('\n');
             }
         }
