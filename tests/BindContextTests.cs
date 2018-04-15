@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Dialogic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Dialogic
