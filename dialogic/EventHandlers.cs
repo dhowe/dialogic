@@ -37,27 +37,17 @@ namespace Dialogic
 
             ea = null;
 
-            // TODO: Refactor with ResumeHandler
-
-            if (String.IsNullOrEmpty(findBy)) // apply to all chats
+            if (String.IsNullOrEmpty(findBy))        // apply action to all chats
             {
                 runtime.chats.ForEach(action);
             }
-            else  if (findBy.StartsWith(Util.LABEL_IDENT, Util.IC)) // label
+            else if (findBy.StartsWith(Util.LABEL_IDENT, Util.IC)) // to one chat
             {
                 action.Invoke(runtime.FindChatByLabel(findBy));
             }
-            else // else, parse as FIND meta data
+            else                                  // to all those matching findBy
             {
-                if (updateDelegate == null) updateDelegate = new Find();
-                try
-                {
-                    updateDelegate.Init(findBy);
-                }
-                catch (ParseException e)
-                {
-                    throw new RuntimeParseException(e);
-                }
+                UpdateFinder(ref updateDelegate, findBy);
                 runtime.FindAllAsync(updateDelegate, action, globals);
             }
 
@@ -95,38 +85,41 @@ namespace Dialogic
             IResume ir = (IResume)ea;
             var label = ir.ResumeWith();
 
-            //Console.WriteLine("ResumeHandler: "+label);
-
             ea = null;
 
-            if (String.IsNullOrEmpty(label)) // TODO: Refactor with ChatUpdateHandler
+            if (String.IsNullOrEmpty(label))                        // resume current
             {
                 scheduler.nextEventTime = scheduler.Resume();
             }
-            else if (label.StartsWith(Util.LABEL_IDENT, Util.IC))
+            else if (label.StartsWith(Util.LABEL_IDENT, Util.IC)) // resume specified
             {
                 scheduler.Suspend();
                 scheduler.Launch(label);
             }
-            else // else, parse as FIND meta data
+            else                                      // resume chat returned by Find
             {
-                if (findDelegate == null) findDelegate = new Find();
-
-                try
-                {
-                    findDelegate.Init(label);
-                }
-                catch (ParseException e)
-                {
-                    throw new RuntimeParseException(e);
-                }
-
                 scheduler.Suspend();
+                UpdateFinder(ref findDelegate, label);
                 runtime.FindAsync(findDelegate, globals);
             }
 
             return null;
         }
+
+        private static void UpdateFinder(ref Find finder, string label)
+        {
+            if (finder == null) finder = new Find();
+
+            try
+            {
+                finder.Init(label);
+            }
+            catch (ParseException e)
+            {
+                throw new RuntimeParseException(e);
+            }
+        }
+
 
         private IUpdateEvent ChoiceHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
@@ -149,7 +142,7 @@ namespace Dialogic
                 if (opt.action != Command.NOP)
                 {
                     // We've gotten a response with a branch, so finish & take it
-                    scheduler.Completed(false); 
+                    scheduler.Completed(false);
                     runtime.FindAsync((Find)opt.action); // find next
                 }
                 else
@@ -198,12 +191,6 @@ namespace Dialogic
                     // Here the Chat has completed without redirecting 
                     // so we check the stack for a chat to resume
                     scheduler.Completed(true);
-
-                    /*int nextEventMs = scheduler.Completed(true);
-                    if (nextEventMs > -1) {
-                        scheduler.Info("<#" + scheduler.chat.text + "-resumed>");
-                        scheduler.nextEventTime = nextEventMs;
-                    }*/
                 }
             }
 
@@ -212,7 +199,7 @@ namespace Dialogic
 
         private IUpdateEvent HandleCommand(Command cmd)
         {
-            if (ChatRuntime.LOG_FILE!= null) WriteToLog(cmd);
+            if (ChatRuntime.LOG_FILE != null) WriteToLog(cmd);
 
             if (cmd is ISendable)
             {
@@ -249,8 +236,9 @@ namespace Dialogic
 
         internal void ComputeNextEventTime(Command cmd)
         {
-            scheduler.nextEventTime = cmd.delay >= 0 ? Util.Millis()
-                + cmd.ComputeDuration() : Int32.MaxValue;
+            scheduler.nextEventTime = (cmd.delay >= 0 ? Util.Millis()
+                + (int)(cmd.ComputeDuration() * Defaults.GLOBAL_TIME_SCALE)
+                : Int32.MaxValue);
         }
 
         public void WriteToLog(Command c)

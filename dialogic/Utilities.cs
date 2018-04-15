@@ -13,12 +13,16 @@ using System.Runtime.CompilerServices;
 namespace Dialogic
 {
     /// <summary>
-    /// A (temporary) container for Dialogic defaults that can be changed
-    /// at runtime.
+    /// A (temporary) container for runtime-settable defaults
     /// </summary>
     public static class Defaults
     {
         internal static readonly char SYMBOL = '$';
+
+        /// <summary>
+        /// Default scale for all Command durations
+        /// </summary>
+        public static double GLOBAL_TIME_SCALE = 1.0;
 
         /// <summary>
         /// Default Command duration for Say
