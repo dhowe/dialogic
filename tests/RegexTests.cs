@@ -132,7 +132,7 @@ namespace Dialogic
             foreach (Match match in matches)
             {
                 //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[1].Value);
+                vars.Add(match.Groups[2].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -146,7 +146,7 @@ namespace Dialogic
             foreach (Match match in matches)
             {
                 //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[1].Value);
+                vars.Add(match.Groups[2].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -160,7 +160,7 @@ namespace Dialogic
             foreach (Match match in matches)
             {
                 //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[1].Value);
+                vars.Add(match.Groups[2].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -175,7 +175,7 @@ namespace Dialogic
             foreach (Match match in matches)
             {
                 //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[1].Value);
+                vars.Add(match.Groups[2].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -204,9 +204,8 @@ namespace Dialogic
             var vars = new List<string>();
             foreach (Match match in matches)
             {
-                if (match.Groups.Count != 2)
-                    throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[1].Value);
+                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
+                vars.Add(match.Groups[2].Value);
             }
             //vars.ForEach(Console.WriteLine);
             //Util.ShowMatches(matches);
