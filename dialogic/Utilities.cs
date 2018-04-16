@@ -781,7 +781,7 @@ namespace Dialogic
                     {
                         if (++iterations > maxIterations) // should never happen
                         {
-                            throw new RealizeException("Max limit: " + this);
+                            throw new ResolverException("Max limit: " + this);
                         }
                         resolved = (string)Util.RandItem(options);
                     }
@@ -804,7 +804,7 @@ namespace Dialogic
 
         private static Exception InvalidState(string sub)
         {
-            return new RealizeException("Invalid State: '" + sub + "'");
+            return new ResolverException("Invalid State: '" + sub + "'");
         }
     }
 

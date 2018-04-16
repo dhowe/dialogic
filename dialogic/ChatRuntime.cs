@@ -59,6 +59,8 @@ namespace Dialogic
         private List<Func<Command, bool>> validators;
         private IDictionary<string, Chat> chats;
 
+        public ChatRuntime() : this(null, null) { }
+
         public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
 
         public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)

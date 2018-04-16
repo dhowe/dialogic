@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Dialogic
 {
@@ -9,9 +10,23 @@ namespace Dialogic
         public DialogicException(string msg = "") : base(msg) { }
     }
 
-    public class RealizeException : DialogicException
+    public class ResolverException : DialogicException
     {
-        public RealizeException(string msg = "") : base(msg) { }
+        public ResolverException(string msg = "") : base(msg) { }
+    }
+
+    public class UnboundSymbolException : ResolverException
+    {
+        public UnboundSymbolException(string symbol, Chat context, 
+            IDictionary<string, object> globals, string msg = "") : 
+            base(GetMessage(symbol, context, globals)) {}
+
+        private static string GetMessage(string s, Chat c, IDictionary<string, object> g)
+        {
+            var cstr = "Unable to resolve symbol: '$" + s + "'\nglobals: " + g.Stringify();
+            if (c != null) cstr += "\nchat#" + c.text + ":" + c.scope.Stringify();
+            return cstr;
+        }
     }
 
     public class FindException : DialogicException

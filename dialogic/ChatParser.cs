@@ -119,28 +119,26 @@ namespace Dialogic
 
         private Chat ActiveChat()
         {
-            return ((Chat)LastOfType(parsedCommands, typeof(Chat)));
+            var chat = ((Chat)LastOfType(parsedCommands, typeof(Chat)));
+
+            // Note: can be null if this is the first command
+
+            //if (chat == null) throw new DialogicException
+                //("Invalid state: no active chat");
+
+            return chat;
         }
 
         private Command ParseCommand(LineContext lc)
         {
+            Type type = lc.command.Length > 0 ? ChatRuntime.TypeMap[lc.command]
+                    : Chat.DefaultCommandType(ActiveChat());
+            
+            Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
 
-
-            Command c = null;
-            try
-            {
-                Type type = lc.command.Length > 0 ?
-                    ChatRuntime.TypeMap[lc.command]
-                        : Chat.DefaultCommandType(ActiveChat());
-                c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
-                HandleActor(lc.actor, c, lc.line, lc.lineNo);
-                HandleCommand(c, lc.line, lc.lineNo);
-                RunValidators(c);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            HandleActor(lc.actor, c, lc.line, lc.lineNo);
+            HandleCommand(c, lc.line, lc.lineNo);
+            RunValidators(c);
 
             return c;
         }
@@ -167,9 +165,11 @@ namespace Dialogic
 
         private void HandleCommand(Command c, string line, int lineNo)
         {
-            if (c is Chat)
+            parsedCommands.Push(c);
+
+            if (c is Chat) // add chat to runtime list
             {
-                AddChatToRuntime((Chat)c);
+                runtime.AddChat((Chat)c);
                 return;
             }
 
@@ -192,8 +192,6 @@ namespace Dialogic
             {
                 ActiveChat().AddCommand(c);
             }
-
-            parsedCommands.Push(c);
         }
 
         private void RunValidators(Command c)
@@ -287,14 +285,10 @@ namespace Dialogic
 
         private void CreateDefaultChat()
         {
-            Chat c = Chat.Create("C" + Util.EpochMs());
-            AddChatToRuntime(c);
-        }
-
-        private void AddChatToRuntime(Chat c)
-        {
-            runtime.AddChat(c);
+            var c = Chat.Create("C" + Util.EpochMs());
+            RunInternalValidators(c);
             parsedCommands.Push(c);
+            runtime.AddChat(c);
         }
     }
 

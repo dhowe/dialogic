@@ -22,6 +22,24 @@ namespace Dialogic
         };
 
         [Test]
+        public void SaveResolveState()
+        {
+            var lines = new[] {
+                "SET hero = (Jane | Jill)",
+                "SAY A girl [selected=$hero] ",
+                //"SAY $selected."
+            };
+            ChatRuntime runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            var chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            //var res = chat.commands[1].Text() + chat.commands[2].Text();
+            //Assert.That(res, Is.EqualTo("A girl Jane Jane.").
+                              //Or.EqualTo("A girl Jill Jill."));
+        }
+
+        [Test]
         public void RealizeSubstringSymbols()
         {
             var lines = new[] {
@@ -56,7 +74,7 @@ namespace Dialogic
                 "SAY $start",
 
             };
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             rt.ParseText(String.Join("\n", lines));
             Chat chat = rt.Chats()[0];
 
@@ -84,7 +102,7 @@ namespace Dialogic
                 "verb = want | hate | like | love",
                 "SAY $start $start $start $start $start $start $start $start",
             };
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             rt.ParseText(String.Join("\n", lines));
 
             rt.Chats()[0].commands.ForEach(c => c.Realize(globals));
@@ -96,7 +114,7 @@ namespace Dialogic
             {
                 if (says[i].IsNullOrEmpty()) continue;
                 results.Add(says[i].Trim());
-            
+
             }
 
             Assert.That(results.Count, Is.GreaterThan(1));
@@ -659,7 +677,7 @@ namespace Dialogic
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
-        
+
             lines = new[] {
                 "start =  $a $b $c",
                 "a = A",

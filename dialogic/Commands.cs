@@ -187,7 +187,7 @@ namespace Dialogic
         }
     }
 
-    public class NoOp : Command //@cond unused 
+    public class NoOp : Command //@cond hide
     { } //@endcond
 
     /// <summary>

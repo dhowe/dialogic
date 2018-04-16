@@ -28,6 +28,14 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
         }
 
+        [Test]
+        public void ASimpleParse()
+        {
+            var cmd = ChatParser.ParseText("SAY Thank you", NO_VALIDATORS)[0].commands[0];
+            Assert.That(cmd, Is.Not.Null);
+            Assert.That(cmd.GetType(), Is.EqualTo(typeof(Say)));
+        }
+            
 
         [Test]
         public void SetNoGlobals()
@@ -352,7 +360,6 @@ namespace Dialogic
             Assert.That(chats[0].staleness, Is.EqualTo(2));
             Assert.That(chats[0].Staleness(), Is.EqualTo(2));
             Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));
-
 
             chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
             chats[0].Realize(null);
@@ -948,6 +955,14 @@ namespace Dialogic
         {
             List<Chat> chats;
 
+            chats = ChatParser.ParseText("HAY is for horses");
+            //Console.WriteLine(chats[0].ToTree());
+            Assert.That(chats.Count, Is.EqualTo(1));
+            Assert.That(chats[0].Count(), Is.EqualTo(1));
+            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
+            Assert.That(chats[0].commands[0].text, Is.EqualTo("HAY is for horses"));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            return;
             chats = ChatParser.ParseText("ASK is for horses?\nOPT Yes #game");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -960,13 +975,7 @@ namespace Dialogic
             Assert.That(opts[0].text, Is.EqualTo("Yes"));
             Assert.That(opts[0].action.text, Is.EqualTo("game"));
 
-            chats = ChatParser.ParseText("HAY is for horses");
-            //Console.WriteLine(chats[0].ToTree());
-            Assert.That(chats.Count, Is.EqualTo(1));
-            Assert.That(chats[0].Count(), Is.EqualTo(1));
-            Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
-            Assert.That(chats[0].commands[0].text, Is.EqualTo("HAY is for horses"));
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
+
 
             chats = ChatParser.ParseText("hello");
             //Console.WriteLine(chats[0].ToTree());
@@ -1160,9 +1169,9 @@ namespace Dialogic
         [Test]
         public void Exceptions()
         {
-            //var ff = "FIND {a b=e}";
-            //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].ToTree());
 
+            //var ff = "SAY $hello";
+            //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].Realize(null)); return;
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A ="));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A 3"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A: 3"));
@@ -1196,7 +1205,8 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SAY {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT a {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("NVM a {a=b}"));
-            //Assert.Throws<ParseException>(() => ChatParser.ParseText("SAYHello")); // ?
+
+            Assert.Throws<UnboundSymbolException>(() => ChatParser.ParseText("SAY $hello")[0].Realize(null));
 
             string[] lines = {
                 "CHAT c1 {type=a,stage=b}","SAY Thank you","SAY Hello",

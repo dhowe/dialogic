@@ -22,25 +22,25 @@ namespace Dialogic
         [Test]
         public void EmptyGlobalScope()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
-            Assert.Throws<RealizeException>(() => 
+            Assert.Throws<ResolverException>(() => 
                 Resolver.BindSymbols("$animal", c1, null));
         }
 
         [Test]
         public void EmptyGlobalLocalScope()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
-            Assert.Throws<RealizeException>(() => 
+            Assert.Throws<ResolverException>(() => 
                 Resolver.BindSymbols("$animal", null, null));
         }
 
         [Test]
         public void SimpleGlobalScope()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             var res = Resolver.BindSymbols("$animal", c1, globals);
             Assert.That(res, Is.EqualTo("dog"));
@@ -49,7 +49,7 @@ namespace Dialogic
         [Test]
         public void ComplexGlobalScope()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             var res = Resolver.BindSymbols("$cmplx", c1, globals);
             Assert.That(res, Is.EqualTo("((a|b) | then)"));
@@ -59,7 +59,7 @@ namespace Dialogic
         [Test]
         public void SimpleLocalScope()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             c1.scope.Add("a", "b");
             var res = Resolver.BindSymbols("$a", c1, globals);
@@ -69,7 +69,7 @@ namespace Dialogic
         [Test]
         public void ComplexLocalScope()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             c1.scope.Add("a", "$b");
             c1.scope.Add("b", "c");
@@ -80,7 +80,7 @@ namespace Dialogic
         [Test]
         public void CrossLocalScope()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "b");
@@ -92,7 +92,7 @@ namespace Dialogic
         [Test]
         public void CrossLocalGlobal()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "$animal");
@@ -103,7 +103,7 @@ namespace Dialogic
         [Test]
         public void CrossLocalGlobalPhrase()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "The $animal ate");
@@ -114,7 +114,7 @@ namespace Dialogic
         [Test]
         public void CrossLocalGlobalPhrases()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "The $animal ate $prep");
@@ -125,7 +125,7 @@ namespace Dialogic
         [Test]
         public void CrossLocalAndBack()
         {
-            ChatRuntime rt = new ChatRuntime(null);
+            ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             c1.scope.Add("a", "$c2.a");
             Chat c2 = rt.AddNewChat("c2");
