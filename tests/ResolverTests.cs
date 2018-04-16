@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dialogic
 {
@@ -27,9 +28,42 @@ namespace Dialogic
         }
 
         [Test]
+        public void ParseSymbols()
+        {
+            var ts = new[] { "", ".", "!", ":", ";", ",", "?", ")", "\"", "'" };
+            foreach (var t in ts) Assert.That(Resolver.ParseSymbols
+                ("$a" + t).First().symbol, Is.EqualTo("a"));
+
+            Assert.That(Resolver.ParseSymbols("$a.b").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[b=$a]").First().symbol, Is.EqualTo("a"));
+
+            Assert.That(Resolver.ParseSymbols("[bc=$a.b]").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[bc=$a.b]").First().alias, Is.EqualTo("bc"));
+
+            Assert.That(Resolver.ParseSymbols("[c=$a.b]").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[c=$a.b]").First().alias, Is.EqualTo("c"));
+
+            Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().alias, Is.EqualTo("c"));
+
+            Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().alias, Is.EqualTo("c"));
+
+            Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().alias, Is.EqualTo("c"));
+
+            Assert.That(Resolver.ParseSymbols("[c=$a.b].").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[c=$a.b].").First().alias, Is.EqualTo("c"));
+
+            Assert.That(Resolver.ParseSymbols("[c=${a.b}].").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("[c=${a.b}].").First().alias, Is.EqualTo("c"));
+        }
+
+        [Test]
         public void GroupRecursionDepth()
         {
-            var str = "CHAT c\n(I | (You | (doh | why | no) | ouY) | They)(want | hate | like | love)(coffee | bread | milk)";
+            var str = "CHAT c\n(I | (You | (doh | why | no) | ouY) | They)";
+            str += "(want | hate | like | love)(coffee | bread | milk)";
             Chat chat = ChatParser.ParseText(str, NO_VALIDATORS)[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Say say = (Dialogic.Say)chat.commands[0];
@@ -55,7 +89,7 @@ namespace Dialogic
         {
             //// no replace to be made
             Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<ResolverException>(() => Resolver.BindSymbols("$a", null, globals));
+            Assert.Throws<UnboundSymbolException>(() => Resolver.BindSymbols("$a", null, globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",

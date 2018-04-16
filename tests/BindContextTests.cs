@@ -24,7 +24,7 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
-            Assert.Throws<ResolverException>(() => 
+            Assert.Throws<UnboundSymbolException>(() => 
                 Resolver.BindSymbols("$animal", c1, null));
         }
 
@@ -33,7 +33,7 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
-            Assert.Throws<ResolverException>(() => 
+            Assert.Throws<UnboundSymbolException>(() => 
                 Resolver.BindSymbols("$animal", null, null));
         }
 

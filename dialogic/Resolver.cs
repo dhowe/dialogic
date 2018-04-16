@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -125,13 +126,18 @@ namespace Dialogic
 
             while (text.Contains(Defaults.SYMBOL))
             {
-                foreach (var symbol in ParseSymbols(text))
+                var symbols = ParseSymbols(text);
+                foreach (var symbol in symbols)
                 {
-                    var dollarsym = Defaults.SYMBOL + symbol;
-
-                    var theSymbol = symbol;
+                    var theSymbol = symbol.symbol;
+                    var toReplace = symbol.text;
+                    //toReplace = Defaults.SYMBOL + symbol.symbol;
+                    if (symbol.alias == null)
+                    {
+                        toReplace = Defaults.SYMBOL + symbol.symbol;
+                    }
                     BindToContext(ref theSymbol, ref context);
-                    text = text.Replace(dollarsym, ResolveSymbol(theSymbol, context, globals));
+                    text = text.Replace(toReplace, ResolveSymbol(theSymbol, context, globals));
                 }
 
                 if (++depth >= maxRecursionDepth) throw new ResolverException
@@ -204,28 +210,88 @@ namespace Dialogic
             throw new UnboundSymbolException(symbol, context, globals);
         }
 
-        private static IEnumerable<string> ParseSymbols(string text)
+        internal class Symbol
         {
-            List<string> symbols = new List<string>();
+            public string text, symbol, alias;
+
+            public Symbol(Match match)
+            {
+                if (match.Groups.Count != 3) throw new ArgumentException
+                    ("Bad match: " + match.Groups.Count);
+                Init(match.Groups[0].Value, match.Groups[2].Value, match.Groups[1].Value);
+            }
+
+            private void Init(string t, string s, string a)
+            {
+                this.text = t.Trim();
+                this.symbol = s.Trim();
+                this.alias = a.Length > 0 ? a.Trim() : null;
+            }
+
+            public override string ToString()
+            {
+                var s = "[$" + symbol + " text='" + text + "'";
+                return s + (alias != null ? " alias=" + alias : "") + "]";
+            }
+        }
+
+        internal static List<Symbol> ParseSymbols(string text, bool showMatches = false)
+        {
+            List<Symbol> symbols = new List<Symbol>();
             var matches = RE.ParseVars.Matches(text);
-            if (matches.Count == 0) return symbols;
+            if (matches.Count == 0 && text.Contains(Defaults.SYMBOL))
+            {
+                throw new ResolverException("Unable to parse symbol: " + text);
+            }
 
             foreach (Match match in matches)
             {
-                if (match.Groups.Count != 2)
+                if (match.Groups.Count != 3)
+                {
                     throw new DialogicException("Bad RE in " + text);
-
-                var symbol = match.Groups[1].Value;
-
-                // Q: do we want to allow multiple identical symbols here?
-                // if (!symbols.Contains(symbol)) 
-                symbols.Add(symbol);
+                }
+                Symbol s = new Symbol(match);
+                //Console.WriteLine(s);
+                symbols.Add(s);
             }
 
             // OPT: we sort here to avoid symbols which are substrings of another
             // symbol causing incorrect replacements ($a being replaced in $ant, 
-            // for example), however this can be avoided by correctly using Regex.Replace
-            // instead of String.Replace() in ResolveSymbols below
+            // for example), however this can be avoided by correctly using 
+            // Regex.Replace instead of String.Replace() in ResolveSymbols below
+            return SortByLength(symbols);
+
+            //return symbols;
+        }
+
+        internal static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
+        {
+            return (from s in syms orderby s.symbol.Length descending select s).ToList();
+        }
+
+        internal static IEnumerable<string> ParseSymbolsOld(string text, bool showMatches = false)
+        {
+            List<string> symbols = new List<string>();
+            var matches = RE.ParseVars.Matches(text);
+            if (matches.Count == 0 && text.Contains(Defaults.SYMBOL))
+            {
+                throw new ResolverException("Unable to parse symbol: " + text);
+            }
+
+            foreach (Match match in matches)
+            {
+                if (match.Groups.Count != 3)
+                {
+                    throw new DialogicException("Bad RE in " + text);
+                }
+                //Console.WriteLine(s);
+                symbols.Add(match.Groups[2].Value);
+            }
+
+            // OPT: we sort here to avoid symbols which are substrings of another
+            // symbol causing incorrect replacements ($a being replaced in $ant, 
+            // for example), however this can be avoided by correctly using 
+            // Regex.Replace instead of String.Replace() in ResolveSymbols below
             return Util.SortByLength(symbols);
         }
 
