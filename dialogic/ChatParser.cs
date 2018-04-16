@@ -84,11 +84,7 @@ namespace Dialogic
 
             try
             {
-                //List<string> parts = DoSubDivision(line, lineNo);
-                //c = ParseCommand(parts, line, lineNo);
                 c = ParseCommand(new LineContext(line, lineNo));
-                RunExternalValidators(c);
-                RunInternalValidators(c);
             }
             catch (Exception ex)
             //catch (ParseException ex)
@@ -121,24 +117,30 @@ namespace Dialogic
             }
         }
 
+        private Chat ActiveChat()
+        {
+            return ((Chat)LastOfType(parsedCommands, typeof(Chat)));
+        }
+
         private Command ParseCommand(LineContext lc)
         {
-            var cmd = lc.command;
-            Type type = cmd.Length > 0 ? ChatRuntime.TypeMap[cmd]
-                : Chat.DefaultCommandType(runtime.Chats().LastOrDefault());
+
 
             Command c = null;
             try
             {
+                Type type = lc.command.Length > 0 ?
+                    ChatRuntime.TypeMap[lc.command]
+                        : Chat.DefaultCommandType(ActiveChat());
                 c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
+                HandleActor(lc.actor, c, lc.line, lc.lineNo);
+                HandleCommand(c, lc.line, lc.lineNo);
+                RunValidators(c);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-            HandleActor(lc.actor, c, lc.line, lc.lineNo);
-            HandleCommand(c, lc.line, lc.lineNo);
 
             return c;
         }
@@ -163,18 +165,11 @@ namespace Dialogic
             }
         }
 
-        //private Chat AddChat(Chat c)
-        //{
-        //    c.runtime = this.runtime;
-        //    runtime.Chats().Add(c);
-        //    return c;
-        //}
-
         private void HandleCommand(Command c, string line, int lineNo)
         {
             if (c is Chat)
             {
-                runtime.AddChat((Chat)c);
+                AddChatToRuntime((Chat)c);
                 return;
             }
 
@@ -187,7 +182,7 @@ namespace Dialogic
                 Command last = LastOfType(parsedCommands, typeof(Ask));
 
                 if (!(last is Ask)) throw new ParseException
-                    (line, lineNo, "Opt must follow Ask");
+                    (line, lineNo, "OPT must follow ASK");
 
                 Ask ask = ((Ask)last);
                 opt.parent = ask.parent;
@@ -195,10 +190,16 @@ namespace Dialogic
             }
             else  // add command to last Chat
             {
-                runtime.Chats().Last().AddCommand(c);
+                ActiveChat().AddCommand(c);
             }
 
             parsedCommands.Push(c);
+        }
+
+        private void RunValidators(Command c)
+        {
+            RunExternalValidators(c);
+            RunInternalValidators(c);
         }
 
         private void RunInternalValidators(Command c)
@@ -244,16 +245,12 @@ namespace Dialogic
                     object val = pair.Value;
                     if (mmeta.ContainsKey(pair.Key))
                     {
-                        if (pair.Key == Meta.ACTOR) // hrmm, ugly special case
+                        if (pair.Key == Meta.ACTOR) // ugly special case
                         {
                             c.SetActor(runtime, (string)val);
                         }
                         else
                         {
-                            //var propInfo = mmeta[pair.Key];
-                            //val = Util.ConvertTo(propInfo.PropertyType, val);
-                            //propInfo.SetValue(c, val, null);
-
                             c.DynamicSet(mmeta[pair.Key], val, false);
                         }
                     }
@@ -291,6 +288,11 @@ namespace Dialogic
         private void CreateDefaultChat()
         {
             Chat c = Chat.Create("C" + Util.EpochMs());
+            AddChatToRuntime(c);
+        }
+
+        private void AddChatToRuntime(Chat c)
+        {
             runtime.AddChat(c);
             parsedCommands.Push(c);
         }

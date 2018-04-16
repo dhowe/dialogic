@@ -47,34 +47,30 @@ namespace Dialogic
         internal static IDictionary<Type, IDictionary<string, PropertyInfo>>
             MetaMeta = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
 
-        internal List<Chat> Chats()
-        {
-            return chats;
-        }
-
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
 
-        private readonly List<Chat> chats;
-
+        private Chat firstChat;
         private Thread searchThread;
         private ChatParser parser;
         private List<IActor> actors;
         private AppEventHandler appEvents;
         private ChatEventHandler chatEvents;
         private List<Func<Command, bool>> validators;
+        private IDictionary<string, Chat> chats;
 
         public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
 
         public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
         {
-            this.actors = InitActors(theActors);
-            this.chats = theChats == null ? new List<Chat>() : theChats;
-
             this.parser = new ChatParser(this);
             this.scheduler = new ChatScheduler(this);
             this.appEvents = new AppEventHandler(this);
             this.chatEvents = new ChatEventHandler(this);
+            this.chats = new Dictionary<string, Chat>();
+            this.actors = InitActors(theActors);
+
+            if (!theChats.IsNullOrEmpty()) theChats.ForEach(AddChat);
         }
 
         public void ParseText(string text, bool disableValidators = false)
@@ -99,7 +95,7 @@ namespace Dialogic
                 var text = File.ReadAllText(f);
                 parser.Parse(ChatParser.StripComments(text));
             }
-            //chats.ForEach(c => Console.WriteLine(c.ToTree()));
+            //Chats().ForEach(c => Console.WriteLine(c.ToTree()));
         }
 
         /// <summary>
@@ -120,19 +116,22 @@ namespace Dialogic
 
         public void Run(string chatLabel = null)
         {
-            if (chats.IsNullOrEmpty()) throw new Exception("No chats found");
+            if (chats.Count < 1) throw new Exception("No chats found");
 
-            var first = chatLabel != null ? FindChatByLabel(chatLabel) : chats[0];
-            scheduler.Launch(first);
+            scheduler.Launch(chatLabel != null ? FindChatByLabel(chatLabel) : FirstChat());
         }
 
         public Chat FindChatByLabel(string label)
         {
             Util.ValidateLabel(ref label);
-            var chat = chats.FirstOrDefault(c => c.text == label);
-            if (chat == null) throw new DialogicException
-                ("Unable to find Chat with label: '" + label + "'");
-            return chat;
+            if (!chats.ContainsKey(label)) throw new DialogicException
+              ("Unable to find Chat with label: '" + label + "'");
+            return chats[label];
+
+            //var chat = Chats().FirstOrDefault(c => c.text == label);
+            //if (chat == null) throw new DialogicException
+            //    ("Unable to find Chat with label: '" + label + "'");
+            //return chat;
         }
 
         public IActor FindActorByName(string name)
@@ -144,20 +143,26 @@ namespace Dialogic
         public override string ToString()
         {
             return "{ context: " + CurrentContext() +
-                ", chats:" + chats.Stringify() + " }";
+                ", chats:" + Chats().Stringify() + " }";
         }
 
         ///////////////////////////////////////////////////////////////////////
 
+        internal List<Chat> Chats()
+        {
+            return chats.Values.ToList();
+        }
+
         internal void AddChat(Chat c)
         {
             c.runtime = this;
-            chats.Add(c);
+            if (chats.Count < 1) firstChat = c;
+            chats.Add(c.text, c);
         }
 
         internal List<Chat> FindChatByMeta(string key, string value) // used?
         {
-            return chats.Where(c => ((string)c.GetMeta(key))
+            return Chats().Where(c => ((string)c.GetMeta(key))
                 == value).ToList<Chat>();
         }
 
@@ -165,8 +170,7 @@ namespace Dialogic
         {
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
-            c.runtime = this;
-            this.chats.Add(c);
+            AddChat(c);
             return c;
         }
 
@@ -197,8 +201,7 @@ namespace Dialogic
                 }
                 else
                 {
-                    var found = DoFindAll(finder, globals);
-                    found.ForEach(action);
+                    DoFindAll(finder, globals).ForEach(action);
                 }
 
             })).Start();
@@ -247,9 +250,11 @@ namespace Dialogic
             return iActors;
         }
 
-        private bool Logging()
+        private Chat FirstChat()
         {
-            return LOG_FILE != null;
+            if (firstChat == null) throw new DialogicException
+                ("Invalid state: no initial Chat" + this);
+            return firstChat;
         }
 
         private static IDictionary<Constraint, bool> ToConstraintMap(Find f)
@@ -284,13 +289,13 @@ namespace Dialogic
         {
             IDictionary<Constraint, bool> cdict = new Dictionary<Constraint, bool>();
             foreach (var c in constraints) cdict.Add(c, c.IsRelaxable());
-            return FuzzySearch.Find(chats, cdict, parent, globals);
+            return FuzzySearch.Find(Chats(), cdict, parent, globals);
         }
 
         internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
         {
             f.Realize(globals); // possibly redundant
-            return FuzzySearch.Find(chats, ToConstraintMap(f), f.parent, globals);
+            return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
         internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
@@ -301,13 +306,13 @@ namespace Dialogic
         internal List<Chat> DoFindAll(Chat parent,
             IDictionary<string, object> globals, params Constraint[] constraints)
         {
-            return FuzzySearch.FindAll(chats, constraints.ToList(), parent, globals);
+            return FuzzySearch.FindAll(Chats(), constraints.ToList(), parent, globals);
         }
 
         internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals = null)
         {
             f.Realize(globals);  // possibly redundant
-            return FuzzySearch.FindAll(chats, ToList(f.realized), f.parent, globals);
+            return FuzzySearch.FindAll(Chats(), ToList(f.realized), f.parent, globals);
         }
     }
 

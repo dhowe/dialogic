@@ -50,7 +50,7 @@ namespace runner
         {
             dialogic = new ChatRuntime(AppConfig.Actors);
             dialogic.ParseFile(fileOrFolder);
-            dialogic.Run();
+            dialogic.Run("#GScriptTest");
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace runner
             var now = Util.Millis();
 
             // a 'Tap' event
-            if (true) Timers.SetTimeout(Util.Rand(2000, 10000), () =>
+            if (true) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
              {
                  interrupted = true;
                  Console.WriteLine("\n<user-event#tap>" +
