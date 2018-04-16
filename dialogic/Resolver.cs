@@ -41,7 +41,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// Handles realization of variables, probabilistic groups, and grammar rules
+    /// Handles resolution of variables, probabilistic groups, and grammar rules
     /// </summary>
     public static class Resolver
     {
@@ -134,7 +134,11 @@ namespace Dialogic
                     //toReplace = Defaults.SYMBOL + symbol.symbol;
                     if (symbol.alias == null)
                     {
-                        toReplace = Defaults.SYMBOL + symbol.symbol;
+                        toReplace = Defaults.SYMBOL + theSymbol;
+                    }
+                    else {
+                        // NEXT: here we need to push the alias into local? scope
+                        // BindToContext(ref theSymbol, ref context);
                     }
                     BindToContext(ref theSymbol, ref context);
                     text = text.Replace(toReplace, ResolveSymbol(theSymbol, context, globals));
@@ -167,7 +171,7 @@ namespace Dialogic
                     if (!(text.Contains('(') && text.Contains(')')))
                     {
                         text = '(' + text + ')';
-                        Console.WriteLine("[WARN] RealizeGroups added parens to: " + text);
+                        Console.WriteLine("[WARN] BindGroups added parens to: " + text);
                     }
 
                     List<string> groups = new List<string>();
@@ -195,7 +199,7 @@ namespace Dialogic
         /// </summary>
         private static string ResolveSymbol(string symbol, Chat context, IDictionary<string, object> globals)
         {
-            //Console.WriteLine("RealizeSymbol: "+symbol+" in chat#"+(context!=null?context.text:"null"));
+            //Console.WriteLine("ResolveSymbol: "+symbol+" in chat#"+(context!=null?context.text:"null"));
 
             if (context != null && context.scope.ContainsKey(symbol)) // check locals
             {
@@ -258,7 +262,7 @@ namespace Dialogic
             // OPT: we sort here to avoid symbols which are substrings of another
             // symbol causing incorrect replacements ($a being replaced in $ant, 
             // for example), however this can be avoided by correctly using 
-            // Regex.Replace instead of String.Replace() in ResolveSymbols below
+            // Regex.Replace instead of String.Replace() in BindSymbols
             return SortByLength(symbols);
 
             //return symbols;
