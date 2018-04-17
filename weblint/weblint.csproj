@@ -48,6 +48,7 @@
     <None Include="run-server.sh" />
     <None Include="data\test.gs" />
     <None Include="make-server.sh" />
+    <None Include="data\test2.gs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
