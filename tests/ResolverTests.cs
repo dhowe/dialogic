@@ -25,6 +25,10 @@ namespace Dialogic
             var res = Resolver.BindSymbols("$a", null, new Dictionary<string, object>()
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello"));
+
+            res = Resolver.BindSymbols("$a!", null, new Dictionary<string, object>()
+                {{ "a", "hello" }, { "b", "32" }});
+            Assert.That(res, Is.EqualTo("hello!"));
         }
 
         [Test]
@@ -33,6 +37,12 @@ namespace Dialogic
             var ts = new[] { "", ".", "!", ":", ";", ",", "?", ")", "\"", "'" };
             foreach (var t in ts) Assert.That(Resolver.ParseSymbols
                 ("$a" + t).First().symbol, Is.EqualTo("a"));
+
+            Assert.That(Resolver.ParseSymbols("${a}").First().symbol, Is.EqualTo("a"));
+            Assert.That(Resolver.ParseSymbols("${a}b").First().symbol, Is.EqualTo("a"));
+
+            Assert.That(Resolver.ParseSymbols("${a.b}").First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Resolver.ParseSymbols("${a.b}b").First().symbol, Is.EqualTo("a.b"));
 
             Assert.That(Resolver.ParseSymbols("$a.b").First().symbol, Is.EqualTo("a.b"));
             Assert.That(Resolver.ParseSymbols("[b=$a]").First().symbol, Is.EqualTo("a"));

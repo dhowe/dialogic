@@ -632,7 +632,7 @@ namespace Dialogic
             realized.Clear();
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
-            realized[Meta.TEXT] = Resolver.BindGroups(text);
+            realized[Meta.TEXT] = Resolver.BindGroups(text, parent);
             return this;
         }
 

@@ -15,6 +15,72 @@ namespace Dialogic
         }
 
         [Test]
+        public void SymbolClassInit()
+        {
+            Symbol s;
+
+            s = new Symbol().Init("$a", "a");
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol().Init("${a}", "a");
+            Assert.That(s.text, Is.EqualTo("${a}"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(true));
+
+            s = new Symbol().Init("${a}", "a");
+            Assert.That(s.text, Is.EqualTo("${a}"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(true));
+
+            s = new Symbol().Init("$a", "a", "bb");
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.EqualTo("bb"));
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol().Init("${a}", "a", "bb");
+            Assert.That(s.text, Is.EqualTo("${a}"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.EqualTo("bb"));
+            Assert.That(s.bounded, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void SymbolClassRegex()
+        {
+            Symbol s;
+
+            s = new Symbol(RE.ParseVars.Match("$a"));
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol(RE.ParseVars.Match("${a}"));
+            Assert.That(s.text, Is.EqualTo("${a}"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(true));
+
+            s = new Symbol(RE.ParseVars.Match("[bb=$a]"));
+            Assert.That(s.text, Is.EqualTo("[bb=$a]"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.EqualTo("bb"));
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol(RE.ParseVars.Match("[bb=${a}]"));
+            Assert.That(s.text, Is.EqualTo("[bb=${a}]"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.EqualTo("bb"));
+            Assert.That(s.bounded, Is.EqualTo(true));
+        }
+
+        [Test]
         public void ResolutionTest()
         {
             string last = null, choice;

@@ -7,7 +7,6 @@ using System.Timers;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Dialogic;
 
 [assembly: InternalsVisibleTo("tests")]
 [assembly: InternalsVisibleTo("weblint")]
@@ -122,6 +121,8 @@ namespace Dialogic
         internal const char OSAVE = '[';
         internal const char CSAVE = ']';
         internal const char LABEL = '#';
+        internal const char EQ = '=';
+        internal const char OR = '|';
     }
 
     /// <summary>
@@ -139,18 +140,19 @@ namespace Dialogic
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
         internal const string PV1 = @"(?:\[([^=]+)=\s*)?\$\{?(" + SYM + @"(?:\.";
-        internal const string PV2 = SYM + @")*)(?:[ .!;,:?()}""'\]]|$)";
-        //public static Regex ParseVars = new Regex(@"(?:\[a=)?" + PV1 + PV2 + @"\]?");
+        internal const string PV2 = SYM + @")*)(?:[ .!;,:?()}""'\]]\]?|$)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
+
+        public static Regex SaveState = new Regex(@"\[\s*([^= ]+)\s*=\s*([^\]]+)\s*\]");
 
         public static Regex SplitOr = new Regex(@"\s*\|\s*");
         public static Regex HasParens = new Regex(@"[\(\)]");
         public static Regex MetaSplit = new Regex(@"\s*,\s*");
         public static Regex ValidGroup = new Regex(@"\([^)]+|[^)]+\)");
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
-        public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
-        public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
+        public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
+        public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
 
     /// <summary>
@@ -158,8 +160,9 @@ namespace Dialogic
     /// </summary>
     public static class Util
     {
-        public static double INFINITE = -1;
         public static StringComparison IC = StringComparison.InvariantCulture;
+
+        internal static double INFINITE = -1;
         internal static string LABEL_IDENT = "#";
 
         private static int start;
