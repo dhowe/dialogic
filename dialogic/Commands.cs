@@ -286,7 +286,7 @@ namespace Dialogic
             }
 
             var tmp = match.Groups[1].Value.Trim();
-            this.text = tmp.TrimFirst(Defaults.SYMBOL);
+            this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();
             this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
@@ -340,7 +340,7 @@ namespace Dialogic
         public override string ToString()
         {
             var txt = this.text;
-            if (global) txt = Defaults.SYMBOL + txt;
+            if (global) txt = Ch.SYMBOL + txt;
             return TypeName().ToUpper() + " " + txt + " = " + value;
         }
     }

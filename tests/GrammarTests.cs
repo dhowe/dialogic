@@ -26,17 +26,30 @@ namespace Dialogic
         {
             var lines = new[] {
                 "SET hero = (Jane | Jill)",
-                "SAY A girl [selected=$hero] ",
-                //"SAY $selected."
+                "SAY A girl [selected=$hero]&nbsp;",
+                "SAY $selected."
             };
             ChatRuntime runtime = new ChatRuntime();
             runtime.ParseText(string.Join("\n", lines));
             var chat = runtime.Chats()[0];
             Assert.That(chat, Is.Not.Null);
             chat.Realize(null);
-            //var res = chat.commands[1].Text() + chat.commands[2].Text();
-            //Assert.That(res, Is.EqualTo("A girl Jane Jane.").
-                              //Or.EqualTo("A girl Jill Jill."));
+            var res = chat.commands[1].Text() + chat.commands[2].Text();
+            Assert.That(res, Is.EqualTo("A girl Jane Jane.").
+                             Or.EqualTo("A girl Jill Jill."));
+            return;
+            lines = new[] {
+                "SET hero = (Jane | Jill)",
+                "SAY A girl [selected=$hero] $selected."
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text() + chat.commands[2].Text();
+            Assert.That(res, Is.EqualTo("A girl Jane Jane.").
+                             Or.EqualTo("A girl Jill Jill."));
         }
 
         [Test]

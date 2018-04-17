@@ -23,7 +23,7 @@ namespace Dialogic
 
         private static string GetMessage(string s, Chat c, IDictionary<string, object> g)
         {
-            var cstr = "Unable to resolve symbol: '$" + s + "'\nglobals: " + g.Stringify();
+            var cstr = "'$" + s + "'\nglobals: " + g.Stringify();
             if (c != null) cstr += "\nchat#" + c.text + ":" + c.scope.Stringify();
             return cstr;
         }

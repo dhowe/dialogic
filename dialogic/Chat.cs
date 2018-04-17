@@ -24,12 +24,9 @@ namespace Dialogic
         internal IDictionary<string, object> scope;
         protected internal ChatRuntime runtime;
 
-        public object this[string key] // use locals as indexer?
+        public object this[string key] // TODO: test using scope as indexer
         {
-            get
-            {
-                return this.scope[key];
-            }
+            get { return this.scope[key]; }
         }
 
         public Chat() : base()
@@ -250,7 +247,7 @@ namespace Dialogic
         internal string ExpandNoGroups(IDictionary<string, object> globals,
             string start)//, bool doGroups = false)
         {
-            start = start.TrimFirst(Defaults.SYMBOL);
+            start = start.TrimFirst(Ch.SYMBOL);
             var re = new Regex(@"\$([^ \(\)]+)");
             string sofar = (string)scope[start];
 
@@ -262,10 +259,10 @@ namespace Dialogic
                     var v = match.Groups[1].Value;
                     if (!scope.ContainsKey(v)) throw new DialogicException
                         ("No match for " + v + " in: " + scope.Stringify());
-                    sofar = sofar.Replace(Defaults.SYMBOL + v, (string)scope[v]);
+                    sofar = sofar.Replace(Ch.SYMBOL + v, (string)scope[v]);
                 }
 
-                if (sofar.IndexOf(Defaults.SYMBOL) < 0) break;
+                if (sofar.IndexOf(Ch.SYMBOL) < 0) break;
             }
 
             if (recursions >= 10) Console.WriteLine("[WARN] Max recursion level"

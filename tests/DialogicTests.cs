@@ -8,6 +8,13 @@ namespace Dialogic
     public class DialogicTests
     {
         [Test]
+        public void EntityDecodeTest()
+        {
+            Assert.That(Html.Decode("&amp;"), Is.EqualTo("&"));
+            Assert.That(Html.Decode("&nbsp;"), Is.EqualTo(" "));
+        }
+
+        [Test]
         public void ResolutionTest()
         {
             string last = null, choice;

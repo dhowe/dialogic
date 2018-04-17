@@ -93,23 +93,19 @@ namespace Dialogic
         /// </summary>
         internal static void BindToContext(ref string symbol, ref Chat context)
         {
-            if (symbol.Contains('.'))
+            if (symbol.Contains(Ch.SCOPE))
             {
                 if (context == null) throw new ResolverException
                     ("Null context for chat-scoped symbol: " + symbol);
 
                 // need to process a chat-scoped symbol
-                var parts = symbol.Split('.');
-                if (parts.Length > 2)
-                {
-                    throw new ResolverException("Unexpected variable format: " + symbol);
-                }
+                var parts = symbol.Split(Ch.SCOPE);
+                if (parts.Length > 2) throw new ResolverException
+                    ("Unexpected variable format: " + symbol);
 
                 var chat = context.runtime.FindChatByLabel(parts[0]);
-                if (chat == null)
-                {
-                    throw new ResolverException("No Chat found with label #" + parts[0]);
-                }
+                if (chat == null) throw new ResolverException
+                    ("No Chat found with label #" + parts[0]);
 
                 symbol = parts[1];
                 context = chat;
@@ -124,31 +120,35 @@ namespace Dialogic
         {
             int depth = 0, maxRecursionDepth = 10;
 
-            while (text.Contains(Defaults.SYMBOL))
+            while (text.Contains(Ch.SYMBOL))
             {
                 var symbols = ParseSymbols(text);
                 foreach (var symbol in symbols)
                 {
                     var theSymbol = symbol.symbol;
-                    var toReplace = symbol.text;
-                    //toReplace = Defaults.SYMBOL + symbol.symbol;
-                    if (symbol.alias == null)
-                    {
-                        toReplace = Defaults.SYMBOL + theSymbol;
-                    }
-                    else {
-                        // NEXT: here we need to push the alias into local? scope
-                        // BindToContext(ref theSymbol, ref context);
-                    }
+                    var toReplace = symbol.alias != null ? 
+                        Ch.SYMBOL + theSymbol : symbol.text;
+
                     BindToContext(ref theSymbol, ref context);
-                    text = text.Replace(toReplace, ResolveSymbol(theSymbol, context, globals));
+                    var symval = ResolveSymbol(theSymbol, context, globals);
+
+
+                    if (symbol.alias != null)
+                    {
+                        // bind the alias in the local context
+                        //AssignOp.EQ.Invoke(symbol.alias, symval, context.scope);
+                        //Console.WriteLine("BOUND: " + context.scope.Stringify());
+                        symval = '[' + symbol.alias + '=' + symval + ']';
+
+                    }
+                    text = text.Replace(toReplace, symval);
                 }
 
                 if (++depth >= maxRecursionDepth) throw new ResolverException
                     ("BindSymbols hit maxRecursionDepth for: " + text);
 
             }
-            return text;
+            return Html.Decode(text);
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace Dialogic
         {
             List<Symbol> symbols = new List<Symbol>();
             var matches = RE.ParseVars.Matches(text);
-            if (matches.Count == 0 && text.Contains(Defaults.SYMBOL))
+            if (matches.Count == 0 && text.Contains(Ch.SYMBOL))
             {
                 throw new ResolverException("Unable to parse symbol: " + text);
             }
@@ -277,7 +277,7 @@ namespace Dialogic
         {
             List<string> symbols = new List<string>();
             var matches = RE.ParseVars.Matches(text);
-            if (matches.Count == 0 && text.Contains(Defaults.SYMBOL))
+            if (matches.Count == 0 && text.Contains(Ch.SYMBOL))
             {
                 throw new ResolverException("Unable to parse symbol: " + text);
             }
@@ -306,7 +306,7 @@ namespace Dialogic
             {
                 var expr = m.Value.Substring(1, m.Value.Length - 2);
 
-                if (Regex.IsMatch(expr, @"[\(\)]")) // TODO: compile
+                if (RE.HasParens.IsMatch(expr)) // TODO: compile
                 {
                     ParseGroups(expr, results);
                 }
