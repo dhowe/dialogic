@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['ch',['Ch',['../class_dialogic_1_1_ch.html',1,'Dialogic']]],
   ['chat',['Chat',['../class_dialogic_1_1_chat.html',1,'Dialogic']]],
   ['chatparser',['ChatParser',['../class_dialogic_1_1_chat_parser.html',1,'Dialogic']]],
   ['chatruntime',['ChatRuntime',['../class_dialogic_1_1_chat_runtime.html',1,'Dialogic']]],

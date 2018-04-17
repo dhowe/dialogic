@@ -70,13 +70,14 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="class_dialogic_1_1_resolver-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Dialogic.Resolver Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Handles realization of variables, probabilistic groups, and grammar rules  
+<p>Handles resolution of variables, probabilistic groups, and grammar rules  
  <a href="class_dialogic_1_1_resolver.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
@@ -87,12 +88,18 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a3e3704e599842610b9a432843c5e1ced"><td class="memItemLeft" align="right" valign="top">static string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_resolver.html#a3e3704e599842610b9a432843c5e1ced">BindSymbols</a> (string text, <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> context, IDictionary&lt; string, object &gt; globals)</td></tr>
 <tr class="memdesc:a3e3704e599842610b9a432843c5e1ced"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iteratively resolve any variables in the specified text in the appropriate context  <a href="#a3e3704e599842610b9a432843c5e1ced">More...</a><br /></td></tr>
 <tr class="separator:a3e3704e599842610b9a432843c5e1ced"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade07dcb9a8c0a7b740a0734b21036dc2"><td class="memItemLeft" align="right" valign="top">static string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_resolver.html#ade07dcb9a8c0a7b740a0734b21036dc2">BindGroups</a> (string text)</td></tr>
-<tr class="memdesc:ade07dcb9a8c0a7b740a0734b21036dc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iteratively resolve any groups in the specified text in the appropriate context, creating and caching <a class="el" href="class_dialogic_1_1_resolution.html">Resolution</a> objects as necessary  <a href="#ade07dcb9a8c0a7b740a0734b21036dc2">More...</a><br /></td></tr>
-<tr class="separator:ade07dcb9a8c0a7b740a0734b21036dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad12aae02aa8d8a004e8be614acfea122"><td class="memItemLeft" align="right" valign="top">static string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_resolver.html#ad12aae02aa8d8a004e8be614acfea122">BindGroups</a> (string text, <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> context=null)</td></tr>
+<tr class="memdesc:ad12aae02aa8d8a004e8be614acfea122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iteratively resolve any groups in the specified text in the appropriate context, creating and caching <a class="el" href="class_dialogic_1_1_resolution.html">Resolution</a> objects as necessary  <a href="#ad12aae02aa8d8a004e8be614acfea122">More...</a><br /></td></tr>
+<tr class="separator:ad12aae02aa8d8a004e8be614acfea122"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a9107b617c85e186ece9d984489c6e6fe"><td class="memItemLeft" align="right" valign="top"><a id="a9107b617c85e186ece9d984489c6e6fe"></a>
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>DBUG</b> = false</td></tr>
+<tr class="separator:a9107b617c85e186ece9d984489c6e6fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Handles realization of variables, probabilistic groups, and grammar rules </p>
+<div class="textblock"><p>Handles resolution of variables, probabilistic groups, and grammar rules </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a7ced27922f0fbc1ee0231e14a7315638"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7ced27922f0fbc1ee0231e14a7315638">&#9670;&nbsp;</a></span>Bind()</h2>
@@ -138,8 +145,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ade07dcb9a8c0a7b740a0734b21036dc2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ade07dcb9a8c0a7b740a0734b21036dc2">&#9670;&nbsp;</a></span>BindGroups()</h2>
+<a id="ad12aae02aa8d8a004e8be614acfea122"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad12aae02aa8d8a004e8be614acfea122">&#9670;&nbsp;</a></span>BindGroups()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -151,8 +158,18 @@ Static Public Member Functions</h2></td></tr>
           <td class="memname">static string Dialogic.Resolver.BindGroups </td>
           <td>(</td>
           <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>text</em></td><td>)</td>
+          <td class="paramname"><em>text</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="class_dialogic_1_1_chat.html">Chat</a>&#160;</td>
+          <td class="paramname"><em>context</em> = <code>null</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -163,6 +180,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Iteratively resolve any groups in the specified text in the appropriate context, creating and caching <a class="el" href="class_dialogic_1_1_resolution.html">Resolution</a> objects as necessary </p>
+<p>HandleSymbolAlias(text, context); </p>
 
 </div>
 </div>
