@@ -15,6 +15,102 @@ namespace Dialogic
         }
 
         [Test]
+        public void SymbolClassInit()
+        {
+            Symbol s;
+
+            s = new Symbol().Init("$a", "a");
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol().Init("${a}", "a");
+            Assert.That(s.text, Is.EqualTo("${a}"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(true));
+
+            s = new Symbol().Init("${a}", "a");
+            Assert.That(s.text, Is.EqualTo("${a}"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void SymbolClassRegex()
+        {
+            Symbol s;
+
+            var m = RE.ParseVars.Match("((a|b) | $prep)");
+            s = new Symbol(m);
+            //Console.WriteLine(s);Util.ShowMatch(m);
+
+            Assert.That(s.text, Is.EqualTo("$prep"));
+            Assert.That(s.symbol, Is.EqualTo("prep"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol(RE.ParseVars.Match("$a"));
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            m = RE.ParseVars.Match("[bb=$a]");
+            s = new Symbol(m);
+
+            Assert.That(s.text, Is.EqualTo("[bb=$a]"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.EqualTo("bb"));
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol(RE.ParseVars.Match("${a}"));
+            Assert.That(s.text, Is.EqualTo("${a}"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(true));
+
+            s = new Symbol(RE.ParseVars.Match("[bb=${a}]"));
+            Assert.That(s.text, Is.EqualTo("[bb=${a}]"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.EqualTo("bb"));
+            Assert.That(s.bounded, Is.EqualTo(true));
+
+            s = new Symbol(RE.ParseVars.Match("$name"));
+            Assert.That(s.text, Is.EqualTo("$name"));
+            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol(RE.ParseVars.Match("$name,"));
+            Assert.That(s.text, Is.EqualTo("$name"));
+            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol(RE.ParseVars.Match("Hello $name,"));
+            Assert.That(s.text, Is.EqualTo("$name"));
+            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+            //text = "Hello $name, nice to $verb you $chat1!";
+
+            s = new Symbol(RE.ParseVars.Match("to $verb you"));
+            Assert.That(s.text, Is.EqualTo("$verb"));
+            Assert.That(s.symbol, Is.EqualTo("verb"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+
+            s = new Symbol(RE.ParseVars.Match("you $chat1!"));
+            Assert.That(s.text, Is.EqualTo("$chat1"));
+            Assert.That(s.symbol, Is.EqualTo("chat1"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+        }
+
+        [Test]
         public void ResolutionTest()
         {
             string last = null, choice;

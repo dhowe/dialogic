@@ -59,16 +59,15 @@ namespace Dialogic
             match = regex.Match("$a=$b");
             //Util.ShowMatch(match);
             Assert.That(match.Value.Trim(), Is.EqualTo("$a=$b"));
-
         }
 
         [Test]
-        public void EnclosedVarText()
+        public void EnclosedVarSets()
         {
             string text;
-            text = "SET a=$b";
             LineContext lc;
 
+            text = "SET a=$b";
             lc = new LineContext(text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
@@ -125,19 +124,47 @@ namespace Dialogic
             List<string> vars;
             MatchCollection matches;
 
+            // Note: this test will break if the regex is changed
+
+            text = "Hello $name, nice to $verb you $chat1";
+            matches = RE.ParseVars.Matches(text);
+            Assert.That(matches.Count, Is.EqualTo(3));
+            vars = new List<string>();
+            foreach (Match match in matches)
+            {
+                vars.Add(match.Groups[3].Value);
+            }
+            Assert.That(vars.Count, Is.EqualTo(3));
+            Assert.That(vars[0], Is.EqualTo("name"));
+            Assert.That(vars[1], Is.EqualTo("verb"));
+            Assert.That(vars[2], Is.EqualTo("chat1"));
+
             text = "Hello $name, nice to $verb you $chat1!";
             matches = RE.ParseVars.Matches(text);
             Assert.That(matches.Count, Is.EqualTo(3));
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
             Assert.That(vars[1], Is.EqualTo("verb"));
             Assert.That(vars[2], Is.EqualTo("chat1"));
+
+            text = "Hello $name, nice to $verb you $chat1!";
+            matches = RE.ParseVars.Matches(text);
+            Assert.That(matches.Count, Is.EqualTo(3));
+            vars = new List<string>();
+            foreach (Match match in matches)
+            {
+                vars.Add(match.Groups[3].Value);
+            }
+            Assert.That(vars.Count, Is.EqualTo(3));
+            Assert.That(vars[0], Is.EqualTo("name"));
+            Assert.That(vars[1], Is.EqualTo("verb"));
+            Assert.That(vars[2], Is.EqualTo("chat1"));
+
 
             text = "Hello $name, nice to $verb you $chat1.";
             matches = RE.ParseVars.Matches(text);
@@ -145,8 +172,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -159,8 +185,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -174,8 +199,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -205,7 +229,7 @@ namespace Dialogic
             foreach (Match match in matches)
             {
                 //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             //vars.ForEach(Console.WriteLine);
             //Util.ShowMatches(matches);
