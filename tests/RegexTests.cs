@@ -124,14 +124,15 @@ namespace Dialogic
             List<string> vars;
             MatchCollection matches;
 
-            text = "Hello $name, nice to $verb you $chat1!";
+            // Note: this test will break if the regex is changed
+
+            text = "Hello $name, nice to $verb you $chat1";
             matches = RE.ParseVars.Matches(text);
             Assert.That(matches.Count, Is.EqualTo(3));
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -144,8 +145,20 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
+            }
+            Assert.That(vars.Count, Is.EqualTo(3));
+            Assert.That(vars[0], Is.EqualTo("name"));
+            Assert.That(vars[1], Is.EqualTo("verb"));
+            Assert.That(vars[2], Is.EqualTo("chat1"));
+
+            text = "Hello $name, nice to $verb you $chat1!";
+            matches = RE.ParseVars.Matches(text);
+            Assert.That(matches.Count, Is.EqualTo(3));
+            vars = new List<string>();
+            foreach (Match match in matches)
+            {
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -159,8 +172,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -173,8 +185,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -188,8 +199,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -219,7 +229,7 @@ namespace Dialogic
             foreach (Match match in matches)
             {
                 //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[2].Value);
+                vars.Add(match.Groups[3].Value);
             }
             //vars.ForEach(Console.WriteLine);
             //Util.ShowMatches(matches);

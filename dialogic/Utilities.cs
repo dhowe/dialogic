@@ -131,6 +131,7 @@ namespace Dialogic
     public static class RE
     {
         internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";
+        internal const string NGSYM = "[A-Za-z_][A-Za-z0-9_-]*?";
         internal const string OP1 = @"^(!?!?$?" + SYM + ")";
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
@@ -139,9 +140,11 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        internal const string PV1 = @"(?:\[([^=]+)=\s*)?\$\{?(" + SYM + @"(?:\.";
-        internal const string PV2 = SYM + @")*)(?:[ .!;,:?()}""'\]]\]?|$)";
-        public static Regex ParseVars = new Regex(PV1 + PV2);
+        internal const string PV1 = @"((?:\[([^=]+)=\s*)";                 // [(alias)=
+        internal const string PV2 = @"?\$\{?";                            // ${
+        internal const string PV3 = @"(" + SYM + @"(?:\." + SYM + @")?)\}?\]?)"; // (na.me) 
+        //internal const string PV4 = @"(?:[ .!;,:?()""']|$)";        // last char 
+        public static Regex ParseVars = new Regex(PV1 + PV2 + PV3);// + PV4);
 
         public static Regex SaveState = new Regex(@"\[\s*([^= ]+)\s*=\s*([^\]]+)\s*\]");
 

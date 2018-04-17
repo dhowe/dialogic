@@ -39,10 +39,7 @@ namespace Dialogic
                 ("$a" + t).First().symbol, Is.EqualTo("a"));
 
             Assert.That(Resolver.ParseSymbols("${a}").First().symbol, Is.EqualTo("a"));
-            Assert.That(Resolver.ParseSymbols("${a}b").First().symbol, Is.EqualTo("a"));
-
             Assert.That(Resolver.ParseSymbols("${a.b}").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("${a.b}b").First().symbol, Is.EqualTo("a.b"));
 
             Assert.That(Resolver.ParseSymbols("$a.b").First().symbol, Is.EqualTo("a.b"));
             Assert.That(Resolver.ParseSymbols("[b=$a]").First().symbol, Is.EqualTo("a"));
@@ -67,6 +64,14 @@ namespace Dialogic
 
             Assert.That(Resolver.ParseSymbols("[c=${a.b}].").First().symbol, Is.EqualTo("a.b"));
             Assert.That(Resolver.ParseSymbols("[c=${a.b}].").First().alias, Is.EqualTo("c"));
+
+
+            Assert.That(Resolver.ParseSymbols("${a}b").First().symbol, Is.EqualTo("a"));
+            Assert.That(Resolver.ParseSymbols("${a.b}b").First().symbol, Is.EqualTo("a.b"));
+
+            //Assert.That(Resolver.ParseSymbols("${a})").First().symbol, Is.EqualTo("a"));
+            //Assert.That(Resolver.ParseSymbols("${a}b)").First().symbol, Is.EqualTo("a"));
+
         }
 
         [Test]

@@ -12,7 +12,7 @@ namespace Dialogic
     /// </summary>
     public static class Resolver
     {
-        public static bool DBUG = true;
+        public static bool DBUG = false;
 
         internal static Dictionary<string, Func<string, string>> ModifierLookup =
             new Dictionary<string, Func<string, string>>
@@ -68,48 +68,54 @@ namespace Dialogic
 
             while (text.Contains(Ch.SYMBOL))
             {
-                var symbols = ParseSymbols(text);
-                var sorted = SortByLength(symbols);
-                foreach (var s in sorted)
-                {
-                    if (!s.bounded)
-                    {
-                        text = text.Replace(Ch.SYMBOL + s.symbol,
-                           Ch.SYMBOL + "{" + s.symbol + '}');
-                    }
-                }
-                Console.WriteLine("  BOUND: " + text);
+                if (DBUG) Console.WriteLine("BindSymbols: " + text);
+                var symbolsUn = ParseSymbols(text);
+                var symbols = SortByLength(symbolsUn);
+                //var sorted = SortByLength(symbols);
+                //foreach (var s in sorted)
+                //{
+                //    if (!s.bounded)
+                //    {
+                //        text = text.Replace(Ch.SYMBOL + s.symbol,
+                //           Ch.SYMBOL + "{" + s.symbol + '}');
+                //    }
+                //}
+                //Console.WriteLine("  BOUND: " + text);
 
-                foreach (var symbol in symbols)
+                foreach (var sym in symbols)
                 //foreach (var symbol in sorted)
                 {
-                    var theSymbol = symbol.BoundedSymbol();
-                    var toReplace = symbol.alias == null ?
-                        Ch.SYMBOL + theSymbol : symbol.BoundedText();
+                    //Console.WriteLine("    SYM: " + sym);
+                    var theSymbol = sym.symbol;//BoundedSymbol();
+                    var toReplace = sym.text;
 
-                    // if its an alias we can wait for the next iteration
-                    Console.WriteLine("    Aliases.HAS? " + symbol.symbol);
-                    if (aliases.Contains(symbol.symbol)) {
-                        text = text.Replace('$'+symbol.BoundedSymbol(),symbol.BoundedSymbol());
-                        continue;    
-                    }
+                    //bounded ? symbol.BoundedSymbol() : Ch.SYMBOL + theSymbol;
+                    //symbol.alias == null ?
+                    //                Ch.SYMBOL + theSymbol : symbol.text;//BoundedText();
+
+                    //// if its an alias we can wait for the next iteration
+                    //Console.WriteLine("    Aliases.HAS? " + symbol.symbol);
+                    //if (aliases.Contains(symbol.symbol)) {
+                    //    text = text.Replace('$'+symbol.BoundedSymbol(),symbol.BoundedSymbol());
+                    //    continue;    
+                    //}
 
                     BindToContext(ref theSymbol, ref context);
-                    var symval = ResolveSymbol(symbol.symbol, context, globals);
+                    var symval = ResolveSymbol(theSymbol, context, globals);
 
                     // if we have an alias, then include it in our resolved 
                     // value so that it can be resolved correctly in BindGroups
-                    if (symbol.alias != null)
+                    if (sym.alias != null)
                     {
-                        symval = Ch.OSAVE + symbol.alias + Ch.EQ + symval + Ch.CSAVE;
-                        aliases.Add(symbol.alias);
-                        Console.WriteLine("    ALIASES: "+aliases.Stringify());
+                        //symval = Ch.OSAVE + symbol.alias + Ch.EQ + symval + Ch.CSAVE;
+                        //aliases.Add(symbol.alias);
+                        //Console.WriteLine("    ALIASES: "+aliases.Stringify());
                     }
 
                     //Console.WriteLine("    pre='"+text+"'");
-                    Console.Write("    " + text + ".Replace(" + toReplace + "," + symval + ")");
+                    if (DBUG) Console.Write("    " + text + ".Replace(" + toReplace + "," + symval + ")");
                     text = text.Replace(toReplace, symval);
-                    Console.WriteLine("   -> '" + text + "'");
+                    if (DBUG) Console.WriteLine("   -> '" + text + "'");
                 }
 
                 if (++depth >= maxRecursionDepth) throw new ResolverException
@@ -117,10 +123,10 @@ namespace Dialogic
 
             }
 
-            foreach (var alias in aliases)
-            {
-                text = text.Replace("{" + alias + "}", "${" + alias + "}");
-            }
+            //foreach (var alias in aliases)
+            //{
+            //    text = text.Replace("{" + alias + "}", "${" + alias + "}");
+            //}
             return Html.Decode(text);
         }
 
@@ -159,7 +165,7 @@ namespace Dialogic
                 }
             }
 
-            return HandleSymbolAlias(text, context);
+            return text;///HandleSymbolAlias(text, context);
         }
 
         /// <summary>
@@ -191,9 +197,10 @@ namespace Dialogic
         /// </summary>
         private static string ResolveSymbol(string symbol, Chat context, IDictionary<string, object> globals)
         {
-            var cstr = "$" + symbol + "\n    globals: " + globals.Stringify();
-            if (context != null) cstr += "\n    chat#" + context.text + ":" + context.scope.Stringify();
-            Console.WriteLine("  ResolveSymbol:" + cstr);
+            //var cstr = "$" + symbol + "\n    globals: " + globals.Stringify();
+            //if (context != null) cstr += "\n    chat#" + context.text + ":" + context.scope.Stringify();
+            //Console.WriteLine("  ResolveSymbol:" + cstr);
+
             if (context != null && context.scope.ContainsKey(symbol)) // check locals
             {
                 return context.scope[symbol].ToString();
@@ -207,12 +214,11 @@ namespace Dialogic
             throw new UnboundSymbolException(symbol, context, globals);
         }
 
-
-
         internal static List<Symbol> ParseSymbols(string text, bool showMatches = false)
         {
             List<Symbol> symbols = new List<Symbol>();
             var matches = RE.ParseVars.Matches(text);
+
             if (matches.Count == 0 && text.Contains(Ch.SYMBOL))
             {
                 throw new ResolverException("Unable to parse symbol: " + text);
@@ -220,10 +226,6 @@ namespace Dialogic
 
             foreach (Match match in matches)
             {
-                if (match.Groups.Count != 3)
-                {
-                    throw new DialogicException("Bad RE in " + text);
-                }
                 Symbol s = new Symbol(match);
                 //Console.WriteLine(s);
                 symbols.Add(s);
@@ -329,9 +331,12 @@ namespace Dialogic
         {
             if (match != null)
             {
-                if (match.Groups.Count != 3) throw new ArgumentException
-                    ("Bad match: " + match.Groups.Count);
-                Init(match.Groups[0].Value, match.Groups[2].Value, match.Groups[1].Value);
+                if (match.Groups.Count != 4)
+                {
+                    Util.ShowMatch(match);
+                    throw new ArgumentException("Bad match: " + match.Groups.Count);
+                }
+                Init(match.Groups[1].Value, match.Groups[3].Value, match.Groups[2].Value);
             }
         }
 
