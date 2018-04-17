@@ -216,26 +216,44 @@ namespace Dialogic
 
         internal class Symbol
         {
-            public string text, symbol, alias;
+            public string text, alias, symbol;
+            public bool bounded = false;
 
-            public Symbol(Match match)
+            public Symbol(Match match = null)
             {
-                if (match.Groups.Count != 3) throw new ArgumentException
-                    ("Bad match: " + match.Groups.Count);
-                Init(match.Groups[0].Value, match.Groups[2].Value, match.Groups[1].Value);
+                if (match != null)
+                {
+                    if (match.Groups.Count != 3) throw new ArgumentException
+                        ("Bad match: " + match.Groups.Count);
+                    Init(match.Groups[0].Value, match.Groups[2].Value, match.Groups[1].Value);
+                }
             }
 
-            private void Init(string t, string s, string a)
+            public Symbol Init(string txt, string sym, string save = "")
             {
-                this.text = t.Trim();
-                this.symbol = s.Trim();
-                this.alias = a.Length > 0 ? a.Trim() : null;
+                this.text = txt.Trim();
+                this.symbol = sym.Trim();
+                this.alias = save.Length > 0 ? save.Trim() : null;
+                this.bounded = text.Contains('{') && text.Contains('}');
+                //Console.WriteLine("SYM"+this);
+                return this;
+            }
+
+            public string BoundedSymbol()
+            {
+                return !bounded ? '{' + symbol + '}' : symbol;
             }
 
             public override string ToString()
             {
-                var s = "[$" + symbol + " text='" + text + "'";
-                return s + (alias != null ? " alias=" + alias : "") + "]";
+                var s = "[$" + (bounded ? '{' + symbol + '}' : symbol) + " text='";
+                return s + text + "'" + (alias != null ? " alias=" + alias : "") + "]";
+            }
+
+            internal string BoundedText()
+            {
+                var dollarSym = Ch.SYMBOL + symbol;
+                return !bounded ? text.Replace(dollarSym, "${" + symbol + '}') : text;
             }
         }
 
