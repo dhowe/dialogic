@@ -357,7 +357,7 @@ namespace Dialogic
                 "SET fortune=Under your skin, tears undulate like a leaky eel.",
                 "SET ending=And thats the end of the story...",
                 "CHAT External {type=a,stage=b}",
-                "SAY $WineReview.review",
+                "SAY #WineReview.review",
             };
             ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
             rt.ParseText(String.Join("\n", lines));

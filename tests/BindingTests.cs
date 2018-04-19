@@ -207,7 +207,7 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
-            c1.scope.Add("a", "$c2.a");
+            c1.scope.Add("a", "#c2.a");
             Chat c2 = rt.AddNewChat("c2");
             c2.scope.Add("a", "b");
             var res = Resolver.Bind("#c1.a", c2, globals);

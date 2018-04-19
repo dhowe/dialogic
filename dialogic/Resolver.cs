@@ -107,16 +107,15 @@ namespace Dialogic
                                 ("Null context for chat-scoped symbol: " + sym);
 
                             var chat = context.runtime.FindChatByLabel(parts[0]);
-                            if (chat == null) throw new ResolverException
-                                ("No Chat found with label #" + parts[0]);
-
+  
                             // reset the context to the chat
                             context = chat;
                             switched = true;
                         }
-                        else {
+                        else
+                        {
                             var obj = parts[0];
-                            Console.WriteLine("LOOKUP: $"+theSymbol+" on globals."+parts[0]);
+                            Console.WriteLine("LOOKUP: $" + theSymbol + " on globals." + parts[0]);
                             if (!globals.ContainsKey(obj)) throw new ResolverException
                                 ("No Chat found with label #" + parts[0]);
 
@@ -137,7 +136,7 @@ namespace Dialogic
                         if (sym.alias != null) toReplace = sym.SymbolText();
 
                         // if we've switched contexts and still have replacements
-                        // to do, we need to repeat (better as recursive call?)
+                        // to do, we need to repeat (perhaps better as recursive call?)
                         if (switched && symval.Contains(Ch.SYMBOL)) doRepeat = true;
 
                         // do the symbol replacement
