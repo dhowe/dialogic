@@ -20,7 +20,7 @@ namespace Dialogic
                 { "count", 4 }
          };
 
-        [Test]
+        /*[Test]
         public void FindChatByMeta()
         {
             string[] lines = {
@@ -48,7 +48,7 @@ namespace Dialogic
             Assert.That(result.Count, Is.EqualTo(0));
             labels = result.Select(o => o.text).ToList();
             Assert.That(labels, Is.EquivalentTo(new string[] { }));
-        }
+        }*/
 
         [Test]
         public void FindChatByName()

@@ -24,9 +24,7 @@ namespace Dialogic
     /// </summary>
     public class ChatRuntime
     {
-        public static string LOG_FILE;// = "../../../dialogic/dia.log";
-
-        public static string CHAT_FILE_EXT = ".gs";
+        public static string LOG_FILE, CHAT_FILE_EXT = ".gs";
 
         internal static bool DebugLifecycle = false;
 
@@ -44,8 +42,8 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal static IDictionary<Type, IDictionary<string, PropertyInfo>>
-            MetaMeta = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
+        internal IDictionary<string, Choice> ChoiceCache
+            = new Dictionary<string, Choice>();
 
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
@@ -58,6 +56,11 @@ namespace Dialogic
         private ChatEventHandler chatEvents;
         private List<Func<Command, bool>> validators;
         private IDictionary<string, Chat> chats;
+
+        public Chat this[string key] // TODO: test
+        {
+            get { return this.chats[key]; }
+        }
 
         public ChatRuntime() : this(null, null) { }
 
@@ -129,11 +132,6 @@ namespace Dialogic
             if (!chats.ContainsKey(label)) throw new DialogicException
               ("Unable to find Chat with label: '" + label + "'");
             return chats[label];
-
-            //var chat = Chats().FirstOrDefault(c => c.text == label);
-            //if (chat == null) throw new DialogicException
-            //    ("Unable to find Chat with label: '" + label + "'");
-            //return chat;
         }
 
         public IActor FindActorByName(string name)
@@ -159,15 +157,13 @@ namespace Dialogic
         {
             c.runtime = this;
             if (chats.Count < 1) firstChat = c;
+            if (c.text == null)
+            {
+                throw new DialogicException("Invalid Chat (no-name): " + c);
+            }
             chats.Add(c.text, c);
         }
-
-        internal List<Chat> FindChatByMeta(string key, string value) // used?
-        {
-            return Chats().Where(c => ((string)c.GetMeta(key))
-                == value).ToList<Chat>();
-        }
-
+         
         internal Chat AddNewChat(string name)
         {
             Chat c = new Chat();

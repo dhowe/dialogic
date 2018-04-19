@@ -10,22 +10,25 @@ namespace Dialogic
         public DialogicException(string msg = "") : base(msg) { }
     }
 
-    public class ResolverException : DialogicException
+    public class BindException : DialogicException
     {
-        public ResolverException(string msg = "") : base(msg) { }
+        public BindException(string msg = "") : base(msg) { }
     }
 
-    public class UnboundSymbolException : ResolverException
+    public class UnboundSymbol : BindException
     {
-        public UnboundSymbolException(string symbol, Chat context, 
+        public UnboundSymbol(string symbol, Chat context, 
             IDictionary<string, object> globals, string msg = "") : 
             base(GetMessage(symbol, context, globals)) {}
 
+        internal UnboundSymbol(Symbol symbol, Chat context,
+            IDictionary<string, object> globals, string msg = "") :
+            base(GetMessage(symbol.SymbolText(), context, globals)) { }
+
         private static string GetMessage(string s, Chat c, IDictionary<string, object> g)
         {
-            var cstr = "'$" + s + "'\nglobals: " + g.Stringify();
-            if (c != null) cstr += "\nchat#" + c.text + ":" + c.scope.Stringify();
-            return cstr;
+            return s + "\nglobals: " + g.Stringify() + (c != null ? "\nchat#" 
+                + c.text + ":" + c.scope.Stringify() : string.Empty);
         }
     }
 

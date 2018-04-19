@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
@@ -12,6 +13,7 @@ namespace Dialogic
         internal List<Command> commands;
 
         protected internal double staleness { get; protected set; }
+        protected internal bool resumable { get; protected set; }
         protected internal bool interruptable { get; protected set; }
         protected internal bool resumeAfterInt { get; protected set; }
         protected internal double stalenessIncr { get; protected set; }
@@ -24,27 +26,25 @@ namespace Dialogic
         internal IDictionary<string, object> scope;
         protected internal ChatRuntime runtime;
 
-        public object this[string key] // TODO: test using scope as indexer
-        {
-            get { return this.scope[key]; }
-        }
-
         public Chat() : base()
         {
             commands = new List<Command>();
 
-            realized = null; // not relevant for chats (use for locals?)
+            resumable = true;
             interruptable = true;
             resumeAfterInt = true;
             stalenessIncr = Defaults.CHAT_STALENESS_INCR;
             staleness = Defaults.CHAT_STALENESS;
             scope = new Dictionary<string, object>();
+            realized = null; // not relevant for chats
         }
 
-        internal static Chat Create(string name)
+        internal static Chat Create(string name, ChatRuntime rt = null)
         {
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
+            if (rt == null) rt = new ChatRuntime();
+            rt.AddChat(c);
             return c;
         }
 
@@ -188,7 +188,7 @@ namespace Dialogic
 
         internal void Run(bool resetCursor = true)
         {
-            if (resetCursor)
+            if (resetCursor || !resumable)
             {
                 this.cursor = 0;
                 IncrementStaleness();
@@ -211,8 +211,8 @@ namespace Dialogic
                     var type = (string)chat.GetMeta(Meta.DEFAULT_CMD);
                     if (!ChatRuntime.TypeMap.ContainsKey(type))
                     {
-                        throw new ParseException("Invalid defaultCmd value" +
-                            " in Chat#" + chat.text);
+                        throw new ParseException("Invalid defaultCmd" +
+                            "  value in Chat#" + chat.text);
                     }
 
                     return ChatRuntime.TypeMap[type];
@@ -222,8 +222,8 @@ namespace Dialogic
                     var mode = (string)chat.GetMeta(Meta.CHAT_MODE);
                     if (mode != "grammar")
                     {
-                        throw new ParseException("Invalid 'mode' value"
-                            + " in Chat#" + chat.text);
+                        throw new ParseException("Invalid 'mode'"
+                            + " value in Chat#" + chat.text);
                     }
                     return typeof(Set);
                 }
@@ -232,19 +232,24 @@ namespace Dialogic
             return typeof(Say);
         }
 
+        public override string Text()
+        {
+            throw new DialogicException("Cannot call Text() on Chat: "+this);
+        }
+
         // testing only below --------------------------------------------------
 
-        internal string Expand(IDictionary<string, object> globals, string start)
+        internal string _Expand(IDictionary<string, object> globals, string start)
         {
             Say s = new Say();
-            s.Init(start, "", new string[0]);
+            s.Init(start, string.Empty, new string[0]);
             s.SetActor(Dialogic.Actor.Default);
             s.parent = this;
             s.Realize(globals);
             return s.Text();
         }
 
-        internal string ExpandNoGroups(IDictionary<string, object> globals,
+        internal string _ExpandNoGroups(IDictionary<string, object> globals,
             string start)//, bool doGroups = false)
         {
             start = start.TrimFirst(Ch.SYMBOL);
@@ -273,40 +278,8 @@ namespace Dialogic
             return sofar;
         }
 
-        protected internal string AsGrammar(IDictionary<string, object> globals,
-            bool localize = true)
-        {
-            var name = text + ".";
-            var re = new Regex(@"\$([^ \(\)]+)");
-            var g = "Grammar#" + text + "\n";
-
-            foreach (var k in globals.Keys)
-            {
-                if (k.StartsWith(name, Util.IC))
-                {
-                    string key = k;
-                    string val = (string)globals[k];
-
-                    if (localize)
-                    {
-                        key = key.Replace(name, "");
-                        val = val.Replace(name, "");
-                    }
-
-                    foreach (Match match in re.Matches(val))
-                    {
-                        var sub = match.Groups[1].Value;
-                        val = val.Replace("$" + sub, "<" + sub + ">");
-                    }
-
-                    g += "  " + key + ": " + val + "\n";
-                }
-            }
-            return g;
-        }
-
-        // unused
-        protected internal string GrammarToJson(IDictionary<string, object>
+        // unused as yet
+        protected internal string _GrammarToJson(IDictionary<string, object>
             globals, bool localize = true)
         {
             var name = text + ".";
@@ -326,11 +299,11 @@ namespace Dialogic
                         val = val.Replace(name, "");
                     }
 
-                    foreach (Match match in re.Matches(val))
-                    {
-                        var sub = match.Groups[1].Value;
-                        val = val.Replace("$" + sub, "<" + sub + ">");
-                    }
+                    //foreach (Match match in re.Matches(val))
+                    //{
+                    //    var sub = match.Groups[1].Value;
+                    //    val = val.Replace("$" + sub, "<" + sub + ">");
+                    //}
 
                     g += "  \"" + key + "\": \"" + val + "\",\n";
                 }

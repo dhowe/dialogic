@@ -17,15 +17,9 @@ namespace Dialogic
         /// </summary>
         public static bool PRESERVE_LINE_NUMBERS = true;
 
-        internal const string TXT = @"((?:(?:[^$}{#])*"
-            + @"(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
-        internal const string DLBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\"
-            + @"(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
-        internal const string MTD = @"(?:\{(.+?)\})?\s*";
-        internal const string ACTR = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
-        private static Regex lineParser;
+        private static Regex lineParser; // static??
 
         protected ChatRuntime runtime;
         protected Stack<Command> parsedCommands;
@@ -40,7 +34,7 @@ namespace Dialogic
         {
             if (lineParser == null)
             {
-                lineParser = new Regex(ACTR + TypesRegex() + TXT + DLBL + MTD);
+                lineParser = new Regex(RE.ACT + TypesRegex() + RE.TXT + RE.LBL + RE.MTD);
             }
             return lineParser;
         }
@@ -119,14 +113,8 @@ namespace Dialogic
 
         private Chat ActiveChat()
         {
-            var chat = ((Chat)LastOfType(parsedCommands, typeof(Chat)));
-
             // Note: can be null if this is the first command
-
-            //if (chat == null) throw new DialogicException
-                //("Invalid state: no active chat");
-
-            return chat;
+            return ((Chat)LastOfType(parsedCommands, typeof(Chat)));
         }
 
         private Command ParseCommand(LineContext lc)
@@ -206,50 +194,25 @@ namespace Dialogic
             c.Validate();
         }
 
-        /// Extract properties that can be set from metadata
-        protected void ExtractMetaMeta(Command c)
-        {
-            var type = c.GetType();
-
-            var mmeta = ChatRuntime.MetaMeta;
-
-            if (!mmeta.ContainsKey(type))
-            {
-                mmeta.Add(type, new Dictionary<string, PropertyInfo>());
-                // Console.WriteLine(type+":");
-
-                var props = type.GetProperties(BindingFlags.Instance
-                    | BindingFlags.Public | BindingFlags.NonPublic);
-
-                foreach (var pi in props)
-                {
-                    mmeta[type].Add(pi.Name, pi);
-                    // Console.WriteLine("  "+pi.Name);
-                }
-            }
-        }
-
-        /// Updates any property values that have been set in metadata
+        /// Update any property values that have been set in metadata
         protected internal void SetPropValuesFromMeta(Command c)
         {
-            if (!ChatRuntime.MetaMeta.ContainsKey(c.GetType())) ExtractMetaMeta(c);
-
             if (c.HasMeta())
             {
-                var mmeta = ChatRuntime.MetaMeta[c.GetType()];
+                var metaMeta = Properties.Lookup(c.GetType());
 
                 foreach (KeyValuePair<string, object> pair in c.meta)
                 {
-                    object val = pair.Value;
-                    if (mmeta.ContainsKey(pair.Key))
+                    object value = pair.Value;
+                    if (metaMeta.ContainsKey(pair.Key))
                     {
                         if (pair.Key == Meta.ACTOR) // ugly special case
                         {
-                            c.SetActor(runtime, (string)val);
+                            c.SetActor(runtime, (string)value);
                         }
                         else
                         {
-                            c.DynamicSet(mmeta[pair.Key], val, false);
+                            c.Update(pair.Key, value, false);
                         }
                     }
                 }

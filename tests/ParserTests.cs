@@ -4,6 +4,12 @@ using NUnit.Framework;
 
 namespace Dialogic
 {
+    /*
+     * State: 
+     *   obj-traversal has 2 broken BindingTests
+     *   obj-trav2 has new Properties object which breaks a test in ParserTests
+     *   TODO: (debug Properties object and merge obj-trav2 back into obj-traversal)
+     */
     [TestFixture]
     public class ParserTests
     {
@@ -275,7 +281,18 @@ namespace Dialogic
             Assert.That(chat.meta, Is.Not.Null);
             Assert.That(chat.realized, Is.Null);
             Assert.That(chat.resumeAfterInt, Is.EqualTo(false));
+            Assert.That(chat.resumable, Is.EqualTo(true));
             Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUME_AFTER_INT)),
+                Is.EqualTo(Convert.ToBoolean("false")));
+            Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUMABLE)),
+                Is.EqualTo(Convert.ToBoolean("false")));
+
+            chat = ChatParser.ParseText("CHAT c1 { resumable=false,type = a,stage = b}")[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.resumable, Is.EqualTo(false));
+            Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUMABLE)),
                 Is.EqualTo(Convert.ToBoolean("false")));
         }
 
@@ -346,8 +363,17 @@ namespace Dialogic
         public void ChatStalenessFromSet()
         {
             List<Chat> chats;
-   
+
+            chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
+            chats[0].Realize(null);
+            //Console.WriteLine(chats[0]+" scope="+chats[0].scope.Stringify());
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].staleness, Is.EqualTo(2));
+            Assert.That(chats[0].Staleness(), Is.EqualTo(2));
+            Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));
+
             chats = ChatParser.ParseText("CHAT c1\nCHAT c2\nSET $c1.staleness=2", NO_VALIDATORS);
+          
             chats[0].Realize(null);
             chats[1].Realize(null);
             //Console.WriteLine(chats[0] + " scope=" + chats[0].scope.Stringify());
@@ -357,14 +383,6 @@ namespace Dialogic
             Assert.That(chats[1].Staleness(), Is.EqualTo(0));
             Assert.That(chats[1].GetMeta(Meta.STALENESS), Is.EqualTo("0"));
 
-            Assert.That(chats[0].staleness, Is.EqualTo(2));
-            Assert.That(chats[0].Staleness(), Is.EqualTo(2));
-            Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));
-
-            chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
-            chats[0].Realize(null);
-            //Console.WriteLine(chats[0]+" scope="+chats[0].scope.Stringify());
-            Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].staleness, Is.EqualTo(2));
             Assert.That(chats[0].Staleness(), Is.EqualTo(2));
             Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));
@@ -962,7 +980,7 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].text, Is.EqualTo("HAY is for horses"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            return;
+
             chats = ChatParser.ParseText("ASK is for horses?\nOPT Yes #game");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -1169,7 +1187,6 @@ namespace Dialogic
         [Test]
         public void Exceptions()
         {
-
             //var ff = "SAY $hello";
             //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].Realize(null)); return;
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A ="));
@@ -1206,7 +1223,7 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT a {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("NVM a {a=b}"));
 
-            Assert.Throws<UnboundSymbolException>(() => ChatParser.ParseText("SAY $hello")[0].Realize(null));
+            Assert.Throws<UnboundSymbol>(() => ChatParser.ParseText("SAY $hello")[0].Realize(null));
 
             string[] lines = {
                 "CHAT c1 {type=a,stage=b}","SAY Thank you","SAY Hello",

@@ -8,9 +8,9 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Dialogic</RootNamespace>
     <AssemblyName>Dialogic</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <PackageId>org.rednoise.dialogic</PackageId>
-    <PackageVersion>0.5.24</PackageVersion>
+    <PackageVersion>0.5.25</PackageVersion>
     <Authors>Daniel C Howe</Authors>
     <Description>Generative interactive dialog</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -19,7 +19,6 @@
     <Title>Dialogic</Title>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PackageIconUrl>http://rednoise.org/images/dialogic.png</PackageIconUrl>
-    <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +41,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Threading.Tasks.Extensions">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.3.0\lib\portable-net45+win8+wp8+wpa81\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple">
+      <HintPath>..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="MessagePack">
+      <HintPath>..\packages\MessagePack.1.7.3.4\lib\net45\MessagePack.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -58,6 +67,7 @@
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Chat.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="Dynamics.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,49 +33,6 @@ namespace Dialogic
         }
 
         [Test]
-        public void ParseSymbols()
-        {
-            var ts = new[] { "", ".", "!", ":", ";", ",", "?", ")", "\"", "'" };
-            foreach (var t in ts) Assert.That(Resolver.ParseSymbols
-                ("$a" + t).First().symbol, Is.EqualTo("a"));
-
-            Assert.That(Resolver.ParseSymbols("${a}").First().symbol, Is.EqualTo("a"));
-            Assert.That(Resolver.ParseSymbols("${a.b}").First().symbol, Is.EqualTo("a.b"));
-
-            Assert.That(Resolver.ParseSymbols("$a.b").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[b=$a]").First().symbol, Is.EqualTo("a"));
-
-            Assert.That(Resolver.ParseSymbols("[bc=$a.b]").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[bc=$a.b]").First().alias, Is.EqualTo("bc"));
-
-            Assert.That(Resolver.ParseSymbols("[c=$a.b]").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[c=$a.b]").First().alias, Is.EqualTo("c"));
-
-            //Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().symbol, Is.EqualTo("a.b"));
-            //Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().alias, Is.EqualTo("c"));
-
-            //Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().symbol, Is.EqualTo("a.b"));
-            //Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().alias, Is.EqualTo("c"));
-
-            //Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().symbol, Is.EqualTo("a.b"));
-            //Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().alias, Is.EqualTo("c"));
-
-            Assert.That(Resolver.ParseSymbols("[c=$a.b].").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[c=$a.b].").First().alias, Is.EqualTo("c"));
-
-            Assert.That(Resolver.ParseSymbols("[c=${a.b}].").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[c=${a.b}].").First().alias, Is.EqualTo("c"));
-
-
-            Assert.That(Resolver.ParseSymbols("${a}b").First().symbol, Is.EqualTo("a"));
-            Assert.That(Resolver.ParseSymbols("${a.b}b").First().symbol, Is.EqualTo("a.b"));
-
-            //Assert.That(Resolver.ParseSymbols("${a})").First().symbol, Is.EqualTo("a"));
-            //Assert.That(Resolver.ParseSymbols("${a}b)").First().symbol, Is.EqualTo("a"));
-
-        }
-
-        [Test]
         public void GroupRecursionDepth()
         {
             var str = "CHAT c\n(I | (You | (doh | why | no) | ouY) | They)";
@@ -104,7 +62,7 @@ namespace Dialogic
         {
             //// no replace to be made
             Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<UnboundSymbolException>(() => Resolver.Bind("$a", null, globals));
+            Assert.Throws<UnboundSymbol>(() => Resolver.Bind("$a", null, globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",
@@ -209,18 +167,20 @@ namespace Dialogic
         [Test]
         public void ReplaceGroups()
         {
+            Chat c1 = CreateParentChat("c1");
+
             var txt = "The boy was (sad | happy)";
             string[] ok = { "The boy was sad", "The boy was happy" };
             for (int i = 0; i < 10; i++)
             {
-                CollectionAssert.Contains(ok, Resolver.BindGroups(txt));
+                CollectionAssert.Contains(ok, Resolver.BindGroups(txt, c1));
             }
 
             txt = "The boy was (sad | happy | dead)";
             ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
             for (int i = 0; i < 10; i++)
             {
-                string s = Resolver.BindGroups(txt);
+                string s = Resolver.BindGroups(txt, c1);
                 //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
@@ -257,7 +217,7 @@ namespace Dialogic
              };
 
             var s = @"SAY $a $a2";
-            s = Resolver.Bind(s, null, globs);
+            s = Resolver.Bind(s, CreateParentChat("c"), globs);
             Assert.That(s, Is.EqualTo("SAY C C"));
         }
 
@@ -266,11 +226,11 @@ namespace Dialogic
         public void ReplaceVars()
         {
             var s = @"SAY The $animal woke $count times";
-            s = Resolver.BindSymbols(s, null, globals);
+            s = Resolver.BindSymbols(s, CreateParentChat("c"), globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
 
             s = @"SAY The $obj-prop woke $count times";
-            s = Resolver.BindSymbols(s, null, globals);
+            s = Resolver.BindSymbols(s, CreateParentChat("c"), globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
         }
 
@@ -278,13 +238,16 @@ namespace Dialogic
         public void ReplaceVarsGroups()
         {
             string s;
+
+            Chat c1 = CreateParentChat("c1");
+
    
             s = @"SAY The $animal woke and $prep (ate|ate)";
-            s = Resolver.Bind(s, null, globals);
+            s = Resolver.Bind(s, c1, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             s = @"SAY The $obj-prop woke and $prep (ate|ate)";
-            s = Resolver.Bind(s, null, globals);
+            s = Resolver.Bind(s, c1, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             //s = realizer.Do("$a", new Dictionary<string, object>()
@@ -294,7 +257,7 @@ namespace Dialogic
             string txt = "letter $group";
             for (int i = 0; i < 10; i++)
             {
-                Assert.That(Resolver.Bind(txt, null, globals),
+                Assert.That(Resolver.Bind(txt, c1, globals),
                     Is.EqualTo("letter a").Or.EqualTo("letter b"));
             }
 
@@ -303,7 +266,7 @@ namespace Dialogic
             string[] res = new string[10];
             for (int i = 0; i < res.Length; i++)
             {
-                res[i] = Resolver.Bind(txt2, null, globals);
+                res[i] = Resolver.Bind(txt2, c1, globals);
             }
             for (int i = 0; i < res.Length; i++)
             {
@@ -325,6 +288,7 @@ namespace Dialogic
             {
                 say.Realize(globals);
                 string said = say.Text();
+                //System.Console.WriteLine(i+") "+said);
                 Assert.That(said, Is.Not.EqualTo(last));
                 last = said;
             }
@@ -401,6 +365,14 @@ namespace Dialogic
             Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
             Assert.That(options[1].Text(), Is.EqualTo("4"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
+        }
+        private static Chat CreateParentChat(string name)
+        {
+            // create a realized Chat with the full set of global props
+            var c = Chat.Create(name);
+            foreach (var prop in globals.Keys) c.SetMeta(prop, globals[prop]);
+            c.Realize(globals);
+            return c;
         }
     }
 }

@@ -35,19 +35,48 @@ namespace Dialogic
             return delay;
         }
 
-        // Set a Command property by name
-        protected internal void DynamicSet(PropertyInfo propInfo, 
-            object val, bool syncMeta = true)
+        /// <summary>
+        /// Will update the value of the property (and meta if syncMeta=true) if it exists, and return true, else false if it does not
+        /// </summary>
+        protected internal bool Update(string property, object value, bool syncMeta = true)
         {
-            val = Util.ConvertTo(propInfo.PropertyType, val);
-            propInfo.SetValue(this, val, null);
+            // will only set if it exists
+            bool updated = Properties.Set(this, property, value, true);
 
             // check if we need to sync metadata as well
-            if (syncMeta && HasMeta(propInfo.Name))
+            if (syncMeta && HasMeta(property))
             {
-                SetMeta(propInfo.Name, val.ToString());
+                SetMeta(property, value.ToString());
             }
+
+            return updated;
         }
+
+        //// Set a Command property by name
+        //protected internal void DynamicSet(string property,
+        //    object val, bool syncMeta = true)
+        //{
+        //    Properties.Set(this, property, val);
+
+        //    // check if we need to sync metadata as well
+        //    if (syncMeta && HasMeta(property))
+        //    {
+        //        SetMeta(property, val.ToString());
+        //    }
+        //}
+
+        // Set a Command property by name
+        //protected internal void DynamicSet(PropertyInfo propInfo, 
+        //    object val, bool syncMeta = true)
+        //{
+        //    Properties.Set(this, propInfo, val);
+
+        //    // check if we need to sync metadata as well
+        //    if (syncMeta && HasMeta(propInfo.Name))
+        //    {
+        //        SetMeta(propInfo.Name, val.ToString());
+        //    }
+        //}
 
         protected Command Delay(double seconds)
         {
@@ -79,10 +108,10 @@ namespace Dialogic
         }
 
         /// <summary>
-        ///  REturns realized text for this object, equivalent to this.Realized(Meta.TEXT);
+        ///  Returns realized text for this object, equivalent to this.Realized(Meta.TEXT);
         /// </summary>
         /// <returns>The text.</returns>
-        public string Text()
+        public virtual string Text()
         {
             if (!realized.ContainsKey(Meta.TEXT))
             {
@@ -271,7 +300,7 @@ namespace Dialogic
     public class Set : Command
     {
         protected internal string value;
-        protected internal AssignOp op;
+        protected internal Assignment op;
         protected internal bool global;
 
         public Set() : base() { }
@@ -279,44 +308,55 @@ namespace Dialogic
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
             var match = RE.ParseSetArgs.Match(txt);
+
             if (match.Groups.Count != 4)
             {
-                //Util.ShowMatch(match);
+                Util.ShowMatch(match);
                 throw new ParseException("Invalid SET args: '" + txt + "'");
             }
 
+
             var tmp = match.Groups[1].Value.Trim();
+
+            var symbol = Symbol.Parse(tmp, parent); // CHANGED from above ???
+
             this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();
-            this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
+            this.op = Assignment.FromString(match.Groups[2].Value.Trim());
         }
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
             if (global && globals == null) throw new DialogicException
-                ("Invalid call to Set.Realize() with null argument");
+                ("Invalid call to Set.Realize() with null argument"); // needed?
 
             var symbol = text;
             var context = parent;
 
-            Resolver.ContextSwitch(ref symbol, ref context);
+            Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
 
             // Here we check if the set matches a dynamic parent property
-            if (context != null)
+            //if (context != null)
+            //{
+            //    IDictionary<string, PropertyInfo> mm = Properties.Lookup(typeof(Chat));
+
+            //    // If so, we don't create a new symbol, but instead set the property
+            //    if (mm.ContainsKey(symbol))
+            //    {
+            //        context.DynamicSet(symbol, value);
+            //        return this;
+            //    }
+            //}
+
+            // Here we check if the set matches a dynamic parent propert
+            // If so, we don't recreate it, but instead set the property
+            if (!context.Update(symbol, value))
             {
-                IDictionary<string, PropertyInfo> mm = ChatRuntime.MetaMeta[typeof(Chat)];
-
-                // If so, we don't create a new symbol, but instead set the property
-                if (mm.ContainsKey(symbol))
-                {
-                    context.DynamicSet(mm[symbol], value);
-                    return this;
-                }
+                // Invoke the assignment in the correct scope
+                //Console.WriteLine("$#" + symbol + " = " + value);
+                op.Invoke(symbol, value, (global ? globals : context.scope));
             }
-
-            // Invoke the assignment in the correct scope
-            op.Invoke(symbol, value, (global ? globals : context.scope));
 
             return this;
         }
@@ -663,6 +703,7 @@ namespace Dialogic
         public const string ON_RESUME = "onResume";
         public const string CHAT_MODE = "chatMode";
         public const string STALENESS = "staleness";
+        public const string RESUMABLE = "resumable";
         public const string DEFAULT_CMD = "defaultCmd";
         public const string INTERRUPTIBLE = "interruptible";
         public const string STALENESS_INCR = "stalenessIncr";

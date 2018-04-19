@@ -7,6 +7,7 @@ using System.Timers;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Reflection;
 
 [assembly: InternalsVisibleTo("tests")]
 [assembly: InternalsVisibleTo("weblint")]
@@ -95,7 +96,7 @@ namespace Dialogic
         public static double SAY_MIN_LEN_MULT = 0.5;
         public static int SAY_MAX_LINE_LEN = 80;
         public static int SAY_MIN_LINE_LEN = 2;
-	}
+    }
 
     /// <summary>
     /// A one-to-one mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
@@ -119,14 +120,16 @@ namespace Dialogic
 
     public static class Ch
     {
+        internal const char MODIFIER = '&';
         internal const char SYMBOL = '$';
         internal const char SCOPE = '.';
         internal const char OGROUP = '(';
         internal const char CGROUP = ')';
         internal const char OSAVE = '[';
         internal const char CSAVE = ']';
+        internal const char OBOUND = '{';
+        internal const char CBOUND = '}';
         internal const char LABEL = '#';
-        internal const char ALIAS = '%';
         internal const char EQ = '=';
         internal const char OR = '|';
     }
@@ -137,17 +140,22 @@ namespace Dialogic
     public static class RE
     {
         internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";
-        internal const string NGSYM = "[A-Za-z_][A-Za-z0-9_-]*?";
         internal const string OP1 = @"^(!?!?$?" + SYM + ")";
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
-        internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
-        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
-        public static Regex MatchParens = new Regex(MP1 + MP2);
+        internal const string XP1 = @"\(([^()]+|(?<Level>\()|";
+        internal const string XP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
+        public static Regex MatchParensX = new Regex(XP1 + XP2);
 
-        internal const string PV1 = @"((?:\[([^=]+)=)?\$\{?";
-        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)\}?\]?)";
+        internal const string MP0 = @"(?:\[([^=()]+)=)?";
+        internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
+        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
+        public static Regex MatchParens = new Regex(MP0 + MP1 + MP2);
+
+        internal const string PV1 = @"((?:\[([^=]+)=)?([$#])\{?";
+        //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)(&" + SYM + @")*\}?\]?)";
+        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
         public static Regex ParseAlias = new Regex(@"\[([^=]+)=([^\]]+)\]");
@@ -160,7 +168,13 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
-        public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+
+        // ChatParser.lineParser Regex
+        internal const string MTD = @"(?:\{(.+?)\})?\s*";
+        internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
+        internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
+        internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
     }
 
     /// <summary>
@@ -743,7 +757,7 @@ namespace Dialogic
         }
     }
 
-    public class Resolution
+    internal class Resolution // unused
     {
         static IDictionary<string, Resolution> resolveCache
             = new Dictionary<string, Resolution>();
@@ -806,7 +820,7 @@ namespace Dialogic
                     {
                         if (++iterations > maxIterations) // should never happen
                         {
-                            throw new ResolverException("Max limit: " + this);
+                            throw new BindException("Max limit: " + this);
                         }
                         resolved = (string)Util.RandItem(options);
                     }
@@ -829,11 +843,11 @@ namespace Dialogic
 
         private static Exception InvalidState(string sub)
         {
-            return new ResolverException("Invalid State: '" + sub + "'");
+            return new BindException("Invalid State: '" + sub + "'");
         }
     }
 
-    public class Html
+    public static class Html
     {
         private static int MIN_ESCAPE = 2, MAX_ESCAPE = 6;
 
@@ -844,6 +858,8 @@ namespace Dialogic
 
         public static String Decode(String input)
         {
+            if (!input.Contains('&')) return input;
+
 #pragma warning disable XS0001  //  Mono StringBuilder serialization warning
 
             StringBuilder writer = null;
@@ -884,7 +900,7 @@ namespace Dialogic
                     try
                     {
                         //int entityValue = Int32.Parse(input.Substring(k, j), radix);
-                        int entityValue = Convert.ToInt32(JSubstring(input, k, j), radix);
+                        int entityValue = Convert.ToInt32(JavaSubstr(input, k, j), radix);
 
                         if (writer == null) writer = new StringBuilder(input.Length);
 
@@ -893,9 +909,6 @@ namespace Dialogic
                         if (entityValue > 0xFFFF)
                         {
                             writer.Append(entityValue.ToString().Substring(0, 2));
-                            //char[] chrs = Character.toChars(entityValue);
-                            //writer.Append(entityValue[0]);
-                            //writer.Append(entityValue[1]);
                         }
                         else
                         {
@@ -912,7 +925,7 @@ namespace Dialogic
                 else
                 {
                     // named escape
-                    string value = LOOKUP[JSubstring(input, i, j)].First();
+                    string value = LOOKUP[JavaSubstr(input, i, j)].First();
                     if (value == null)
                     {
                         i++;
@@ -920,7 +933,7 @@ namespace Dialogic
                     }
 
                     if (writer == null) writer = new StringBuilder(input.Length);
-                    writer.Append(JSubstring(input, st, i - 1));
+                    writer.Append(JavaSubstr(input, st, i - 1));
                     writer.Append(value);
                 }
 
@@ -932,7 +945,7 @@ namespace Dialogic
             if (writer != null)
             {
                 //Console.WriteLine("input.Substring(st, input.Length) :: "+input);
-                writer.Append(JSubstring(input, st, input.Length));
+                writer.Append(JavaSubstr(input, st, input.Length));
                 return writer.ToString();
             }
 #pragma warning restore XS0001 //  Mono StringBuilder serialization warning
@@ -940,7 +953,7 @@ namespace Dialogic
             return input;
         }
 
-        private static string JSubstring(string s, int beginIndex, int endIndex)
+        private static string JavaSubstr(string s, int beginIndex, int endIndex)
         {
             int len = endIndex - beginIndex;
             return s.Substring(beginIndex, len);
@@ -949,10 +962,11 @@ namespace Dialogic
         private static ILookup<string, string> LOOKUP;
 
         private static readonly IDictionary<string, string> ESCAPES
-            = new Dictionary<string, string>()
+            = new Dictionary<string, string>() // replace with C# native?
         {
             {"\"",     "quot"}, // " - double-quote
             {"&",      "amp"}, // & - ampersand
+            {"#",      "num"}, // # - hash
             {"<",      "lt"}, // < - less-than
             {">",      "gt"}, // > - greater-than
             {" ",      "nbsp"},// non-breaking space
@@ -962,196 +976,6 @@ namespace Dialogic
             {"\u00A3", "pound"}, // pound sign
             {"\u00AE", "reg"}, // ® registered trademark
         };
-    }
-
-
-    /// <summary>
-    /// Represents an atomic operation on a pair of metadata string that when invoked returns a boolean
-    /// </summary>
-    public class Operator
-    {
-        private enum OpType { EQUALITY, COMPARISON, MATCHING, ASSIGNMENT }
-
-        public static Operator EQ = new Operator("=", OpType.EQUALITY);
-        public static Operator NE = new Operator("!=", OpType.EQUALITY);
-
-        public static Operator SW = new Operator("^=", OpType.MATCHING);
-        public static Operator EW = new Operator("$=", OpType.MATCHING);
-        public static Operator RE = new Operator("*=", OpType.MATCHING);
-
-        public static Operator GT = new Operator(">", OpType.COMPARISON);
-        public static Operator LT = new Operator("<", OpType.COMPARISON);
-        public static Operator LE = new Operator("<=", OpType.COMPARISON);
-        public static Operator GE = new Operator(">=", OpType.COMPARISON);
-
-        public static Operator[] ALL = { GT, LT, EQ, NE, LE, GE, SW, EQ, RE };
-
-        private readonly string value;
-        private readonly OpType type;
-
-        private Operator(string v, OpType o)
-        {
-            this.value = v;
-            this.type = o;
-        }
-
-        public static string FromOperator(Operator op)
-        {
-            for (int i = 0; i < ALL.Length; i++)
-            {
-                if (op == ALL[i]) return op.ToString();
-            }
-            throw new Exception("Invalid Operator: " + op);
-        }
-
-        public static Operator FromString(string op)
-        {
-            switch (op)
-            {
-                case ">": return Operator.GT;
-                case "<": return Operator.LT;
-                case ">=": return Operator.GE;
-                case "<=": return Operator.LE;
-                case "!=": return Operator.NE;
-                case "^=": return Operator.SW;
-                case "$=": return Operator.EW;
-                case "*=": return Operator.RE;
-                case "==": return Operator.EQ;
-                case "=": return Operator.EQ;
-            }
-            throw new Exception("Invalid Operator: " + op);
-        }
-
-        public override string ToString()
-        {
-            return this.value;
-        }
-
-        public bool Invoke(string s1, string s2)
-        {
-            if (s1 == null) throw new OperatorException(this);
-
-            if (this.type == OpType.EQUALITY)
-            {
-                if (this == EQ) return Equals(s1, s2);
-                if (this == NE) return !Equals(s1, s2);
-            }
-            else if (this.type == OpType.MATCHING)
-            {
-                if (s2 == null) return false;
-                if (this == SW) return s1.StartsWith(s2, StringComparison.CurrentCulture);
-                if (this == EW) return s1.EndsWith(s2, StringComparison.CurrentCulture);
-                if (this == RE) return new Regex(s2).IsMatch(s1);
-            }
-            else if (this.type == OpType.COMPARISON)
-            {
-                try
-                {
-                    double o1 = (double)Convert.ChangeType(s1, typeof(double));
-                    double o2 = (double)Convert.ChangeType(s2, typeof(double));
-                    if (this == GT) return o1 > o2;
-                    if (this == LT) return o1 < o2;
-                    if (this == GE) return o1 >= o2;
-                    if (this == LE) return o1 <= o2;
-                }
-                catch (FormatException)
-                {
-                    throw new OperatorException(this, "Expected numeric "
-                        + "operands, but found [" + s1 + "," + s2 + "]");
-                }
-                catch (Exception e)
-                {
-                    throw new OperatorException(this, e);
-                }
-            }
-            throw new OperatorException(this, "Unexpected Op type: ");
-        }
-    }
-
-    public class AssignOp
-    {
-        public static AssignOp EQ = new AssignOp("=");
-        public static AssignOp OE = new AssignOp("|=");
-        public static AssignOp PE = new AssignOp("+=");
-        /*public static AssignOp ME = new AssignOp("-=");
-        public static AssignOp TE = new AssignOp("*=");
-        public static AssignOp DE = new AssignOp("/=");*/
-
-        public static AssignOp[] ALL = { EQ, OE, PE };//, ME, TE, DE };
-
-        private readonly string value;
-
-        private AssignOp(string v)
-        {
-            this.value = v;
-        }
-
-        public static string FromOperator(AssignOp op)
-        {
-            for (int i = 0; i < ALL.Length; i++)
-            {
-                if (op == ALL[i]) return op.ToString();
-            }
-            throw new Exception("Invalid Operator: " + op);
-        }
-
-        public static AssignOp FromString(string op)
-        {
-            switch (op)
-            {
-                case "=": return AssignOp.EQ;
-                case "|=": return AssignOp.OE;
-                case "+=": return AssignOp.PE;
-                    /*case "-=": return AssignOp.ME;
-                    case "*=": return AssignOp.TE;
-                    case "/=": return AssignOp.DE;*/
-            }
-            throw new Exception("Invalid Operator: " + op);
-        }
-
-        public override string ToString()
-        {
-            return this.value;
-        }
-
-        public bool Invoke(string s1, string s2, IDictionary<string, object> scope)
-        {
-            s1 = s1.TrimFirst(Ch.SYMBOL);
-
-            string result = null;
-
-            if (this == EQ)
-            {
-                if (Util.HasOpenGroup(s2)) s2 = s2.Parenthify();
-                result = s2;
-            }
-            else if (this == OE)
-            {
-                if (!scope.ContainsKey(s1)) throw new ParseException
-                    ("Variable " + s1 + " not found in globals:\n  " + scope.Stringify());
-
-                var now = (string)scope[s1];
-                if (now.StartsWith('(') && now.EndsWith(')'))
-                {
-                    result = now.TrimLast(')') + " | " + s2 + ')';
-                }
-                else
-                {
-                    result = '(' + now + " | " + s2 + ')';
-                }
-            }
-            else if (this == PE)
-            {
-                if (!scope.ContainsKey(s1)) throw new ParseException
-                    ("Variable " + s1 + " not found in globals:\n  " + scope.Stringify());
-
-                result = scope[s1] + " " + s2;
-            }
-
-            scope[s1] = result;
-
-            return true;
-        }
     }
 
     // adapted from:
@@ -1232,7 +1056,6 @@ namespace Dialogic
 
     }//@endcond
 
-
     public static class Exts //@cond unused
     {
         internal delegate void Action<T1, T2, T3, T4, T5>
@@ -1241,6 +1064,29 @@ namespace Dialogic
         internal static void Apply<T>(this IList<T> il, Action<T, T, T, T, T> action)
         {
             action(il[0], il[1], il[2], il[3], il[4]);
+        }
+
+        internal static string[] Values(this GroupCollection groups)
+        {
+            if (groups == null) throw new ArgumentException("Null groups");
+
+            string[] parts = new string[groups.Count];
+            for (int i = 0; i < groups.Count; i++)
+            {
+                parts[i] = groups[i].Value;
+            }
+
+            return parts;
+        }
+
+        /// <summary>
+        /// Removes the last element of a list and returns it
+        /// </summary>
+        internal static T Pop<T>(this List<T> list)
+        {
+            var last = list.Last();
+            list.RemoveAt(list.Count - 1);
+            return last;
         }
 
         internal static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)
@@ -1282,9 +1128,14 @@ namespace Dialogic
             return !str.IsNullOrEmpty() && str[str.Length - 1] == c;
         }
 
-        internal static bool Contains(this string str, char c)
+        internal static bool Contains(this string str, params char[] c)
         {
-            return !str.IsNullOrEmpty() && str.IndexOf(c) > -1;
+            if (str.IsNullOrEmpty()) return false;
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (str.IndexOf(c[i]) > -1) return true;
+            }
+            return false;
         }
 
         internal static string TrimEnds(this string str, char start, char end)

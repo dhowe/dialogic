@@ -8,7 +8,7 @@
     <RootNamespace>tests</RootNamespace>
     <AssemblyName>tests</AssemblyName>
     <TargetFramework>net35</TargetFramework>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,6 +43,7 @@
     <Compile Include="RegexTests.cs" />
     <Compile Include="BindingTests.cs" />
     <Compile Include="GrammarTests.cs" />
+    <Compile Include="DynamicsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
