@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -14,12 +13,12 @@ namespace Dialogic
     {
         public static bool DBUG = false;
 
-        internal static Dictionary<string, Func<string, string>> ModifierLookup =
+        internal static IDictionary<string, Func<string, string>> ModifierLookup =
             new Dictionary<string, Func<string, string>>
            {
-               { "quotify",       Modifiers.Quotify },
-               { "capitalize",    Modifiers.Quotify },
-               { "allCaps",       Modifiers.AllCaps }
+               { "quotify",       Modifier.Quotify },
+               { "capitalize",    Modifier.Capitalize},
+               { "allCaps",       Modifier.AllCaps }
            };
 
         /// <summary>
@@ -30,27 +29,32 @@ namespace Dialogic
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (globals.IsNullOrEmpty() && parent == null) return BindGroups(text, parent);
-
-            if (DBUG) Console.WriteLine("Bind: " + text);
+            if (DBUG) Console.WriteLine("--------------------------------\nBind: " + text);
 
             var original = text;
-            int depth = 0, maxRecursionDepth = 10;
+            int depth = 0, maxRecursionDepth = Defaults.BIND_MAX_DEPTH;
 
             do
             {
-                if (DBUG) Console.WriteLine("  BindSymbols(" + depth + ") -> " + text);
-                text = BindSymbols(text, parent, globals);
+                text = BindSymbols(text, parent, globals, depth);
 
-                if (DBUG) Console.WriteLine("  BindGroups(" + depth + ") -> " + text);
-                text = BindGroups(text, parent);
+                text = BindGroups(text, parent, depth);
 
-                if (++depth > maxRecursionDepth) throw new ResolverException
-                    ("Bind hit maxRecursionDepth for: " + original);
+                if (++depth > maxRecursionDepth) // bail if hit max depth
+                {
+                    if (text.Contains('$'))
+                    {
+                        var symbols = ParseSymbols(text, false);
+                        if (!symbols.IsNullOrEmpty()) throw new UnboundSymbolException
+                            (symbols[0].symbol, parent, globals);
+                    }
+                    throw new ResolverException
+                        ("Resolver hit maxRecursionDepth for: " + original);
+                }
 
             } while (IsDynamic(text));
 
-            if (DBUG) Console.WriteLine("  Result: " + text + "\n");
+            if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
             return text;
         }
@@ -60,73 +64,57 @@ namespace Dialogic
         /// in the appropriate context
         /// </summary>
         public static string BindSymbols(string text, Chat context,
-            IDictionary<string, object> globals)
+            IDictionary<string, object> globals, int level = 0)
         {
-            int depth = 0, maxRecursionDepth = 10;
-
-            var aliases = new HashSet<string>();
-
-            while (text.Contains(Ch.SYMBOL))
+            var doRepeat = false;
+            do
             {
-                if (DBUG) Console.WriteLine("BindSymbols: " + text);
-                var symbolsUn = ParseSymbols(text);
-                var symbols = SortByLength(symbolsUn);
-                //var sorted = SortByLength(symbols);
-                //foreach (var s in sorted)
-                //{
-                //    if (!s.bounded)
-                //    {
-                //        text = text.Replace(Ch.SYMBOL + s.symbol,
-                //           Ch.SYMBOL + "{" + s.symbol + '}');
-                //    }
-                //}
-                //Console.WriteLine("  BOUND: " + text);
+                var symbols = ParseSymbols(text, true);
 
-                foreach (var sym in symbols)
-                //foreach (var symbol in sorted)
+                if (DBUG)
                 {
-                    //Console.WriteLine("    SYM: " + sym);
-                    var theSymbol = sym.symbol;//BoundedSymbol();
-                    var toReplace = sym.text;
-
-                    //bounded ? symbol.BoundedSymbol() : Ch.SYMBOL + theSymbol;
-                    //symbol.alias == null ?
-                    //                Ch.SYMBOL + theSymbol : symbol.text;//BoundedText();
-
-                    //// if its an alias we can wait for the next iteration
-                    //Console.WriteLine("    Aliases.HAS? " + symbol.symbol);
-                    //if (aliases.Contains(symbol.symbol)) {
-                    //    text = text.Replace('$'+symbol.BoundedSymbol(),symbol.BoundedSymbol());
-                    //    continue;    
-                    //}
-
-                    BindToContext(ref theSymbol, ref context);
-                    var symval = ResolveSymbol(theSymbol, context, globals);
-
-                    // if we have an alias, then include it in our resolved 
-                    // value so that it can be resolved correctly in BindGroups
-                    if (sym.alias != null)
-                    {
-                        //symval = Ch.OSAVE + symbol.alias + Ch.EQ + symval + Ch.CSAVE;
-                        //aliases.Add(symbol.alias);
-                        //Console.WriteLine("    ALIASES: "+aliases.Stringify());
-                    }
-
-                    //Console.WriteLine("    pre='"+text+"'");
-                    if (DBUG) Console.Write("    " + text + ".Replace(" + toReplace + "," + symval + ")");
-                    text = text.Replace(toReplace, symval);
-                    if (DBUG) Console.WriteLine("   -> '" + text + "'");
+                    var s = "  BindSymbols(" + level + ") -> " + text;
+                    s += "\n  Symbols(" + symbols.Count + "): ";
+                    symbols.ForEach(sym => s += "$" + sym.symbol);
+                    Console.WriteLine(s);
                 }
 
-                if (++depth >= maxRecursionDepth) throw new ResolverException
-                    ("BindSymbols hit maxRecursionDepth for: " + text);
+                doRepeat = false;
+                foreach (var sym in symbols)
+                {
+                    string theSymbol = sym.symbol, toReplace = sym.text;
 
-            }
+                    // check if we need to do a context switch
+                    var switched = ContextSwitch(ref theSymbol, ref context);
 
-            //foreach (var alias in aliases)
-            //{
-            //    text = text.Replace("{" + alias + "}", "${" + alias + "}");
-            //}
+                    // lookup the value for the symbol
+                    var symval = ResolveSymbol(theSymbol, context, globals);
+
+                    if (symval != null)
+                    {
+                        // if we have an alias, then include it in our resolved 
+                        // value so that it can be handled properly in BindGroups
+                        if (sym.alias != null) toReplace = sym.SymbolText();
+
+                        // if we've switched contexts and still have replacements
+                        // to do, we need to repeat (better as recursive call?)
+                        if (switched && symval.Contains(Ch.SYMBOL)) doRepeat = true;
+
+                        // do the symbol replacement
+                        text = text.Replace(toReplace, symval);
+
+                        if (DBUG)
+                        {
+                            Console.WriteLine("    " + toReplace + " -> '" + symval + "'");
+                            if (doRepeat) Console.WriteLine
+                                ("   Repeat with context=#" + context.text + " -> " + text);
+                        }
+                    }
+                }
+
+            } while (doRepeat);
+
+
             return Html.Decode(text);
         }
 
@@ -135,43 +123,56 @@ namespace Dialogic
         /// in the appropriate context, creating and caching Resolution
         /// objects as necessary
         /// </summary>
-        public static string BindGroups(string text, Chat context = null)
+        public static string BindGroups(string text, Chat context = null, int level = 0)
         {
-            if (!String.IsNullOrEmpty(text))
+            if (text.Contains(Ch.OR))
             {
-                int depth = 0, maxRecursionDepth = 10;
+                if (DBUG) Console.WriteLine("  BindSymbols(" + level + ") -> " + text);
+
                 var original = text;
-                while (text.Contains(Ch.OR))
+
+                if (!(text.Contains(Ch.OGROUP) && text.Contains(Ch.CGROUP)))
                 {
-                    if (++depth > maxRecursionDepth) throw new ResolverException
-                        ("BindGroups hit maxRecursionDepth for: " + original);
+                    text = Ch.OGROUP + text + Ch.CGROUP;
+                    Console.WriteLine("[WARN] BindGroups added parens to: " + text);
+                }
 
-                    if (!(text.Contains(Ch.OGROUP) && text.Contains(Ch.CGROUP)))
-                    {
-                        text = Ch.OGROUP + text + Ch.CGROUP;
-                        Console.WriteLine("[WARN] BindGroups added parens to: " + text);
-                    }
+                List<string> groups = new List<string>();
+                ParseGroups(text, groups);
 
-                    List<string> groups = new List<string>();
-                    ParseGroups(text, groups);
+                if (DBUG) Console.WriteLine("    Groups: " + groups.Stringify());
 
-                    if (DBUG) Console.WriteLine("    Groups: " + groups.Stringify());
+                foreach (var opt in groups)
+                {
+                    var pick = Resolution.Choose(opt);
+                    if (DBUG) Console.WriteLine("      " + opt + " -> " + pick);
+                    text = text.ReplaceFirst(opt, pick);
+                }
 
-                    foreach (var opt in groups)
-                    {
-                        var pick = Resolution.Choose(opt);
-                        text = text.ReplaceFirst(opt, pick);
-                    }
+                var match = RE.ParseAlias.Match(text);
+                if (match != null && match.Groups.Count == 3)
+                {
+                    var full = match.Groups[0].Value;
+                    var choice = match.Groups[2].Value;
+
+                    // store the alias as a symbol in current scope
+                    context.scope[match.Groups[1].Value] = choice;
+
+                    // now do the replacement
+                    text = text.ReplaceFirst(full, choice);
+
+                    if (DBUG) Console.WriteLine("      " + full + " -> " + choice
+                        + "\n      scope: " + context.scope.Stringify());
                 }
             }
 
-            return text;///HandleSymbolAlias(text, context);
+            return text;
         }
 
         /// <summary>
         /// Handles Chat-scoping of variables by updating symbol name and switching to specified context
         /// </summary>
-        internal static void BindToContext(ref string symbol, ref Chat context)
+        internal static bool ContextSwitch(ref string symbol, ref Chat context)
         {
             if (symbol.Contains(Ch.SCOPE))
             {
@@ -189,32 +190,32 @@ namespace Dialogic
 
                 symbol = parts[1];
                 context = chat;
+
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
         /// First do local lookup from Chat context, then if not found, try global lookup
         /// </summary>
-        private static string ResolveSymbol(string symbol, Chat context, IDictionary<string, object> globals)
+        private static string ResolveSymbol(string symbol, Chat context,
+            IDictionary<string, object> globals)
         {
-            //var cstr = "$" + symbol + "\n    globals: " + globals.Stringify();
-            //if (context != null) cstr += "\n    chat#" + context.text + ":" + context.scope.Stringify();
-            //Console.WriteLine("  ResolveSymbol:" + cstr);
-
+            string result = null;
             if (context != null && context.scope.ContainsKey(symbol)) // check locals
             {
-                return context.scope[symbol].ToString();
+                result = context.scope[symbol].ToString();
             }
-
-            if (globals != null && globals.ContainsKey(symbol))   // check globals
+            else if (globals != null && globals.ContainsKey(symbol))   // check globals
             {
-                return globals[symbol].ToString();
+                result = globals[symbol].ToString();
             }
-
-            throw new UnboundSymbolException(symbol, context, globals);
+            return result;
         }
 
-        internal static List<Symbol> ParseSymbols(string text, bool showMatches = false)
+        internal static List<Symbol> ParseSymbols(string text, bool sortResults = false)
         {
             List<Symbol> symbols = new List<Symbol>();
             var matches = RE.ParseVars.Matches(text);
@@ -226,23 +227,14 @@ namespace Dialogic
 
             foreach (Match match in matches)
             {
-                Symbol s = new Symbol(match);
-                //Console.WriteLine(s);
-                symbols.Add(s);
+                symbols.Add(new Symbol(match));
             }
 
             // OPT: we sort here to avoid symbols which are substrings of another
             // symbol causing incorrect replacements ($a being replaced in $ant, 
             // for example), however this can be avoided by correctly using 
             // Regex.Replace instead of String.Replace() in BindSymbols
-            return symbols;
-
-            //return symbols;
-        }
-
-        internal static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
-        {
-            return (from s in syms orderby s.symbol.Length descending select s).ToList();
+            return sortResults ? SortByLength(symbols) : symbols;
         }
 
         private static void ParseGroups(string input, List<string> results)
@@ -262,34 +254,19 @@ namespace Dialogic
             }
         }
 
-        private static bool IsDynamic(string text)
+        private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
         {
-            return text != null &&
-                (text.IndexOf('|') > -1 || text.IndexOf('$') > -1);
+            return (from s in syms orderby s.symbol.Length descending select s).ToList();
         }
 
-        private static string HandleSymbolAlias(string text, Chat context)
+        private static bool IsDynamic(string text)
         {
-            var match = RE.SaveState.Match(text);
-
-            if (match.Groups.Count == 3)
-            {
-                string symbol = match.Groups[1].Value,
-                    value = match.Groups[2].Value;
-
-                AssignOp.EQ.Invoke(symbol, value, context.scope);
-                Console.WriteLine("REPLACE: " + match.Groups[0].Value + " with " + value);
-                //Console.WriteLine("    Scope -> " + context.scope.Stringify());
-                text = text.Replace(match.Groups[0].Value, value);
-                //Console.WriteLine("    Saved -> " + text);
-            }
-
-            return text;
+            return text != null && (text.Contains(Ch.OR) || text.Contains(Ch.SYMBOL));
         }
 
     }
 
-    static class Modifiers
+    static class Modifier
     {
         /// <summary>
         /// Capitalize the first character.
@@ -350,21 +327,26 @@ namespace Dialogic
             return this;
         }
 
-        public string BoundedSymbol()
-        {
-            return !bounded ? '{' + symbol + '}' : symbol;
-        }
-
         public override string ToString()
         {
-            var s = "[$" + (bounded ? '{' + symbol + '}' : symbol) + " text='";
-            return s + text + "'" + (alias != null ? " alias=" + alias : "") + "]";
+            return SymbolText() + (text != null ? " text='" + text +
+                "'" : "") + (alias != null ? " alias=" + alias : "") + "]";
         }
 
-        internal string BoundedText()
+        //public string BoundedSymbol()
+        //{
+        //    return !bounded ? '{' + symbol + '}' : symbol;
+        //}
+
+        //internal string BoundedText()
+        //{
+        //    var dollarSym = Ch.SYMBOL + symbol;
+        //    return !bounded ? text.Replace(dollarSym, "${" + symbol + '}') : text;
+        //}
+
+        internal string SymbolText()
         {
-            var dollarSym = Ch.SYMBOL + symbol;
-            return !bounded ? text.Replace(dollarSym, "${" + symbol + '}') : text;
+            return "$" + (bounded ? "{" + symbol + '}' : symbol);
         }
     }
 }

@@ -83,14 +83,19 @@ namespace Dialogic
         /// </summary>
         public static bool CHAT_ENABLE_SMOOTHING = true;
 
-        // Default Timing fields for Say, Ask, Opt (?)
+        /// <summary>
+        ///  Max recursion depth for Resolver bindings
+        /// </summary>
+        public static int BIND_MAX_DEPTH = 10;
+
+        // Default Timing fields for Say, Ask, Opt
         public static double SAY_FAST_MULT = 0.5;
         public static double SAY_SLOW_MULT = 2.0;
         public static double SAY_MAX_LEN_MULT = 2.0;
         public static double SAY_MIN_LEN_MULT = 0.5;
         public static int SAY_MAX_LINE_LEN = 80;
         public static int SAY_MIN_LINE_LEN = 2;
-    }
+	}
 
     /// <summary>
     /// A one-to-one mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
@@ -121,6 +126,7 @@ namespace Dialogic
         internal const char OSAVE = '[';
         internal const char CSAVE = ']';
         internal const char LABEL = '#';
+        internal const char ALIAS = '%';
         internal const char EQ = '=';
         internal const char OR = '|';
     }
@@ -140,12 +146,11 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        internal const string PV1 = @"((?:\[([^=]+)=\s*)";                 // [(alias)=
-        internal const string PV2 = @"?\$\{?";                            // ${
-        internal const string PV3 = @"(" + SYM + @"(?:\." + SYM + @")?)\}?\]?)"; // (na.me) 
-        //internal const string PV4 = @"(?:[ .!;,:?()""']|$)";        // last char 
-        public static Regex ParseVars = new Regex(PV1 + PV2 + PV3);// + PV4);
+        internal const string PV1 = @"((?:\[([^=]+)=)?\$\{?";
+        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)\}?\]?)";
+        public static Regex ParseVars = new Regex(PV1 + PV2);
 
+        public static Regex ParseAlias = new Regex(@"\[([^=]+)=([^\]]+)\]");
         public static Regex SaveState = new Regex(@"\[\s*([^= ]+)\s*=\s*([^\]]+)\s*\]");
 
         public static Regex SplitOr = new Regex(@"\s*\|\s*");

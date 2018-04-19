@@ -300,7 +300,7 @@ namespace Dialogic
             var symbol = text;
             var context = parent;
 
-            Resolver.BindToContext(ref symbol, ref context);
+            Resolver.ContextSwitch(ref symbol, ref context);
 
             // Here we check if the set matches a dynamic parent property
             if (context != null)

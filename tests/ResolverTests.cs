@@ -50,14 +50,14 @@ namespace Dialogic
             Assert.That(Resolver.ParseSymbols("[c=$a.b]").First().symbol, Is.EqualTo("a.b"));
             Assert.That(Resolver.ParseSymbols("[c=$a.b]").First().alias, Is.EqualTo("c"));
 
-            Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().alias, Is.EqualTo("c"));
+            //Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().symbol, Is.EqualTo("a.b"));
+            //Assert.That(Resolver.ParseSymbols("[ c=$a.b]").First().alias, Is.EqualTo("c"));
 
-            Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().alias, Is.EqualTo("c"));
+            //Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().symbol, Is.EqualTo("a.b"));
+            //Assert.That(Resolver.ParseSymbols("[c= $a.b]").First().alias, Is.EqualTo("c"));
 
-            Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().alias, Is.EqualTo("c"));
+            //Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().symbol, Is.EqualTo("a.b"));
+            //Assert.That(Resolver.ParseSymbols("[c=$a.b ]").First().alias, Is.EqualTo("c"));
 
             Assert.That(Resolver.ParseSymbols("[c=$a.b].").First().symbol, Is.EqualTo("a.b"));
             Assert.That(Resolver.ParseSymbols("[c=$a.b].").First().alias, Is.EqualTo("c"));
@@ -104,7 +104,7 @@ namespace Dialogic
         {
             //// no replace to be made
             Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<UnboundSymbolException>(() => Resolver.BindSymbols("$a", null, globals));
+            Assert.Throws<UnboundSymbolException>(() => Resolver.Bind("$a", null, globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",
@@ -257,7 +257,7 @@ namespace Dialogic
              };
 
             var s = @"SAY $a $a2";
-            s = Resolver.BindSymbols(s, null, globs);
+            s = Resolver.Bind(s, null, globs);
             Assert.That(s, Is.EqualTo("SAY C C"));
         }
 

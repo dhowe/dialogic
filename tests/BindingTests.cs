@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Dialogic
 {
     [TestFixture]
-    class BindContextTests
+    class BindingTests
     {
         const bool NO_VALIDATORS = true;
 
@@ -25,7 +25,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             Assert.Throws<UnboundSymbolException>(() => 
-                Resolver.BindSymbols("$animal", c1, null));
+                Resolver.Bind("$animal", c1, null));
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             Assert.Throws<UnboundSymbolException>(() => 
-                Resolver.BindSymbols("$animal", null, null));
+                Resolver.Bind("$animal", null, null));
         }
 
         [Test]
@@ -42,7 +42,7 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
-            var res = Resolver.BindSymbols("$animal", c1, globals);
+            var res = Resolver.Bind("$animal", c1, globals);
             Assert.That(res, Is.EqualTo("dog"));
         }
 
@@ -51,9 +51,8 @@ namespace Dialogic
         {
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
-            var res = Resolver.BindSymbols("$cmplx", c1, globals);
-            Assert.That(res, Is.EqualTo("((a|b) | then)"));
-            //Assert.That(res, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("then"));
+            var res = Resolver.Bind("$cmplx", c1, globals);
+            Assert.That(res, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("then"));
         }
 
         [Test]
@@ -62,7 +61,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             c1.scope.Add("a", "b");
-            var res = Resolver.BindSymbols("$a", c1, globals);
+            var res = Resolver.Bind("$a", c1, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
 
@@ -73,7 +72,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             c1.scope.Add("a", "$b");
             c1.scope.Add("b", "c");
-            var res = Resolver.BindSymbols("$a", c1, globals);
+            var res = Resolver.Bind("$a", c1, globals);
             Assert.That(res, Is.EqualTo("c"));
         }
 
@@ -85,7 +84,7 @@ namespace Dialogic
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "b");
             //var res = c2.Realizer().Do("$c1.a", globals, c2);
-            var res = Resolver.BindSymbols("$c1.a", c2, globals);
+            var res = Resolver.Bind("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
 
@@ -96,7 +95,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "$animal");
-            var res = Resolver.BindSymbols("$c1.a", c2, globals);
+            var res = Resolver.Bind("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("dog"));
         }
 
@@ -107,7 +106,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "The $animal ate");
-            var res = Resolver.BindSymbols("$c1.a", c2, globals);
+            var res = Resolver.Bind("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("The dog ate"));
         }
 
@@ -118,7 +117,7 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             Chat c2 = rt.AddNewChat("c2");
             c1.scope.Add("a", "The $animal ate $prep");
-            var res = Resolver.BindSymbols("$c1.a", c2, globals);
+            var res = Resolver.Bind("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("The dog ate then"));
         }
 
@@ -130,7 +129,7 @@ namespace Dialogic
             c1.scope.Add("a", "$c2.a");
             Chat c2 = rt.AddNewChat("c2");
             c2.scope.Add("a", "b");
-            var res = Resolver.BindSymbols("$c1.a", c2, globals);
+            var res = Resolver.Bind("$c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("b"));
         }
 
