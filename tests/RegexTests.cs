@@ -124,6 +124,7 @@ namespace Dialogic
             List<string> vars;
             MatchCollection matches;
 
+            int symbolMatchIndex = 4;
             // Note: this test will break if the regex is changed
 
             text = "Hello $name, nice to $verb you $chat1";
@@ -132,7 +133,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                vars.Add(match.Groups[3].Value);
+                vars.Add(match.Groups[symbolMatchIndex].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -145,7 +146,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                vars.Add(match.Groups[3].Value);
+                vars.Add(match.Groups[symbolMatchIndex].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -158,7 +159,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                vars.Add(match.Groups[3].Value);
+                vars.Add(match.Groups[symbolMatchIndex].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -172,7 +173,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                vars.Add(match.Groups[3].Value);
+                vars.Add(match.Groups[symbolMatchIndex].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -185,7 +186,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                vars.Add(match.Groups[3].Value);
+                vars.Add(match.Groups[symbolMatchIndex].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -199,7 +200,7 @@ namespace Dialogic
             vars = new List<string>();
             foreach (Match match in matches)
             {
-                vars.Add(match.Groups[3].Value);
+                vars.Add(match.Groups[symbolMatchIndex].Value);
             }
             Assert.That(vars.Count, Is.EqualTo(3));
             Assert.That(vars[0], Is.EqualTo("name"));
@@ -221,15 +222,16 @@ namespace Dialogic
             ParseOneVar("It was an $animal; he said", "animal");
         }
 
-        private static void ParseOneVar(string text, string expected)
+        private static void ParseOneVar(string text, string expected, int symbolMatchIndex=4)
         {
             var matches = RE.ParseVars.Matches(text);
             //Assert.That(matches.Count, Is.EqualTo(1));
             var vars = new List<string>();
+
             foreach (Match match in matches)
             {
                 //if (match.Groups.Count != 2)throw new DialogicException("Bad RE in " + text);
-                vars.Add(match.Groups[3].Value);
+                vars.Add(match.Groups[symbolMatchIndex].Value);
             }
             //vars.ForEach(Console.WriteLine);
             //Util.ShowMatches(matches);

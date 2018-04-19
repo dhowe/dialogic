@@ -21,9 +21,13 @@ namespace Dialogic
             IDictionary<string, object> globals, string msg = "") : 
             base(GetMessage(symbol, context, globals)) {}
 
+        internal UnboundSymbolException(Symbol symbol, Chat context,
+            IDictionary<string, object> globals, string msg = "") :
+            base(GetMessage(symbol.SymbolText(), context, globals)) { }
+
         private static string GetMessage(string s, Chat c, IDictionary<string, object> g)
         {
-            var cstr = "'$" + s + "'\nglobals: " + g.Stringify();
+            var cstr = s + "'\nglobals: " + g.Stringify();
             if (c != null) cstr += "\nchat#" + c.text + ":" + c.scope.Stringify();
             return cstr;
         }

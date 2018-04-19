@@ -27,6 +27,7 @@ namespace Dialogic
         /// </summary>
         public static string Bind(string text, Chat parent, IDictionary<string, object> globals)
         {
+            ;
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
             if (DBUG) Console.WriteLine("--------------------------------\nBind: " + text);
@@ -36,17 +37,23 @@ namespace Dialogic
 
             do
             {
+                // resolve any symbols in the input
                 text = BindSymbols(text, parent, globals, depth);
 
+                // resolve any groups in the input
                 text = BindGroups(text, parent, depth);
 
-                if (++depth > maxRecursionDepth) // bail if hit max depth
+                // throw if we've hit max recursion depth
+                if (++depth > maxRecursionDepth)
                 {
-                    if (text.Contains('$'))
+                    if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
                     {
                         var symbols = ParseSymbols(text, false);
-                        if (!symbols.IsNullOrEmpty()) throw new UnboundSymbolException
-                            (symbols[0].symbol, parent, globals);
+                        if (!symbols.IsNullOrEmpty())
+                        {
+                            throw new UnboundSymbolException
+                                (symbols[0], parent, globals);
+                        }
                     }
                     throw new ResolverException
                         ("Resolver hit maxRecursionDepth for: " + original);
@@ -83,9 +90,42 @@ namespace Dialogic
                 foreach (var sym in symbols)
                 {
                     string theSymbol = sym.symbol, toReplace = sym.text;
+                    bool switched = false;
 
-                    // check if we need to do a context switch
-                    var switched = ContextSwitch(ref theSymbol, ref context);
+                    if (theSymbol.Contains(Ch.SCOPE))
+                    {
+                        // need to process a chat-scoped symbol
+                        var parts = theSymbol.Split(Ch.SCOPE);
+                        if (parts.Length > 2) throw new ResolverException
+                            ("Unexpected variable format: " + sym);
+
+                        theSymbol = parts[1];
+
+                        if (sym.chatScoped)
+                        {
+                            if (context == null) throw new ResolverException
+                                ("Null context for chat-scoped symbol: " + sym);
+
+                            var chat = context.runtime.FindChatByLabel(parts[0]);
+                            if (chat == null) throw new ResolverException
+                                ("No Chat found with label #" + parts[0]);
+
+                            // reset the context to the chat
+                            context = chat;
+                            switched = true;
+                        }
+                        else {
+                            var obj = parts[0];
+                            Console.WriteLine("LOOKUP: $"+theSymbol+" on globals."+parts[0]);
+                            if (!globals.ContainsKey(obj)) throw new ResolverException
+                                ("No Chat found with label #" + parts[0]);
+
+                            // WORKING HERE: get prop via reflection
+
+                            return text;
+                        }
+
+                    }
 
                     // lookup the value for the symbol
                     var symval = ResolveSymbol(theSymbol, context, globals);
@@ -107,7 +147,7 @@ namespace Dialogic
                         {
                             Console.WriteLine("    " + toReplace + " -> '" + symval + "'");
                             if (doRepeat) Console.WriteLine
-                                ("   Repeat with context=#" + context.text + " -> " + text);
+                                ("    Repeat with context=#" + context.text + " -> " + text);
                         }
                     }
                 }
@@ -153,10 +193,12 @@ namespace Dialogic
                 if (match != null && match.Groups.Count == 3)
                 {
                     var full = match.Groups[0].Value;
+                    var symbol = match.Groups[1].Value;
                     var choice = match.Groups[2].Value;
 
                     // store the alias as a symbol in current scope
-                    context.scope[match.Groups[1].Value] = choice;
+                    //context.scope[match.Groups[1].Value] = choice;
+                    Assignment.EQ.Invoke(symbol, choice, context.scope);
 
                     // now do the replacement
                     text = text.ReplaceFirst(full, choice);
@@ -220,7 +262,7 @@ namespace Dialogic
             List<Symbol> symbols = new List<Symbol>();
             var matches = RE.ParseVars.Matches(text);
 
-            if (matches.Count == 0 && text.Contains(Ch.SYMBOL))
+            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
             {
                 throw new ResolverException("Unable to parse symbol: " + text);
             }
@@ -261,7 +303,7 @@ namespace Dialogic
 
         private static bool IsDynamic(string text)
         {
-            return text != null && (text.Contains(Ch.OR) || text.Contains(Ch.SYMBOL));
+            return text != null && text.Contains(Ch.OR, Ch.SYMBOL, Ch.LABEL);
         }
 
     }
@@ -302,51 +344,46 @@ namespace Dialogic
     internal class Symbol
     {
         public string text, alias, symbol;
-        public bool bounded = false;
+        public bool bounded, chatScoped;
 
         public Symbol(Match match = null)
         {
             if (match != null)
             {
-                if (match.Groups.Count != 4)
+                var groups = match.Groups;
+                if (groups.Count != 5)
                 {
                     Util.ShowMatch(match);
-                    throw new ArgumentException("Bad match: " + match.Groups.Count);
+                    throw new ArgumentException
+                        ("Invalid input to Symbol(): " + groups.Count);
                 }
-                Init(match.Groups[1].Value, match.Groups[3].Value, match.Groups[2].Value);
+
+                Init(groups[1].Value, groups[4].Value, groups[2].Value, groups[3].Value == Ch.LABEL.ToString());
             }
         }
 
-        public Symbol Init(string txt, string sym, string save = "")
+        public Symbol Init(string txt, string sym, string save = "", bool chatLocal = false)
         {
             this.text = txt.Trim();
             this.symbol = sym.Trim();
             this.alias = save.Length > 0 ? save.Trim() : null;
-            this.bounded = text.Contains('{') && text.Contains('}');
-            //Console.WriteLine("SYM"+this);
+            this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
+            this.chatScoped = chatLocal;
+
             return this;
         }
 
         public override string ToString()
         {
-            return SymbolText() + (text != null ? " text='" + text +
-                "'" : "") + (alias != null ? " alias=" + alias : "") + "]";
+            var s = SymbolText();
+            if (text != s) s += " text='" + text + "'";
+            return s += (alias != null ? " alias=" + alias : "");
         }
-
-        //public string BoundedSymbol()
-        //{
-        //    return !bounded ? '{' + symbol + '}' : symbol;
-        //}
-
-        //internal string BoundedText()
-        //{
-        //    var dollarSym = Ch.SYMBOL + symbol;
-        //    return !bounded ? text.Replace(dollarSym, "${" + symbol + '}') : text;
-        //}
 
         internal string SymbolText()
         {
-            return "$" + (bounded ? "{" + symbol + '}' : symbol);
+            return (chatScoped ? Ch.LABEL : Ch.SYMBOL)
+                + (bounded ? "{" + symbol + '}' : symbol);
         }
     }
 }

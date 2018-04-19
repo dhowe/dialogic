@@ -18,9 +18,40 @@ namespace Dialogic
             { "prep", "then" },
             { "group", "(a|b)" },
             { "cmplx", "($group | $prep)" },
-            { "count", 4 }
+            { "count", 4 },
+            { "fish",  new Fish("Fred")}
         };
 
+        class Fish
+        {
+            public string name { get; protected set; }
+            public Fish(string name)
+            {
+                this.name = name;
+            }
+        }
+
+        //[Test]
+        public void SaveGlobalResolveState()
+        {
+            // TODO ?
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            lines = new[] {
+                "SAY A girl [selected=$fish.name] $selected",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text() + chat.commands[2].Text();
+            Assert.That(res, Is.EqualTo("A girl Fred Fred"));
+        }
+            
         [Test]
         public void SaveResolveState()
         {
@@ -212,7 +243,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
             object outv = null;
@@ -226,7 +257,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("4"));
             set.Realize(globals);
             outv = null;
@@ -246,7 +277,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("$obj-prop"));
             set.Realize(globals);
             Assert.That(chat.scope["a"], Is.EqualTo("$obj-prop"));
@@ -257,7 +288,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a2"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("$obj-prop"));
             set.Realize(globals);
             Assert.That(chat.scope["a2"], Is.EqualTo("$obj-prop"));
@@ -267,7 +298,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("${obj-prop}"));
             set.Realize(globals);
             Assert.That(chat.scope["a"], Is.EqualTo("${obj-prop}"));
@@ -278,7 +309,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a2"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("${obj-prop}"));
             set.Realize(globals);
             Assert.That(chat.scope["a2"], Is.EqualTo("${obj-prop}"));
@@ -295,7 +326,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("(4 | 5)"));
             set.Realize(globals);
             //Assert.That(globals["a"], Is.EqualTo("4").Or.EqualTo("5"));
@@ -307,7 +338,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("a"));
-            Assert.That(set.op, Is.EqualTo(AssignOp.EQ));
+            Assert.That(set.op, Is.EqualTo(Assignment.EQ));
             Assert.That(set.value, Is.EqualTo("( 4 | 5 )"));
             set.Realize(globals);
             object outv = null;
@@ -546,7 +577,7 @@ namespace Dialogic
                 "greeting = (Hello | Goodbye)",
                 "",
                 "CHAT c2",
-                "$c1.review",
+                "#c1.review",
             };
 
             var chats = ChatParser.ParseText(String.Join("\n", lines), true);

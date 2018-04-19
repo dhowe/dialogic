@@ -237,7 +237,7 @@ namespace Dialogic
         internal string Expand(IDictionary<string, object> globals, string start)
         {
             Say s = new Say();
-            s.Init(start, "", new string[0]);
+            s.Init(start, string.Empty, new string[0]);
             s.SetActor(Dialogic.Actor.Default);
             s.parent = this;
             s.Realize(globals);
@@ -273,39 +273,7 @@ namespace Dialogic
             return sofar;
         }
 
-        protected internal string AsGrammar(IDictionary<string, object> globals,
-            bool localize = true)
-        {
-            var name = text + ".";
-            var re = new Regex(@"\$([^ \(\)]+)");
-            var g = "Grammar#" + text + "\n";
-
-            foreach (var k in globals.Keys)
-            {
-                if (k.StartsWith(name, Util.IC))
-                {
-                    string key = k;
-                    string val = (string)globals[k];
-
-                    if (localize)
-                    {
-                        key = key.Replace(name, "");
-                        val = val.Replace(name, "");
-                    }
-
-                    foreach (Match match in re.Matches(val))
-                    {
-                        var sub = match.Groups[1].Value;
-                        val = val.Replace("$" + sub, "<" + sub + ">");
-                    }
-
-                    g += "  " + key + ": " + val + "\n";
-                }
-            }
-            return g;
-        }
-
-        // unused
+        // unused as yet
         protected internal string GrammarToJson(IDictionary<string, object>
             globals, bool localize = true)
         {
@@ -326,11 +294,11 @@ namespace Dialogic
                         val = val.Replace(name, "");
                     }
 
-                    foreach (Match match in re.Matches(val))
-                    {
-                        var sub = match.Groups[1].Value;
-                        val = val.Replace("$" + sub, "<" + sub + ">");
-                    }
+                    //foreach (Match match in re.Matches(val))
+                    //{
+                    //    var sub = match.Groups[1].Value;
+                    //    val = val.Replace("$" + sub, "<" + sub + ">");
+                    //}
 
                     g += "  \"" + key + "\": \"" + val + "\",\n";
                 }

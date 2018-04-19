@@ -129,11 +129,6 @@ namespace Dialogic
             if (!chats.ContainsKey(label)) throw new DialogicException
               ("Unable to find Chat with label: '" + label + "'");
             return chats[label];
-
-            //var chat = Chats().FirstOrDefault(c => c.text == label);
-            //if (chat == null) throw new DialogicException
-            //    ("Unable to find Chat with label: '" + label + "'");
-            //return chat;
         }
 
         public IActor FindActorByName(string name)

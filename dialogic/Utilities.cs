@@ -95,7 +95,7 @@ namespace Dialogic
         public static double SAY_MIN_LEN_MULT = 0.5;
         public static int SAY_MAX_LINE_LEN = 80;
         public static int SAY_MIN_LINE_LEN = 2;
-	}
+    }
 
     /// <summary>
     /// A one-to-one mapping from a string command to its object type, e.g., "SAY" -> Dialogic.Say
@@ -125,8 +125,9 @@ namespace Dialogic
         internal const char CGROUP = ')';
         internal const char OSAVE = '[';
         internal const char CSAVE = ']';
+        internal const char OBOUND = '{';
+        internal const char CBOUND = '}';
         internal const char LABEL = '#';
-        internal const char ALIAS = '%';
         internal const char EQ = '=';
         internal const char OR = '|';
     }
@@ -146,7 +147,7 @@ namespace Dialogic
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
-        internal const string PV1 = @"((?:\[([^=]+)=)?\$\{?";
+        internal const string PV1 = @"((?:\[([^=]+)=)?([$#])\{?";
         internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)\}?\]?)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
@@ -160,7 +161,7 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
-        public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
 
     /// <summary>
@@ -1068,25 +1069,25 @@ namespace Dialogic
         }
     }
 
-    public class AssignOp
+    public class Assignment
     {
-        public static AssignOp EQ = new AssignOp("=");
-        public static AssignOp OE = new AssignOp("|=");
-        public static AssignOp PE = new AssignOp("+=");
+        public static Assignment EQ = new Assignment("=");
+        public static Assignment OE = new Assignment("|=");
+        public static Assignment PE = new Assignment("+=");
         /*public static AssignOp ME = new AssignOp("-=");
         public static AssignOp TE = new AssignOp("*=");
         public static AssignOp DE = new AssignOp("/=");*/
 
-        public static AssignOp[] ALL = { EQ, OE, PE };//, ME, TE, DE };
+        public static Assignment[] ALL = { EQ, OE, PE };//, ME, TE, DE };
 
         private readonly string value;
 
-        private AssignOp(string v)
+        private Assignment(string v)
         {
             this.value = v;
         }
 
-        public static string FromOperator(AssignOp op)
+        public static string FromOperator(Assignment op)
         {
             for (int i = 0; i < ALL.Length; i++)
             {
@@ -1095,13 +1096,13 @@ namespace Dialogic
             throw new Exception("Invalid Operator: " + op);
         }
 
-        public static AssignOp FromString(string op)
+        public static Assignment FromString(string op)
         {
             switch (op)
             {
-                case "=": return AssignOp.EQ;
-                case "|=": return AssignOp.OE;
-                case "+=": return AssignOp.PE;
+                case "=": return Assignment.EQ;
+                case "|=": return Assignment.OE;
+                case "+=": return Assignment.PE;
                     /*case "-=": return AssignOp.ME;
                     case "*=": return AssignOp.TE;
                     case "/=": return AssignOp.DE;*/
@@ -1282,9 +1283,14 @@ namespace Dialogic
             return !str.IsNullOrEmpty() && str[str.Length - 1] == c;
         }
 
-        internal static bool Contains(this string str, char c)
+        internal static bool Contains(this string str, params char[] c)
         {
-            return !str.IsNullOrEmpty() && str.IndexOf(c) > -1;
+            if (str.IsNullOrEmpty()) return false;
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (str.IndexOf(c[i]) > -1) return true;
+            }
+            return false;
         }
 
         internal static string TrimEnds(this string str, char start, char end)

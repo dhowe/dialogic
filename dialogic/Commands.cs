@@ -271,7 +271,7 @@ namespace Dialogic
     public class Set : Command
     {
         protected internal string value;
-        protected internal AssignOp op;
+        protected internal Assignment op;
         protected internal bool global;
 
         public Set() : base() { }
@@ -281,26 +281,36 @@ namespace Dialogic
             var match = RE.ParseSetArgs.Match(txt);
             if (match.Groups.Count != 4)
             {
-                //Util.ShowMatch(match);
+                Util.ShowMatch(match);
                 throw new ParseException("Invalid SET args: '" + txt + "'");
             }
 
+            //var symbol = new Symbol(RE.ParseVars.Match(match.Groups[1].Value.Trim()));
+
+            //Console.WriteLine(symbol);
+
+            //Util.ShowMatch(match);
             var tmp = match.Groups[1].Value.Trim();
+            Console.WriteLine("TMP: "+tmp);
+            var symbol = new Symbol().Init(tmp, tmp, string.Empty, false);
+            Console.WriteLine("SYM: " + symbol);
             this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();
-            this.op = AssignOp.FromString(match.Groups[2].Value.Trim());
+            this.op = Assignment.FromString(match.Groups[2].Value.Trim());
         }
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
             if (global && globals == null) throw new DialogicException
-                ("Invalid call to Set.Realize() with null argument");
+                ("Invalid call to Set.Realize() with null argument"); // needed?
 
             var symbol = text;
             var context = parent;
 
-            Resolver.ContextSwitch(ref symbol, ref context);
+            new Symbol().Init(text, text, string.Empty);
+
+            Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
 
             // Here we check if the set matches a dynamic parent property
             if (context != null)
