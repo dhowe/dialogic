@@ -232,6 +232,31 @@ namespace Dialogic
         /// Updates any property values that have been set in metadata
         protected internal void SetPropValuesFromMeta(Command c)
         {
+            var metaMeta = Properties.Get(c);
+
+            if (c.HasMeta())
+            {
+                foreach (KeyValuePair<string, object> pair in c.meta)
+                {
+                    object val = pair.Value;
+                    if (metaMeta.ContainsKey(pair.Key))
+                    {
+                        if (pair.Key == Meta.ACTOR) // ugly special case
+                        {
+                            c.SetActor(runtime, (string)val);
+                        }
+                        else
+                        {
+                            c.DynamicSet(metaMeta[pair.Key], val, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// Updates any property values that have been set in metadata
+        protected internal void SetPropValuesFromMetaOld(Command c)
+        {
             if (!ChatRuntime.MetaMeta.ContainsKey(c.GetType())) ExtractMetaMeta(c);
 
             if (c.HasMeta())

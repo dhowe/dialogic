@@ -7,6 +7,7 @@ using System.Timers;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Reflection;
 
 [assembly: InternalsVisibleTo("tests")]
 [assembly: InternalsVisibleTo("weblint")]
@@ -161,7 +162,9 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
-        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+
+        // replace start with SYM
+        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)"); 
     }
 
     /// <summary>
@@ -1233,6 +1236,36 @@ namespace Dialogic
 
     }//@endcond
 
+    public class Properties //@cond unused
+    {
+        static IDictionary<Type, IDictionary<string, PropertyInfo>> lookup;
+
+        static Properties instance = new Properties();
+
+        private Properties()
+        {
+            lookup = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
+        }
+
+        internal static IDictionary<string, PropertyInfo> Get(object c)
+        {
+            var type = c.GetType();
+            if (!lookup.ContainsKey(type))
+            {
+                var propMap = new Dictionary<string, PropertyInfo>();
+                var props = type.GetProperties(BindingFlags.Instance
+                    | BindingFlags.Public | BindingFlags.NonPublic);
+
+                foreach (var pi in props)
+                {
+                    propMap.Add(pi.Name, pi);
+                    //Console.WriteLine("  "+pi.Name);
+                }
+                lookup[type] = propMap;
+            }
+            return lookup[type];
+        }
+    }
 
     public static class Exts //@cond unused
     {

@@ -279,6 +279,7 @@ namespace Dialogic
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
             var match = RE.ParseSetArgs.Match(txt);
+
             if (match.Groups.Count != 4)
             {
                 Util.ShowMatch(match);
@@ -291,9 +292,9 @@ namespace Dialogic
 
             //Util.ShowMatch(match);
             var tmp = match.Groups[1].Value.Trim();
-            Console.WriteLine("TMP: "+tmp);
+            //Console.WriteLine("TMP: "+tmp);
             var symbol = new Symbol().Init(tmp, tmp, string.Empty, false);
-            Console.WriteLine("SYM: " + symbol);
+            //Console.WriteLine("SYM: " + symbol);
             this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();
@@ -308,6 +309,7 @@ namespace Dialogic
             var symbol = text;
             var context = parent;
 
+            // TODO: WORKING HERE
             new Symbol().Init(text, text, string.Empty);
 
             Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
@@ -315,7 +317,7 @@ namespace Dialogic
             // Here we check if the set matches a dynamic parent property
             if (context != null)
             {
-                IDictionary<string, PropertyInfo> mm = ChatRuntime.MetaMeta[typeof(Chat)];
+                IDictionary<string, PropertyInfo> mm = Properties.Get(typeof(Chat));
 
                 // If so, we don't create a new symbol, but instead set the property
                 if (mm.ContainsKey(symbol))
@@ -326,6 +328,7 @@ namespace Dialogic
             }
 
             // Invoke the assignment in the correct scope
+            Console.WriteLine("$#"+symbol+" = "+value);
             op.Invoke(symbol, value, (global ? globals : context.scope));
 
             return this;

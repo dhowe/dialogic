@@ -120,6 +120,7 @@ namespace Dialogic
                                 ("No Chat found with label #" + parts[0]);
 
                             // WORKING HERE: get prop via reflection
+                            var props = Properties.Get(obj);
 
                             return text;
                         }
