@@ -39,8 +39,7 @@ namespace Dialogic
         protected internal void DynamicSet(PropertyInfo propInfo, 
             object val, bool syncMeta = true)
         {
-            val = Util.ConvertTo(propInfo.PropertyType, val);
-            propInfo.SetValue(this, val, null);
+            Properties.Set(this, propInfo, val);
 
             // check if we need to sync metadata as well
             if (syncMeta && HasMeta(propInfo.Name))
@@ -279,6 +278,7 @@ namespace Dialogic
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
             var match = RE.ParseSetArgs.Match(txt);
+
             if (match.Groups.Count != 4)
             {
                 Util.ShowMatch(match);
@@ -308,6 +308,7 @@ namespace Dialogic
             var symbol = text;
             var context = parent;
 
+            // TODO: WORKING HERE
             new Symbol().Init(text, text, string.Empty);
 
             Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
@@ -315,7 +316,7 @@ namespace Dialogic
             // Here we check if the set matches a dynamic parent property
             if (context != null)
             {
-                IDictionary<string, PropertyInfo> mm = ChatRuntime.MetaMeta[typeof(Chat)];
+                IDictionary<string, PropertyInfo> mm = Properties.Lookup(typeof(Chat));
 
                 // If so, we don't create a new symbol, but instead set the property
                 if (mm.ContainsKey(symbol))
@@ -326,6 +327,7 @@ namespace Dialogic
             }
 
             // Invoke the assignment in the correct scope
+            Console.WriteLine("$#"+symbol+" = "+value);
             op.Invoke(symbol, value, (global ? globals : context.scope));
 
             return this;

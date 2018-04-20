@@ -352,8 +352,18 @@ namespace Dialogic
         public void ChatStalenessFromSet()
         {
             List<Chat> chats;
-   
+
+            chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
+            chats[0].Realize(null);
+            //Console.WriteLine(chats[0]+" scope="+chats[0].scope.Stringify());
+            Assert.That(chats[0], Is.Not.Null);
+            Assert.That(chats[0].staleness, Is.EqualTo(2));
+            Assert.That(chats[0].Staleness(), Is.EqualTo(2));
+            Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));
+
+            return;
             chats = ChatParser.ParseText("CHAT c1\nCHAT c2\nSET $c1.staleness=2", NO_VALIDATORS);
+          
             chats[0].Realize(null);
             chats[1].Realize(null);
             //Console.WriteLine(chats[0] + " scope=" + chats[0].scope.Stringify());
@@ -363,14 +373,6 @@ namespace Dialogic
             Assert.That(chats[1].Staleness(), Is.EqualTo(0));
             Assert.That(chats[1].GetMeta(Meta.STALENESS), Is.EqualTo("0"));
 
-            Assert.That(chats[0].staleness, Is.EqualTo(2));
-            Assert.That(chats[0].Staleness(), Is.EqualTo(2));
-            Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));
-
-            chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
-            chats[0].Realize(null);
-            //Console.WriteLine(chats[0]+" scope="+chats[0].scope.Stringify());
-            Assert.That(chats[0], Is.Not.Null);
             Assert.That(chats[0].staleness, Is.EqualTo(2));
             Assert.That(chats[0].Staleness(), Is.EqualTo(2));
             Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));

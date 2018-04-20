@@ -7,6 +7,7 @@ using System.Timers;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Reflection;
 
 [assembly: InternalsVisibleTo("tests")]
 [assembly: InternalsVisibleTo("weblint")]
@@ -161,7 +162,17 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
-        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+
+        // For ChatParser.lineParser Regex
+        internal const string MTD = @"(?:\{(.+?)\})?\s*";
+        internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
+        internal const string TXT = @"((?:(?:[^$}{#])*"
+            + @"(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
+        internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\"
+            + @"(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
+
+        // TODO: replace start with SYM
+        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)"); 
     }
 
     /// <summary>
@@ -1233,6 +1244,50 @@ namespace Dialogic
 
     }//@endcond
 
+    public class Properties //@cond unused
+    {
+        static IDictionary<Type, IDictionary<string, PropertyInfo>> lookup;
+
+        static Properties instance = new Properties();
+
+        private Properties()
+        {
+            lookup = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
+        }
+
+        internal static IDictionary<string, PropertyInfo> Lookup(Type type)
+        {
+            if (!lookup.ContainsKey(type))
+            {
+                var propMap = new Dictionary<string, PropertyInfo>();
+
+                var props = type.GetProperties(BindingFlags.Instance
+                    | BindingFlags.Public | BindingFlags.NonPublic);
+
+                foreach (var pi in props)
+                {
+                    propMap.Add(pi.Name, pi);
+                    //Console.WriteLine("  "+pi.Name);
+                }
+                lookup[type] = propMap;
+            }
+            return lookup[type];
+        }
+
+        // TODO: test
+        internal static void Set(Object target, PropertyInfo pinfo, object value)
+        {
+            value = Util.ConvertTo(pinfo.PropertyType, value);
+            pinfo.SetValue(target, value, null);
+        }
+
+        // TODO: test
+        internal static object Get(Object target, PropertyInfo pinfo)
+        {
+            var value = pinfo.GetValue(target);
+            return Util.ConvertTo(pinfo.PropertyType, value);
+        }
+    }
 
     public static class Exts //@cond unused
     {

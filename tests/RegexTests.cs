@@ -25,7 +25,7 @@ namespace Dialogic
         {
             Match match;
 
-            Regex regex = new Regex(ChatParser.TXT);
+            Regex regex = new Regex(RE.TXT);
 
             Assert.That(regex.Match("a = b {").Value.Trim(), Is.EqualTo("a = b"));
             Assert.That(regex.Match("a = b {a=b}").Value.Trim(), Is.EqualTo("a = b"));
@@ -242,11 +242,11 @@ namespace Dialogic
         [Test]
         public void ChatLabels()
         {
-            string RE = ChatParser.TypesRegex() + ChatParser.TXT;
+            string ReRe = ChatParser.TypesRegex() + RE.TXT;
             //Console.WriteLine(RE);
 
             string s;
-            var re = new Regex(RE);
+            var re = new Regex(ReRe);
 
             s = "CHAT";
             Assert.That(re.Match(s).Groups[1].Value, Is.EqualTo(s));
@@ -260,7 +260,7 @@ namespace Dialogic
             Assert.That(parts[2], Is.EqualTo(""));
             Assert.That(parts[3], Is.EqualTo(""));
 
-            re = new Regex(RE);
+            re = new Regex(ReRe);
 
             s = "CHAT";
             Assert.That(re.Match(s).Groups[1].Value, Is.EqualTo(s));
@@ -282,7 +282,7 @@ namespace Dialogic
         public void LabelOnly()
         {
             string s;
-            var re = new Regex(ChatParser.DLBL);
+            var re = new Regex(RE.LBL);
 
             s = "#Hello";
             Assert.That(re.Match(s).Groups[1].Value, Is.EqualTo(s));

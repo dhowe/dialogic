@@ -24,9 +24,7 @@ namespace Dialogic
     /// </summary>
     public class ChatRuntime
     {
-        public static string LOG_FILE;// = "../../../dialogic/dia.log";
-
-        public static string CHAT_FILE_EXT = ".gs";
+        public static string LOG_FILE, CHAT_FILE_EXT = ".gs";
 
         internal static bool DebugLifecycle = false;
 
