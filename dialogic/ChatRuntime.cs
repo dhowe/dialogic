@@ -155,12 +155,6 @@ namespace Dialogic
             chats.Add(c.text, c);
         }
 
-        internal List<Chat> FindChatByMeta(string key, string value) // used?
-        {
-            return Chats().Where(c => ((string)c.GetMeta(key))
-                == value).ToList<Chat>();
-        }
-
         internal Chat AddNewChat(string name)
         {
             Chat c = new Chat();

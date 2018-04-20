@@ -96,7 +96,7 @@ namespace Dialogic
                     {
                         // need to process a chat-scoped symbol
                         var parts = theSymbol.Split(Ch.SCOPE);
-                        if (parts.Length > 2) throw new ResolverException
+                        if (parts.Length < 2) throw new ResolverException
                             ("Unexpected variable format: " + sym);
 
                         theSymbol = parts[1];
@@ -114,21 +114,34 @@ namespace Dialogic
                         }
                         else
                         {
-                            var obj = parts[0];
-                            Console.WriteLine("LOOKUP: $" + theSymbol + " on globals." + parts[0]);
-                            if (!globals.ContainsKey(obj)) throw new ResolverException
-                                ("No Chat found with label #" + parts[0]);
+
+                            var obj = ResolveSymbol(parts[0], context, globals);
+
+                            if (obj == null) throw new UnboundSymbolException(sym, context, globals);
+
+                            Console.WriteLine("LOOKUP: $" + theSymbol + " on globals." + obj);
 
                             // WORKING HERE: get prop via reflection
-                            //var props = Properties.Get(obj);
+                            var props = Properties.Lookup(obj.GetType());
+                            Console.WriteLine(props.Stringify());
+                            if (!props.ContainsKey(theSymbol))
+                            {
+                                throw new UnboundSymbolException(sym, context, globals);
+                            }
 
+                            // TODO: handle multiple layers of traversal
+
+                            var result = Properties.Get(obj, props[theSymbol]).ToString();
+                            Console.WriteLine("FOUND: "+ result);
+
+                            text = text.Replace(toReplace, result);
                             return text;
                         }
 
                     }
 
                     // lookup the value for the symbol
-                    var symval = ResolveSymbol(theSymbol, context, globals);
+                    var symval = ResolveSymbol(theSymbol, context, globals).ToString();
 
                     if (symval != null)
                     {
@@ -242,17 +255,17 @@ namespace Dialogic
         /// <summary>
         /// First do local lookup from Chat context, then if not found, try global lookup
         /// </summary>
-        private static string ResolveSymbol(string symbol, Chat context,
+        private static object ResolveSymbol(string symbol, Chat context,
             IDictionary<string, object> globals)
         {
-            string result = null;
+            object result = null;
             if (context != null && context.scope.ContainsKey(symbol)) // check locals
             {
-                result = context.scope[symbol].ToString();
+                result = context.scope[symbol];
             }
             else if (globals != null && globals.ContainsKey(symbol))   // check globals
             {
-                result = globals[symbol].ToString();
+                result = globals[symbol];
             }
             return result;
         }

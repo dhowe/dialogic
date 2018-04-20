@@ -1257,6 +1257,7 @@ namespace Dialogic
 
         internal static IDictionary<string, PropertyInfo> Lookup(Type type)
         {
+            var dbug = true;
             if (!lookup.ContainsKey(type))
             {
                 var propMap = new Dictionary<string, PropertyInfo>();
@@ -1264,11 +1265,13 @@ namespace Dialogic
                 var props = type.GetProperties(BindingFlags.Instance
                     | BindingFlags.Public | BindingFlags.NonPublic);
 
+                if (dbug) Console.Write(type.Name+"[ ");
                 foreach (var pi in props)
                 {
                     propMap.Add(pi.Name, pi);
-                    //Console.WriteLine("  "+pi.Name);
+                    if (dbug) Console.Write(pi.Name+", ");
                 }
+                if (dbug) Console.WriteLine(" ]");
                 lookup[type] = propMap;
             }
             return lookup[type];
