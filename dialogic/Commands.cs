@@ -39,8 +39,7 @@ namespace Dialogic
         protected internal void DynamicSet(PropertyInfo propInfo, 
             object val, bool syncMeta = true)
         {
-            val = Util.ConvertTo(propInfo.PropertyType, val);
-            propInfo.SetValue(this, val, null);
+            Properties.Set(this, propInfo, val);
 
             // check if we need to sync metadata as well
             if (syncMeta && HasMeta(propInfo.Name))
@@ -317,7 +316,7 @@ namespace Dialogic
             // Here we check if the set matches a dynamic parent property
             if (context != null)
             {
-                IDictionary<string, PropertyInfo> mm = Properties.Get(typeof(Chat));
+                IDictionary<string, PropertyInfo> mm = Properties.Lookup(typeof(Chat));
 
                 // If so, we don't create a new symbol, but instead set the property
                 if (mm.ContainsKey(symbol))

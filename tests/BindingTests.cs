@@ -45,7 +45,7 @@ namespace Dialogic
         [Test]
         public void TestGetProps()
         {
-            var props = Properties.Get(globals["fish"]);
+            var props = Properties.Lookup(globals["fish"].GetType());
             Console.WriteLine(props.Stringify());
             //Assert.That(props[""].Text(), Is.EqualTo("hello"));
 
