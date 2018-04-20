@@ -291,9 +291,9 @@ namespace Dialogic
 
             //Util.ShowMatch(match);
             var tmp = match.Groups[1].Value.Trim();
-            Console.WriteLine("TMP: "+tmp);
+            //Console.WriteLine("TMP: "+tmp);
             var symbol = new Symbol().Init(tmp, tmp, string.Empty, false);
-            Console.WriteLine("SYM: " + symbol);
+            //Console.WriteLine("SYM: " + symbol);
             this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();

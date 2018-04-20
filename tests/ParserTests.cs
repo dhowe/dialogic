@@ -4,6 +4,12 @@ using NUnit.Framework;
 
 namespace Dialogic
 {
+    /*
+     * State: 
+     *   obj-traversal has 2 broken BindingTests
+     *   obj-trav2 has new Properties object which breaks a test in ParserTests
+     *   TODO: (debug Properties object and merge obj-trav2 back into obj-traversal)
+     */
     [TestFixture]
     public class ParserTests
     {
