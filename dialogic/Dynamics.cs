@@ -6,21 +6,19 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    public class Properties //@cond unused
+    public static class Properties //@cond unused
     {
-        static IDictionary<Type, IDictionary<string, PropertyInfo>> lookup;
+        static IDictionary<Type, IDictionary<string, PropertyInfo>> Cache;
 
-        static Properties instance = new Properties();
-
-        private Properties()
+        static Properties()
         {
-            lookup = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
+            Cache = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
         }
 
         internal static IDictionary<string, PropertyInfo> Lookup(Type type)
         {
             var dbug = false;
-            if (!lookup.ContainsKey(type))
+            if (!Cache.ContainsKey(type))
             {
                 var propMap = new Dictionary<string, PropertyInfo>();
 
@@ -34,23 +32,76 @@ namespace Dialogic
                     if (dbug) Console.Write(pi.Name + ",");
                 }
                 if (dbug) Console.WriteLine("]");
-                lookup[type] = propMap;
+                Cache[type] = propMap;
             }
-            return lookup[type];
+
+            return Cache[type];
         }
 
-        // TODO: test
-        internal static void Set(Object target, PropertyInfo pinfo, object value)
+        private static void Set(Object target, PropertyInfo pinfo, object value)
         {
             value = Util.ConvertTo(pinfo.PropertyType, value);
             pinfo.SetValue(target, value, null);
         }
 
-        // TODO: test
-        internal static object Get(Object target, PropertyInfo pinfo)
+        private static object Get(Object target, PropertyInfo pinfo)
         {
             var value = pinfo.GetValue(target);
             return Util.ConvertTo(pinfo.PropertyType, value);
+        }
+
+        internal static void Set(Object target, string property, object value)
+        {
+            var lookup = Lookup(target.GetType());
+            if (lookup != null && lookup.ContainsKey(property))
+            {
+                var pinfo = lookup[property];
+                value = Util.ConvertTo(pinfo.PropertyType, value);
+                pinfo.SetValue(target, value, null);
+            }
+            else
+            {
+                throw new ResolverException("Invalid Set: " + property);
+            }
+        }
+
+        internal static object Get(Object target, string property)
+        {
+            var lookup = Lookup(target.GetType());
+            if (lookup != null && lookup.ContainsKey(property))
+            {
+                var pinfo = lookup[property];
+                var value = pinfo.GetValue(target);
+                return Util.ConvertTo(pinfo.PropertyType, value);
+            }
+            throw new ResolverException("Invalid Get: " + property);
+        }
+    }
+
+    public static class Methods
+    {
+        static IDictionary<Type, IDictionary<string, MethodInfo>> Cache;
+
+        static Methods()
+        {
+            Cache = new Dictionary<Type, IDictionary<string, MethodInfo>>();
+        }
+
+        internal static object Invoke(object target, string methodName, object[] args = null)
+        {
+            var type = target.GetType();
+            if (!Cache.ContainsKey(type) || Cache[type].ContainsKey(methodName)) {
+                
+                Cache[type] = new Dictionary<string, MethodInfo>(); // binding flags?
+                Cache[type][methodName] = type.GetMethod(methodName, ArgsToTypes(args));
+            }
+            return Cache[type][methodName].Invoke(target, args); 
+        }
+
+        private static Type[] ArgsToTypes(object[] args)
+        {
+            if (args == null) return new Type[0];
+            return Array.ConvertAll(args, o => o.GetType());
         }
     }
 
@@ -60,10 +111,10 @@ namespace Dialogic
         public string text, alias, symbol;
         public bool bounded, chatScoped;
 
-        private Symbol(params string[] parts) : 
-            this(parts[0], parts[3], parts[1], parts[2]) {}
+        private Symbol(params string[] parts) :
+            this(parts[0], parts[3], parts[1], parts[2]) { }
 
-        internal Symbol(string text, string symbol, 
+        internal Symbol(string text, string symbol,
             string alias = null, string typeChar = null)
         {
             this.text = text.Trim();
@@ -73,7 +124,7 @@ namespace Dialogic
             this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
 
-        private void ParseMods(Group group)
+        private Symbol ParseMods(Group group)
         {
             var modGroup = group.Value.Trim();
             if (!modGroup.IsNullOrEmpty())
@@ -88,6 +139,7 @@ namespace Dialogic
                 }
                 //Console.WriteLine("MODS: " + modifiers.Stringify());
             }
+            return this;
         }
 
         public override string ToString()
@@ -106,26 +158,15 @@ namespace Dialogic
         public static List<Symbol> Parse(string text, bool sortResults = false)
         {
             var symbols = new List<Symbol>();
-            var matches = RE.ParseVars.Matches(text);
-
-            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
-            {
-                throw new ResolverException("Unable to parse symbol: " + text);
-            }
+            var matches = GetMatches(text);
 
             foreach (Match match in matches)
             {
-                var groups = match.Groups;
-                if (groups.Count != 6)
-                {
-                    Util.ShowMatch(match);
-                    throw new ArgumentException
-                        ("Invalid input to Symbol(): " + groups.Count);
-                }
+                GroupCollection groups = GetGroups(match);
 
-                var sym = new Symbol(groups.Values().Skip(1).ToArray());
-                sym.ParseMods(groups[5]);
-                symbols.Add(sym);
+                // Create a new Symbol and add it to the list
+                var args = groups.Values().Skip(1).ToArray();
+                symbols.Add(new Symbol(args).ParseMods(groups[5]));
             }
 
             // OPT: we can sort here to avoid symbols which are substrings of other
@@ -133,6 +174,30 @@ namespace Dialogic
             // for example), however should be avoided by using Regex.Replace 
             // instead of String.Replace() in BindSymbols
             return sortResults ? SortByLength(symbols) : symbols;
+        }
+
+        private static MatchCollection GetMatches(string text)
+        {
+            var matches = RE.ParseVars.Matches(text);
+
+            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
+            {
+                throw new ResolverException("Unable to parse symbol: " + text);
+            }
+
+            return matches;
+        }
+
+        private static GroupCollection GetGroups(Match match)
+        {
+            var groups = match.Groups;
+            if (groups.Count != 6)
+            {
+                Util.ShowMatch(match);
+                throw new ArgumentException
+                    ("Invalid input to Symbol(): " + groups.Count);
+            }
+            return groups;
         }
 
         private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
@@ -278,9 +343,9 @@ namespace Dialogic
                 case "=": return Assignment.EQ;
                 case "|=": return Assignment.OE;
                 case "+=": return Assignment.PE;
-                /*case "-=": return AssignOp.ME;
-                case "*=": return AssignOp.TE;
-                case "/=": return AssignOp.DE;*/
+                    /*case "-=": return AssignOp.ME;
+                    case "*=": return AssignOp.TE;
+                    case "/=": return AssignOp.DE;*/
             }
             throw new Exception("Invalid Operator: " + op);
         }

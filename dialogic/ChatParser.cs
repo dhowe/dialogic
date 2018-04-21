@@ -194,37 +194,13 @@ namespace Dialogic
             c.Validate();
         }
 
-        /* NOTE: Deprecate in favor of Properties object
-         * Extract properties that can be set from metadata 
-        protected void ExtractMetaMeta(Command c)
-        {
-            var type = c.GetType();
-
-            var mmeta = ChatRuntime.MetaMeta;
-
-            if (!mmeta.ContainsKey(type))
-            {
-                mmeta.Add(type, new Dictionary<string, PropertyInfo>());
-                // Console.WriteLine(type+":");
-
-                var props = type.GetProperties(BindingFlags.Instance
-                    | BindingFlags.Public | BindingFlags.NonPublic);
-
-                foreach (var pi in props)
-                {
-                    mmeta[type].Add(pi.Name, pi);
-                    // Console.WriteLine("  "+pi.Name);
-                }
-            }
-        }*/
-
         /// Update any property values that have been set in metadata
         protected internal void SetPropValuesFromMeta(Command c)
         {
-            var metaMeta = Properties.Lookup(c.GetType());
-
             if (c.HasMeta())
             {
+                var metaMeta = Properties.Lookup(c.GetType());
+
                 foreach (KeyValuePair<string, object> pair in c.meta)
                 {
                     object val = pair.Value;
@@ -236,7 +212,7 @@ namespace Dialogic
                         }
                         else
                         {
-                            c.DynamicSet(metaMeta[pair.Key], val, false);
+                            c.DynamicSet(pair.Key, val, false);
                         }
                     }
                 }

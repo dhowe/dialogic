@@ -25,6 +25,7 @@ namespace Dialogic
         class Fish
         {
             public string name { get; protected set; }
+            public int Id() { return 9;  }
             public Fish(string name)
             {
                 this.name = name;
@@ -49,6 +50,46 @@ namespace Dialogic
             chat.Realize(globals);
             res = chat.commands[1].Text() + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Fred Fred"));
+        }
+
+        [Test]
+        public void ResolveWithAlias()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            lines = new[] {
+                "SAY The girl was $fish.Id().",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(globals);
+            res = chat.commands[1].Text() + chat.commands[2].Text();
+            Assert.That(res, Is.EqualTo("The girl was 9."));
+        }
+
+        [Test]
+        public void ResolveWithAliasMods()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            lines = new[] {
+                "SAY A girl [selected=$fish.Id()] $selected",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(globals);
+            res = chat.commands[1].Text() + chat.commands[2].Text();
+            Assert.That(res, Is.EqualTo("A girl 9 9"));
         }
             
         [Test]

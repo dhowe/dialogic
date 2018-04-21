@@ -36,17 +36,30 @@ namespace Dialogic
         }
 
         // Set a Command property by name
-        protected internal void DynamicSet(PropertyInfo propInfo, 
+        protected internal void DynamicSet(string property,
             object val, bool syncMeta = true)
         {
-            Properties.Set(this, propInfo, val);
+            Properties.Set(this, property, val);
 
             // check if we need to sync metadata as well
-            if (syncMeta && HasMeta(propInfo.Name))
+            if (syncMeta && HasMeta(property))
             {
-                SetMeta(propInfo.Name, val.ToString());
+                SetMeta(property, val.ToString());
             }
         }
+
+        // Set a Command property by name
+        //protected internal void DynamicSet(PropertyInfo propInfo, 
+        //    object val, bool syncMeta = true)
+        //{
+        //    Properties.Set(this, propInfo, val);
+
+        //    // check if we need to sync metadata as well
+        //    if (syncMeta && HasMeta(propInfo.Name))
+        //    {
+        //        SetMeta(propInfo.Name, val.ToString());
+        //    }
+        //}
 
         protected Command Delay(double seconds)
         {
@@ -308,9 +321,6 @@ namespace Dialogic
             var symbol = text;
             var context = parent;
 
-            // TODO:
-            //new Symbol(text, text, string.Empty);
-
             Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
 
             // Here we check if the set matches a dynamic parent property
@@ -321,13 +331,13 @@ namespace Dialogic
                 // If so, we don't create a new symbol, but instead set the property
                 if (mm.ContainsKey(symbol))
                 {
-                    context.DynamicSet(mm[symbol], value);
+                    context.DynamicSet(symbol, value);
                     return this;
                 }
             }
 
             // Invoke the assignment in the correct scope
-            Console.WriteLine("$#"+symbol+" = "+value);
+            //Console.WriteLine("$#" + symbol + " = " + value);
             op.Invoke(symbol, value, (global ? globals : context.scope));
 
             return this;

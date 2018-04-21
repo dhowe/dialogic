@@ -13,7 +13,7 @@ namespace Dialogic
             var rt = new ChatRuntime();
             rt.ParseText("CHAT c1\nSAY OK");
             Assert.That(rt.Chats()[0], Is.Not.Null);
-            Assert.That(rt["c1"], Is.Not.Null);
+            Assert.That(rt["c1"], Is.Not.Null); // ???
         }
 
         [Test]

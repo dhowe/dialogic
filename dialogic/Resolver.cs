@@ -62,7 +62,7 @@ namespace Dialogic
 
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
-            return text;
+            return Html.Decode(text); // resolve any encoded entities
         }
 
         // TODO: Add to API (ChatRuntime)
@@ -78,7 +78,7 @@ namespace Dialogic
         public static string BindSymbols(string text, Chat context,
             IDictionary<string, object> globals, int level = 0)
         {
-            var doRepeat = false;
+            var doRepeat = false;           // needs some cleanup
             do
             {
                 var symbols = Symbol.Parse(text, true);
@@ -150,8 +150,8 @@ namespace Dialogic
 
                         var toReplace = sym.text;
 
-                        //// if we have an alias, then include it in our resolved 
-                        //// value so that it can be handled properly in BindGroups
+                        // if we have an alias, then include it in our resolved 
+                        // value so that it can be handled properly in BindGroups
                         if (sym.alias != null) {
                             if (replaceWith.Contains(Ch.OR))
                             {
@@ -182,7 +182,7 @@ namespace Dialogic
             } while (doRepeat);
 
 
-            return Html.Decode(text);
+            return text;
         }
 
         /// <summary>
@@ -197,11 +197,7 @@ namespace Dialogic
 
             for (int i = 1; i < parts.Length; i++)
             {
-                var props = Properties.Lookup(obj.GetType());
-                //Console.WriteLine(props.Stringify());
-                if (!props.ContainsKey(parts[i])) return null;
-
-                obj = Properties.Get(obj, props[parts[i]]);
+                obj = Properties.Get(obj, parts[i]);
                 if (obj == null) return null;
             }
 
