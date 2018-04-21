@@ -8,6 +8,15 @@ namespace Dialogic
     public class DialogicTests
     {
         [Test]
+        public void RuntimeIndexTest()
+        {
+            var rt = new ChatRuntime();
+            rt.ParseText("CHAT c1\nSAY OK");
+            Assert.That(rt.Chats()[0], Is.Not.Null);
+            Assert.That(rt["c1"], Is.Not.Null);
+        }
+
+        [Test]
         public void EntityDecodeTest()
         {
             Assert.That(Html.Decode("&amp;"), Is.EqualTo("&"));
