@@ -16,8 +16,8 @@ namespace Dialogic
         internal static IDictionary<string, Func<string, string>> ModTable
             = new Dictionary<string, Func<string, string>>
            {
+               { "capitalize",    Modifier.Capitalize },
                { "quotify",       Modifier.Quotify },
-               { "capitalize",    Modifier.Capitalize},
                { "allCaps",       Modifier.AllCaps }
            };
 
@@ -100,14 +100,12 @@ namespace Dialogic
 
                     // 3 cases for each: simple-global, global-object, simple-local 
 
+                    // We have a scoped symbol to process
                     if (theSymbol.Contains(Ch.SCOPE))
                     {
-                        // need to process a scoped symbol
                         var parts = theSymbol.Split(Ch.SCOPE);
-                        if (parts.Length < 2)
-                        {
-                            throw new ResolverException("Invalid symbol: " + sym);
-                        }
+                        if (parts.Length < 2) throw new ResolverException
+                            ("Invalid symbol: " + sym);
 
                         theSymbol = parts[1];
 
@@ -138,8 +136,7 @@ namespace Dialogic
                         // lookup the value for the symbol
                         var tmp = ResolveSymbol(theSymbol, context, globals);
                         if (tmp != null) replaceWith = tmp.ToString();
-
-                        // note: may be null here if we have an unresolved alias 
+                        // note: may be null here if an unresolved alias 
                     }
 
                     if (replaceWith != null)
@@ -172,7 +169,8 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Dynamically resolve the path through the object's properties
+        /// Dynamically resolve the path through the object's 
+        /// properties in global scope
         /// </summary>
         private static object ResolveObject(string[] parts, IDictionary<string, object> globals)
         {
