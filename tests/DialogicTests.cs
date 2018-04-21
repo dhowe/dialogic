@@ -19,19 +19,19 @@ namespace Dialogic
         {
             Symbol s;
 
-            s = new Symbol().Init("$a", "a");
+            s = new Symbol("$a", "a");
             Assert.That(s.text, Is.EqualTo("$a"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
 
-            s = new Symbol().Init("${a}", "a");
+            s = new Symbol("${a}", "a");
             Assert.That(s.text, Is.EqualTo("${a}"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(true));
 
-            s = new Symbol().Init("${a}", "a");
+            s = new Symbol("${a}", "a");
             Assert.That(s.text, Is.EqualTo("${a}"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);

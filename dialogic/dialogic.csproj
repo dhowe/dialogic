@@ -67,6 +67,7 @@
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Chat.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="Dynamics.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
