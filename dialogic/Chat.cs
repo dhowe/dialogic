@@ -24,11 +24,6 @@ namespace Dialogic
         internal IDictionary<string, object> scope;
         protected internal ChatRuntime runtime;
 
-        //public object this[string key] // TODO: test using scope as indexer
-        //{
-        //    get { return this.scope[key]; }
-        //}
-
         public Chat() : base()
         {
             commands = new List<Command>();

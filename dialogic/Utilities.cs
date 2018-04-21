@@ -120,6 +120,7 @@ namespace Dialogic
 
     public static class Ch
     {
+        internal const char MODIFIER = '&';
         internal const char SYMBOL = '$';
         internal const char SCOPE = '.';
         internal const char OGROUP = '(';
@@ -149,7 +150,7 @@ namespace Dialogic
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
         internal const string PV1 = @"((?:\[([^=]+)=)?([$#])\{?";
-        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)\}?\]?)";
+        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)(&" + SYM + @")*\}?\]?)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
         public static Regex ParseAlias = new Regex(@"\[([^=]+)=([^\]]+)\]");
@@ -162,17 +163,13 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
+        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
 
-        // For ChatParser.lineParser Regex
+        // ChatParser.lineParser Regex
         internal const string MTD = @"(?:\{(.+?)\})?\s*";
         internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
-        internal const string TXT = @"((?:(?:[^$}{#])*"
-            + @"(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
-        internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\"
-            + @"(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
-
-        // TODO: replace start with SYM
-        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
+        internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
     }
 
     /// <summary>
@@ -1299,6 +1296,19 @@ namespace Dialogic
         internal static void Apply<T>(this IList<T> il, Action<T, T, T, T, T> action)
         {
             action(il[0], il[1], il[2], il[3], il[4]);
+        }
+
+        internal static string[] Values(this GroupCollection groups)
+        {
+            if (groups == null) throw new ArgumentException("Null groups");
+
+            string[] parts = new string[groups.Count];
+            for (int i = 0; i < groups.Count; i++)
+            {
+                parts[i] = groups[i].Value;
+            }
+
+            return parts;
         }
 
         internal static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)

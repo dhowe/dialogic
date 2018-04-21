@@ -13,8 +13,8 @@ namespace Dialogic
     {
         public static bool DBUG = false;
 
-        internal static IDictionary<string, Func<string, string>> ModifierLookup =
-            new Dictionary<string, Func<string, string>>
+        internal static IDictionary<string, Func<string, string>> ModTable
+            = new Dictionary<string, Func<string, string>>
            {
                { "quotify",       Modifier.Quotify },
                { "capitalize",    Modifier.Capitalize},
@@ -47,7 +47,7 @@ namespace Dialogic
                 {
                     if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
                     {
-                        var symbols = ParseSymbols(text, false);
+                        var symbols = Symbol.Parse(text, false);
                         if (!symbols.IsNullOrEmpty())
                         {
                             throw new UnboundSymbolException
@@ -65,6 +65,12 @@ namespace Dialogic
             return text;
         }
 
+        // TODO: Add to API (ChatRuntime)
+        internal static void AddModifier(string name, Func<string, string> func, string alias = null)
+        {
+            ModTable[name] = func;
+        }
+
         /// <summary>
         /// Iteratively resolve any variables in the specified text 
         /// in the appropriate context
@@ -75,7 +81,7 @@ namespace Dialogic
             var doRepeat = false;
             do
             {
-                var symbols = ParseSymbols(text, true);
+                var symbols = Symbol.Parse(text, true);
 
                 if (DBUG)
                 {
@@ -286,28 +292,6 @@ namespace Dialogic
             return result;
         }
 
-        internal static List<Symbol> ParseSymbols(string text, bool sortResults = false)
-        {
-            List<Symbol> symbols = new List<Symbol>();
-            var matches = RE.ParseVars.Matches(text);
-
-            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
-            {
-                throw new ResolverException("Unable to parse symbol: " + text);
-            }
-
-            foreach (Match match in matches)
-            {
-                symbols.Add(new Symbol(match));
-            }
-
-            // OPT: we sort here to avoid symbols which are substrings of another
-            // symbol causing incorrect replacements ($a being replaced in $ant, 
-            // for example), however this can be avoided by correctly using 
-            // Regex.Replace instead of String.Replace() in BindSymbols
-            return sortResults ? SortByLength(symbols) : symbols;
-        }
-
         private static void ParseGroups(string input, List<string> results)
         {
             foreach (Match m in RE.MatchParens.Matches(input))
@@ -323,11 +307,6 @@ namespace Dialogic
                     results.Add(m.Value);
                 }
             }
-        }
-
-        private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
-        {
-            return (from s in syms orderby s.symbol.Length descending select s).ToList();
         }
 
         private static bool IsDynamic(string text)
@@ -350,7 +329,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Capitalizes every character.
+        /// Capitalize every character
         /// </summary>
         /// <param name="str"></param>
         /// <returns>The modified string</returns>
@@ -360,7 +339,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Wraps the given string in double-quotes.
+        /// Wraps the string in double-quotes
         /// </summary>
         /// <param name="str"></param>
         /// <returns>The modified string</returns>
@@ -372,26 +351,30 @@ namespace Dialogic
 
     internal class Symbol
     {
+        public List<string> modifiers;
         public string text, alias, symbol;
         public bool bounded, chatScoped;
 
-        public Symbol(Match match = null)
-        {
-            if (match != null)
-            {
-                var groups = match.Groups;
-                if (groups.Count != 5)
-                {
-                    Util.ShowMatch(match);
-                    throw new ArgumentException
-                        ("Invalid input to Symbol(): " + groups.Count);
-                }
+        internal Symbol() {}
 
-                Init(groups[1].Value, groups[4].Value, groups[2].Value, groups[3].Value == Ch.LABEL.ToString());
+        private void ParseMods(Group group)
+        {
+            var modGroup = group.Value.Trim();
+            if (!modGroup.IsNullOrEmpty())
+            {
+                if (modifiers == null)
+                {
+                    modifiers = new List<string>();
+                }
+                foreach (Capture mod in group.Captures)
+                {
+                    modifiers.Add(mod.Value.TrimFirst(Ch.MODIFIER));
+                }
+                //Console.WriteLine("MODS: " + modifiers.Stringify());
             }
         }
 
-        public Symbol Init(string txt, string sym, string save = "", bool chatLocal = false)
+        internal Symbol Init(string txt, string sym, string save = "", bool chatLocal = false)
         {
             this.text = txt.Trim();
             this.symbol = sym.Trim();
@@ -413,6 +396,50 @@ namespace Dialogic
         {
             return (chatScoped ? Ch.LABEL : Ch.SYMBOL)
                 + (bounded ? "{" + symbol + '}' : symbol);
+        }
+
+        internal static List<Symbol> Parse(string text, bool sortResults = false)
+        {
+            var symbols = new List<Symbol>();
+            var matches = RE.ParseVars.Matches(text);
+
+            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
+            {
+                throw new ResolverException("Unable to parse symbol: " + text);
+            }
+
+            foreach (Match match in matches)
+            {
+                var groups = match.Groups;
+                if (groups.Count != 6)
+                {
+                    Util.ShowMatch(match);
+                    throw new ArgumentException
+                        ("Invalid input to Symbol(): " + groups.Count);
+                }
+                var sym = new Symbol(groups.Values());
+                sym.ParseMods(groups[5]);
+                symbols.Add(sym);
+            }
+
+            // OPT: we can sort here to avoid symbols which are substrings of other
+            // symbols causing incorrect replacements ($a being replaced in $ant, 
+            // for example), however should be avoided by using Regex.Replace 
+            // instead of String.Replace() in BindSymbols
+            return sortResults ? SortByLength(symbols) : symbols;
+        }
+
+        internal Symbol(params string[] parts) { 
+            this.text = parts[1].Trim();
+            this.symbol = parts[4].Trim();
+            this.alias = parts[2].Length > 0 ? parts[2].Trim() : null;
+            this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
+            this.chatScoped = (parts[3] == Ch.LABEL.ToString());
+        }
+
+        private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
+        {
+            return (from s in syms orderby s.symbol.Length descending select s).ToList();
         }
     }
 }

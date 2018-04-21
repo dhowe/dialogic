@@ -43,8 +43,7 @@ namespace Dialogic
         {
             Symbol s;
 
-            var m = RE.ParseVars.Match("((a|b) | $prep)");
-            s = new Symbol(m);
+            s = Symbol.Parse("((a|b) | $prep)")[0];
             //Console.WriteLine(s);Util.ShowMatch(m);
 
             Assert.That(s.text, Is.EqualTo("$prep"));
@@ -52,58 +51,56 @@ namespace Dialogic
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
 
-            s = new Symbol(RE.ParseVars.Match("$a"));
+            s = Symbol.Parse("$a")[0];
             Assert.That(s.text, Is.EqualTo("$a"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
 
-            m = RE.ParseVars.Match("[bb=$a]");
-            s = new Symbol(m);
-
+            s = Symbol.Parse("[bb=$a]")[0];
             Assert.That(s.text, Is.EqualTo("[bb=$a]"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.EqualTo("bb"));
             Assert.That(s.bounded, Is.EqualTo(false));
 
-            s = new Symbol(RE.ParseVars.Match("${a}"));
+            s = Symbol.Parse("${a}")[0];
             Assert.That(s.text, Is.EqualTo("${a}"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(true));
 
-            s = new Symbol(RE.ParseVars.Match("[bb=${a}]"));
+            s = Symbol.Parse("[bb=${a}]")[0];
             Assert.That(s.text, Is.EqualTo("[bb=${a}]"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.EqualTo("bb"));
             Assert.That(s.bounded, Is.EqualTo(true));
 
-            s = new Symbol(RE.ParseVars.Match("$name"));
+            s = Symbol.Parse("$name")[0];
             Assert.That(s.text, Is.EqualTo("$name"));
             Assert.That(s.symbol, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
 
-            s = new Symbol(RE.ParseVars.Match("$name,"));
+            s = Symbol.Parse("$name,")[0];
             Assert.That(s.text, Is.EqualTo("$name"));
             Assert.That(s.symbol, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
 
-            s = new Symbol(RE.ParseVars.Match("Hello $name,"));
+            s = Symbol.Parse("Hello $name,")[0];
             Assert.That(s.text, Is.EqualTo("$name"));
             Assert.That(s.symbol, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
             //text = "Hello $name, nice to $verb you $chat1!";
 
-            s = new Symbol(RE.ParseVars.Match("to $verb you"));
+            s = Symbol.Parse("to $verb you")[0];
             Assert.That(s.text, Is.EqualTo("$verb"));
             Assert.That(s.symbol, Is.EqualTo("verb"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
 
-            s = new Symbol(RE.ParseVars.Match("you $chat1!"));
+            s = Symbol.Parse("you $chat1!")[0];
             Assert.That(s.text, Is.EqualTo("$chat1"));
             Assert.That(s.symbol, Is.EqualTo("chat1"));
             Assert.That(s.alias, Is.Null);
@@ -158,7 +155,7 @@ namespace Dialogic
 
             Assert.That(ue.Get("animal"), Is.EqualTo("dog"));
             Assert.That(ue.Get("MISS1"), Is.Null);
-            Assert.That(ue.Get("MISS2","cat"), Is.EqualTo("cat"));
+            Assert.That(ue.Get("MISS2", "cat"), Is.EqualTo("cat"));
 
             Assert.That(ue.GetInt("count"), Is.EqualTo(4));
             Assert.That(ue.GetInt("MISS1"), Is.EqualTo(-1));

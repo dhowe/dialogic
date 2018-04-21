@@ -42,9 +42,6 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal static IDictionary<Type, IDictionary<string, PropertyInfo>>
-            MetaMeta = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
-
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
 
@@ -56,6 +53,11 @@ namespace Dialogic
         private ChatEventHandler chatEvents;
         private List<Func<Command, bool>> validators;
         private IDictionary<string, Chat> chats;
+
+        public object this[string key] // TODO: test
+        {
+            get { return this.chats[key]; }
+        }
 
         public ChatRuntime() : this(null, null) { }
 
