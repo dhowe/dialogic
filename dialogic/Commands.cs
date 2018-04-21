@@ -292,7 +292,7 @@ namespace Dialogic
             //Util.ShowMatch(match);
             var tmp = match.Groups[1].Value.Trim();
             //Console.WriteLine("TMP: "+tmp);
-            var symbol = new Symbol(tmp, tmp, string.Empty, false);
+            var symbol = new Symbol(tmp, tmp, string.Empty, "$");
             //Console.WriteLine("SYM: " + symbol);
             this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");

@@ -60,24 +60,17 @@ namespace Dialogic
         public string text, alias, symbol;
         public bool bounded, chatScoped;
 
-        internal Symbol() { }
+        private Symbol(params string[] parts) : 
+            this(parts[0], parts[3], parts[1], parts[2]) {}
 
-        internal Symbol(params string[] parts)
+        internal Symbol(string text, string symbol, 
+            string alias = null, string typeChar = null)
         {
-            this.text = parts[1].Trim();
-            this.symbol = parts[4].Trim();
-            this.alias = parts[2].Length > 0 ? parts[2].Trim() : null;
+            this.text = text.Trim();
+            this.symbol = symbol.Trim();
+            this.alias = !alias.IsNullOrEmpty() ? alias.Trim() : null;
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
-            this.chatScoped = (parts[3] == Ch.LABEL.ToString());
-        }
-
-        internal Symbol(string txt, string sym, string save = "", bool chatLocal = false)
-        {
-            this.text = txt.Trim();
-            this.symbol = sym.Trim();
-            this.alias = save.Length > 0 ? save.Trim() : null;
-            this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
-            this.chatScoped = chatLocal;
+            this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
 
         private void ParseMods(Group group)
@@ -110,7 +103,7 @@ namespace Dialogic
                 + (bounded ? "{" + symbol + '}' : symbol);
         }
 
-        internal static List<Symbol> Parse(string text, bool sortResults = false)
+        public static List<Symbol> Parse(string text, bool sortResults = false)
         {
             var symbols = new List<Symbol>();
             var matches = RE.ParseVars.Matches(text);
@@ -129,7 +122,8 @@ namespace Dialogic
                     throw new ArgumentException
                         ("Invalid input to Symbol(): " + groups.Count);
                 }
-                var sym = new Symbol(groups.Values());
+
+                var sym = new Symbol(groups.Values().Skip(1).ToArray());
                 sym.ParseMods(groups[5]);
                 symbols.Add(sym);
             }
