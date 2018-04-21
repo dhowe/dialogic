@@ -172,7 +172,7 @@ namespace Dialogic
             + @"(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
 
         // TODO: replace start with SYM
-        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)"); 
+        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
     }
 
     /// <summary>
@@ -845,7 +845,7 @@ namespace Dialogic
         }
     }
 
-    public class Html
+    public static class Html
     {
         private static int MIN_ESCAPE = 2, MAX_ESCAPE = 6;
 
@@ -856,6 +856,8 @@ namespace Dialogic
 
         public static String Decode(String input)
         {
+            if (!input.Contains('&')) return input;
+
 #pragma warning disable XS0001  //  Mono StringBuilder serialization warning
 
             StringBuilder writer = null;
@@ -905,9 +907,6 @@ namespace Dialogic
                         if (entityValue > 0xFFFF)
                         {
                             writer.Append(entityValue.ToString().Substring(0, 2));
-                            //char[] chrs = Character.toChars(entityValue);
-                            //writer.Append(entityValue[0]);
-                            //writer.Append(entityValue[1]);
                         }
                         else
                         {
@@ -1257,7 +1256,7 @@ namespace Dialogic
 
         internal static IDictionary<string, PropertyInfo> Lookup(Type type)
         {
-            var dbug = true;
+            var dbug = false;
             if (!lookup.ContainsKey(type))
             {
                 var propMap = new Dictionary<string, PropertyInfo>();
@@ -1265,13 +1264,13 @@ namespace Dialogic
                 var props = type.GetProperties(BindingFlags.Instance
                     | BindingFlags.Public | BindingFlags.NonPublic);
 
-                if (dbug) Console.Write(type.Name+"[ ");
+                if (dbug) Console.Write(type.Name + "[");
                 foreach (var pi in props)
                 {
                     propMap.Add(pi.Name, pi);
-                    if (dbug) Console.Write(pi.Name+", ");
+                    if (dbug) Console.Write(pi.Name + ",");
                 }
-                if (dbug) Console.WriteLine(" ]");
+                if (dbug) Console.WriteLine("]");
                 lookup[type] = propMap;
             }
             return lookup[type];

@@ -27,7 +27,6 @@ namespace Dialogic
         /// </summary>
         public static string Bind(string text, Chat parent, IDictionary<string, object> globals)
         {
-            ;
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
             if (DBUG) Console.WriteLine("--------------------------------\nBind: " + text);
@@ -89,86 +88,103 @@ namespace Dialogic
                 doRepeat = false;
                 foreach (var sym in symbols)
                 {
-                    string theSymbol = sym.symbol, toReplace = sym.text;
+                    string theSymbol = sym.symbol;
+                    string replaceWith = null;
                     bool switched = false;
+
+                    // 3 cases for each: simple-global, global-object, simple-local 
 
                     if (theSymbol.Contains(Ch.SCOPE))
                     {
-                        // need to process a chat-scoped symbol
+                        // need to process a scoped symbol
                         var parts = theSymbol.Split(Ch.SCOPE);
-                        if (parts.Length < 2) throw new ResolverException
-                            ("Unexpected variable format: " + sym);
+                        if (parts.Length < 2)
+                        {
+                            throw new ResolverException("Invalid symbol: " + sym);
+                        }
 
                         theSymbol = parts[1];
 
-                        if (sym.chatScoped)
+                        if (!sym.chatScoped) // global-traversal
+                        {
+                            var result = ResolveObject(parts, globals);
+                            if (result == null)
+                            {
+                                throw new UnboundSymbolException(sym, context, globals);
+                            }
+                            replaceWith = result.ToString();
+                        }
+                        else                // chat-scoped
                         {
                             if (context == null) throw new ResolverException
                                 ("Null context for chat-scoped symbol: " + sym);
 
                             var chat = context.runtime.FindChatByLabel(parts[0]);
-  
+
                             // reset the context to the chat
                             context = chat;
                             switched = true;
                         }
-                        else
-                        {
-
-                            var obj = ResolveSymbol(parts[0], context, globals);
-
-                            if (obj == null) throw new UnboundSymbolException(sym, context, globals);
-
-                            Console.WriteLine("LOOKUP: $" + theSymbol + " on globals." + obj);
-
-                            // WORKING HERE: get prop via reflection
-                            var props = Properties.Lookup(obj.GetType());
-                            Console.WriteLine(props.Stringify());
-                            if (!props.ContainsKey(theSymbol))
-                            {
-                                throw new UnboundSymbolException(sym, context, globals);
-                            }
-
-                            // TODO: handle multiple layers of traversal
-
-                            var result = Properties.Get(obj, props[theSymbol]).ToString();
-                            Console.WriteLine("FOUND: "+ result);
-
-                            text = text.Replace(toReplace, result);
-                            return text;
-                        }
-
                     }
 
-                    // lookup the value for the symbol
-                    var symval = ResolveSymbol(theSymbol, context, globals).ToString();
+                    if (replaceWith == null)
+                    {
+                        // lookup the value for the symbol
+                        var tmp = ResolveSymbol(theSymbol, context, globals);
+                        if (tmp != null) replaceWith = tmp.ToString();
 
-                    if (symval != null)
+                        // note: may be null here if we have an unresolved alias 
+                    }
+
+                    if (replaceWith != null)
                     {
                         // if we have an alias, then include it in our resolved 
                         // value so that it can be handled properly in BindGroups
-                        if (sym.alias != null) toReplace = sym.SymbolText();
+                        var toReplace = sym.alias != null ? sym.SymbolText() : sym.text;
 
                         // if we've switched contexts and still have replacements
                         // to do, we need to repeat (perhaps better as recursive call?)
-                        if (switched && symval.Contains(Ch.SYMBOL)) doRepeat = true;
+                        if (switched && replaceWith.Contains(Ch.SYMBOL)) doRepeat = true;
 
                         // do the symbol replacement
-                        text = text.Replace(toReplace, symval);
+                        text = text.Replace(toReplace, replaceWith);
 
                         if (DBUG)
                         {
-                            Console.WriteLine("    " + toReplace + " -> '" + symval + "'");
+                            Console.WriteLine("    " + toReplace + " -> '" + replaceWith + "'");
                             if (doRepeat) Console.WriteLine
                                 ("    Repeat with context=#" + context.text + " -> " + text);
                         }
                     }
-                }
+
+                } // end foreach
 
             } while (doRepeat);
 
 
             return Html.Decode(text);
+        }
+
+        /// <summary>
+        /// Dynamically resolve the path through the object's properties
+        /// </summary>
+        private static object ResolveObject(string[] parts, IDictionary<string, object> globals)
+        {
+            var obj = ResolveSymbol(parts[0], null, globals);
+
+            if (obj == null) return null;
+
+            for (int i = 1; i < parts.Length; i++)
+            {
+                var props = Properties.Lookup(obj.GetType());
+                //Console.WriteLine(props.Stringify());
+                if (!props.ContainsKey(parts[i])) return null;
+
+                obj = Properties.Get(obj, props[parts[i]]);
+                if (obj == null) return null;
+            }
+
+            return obj;
         }
 
         /// <summary>

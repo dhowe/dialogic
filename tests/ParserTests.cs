@@ -361,7 +361,6 @@ namespace Dialogic
             Assert.That(chats[0].Staleness(), Is.EqualTo(2));
             Assert.That(chats[0].GetMeta(Meta.STALENESS), Is.EqualTo("2"));
 
-            return;
             chats = ChatParser.ParseText("CHAT c1\nCHAT c2\nSET $c1.staleness=2", NO_VALIDATORS);
           
             chats[0].Realize(null);
@@ -970,7 +969,7 @@ namespace Dialogic
             Assert.That(chats[0].GetType(), Is.EqualTo(typeof(Chat)));
             Assert.That(chats[0].commands[0].text, Is.EqualTo("HAY is for horses"));
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            return;
+
             chats = ChatParser.ParseText("ASK is for horses?\nOPT Yes #game");
             //Console.WriteLine(chats[0].ToTree());
             Assert.That(chats.Count, Is.EqualTo(1));

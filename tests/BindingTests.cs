@@ -108,8 +108,6 @@ namespace Dialogic
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
 
-return;
-
             // global-bounded
             lines = new[] {
                 "CHAT c1",
@@ -137,6 +135,8 @@ return;
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
+            return; // TODO:
+
             // chat-direct access
             lines = new[] {
                 "CHAT c1",
@@ -145,8 +145,9 @@ return;
                 "SAY $chats.c1.foo",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.commands[0].Text(), Is.EqualTo("bar"));
+            chats = ChatParser.ParseText(text, true);
+            chats.ForEach(c => c.Realize(globals));
+            Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
 
             // chat-direct bounded
             lines = new[] {
@@ -156,8 +157,9 @@ return;
                 "SAY ${chats.c1.foo}",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
-            Assert.That(chat.commands[0].Text(), Is.EqualTo("bar"));
+            chats = ChatParser.ParseText(text, true);
+            chats.ForEach(c => c.Realize(globals));
+            Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
         }
 
         [Test]
@@ -168,7 +170,6 @@ return;
             var res = Resolver.Bind("Hello $fish.name", c1, globals);
             Assert.That(res, Is.EqualTo("Hello Fred"));
 
-            return;
             res = Resolver.Bind("Hello $fish.name.", c1, globals);
             Assert.That(res, Is.EqualTo("Hello Fred."));
         }

@@ -234,7 +234,7 @@ namespace Dialogic
 
         // testing only below --------------------------------------------------
 
-        internal string Expand(IDictionary<string, object> globals, string start)
+        internal string _Expand(IDictionary<string, object> globals, string start)
         {
             Say s = new Say();
             s.Init(start, string.Empty, new string[0]);
@@ -244,7 +244,7 @@ namespace Dialogic
             return s.Text();
         }
 
-        internal string ExpandNoGroups(IDictionary<string, object> globals,
+        internal string _ExpandNoGroups(IDictionary<string, object> globals,
             string start)//, bool doGroups = false)
         {
             start = start.TrimFirst(Ch.SYMBOL);
@@ -274,7 +274,7 @@ namespace Dialogic
         }
 
         // unused as yet
-        protected internal string GrammarToJson(IDictionary<string, object>
+        protected internal string _GrammarToJson(IDictionary<string, object>
             globals, bool localize = true)
         {
             var name = text + ".";
