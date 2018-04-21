@@ -111,6 +111,9 @@ namespace Dialogic
 
                         if (!sym.chatScoped) // global-traversal
                         {
+
+                            // SAVE that we are working in global scope if we have an alias
+
                             var result = ResolveObject(parts, globals);
                             if (result == null)
                             {
@@ -141,13 +144,27 @@ namespace Dialogic
 
                     if (replaceWith != null)
                     {
-                        // if we have an alias, then include it in our resolved 
-                        // value so that it can be handled properly in BindGroups
-                        var toReplace = sym.alias != null ? sym.SymbolText() : sym.text;
-
                         // if we've switched contexts and still have replacements
                         // to do, we need to repeat (perhaps better as recursive call?)
                         if (switched && replaceWith.Contains(Ch.SYMBOL)) doRepeat = true;
+
+                        var toReplace = sym.text;
+
+                        //// if we have an alias, then include it in our resolved 
+                        //// value so that it can be handled properly in BindGroups
+                        if (sym.alias != null) {
+                            if (replaceWith.Contains(Ch.OR))
+                            {
+                                toReplace = sym.SymbolText();
+                            }
+                            // TODO: working here
+
+                            // here we need to put the alias into scope
+
+
+                        }
+                                           
+                        //var toReplace = sym.alias != null ? sym.SymbolText() : sym.text;
 
                         // do the symbol replacement
                         text = text.Replace(toReplace, replaceWith);

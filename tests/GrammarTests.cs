@@ -31,10 +31,9 @@ namespace Dialogic
             }
         }
 
-        //[Test]
+        [Test]
         public void SaveGlobalResolveState()
         {
-            // TODO ?
             string[] lines;
             ChatRuntime runtime;
             Chat chat;
@@ -47,7 +46,7 @@ namespace Dialogic
             runtime.ParseText(string.Join("\n", lines));
             chat = runtime.Chats()[0];
             Assert.That(chat, Is.Not.Null);
-            chat.Realize(null);
+            chat.Realize(globals);
             res = chat.commands[1].Text() + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Fred Fred"));
         }
@@ -132,7 +131,6 @@ namespace Dialogic
             res = chat.commands[1].Text();// + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane.").
                                          Or.EqualTo("A girl Jill Jill."));
-
 
             lines = new[] {
                 "SET hero = (Jane | Jill)",
