@@ -30,9 +30,14 @@ namespace Dialogic
         class Fish
         {
             public static string species { get; protected set; }
+            public static string GetSpecies() { return species; }
 
             public string name { get; protected set; }
             public Flipper flipper { get; protected set; }
+
+            public Flipper GetFlipper() { return flipper; }
+
+            public double GetFlipperSpeed() { return flipper.speed; }
 
             private int id = 9;
 
@@ -59,6 +64,63 @@ namespace Dialogic
                 return this.speed.ToString();
             }
         }
+
+        [Test]
+        public void ResolveTraversalWithParameters()
+        {
+            // TODO:
+        }
+
+        [Test]
+        public void ResolveTraversalWithFunctions()
+        {
+            object result;
+
+            result = Symbol.Parse("The $fish.Id()")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+
+            result = Symbol.Parse("The $fish.GetSpecies()")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("Oscar"));
+
+            result = Symbol.Parse("you $fish.GetFlipper()?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you $fish.GetFlipperSpeed()?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("#$fish.Id()")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("#9"));
+
+            result = Symbol.Parse("you $fish.GetFlipper().speed?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you $fish.GetFlipper().ToString()?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            // bounded ----------------------------------------------------------------
+
+            result = Symbol.Parse("#{$fish.Id()}")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("#9"));
+
+            result = Symbol.Parse("The ${fish.Id()}")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+
+            result = Symbol.Parse("The ${fish.GetSpecies()}")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("Oscar"));
+
+            result = Symbol.Parse("you ${fish.GetFlipper()}?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.GetFlipperSpeed()}?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.GetFlipper().speed}?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.GetFlipper().ToString()}?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+        }
     
         [Test]
         public void ResolveSymbolTraversal()
@@ -74,6 +136,18 @@ namespace Dialogic
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
             result = Symbol.Parse("you $fish.flipper.speed?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.name}?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("Fred"));
+
+            result = Symbol.Parse("you ${fish.species}?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("Oscar"));
+
+            result = Symbol.Parse("you ${fish.flipper}?")[0].Resolve(null, globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.flipper.speed}?")[0].Resolve(null, globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
         }
 
@@ -415,24 +489,24 @@ namespace Dialogic
             Assert.That(s.bounded, Is.EqualTo(false));
         }
 
-        [Test]
-        public void ParseSymbolWithMod()
-        {
-            var ts = new[] { "", ".", "!", ":", ";", ",", "?", ")", "\"", "'" };
-            foreach (var t in ts)
-            {
-                var sy = Symbol.Parse("$ab&c" + t).First();
-                Assert.That(sy.symbol, Is.EqualTo("ab"));
-                Assert.That(sy.modifiers.Count, Is.EqualTo(1));
-                Assert.That(sy.modifiers[0], Is.EqualTo("c"));
-            }
+        //[Test]
+        //public void ParseSymbolWithMod()
+        //{
+        //    var ts = new[] { "", ".", "!", ":", ";", ",", "?", ")", "\"", "'" };
+        //    foreach (var t in ts)
+        //    {
+        //        var sy = Symbol.Parse("$ab&c" + t).First();
+        //        Assert.That(sy.symbol, Is.EqualTo("ab"));
+        //        Assert.That(sy.modifiers.Count, Is.EqualTo(1));
+        //        Assert.That(sy.modifiers[0], Is.EqualTo("c"));
+        //    }
 
-            var sym = Symbol.Parse("$ab&mod1&mod2.").First();
-            Assert.That(sym.symbol, Is.EqualTo("ab"));
-            Assert.That(sym.modifiers.Count, Is.EqualTo(2));
-            Assert.That(sym.modifiers[0], Is.EqualTo("mod1"));
-            Assert.That(sym.modifiers[1], Is.EqualTo("mod2"));
-        }
+        //    var sym = Symbol.Parse("$ab&mod1&mod2.").First();
+        //    Assert.That(sym.symbol, Is.EqualTo("ab"));
+        //    Assert.That(sym.modifiers.Count, Is.EqualTo(2));
+        //    Assert.That(sym.modifiers[0], Is.EqualTo("mod1"));
+        //    Assert.That(sym.modifiers[1], Is.EqualTo("mod2"));
+        //}
 
         [Test]
         public void ParseSymbols()

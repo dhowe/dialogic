@@ -149,7 +149,8 @@ namespace Dialogic
         public static Regex MatchParens = new Regex(MP1 + MP2);
 
         internal const string PV1 = @"((?:\[([^=]+)=)?([$#])\{?";
-        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)(&" + SYM + @")*\}?\]?)";
+        //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)(&" + SYM + @")*\}?\]?)";
+        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
         public static Regex ParseAlias = new Regex(@"\[([^=]+)=([^\]]+)\]");

@@ -101,7 +101,7 @@ namespace Dialogic
 
     internal class Symbol
     {
-        public List<string> modifiers;
+        //public List<string> modifiers;
         public string text, alias, symbol;
         public bool bounded, chatScoped;
 
@@ -118,23 +118,23 @@ namespace Dialogic
             this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
 
-        private Symbol ParseMods(Group group)
-        {
-            var modGroup = group.Value.Trim();
-            if (!modGroup.IsNullOrEmpty())
-            {
-                if (modifiers == null)
-                {
-                    modifiers = new List<string>();
-                }
-                foreach (Capture mod in group.Captures)
-                {
-                    modifiers.Add(mod.Value.TrimFirst(Ch.MODIFIER));
-                }
-                //Console.WriteLine("MODS: " + modifiers.Stringify());
-            }
-            return this;
-        }
+        //private Symbol ParseMods(Group group)
+        //{
+        //    var modGroup = group.Value.Trim();
+        //    if (!modGroup.IsNullOrEmpty())
+        //    {
+        //        if (modifiers == null)
+        //        {
+        //            modifiers = new List<string>();
+        //        }
+        //        foreach (Capture mod in group.Captures)
+        //        {
+        //            modifiers.Add(mod.Value.TrimFirst(Ch.MODIFIER));
+        //        }
+        //        //Console.WriteLine("MODS: " + modifiers.Stringify());
+        //    }
+        //    return this;
+        //}
 
         public override string ToString()
         {
@@ -156,11 +156,11 @@ namespace Dialogic
 
             foreach (Match match in matches)
             {
-                GroupCollection groups = GetGroups(match, 6);
+                GroupCollection groups = GetGroups(match, 5);
 
                 // Create a new Symbol and add it to the list
                 var args = groups.Values().Skip(1).ToArray();
-                symbols.Add(new Symbol(args).ParseMods(groups[5]));
+                symbols.Add(new Symbol(args));//.ParseMods(groups[5]));
             }
 
             // OPT: we can sort here to avoid symbols which are substrings of other
