@@ -117,6 +117,150 @@ namespace Dialogic
         }
     }
 
+    internal class Choice
+    {
+        private static IDictionary<string, Choice> Choices
+            = new Dictionary<string, Choice>();
+
+        //private static IDictionary<Choice, string> Cache
+            //= new Dictionary<Choice, string>();
+
+        public string alias;
+        private string text;
+        public readonly string[] options;
+
+        private string lastResolved;
+        private Chat context;
+
+        private Choice(Chat context, string text, string groups, string alias = null)
+        {
+            this.text = text;
+            this.context = context;
+            this.options = RE.SplitOr.Split(groups);
+            this.alias = alias.IsNullOrEmpty() ? null : alias;
+            //this.options = ParseOptions();
+            //Console.WriteLine(this);
+        }
+
+        public string Text()
+        {
+            //var s = Ch.OGROUP + text + Ch.CGROUP;
+            //return (alias != null ? Ch.OSAVE + alias + "=" + s + Ch.CSAVE : s);
+            return text;
+        }
+
+        public static List<Choice> Parse(string input, Chat context=null)
+        {
+            var groups = new List<Choice>();
+            Parse(input, groups, context);
+            return groups;
+        }
+
+        private static void Parse(string input, List<Choice> results, Chat context)
+        {
+            // Cache the entire match?
+            foreach (Match m in RE.MatchParens.Matches(input))
+            {
+                //Util.ShowMatch(m);
+                var full  = m.Groups[0].Value;
+                var alias = m.Groups[1].Value;
+                var oidx = full.IndexOf(Ch.OGROUP);
+                var cidx = full.LastIndexOf(Ch.CGROUP);
+                var expr = full.Substring(oidx+1, cidx-oidx-1);
+                //Console.WriteLine("Full: " + full + "\nExpr: " + expr + "\nAlia: " + alias);
+                //var expr  = m.Groups[2].Value;
+                 
+                //var caps = m.Groups[2].Captures;
+                //Console.WriteLine("EXPR: "+expr);
+
+                //Console.WriteLine("::"+expr+" "+alias);
+                    // Substring(1, m.Value.Length - 2);
+                    // m.Value.Substring(1, m.Value.Length-2);
+
+                if (RE.HasParens.IsMatch(expr))
+                {
+                    Parse(expr, results, context);
+                }
+                else
+                {
+                    // cache our prior Choice objects here
+                    if (!Choices.ContainsKey(full))
+                    {
+                        Choices.Add(full, new Choice(context, full, expr, alias));
+                    }
+                    results.Add(Choices[full]);///new Choice(context, full, expr, alias));
+                }
+            }
+        }
+
+        //private string[] ParseOptions()
+        //{
+        //    if (!Regex.IsMatch(text, @"\([^)]+|[^)]+\)"))
+        //    {
+        //        throw new Exception("BAD group");
+        //    }
+
+        //    // trim (,) from ends
+        //    text = text.TrimFirst('(').TrimLast(')');
+
+        //    // parse unique choices only
+        //    return Regex.Split(text, @"\s*\|\s*").Distinct().ToArray();
+        //}
+
+        internal string Resolve()
+        {
+            string resolved = null;
+
+            switch (options.Length)
+            {
+                // degenerate single option case
+                case 1:
+                    resolved = options[0];
+                    break;
+
+                // avoid oscillators, just choose random
+                case 2:
+                    resolved = (string)Util.RandItem(options);
+                    break;
+
+                default: // choose something different than last time
+                    int iterations = 0, maxIterations = 100;
+                    do
+                    {
+                        if (++iterations > maxIterations) // should never happen
+                        {
+                            throw new BindException("Max limit: " + this);
+                        }
+                        resolved = (string)Util.RandItem(options);
+                    }
+                    while (Equals(lastResolved, resolved));
+                    break;
+            }
+
+            HandleAlias(resolved, context.scope);
+            //Console.WriteLine("last="+lastResolved+" res="+resolved);
+
+            return (lastResolved = resolved);
+        }
+
+        private void HandleAlias(object resolved, IDictionary<string, object> scope)
+        {
+            if (this.alias != null && resolved != null)
+            {
+                if (!resolved.ToString().Contains(Ch.OR))
+                {
+                    Console.WriteLine("Choice.Push: " + alias + ": " + resolved);
+                    scope[alias] = resolved;
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return Text();
+        }
+    }
+
     internal class Symbol
     {
         public string text, alias, symbol;
@@ -133,7 +277,7 @@ namespace Dialogic
             this.context = context;
             this.text = theText.Trim();
             this.symbol = theSymbol.Trim();
-            this.alias = !alias.IsNullOrEmpty() ? alias.Trim() : null;
+            this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
             this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
@@ -197,7 +341,7 @@ namespace Dialogic
 
         private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
         {
-            return (from s in syms orderby s.symbol.Length descending select s).ToList();
+            return (from s in syms orderby s.symbol.Length ascending select s).ToList();
         }
 
         internal SymbolType Type()
@@ -217,6 +361,11 @@ namespace Dialogic
 
             switch (this.Type())
             {
+                case SymbolType.SIMPLE:
+
+                    HandleAlias(resolved, globals);
+                    break;
+
                 case SymbolType.GLOBAL_SCOPE:
 
                     // Dynamically resolve the object path 
@@ -233,6 +382,8 @@ namespace Dialogic
                         }
                         if (resolved == null) throw new UnboundSymbol
                             (symbol, context, globals);
+
+                        HandleAlias(resolved, globals);
                     }
                     break;
 
@@ -243,43 +394,37 @@ namespace Dialogic
                         throw new BindException("Null context/runtime: " + this);
                     }
 
-                    // Find/save the correct scope for the lookup
+                    // Find/store the correct scope for the lookup
                     this.context = context.runtime.FindChatByLabel(parts[0]);
                     resolved = ResolveSymbol(parts[1], context, globals);
-                    // ** we've changed context **
+                    HandleAlias(resolved, context.scope);
                     break;
             }
-
-            //string result = null;
-            //string toReplace = this.text;
-
-            if (resolved != null)
-            {
-
-                if (this.alias != null)
-                {
-
-                    // 1. inject alias into scope
-                    // 2. make sure we're replacing the full text
-                }
-
-                //Console.WriteLine("REPLACE: "+toReplace + " -> "+resolved);
-                //result = resolved.ToString();
-            }
-
-            //Console.WriteLine("RETURN: " + toReplace + " -> " + resolved);
 
             return resolved;
         }
 
-        internal static object ResolveSymbol(string text, Chat context, IDictionary<string, object> globals)
+        private void HandleAlias(object resolved, IDictionary<string, object> scope)
         {
-            object result = null;
-            if (context != null && context.scope.ContainsKey(text)) // check locals
+            if (this.alias != null && resolved != null)
+            {
+                if (!resolved.ToString().Contains(Ch.OR))
+                {
+                    Console.WriteLine("Symbol.Push: " + alias + ": " + resolved);
+                    scope[alias] = resolved;
+                }
+            }
+        }
+
+        internal static object ResolveSymbol(string text, 
+            Chat context, IDictionary<string, object> globals)
+        {
+            object result = null; // check locals, then globals
+            if (context != null && context.scope.ContainsKey(text)) 
             {
                 result = context.scope[text];
             }
-            else if (globals != null && globals.ContainsKey(text))   // check globals
+            else if (globals != null && globals.ContainsKey(text))
             {
                 result = globals[text];
             }

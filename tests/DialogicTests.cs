@@ -24,6 +24,14 @@ namespace Dialogic
         }
 
         [Test]
+        public void ListPopExt()
+        {
+            var ints = new List<int>() {4,7,2,3};
+            Assert.That(ints.Pop(), Is.EqualTo(3));
+            Assert.That(ints.Count, Is.EqualTo(3));
+        }
+
+        [Test]
         public void SecStrToMsTest()
         {
             Assert.That(Util.SecStrToMs("1"), Is.EqualTo(1000));

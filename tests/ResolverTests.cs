@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -158,7 +159,7 @@ namespace Dialogic
             {
                 c.Realize(globals);
                 var txt = c.Text();
-                //Console.WriteLine(i+") "+txt);
+                Console.WriteLine(i+") "+txt);
                 CollectionAssert.Contains(ok, txt);
             }
         }
@@ -282,6 +283,7 @@ namespace Dialogic
             {
                 say.Realize(globals);
                 string said = say.Text();
+                //System.Console.WriteLine(i+") "+said);
                 Assert.That(said, Is.Not.EqualTo(last));
                 last = said;
             }

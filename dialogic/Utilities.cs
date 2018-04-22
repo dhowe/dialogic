@@ -144,9 +144,14 @@ namespace Dialogic
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
+        internal const string XP1 = @"\(([^()]+|(?<Level>\()|";
+        internal const string XP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
+        public static Regex MatchParensX = new Regex(XP1 + XP2);
+
+        internal const string MP0 = @"(?:\[([^=()]+)=)?";
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
-        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
-        public static Regex MatchParens = new Regex(MP1 + MP2);
+        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
+        public static Regex MatchParens = new Regex(MP0 + MP1 + MP2);
 
         internal const string PV1 = @"((?:\[([^=]+)=)?([$#])\{?";
         //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)(&" + SYM + @")*\}?\]?)";
@@ -1072,6 +1077,16 @@ namespace Dialogic
             }
 
             return parts;
+        }
+
+        /// <summary>
+        /// Removes the last element of a list and returns it
+        /// </summary>
+        internal static T Pop<T>(this List<T> list)
+        {
+            var last = list.Last();
+            list.RemoveAt(list.Count - 1);
+            return last;
         }
 
         internal static bool IsNullOrEmpty<T>(this IEnumerable<T> ie)

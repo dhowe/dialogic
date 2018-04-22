@@ -21,6 +21,58 @@ namespace Dialogic
         };
 
         [Test]
+        public void MatchGroups()
+        {
+            MatchCollection matches;
+
+
+            matches = RE.MatchParens.Matches("[d=(a | b)]");
+            Util.ShowMatches(matches);
+
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("[d=(a | b)]"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo("d"));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a | b"));
+            return;
+            matches = RE.MatchParens.Matches("((a | b) | c)");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("((a | b) | c)"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a | b"));
+
+            matches = RE.MatchParens.Matches("(a | b)");
+            //Util.ShowMatches(matches);
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("(a | b)"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a | b"));
+
+            matches = RE.MatchParens.Matches("(a|b)");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("(a|b)"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a|b"));
+
+
+            matches = RE.MatchParens.Matches("[d=(a|b)]");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("[d=(a|b)]"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo("d"));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a|b"));
+
+            matches = RE.MatchParens.Matches("(a | b | c)");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("(a | b | c)"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a | b | c"));
+
+            matches = RE.MatchParens.Matches("(a | b | c)");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("(a | b | c)"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a | b | c"));
+
+            matches = RE.MatchParens.Matches("[d=(a | b | c)]");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("[d=(a | b | c)]"));
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo("d"));
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("a | b | c"));
+
+        }
+
+        [Test]
         public void MatchValidText()
         {
             Match match;
