@@ -61,7 +61,7 @@ namespace Dialogic
         {
             //// no replace to be made
             Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<UnboundSymbolException>(() => Resolver.Bind("$a", null, globals));
+            Assert.Throws<UnboundSymbol>(() => Resolver.Bind("$a", null, globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",

@@ -315,18 +315,11 @@ namespace Dialogic
                 throw new ParseException("Invalid SET args: '" + txt + "'");
             }
 
-            //var symbol = new Symbol(RE.ParseVars.Match(match.Groups[1].Value.Trim()));
 
-            //Console.WriteLine(symbol);
-
-            //Util.ShowMatch(match);
             var tmp = match.Groups[1].Value.Trim();
-            //Console.WriteLine("TMP: "+tmp);
 
-            //var symbol = new Symbol(tmp, tmp, string.Empty, "$");
-            var symbol = Symbol.Parse(tmp); // CHANGED from above
+            var symbol = Symbol.Parse(tmp, parent); // CHANGED from above ???
 
-            //Console.WriteLine("SYM: " + symbol);
             this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();

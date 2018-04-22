@@ -69,56 +69,59 @@ namespace Dialogic
         public void ResolveTraversalWithParameters()
         {
             // TODO:
+            Chat c1 = null;
         }
 
         [Test]
         public void ResolveTraversalWithFunctions()
         {
             object result;
+            Chat c1 = null;
 
-            result = Symbol.Parse("The $fish.Id()")[0].Resolve(null, globals);
+            result = Symbol.Parse("The $fish.Id()", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
-            result = Symbol.Parse("The $fish.GetSpecies()")[0].Resolve(null, globals);
+            result = Symbol.Parse("The $fish.GetSpecies()", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Oscar"));
 
-            result = Symbol.Parse("you $fish.GetFlipper()?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $fish.GetFlipper()?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you $fish.GetFlipperSpeed()?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $fish.GetFlipperSpeed()?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("#$fish.Id()")[0].Resolve(null, globals);
-            Assert.That(result.ToString(), Is.EqualTo("#9"));
 
-            result = Symbol.Parse("you $fish.GetFlipper().speed?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $fish.GetFlipper().speed?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you $fish.GetFlipper().ToString()?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $fish.GetFlipper().ToString()?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
             // bounded ----------------------------------------------------------------
 
-            result = Symbol.Parse("#{$fish.Id()}")[0].Resolve(null, globals);
-            Assert.That(result.ToString(), Is.EqualTo("#9"));
-
-            result = Symbol.Parse("The ${fish.Id()}")[0].Resolve(null, globals);
+            result = Symbol.Parse("The ${fish.Id()}", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
-            result = Symbol.Parse("The ${fish.GetSpecies()}")[0].Resolve(null, globals);
+            result = Symbol.Parse("The ${fish.GetSpecies()}", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Oscar"));
 
-            result = Symbol.Parse("you ${fish.GetFlipper()}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.GetFlipper()}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you ${fish.GetFlipperSpeed()}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.GetFlipperSpeed()}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you ${fish.GetFlipper().speed}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.GetFlipper().speed}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you ${fish.GetFlipper().ToString()}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.GetFlipper().ToString()}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("#{$fish.Id()}", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+
+            result = Symbol.Parse("#$fish.Id()", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
 
         }
     
@@ -126,159 +129,175 @@ namespace Dialogic
         public void ResolveSymbolTraversal()
         {
             object result;
-            result = Symbol.Parse("you $fish.name?")[0].Resolve(null, globals);
+            Chat c1 = null;
+
+            result = Symbol.Parse("#$fish.flipper.speed", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you $fish.name?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Fred"));
 
-            result = Symbol.Parse("you $fish.species?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $fish.species?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Oscar"));
 
-            result = Symbol.Parse("you $fish.flipper?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $fish.flipper?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you $fish.flipper.speed?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $fish.flipper.speed?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you ${fish.name}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.name}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Fred"));
 
-            result = Symbol.Parse("you ${fish.species}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.species}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Oscar"));
 
-            result = Symbol.Parse("you ${fish.flipper}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.flipper}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-            result = Symbol.Parse("you ${fish.flipper.speed}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${fish.flipper.speed}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
         }
 
         [Test]
         public void Exceptions()
         {
-            Assert.Throws<BindException>(() => Symbol.Parse("#chat")[0].Resolve(null, globals));
-            Assert.Throws<BindException>(() => Symbol.Parse("#{chat}")[0].Resolve(null, globals));
+            Chat c1 = null;
+            Assert.Throws<BindException>(() => Symbol.Parse("#chat", c1)[0].Resolve(globals));
+            Assert.Throws<BindException>(() => Symbol.Parse("#{chat}", c1)[0].Resolve(globals));
         }
 
         [Test]
         public void SingleHashSymbolResolve()
         {
-            // create a realized Chat with the set of global props
+            Chat c1 = CreateParentChat();
+
+            object result;
+            result = Symbol.Parse("you #c1.prop1?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("hum"));
+
+            result = Symbol.Parse("you #{c1.prop1}?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("hum"));
+
+            result = Symbol.Parse("you #c1.prop1!", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("hum"));
+
+            result = Symbol.Parse("you #{c1.prop1}!", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("hum"));
+
+            result = Symbol.Parse("#c1.a", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("A"));
+
+            result = Symbol.Parse("#{c1.a}", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("A"));
+
+            result = Symbol.Parse("#c1.a", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("A"));
+
+            result = Symbol.Parse("((a|b) | #c1.prep)", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("then"));
+
+            result = Symbol.Parse("[bb=#c1.a]", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("A"));
+
+            result = Symbol.Parse("[bb=#{c1.a}]", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("A"));
+
+            result = Symbol.Parse("#c1.name", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Jon"));
+
+            result = Symbol.Parse("#c1.name,", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Jon"));
+
+            result = Symbol.Parse("Hello #c1.name,", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Jon"));
+
+            result = Symbol.Parse("to #c1.verb you", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("melt"));
+
+            result = Symbol.Parse("#{c1.name}", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Jon"));
+
+            result = Symbol.Parse("Hello #{c1.name},", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Jon"));
+
+            result = Symbol.Parse("to #{c1.verb} you", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("melt"));
+
+            result = Symbol.Parse("#{c1.name},", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Jon"));
+        }
+
+        private static Chat CreateParentChat()
+        {
+            // create a realized Chat with the full set of global props
             var c1 = Chat.Create("c1");
             foreach (var prop in globals.Keys) c1.SetMeta(prop, globals[prop]);
             c1.Realize(globals);
-
-            object result;
-            result = Symbol.Parse("you #c1.prop1?")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("you #{c1.prop1}?")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("you #c1.prop1!")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("you #{c1.prop1}!")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("#c1.a")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("#{c1.a}")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("#c1.a")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("((a|b) | #c1.prep)")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("then"));
-
-            result = Symbol.Parse("[bb=#c1.a]")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("[bb=#{c1.a}]")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("#c1.name")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("#c1.name,")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("Hello #c1.name,")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("to #c1.verb you")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("melt"));
-
-            result = Symbol.Parse("#{c1.name}")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("Hello #{c1.name},")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("to #{c1.verb} you")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("melt"));
-
-            result = Symbol.Parse("#{c1.name},")[0].Resolve(c1, globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
+            return c1;
         }
 
         [Test]
         public void SingleDollarSymbolResolve()
         {
             object result;
+            Chat c1 = null;
 
-            result = Symbol.Parse("you $prop1?")[0].Resolve(null, globals);
+            result = Symbol.Parse("#$count", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("4"));
+
+            result = Symbol.Parse("you $prop1?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("hum"));
 
-            result = Symbol.Parse("you ${prop1}?")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${prop1}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("hum"));
 
-            result = Symbol.Parse("you $prop1!")[0].Resolve(null, globals);
+            result = Symbol.Parse("you $prop1!", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("hum"));
 
-            result = Symbol.Parse("you ${prop1}!")[0].Resolve(null, globals);
+            result = Symbol.Parse("you ${prop1}!", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("hum"));
 
-            result = Symbol.Parse("$a")[0].Resolve(null, globals);
+            result = Symbol.Parse("$a", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("A"));
 
-            result = Symbol.Parse("${a}")[0].Resolve(null, globals);
+            result = Symbol.Parse("${a}", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("A"));
 
-            result = Symbol.Parse("$a")[0].Resolve(null, globals);
+            result = Symbol.Parse("$a", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("A"));
 
-            result = Symbol.Parse("((a|b) | $prep)")[0].Resolve(null, globals);
+            result = Symbol.Parse("((a|b) | $prep)", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("then"));
 
-            result = Symbol.Parse("[bb=$a]")[0].Resolve(null, globals);
+            result = Symbol.Parse("[bb=$a]", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("A"));
 
-            result = Symbol.Parse("[bb=${a}]")[0].Resolve(null, globals);
+            result = Symbol.Parse("[bb=${a}]", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("A"));
 
-            result = Symbol.Parse("$name")[0].Resolve(null, globals);
+            result = Symbol.Parse("$name", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Jon"));
 
-            result = Symbol.Parse("$name,")[0].Resolve(null, globals);
+            result = Symbol.Parse("$name,", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Jon"));
 
-            result = Symbol.Parse("Hello $name,")[0].Resolve(null, globals);
+            result = Symbol.Parse("Hello $name,", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Jon"));
 
-            result = Symbol.Parse("to $verb you")[0].Resolve(null, globals);
+            result = Symbol.Parse("to $verb you", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("melt"));
 
-            result = Symbol.Parse("${name}")[0].Resolve(null, globals);
+            result = Symbol.Parse("${name}", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Jon"));
 
-            result = Symbol.Parse("Hello ${name},")[0].Resolve(null, globals);
+            result = Symbol.Parse("Hello ${name},", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Jon"));
 
-            result = Symbol.Parse("to ${verb} you")[0].Resolve(null, globals);
+            result = Symbol.Parse("to ${verb} you", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("melt"));
 
-            result = Symbol.Parse("${name},")[0].Resolve(null, globals);
+            result = Symbol.Parse("${name},", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Jon"));
         }
 
@@ -381,7 +400,6 @@ namespace Dialogic
             var fish = new Fish("Frank");
             var obj = Methods.Invoke(fish, "Id");
             Assert.That(obj.ToString(), Is.EqualTo("9"));
-
             Methods.Invoke(fish, "Id", new object[] { 10 });
             Assert.That(Methods.Invoke(fish, "Id").ToString(), Is.EqualTo("10"));
         }
@@ -403,6 +421,14 @@ namespace Dialogic
             Symbol s;
 
             s = Symbol.Parse("$a")[0];
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            Assert.That(s.bounded, Is.EqualTo(false));
+            Assert.That(s.chatScoped, Is.EqualTo(false));
+            Assert.That(s.ToString(), Is.EqualTo(s.text));
+
+            s = Symbol.Parse("#$a")[0];
             Assert.That(s.text, Is.EqualTo("$a"));
             Assert.That(s.symbol, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);

@@ -1212,7 +1212,7 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ChatParser.ParseText("WAIT a {a=b}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("NVM a {a=b}"));
 
-            Assert.Throws<UnboundSymbolException>(() => ChatParser.ParseText("SAY $hello")[0].Realize(null));
+            Assert.Throws<UnboundSymbol>(() => ChatParser.ParseText("SAY $hello")[0].Realize(null));
 
             string[] lines = {
                 "CHAT c1 {type=a,stage=b}","SAY Thank you","SAY Hello",

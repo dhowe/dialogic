@@ -47,12 +47,9 @@ namespace Dialogic
                 {
                     if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
                     {
-                        var symbols = Symbol.Parse(text, false);
-                        if (!symbols.IsNullOrEmpty())
-                        {
-                            throw new UnboundSymbolException
-                                (symbols[0], parent, globals);
-                        }
+                        var symbols = Symbol.Parse(text, parent);
+                        if (!symbols.IsNullOrEmpty()) throw new UnboundSymbol
+                            (symbols[0], parent, globals);
                     }
                     throw new BindException
                         ("Resolver hit maxRecursionDepth for: " + original);
@@ -63,6 +60,42 @@ namespace Dialogic
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
             return Html.Decode(text); // resolve any encoded entities
+        }
+
+        ///// <summary>
+        ///// Iteratively resolve any variables in the specified text 
+        ///// in the appropriate context
+        ///// </summary>
+        public static string BindSymbols(string text, Chat context,
+            IDictionary<string, object> globals, int level = 0)
+        {
+            var recurse = false;
+            do
+            {
+                var symbols = Symbol.Parse(text, context);
+
+                recurse = false;
+                foreach (var sym in symbols)
+                {
+                    var result = sym.Resolve(globals);
+                    if (result != null)
+                    {
+                        text = text.Replace(sym.text, result.ToString());
+
+                        // see if we've switched contexts
+                        if (sym.context != context && text.Contains(Ch.SYMBOL))
+                        {
+
+                            // TODO: WORKING ON CONTEXT SWITCH HERE !!!!
+
+                            //context = sym.context;
+                            recurse = true;
+                        }
+                    }
+                }
+            } while (recurse);
+
+            return text;
         }
 
         //// TODO: Add to API (ChatRuntime)
@@ -128,13 +161,13 @@ namespace Dialogic
         /// Iteratively resolve any variables in the specified text 
         /// in the appropriate context
         /// </summary>
-        public static string BindSymbols(string text, Chat context,
-            IDictionary<string, object> globals, int level = 0)
+        public static string BindSymbolsOld(string text, Chat context,
+        IDictionary<string, object> globals, int level = 0)
         {
             var doRepeat = false;           // needs some cleanup
             do
             {
-                var symbols = Symbol.Parse(text, true);
+                var symbols = Symbol.Parse(text, context);
 
                 if (DBUG)
                 {
@@ -170,7 +203,7 @@ namespace Dialogic
                             var result = ResolveObject(parts, globals);
                             if (result == null)
                             {
-                                throw new UnboundSymbolException(sym, context, globals);
+                                throw new UnboundSymbol(sym, context, globals);
                             }
                             replaceWith = result.ToString();
                         }
@@ -257,7 +290,7 @@ namespace Dialogic
             for (int i = 1; i < parts.Length; i++)
             {
                 obj = Properties.Get(obj, parts[i]);
-                if (obj == null) throw new UnboundSymbolException
+                if (obj == null) throw new UnboundSymbol
                     (string.Join(Ch.SCOPE.ToString(), parts), null, globals);
             }
 

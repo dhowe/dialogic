@@ -895,7 +895,7 @@ namespace Dialogic
                     try
                     {
                         //int entityValue = Int32.Parse(input.Substring(k, j), radix);
-                        int entityValue = Convert.ToInt32(JSubstring(input, k, j), radix);
+                        int entityValue = Convert.ToInt32(JavaSubstr(input, k, j), radix);
 
                         if (writer == null) writer = new StringBuilder(input.Length);
 
@@ -920,7 +920,7 @@ namespace Dialogic
                 else
                 {
                     // named escape
-                    string value = LOOKUP[JSubstring(input, i, j)].First();
+                    string value = LOOKUP[JavaSubstr(input, i, j)].First();
                     if (value == null)
                     {
                         i++;
@@ -928,7 +928,7 @@ namespace Dialogic
                     }
 
                     if (writer == null) writer = new StringBuilder(input.Length);
-                    writer.Append(JSubstring(input, st, i - 1));
+                    writer.Append(JavaSubstr(input, st, i - 1));
                     writer.Append(value);
                 }
 
@@ -940,7 +940,7 @@ namespace Dialogic
             if (writer != null)
             {
                 //Console.WriteLine("input.Substring(st, input.Length) :: "+input);
-                writer.Append(JSubstring(input, st, input.Length));
+                writer.Append(JavaSubstr(input, st, input.Length));
                 return writer.ToString();
             }
 #pragma warning restore XS0001 //  Mono StringBuilder serialization warning
@@ -948,7 +948,7 @@ namespace Dialogic
             return input;
         }
 
-        private static string JSubstring(string s, int beginIndex, int endIndex)
+        private static string JavaSubstr(string s, int beginIndex, int endIndex)
         {
             int len = endIndex - beginIndex;
             return s.Substring(beginIndex, len);
@@ -957,10 +957,11 @@ namespace Dialogic
         private static ILookup<string, string> LOOKUP;
 
         private static readonly IDictionary<string, string> ESCAPES
-            = new Dictionary<string, string>()
+            = new Dictionary<string, string>() // replace with C# native?
         {
             {"\"",     "quot"}, // " - double-quote
             {"&",      "amp"}, // & - ampersand
+            {"#",      "num"}, // # - hash
             {"<",      "lt"}, // < - less-than
             {">",      "gt"}, // > - greater-than
             {" ",      "nbsp"},// non-breaking space

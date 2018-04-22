@@ -22,7 +22,7 @@ namespace Dialogic
             {
                 var propMap = new Dictionary<string, PropertyInfo>();
 
-                var props = type.GetProperties(BindingFlags.Instance 
+                var props = type.GetProperties(BindingFlags.Instance
                     | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 
                 if (dbug) Console.Write(type.Name + "[");
@@ -38,7 +38,7 @@ namespace Dialogic
             return Cache[type];
         }
 
-        internal static bool Set(Object target, string property, object value, bool onlyIfExists=false)
+        internal static bool Set(Object target, string property, object value, bool onlyIfExists = false)
         {
             var lookup = Lookup(target.GetType());
 
@@ -55,7 +55,7 @@ namespace Dialogic
             return false;
         }
 
-        internal static object Get(Object target, string property, object defaultVal=null)
+        internal static object Get(Object target, string property, object defaultVal = null)
         {
             var lookup = Lookup(target.GetType());
 
@@ -81,15 +81,27 @@ namespace Dialogic
             Cache = new Dictionary<Type, IDictionary<string, MethodInfo>>();
         }
 
+        internal static string CacheKey(string methodName, object[] args = null)
+        {
+            return methodName + ArgsToTypeString(args);
+        }
+
         internal static object Invoke(object target, string methodName, object[] args = null)
         {
             var type = target.GetType();
-            if (!Cache.ContainsKey(type) || Cache[type].ContainsKey(methodName)) {
-                
-                Cache[type] = new Dictionary<string, MethodInfo>(); // binding flags?
-                Cache[type][methodName] = type.GetMethod(methodName, ArgsToTypes(args));
+            if (!Cache.ContainsKey(type))
+            {
+                Cache[type] = new Dictionary<string, MethodInfo>();
             }
-            return Cache[type][methodName].Invoke(target, args); 
+
+            var key = CacheKey(methodName, args);
+            if (!Cache[type].ContainsKey(key))
+            {
+                // binding flags?
+                Cache[type][key] = type.GetMethod(methodName, ArgsToTypes(args));
+            }
+
+            return Cache[type][key].Invoke(target, args);
         }
 
         private static Type[] ArgsToTypes(object[] args)
@@ -97,44 +109,34 @@ namespace Dialogic
             if (args == null) return new Type[0];
             return Array.ConvertAll(args, o => o.GetType());
         }
+
+        private static string ArgsToTypeString(object[] args)
+        {
+            return ArgsToTypes(args).Aggregate(string.Empty,
+                (a, b) => a + Ch.LABEL + b);
+        }
     }
 
     internal class Symbol
     {
-        //public List<string> modifiers;
         public string text, alias, symbol;
         public bool bounded, chatScoped;
+        public Chat context;
 
-        private Symbol(params string[] parts) :
-            this(parts[0], parts[3], parts[1], parts[2]) { }
+        private Symbol(Chat context, params string[] parts) :
+            this(context, parts[0], parts[3], parts[1], parts[2])
+        { }
 
-        private Symbol(string theText, string theSymbol,
+        private Symbol(Chat context, string theText, string theSymbol,
             string alias = null, string typeChar = null)
         {
+            this.context = context;
             this.text = theText.Trim();
             this.symbol = theSymbol.Trim();
             this.alias = !alias.IsNullOrEmpty() ? alias.Trim() : null;
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
             this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
-
-        //private Symbol ParseMods(Group group)
-        //{
-        //    var modGroup = group.Value.Trim();
-        //    if (!modGroup.IsNullOrEmpty())
-        //    {
-        //        if (modifiers == null)
-        //        {
-        //            modifiers = new List<string>();
-        //        }
-        //        foreach (Capture mod in group.Captures)
-        //        {
-        //            modifiers.Add(mod.Value.TrimFirst(Ch.MODIFIER));
-        //        }
-        //        //Console.WriteLine("MODS: " + modifiers.Stringify());
-        //    }
-        //    return this;
-        //}
 
         public override string ToString()
         {
@@ -149,7 +151,7 @@ namespace Dialogic
                 + (bounded ? "{" + symbol + '}' : symbol);
         }
 
-        public static List<Symbol> Parse(string text, bool sortResults = false)
+        public static List<Symbol> Parse(string text, Chat context = null)
         {
             var symbols = new List<Symbol>();
             var matches = GetMatches(text);
@@ -160,14 +162,14 @@ namespace Dialogic
 
                 // Create a new Symbol and add it to the list
                 var args = groups.Values().Skip(1).ToArray();
-                symbols.Add(new Symbol(args));//.ParseMods(groups[5]));
+                symbols.Add(new Symbol(context, args));//.ParseMods(groups[5]));
             }
 
             // OPT: we can sort here to avoid symbols which are substrings of other
             // symbols causing incorrect replacements ($a being replaced in $ant, 
             // for example), however should be avoided by using Regex.Replace 
             // instead of String.Replace() in BindSymbols
-            return sortResults ? SortByLength(symbols) : symbols;
+            return SortByLength(symbols);
         }
 
         private static MatchCollection GetMatches(string text)
@@ -200,18 +202,18 @@ namespace Dialogic
 
         internal SymbolType Type()
         {
-            return this.symbol.Contains(Ch.SCOPE) ? (this.chatScoped ? 
-                SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE): SymbolType.SIMPLE;
+            return this.symbol.Contains(Ch.SCOPE) ? (this.chatScoped ?
+                SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE) : SymbolType.SIMPLE;
         }
 
-        internal object Resolve(Chat context, IDictionary<string, object> globals)
+        internal object Resolve(IDictionary<string, object> globals)
         {
             string[] parts = symbol.Split(Ch.SCOPE);
 
             if (parts.Length == 1 && chatScoped) throw new BindException
-                ("Illegally-scoped variable: "+this);
+                ("Illegally-scoped variable: " + this);
 
-            var resolved = ResolveSymbol(parts[0], context, globals);
+            object resolved = ResolveSymbol(parts[0], context, globals);
 
             switch (this.Type())
             {
@@ -220,8 +222,16 @@ namespace Dialogic
                     // Dynamically resolve the object path 
                     for (int i = 1; i < parts.Length; i++)
                     {
-                        resolved = Properties.Get(resolved, parts[i]);
-                        if (resolved == null) throw new UnboundSymbolException
+                        if (parts[i].EndsWith(Ch.CGROUP))
+                        {
+                            var func = parts[i].Replace("()", "");
+                            resolved = Methods.Invoke(resolved, func, null);
+                        }
+                        else
+                        {
+                            resolved = Properties.Get(resolved, parts[i]);
+                        }
+                        if (resolved == null) throw new UnboundSymbol
                             (symbol, context, globals);
                     }
                     break;
@@ -233,31 +243,33 @@ namespace Dialogic
                         throw new BindException("Null context/runtime: " + this);
                     }
 
-                    // Find the correct scope for the lookup
-                    context = context.runtime.FindChatByLabel(parts[0]);
+                    // Find/save the correct scope for the lookup
+                    this.context = context.runtime.FindChatByLabel(parts[0]);
                     resolved = ResolveSymbol(parts[1], context, globals);
                     // ** we've changed context **
                     break;
             }
 
-            string result = null;
-            string toReplace = this.text;
-                           
-            if (resolved != null) {
-                
-                if (this.alias != null) {
-                    
+            //string result = null;
+            //string toReplace = this.text;
+
+            if (resolved != null)
+            {
+
+                if (this.alias != null)
+                {
+
                     // 1. inject alias into scope
                     // 2. make sure we're replacing the full text
                 }
 
                 //Console.WriteLine("REPLACE: "+toReplace + " -> "+resolved);
-                result = resolved.ToString();
+                //result = resolved.ToString();
             }
 
             //Console.WriteLine("RETURN: " + toReplace + " -> " + resolved);
 
-            return result;
+            return resolved;
         }
 
         internal static object ResolveSymbol(string text, Chat context, IDictionary<string, object> globals)
