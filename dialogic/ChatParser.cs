@@ -203,16 +203,16 @@ namespace Dialogic
 
                 foreach (KeyValuePair<string, object> pair in c.meta)
                 {
-                    object val = pair.Value;
+                    object value = pair.Value;
                     if (metaMeta.ContainsKey(pair.Key))
                     {
                         if (pair.Key == Meta.ACTOR) // ugly special case
                         {
-                            c.SetActor(runtime, (string)val);
+                            c.SetActor(runtime, (string)value);
                         }
                         else
                         {
-                            c.DynamicSet(pair.Key, val, false);
+                            c.Update(pair.Key, value, false);
                         }
                     }
                 }

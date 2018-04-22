@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
@@ -36,10 +37,12 @@ namespace Dialogic
             scope = new Dictionary<string, object>();
         }
 
-        internal static Chat Create(string name)
+        internal static Chat Create(string name, ChatRuntime rt = null)
         {
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
+            if (rt == null) rt = new ChatRuntime();
+            rt.AddChat(c);
             return c;
         }
 

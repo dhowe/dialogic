@@ -1176,7 +1176,6 @@ namespace Dialogic
         [Test]
         public void Exceptions()
         {
-
             //var ff = "SAY $hello";
             //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].Realize(null)); return;
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A ="));

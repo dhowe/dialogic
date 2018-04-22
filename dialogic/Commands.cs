@@ -35,18 +35,35 @@ namespace Dialogic
             return delay;
         }
 
-        // Set a Command property by name
-        protected internal void DynamicSet(string property,
-            object val, bool syncMeta = true)
+        /// <summary>
+        /// Will update the value of the property (and meta if syncMeta=true) if it exists, and return true, else false if it does not
+        /// </summary>
+        protected internal bool Update(string property, object value, bool syncMeta = true)
         {
-            Properties.Set(this, property, val);
+            // will only set if it exists
+            bool updated = Properties.Set(this, property, value, true);
 
             // check if we need to sync metadata as well
             if (syncMeta && HasMeta(property))
             {
-                SetMeta(property, val.ToString());
+                SetMeta(property, value.ToString());
             }
+
+            return updated;
         }
+
+        //// Set a Command property by name
+        //protected internal void DynamicSet(string property,
+        //    object val, bool syncMeta = true)
+        //{
+        //    Properties.Set(this, property, val);
+
+        //    // check if we need to sync metadata as well
+        //    if (syncMeta && HasMeta(property))
+        //    {
+        //        SetMeta(property, val.ToString());
+        //    }
+        //}
 
         // Set a Command property by name
         //protected internal void DynamicSet(PropertyInfo propInfo, 
@@ -305,7 +322,10 @@ namespace Dialogic
             //Util.ShowMatch(match);
             var tmp = match.Groups[1].Value.Trim();
             //Console.WriteLine("TMP: "+tmp);
-            var symbol = new Symbol(tmp, tmp, string.Empty, "$");
+
+            //var symbol = new Symbol(tmp, tmp, string.Empty, "$");
+            var symbol = Symbol.Parse(tmp); // CHANGED from above
+
             //Console.WriteLine("SYM: " + symbol);
             this.text = tmp.TrimFirst(Ch.SYMBOL);
             this.global = (tmp != text) && !text.Contains(".");
@@ -324,21 +344,26 @@ namespace Dialogic
             Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
 
             // Here we check if the set matches a dynamic parent property
-            if (context != null)
+            //if (context != null)
+            //{
+            //    IDictionary<string, PropertyInfo> mm = Properties.Lookup(typeof(Chat));
+
+            //    // If so, we don't create a new symbol, but instead set the property
+            //    if (mm.ContainsKey(symbol))
+            //    {
+            //        context.DynamicSet(symbol, value);
+            //        return this;
+            //    }
+            //}
+
+            // Here we check if the set matches a dynamic parent propert
+            // If so, we don't recreate it, but instead set the property
+            if (!context.Update(symbol, value))
             {
-                IDictionary<string, PropertyInfo> mm = Properties.Lookup(typeof(Chat));
-
-                // If so, we don't create a new symbol, but instead set the property
-                if (mm.ContainsKey(symbol))
-                {
-                    context.DynamicSet(symbol, value);
-                    return this;
-                }
+                // Invoke the assignment in the correct scope
+                //Console.WriteLine("$#" + symbol + " = " + value);
+                op.Invoke(symbol, value, (global ? globals : context.scope));
             }
-
-            // Invoke the assignment in the correct scope
-            //Console.WriteLine("$#" + symbol + " = " + value);
-            op.Invoke(symbol, value, (global ? globals : context.scope));
 
             return this;
         }

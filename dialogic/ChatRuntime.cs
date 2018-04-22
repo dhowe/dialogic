@@ -154,9 +154,13 @@ namespace Dialogic
         {
             c.runtime = this;
             if (chats.Count < 1) firstChat = c;
+            if (c.text == null)
+            {
+                throw new DialogicException("Invalid Chat (no-name): " + c);
+            }
             chats.Add(c.text, c);
         }
-
+         
         internal Chat AddNewChat(string name)
         {
             Chat c = new Chat();

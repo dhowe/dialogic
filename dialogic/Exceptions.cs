@@ -10,12 +10,12 @@ namespace Dialogic
         public DialogicException(string msg = "") : base(msg) { }
     }
 
-    public class ResolverException : DialogicException
+    public class BindException : DialogicException
     {
-        public ResolverException(string msg = "") : base(msg) { }
+        public BindException(string msg = "") : base(msg) { }
     }
 
-    public class UnboundSymbolException : ResolverException
+    public class UnboundSymbolException : BindException
     {
         public UnboundSymbolException(string symbol, Chat context, 
             IDictionary<string, object> globals, string msg = "") : 

@@ -22,8 +22,8 @@ namespace Dialogic
             {
                 var propMap = new Dictionary<string, PropertyInfo>();
 
-                var props = type.GetProperties(BindingFlags.Instance
-                    | BindingFlags.Public | BindingFlags.NonPublic);
+                var props = type.GetProperties(BindingFlags.Instance 
+                    | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 
                 if (dbug) Console.Write(type.Name + "[");
                 foreach (var pi in props)
@@ -38,43 +38,37 @@ namespace Dialogic
             return Cache[type];
         }
 
-        private static void Set(Object target, PropertyInfo pinfo, object value)
-        {
-            value = Util.ConvertTo(pinfo.PropertyType, value);
-            pinfo.SetValue(target, value, null);
-        }
-
-        private static object Get(Object target, PropertyInfo pinfo)
-        {
-            var value = pinfo.GetValue(target);
-            return Util.ConvertTo(pinfo.PropertyType, value);
-        }
-
-        internal static void Set(Object target, string property, object value)
+        internal static bool Set(Object target, string property, object value, bool onlyIfExists=false)
         {
             var lookup = Lookup(target.GetType());
+
             if (lookup != null && lookup.ContainsKey(property))
             {
                 var pinfo = lookup[property];
                 value = Util.ConvertTo(pinfo.PropertyType, value);
                 pinfo.SetValue(target, value, null);
+                return true;
             }
-            else
-            {
-                throw new ResolverException("Invalid Set: " + property);
-            }
+
+            if (!onlyIfExists) throw new BindException("Invalid Set: " + property);
+
+            return false;
         }
 
-        internal static object Get(Object target, string property)
+        internal static object Get(Object target, string property, object defaultVal=null)
         {
             var lookup = Lookup(target.GetType());
+
             if (lookup != null && lookup.ContainsKey(property))
             {
                 var pinfo = lookup[property];
                 var value = pinfo.GetValue(target);
                 return Util.ConvertTo(pinfo.PropertyType, value);
             }
-            throw new ResolverException("Invalid Get: " + property);
+
+            if (defaultVal != null) return defaultVal;
+
+            throw new BindException("Invalid Get: " + property);
         }
     }
 
@@ -114,11 +108,11 @@ namespace Dialogic
         private Symbol(params string[] parts) :
             this(parts[0], parts[3], parts[1], parts[2]) { }
 
-        internal Symbol(string text, string symbol,
+        private Symbol(string theText, string theSymbol,
             string alias = null, string typeChar = null)
         {
-            this.text = text.Trim();
-            this.symbol = symbol.Trim();
+            this.text = theText.Trim();
+            this.symbol = theSymbol.Trim();
             this.alias = !alias.IsNullOrEmpty() ? alias.Trim() : null;
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
             this.chatScoped = (typeChar == Ch.LABEL.ToString());
@@ -162,7 +156,7 @@ namespace Dialogic
 
             foreach (Match match in matches)
             {
-                GroupCollection groups = GetGroups(match);
+                GroupCollection groups = GetGroups(match, 6);
 
                 // Create a new Symbol and add it to the list
                 var args = groups.Values().Skip(1).ToArray();
@@ -182,20 +176,19 @@ namespace Dialogic
 
             if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
             {
-                throw new ResolverException("Unable to parse symbol: " + text);
+                throw new BindException("Unable to parse symbol: " + text);
             }
 
             return matches;
         }
 
-        private static GroupCollection GetGroups(Match match)
+        private static GroupCollection GetGroups(Match match, int expected)
         {
             var groups = match.Groups;
-            if (groups.Count != 6)
+            if (groups.Count != expected)
             {
                 Util.ShowMatch(match);
-                throw new ArgumentException
-                    ("Invalid input to Symbol(): " + groups.Count);
+                throw new ArgumentException("Invalid group count " + groups.Count);
             }
             return groups;
         }
@@ -204,7 +197,86 @@ namespace Dialogic
         {
             return (from s in syms orderby s.symbol.Length descending select s).ToList();
         }
+
+        internal SymbolType Type()
+        {
+            return this.symbol.Contains(Ch.SCOPE) ? (this.chatScoped ? 
+                SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE): SymbolType.SIMPLE;
+        }
+
+        internal object Resolve(Chat context, IDictionary<string, object> globals)
+        {
+            string[] parts = symbol.Split(Ch.SCOPE);
+
+            if (parts.Length == 1 && chatScoped) throw new BindException
+                ("Illegally-scoped variable: "+this);
+
+            var resolved = ResolveSymbol(parts[0], context, globals);
+
+            switch (this.Type())
+            {
+                case SymbolType.GLOBAL_SCOPE:
+
+                    // Dynamically resolve the object path 
+                    for (int i = 1; i < parts.Length; i++)
+                    {
+                        resolved = Properties.Get(resolved, parts[i]);
+                        if (resolved == null) throw new UnboundSymbolException
+                            (symbol, context, globals);
+                    }
+                    break;
+
+                case SymbolType.CHAT_SCOPE:
+
+                    if (context == null || context.runtime == null)
+                    {
+                        throw new BindException("Null context/runtime: " + this);
+                    }
+
+                    // Find the correct scope for the lookup
+                    context = context.runtime.FindChatByLabel(parts[0]);
+                    resolved = ResolveSymbol(parts[1], context, globals);
+                    // ** we've changed context **
+                    break;
+            }
+
+            string result = null;
+            string toReplace = this.text;
+                           
+            if (resolved != null) {
+                
+                if (this.alias != null) {
+                    
+                    // 1. inject alias into scope
+                    // 2. make sure we're replacing the full text
+                }
+
+                //Console.WriteLine("REPLACE: "+toReplace + " -> "+resolved);
+                result = resolved.ToString();
+            }
+
+            //Console.WriteLine("RETURN: " + toReplace + " -> " + resolved);
+
+            return result;
+        }
+
+        internal static object ResolveSymbol(string text, Chat context, IDictionary<string, object> globals)
+        {
+            object result = null;
+            if (context != null && context.scope.ContainsKey(text)) // check locals
+            {
+                result = context.scope[text];
+            }
+            else if (globals != null && globals.ContainsKey(text))   // check globals
+            {
+                result = globals[text];
+            }
+            return result;
+        }
     }
+
+    internal enum SymbolType { SIMPLE, CHAT_SCOPE, GLOBAL_SCOPE }
+
 
     /// <summary>
     /// Represents an atomic operation on a pair of metadata string that when invoked returns a boolean

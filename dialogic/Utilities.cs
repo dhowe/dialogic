@@ -140,7 +140,6 @@ namespace Dialogic
     public static class RE
     {
         internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";
-        internal const string NGSYM = "[A-Za-z_][A-Za-z0-9_-]*?";
         internal const string OP1 = @"^(!?!?$?" + SYM + ")";
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
@@ -815,7 +814,7 @@ namespace Dialogic
                     {
                         if (++iterations > maxIterations) // should never happen
                         {
-                            throw new ResolverException("Max limit: " + this);
+                            throw new BindException("Max limit: " + this);
                         }
                         resolved = (string)Util.RandItem(options);
                     }
@@ -838,7 +837,7 @@ namespace Dialogic
 
         private static Exception InvalidState(string sub)
         {
-            return new ResolverException("Invalid State: '" + sub + "'");
+            return new BindException("Invalid State: '" + sub + "'");
         }
     }
 

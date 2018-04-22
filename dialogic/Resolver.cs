@@ -54,7 +54,7 @@ namespace Dialogic
                                 (symbols[0], parent, globals);
                         }
                     }
-                    throw new ResolverException
+                    throw new BindException
                         ("Resolver hit maxRecursionDepth for: " + original);
                 }
 
@@ -65,11 +65,64 @@ namespace Dialogic
             return Html.Decode(text); // resolve any encoded entities
         }
 
-        // TODO: Add to API (ChatRuntime)
-        internal static void AddModifier(string name, Func<string, string> func, string alias = null)
-        {
-            ModTable[name] = func;
-        }
+        //// TODO: Add to API (ChatRuntime)
+        //internal static void AddModifier(string name, Func<string, string> func, string alias = null)
+        //{
+        //    ModTable[name] = func;
+        //}
+
+        ///// <summary>
+        ///// Iteratively resolve any variables in the specified text 
+        ///// in the appropriate context
+        ///// </summary>
+        //public static string BindSymbols(string text, Chat context,
+        //    IDictionary<string, object> globals, int level = 0)
+        //{
+        //    var symbols = Symbol.Parse(text, true);
+        //    foreach (var sym in symbols)
+        //    {
+
+
+        //        bool newContext = false;
+        //        string toReplace = null;
+        //        string replaceWith = null;
+        //        string[] parts = null;
+
+        //        switch (sym.Type())
+        //        {
+
+        //            case SymbolType.SIMPLE:
+        //                var tmp1 = ResolveSymbol(sym.symbol, context, globals);
+        //                if (tmp1 != null) replaceWith = tmp1.ToString();
+        //                // may be null here for an unrealized alias
+        //                break;
+
+        //            case SymbolType.CHAT_SCOPE:
+        //                parts = sym.symbol.Split(Ch.SCOPE);
+        //                if (parts.Length != 2) throw new ResolverException
+        //                    ("Invalid symbol: " + sym);
+        //                if (context == null) throw new ResolverException
+        //                    ("Null local context: " + sym);
+        //                context = context.runtime.FindChatByLabel(parts[0]);
+        //                var tmp2 = ResolveSymbol(parts[1], context, globals);
+        //                if (tmp2 != null) replaceWith = tmp2.ToString();
+        //                newContext = true;
+        //                break;
+
+        //            case SymbolType.GLOBAL_SCOPE:
+        //                parts = sym.symbol.Split(Ch.SCOPE);
+        //                if (parts.Length < 2) throw new ResolverException
+        //                    ("Invalid symbol: " + sym);
+        //                replaceWith = ResolveObject(parts, globals).ToString();
+        //                break;
+        //        }
+
+        //        if (replaceWith != null)
+        //        {
+        //            text = text.Replace(toReplace, replaceWith);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Iteratively resolve any variables in the specified text 
@@ -98,18 +151,18 @@ namespace Dialogic
                     string replaceWith = null;
                     bool switched = false;
 
-                    // 3 cases for each: simple-global, global-object, simple-local 
+                    // 3 cases for each: 1. simple-global, 2. global-object, 3. simple-local 
 
-                    // We have a scoped symbol to process
+                    // We have a scoped symbol to process ($a.b || #a.b)
                     if (theSymbol.Contains(Ch.SCOPE))
                     {
                         var parts = theSymbol.Split(Ch.SCOPE);
-                        if (parts.Length < 2) throw new ResolverException
+                        if (parts.Length < 2) throw new BindException
                             ("Invalid symbol: " + sym);
 
-                        theSymbol = parts[1];
+                        //theSymbol = parts[1];
 
-                        if (!sym.chatScoped) // global-traversal
+                        if (!sym.chatScoped) // global-traversal  ($a.b)
                         {
 
                             // SAVE that we are working in global scope if we have an alias
@@ -121,9 +174,9 @@ namespace Dialogic
                             }
                             replaceWith = result.ToString();
                         }
-                        else                // chat-scoped
+                        else                // chat-scoped (#a.b)
                         {
-                            if (context == null) throw new ResolverException
+                            if (context == null) throw new BindException
                                 ("Null context for chat-scoped symbol: " + sym);
 
                             var chat = context.runtime.FindChatByLabel(parts[0]);
@@ -133,14 +186,19 @@ namespace Dialogic
                             switched = true;
                         }
                     }
-
-                    if (replaceWith == null)
+                    else // unscoped global ($a)
                     {
-                        // lookup the value for the symbol
                         var tmp = ResolveSymbol(theSymbol, context, globals);
                         if (tmp != null) replaceWith = tmp.ToString();
-                        // note: may be null here if an unresolved alias 
                     }
+
+                    //if (replaceWith == null)
+                    //{
+                    //    // lookup the value for the symbol
+                    //    var tmp = ResolveSymbol(theSymbol, context, globals);
+                    //    if (tmp != null) replaceWith = tmp.ToString();
+                    //    // note: may be null here if an unresolved alias 
+                    //}
 
                     if (replaceWith != null)
                     {
@@ -152,19 +210,18 @@ namespace Dialogic
 
                         // if we have an alias, then include it in our resolved 
                         // value so that it can be handled properly in BindGroups
-                        if (sym.alias != null) {
+                        if (sym.alias != null)
+                        {
                             if (replaceWith.Contains(Ch.OR))
                             {
                                 toReplace = sym.SymbolText();
                             }
                             // TODO: working here
-
+                            // we can't replace the full text without putting the alias in scope
                             // here we need to put the alias into scope
 
 
                         }
-                                           
-                        //var toReplace = sym.alias != null ? sym.SymbolText() : sym.text;
 
                         // do the symbol replacement
                         text = text.Replace(toReplace, replaceWith);
@@ -191,6 +248,8 @@ namespace Dialogic
         /// </summary>
         private static object ResolveObject(string[] parts, IDictionary<string, object> globals)
         {
+            // TODO: NEED TO HANDLE FUNCTIONS IN HERE
+
             var obj = ResolveSymbol(parts[0], null, globals);
 
             if (obj == null) return null;
@@ -198,7 +257,8 @@ namespace Dialogic
             for (int i = 1; i < parts.Length; i++)
             {
                 obj = Properties.Get(obj, parts[i]);
-                if (obj == null) return null;
+                if (obj == null) throw new UnboundSymbolException
+                    (string.Join(Ch.SCOPE.ToString(), parts), null, globals);
             }
 
             return obj;
@@ -264,16 +324,16 @@ namespace Dialogic
         {
             if (symbol.Contains(Ch.SCOPE))
             {
-                if (context == null) throw new ResolverException
+                if (context == null) throw new BindException
                     ("Null context for chat-scoped symbol: " + symbol);
 
                 // need to process a chat-scoped symbol
                 var parts = symbol.Split(Ch.SCOPE);
-                if (parts.Length > 2) throw new ResolverException
+                if (parts.Length > 2) throw new BindException
                     ("Unexpected variable format: " + symbol);
 
                 var chat = context.runtime.FindChatByLabel(parts[0]);
-                if (chat == null) throw new ResolverException
+                if (chat == null) throw new BindException
                     ("No Chat found with label #" + parts[0]);
 
                 symbol = parts[1];

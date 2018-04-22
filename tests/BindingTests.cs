@@ -42,15 +42,6 @@ namespace Dialogic
             }
         }
 
-        [Test]
-        public void TestGetProps()
-        {
-            var props = Properties.Lookup(globals["fish"].GetType());
-            Console.WriteLine(props.Stringify());
-            //Assert.That(props[""].Text(), Is.EqualTo("hello"));
-
-            // TODO:
-        }
 
         [Test]
         public void SimpleSetExpansions()

@@ -588,6 +588,7 @@ namespace Dialogic
             var result = cmd.Text();
             Assert.That(result, Is.EqualTo("c"));
 
+
             lines = new[] {
                 "CHAT wine1 {noStart=true}",
                 "SET a = $b",
@@ -595,7 +596,6 @@ namespace Dialogic
                 "SAY ${a}"
             };
 
-            Console.WriteLine("TEST2:");
             runtime = new ChatRuntime(Tendar.AppConfig.Actors);
             runtime.ParseText(string.Join("\n", lines), false);
             runtime.Chats().ForEach(c => c.Realize(null));
