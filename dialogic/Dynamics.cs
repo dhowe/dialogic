@@ -123,7 +123,7 @@ namespace Dialogic
             = new Dictionary<string, Choice>();
 
         //private static IDictionary<Choice, string> Cache
-            //= new Dictionary<Choice, string>();
+        //= new Dictionary<Choice, string>();
 
         public string alias;
         private string text;
@@ -149,7 +149,7 @@ namespace Dialogic
             return text;
         }
 
-        public static List<Choice> Parse(string input, Chat context=null)
+        public static List<Choice> Parse(string input, Chat context = null)
         {
             var groups = new List<Choice>();
             Parse(input, groups, context);
@@ -162,20 +162,20 @@ namespace Dialogic
             foreach (Match m in RE.MatchParens.Matches(input))
             {
                 //Util.ShowMatch(m);
-                var full  = m.Groups[0].Value;
+                var full = m.Groups[0].Value;
                 var alias = m.Groups[1].Value;
                 var oidx = full.IndexOf(Ch.OGROUP);
                 var cidx = full.LastIndexOf(Ch.CGROUP);
-                var expr = full.Substring(oidx+1, cidx-oidx-1);
+                var expr = full.Substring(oidx + 1, cidx - oidx - 1);
                 //Console.WriteLine("Full: " + full + "\nExpr: " + expr + "\nAlia: " + alias);
                 //var expr  = m.Groups[2].Value;
-                 
+
                 //var caps = m.Groups[2].Captures;
                 //Console.WriteLine("EXPR: "+expr);
 
                 //Console.WriteLine("::"+expr+" "+alias);
-                    // Substring(1, m.Value.Length - 2);
-                    // m.Value.Substring(1, m.Value.Length-2);
+                // Substring(1, m.Value.Length - 2);
+                // m.Value.Substring(1, m.Value.Length-2);
 
                 if (RE.HasParens.IsMatch(expr))
                 {
@@ -223,7 +223,8 @@ namespace Dialogic
                     resolved = (string)Util.RandItem(options);
                     break;
 
-                default: // choose something different than last time
+                // otherwise choose differently than last time
+                default:
                     int iterations = 0, maxIterations = 100;
                     do
                     {
@@ -249,7 +250,7 @@ namespace Dialogic
             {
                 if (!resolved.ToString().Contains(Ch.OR))
                 {
-                    Console.WriteLine("Choice.Push: " + alias + ": " + resolved);
+                    //Console.WriteLine("Choice.Push: " + alias + ": " + resolved);
                     scope[alias] = resolved;
                 }
             }
@@ -350,7 +351,7 @@ namespace Dialogic
                 SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE) : SymbolType.SIMPLE;
         }
 
-        internal object Resolve(IDictionary<string, object> globals)
+        internal string Resolve(IDictionary<string, object> globals)
         {
             string[] parts = symbol.Split(Ch.SCOPE);
 
@@ -401,7 +402,22 @@ namespace Dialogic
                     break;
             }
 
-            return resolved;
+            string result = null;
+
+            if (resolved != null)
+            {
+                result = resolved.ToString();
+
+                // if we have an alias, but the replacement is not fully resolved
+                // then we keep the alias in the text for later resolution
+                if (alias != null && result.Contains(Ch.OR, Ch.SYMBOL))
+                {
+                    result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
+                }
+
+            }
+
+            return result;
         }
 
         private void HandleAlias(object resolved, IDictionary<string, object> scope)
@@ -410,17 +426,17 @@ namespace Dialogic
             {
                 if (!resolved.ToString().Contains(Ch.OR))
                 {
-                    Console.WriteLine("Symbol.Push: " + alias + ": " + resolved);
+                    //Console.WriteLine("Symbol.Push: " + alias + ": " + resolved);
                     scope[alias] = resolved;
                 }
             }
         }
 
-        internal static object ResolveSymbol(string text, 
+        internal static object ResolveSymbol(string text,
             Chat context, IDictionary<string, object> globals)
         {
             object result = null; // check locals, then globals
-            if (context != null && context.scope.ContainsKey(text)) 
+            if (context != null && context.scope.ContainsKey(text))
             {
                 result = context.scope[text];
             }

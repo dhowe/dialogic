@@ -73,14 +73,20 @@ namespace Dialogic
                 var result = symbol.Resolve(globals);
                 if (result != null)
                 {
-                    var pretext = text;
-                    //Console.WriteLine("symbol:"+symbol);
+                    string pretext = text, toReplace = symbol.text;
 
-                    // TODO: NEED TO MAINTAIN THE alias
-                    text = text.Replace(symbol.text, result.ToString());
+                    // moved to Symbol
+                    //string replaceWith = result.ToString();
+                    // if we have an alias, but the replacement is not fully resolved
+                    // then we need to maintain the alias in the text for later
+                    //if (symbol.alias != null && IsDynamic(replaceWith))
+                    //{
+                    //    replaceWith = Ch.OSAVE + symbol.alias + Ch.EQ + replaceWith + Ch.CSAVE;
+                    //}
 
-                    if (DBUG) Console.WriteLine("      " + 
-                        symbol.SymbolText() + " -> " + result);
+                    text = text.Replace(symbol.text, result);
+
+                    if (DBUG) Console.WriteLine("      " +symbol.SymbolText() + " -> " + result);
 
                     if (pretext != text && text.Contains(Ch.SYMBOL))
                     {
@@ -90,7 +96,7 @@ namespace Dialogic
                     }
                 }
             }
-     
+
             return text;
         }
 
@@ -113,15 +119,15 @@ namespace Dialogic
                     Console.WriteLine("[WARN] BindGroups added parens to: " + text);
                 }
 
-                var groups = Choice.Parse(text, context);
+                var choices = Choice.Parse(text, context);
 
-                if (DBUG) Console.WriteLine("    Groups: " + groups.Stringify());
+                if (DBUG) Console.WriteLine("    Groups: " + choices.Stringify());
 
-                foreach (var g in groups)
+                foreach (var choice in choices)
                 {
-                    var pick = g.Resolve();
-                    if (DBUG) Console.WriteLine("      " + g + " -> " + pick);
-                    text = text.ReplaceFirst(g.Text(), pick);
+                    var pick = choice.Resolve();
+                    if (DBUG) Console.WriteLine("      " + choice + " -> " + pick);
+                    text = text.ReplaceFirst(choice.Text(), pick);
                 }
             }
 

@@ -92,35 +92,37 @@ namespace Dialogic
             Chat chat;
             string res;
 
-            lines = new[] {
+            if (false)
+            {
+                lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [selected=$hero]&nbsp;",
                 "SAY $selected"
             };
-            runtime = new ChatRuntime();
-            runtime.ParseText(string.Join("\n", lines));
-            chat = runtime.Chats()[0];
-            Assert.That(chat, Is.Not.Null);
-            chat.Realize(null);
-            res = chat.commands[1].Text() + chat.commands[2].Text();
-            Assert.That(res, Is.EqualTo("A girl Jane Jane").
-                             Or.EqualTo("A girl Jill Jill"));
-            return;
-            lines = new[] {
+                runtime = new ChatRuntime();
+                runtime.ParseText(string.Join("\n", lines));
+                chat = runtime.Chats()[0];
+                Assert.That(chat, Is.Not.Null);
+                chat.Realize(null);
+                res = chat.commands[1].Text() + chat.commands[2].Text();
+                Assert.That(res, Is.EqualTo("A girl Jane Jane").
+                                 Or.EqualTo("A girl Jill Jill"));
+
+                lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [a=$hero]&nbsp;",
                 "SAY $a"
             };
-            runtime = new ChatRuntime();
-            runtime.ParseText(string.Join("\n", lines));
-            chat = runtime.Chats()[0];
-            Assert.That(chat, Is.Not.Null);
-            chat.Realize(null);
-            res = chat.commands[1].Text() + chat.commands[2].Text();
-            Assert.That(res, Is.EqualTo("A girl Jane Jane").
-                             Or.EqualTo("A girl Jill Jill"));
+                runtime = new ChatRuntime();
+                runtime.ParseText(string.Join("\n", lines));
+                chat = runtime.Chats()[0];
+                Assert.That(chat, Is.Not.Null);
+                chat.Realize(null);
+                res = chat.commands[1].Text() + chat.commands[2].Text();
+                Assert.That(res, Is.EqualTo("A girl Jane Jane").
+                                 Or.EqualTo("A girl Jill Jill"));
 
-
+            }
             lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [selected=$hero]&nbsp;",
