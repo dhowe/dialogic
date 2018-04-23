@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['updateevent',['UpdateEvent',['../class_dialogic_1_1_update_event.html',1,'Dialogic']]],
-  ['userevent',['UserEvent',['../class_dialogic_1_1_user_event.html',1,'Dialogic']]],
-  ['util',['Util',['../class_dialogic_1_1_util.html',1,'Dialogic']]]
+  ['set',['Set',['../class_dialogic_1_1_set.html',1,'Dialogic']]],
+  ['stalenessupdate',['StalenessUpdate',['../class_dialogic_1_1_staleness_update.html',1,'Dialogic']]],
+  ['suspendevent',['SuspendEvent',['../class_dialogic_1_1_suspend_event.html',1,'Dialogic']]]
 ];

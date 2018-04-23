@@ -99,9 +99,9 @@ Inheritance diagram for Dialogic.Command:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aefd691e636e6cfcf2e7973687cbbffbf"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#aefd691e636e6cfcf2e7973687cbbffbf">Text</a> ()</td></tr>
-<tr class="memdesc:aefd691e636e6cfcf2e7973687cbbffbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">REturns realized text for this object, equivalent to this.Realized(Meta.TEXT);  <a href="#aefd691e636e6cfcf2e7973687cbbffbf">More...</a><br /></td></tr>
-<tr class="separator:aefd691e636e6cfcf2e7973687cbbffbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f0d2008a75524201d5760844064bd58"><td class="memItemLeft" align="right" valign="top">virtual string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a2f0d2008a75524201d5760844064bd58">Text</a> ()</td></tr>
+<tr class="memdesc:a2f0d2008a75524201d5760844064bd58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns realized text for this object, equivalent to this.Realized(Meta.TEXT);  <a href="#a2f0d2008a75524201d5760844064bd58">More...</a><br /></td></tr>
+<tr class="separator:a2f0d2008a75524201d5760844064bd58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a081051f09320a3f4500a829eb527eb80"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a081051f09320a3f4500a829eb527eb80">GetActor</a> ()</td></tr>
 <tr class="memdesc:a081051f09320a3f4500a829eb527eb80"><td class="mdescLeft">&#160;</td><td class="mdescRight">In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.  <a href="#a081051f09320a3f4500a829eb527eb80">More...</a><br /></td></tr>
 <tr class="separator:a081051f09320a3f4500a829eb527eb80"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -177,6 +177,9 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>CHAT_MODE</b>
 <tr class="memitem:af9d9c317510d0b6f4674509c3ddf09ab inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="af9d9c317510d0b6f4674509c3ddf09ab"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>STALENESS</b> = &quot;staleness&quot;</td></tr>
 <tr class="separator:af9d9c317510d0b6f4674509c3ddf09ab inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04ea0fe68d888be339f2f796df6afd2b inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a04ea0fe68d888be339f2f796df6afd2b"></a>
+const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUMABLE</b> = &quot;resumable&quot;</td></tr>
+<tr class="separator:a04ea0fe68d888be339f2f796df6afd2b inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60feff1510af9b8368c72ac0e7445910 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a60feff1510af9b8368c72ac0e7445910"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_CMD</b> = &quot;defaultCmd&quot;</td></tr>
 <tr class="separator:a60feff1510af9b8368c72ac0e7445910 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,8 +224,8 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_
 
 </div>
 </div>
-<a id="aefd691e636e6cfcf2e7973687cbbffbf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aefd691e636e6cfcf2e7973687cbbffbf">&#9670;&nbsp;</a></span>Text()</h2>
+<a id="a2f0d2008a75524201d5760844064bd58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f0d2008a75524201d5760844064bd58">&#9670;&nbsp;</a></span>Text()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +234,7 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">string Dialogic.Command.Text </td>
+          <td class="memname">virtual string Dialogic.Command.Text </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -239,13 +242,15 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>REturns realized text for this object, equivalent to this.Realized(Meta.TEXT); </p>
+<p>Returns realized text for this object, equivalent to this.Realized(Meta.TEXT); </p>
 <dl class="section return"><dt>Returns</dt><dd>The text.</dd></dl>
+
+<p>Reimplemented in <a class="el" href="class_dialogic_1_1_chat.html#a16fff9365f2cd8a9e35d84e1c28bffbb">Dialogic.Chat</a>.</p>
 
 </div>
 </div>

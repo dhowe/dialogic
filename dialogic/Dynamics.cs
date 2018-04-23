@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
-    public static class Properties //@cond unused
+    public static class Properties
     {
         static IDictionary<Type, IDictionary<string, PropertyInfo>> Cache;
 

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wait_5fduration',['WAIT_DURATION',['../class_dialogic_1_1_defaults.html#ab11b6068d93ad896a0389a4c6b5af7f7',1,'Dialogic::Defaults']]]
+  ['say_5fduration',['SAY_DURATION',['../class_dialogic_1_1_defaults.html#ad8ef6a7453dcac7a87b5304c3590a3fa',1,'Dialogic::Defaults']]]
 ];

@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['rand',['Rand',['../class_dialogic_1_1_util.html#ad3756e2bdfb7c38ef9ff07b457bffc51',1,'Dialogic.Util.Rand(int min, int max)'],['../class_dialogic_1_1_util.html#a62bf750a02349fb1ee11cc4d6ceecbdc',1,'Dialogic.Util.Rand(int max)'],['../class_dialogic_1_1_util.html#a1c0a2e7c745e6402a6e96c60cb8f19d8',1,'Dialogic.Util.Rand()'],['../class_dialogic_1_1_util.html#aa89b14917300ac1b97cdc0a6d5d6034a',1,'Dialogic.Util.Rand(double min, double max)'],['../class_dialogic_1_1_util.html#af1b90cd8b59890294d13deba2a1010b1',1,'Dialogic.Util.Rand(double max)']]],
-  ['randitem',['RandItem',['../class_dialogic_1_1_util.html#aa616e37687406132dc2f97aec4688601',1,'Dialogic::Util']]],
-  ['randitem_3c_20t_20_3e',['RandItem&lt; T &gt;',['../class_dialogic_1_1_util.html#a1277b5761b1ede721df5bba06e7f8a4e',1,'Dialogic::Util']]]
+  ['text',['Text',['../class_dialogic_1_1_chat.html#a16fff9365f2cd8a9e35d84e1c28bffbb',1,'Dialogic.Chat.Text()'],['../class_dialogic_1_1_command.html#a2f0d2008a75524201d5760844064bd58',1,'Dialogic.Command.Text()']]],
+  ['tomillis',['ToMillis',['../class_dialogic_1_1_util.html#a37840bebacbbc886a2f8aa4e61022aec',1,'Dialogic::Util']]],
+  ['tosec',['ToSec',['../class_dialogic_1_1_util.html#a751f2c3ec959c4d67e13c388f04f0642',1,'Dialogic::Util']]],
+  ['trimfirst',['TrimFirst',['../class_dialogic_1_1_util.html#aa5d692b014000f14242bbac95c8ae9bc',1,'Dialogic::Util']]],
+  ['trimlast',['TrimLast',['../class_dialogic_1_1_util.html#a913c5e22d8656af9263c9fb442e4d351',1,'Dialogic::Util']]]
 ];

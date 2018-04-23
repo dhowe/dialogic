@@ -19,6 +19,7 @@
     <Title>Dialogic</Title>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PackageIconUrl>http://rednoise.org/images/dialogic.png</PackageIconUrl>
+    <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
