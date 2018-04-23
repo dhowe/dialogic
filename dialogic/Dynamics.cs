@@ -178,7 +178,7 @@ namespace Dialogic
                         {
                             cache.Add(choiceKey, new Choice(context, full, expr, alias));
                         }
-                        else Console.WriteLine("CACHE-HIT: "+choiceKey);
+                        //else Console.WriteLine("CACHE-HIT: "+choiceKey);
                         results.Add(cache[choiceKey]);
                     }
                     else  // no cache

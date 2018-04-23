@@ -159,7 +159,7 @@ namespace Dialogic
             {
                 c.Realize(globals);
                 var txt = c.Text();
-                Console.WriteLine(i+") "+txt);
+                //Console.WriteLine(i+") "+txt);
                 CollectionAssert.Contains(ok, txt);
             }
         }

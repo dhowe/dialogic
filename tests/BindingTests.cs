@@ -127,7 +127,7 @@ namespace Dialogic
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
-            return; // TODO:
+            return; // TODO
 
             // chat-direct access
             lines = new[] {
