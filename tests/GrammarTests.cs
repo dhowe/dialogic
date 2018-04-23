@@ -25,7 +25,7 @@ namespace Dialogic
         class Fish
         {
             public string name { get; protected set; }
-            public int Id() { return 9;  }
+            public int Id() { return 9; }
             public Fish(string name)
             {
                 this.name = name;
@@ -50,6 +50,7 @@ namespace Dialogic
             chat.Realize(globals);
             res = chat.commands[0].Text();
             Assert.That(res, Is.EqualTo("A girl Fred Fred"));
+            Console.WriteLine("X: " + chat + " " + chat.scope.Stringify() + "\nglobals=" + globals.Stringify());
         }
 
         [Test]
@@ -83,7 +84,7 @@ namespace Dialogic
             res = chat.commands[0].Text();
             Assert.That(res, Is.EqualTo("A girl 9 9"));
         }
-            
+
         [Test]
         public void SaveResolveState()
         {
@@ -92,37 +93,56 @@ namespace Dialogic
             Chat chat;
             string res;
 
-            if (false)
-            {
-                lines = new[] {
+
+            lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [selected=$hero]&nbsp;",
                 "SAY $selected"
             };
-                runtime = new ChatRuntime();
-                runtime.ParseText(string.Join("\n", lines));
-                chat = runtime.Chats()[0];
-                Assert.That(chat, Is.Not.Null);
-                chat.Realize(null);
-                res = chat.commands[1].Text() + chat.commands[2].Text();
-                Assert.That(res, Is.EqualTo("A girl Jane Jane").
-                                 Or.EqualTo("A girl Jill Jill"));
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text() + chat.commands[2].Text();
+            Assert.That(res, Is.EqualTo("A girl Jane Jane").
+                             Or.EqualTo("A girl Jill Jill"));
+            Console.WriteLine("1: " + chat + " " + chat.scope.Stringify()
+                + "\nglobals=" + globals.Stringify());
 
-                lines = new[] {
+        }
+
+        [Test]
+        public void SaveResolveState2()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+            lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [a=$hero]&nbsp;",
                 "SAY $a"
             };
-                runtime = new ChatRuntime();
-                runtime.ParseText(string.Join("\n", lines));
-                chat = runtime.Chats()[0];
-                Assert.That(chat, Is.Not.Null);
-                chat.Realize(null);
-                res = chat.commands[1].Text() + chat.commands[2].Text();
-                Assert.That(res, Is.EqualTo("A girl Jane Jane").
-                                 Or.EqualTo("A girl Jill Jill"));
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text() + chat.commands[2].Text();
+            Assert.That(res, Is.EqualTo("A girl Jane Jane").
+                             Or.EqualTo("A girl Jill Jill"));
+            Console.WriteLine("2: "+chat + " " + chat.scope.Stringify() + "\nglobals=" + globals.Stringify());
 
-            }
+        }
+
+        [Test]
+        public void SaveResolveState3()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
             lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [selected=$hero]&nbsp;",
@@ -136,8 +156,17 @@ namespace Dialogic
             res = chat.commands[1].Text() + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane.").
                              Or.EqualTo("A girl Jill Jill."));
-            
+            Console.WriteLine("3: " + chat + " " + chat.scope.Stringify() + "\nglobals=" + globals.Stringify());
 
+        }
+
+        [Test]
+        public void SaveResolveState4()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
             lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [selected=${hero}]&nbsp;",
@@ -152,6 +181,14 @@ namespace Dialogic
             Assert.That(res, Is.EqualTo("A girl Jane Jane.").
                              Or.EqualTo("A girl Jill Jill."));
 
+        }
+        [Test]
+        public void SaveResolveState5()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
 
             lines = new[] {
                 "SET hero = (Jane | Jill)",
@@ -166,6 +203,14 @@ namespace Dialogic
             res = chat.commands[1].Text();// + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane.").
                                          Or.EqualTo("A girl Jill Jill."));
+        }
+        [Test]
+        public void SaveResolveState6()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
 
             lines = new[] {
                 "SET hero = (Jane | Jill)",
@@ -179,7 +224,7 @@ namespace Dialogic
             chat.Realize(null);
             res = chat.commands[1].Text();// + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane.").
-                             Or.EqualTo("A girl Jill Jill."));
+                                     Or.EqualTo("A girl Jill Jill."));
         }
 
         [Test]

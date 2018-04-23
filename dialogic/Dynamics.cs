@@ -119,12 +119,6 @@ namespace Dialogic
 
     internal class Choice
     {
-        private static IDictionary<string, Choice> Choices
-            = new Dictionary<string, Choice>();
-
-        //private static IDictionary<Choice, string> Cache
-        //= new Dictionary<Choice, string>();
-
         public string alias;
         private string text;
         public readonly string[] options;
@@ -138,14 +132,14 @@ namespace Dialogic
             this.context = context;
             this.options = RE.SplitOr.Split(groups);
             this.alias = alias.IsNullOrEmpty() ? null : alias;
-            //this.options = ParseOptions();
-            //Console.WriteLine(this);
+            if (context == null || context.runtime == null)
+            {
+                Console.WriteLine("[WARN] Null context/runtime in Choice: "+text);
+            }
         }
 
         public string Text()
         {
-            //var s = Ch.OGROUP + text + Ch.CGROUP;
-            //return (alias != null ? Ch.OSAVE + alias + "=" + s + Ch.CSAVE : s);
             return text;
         }
 
@@ -167,15 +161,6 @@ namespace Dialogic
                 var oidx = full.IndexOf(Ch.OGROUP);
                 var cidx = full.LastIndexOf(Ch.CGROUP);
                 var expr = full.Substring(oidx + 1, cidx - oidx - 1);
-                //Console.WriteLine("Full: " + full + "\nExpr: " + expr + "\nAlia: " + alias);
-                //var expr  = m.Groups[2].Value;
-
-                //var caps = m.Groups[2].Captures;
-                //Console.WriteLine("EXPR: "+expr);
-
-                //Console.WriteLine("::"+expr+" "+alias);
-                // Substring(1, m.Value.Length - 2);
-                // m.Value.Substring(1, m.Value.Length-2);
 
                 if (RE.HasParens.IsMatch(expr))
                 {
@@ -183,30 +168,33 @@ namespace Dialogic
                 }
                 else
                 {
-                    // cache our prior Choice objects here
-                    if (!Choices.ContainsKey(full))
+                    if (CacheEnabled(context))
                     {
-                        Choices.Add(full, new Choice(context, full, expr, alias));
+                        var cache = context.runtime.ChoiceCache;
+
+                        // cache our prior Choice objects here
+                        var choiceKey = context.text + Ch.LABEL + full;
+                        if (!cache.ContainsKey(choiceKey))
+                        {
+                            cache.Add(choiceKey, new Choice(context, full, expr, alias));
+                        }
+                        else Console.WriteLine("CACHE-HIT: "+choiceKey);
+                        results.Add(cache[choiceKey]);
                     }
-                    results.Add(Choices[full]);///new Choice(context, full, expr, alias));
+                    else  // no cache
+                    {
+                        results.Add(new Choice(context, full, expr, alias));
+                    }
                 }
             }
         }
 
-        //private string[] ParseOptions()
-        //{
-        //    if (!Regex.IsMatch(text, @"\([^)]+|[^)]+\)"))
-        //    {
-        //        throw new Exception("BAD group");
-        //    }
-
-        //    // trim (,) from ends
-        //    text = text.TrimFirst('(').TrimLast(')');
-
-        //    // parse unique choices only
-        //    return Regex.Split(text, @"\s*\|\s*").Distinct().ToArray();
-        //}
-
+        internal static bool CacheEnabled(Chat context)
+        {
+            return context != null && context.runtime != null 
+                && context.runtime.ChoiceCache != null;
+        }
+            
         internal string Resolve()
         {
             string resolved = null;
@@ -238,20 +226,25 @@ namespace Dialogic
                     break;
             }
 
-            HandleAlias(resolved, context.scope);
+            HandleAlias(resolved, context);
+
             //Console.WriteLine("last="+lastResolved+" res="+resolved);
 
             return (lastResolved = resolved);
         }
 
-        private void HandleAlias(object resolved, IDictionary<string, object> scope)
+        private void HandleAlias(object resolved, Chat ctx)
         {
+            var scope = ctx != null ? ctx.scope : null;
             if (this.alias != null && resolved != null)
             {
+                if (scope == null) throw new BindException("Null runtime/context: " + this);
+
                 if (!resolved.ToString().Contains(Ch.OR))
                 {
-                    //Console.WriteLine("Choice.Push: " + alias + ": " + resolved);
+                    Console.WriteLine("      Choice.Push: " + alias + "=" + resolved);
                     scope[alias] = resolved;
+                    Console.WriteLine("      Scope: " + ctx.text + "." + scope.Stringify());
                 }
             }
         }
@@ -305,9 +298,9 @@ namespace Dialogic
             {
                 GroupCollection groups = GetGroups(match, 5);
 
-                // Create a new Symbol and add it to the list
+                // Create a new Symbol and add it to the result
                 var args = groups.Values().Skip(1).ToArray();
-                symbols.Add(new Symbol(context, args));//.ParseMods(groups[5]));
+                symbols.Add(new Symbol(context, args));
             }
 
             // OPT: we can sort here to avoid symbols which are substrings of other
@@ -317,40 +310,6 @@ namespace Dialogic
             return SortByLength(symbols);
         }
 
-        private static MatchCollection GetMatches(string text)
-        {
-            var matches = RE.ParseVars.Matches(text);
-
-            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
-            {
-                throw new BindException("Unable to parse symbol: " + text);
-            }
-
-            return matches;
-        }
-
-        private static GroupCollection GetGroups(Match match, int expected)
-        {
-            var groups = match.Groups;
-            if (groups.Count != expected)
-            {
-                Util.ShowMatch(match);
-                throw new ArgumentException("Invalid group count " + groups.Count);
-            }
-            return groups;
-        }
-
-        private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
-        {
-            return (from s in syms orderby s.symbol.Length ascending select s).ToList();
-        }
-
-        internal SymbolType Type()
-        {
-            return this.symbol.Contains(Ch.SCOPE) ? (this.chatScoped ?
-                SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE) : SymbolType.SIMPLE;
-        }
-
         internal string Resolve(IDictionary<string, object> globals)
         {
             string[] parts = symbol.Split(Ch.SCOPE);
@@ -358,8 +317,14 @@ namespace Dialogic
             if (parts.Length == 1 && chatScoped) throw new BindException
                 ("Illegally-scoped variable: " + this);
 
-            object resolved = ResolveSymbol(parts[0], context, globals);
+            //Console.WriteLine("CHECK: " + parts[0] + " in " + context.text + "." + context.scope.Stringify());
+            //if (context.scope.Count < 1)
+            //{
+            //    Console.WriteLine("EMPTY SCOPE! " + context.text);
+            //}
 
+            object resolved = ResolveSymbol(parts[0], context, globals);
+            //Console.WriteLine("GOT: " + resolved);
             switch (this.Type())
             {
                 case SymbolType.SIMPLE:
@@ -396,7 +361,12 @@ namespace Dialogic
                     }
 
                     // Find/store the correct scope for the lookup
-                    this.context = context.runtime.FindChatByLabel(parts[0]);
+                    var chat = context.runtime.FindChatByLabel(parts[0]);
+                    if (chat != null && chat != context)
+                    {
+                        //Console.WriteLine("Context-Switch -> " + chat + " " + chat.scope.Stringify());
+                        context = chat;
+                    }
                     resolved = ResolveSymbol(parts[1], context, globals);
                     HandleAlias(resolved, context.scope);
                     break;
@@ -426,7 +396,7 @@ namespace Dialogic
             {
                 if (!resolved.ToString().Contains(Ch.OR))
                 {
-                    //Console.WriteLine("Symbol.Push: " + alias + ": " + resolved);
+                    Console.WriteLine("      Symbol.Push: $" + alias + "=" + resolved);
                     scope[alias] = resolved;
                 }
             }
@@ -446,9 +416,43 @@ namespace Dialogic
             }
             return result;
         }
-    }
 
-    internal enum SymbolType { SIMPLE, CHAT_SCOPE, GLOBAL_SCOPE }
+        private static MatchCollection GetMatches(string text)
+        {
+            var matches = RE.ParseVars.Matches(text);
+
+            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
+            {
+                throw new BindException("Unable to parse symbol: " + text);
+            }
+
+            return matches;
+        }
+
+        private static GroupCollection GetGroups(Match match, int expected)
+        {
+            var groups = match.Groups;
+            if (groups.Count != expected)
+            {
+                Util.ShowMatch(match);
+                throw new ArgumentException("Invalid group count " + groups.Count);
+            }
+            return groups;
+        }
+
+        private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
+        {
+            return (from s in syms orderby s.symbol.Length ascending select s).ToList();
+        }
+
+        internal SymbolType Type()
+        {
+            return this.symbol.Contains(Ch.SCOPE) ? (this.chatScoped ?
+                SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE) : SymbolType.SIMPLE;
+        }
+
+        internal enum SymbolType { SIMPLE, CHAT_SCOPE, GLOBAL_SCOPE }
+    }
 
 
     /// <summary>

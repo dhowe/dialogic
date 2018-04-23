@@ -108,10 +108,10 @@ namespace Dialogic
         }
 
         /// <summary>
-        ///  REturns realized text for this object, equivalent to this.Realized(Meta.TEXT);
+        ///  Returns realized text for this object, equivalent to this.Realized(Meta.TEXT);
         /// </summary>
         /// <returns>The text.</returns>
-        public string Text()
+        public virtual string Text()
         {
             if (!realized.ContainsKey(Meta.TEXT))
             {
@@ -703,6 +703,7 @@ namespace Dialogic
         public const string ON_RESUME = "onResume";
         public const string CHAT_MODE = "chatMode";
         public const string STALENESS = "staleness";
+        public const string RESUMABLE = "resumable";
         public const string DEFAULT_CMD = "defaultCmd";
         public const string INTERRUPTIBLE = "interruptible";
         public const string STALENESS_INCR = "stalenessIncr";

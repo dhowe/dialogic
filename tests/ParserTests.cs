@@ -281,7 +281,18 @@ namespace Dialogic
             Assert.That(chat.meta, Is.Not.Null);
             Assert.That(chat.realized, Is.Null);
             Assert.That(chat.resumeAfterInt, Is.EqualTo(false));
+            Assert.That(chat.resumable, Is.EqualTo(true));
             Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUME_AFTER_INT)),
+                Is.EqualTo(Convert.ToBoolean("false")));
+            Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUMABLE)),
+                Is.EqualTo(Convert.ToBoolean("false")));
+
+            chat = ChatParser.ParseText("CHAT c1 { resumable=false,type = a,stage = b}")[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.meta, Is.Not.Null);
+            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.resumable, Is.EqualTo(false));
+            Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUMABLE)),
                 Is.EqualTo(Convert.ToBoolean("false")));
         }
 

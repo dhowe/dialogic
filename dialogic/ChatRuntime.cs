@@ -42,6 +42,9 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
+        internal IDictionary<string, Choice> ChoiceCache
+            = new Dictionary<string, Choice>();
+
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
 
@@ -54,7 +57,7 @@ namespace Dialogic
         private List<Func<Command, bool>> validators;
         private IDictionary<string, Chat> chats;
 
-        public object this[string key] // TODO: test
+        public Chat this[string key] // TODO: test
         {
             get { return this.chats[key]; }
         }

@@ -11,7 +11,7 @@ namespace Dialogic
     /// </summary>
     public static class Resolver
     {
-        public static bool DBUG = true;
+        public static bool DBUG = false;
 
         /// <summary>
         /// Iteratively resolve any variables or groups in the specified text 
@@ -21,7 +21,7 @@ namespace Dialogic
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (DBUG) Console.WriteLine("--------------------------------\nBind: " + text);
+            if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, parent));
 
             var original = text;
             int depth = 0, maxRecursionDepth = Defaults.BIND_MAX_DEPTH;
@@ -54,6 +54,12 @@ namespace Dialogic
             return Html.Decode(text); // resolve any encoded entities
         }
 
+        private static string Info(string text, Chat parent)
+        {
+            return text + " :: " + (parent == null ? "{}" :
+                parent.text + parent.scope.Stringify());
+        }
+
         ///// <summary>
         ///// Iteratively resolve any variables in the text 
         ///// via the appropriate context
@@ -61,12 +67,12 @@ namespace Dialogic
         public static string BindSymbols(string text, Chat context,
             IDictionary<string, object> globals, int level = 0)
         {
-            if (DBUG) Console.WriteLine("  BindSymbols(" + level + ") -> " + text);
+            if (DBUG) Console.WriteLine("  Symbols(" + level + "): " + Info(text, context));
 
             var symbols = Symbol.Parse(text, context);
             while (symbols.Count > 0)
             {
-                if (DBUG) Console.WriteLine("    Symbols: " + symbols.Stringify());
+                if (DBUG) Console.WriteLine("    Found: " + symbols.Stringify());
 
                 var symbol = symbols.Pop();
 
@@ -75,18 +81,9 @@ namespace Dialogic
                 {
                     string pretext = text, toReplace = symbol.text;
 
-                    // moved to Symbol
-                    //string replaceWith = result.ToString();
-                    // if we have an alias, but the replacement is not fully resolved
-                    // then we need to maintain the alias in the text for later
-                    //if (symbol.alias != null && IsDynamic(replaceWith))
-                    //{
-                    //    replaceWith = Ch.OSAVE + symbol.alias + Ch.EQ + replaceWith + Ch.CSAVE;
-                    //}
-
                     text = text.Replace(symbol.text, result);
 
-                    if (DBUG) Console.WriteLine("      " +symbol.SymbolText() + " -> " + result);
+                    if (DBUG) Console.WriteLine("      " + symbol.SymbolText() + " -> " + result);
 
                     if (pretext != text && text.Contains(Ch.SYMBOL))
                     {
@@ -109,7 +106,7 @@ namespace Dialogic
         {
             if (text.Contains(Ch.OR))
             {
-                if (DBUG) Console.WriteLine("  BindGroups(" + level + ") -> " + text);
+                if (DBUG) Console.WriteLine("  Groups(" + level + "): " + Info(text, context));
 
                 var original = text;
 
@@ -121,7 +118,7 @@ namespace Dialogic
 
                 var choices = Choice.Parse(text, context);
 
-                if (DBUG) Console.WriteLine("    Groups: " + choices.Stringify());
+                if (DBUG) Console.WriteLine("    Found: " + choices.Stringify());
 
                 foreach (var choice in choices)
                 {
