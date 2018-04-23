@@ -69,7 +69,7 @@ namespace Dialogic
         public void ResolveTraversalWithParameters()
         {
             // TODO:
-            Chat c1 = null;
+            //Chat c1 = null;
         }
 
         [Test]

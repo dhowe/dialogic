@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Reflection;
+using System.Globalization;
 
 [assembly: InternalsVisibleTo("tests")]
 [assembly: InternalsVisibleTo("weblint")]
@@ -1165,10 +1166,28 @@ namespace Dialogic
     /// </summary>
     static class Modifiers //@cond hidden
     {
+        /// <summary>
+        /// Prefixes the string with 'a' or 'an' as appropriate.
+        /// </summary>
         public static string articlize(this string str)
         {
-            //Console.WriteLine("articlize: " + str);
             return (RiTa.VOWELS.Contains(str[0]) ? "an " : "a ") + str;
+        }
+
+        /// <summary>
+        /// Capitalizes the first character.
+        /// </summary>
+        public static string capitalize(string str)
+        {
+            return char.ToUpper(str[0]) + str.Substring(1);
+        }
+
+        /// <summary>
+        /// Wraps the given string in double-quotes.
+        /// </summary>
+        public static string quotify(string str)
+        {
+            return "\"" + str + "\"";
         }
 
     }//@endcond

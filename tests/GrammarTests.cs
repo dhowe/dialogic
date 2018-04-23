@@ -45,6 +45,7 @@ namespace Dialogic
             Chat chat;
             string res;
 
+
             lines = new[] {
                 "SAY A girl [selected=$fish.name] $selected",
             };
@@ -55,6 +56,28 @@ namespace Dialogic
             chat.Realize(globals);
             res = chat.commands[0].Text();
             Assert.That(res, Is.EqualTo("A girl Fred Fred"));
+
+            lines = new[] {
+                "SAY A girl [selected=$fish.name] $selected.ToUpper()",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(globals);
+            res = chat.commands[0].Text();
+            Assert.That(res, Is.EqualTo("A girl Fred FRED"));
+
+            lines = new[] {
+                "SAY A girl [selected=$fish.name.ToUpper()] $selected",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(globals);
+            res = chat.commands[0].Text();
+            Assert.That(res, Is.EqualTo("A girl FRED FRED"));
         }
 
         [Test]
@@ -90,7 +113,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void ResolveWithArticlize2()
+        public void ResolveWithArticlize()
         {
             string[] lines;
             ChatRuntime runtime;
@@ -129,6 +152,31 @@ namespace Dialogic
                                  Or.EqualTo("She was a person.").
                                  Or.EqualTo("She was a banker."));
                 last = res;
+            }
+
+            if (false)
+            {
+                // TODO: support multiple functions
+
+                lines = new[] {
+                "SET hero = (animal | artist | person | banker)",
+                "SAY She was $hero.articlize().capitalize().",
+            };
+                runtime = new ChatRuntime();
+                runtime.ParseText(string.Join("\n", lines));
+                chat = runtime.Chats()[0];
+                Assert.That(chat, Is.Not.Null);
+                for (int i = 0; i < 5; i++)
+                {
+                    chat.Realize(null);
+                    res = chat.commands[1].Text();
+                    Assert.That(res, Is.Not.EqualTo(last));
+                    Assert.That(res, Is.EqualTo("She was an artist.").
+                                     Or.EqualTo("She was an animal.").
+                                     Or.EqualTo("She was a person.").
+                                     Or.EqualTo("She was a banker."));
+                    last = res;
+                }
             }
         }
 
@@ -1118,6 +1166,18 @@ namespace Dialogic
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B E").Or.EqualTo("A B C C").Or.EqualTo("A B C D"));
+
+            lines = new[] {
+                "start =  $a $b",
+                "a = The hungry dog",
+                "a |= The angry cat",
+                "b = bit the tiny child",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._Expand(globals, "$start"),
+                        Is.EqualTo("The hungry dog bit the tiny child")
+                        .Or.EqualTo("The angry cat bit the tiny child"));
 
             lines = new[] {
                 "start =  $a $b",

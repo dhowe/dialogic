@@ -406,7 +406,7 @@ namespace Dialogic
                                 resolved = resolved + "." + parts[i];
                             }
                             else
-                            {
+                            {   // nothing more to resolve, so invoke
                                 resolved = Methods.Invoke(resolved, func, null);
                             }
                             // TODO: handle other signatures
