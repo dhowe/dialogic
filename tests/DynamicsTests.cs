@@ -580,29 +580,6 @@ namespace Dialogic
         }
 
         [Test]
-        public void ResolutionTest() // unused
-        {
-            string last = null, choice;
-            for (int i = 0; i < 10; i++)
-            {
-                choice = Resolution.Choose("(a | b | c)");
-                Assert.That(choice, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("c"));
-                Assert.That(choice, Is.Not.EqualTo(last));
-                last = choice;
-            }
-
-            for (int i = 0; i < 10; i++)
-            {
-                Assert.That(Resolution.Choose("(a|b)"), Is.EqualTo("a").Or.EqualTo("b"));
-            }
-
-            for (int i = 0; i < 3; i++)
-            {
-                Assert.That(Resolution.Choose("(a |a)"), Is.EqualTo("a"));
-            }
-        }
-
-        [Test]
         public void ResolveGroupsWithAlias()
         {
             ChatRuntime rt;

@@ -165,6 +165,25 @@ namespace Dialogic
         }
 
         [Test]
+        public void ComplexPlusModifier()
+        {
+            // "cmplx" -> "($group | $prep)" 
+            // "prep"  -> "then" },
+            // "group" -> "(a|b)" },
+            string[] ok = { "letter an a", "letter a b", "letter a then" };
+            Chat chat = ChatParser.ParseText("SAY letter $cmplx.articlize()")[0];
+            Command c = chat.commands[0];
+            Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
+            for (int i = 0; i < 10; i++)
+            {
+                c.Realize(globals);
+                var txt = c.Text();
+                //Console.WriteLine(i+") "+txt);
+                CollectionAssert.Contains(ok, txt);
+            }
+        }
+
+        [Test]
         public void ReplaceGroups()
         {
             Chat c1 = CreateParentChat("c1");

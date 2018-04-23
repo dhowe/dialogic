@@ -8,6 +8,11 @@ namespace Dialogic
     [TestFixture]
     class GrammarTests
     {
+        void HandleFunc()
+        {
+        }
+
+
         const bool NO_VALIDATORS = true;
 
         static IDictionary<string, object> globals
@@ -50,7 +55,6 @@ namespace Dialogic
             chat.Realize(globals);
             res = chat.commands[0].Text();
             Assert.That(res, Is.EqualTo("A girl Fred Fred"));
-            Console.WriteLine("X: " + chat + " " + chat.scope.Stringify() + "\nglobals=" + globals.Stringify());
         }
 
         [Test]
@@ -86,6 +90,49 @@ namespace Dialogic
         }
 
         [Test]
+        public void ResolveWithArticlize2()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res, last = null;
+
+            lines = new[] {
+                "SET hero = artist",
+                "SAY She was $hero.articlize().",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text();
+            //Console.WriteLine(res);
+            Assert.That(res, Is.EqualTo("She was an artist."));
+
+
+            lines = new[] {
+                "SET hero = (animal | artist | person | banker)",
+                "SAY She was $hero.articlize().",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            for (int i = 0; i < 5; i++)
+            {
+                chat.Realize(null);
+                res = chat.commands[1].Text();
+                Assert.That(res, Is.Not.EqualTo(last));
+                Assert.That(res, Is.EqualTo("She was an artist.").
+                                 Or.EqualTo("She was an animal.").
+                                 Or.EqualTo("She was a person.").
+                                 Or.EqualTo("She was a banker."));
+                last = res;
+            }
+        }
+
+        [Test]
         public void SaveResolveState()
         {
             string[] lines;
@@ -107,7 +154,7 @@ namespace Dialogic
             res = chat.commands[1].Text() + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane").
                              Or.EqualTo("A girl Jill Jill"));
- 
+
             lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [a=$hero]&nbsp;",
@@ -137,8 +184,8 @@ namespace Dialogic
             res = chat.commands[1].Text() + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane.").
                              Or.EqualTo("A girl Jill Jill."));
-            
- 
+
+
             lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [selected=${hero}]&nbsp;",
@@ -166,7 +213,7 @@ namespace Dialogic
             res = chat.commands[1].Text();// + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane.").
                                          Or.EqualTo("A girl Jill Jill."));
- 
+
             lines = new[] {
                 "SET hero = (Jane | Jill)",
                 "SAY A girl [selected=${hero}] ${selected}."

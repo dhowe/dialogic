@@ -81,12 +81,7 @@ namespace Dialogic
             Cache = new Dictionary<Type, IDictionary<string, MethodInfo>>();
         }
 
-        internal static string CacheKey(string methodName, object[] args = null)
-        {
-            return methodName + ArgsToTypeString(args);
-        }
-
-        internal static object Invoke(object target, string methodName, object[] args = null)
+        public static object Invoke(object target, string methodName, object[] args = null)
         {
             var type = target.GetType();
             if (!Cache.ContainsKey(type))
@@ -94,20 +89,61 @@ namespace Dialogic
                 Cache[type] = new Dictionary<string, MethodInfo>();
             }
 
+            MethodInfo method = null;
             var key = CacheKey(methodName, args);
+
             if (!Cache[type].ContainsKey(key))
             {
-                // binding flags?
-                Cache[type][key] = type.GetMethod(methodName, ArgsToTypes(args));
+                method = type.GetMethod(methodName, ArgsToTypes(args));
+                if (method == null && target is string)
+                {
+                    return InvokeExt(target, methodName);
+                }
+
+                if (method == null) throw new BindException
+                    ("Invoke -> no method " + type + "." + key);
+
+                Cache[type][key] = method;
             }
 
-            return Cache[type][key].Invoke(target, args);
+            method = Cache[type][key];
+
+            return method.IsStatic ? method.Invoke(null, args) :
+                         method.Invoke(target, args);
         }
 
-        private static Type[] ArgsToTypes(object[] args)
+        internal static object InvokeExt(object target, string methodName)
+        {
+            var type = typeof(Modifiers);
+            if (!Cache.ContainsKey(type))
+            {
+                Cache[type] = new Dictionary<string, MethodInfo>();
+            }
+
+            var args = new[] { target };
+            var key = CacheKey(methodName, args);
+
+            if (!Cache[type].ContainsKey(key))
+            {
+                var method = type.GetMethod(methodName, ArgsToTypes(args));
+                if (method == null) throw new BindException
+                    ("InvokeExt -> no method " + type + "." + key);
+                
+                Cache[type][key] = method;
+            }
+
+            return Cache[type][key].Invoke(null, args);
+        }
+
+        internal static Type[] ArgsToTypes(object[] args)
         {
             if (args == null) return new Type[0];
             return Array.ConvertAll(args, o => o.GetType());
+        }
+
+        private static string CacheKey(string methodName, object[] args = null)
+        {
+            return methodName + ArgsToTypeString(args);
         }
 
         private static string ArgsToTypeString(object[] args)
@@ -120,24 +156,29 @@ namespace Dialogic
     internal class Choice
     {
         public string alias;
-        private string text;
+        private string text, modifier;
         public readonly string[] options;
 
         private string lastResolved;
         private Chat context;
 
-        private Choice(Chat context, string text, string groups, string alias = null)
+        private Choice(Chat context, string text, string groups, string alias = null, string method = null)
         {
             this.text = text;
             this.context = context;
+            this.modifier = method; 
             this.options = RE.SplitOr.Split(groups);
             this.alias = alias.IsNullOrEmpty() ? null : alias;
-    
         }
 
         public string Text()
         {
-            return text;
+            return text + Modifier();
+        }
+
+        private string Modifier()
+        {
+            return modifier.IsNullOrEmpty() ? string.Empty : '.'+modifier + "()";
         }
 
         public static List<Choice> Parse(string input, Chat context)
@@ -161,9 +202,19 @@ namespace Dialogic
             // Cache the entire match?
             foreach (Match m in RE.MatchParens.Matches(input))
             {
-                //Util.ShowMatch(m);
+                //Util.ShowMatch(m);   // TODO: redo this
+
                 var full = m.Groups[0].Value;
                 var alias = m.Groups[1].Value;
+                var method = m.Groups[3].Value;
+      
+                if (!method.IsNullOrEmpty()) {
+                    var didx = full.LastIndexOf('.');
+                    full = full.Substring(0, didx);
+                }
+
+                //Console.WriteLine("full:"+full+" alias="+alias+" method="+method);
+
                 var oidx = full.IndexOf(Ch.OGROUP);
                 var cidx = full.LastIndexOf(Ch.CGROUP);
                 var expr = full.Substring(oidx + 1, cidx - oidx - 1);
@@ -182,14 +233,14 @@ namespace Dialogic
                         var choiceKey = context.text + Ch.LABEL + full;
                         if (!cache.ContainsKey(choiceKey))
                         {
-                            cache.Add(choiceKey, new Choice(context, full, expr, alias));
+                            cache.Add(choiceKey, new Choice(context, full, expr, alias, method));
                         }
                         //else Console.WriteLine("CACHE-HIT: "+choiceKey);
                         results.Add(cache[choiceKey]);
                     }
                     else  // no cache
                     {
-                        results.Add(new Choice(context, full, expr, alias));
+                        results.Add(new Choice(context, full, expr, alias, method));
                     }
                 }
             }
@@ -197,10 +248,10 @@ namespace Dialogic
 
         internal static bool CacheEnabled(Chat context)
         {
-            return context != null && context.runtime != null 
+            return context != null && context.runtime != null
                 && context.runtime.ChoiceCache != null;
         }
-            
+
         internal string Resolve()
         {
             string resolved = null;
@@ -233,10 +284,20 @@ namespace Dialogic
             }
 
             HandleAlias(resolved, context);
+            lastResolved = resolved;
 
             //Console.WriteLine("last="+lastResolved+" res="+resolved);
+            return HandleModifier(resolved);
+        }
 
-            return (lastResolved = resolved);
+        private string HandleModifier(string resolved)
+        {
+            var res = modifier.IsNullOrEmpty() ? resolved : 
+                Methods.Invoke(resolved, modifier, null).Stringify();
+
+            //Console.WriteLine("HandleModifier: " + resolved+ " -> "+res);
+
+            return res;
         }
 
         private void HandleAlias(object resolved, Chat ctx)
@@ -249,7 +310,7 @@ namespace Dialogic
                 if (!resolved.ToString().Contains(Ch.OR))
                 {
                     //Console.WriteLine("      Choice.Push: " + alias + "=" 
-                        //+ resolved +" "+ctx.text + scope.Stringify()));
+                    //+ resolved +" "+ctx.text + scope.Stringify()));
                     scope[alias] = resolved;
                 }
             }
@@ -323,14 +384,7 @@ namespace Dialogic
             if (parts.Length == 1 && chatScoped) throw new BindException
                 ("Illegally-scoped variable: " + this);
 
-            //Console.WriteLine("CHECK: " + parts[0] + " in " + context.text + "." + context.scope.Stringify());
-            //if (context.scope.Count < 1)
-            //{
-            //    Console.WriteLine("EMPTY SCOPE! " + context.text);
-            //}
-
             object resolved = ResolveSymbol(parts[0], context, globals);
-            //Console.WriteLine("GOT: " + resolved);
             switch (this.Type())
             {
                 case SymbolType.SIMPLE:
@@ -346,12 +400,22 @@ namespace Dialogic
                         if (parts[i].EndsWith(Ch.CGROUP))
                         {
                             var func = parts[i].Replace("()", "");
-                            resolved = Methods.Invoke(resolved, func, null);
+                            if (resolved.ToString().Contains(Ch.OR))
+                            {
+                                // delay the method call until fully resolved
+                                resolved = resolved + "." + parts[i];
+                            }
+                            else
+                            {
+                                resolved = Methods.Invoke(resolved, func, null);
+                            }
+                            // TODO: handle other signatures
                         }
                         else
                         {
                             resolved = Properties.Get(resolved, parts[i]);
                         }
+
                         if (resolved == null) throw new UnboundSymbol
                             (symbol, context, globals);
 
@@ -367,22 +431,15 @@ namespace Dialogic
                     }
 
                     // Find/store the correct scope for the lookup
-                    var chat = context.runtime.FindChatByLabel(parts[0]);
-                    if (chat != null && chat != context)
-                    {
-                        //Console.WriteLine("Context-Switch -> " + chat + " " + chat.scope.Stringify());
-                        context = chat;
-                    }
+                    context = context.runtime.FindChatByLabel(parts[0]);
                     resolved = ResolveSymbol(parts[1], context, globals);
                     HandleAlias(resolved, context.scope);
                     break;
             }
 
-            string result = null;
-
             if (resolved != null)
             {
-                result = resolved.ToString();
+                var result = resolved.ToString();
 
                 // if we have an alias, but the replacement is not fully resolved
                 // then we keep the alias in the text for later resolution
@@ -391,9 +448,10 @@ namespace Dialogic
                     result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
                 }
 
+                return result;
             }
 
-            return result;
+            return null;
         }
 
         private void HandleAlias(object resolved, IDictionary<string, object> scope)

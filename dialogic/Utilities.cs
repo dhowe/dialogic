@@ -151,7 +151,8 @@ namespace Dialogic
         internal const string MP0 = @"(?:\[([^=()]+)=)?";
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
-        public static Regex MatchParens = new Regex(MP0 + MP1 + MP2);
+        internal const string MP3 = @"(?:\.(" + SYM + @")\(\))?";
+        public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
 
         internal const string PV1 = @"((?:\[([^=]+)=)?([$#])\{?";
         //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)(&" + SYM + @")*\}?\]?)";
@@ -176,6 +177,12 @@ namespace Dialogic
         internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
         internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
     }
+
+
+    public static class RiTa//@cond hidden
+    {
+        public const string VOWELS = "aeiou";
+    }//@endcond
 
     /// <summary>
     /// Static utility functions for Dialogic
@@ -755,91 +762,6 @@ namespace Dialogic
         {
             if (IsRelaxable()) type = ConstraintType.Soft;
         }
-    }
-
-    internal class Resolution // unused
-    {
-        static IDictionary<string, Resolution> resolveCache
-            = new Dictionary<string, Resolution>();
-
-        readonly string[] options;
-        string lastResolved;
-
-        private Resolution(string text)
-        {
-            //Console.WriteLine("new Resolution: '" + text + "'");
-            this.options = ParseGroup(text);
-        }
-
-        public static string Choose(string text)
-        {
-            if (!resolveCache.ContainsKey(text))
-            {
-                resolveCache.Add(text, new Resolution(text));
-            }
-
-            return resolveCache[text].Choose();
-        }
-
-        private static string ResolveGroup(string sub)
-        {
-            if (!RE.ValidGroup.IsMatch(sub)) throw InvalidState(sub);
-
-            sub = sub.Substring(1, sub.Length - 2);
-            string[] opts = RE.SplitOr.Split(sub);
-
-            if (opts.Length < 2) throw InvalidState(sub);
-
-            return (string)Util.RandItem(opts);
-        }
-
-        public override string ToString()
-        {
-            return "(" + string.Join("|", options) + ")";
-        }
-
-        private string Choose()
-        {
-            string resolved = null;
-
-            switch (options.Length)
-            {
-                // degenerate single option case
-                case 1:
-                    resolved = options[0];
-                    break;
-
-                // avoid oscillators, just choose random
-                case 2:
-                    resolved = (string)Util.RandItem(options);
-                    break;
-
-                default: // choose something different than last time
-                    int iterations = 0, maxIterations = 100;
-                    do
-                    {
-                        if (++iterations > maxIterations) // should never happen
-                        {
-                            throw new BindException("Max limit: " + this);
-                        }
-                        resolved = (string)Util.RandItem(options);
-                    }
-                    while (Equals(lastResolved, resolved));
-                    break;
-            }
-            return (lastResolved = resolved);
-        }
-
-        private static string[] ParseGroup(string sub)
-        {
-            if (!Regex.IsMatch(sub, @"\([^)]+|[^)]+\)")) throw InvalidState(sub);
-
-            // trim (,) from ends
-            sub = sub.TrimFirst('(').TrimLast(')');
-
-            // parse unique choices only
-            return Regex.Split(sub, @"\s*\|\s*").Distinct().ToArray(); ;
-        }
 
         private static Exception InvalidState(string sub)
         {
@@ -1056,7 +978,7 @@ namespace Dialogic
 
     }//@endcond
 
-    public static class Exts //@cond unused
+    public static class Exts //@cond hidden
     {
         internal delegate void Action<T1, T2, T3, T4, T5>
             (T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
@@ -1233,6 +1155,20 @@ namespace Dialogic
                 type = type.BaseType;
             }
             return false;
+        }
+
+
+    }//@endcond
+
+    /// <summary>
+    /// This class holds extension methods for symbol/grammar expansion
+    /// </summary>
+    static class Modifiers //@cond hidden
+    {
+        public static string articlize(this string str)
+        {
+            //Console.WriteLine("articlize: " + str);
+            return (RiTa.VOWELS.Contains(str[0]) ? "an " : "a ") + str;
         }
 
     }//@endcond

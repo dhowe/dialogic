@@ -29,8 +29,8 @@ Bye! {speed=fast}
 
 CHAT OnTapEvent {noStart=true,resumeAfter=true}
 DO #TapResponse
-SAY Ok, I see you!
-
+SAY Ok, I see you! 
+SAY Wait, is that (cat | dog | artichoke).articlize()?
 
 CHAT MyWorld {noStart=true,chatMode=grammar}
 start = My world is a <adj>, <adj> place

@@ -8,6 +8,16 @@ namespace Dialogic
     public class DialogicTests
     {
         [Test]
+        public void TestGetExtMethods()
+        {
+            var s = Methods.InvokeExt("animal", "articlize");
+            Assert.That(s, Is.EqualTo("an animal"));
+
+            s = Methods.InvokeExt("cat", "articlize");
+            Assert.That(s, Is.EqualTo("a cat"));
+        }
+
+        [Test]
         public void RuntimeIndexTest()
         {
             var rt = new ChatRuntime();
