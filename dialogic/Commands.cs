@@ -23,6 +23,8 @@ namespace Dialogic
         protected internal readonly int id;
         protected internal Chat parent;
 
+        protected internal LineContext lineContext;
+
         protected Command()
         {
             this.delay = 0;
@@ -33,11 +35,6 @@ namespace Dialogic
         protected double Delay()
         {
             return delay;
-        }
-
-        internal CommandData ToCommandData()
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

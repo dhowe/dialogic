@@ -78,7 +78,7 @@ namespace Dialogic
 
             try
             {
-                c = ParseCommand(new LineContext(line, lineNo));
+                c = CreateCommand(new LineContext(line, lineNo));
             }
             catch (Exception ex)
             //catch (ParseException ex)
@@ -117,12 +117,13 @@ namespace Dialogic
             return ((Chat)LastOfType(parsedCommands, typeof(Chat)));
         }
 
-        private Command ParseCommand(LineContext lc)
+        internal Command CreateCommand(LineContext lc)
         {
             Type type = lc.command.Length > 0 ? ChatRuntime.TypeMap[lc.command]
                     : Chat.DefaultCommandType(ActiveChat());
             
             Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
+            c.lineContext = lc;
 
             HandleActor(lc.actor, c, lc.line, lc.lineNo);
             HandleCommand(c, lc.line, lc.lineNo);
@@ -255,12 +256,21 @@ namespace Dialogic
         }
     }
 
-    internal class LineContext
+    public class LineContext
     {
         internal string actor, command, text, label, meta;
 
         internal readonly string line;
         internal readonly int lineNo;
+
+        public LineContext(string actor, string command, string text, string label, string meta)
+        {
+            this.actor = actor;
+            this.command = command;
+            this.text = text;
+            this.label = label;
+            this.meta = meta;
+        }
 
         public LineContext(string line, int lineNo = -1, bool showMatch = false)
         {

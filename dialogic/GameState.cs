@@ -9,36 +9,31 @@ namespace Dialogic
     {
         public string firstChat;
         public List<ChatData> chatData;
-        public List<ActorData> actorData;
-
-        // TODO: Validators, CommandDefs
 
         public static GameState Create(ChatRuntime rt)
         {
             return new GameState().FromGameObject(rt);   
         }
 
-        public ChatRuntime ToGameObject()
+        public void AppendTo(ChatRuntime rt)
         {
-            List<IActor> actors = new List<IActor>(actorData.Count);
-            actorData.ForEach(a => actors.Add(a.ToGameObject()));
-          
-            List<Chat> chats = new List<Chat>(chatData.Count);
-            chatData.ForEach(c => chats.Add(c.ToGameObject()));
+            chatData.ForEach(cd => rt.AddChat(cd.ToGameObject(rt)));
+            rt.firstChat = this.firstChat;
+        }
 
-            return new ChatRuntime(chats, actors);
+        public ChatRuntime ToGameObject(List<IActor> actors)
+        {
+            var runtime = new ChatRuntime(actors);
+            GameState gameState = GameState.Create(runtime);
+            AppendTo(runtime);
+            return runtime;
         }
 
         public GameState FromGameObject(ChatRuntime rt)
         {
             this.firstChat = rt.firstChat;
-            this.chatData = new List<ChatData>(rt.chats.Keys.Count);
-            this.actorData = new List<ActorData>(rt.actors.Count);
 
-            foreach (var actor in rt.actors)
-            {
-                this.actorData.Add(ActorData.Create((Dialogic.Actor) actor));
-            }
+            this.chatData = new List<ChatData>(rt.chats.Keys.Count);
             foreach (var chat in rt.chats.Values)
             {
                 this.chatData.Add(ChatData.Create(chat));
@@ -46,51 +41,6 @@ namespace Dialogic
 
             return this;
         }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class CommandData
-    {
-        Dictionary<string, string> meta;
-
-        public double delay;
-
-        public string text;
-        public string actorName;
-        public string parentName;
-
-        internal static CommandData Create(Command c)
-        {
-            return new CommandData().FromGameObject(c);
-        }
-
-        public CommandData FromGameObject(Command c)
-        {
-            this.text = c.text;
-            this.delay = c.delay;
-            this.parentName = c.parent.text;
-            this.actorName = c.actor.Name();
-
-            if (c.HasMeta())
-            {
-                this.meta = new Dictionary<string, string>();
-                foreach (var key in c.meta.Keys)
-                {
-                    this.meta.Add(key, c.meta[key].ToString());
-                }
-            }
-
-            return this;
-        }
-
-
-        internal Command ToGameObject()
-        {
-            Command c = null;//new Command();
-            //TODO:
-            return c;
-        }
-
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
@@ -117,6 +67,7 @@ namespace Dialogic
         public ChatData FromGameObject(Chat chat)
         {
             this.text = chat.text;
+
             this.staleness = chat.staleness;
             this.resumable = chat.resumable;
             this.interruptable = chat.interruptable;
@@ -133,27 +84,77 @@ namespace Dialogic
             return this;
         }
 
-
-        internal Chat ToGameObject()
+        internal Chat ToGameObject(ChatRuntime rt)
         {
-            Chat c = Chat.Create(text);
-            c.text = this.text;
-            c.Staleness(this.staleness);
-            c.Resumable(this.resumable);
-            c.Interruptable(this.interruptable);
-            c.ResumeAfterInterrupting(this.resumeAfterInt);
-            c.StalenessIncr(this.stalenessIncr);
+            Chat chat = Chat.Create(text);
+            chat.runtime = rt;
 
-            c.cursor = this.cursor;
-            c.lastRunAt = this.lastRunAt;
-            c.allowSmoothingOnResume = this.allowSmoothingOnResume;
+            chat.Staleness(this.staleness);
+            chat.Resumable(this.resumable);
+            chat.Interruptable(this.interruptable);
+            chat.ResumeAfterInterrupting(this.resumeAfterInt);
+            chat.StalenessIncr(this.stalenessIncr);
 
-            c.commands = new List<CommandData>(this.commands.Count);
-            this.commands.ForEach(cmd => c.commands.Add(CommandData.Create(cmd)));
-            return c;
+            chat.cursor = this.cursor;
+            chat.lastRunAt = this.lastRunAt;
+            chat.allowSmoothingOnResume = this.allowSmoothingOnResume;
+
+            chat.commands = new List<Command>(this.commands.Count);
+            this.commands.ForEach(cmd => chat.AddCommand(cmd.ToGameObject(rt)));
+
+            return chat;
         }
     }
 
+
+    [MessagePackObject(keyAsPropertyName: true)]
+    public class CommandData
+    {
+        //Dictionary<string, string> meta;
+        //public double delay;
+        //public string text;
+        //public string type;
+        //public string actorName;
+        //public string parentName;
+
+        public string actor, command, text, label, meta;
+
+        internal static CommandData Create(Command c)
+        {
+            return new CommandData().FromGameObject(c);
+        }
+
+        public CommandData FromGameObject(Command c)
+        {
+            this.command = c.TypeName(); // can be null in LineContext
+
+            LineContext lc = c.lineContext;
+            this.actor = lc.actor;
+            this.text = lc.text;
+            this.label = lc.label;
+            this.meta = lc.meta;
+
+            return this;
+        }
+
+
+        internal Command ToGameObject(ChatRuntime rt)
+        {
+            LineContext lc = new LineContext(actor, command, text, label, meta);
+            //Type type = ChatRuntime.TypeMap[lc.command];
+
+            //Command c = Command.Create(type, lc.text, lc.label, parser.SplitMeta(lc.meta));
+            //c.lineContext = lc;
+
+            //parser.HandleActor(lc.actor, c, lc.line, lc.lineNo);
+            //parser.HandleCommand(c, lc.line, lc.lineNo);
+            //parser.RunValidators(c);
+
+            return rt.Parser().CreateCommand(lc);
+        }
+    }
+
+    /*
     [MessagePackObject(keyAsPropertyName: true)]
     public class ActorData
     {
@@ -176,5 +177,5 @@ namespace Dialogic
         {
             return new Actor(name, isDefault);
         }
-    }
+    }*/
 }

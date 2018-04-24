@@ -15,19 +15,17 @@ namespace runner
         public static void Main(string[] args)
         {
             var rt = new ChatRuntime(AppConfig.Actors);
-            rt.ParseFile(srcpath+"/data/gscript.gs");
+            rt.ParseFile(srcpath+"/data/noglobal.gs");
             var state = GameState.Create(rt);
             //dialogic.Run("#GScriptTest");
 
-            //var bytes = MessagePackSerializer.Serialize(dialogic);
-            var bytes = MessagePackSerializer.Serialize(state, MessagePack.Resolvers.StandardResolverAllowPrivate.Instance);
-            var mc2 = MessagePackSerializer.Deserialize<GameState>(bytes);
-
-            // you can dump msgpack binary to human readable json.
-            // In default, MeesagePack for C# reduce property name information.
-            // [99,"hoge","huga"]
+            var bytes = MessagePackSerializer.Serialize(state);
             var json = MessagePackSerializer.ToJson(bytes);
             Console.WriteLine(json);
+
+            var rt2 = new ChatRuntime(AppConfig.Actors);
+            MessagePackSerializer.Deserialize<GameState>(bytes).AppendTo(rt2);
+            rt2.Run();
 
             //new MockGameEngine(srcpath + "/data/gscript.gs").Run();
         }
