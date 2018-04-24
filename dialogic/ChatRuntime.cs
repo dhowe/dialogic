@@ -28,7 +28,7 @@ namespace Dialogic
 
         internal static bool DebugLifecycle = false;
 
-        internal static IDictionary<string, Type> TypeMap
+        internal IDictionary<string, Type> typeMap
             = new Dictionary<string, Type>()
         {
             { "CHAT",   typeof(Chat) },
@@ -42,22 +42,20 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal IDictionary<string, Choice> ChoiceCache
-            = new Dictionary<string, Choice>();
-
+        internal IDictionary<string, Choice> choiceCache;
         internal bool validatorsDisabled;
         internal ChatScheduler scheduler;
+        internal string firstChat;
+        internal List<IActor> actors;
+        internal IDictionary<string, Chat> chats;
+        internal List<Func<Command, bool>> validators;
 
-        private Chat firstChat;
+        private ChatEventHandler chatEvents;
+        private AppEventHandler appEvents;
         private Thread searchThread;
         private ChatParser parser;
-        private List<IActor> actors;
-        private AppEventHandler appEvents;
-        private ChatEventHandler chatEvents;
-        private List<Func<Command, bool>> validators;
-        private IDictionary<string, Chat> chats;
 
-        public Chat this[string key] // TODO: test
+        public Chat this[string key]
         {
             get { return this.chats[key]; }
         }
@@ -73,6 +71,7 @@ namespace Dialogic
             this.appEvents = new AppEventHandler(this);
             this.chatEvents = new ChatEventHandler(this);
             this.chats = new Dictionary<string, Chat>();
+            this.choiceCache = new Dictionary<string, Choice>();
             this.actors = InitActors(theActors);
 
             if (!theChats.IsNullOrEmpty()) theChats.ForEach(AddChat);
@@ -121,9 +120,16 @@ namespace Dialogic
 
         public void Run(string chatLabel = null)
         {
+            
             if (chats.Count < 1) throw new Exception("No chats found");
 
-            scheduler.Launch(chatLabel != null ? FindChatByLabel(chatLabel) : FirstChat());
+            //this.version = Assembly.GetExecutingAssembly().GetName().Version;
+            //Console.WriteLine("Dialogic v"+this.version);
+
+            //Console.WriteLine("The version of the currently executing assembly is: {0}",
+                              //typeof(ChatRuntime).Assembly.GetName().Version);
+
+            scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
         }
 
         public Chat FindChatByLabel(string label)
@@ -146,17 +152,17 @@ namespace Dialogic
                 ", chats:" + Chats().Stringify() + " }";
         }
 
-        ///////////////////////////////////////////////////////////////////////
-
-        internal List<Chat> Chats()
+        public List<Chat> Chats()
         {
             return chats.Values.ToList();
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         internal void AddChat(Chat c)
         {
             c.runtime = this;
-            if (chats.Count < 1) firstChat = c;
+            if (chats.Count < 1) firstChat = c.text;
             if (c.text == null)
             {
                 throw new DialogicException("Invalid Chat (no-name): " + c);
@@ -164,7 +170,7 @@ namespace Dialogic
             chats.Add(c.text, c);
         }
          
-        internal Chat AddNewChat(string name)
+        internal Chat AddNewChat(string name) // testing only
         {
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
@@ -235,9 +241,9 @@ namespace Dialogic
                 {
                     foreach (var cmd in cmds)
                     {
-                        if (!TypeMap.ContainsKey(cmd.label))
+                        if (!typeMap.ContainsKey(cmd.label))
                         {
-                            TypeMap.Add(cmd.label, cmd.type);
+                            typeMap.Add(cmd.label, cmd.type);
                         }
                     }
                 }
@@ -246,13 +252,6 @@ namespace Dialogic
             });
 
             return iActors;
-        }
-
-        private Chat FirstChat()
-        {
-            if (firstChat == null) throw new DialogicException
-                ("Invalid state: no initial Chat" + this);
-            return firstChat;
         }
 
         private static IDictionary<Constraint, bool> ToConstraintMap(Find f)

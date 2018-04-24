@@ -116,53 +116,55 @@ namespace Dialogic
         [Test]
         public void EnclosedVarSets()
         {
+            var cp = new ChatRuntime().Parser();
+
             string text;
             LineContext lc;
 
             text = "SET a=$b";
-            lc = new LineContext(text);
+            lc = new LineContext(cp, text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
             Assert.That(lc.text, Is.EqualTo("a=$b"));
             Assert.That(lc.meta, Is.EqualTo(""));
 
             text = "SET a=${b}";
-            lc = new LineContext(text);
+            lc = new LineContext(cp, text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
             Assert.That(lc.text, Is.EqualTo("a=${b}"));
             Assert.That(lc.meta, Is.EqualTo(""));
 
             text = "SET a=${b} {meta=val}";
-            lc = new LineContext(text);
+            lc = new LineContext(cp, text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
             Assert.That(lc.text, Is.EqualTo("a=${b}"));
             Assert.That(lc.meta, Is.EqualTo("meta=val"));
 
             text = "SET a=${b.c} {meta=val}";
-            lc = new LineContext(text);
+            lc = new LineContext(cp, text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
             Assert.That(lc.text, Is.EqualTo("a=${b.c}"));
             Assert.That(lc.meta, Is.EqualTo("meta=val"));
 
             text = "SET a=${b->c} {meta=val}";
-            lc = new LineContext(text);
+            lc = new LineContext(cp, text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
             Assert.That(lc.text, Is.EqualTo("a=${b->c}"));
             Assert.That(lc.meta, Is.EqualTo("meta=val"));
 
             text = "SET a=${b->c->d} {meta=val}";
-            lc = new LineContext(text);
+            lc = new LineContext(cp, text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
             Assert.That(lc.text, Is.EqualTo("a=${b->c->d}"));
             Assert.That(lc.meta, Is.EqualTo("meta=val"));
 
             text = "SET a=${b&c&d} {meta=val}";
-            lc = new LineContext(text);
+            lc = new LineContext(cp, text);
             Assert.That(lc, Is.Not.Null);
             Assert.That(lc.command, Is.EqualTo("SET"));
             Assert.That(lc.text, Is.EqualTo("a=${b&c&d}"));
@@ -294,7 +296,9 @@ namespace Dialogic
         [Test]
         public void ChatLabels()
         {
-            string ReRe = ChatParser.TypesRegex() + RE.TXT;
+            var cp = new ChatRuntime().Parser();
+
+            string ReRe = cp.TypesRegex() + RE.TXT;
             //Console.WriteLine(RE);
 
             string s;
@@ -364,7 +368,8 @@ namespace Dialogic
         [Test]
         public void TestLines()
         {
-            var re = ChatParser.LineParser();
+            var re = new ChatRuntime().Parser().LineParser();
+
             Match match = re.Match("DO #Hello");
             //Util.ShowMatch(match);
             Assert.That(match.Groups.Count, Is.GreaterThanOrEqualTo(5));
@@ -377,7 +382,6 @@ namespace Dialogic
 
             //for (int i = 0; i < parts.Count; i++)Console.WriteLine(i+") "+parts[i]);
 
-            re = ChatParser.LineParser();
             match = re.Match("DO #(Hello | Goodbye)");
             Assert.That(match.Groups.Count, Is.GreaterThanOrEqualTo(5));
 

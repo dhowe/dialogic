@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
@@ -66,6 +65,17 @@ namespace Dialogic
         internal bool ResumeAfterInterrupting()
         {
             return resumeAfterInt;
+        }
+
+        internal bool Resumable()
+        {
+            return this.resumable;
+        }
+
+        internal Chat Resumable(bool isResumable)
+        {
+            this.resumable = isResumable;
+            return this;
         }
 
         internal Chat Staleness(double d)
@@ -204,18 +214,19 @@ namespace Dialogic
 
         internal static Type DefaultCommandType(Chat chat)
         {
-            if (chat != null)
+            if (chat != null && chat.runtime != null)
             {
+                var typeMap = chat.runtime.typeMap;
                 if (chat.HasMeta(Meta.DEFAULT_CMD))
                 {
                     var type = (string)chat.GetMeta(Meta.DEFAULT_CMD);
-                    if (!ChatRuntime.TypeMap.ContainsKey(type))
+                    if (!typeMap.ContainsKey(type))
                     {
                         throw new ParseException("Invalid defaultCmd" +
                             "  value in Chat#" + chat.text);
                     }
 
-                    return ChatRuntime.TypeMap[type];
+                    return typeMap[type];
                 }
                 else if (chat.HasMeta(Meta.CHAT_MODE))
                 {

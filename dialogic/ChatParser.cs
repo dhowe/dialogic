@@ -19,7 +19,7 @@ namespace Dialogic
 
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
-        private static Regex lineParser; // static??
+        private Regex lineParser;
 
         protected ChatRuntime runtime;
         protected Stack<Command> parsedCommands;
@@ -30,7 +30,7 @@ namespace Dialogic
             this.runtime = runtime;
         }
 
-        internal static Regex LineParser()
+        internal Regex LineParser()
         {
             if (lineParser == null)
             {
@@ -60,10 +60,10 @@ namespace Dialogic
             }
         }
 
-        internal static string TypesRegex()
+        internal string TypesRegex()
         {
             string s = @"(";
-            var cmds = ChatRuntime.TypeMap.Keys;
+            var cmds = runtime.typeMap.Keys;
             for (int i = 0; i < cmds.Count; i++)
             {
                 s += cmds.ElementAt(i);
@@ -78,7 +78,7 @@ namespace Dialogic
 
             try
             {
-                c = ParseCommand(new LineContext(line, lineNo));
+                c = CreateCommand(new LineContext(this, line, lineNo));
             }
             catch (Exception ex)
             //catch (ParseException ex)
@@ -117,12 +117,13 @@ namespace Dialogic
             return ((Chat)LastOfType(parsedCommands, typeof(Chat)));
         }
 
-        private Command ParseCommand(LineContext lc)
+        internal Command CreateCommand(LineContext lc)
         {
-            Type type = lc.command.Length > 0 ? ChatRuntime.TypeMap[lc.command]
+            Type type = lc.command.Length > 0 ? runtime.typeMap[lc.command]
                     : Chat.DefaultCommandType(ActiveChat());
             
             Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
+            c.lineContext = lc;
 
             HandleActor(lc.actor, c, lc.line, lc.lineNo);
             HandleCommand(c, lc.line, lc.lineNo);
@@ -255,15 +256,28 @@ namespace Dialogic
         }
     }
 
-    internal class LineContext
+    public class LineContext
     {
         internal string actor, command, text, label, meta;
 
         internal readonly string line;
         internal readonly int lineNo;
 
-        public LineContext(string line, int lineNo = -1, bool showMatch = false)
+        private readonly ChatParser parser;
+
+        public LineContext(ChatParser parser, string actor, string command, string text, string label, string meta)
         {
+            this.parser = parser;
+            this.actor = actor;
+            this.command = command;
+            this.text = text;
+            this.label = label;
+            this.meta = meta;
+        }
+
+        public LineContext(ChatParser parser, string line, int lineNo = -1, bool showMatch = false)
+        {
+            this.parser = parser;
             this.line = line;
             this.lineNo = lineNo;
             ParseLineContext(showMatch);
@@ -271,7 +285,7 @@ namespace Dialogic
 
         private void ParseLineContext(bool showMatch = false)
         {
-            Match match = ChatParser.LineParser().Match(line);
+            Match match = parser.LineParser().Match(line);
 
             if (showMatch) Util.ShowMatch(match);
 
