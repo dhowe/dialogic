@@ -35,6 +35,11 @@ namespace Dialogic
             return delay;
         }
 
+        internal CommandData ToCommandData()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Will update the value of the property (and meta if syncMeta=true) if it exists, and return true, else false if it does not
         /// </summary>
@@ -51,32 +56,6 @@ namespace Dialogic
 
             return updated;
         }
-
-        //// Set a Command property by name
-        //protected internal void DynamicSet(string property,
-        //    object val, bool syncMeta = true)
-        //{
-        //    Properties.Set(this, property, val);
-
-        //    // check if we need to sync metadata as well
-        //    if (syncMeta && HasMeta(property))
-        //    {
-        //        SetMeta(property, val.ToString());
-        //    }
-        //}
-
-        // Set a Command property by name
-        //protected internal void DynamicSet(PropertyInfo propInfo, 
-        //    object val, bool syncMeta = true)
-        //{
-        //    Properties.Set(this, propInfo, val);
-
-        //    // check if we need to sync metadata as well
-        //    if (syncMeta && HasMeta(propInfo.Name))
-        //    {
-        //        SetMeta(propInfo.Name, val.ToString());
-        //    }
-        //}
 
         protected Command Delay(double seconds)
         {

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using MessagePack;
 
 namespace Dialogic
 {
     /// <summary>
     /// Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contains one or more commands. When a Chat is run, each command is executed in order, until all have been run, or the system jumps to a new Chat. The Chat command accepts a required label, followed, optionally, by metadata, which can be used with the Find command to search for Chats matching desired criteria.
     /// </summary>
+    [MessagePackObject(keyAsPropertyName: true)]
     public class Chat : Command
     {
         internal List<Command> commands;
@@ -66,6 +68,17 @@ namespace Dialogic
         internal bool ResumeAfterInterrupting()
         {
             return resumeAfterInt;
+        }
+
+        internal bool Resumable()
+        {
+            return this.resumable;
+        }
+
+        internal Chat Resumable(bool isResumable)
+        {
+            this.resumable = isResumable;
+            return this;
         }
 
         internal Chat Staleness(double d)

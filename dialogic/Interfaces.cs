@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using MessagePack;
 
 namespace Dialogic
 {
     /// <summary>
     /// An Actor to which IAssignable Commands can be assigned; may also include custom Commands and validators specific to the client application
     /// </summary>
+
     public interface IActor
     {
         string Name();

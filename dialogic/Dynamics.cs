@@ -227,7 +227,7 @@ namespace Dialogic
                 {
                     if (CacheEnabled(context))
                     {
-                        var cache = context.runtime.ChoiceCache;
+                        var cache = context.runtime.choiceCache;
 
                         // cache our prior Choice objects here
                         var choiceKey = context.text + Ch.LABEL + full;
@@ -249,7 +249,7 @@ namespace Dialogic
         internal static bool CacheEnabled(Chat context)
         {
             return context != null && context.runtime != null
-                && context.runtime.ChoiceCache != null;
+                && context.runtime.choiceCache != null;
         }
 
         internal string Resolve()

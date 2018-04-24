@@ -14,12 +14,14 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            var dialogic = new ChatRuntime(AppConfig.Actors);
-            dialogic.ParseFile(srcpath+"/data/gscript.gs");
+            var rt = new ChatRuntime(AppConfig.Actors);
+            rt.ParseFile(srcpath+"/data/gscript.gs");
+            var state = GameState.Create(rt);
             //dialogic.Run("#GScriptTest");
 
-            var bytes = MessagePackSerializer.Serialize(dialogic);
-            var mc2 = MessagePackSerializer.Deserialize<ChatRuntime>(bytes);
+            //var bytes = MessagePackSerializer.Serialize(dialogic);
+            var bytes = MessagePackSerializer.Serialize(state, MessagePack.Resolvers.StandardResolverAllowPrivate.Instance);
+            var mc2 = MessagePackSerializer.Deserialize<GameState>(bytes);
 
             // you can dump msgpack binary to human readable json.
             // In default, MeesagePack for C# reduce property name information.
