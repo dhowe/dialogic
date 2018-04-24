@@ -45,6 +45,7 @@
     <Compile Include="BindingTests.cs" />
     <Compile Include="GrammarTests.cs" />
     <Compile Include="DynamicsTests.cs" />
+    <Compile Include="SerializeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj">

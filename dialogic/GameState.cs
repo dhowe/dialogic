@@ -4,18 +4,46 @@ using MessagePack;
 
 namespace Dialogic
 {
+    public static class Serializer
+    {
+        public static byte[] ToBytes(ChatRuntime rt)
+        {
+            return MessagePackSerializer.Serialize(GameState.Create(rt));
+        }
+
+        public static void FromBytes(ChatRuntime rt, byte[] bytes)
+        {
+            MessagePackSerializer.Deserialize<GameState>(bytes).Update(rt);
+        }
+
+        public static string ToJSON(ChatRuntime rt)
+        {
+            return MessagePackSerializer.ToJson(ToBytes(rt));
+        }
+    }
+
+
+    /// <summary>
+    /// A serializable subset of system properties with which 
+    /// to store/restore instances of Dialogic
+    /// </summary>
     [MessagePackObject(keyAsPropertyName: true)]
     public class GameState
     {
+        /* Issues: 
+         *      - metadata values not updating
+         *      - default metadata values showing
+         */
+
         public string firstChat;
         public List<ChatData> chatData;
 
         public static GameState Create(ChatRuntime rt)
         {
-            return new GameState().FromGameObject(rt);   
+            return new GameState().FromGameObject(rt);
         }
 
-        public void AppendTo(ChatRuntime rt)
+        public void Update(ChatRuntime rt)
         {
             chatData.ForEach(cd => rt.AddChat(cd.ToGameObject(rt)));
             rt.firstChat = this.firstChat;
@@ -25,7 +53,7 @@ namespace Dialogic
         {
             var runtime = new ChatRuntime(actors);
             GameState gameState = GameState.Create(runtime);
-            AppendTo(runtime);
+            Update(runtime);
             return runtime;
         }
 
@@ -48,15 +76,12 @@ namespace Dialogic
     {
         public List<CommandData> commands;
 
-        public double staleness;
-        public bool resumable;
-        public bool interruptable;
-        public bool resumeAfterInt;
-        public double stalenessIncr;
+        public double staleness, stalenessIncr;
+        public bool resumable, interruptable, resumeAfterInt;
 
-        public int cursor = 0;
-        public int lastRunAt = -1;
+        public int cursor = 0, lastRunAt = -1;
         public bool allowSmoothingOnResume = true;
+
         public string text;
 
         internal static ChatData Create(Chat c)
@@ -126,7 +151,7 @@ namespace Dialogic
 
         public CommandData FromGameObject(Command c)
         {
-            this.command = c.TypeName(); // can be null in LineContext
+            this.command = c.TypeName().ToUpper();
 
             LineContext lc = c.lineContext;
             this.actor = lc.actor;
@@ -140,7 +165,8 @@ namespace Dialogic
 
         internal Command ToGameObject(ChatRuntime rt)
         {
-            LineContext lc = new LineContext(actor, command, text, label, meta);
+            ChatParser parser = rt.Parser();
+            LineContext lc = new LineContext(parser, actor, command, text, label, meta);
             //Type type = ChatRuntime.TypeMap[lc.command];
 
             //Command c = Command.Create(type, lc.text, lc.label, parser.SplitMeta(lc.meta));
@@ -150,7 +176,7 @@ namespace Dialogic
             //parser.HandleCommand(c, lc.line, lc.lineNo);
             //parser.RunValidators(c);
 
-            return rt.Parser().CreateCommand(lc);
+            return parser.CreateCommand(lc);
         }
     }
 

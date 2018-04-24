@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using MessagePack;
 
 namespace Dialogic
 {
@@ -23,14 +22,13 @@ namespace Dialogic
     ///     dialogic.Run("#FirstChat");
     /// \endcode
     /// </summary>
-    [MessagePackObject(keyAsPropertyName: true)]
     public class ChatRuntime
     {
         public static string LOG_FILE, CHAT_FILE_EXT = ".gs";
 
         internal static bool DebugLifecycle = false;
 
-        internal static IDictionary<string, Type> TypeMap
+        internal IDictionary<string, Type> typeMap
             = new Dictionary<string, Type>()
         {
             { "CHAT",   typeof(Chat) },
@@ -122,7 +120,14 @@ namespace Dialogic
 
         public void Run(string chatLabel = null)
         {
+            
             if (chats.Count < 1) throw new Exception("No chats found");
+
+            //this.version = Assembly.GetExecutingAssembly().GetName().Version;
+            //Console.WriteLine("Dialogic v"+this.version);
+
+            //Console.WriteLine("The version of the currently executing assembly is: {0}",
+                              //typeof(ChatRuntime).Assembly.GetName().Version);
 
             scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
         }
@@ -147,12 +152,12 @@ namespace Dialogic
                 ", chats:" + Chats().Stringify() + " }";
         }
 
-        ///////////////////////////////////////////////////////////////////////
-
-        internal List<Chat> Chats()
+        public List<Chat> Chats()
         {
             return chats.Values.ToList();
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         internal void AddChat(Chat c)
         {
@@ -165,7 +170,7 @@ namespace Dialogic
             chats.Add(c.text, c);
         }
          
-        internal Chat AddNewChat(string name)
+        internal Chat AddNewChat(string name) // testing only
         {
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
@@ -236,9 +241,9 @@ namespace Dialogic
                 {
                     foreach (var cmd in cmds)
                     {
-                        if (!TypeMap.ContainsKey(cmd.label))
+                        if (!typeMap.ContainsKey(cmd.label))
                         {
-                            TypeMap.Add(cmd.label, cmd.type);
+                            typeMap.Add(cmd.label, cmd.type);
                         }
                     }
                 }

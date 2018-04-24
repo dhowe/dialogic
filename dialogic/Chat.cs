@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using MessagePack;
 
 namespace Dialogic
 {
     /// <summary>
     /// Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contains one or more commands. When a Chat is run, each command is executed in order, until all have been run, or the system jumps to a new Chat. The Chat command accepts a required label, followed, optionally, by metadata, which can be used with the Find command to search for Chats matching desired criteria.
     /// </summary>
-    [MessagePackObject(keyAsPropertyName: true)]
     public class Chat : Command
     {
         internal List<Command> commands;
@@ -217,18 +214,19 @@ namespace Dialogic
 
         internal static Type DefaultCommandType(Chat chat)
         {
-            if (chat != null)
+            if (chat != null && chat.runtime != null)
             {
+                var typeMap = chat.runtime.typeMap;
                 if (chat.HasMeta(Meta.DEFAULT_CMD))
                 {
                     var type = (string)chat.GetMeta(Meta.DEFAULT_CMD);
-                    if (!ChatRuntime.TypeMap.ContainsKey(type))
+                    if (!typeMap.ContainsKey(type))
                     {
                         throw new ParseException("Invalid defaultCmd" +
                             "  value in Chat#" + chat.text);
                     }
 
-                    return ChatRuntime.TypeMap[type];
+                    return typeMap[type];
                 }
                 else if (chat.HasMeta(Meta.CHAT_MODE))
                 {

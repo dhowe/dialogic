@@ -16,16 +16,18 @@ namespace runner
         {
             var rt = new ChatRuntime(AppConfig.Actors);
             rt.ParseFile(srcpath+"/data/noglobal.gs");
-            var state = GameState.Create(rt);
-            //dialogic.Run("#GScriptTest");
+            var bytes = Serializer.ToBytes(rt);
+            var json = Serializer.ToJSON(rt);
 
-            var bytes = MessagePackSerializer.Serialize(state);
-            var json = MessagePackSerializer.ToJson(bytes);
+            Console.WriteLine(rt);
             Console.WriteLine(json);
 
-            var rt2 = new ChatRuntime(AppConfig.Actors);
-            MessagePackSerializer.Deserialize<GameState>(bytes).AppendTo(rt2);
-            rt2.Run();
+            rt = new ChatRuntime(AppConfig.Actors);
+            Serializer.FromBytes(rt, bytes);
+
+            Console.WriteLine(rt);
+
+            //rt.Chats().ForEach(c => Console.WriteLine(c.ToTree()+"\n"));
 
             //new MockGameEngine(srcpath + "/data/gscript.gs").Run();
         }
