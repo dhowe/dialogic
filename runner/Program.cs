@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Dialogic;
 using Tendar;
+using MessagePack;
 
 namespace runner
 {
@@ -13,7 +14,20 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
+            var dialogic = new ChatRuntime(AppConfig.Actors);
+            dialogic.ParseFile(srcpath+"/data/gscript.gs");
+            //dialogic.Run("#GScriptTest");
+
+            var bytes = MessagePackSerializer.Serialize(dialogic);
+            var mc2 = MessagePackSerializer.Deserialize<ChatRuntime>(bytes);
+
+            // you can dump msgpack binary to human readable json.
+            // In default, MeesagePack for C# reduce property name information.
+            // [99,"hoge","huga"]
+            var json = MessagePackSerializer.ToJson(bytes);
+            Console.WriteLine(json);
+
+            //new MockGameEngine(srcpath + "/data/gscript.gs").Run();
         }
 
         public static string srcpath = "../../../dialogic";

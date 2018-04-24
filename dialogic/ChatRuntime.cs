@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using MessagePack;
 
 namespace Dialogic
 {
@@ -22,6 +23,7 @@ namespace Dialogic
     ///     dialogic.Run("#FirstChat");
     /// \endcode
     /// </summary>
+    [MessagePackObject(keyAsPropertyName: true)]
     public class ChatRuntime
     {
         public static string LOG_FILE, CHAT_FILE_EXT = ".gs";
@@ -57,7 +59,7 @@ namespace Dialogic
         private List<Func<Command, bool>> validators;
         private IDictionary<string, Chat> chats;
 
-        public Chat this[string key] // TODO: test
+        public Chat this[string key]
         {
             get { return this.chats[key]; }
         }
