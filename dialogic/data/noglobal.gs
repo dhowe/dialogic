@@ -1,4 +1,5 @@
-﻿SET $emotion = simple | lost
+﻿CHAT Init {type=a,stage=b}
+SET $emotion = simple | lost
 SET $place = Purgatory
 SET $neg = Nah | No | Nyet
 SET $verb = play | start | begin

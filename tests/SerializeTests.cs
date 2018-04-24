@@ -3,8 +3,9 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using Dialogic;
+using Tendar;
 
-namespace tests
+namespace Dialogic
 {
     [TestFixture]
     public class SerializeTests
@@ -21,22 +22,20 @@ namespace tests
                 { "count", 4 }
          };
 
-        [Test]
+        //[Test] TODO: in progress
         public void SaveRestoreChats()
         {
-            var rt = new ChatRuntime(AppConfig.Actors);
-            rt.ParseFile(srcpath + "/data/noglobal.gs");
-            Console.WriteLine(rt);
-            var state = GameState.Create(rt);
-            //dialogic.Run("#GScriptTest");
+            var testfile = AppDomain.CurrentDomain.BaseDirectory;
+            testfile += "../dialogic/data/noglobal.gs";
+            ChatRuntime rtOut, rtIn = new ChatRuntime(AppConfig.Actors);
+            rtIn.ParseFile(testfile);
 
-            var bytes = MessagePackSerializer.Serialize(state);
-            var json = MessagePackSerializer.ToJson(bytes);
-            //Console.WriteLine(json);
+            var bytes = Serializer.ToBytes(rtIn);
+            Serializer.FromBytes(rtOut = new ChatRuntime(AppConfig.Actors), bytes);
 
-            var runtime = new ChatRuntime(AppConfig.Actors);
-            MessagePackSerializer.Deserialize<GameState>(bytes).Update(runtime);
-            Console.WriteLine(runtime);
+            //Console.WriteLine(rtOut.ToString());
+
+            Assert.That(rtOut.ToString(), Is.EqualTo(rtIn.ToString()));
         }
     }
 }

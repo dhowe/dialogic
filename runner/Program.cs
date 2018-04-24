@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Dialogic;
 using Tendar;
-using MessagePack;
 
 namespace runner
 {
@@ -14,22 +13,7 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            var rt = new ChatRuntime(AppConfig.Actors);
-            rt.ParseFile(srcpath+"/data/noglobal.gs");
-            var bytes = Serializer.ToBytes(rt);
-            var json = Serializer.ToJSON(rt);
-
-            Console.WriteLine(rt);
-            Console.WriteLine(json);
-
-            rt = new ChatRuntime(AppConfig.Actors);
-            Serializer.FromBytes(rt, bytes);
-
-            Console.WriteLine(rt);
-
-            //rt.Chats().ForEach(c => Console.WriteLine(c.ToTree()+"\n"));
-
-            //new MockGameEngine(srcpath + "/data/gscript.gs").Run();
+            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
         }
 
         public static string srcpath = "../../../dialogic";
