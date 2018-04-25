@@ -245,7 +245,7 @@ namespace Dialogic
 
                 return new UpdateEvent((Dialogic.ISendable)cmd); // fire cmd event
             }
-            else if (cmd is Find)
+            else if (cmd is Find && !runtime.immediateMode) // fix to 
             {
                 scheduler.Completed(false); // finish 
                 runtime.FindAsync((Find)cmd);  // then do Find

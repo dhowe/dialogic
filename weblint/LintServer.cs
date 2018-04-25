@@ -42,7 +42,12 @@ namespace Dialogic.Server
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    return ip.ToString();
+                    var local = ip.ToString();
+                    if (local.StartsWithAny("192.168", "10.", "172."))
+                    {
+                        local = "localhost";
+                    }
+                    return local;
                 }
             }
             throw new Exception("No IPv4 network adapters with a valid address");
@@ -74,7 +79,11 @@ namespace Dialogic.Server
                             }
                             finally
                             {
-                                if (ctx != null) ctx.Response.OutputStream.Close();
+                                try
+                                {
+                                    if (ctx != null) ctx.Response.OutputStream.Close();
+                                }
+                                catch (Exception) { /* ignore */ }
                             }
 
                         }, listener.GetContext());
@@ -86,8 +95,12 @@ namespace Dialogic.Server
 
         public void Stop()
         {
-            listener.Stop();
-            listener.Close();
+            try
+            {
+                listener.Stop();
+                listener.Close();
+            }
+            catch (Exception) { /* ignore */ }
         }
 
         public static string SendResponse(HttpListenerRequest request)
@@ -128,7 +141,7 @@ namespace Dialogic.Server
                 var result = string.Empty;
                 if (mode == "execute")
                 {
-                    // run the chats without any delays, outputting SAY commands
+                    // run the chats without delays, outputting SAY/ASK commands
                     result = WebUtility.HtmlEncode(runtime.InvokeImmediate
                         (new Dictionary<string, object>())); 
                 }
