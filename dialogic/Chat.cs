@@ -47,72 +47,6 @@ namespace Dialogic
             return c;
         }
 
-        internal double Staleness()
-        {
-            return staleness;
-        }
-
-        internal double StalenessIncr()
-        {
-            return stalenessIncr;
-        }
-
-        internal bool Interruptable()
-        {
-            return interruptable;
-        }
-
-        internal bool ResumeAfterInterrupting()
-        {
-            return resumeAfterInt;
-        }
-
-        internal bool Resumable()
-        {
-            return this.resumable;
-        }
-
-        internal Chat Resumable(bool isResumable)
-        {
-            this.resumable = isResumable;
-            return this;
-        }
-
-        internal Chat Staleness(double d)
-        {
-            staleness = d;
-            SetMeta(Meta.STALENESS, d.ToString());
-            return this;
-        }
-
-        internal Chat IncrementStaleness()
-        {
-            Staleness(staleness + stalenessIncr);
-            return this;
-        }
-
-        internal Chat StalenessIncr(double incr)
-        {
-            this.stalenessIncr = incr;
-            SetMeta(Meta.STALENESS_INCR, incr.ToString());
-            return this;
-        }
-
-        internal Chat Interruptable(bool val)
-        {
-            this.interruptable = val;
-            SetMeta(Meta.INTERRUPTIBLE, val.ToString());
-
-            return this;
-        }
-
-        internal Chat ResumeAfterInterrupting(bool val)
-        {
-            this.resumeAfterInt = val;
-            SetMeta(Meta.RESUME_AFTER_INT, val.ToString());
-            return this;
-        }
-
         public int Count()
         {
             return commands.Count;
@@ -166,18 +100,37 @@ namespace Dialogic
                 s += '{';
                 foreach (var key in meta.Keys)
                 {
-                    // no need to show the default staleness
-                    if (key == Meta.STALENESS &&
-                        Util.FloatingEquals(Staleness(), Defaults.CHAT_STALENESS))
+                    // no need to show the default properties
+                    if (!HasDefaultPropValue(key, meta[key]))
                     {
-                        continue;
+                        s += key + '=' + meta[key] + ',';
                     }
-
-                    s += key + '=' + meta[key] + ',';
                 }
                 s = s.TrimLast(',') + "}";
             }
             return s.ReplaceFirst("{}", string.Empty);
+        }
+
+        private bool HasDefaultPropValue(string key, object val) 
+        {
+            if (key == Meta.STALENESS && Util.FloatingEquals
+                (staleness, Defaults.CHAT_STALENESS))
+            {
+                return true;  // refactor this ugly thing
+            }
+            else if (key == Meta.STALENESS_INCR && Util.FloatingEquals
+                     (stalenessIncr, Defaults.CHAT_STALENESS_INCR))
+            {
+                return true;
+            }
+            else if ((key == Meta.RESUMABLE && resumable) || 
+                     (key == Meta.INTERRUPTIBLE && interruptable) ||
+                     (key == Meta.RESUME_AFTER_INT && resumeAfterInt))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         internal Chat LastRunAt(int ms)
@@ -245,10 +198,78 @@ namespace Dialogic
 
         public override string Text()
         {
-            throw new DialogicException("Cannot call Text() on Chat: "+this);
+            throw new DialogicException("Cannot call Text() on Chat: " + this);
         }
 
-        // testing only below --------------------------------------------------
+        // meta-settable properties -------------------------------------------
+
+        internal double Staleness()
+        {
+            return staleness;
+        }
+
+        internal double StalenessIncr()
+        {
+            return stalenessIncr;
+        }
+
+        internal bool Interruptable()
+        {
+            return interruptable;
+        }
+
+        internal bool ResumeAfterInterrupting()
+        {
+            return resumeAfterInt;
+        }
+
+        internal bool Resumable()
+        {
+            return this.resumable;
+        }
+
+        internal Chat Resumable(bool isResumable)
+        {
+            this.resumable = isResumable;
+            return this;
+        }
+
+        internal Chat Staleness(double d)
+        {
+            staleness = d;
+            SetMeta(Meta.STALENESS, d.ToString());
+            return this;
+        }
+
+        internal Chat IncrementStaleness()
+        {
+            Staleness(staleness + stalenessIncr);
+            return this;
+        }
+
+        internal Chat StalenessIncr(double incr)
+        {
+            this.stalenessIncr = incr;
+            SetMeta(Meta.STALENESS_INCR, incr.ToString());
+            return this;
+        }
+
+        internal Chat Interruptable(bool val)
+        {
+            this.interruptable = val;
+            SetMeta(Meta.INTERRUPTIBLE, val.ToString());
+
+            return this;
+        }
+
+        internal Chat ResumeAfterInterrupting(bool val)
+        {
+            this.resumeAfterInt = val;
+            SetMeta(Meta.RESUME_AFTER_INT, val.ToString());
+            return this;
+        }
+
+        // testing below ------------------------------------------------------
 
         internal string _Expand(IDictionary<string, object> globals, string start)
         {
@@ -260,10 +281,10 @@ namespace Dialogic
             return s.Text();
         }
 
-        internal string _ExpandNoGroups(IDictionary<string, object> globals,
-            string start)//, bool doGroups = false)
+        internal string _ExpandNoGroups(IDictionary<string, object> globals, string start)
         {
             start = start.TrimFirst(Ch.SYMBOL);
+
             var re = new Regex(@"\$([^ \(\)]+)");
             string sofar = (string)scope[start];
 
@@ -284,12 +305,10 @@ namespace Dialogic
             if (recursions >= 10) Console.WriteLine("[WARN] Max recursion level"
                 + " reached: " + start + " -> " + sofar);
 
-            //if (doGroups) sofar = Realizer.DoGroups(sofar);
 
             return sofar;
         }
 
-        // unused as yet
         protected internal string _GrammarToJson(IDictionary<string, object>
             globals, bool localize = true)
         {
@@ -310,16 +329,19 @@ namespace Dialogic
                         val = val.Replace(name, "");
                     }
 
-                    //foreach (Match match in re.Matches(val))
-                    //{
-                    //    var sub = match.Groups[1].Value;
-                    //    val = val.Replace("$" + sub, "<" + sub + ">");
-                    //}
-
                     g += "  \"" + key + "\": \"" + val + "\",\n";
                 }
             }
             return g.Substring(0, g.Length - 2) + "\n}";
+        }
+
+        internal void OnCompletion()
+        {
+            // clear any local scope
+            this.scope.Clear(); 
+
+            // and realized command data
+            commands.ForEach(c => c.realized.Clear()); //tmp
         }
     }
 }

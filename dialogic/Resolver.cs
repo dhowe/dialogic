@@ -21,7 +21,7 @@ namespace Dialogic
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, parent));
+            if (DBUG) ; Console.WriteLine("------------------------\nBind: " + Info(text, parent));
 
             var original = text;
             int depth = 0, maxRecursionDepth = Defaults.BIND_MAX_DEPTH;
@@ -40,11 +40,17 @@ namespace Dialogic
                     if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
                     {
                         var symbols = Symbol.Parse(text, parent);
-                        if (!symbols.IsNullOrEmpty()) throw new UnboundSymbol
-                            (symbols[0], parent, globals);
+                        if (!symbols.IsNullOrEmpty())
+                        {
+                            if (parent.runtime.strictMode) throw new UnboundSymbol
+                                (symbols[0], parent, globals);
+                            Console.WriteLine("[WARN] Unbound symbol: " + symbols[0]+" globals: "+globals.Stringify());
+                        }
                     }
-                    throw new BindException
+                    if (parent.runtime.strictMode) throw new BindException
                         ("Resolver hit maxRecursionDepth for: " + original);
+
+                    break;
                 }
 
             } while (IsDynamic(text));

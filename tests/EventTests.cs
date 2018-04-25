@@ -10,6 +10,55 @@ namespace Dialogic
     {
         const bool NO_VALIDATORS = true;
 
+        static IDictionary<string, object> globals
+            = new Dictionary<string, object>
+        {
+            { "animal", "dog" },
+            { "group", "(a|b)" },
+            { "count", 4 },
+        };
+
+        [Test]
+        public void RuntimeModesTest()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello $animal.",
+                "ASK you are a $animal?",
+                "SAY ok.",
+            };
+            string s, contents = String.Join("\n", lines);
+
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(contents);
+            s = InvokeImmediate(rt, rt["c"]);
+            Console.WriteLine(s);
+            Assert.That(s, Is.EqualTo("hello dog. you are a dog? ok."));
+        }
+
+        private static string InvokeImmediate(ChatRuntime rt, params Chat[] chats)
+        {
+            EventArgs ea = null;
+
+            if (chats.IsNullOrEmpty()) chats = rt.Chats().ToArray();
+                
+            rt.immediateMode = true;
+            rt.Run();
+
+            for (int i = 0; i < max; i++)
+            {
+
+            }
+            var result = "";
+            for (int i = 0; i <= c.commands.Count; i++)
+            {
+                var ue = rt.Update(globals, ref ea);
+                if (i > 0) result += ue.Text() + " ";
+            }
+
+            return result.Trim();
+        }
+
         [Test]
         public void StalenessEventTest()
         {

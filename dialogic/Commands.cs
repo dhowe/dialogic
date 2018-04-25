@@ -395,6 +395,15 @@ namespace Dialogic
             this.timeout = Defaults.ASK_TIMEOUT;
         }
 
+        internal Say ToSay()
+        {
+            Say say = new Say();
+            say.SetMeta(Meta.TEXT, text);
+            say.parent = parent;
+            say.text = text;
+            return say;
+        }
+
         protected double Timeout()
         {
             return timeout;
@@ -411,8 +420,8 @@ namespace Dialogic
         {
             if (options.Count < 1) // default options
             {
-                options.Add(new Opt("Yes", NOP));
-                options.Add(new Opt("No", NOP));
+                AddOption(new Opt("Yes", NOP));
+                AddOption(new Opt("No", NOP));
             }
             return options;
         }
@@ -540,7 +549,7 @@ namespace Dialogic
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
             realized.Clear();
-            RealizeMeta(globals); // only realized meta
+            RealizeMeta(globals); // only realize meta
             return this;
         }
 

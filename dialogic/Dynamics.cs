@@ -324,7 +324,7 @@ namespace Dialogic
 
     internal class Symbol
     {
-        public string text, alias, symbol;
+        public string text, alias, name;
         public bool bounded, chatScoped;
         public Chat context;
 
@@ -337,7 +337,7 @@ namespace Dialogic
         {
             this.context = context;
             this.text = theText.Trim();
-            this.symbol = theSymbol.Trim();
+            this.name = theSymbol.Trim();
             this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
             this.chatScoped = (typeChar == Ch.LABEL.ToString());
@@ -353,7 +353,7 @@ namespace Dialogic
         internal string SymbolText()
         {
             return (chatScoped ? Ch.LABEL : Ch.SYMBOL)
-                + (bounded ? "{" + symbol + '}' : symbol);
+                + (bounded ? "{" + name + '}' : name);
         }
 
         public static List<Symbol> Parse(string text, Chat context)
@@ -379,7 +379,7 @@ namespace Dialogic
 
         internal string Resolve(IDictionary<string, object> globals)
         {
-            string[] parts = symbol.Split(Ch.SCOPE);
+            string[] parts = name.Split(Ch.SCOPE);
 
             if (parts.Length == 1 && chatScoped) throw new BindException
                 ("Illegally-scoped variable: " + this);
@@ -416,8 +416,15 @@ namespace Dialogic
                             resolved = Properties.Get(resolved, parts[i]);
                         }
 
-                        if (resolved == null) throw new UnboundSymbol
-                            (symbol, context, globals);
+                        if (resolved == null)
+                        {
+                            if (context.runtime.strictMode)
+                            {
+                                throw new UnboundSymbol(name, context, globals);
+                            }
+                            Console.WriteLine("WARN: ALLOWING UNBOUND SYMBOL: "+name.ToUpper());
+                            resolved = name.ToUpper();
+                        }
 
                         HandleAlias(resolved, globals);
                     }
@@ -506,12 +513,12 @@ namespace Dialogic
 
         private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
         {
-            return (from s in syms orderby s.symbol.Length ascending select s).ToList();
+            return (from s in syms orderby s.name.Length ascending select s).ToList();
         }
 
         internal SymbolType Type()
         {
-            return this.symbol.Contains(Ch.SCOPE) ? (this.chatScoped ?
+            return this.name.Contains(Ch.SCOPE) ? (this.chatScoped ?
                 SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE) : SymbolType.SIMPLE;
         }
 

@@ -42,8 +42,10 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal IDictionary<string, Choice> choiceCache;
         internal bool validatorsDisabled;
+        internal bool immediateMode = true, strictMode = false;
+
+        internal IDictionary<string, Choice> choiceCache;
         internal ChatScheduler scheduler;
         internal string firstChat;
         internal List<IActor> actors;
@@ -55,10 +57,6 @@ namespace Dialogic
         private Thread searchThread;
         private ChatParser parser;
 
-        public Chat this[string key]
-        {
-            get { return this.chats[key]; }
-        }
 
         public ChatRuntime() : this(null, null) { }
 
@@ -75,6 +73,11 @@ namespace Dialogic
             this.actors = InitActors(theActors);
 
             if (!theChats.IsNullOrEmpty()) theChats.ForEach(AddChat);
+        }
+
+        public Chat this[string key] // string indexer -> runtime["chat4"]
+        {
+            get { return this.chats[key]; }
         }
 
         public void ParseText(string text, bool disableValidators = false)
@@ -119,15 +122,8 @@ namespace Dialogic
         }
 
         public void Run(string chatLabel = null)
-        {
-            
+        {            
             if (chats.Count < 1) throw new Exception("No chats found");
-
-            //this.version = Assembly.GetExecutingAssembly().GetName().Version;
-            //Console.WriteLine("Dialogic v"+this.version);
-
-            //Console.WriteLine("The version of the currently executing assembly is: {0}",
-                              //typeof(ChatRuntime).Assembly.GetName().Version);
 
             scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
         }
@@ -194,7 +190,8 @@ namespace Dialogic
         /// <param name="finder">Finder.</param>
         /// <param name="action">Action.</param>
         /// <param name="globals">Globals.</param>
-        internal void FindAllAsync(Find finder, Action<Chat> action, IDictionary<string, object> globals = null)
+        internal void FindAllAsync(Find finder, Action<Chat> action, 
+            IDictionary<string, object> globals = null)
         {
             (searchThread = new Thread(() =>
             {
@@ -211,7 +208,8 @@ namespace Dialogic
             })).Start();
         }
 
-        internal void FindAsync(Find finder, IDictionary<string, object> globals = null)
+        internal void FindAsync(Find finder, 
+            IDictionary<string, object> globals = null)
         {
             int ts = Util.Millis();
             (searchThread = new Thread(() =>
@@ -404,6 +402,8 @@ namespace Dialogic
 
         internal void Suspend()
         {
+            if (runtime.immediateMode) return;
+
             if (chat != null)
             {
                 if (!chat.interruptable)
@@ -425,7 +425,9 @@ namespace Dialogic
 
         internal int Resume()
         {
-            if (chat != null && nextEventTime > -1)
+            if (runtime.immediateMode) return -1;
+
+            if (chat != null && !Waiting())
             {
                 Warn("Ignoring attempt to resume while Chat#"
                      + chat.text + " is active & running\n");
@@ -501,6 +503,8 @@ namespace Dialogic
 
             Info("<#" + chat.text + "-finished>");
 
+            this.chat.OnCompletion();
+
             this.chat = null;
 
             if (resumesAfter) this.Resume();
@@ -519,10 +523,15 @@ namespace Dialogic
             Console.WriteLine("[WARN] " + msg);
         }
 
+        internal bool Waiting()
+        {
+            return nextEventTime == -1;
+        }
+
         internal bool Ready()
         {
-            return chat != null && nextEventTime > -1
-                && Util.Millis() >= nextEventTime;
+            return chat != null && !Waiting() && 
+                (runtime.immediateMode || Util.Millis() >= nextEventTime);
         }
     }
 }
