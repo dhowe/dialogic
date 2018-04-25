@@ -95,25 +95,21 @@ namespace Dialogic.Server
             var html = IndexPageContent.Replace("%%URL%%", SERVER_URL);
 
             var kvs = ParsePostData(request);
+
             var path = kvs.ContainsKey("path") ? kvs["path"] : null;
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
             var mode = kvs.ContainsKey("mode") ? kvs["mode"] : "validate";
 
             if (!String.IsNullOrEmpty(path))
             {
-                // get code from file
-                using (var wb = new WebClient())
-                {
-                    code = wb.DownloadString(path);
-                }
+                // fetch code from file
+                using (var wb = new WebClient()) code = wb.DownloadString(path); 
             }
 
             if (String.IsNullOrEmpty(code))
             {
                 return html.Replace("%%CODE%%", "Enter your code here");
             }
-
-            //Console.WriteLine("mode: " + mode+" code:\n" + code + "\n");
 
             html = html.Replace("%%CODE%%", WebUtility.HtmlEncode(code));
             html = html.Replace("%%CCLASS%%", "shown");
@@ -122,39 +118,31 @@ namespace Dialogic.Server
             {
                 string content = String.Empty;
                 runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+                runtime.strictMode = false; // allow unbound symbols in output
+                runtime.immediateMode = true; // ignore command timings
                 runtime.ParseText(code, false); // true to disable validators
 
                 //Console.WriteLine(runtime);
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
 
+                var result = string.Empty;
                 if (mode == "execute")
                 {
-                    var globals = new Dictionary<string, object>();
-                    runtime.Chats().ForEach(c => c.Realize(globals));
-                    var cmd = runtime.Chats().Last().commands.Last();
-                    var executeContent = cmd.TypeName().ToUpper() + " "
-                        + cmd.text + " -> " + cmd.Text();
-                    html = html.Replace("%%EXECUTE%%", WebUtility.HtmlEncode(executeContent));
+                    // run the chats without any delays, outputting SAY commands
+                    result = WebUtility.HtmlEncode(runtime.InvokeImmediate
+                        (new Dictionary<string, object>())); 
                 }
-                else
-                {
-                    html = html.Replace("%%EXECUTE%%", "");
-                }
-
                 html = html.Replace("%%RESULT%%", WebUtility.HtmlEncode(content));
+                html = html.Replace("%%EXECUTE%%", result);
                 html = html.Replace("%%RCLASS%%", "success");
             }
             catch (ParseException ex)
             {
                 OnError(ref html, ex, ex.lineNumber);
             }
-            catch (DialogicException ex)
-            {
-                OnError(ref html, ex, -1);
-            }
             catch (Exception e)
             {
-                Console.WriteLine("[ERROR] " + e);
+                OnError(ref html, e, -1);
             }
 
             return html;
@@ -164,15 +152,15 @@ namespace Dialogic.Server
         {
             html = html.Replace("%%EXECUTE%%", "");
             html = html.Replace("%%RCLASS%%", "error");
-            html = html.Replace("%%RESULT%%", ex.Message);
-            html = html.Replace("%%ERRORLINE%%",
-                (lineno >= 0 ? lineno.ToString() : ""));
+            html = html.Replace("%%RESULT%%", lineno < 0 ? ex.ToString() : ex.Message);
+            html = html.Replace("%%ERRORLINE%%", lineno < 0 ? "" : lineno.ToString());
+
+            if (lineno < 0) Console.WriteLine("[STACK]\n" + ex.Message);
         }
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
         {
-
-            IDictionary<string, string> result = new Dictionary<string, string>();
+            var result = new Dictionary<string, string>();
 
             if (request.HasEntityBody)
             {

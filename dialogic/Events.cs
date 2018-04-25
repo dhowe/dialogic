@@ -193,6 +193,11 @@ namespace Dialogic
             return (!data.ContainsKey(Meta.OPTS)) ?
                 (string)data[Meta.OPTS] : null;
         }
+
+        public override string ToString()
+        {
+            return Type() + " " + Text();
+        }
     }
 
 }
