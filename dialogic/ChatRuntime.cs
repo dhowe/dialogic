@@ -28,6 +28,8 @@ namespace Dialogic
 
         internal static bool DebugLifecycle = false;
 
+        public bool immediateMode, strictMode = true;
+
         internal IDictionary<string, Type> typeMap
             = new Dictionary<string, Type>()
         {
@@ -42,16 +44,14 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal bool validatorsDisabled;
-        internal bool immediateMode = true, strictMode = false;
-
         internal IDictionary<string, Choice> choiceCache;
         internal ChatScheduler scheduler;
+        internal bool validatorsDisabled;
         internal string firstChat;
-        internal List<IActor> actors;
-        internal IDictionary<string, Chat> chats;
-        internal List<Func<Command, bool>> validators;
 
+        private List<IActor> actors;
+        private List<Func<Command, bool>> validators;
+        private IDictionary<string, Chat> chats;
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private Thread searchThread;
@@ -154,6 +154,27 @@ namespace Dialogic
         }
 
         ///////////////////////////////////////////////////////////////////////
+
+        internal string InvokeImmediate(IDictionary<string, object> globals)
+        {
+            var previousMode = immediateMode;
+            this.immediateMode = true;
+
+            var result = "";
+            foreach (var c in chats.Values)
+            {
+                this.Run(c.text);
+                for (int i = 0; i <= c.commands.Count; i++)
+                {
+                    var ue = chatEvents.OnEvent(globals);
+                    if (i > 0) result += ue.Text() + '\n';
+                }
+            }
+
+            this.immediateMode = previousMode;
+
+            return result.TrimLast('\n');
+        }
 
         internal void AddChat(Chat c)
         {

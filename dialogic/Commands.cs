@@ -395,15 +395,6 @@ namespace Dialogic
             this.timeout = Defaults.ASK_TIMEOUT;
         }
 
-        internal Say ToSay()
-        {
-            Say say = new Say();
-            say.SetMeta(Meta.TEXT, text);
-            say.parent = parent;
-            say.text = text;
-            return say;
-        }
-
         protected double Timeout()
         {
             return timeout;
@@ -413,6 +404,7 @@ namespace Dialogic
         {
             timeout = seconds;
             SetMeta(Meta.TIMEOUT, seconds.ToString());
+
             return this;
         }
 
@@ -423,6 +415,7 @@ namespace Dialogic
                 AddOption(new Opt("Yes", NOP));
                 AddOption(new Opt("No", NOP));
             }
+
             return options;
         }
 
@@ -447,6 +440,7 @@ namespace Dialogic
         {
             this.selectedIdx = i;
             if (i >= 0 && i < options.Count) return Selected();
+
             return null;
         }
 
@@ -460,16 +454,29 @@ namespace Dialogic
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
             base.Realize(globals);
+
             Options().ForEach(o => o.Realize(globals));
             realized[Meta.TIMEOUT] = timeout.ToString();
             realized[Meta.OPTS] = JoinOptions();
+
             return this;
+        }
+
+        protected internal Say ToSay() // for immediate mode only
+        {
+            Say say = new Say();
+            say.parent = parent;
+            say.realized[Meta.TYPE] = say.TypeName();
+            say.realized[Meta.TEXT] = say.text = (string)realized[Meta.TEXT];
+
+            return say;
         }
 
         public override string ToString()
         {
             string s = base.ToString();
             if (options != null) options.ForEach(o => s += "\n  " + o);
+
             return s;
         }
     }
@@ -506,6 +513,7 @@ namespace Dialogic
         protected internal override Command Validate()
         {
             this.action.Validate(); // validate the option
+
             return this;
         }
 
@@ -550,6 +558,7 @@ namespace Dialogic
         {
             realized.Clear();
             RealizeMeta(globals); // only realize meta
+
             return this;
         }
 
@@ -623,6 +632,7 @@ namespace Dialogic
                 foreach (var ct in meta.Values) s += ct + ",";
                 s = s.Substring(0, s.Length - 1) + "}";
             }
+
             return s;
         }
 
@@ -649,6 +659,7 @@ namespace Dialogic
         public new Go Init(string label)
         {
             Init(String.Empty, label, null);
+
             return this;
         }
 
@@ -658,6 +669,7 @@ namespace Dialogic
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
             realized[Meta.TEXT] = Resolver.BindGroups(text, parent);
+
             return this;
         }
 

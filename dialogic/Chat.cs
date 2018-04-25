@@ -201,6 +201,12 @@ namespace Dialogic
             throw new DialogicException("Cannot call Text() on Chat: " + this);
         }
 
+        internal Chat IncrementStaleness()
+        {
+            Staleness(staleness + stalenessIncr);
+            return this;
+        }
+
         // meta-settable properties -------------------------------------------
 
         internal double Staleness()
@@ -228,44 +234,33 @@ namespace Dialogic
             return this.resumable;
         }
 
-        internal Chat Resumable(bool isResumable)
+        internal Chat Resumable(bool b)
         {
-            this.resumable = isResumable;
+            SetMeta(Meta.RESUMABLE, (resumable = b).ToString());
             return this;
         }
 
         internal Chat Staleness(double d)
         {
-            staleness = d;
-            SetMeta(Meta.STALENESS, d.ToString());
-            return this;
-        }
-
-        internal Chat IncrementStaleness()
-        {
-            Staleness(staleness + stalenessIncr);
+            SetMeta(Meta.STALENESS, (staleness = d).ToString());
             return this;
         }
 
         internal Chat StalenessIncr(double incr)
         {
-            this.stalenessIncr = incr;
-            SetMeta(Meta.STALENESS_INCR, incr.ToString());
+            SetMeta(Meta.STALENESS_INCR, (stalenessIncr = incr).ToString());
             return this;
         }
 
         internal Chat Interruptable(bool val)
         {
-            this.interruptable = val;
-            SetMeta(Meta.INTERRUPTIBLE, val.ToString());
-
+            SetMeta(Meta.INTERRUPTIBLE, (interruptable = val).ToString());
             return this;
         }
 
         internal Chat ResumeAfterInterrupting(bool val)
         {
-            this.resumeAfterInt = val;
-            SetMeta(Meta.RESUME_AFTER_INT, val.ToString());
+            SetMeta(Meta.RESUME_AFTER_INT, (resumeAfterInt = val).ToString());
             return this;
         }
 

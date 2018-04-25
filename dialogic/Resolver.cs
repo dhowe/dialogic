@@ -21,7 +21,7 @@ namespace Dialogic
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (DBUG) ; Console.WriteLine("------------------------\nBind: " + Info(text, parent));
+            if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, parent));
 
             var original = text;
             int depth = 0, maxRecursionDepth = Defaults.BIND_MAX_DEPTH;
@@ -44,7 +44,9 @@ namespace Dialogic
                         {
                             if (parent.runtime.strictMode) throw new UnboundSymbol
                                 (symbols[0], parent, globals);
-                            Console.WriteLine("[WARN] Unbound symbol: " + symbols[0]+" globals: "+globals.Stringify());
+                            
+                            Console.WriteLine("[WARN] Unbound symbol: " 
+                                + symbols[0] + " globals: " + globals.Stringify());
                         }
                     }
                     if (parent.runtime.strictMode) throw new BindException

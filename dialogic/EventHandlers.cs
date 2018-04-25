@@ -201,7 +201,7 @@ namespace Dialogic
             return null;
         }
 
-        private IUpdateEvent HandleCommand(Command cmd, 
+        private IUpdateEvent HandleCommand(Command cmd,
             IDictionary<string, object> globals)
         {
             if (ChatRuntime.LOG_FILE != null) WriteToLog(cmd);
@@ -232,7 +232,11 @@ namespace Dialogic
                 }
                 else if (cmd is Ask)
                 {
-                    cmd = ((Ask)cmd).ToSay().Realize(globals);
+                    var opt = Util.RandItem(((Ask)cmd).Options());
+                    //Console.WriteLine(opt);
+                    cmd = ((Ask)cmd).ToSay(); // convert Ask to Say
+                    var finder = new Go().Init(opt.action.text);
+                    runtime.FindAsync(finder);  // then do Find
                 }
 
                 return new UpdateEvent((Dialogic.ISendable)cmd); // fire cmd event

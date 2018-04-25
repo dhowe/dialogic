@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using NUnit.Framework;
 
@@ -26,37 +27,16 @@ namespace Dialogic
                 "SAY hello $animal.",
                 "ASK you are a $animal?",
                 "SAY ok.",
+                "CHAT c1",
+                "SAY goodbye."
             };
             string s, contents = String.Join("\n", lines);
 
             ChatRuntime rt = new ChatRuntime();
             rt.ParseText(contents);
-            s = InvokeImmediate(rt, rt["c"]);
-            Console.WriteLine(s);
-            Assert.That(s, Is.EqualTo("hello dog. you are a dog? ok."));
-        }
-
-        private static string InvokeImmediate(ChatRuntime rt, params Chat[] chats)
-        {
-            EventArgs ea = null;
-
-            if (chats.IsNullOrEmpty()) chats = rt.Chats().ToArray();
-                
-            rt.immediateMode = true;
-            rt.Run();
-
-            for (int i = 0; i < max; i++)
-            {
-
-            }
-            var result = "";
-            for (int i = 0; i <= c.commands.Count; i++)
-            {
-                var ue = rt.Update(globals, ref ea);
-                if (i > 0) result += ue.Text() + " ";
-            }
-
-            return result.Trim();
+            s = rt.InvokeImmediate(globals);
+            //Console.WriteLine(s);
+            Assert.That(s, Is.EqualTo("hello dog.\nyou are a dog?\nok.\ngoodbye."));
         }
 
         [Test]
@@ -78,7 +58,7 @@ namespace Dialogic
             EventArgs icu = new StalenessUpdate(5);
             rt.Update(null, ref icu);
             chats.ForEach(c => Assert.That(c.Staleness(), Is.EqualTo(5)));
-
+return;
             icu = new StalenessUpdate(100, "#c4");
             rt.Update(null, ref icu);
             Assert.That(rt.FindChatByLabel("c1").Staleness(), Is.EqualTo(5));
