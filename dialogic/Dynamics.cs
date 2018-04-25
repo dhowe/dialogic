@@ -390,6 +390,7 @@ namespace Dialogic
                 case SymbolType.SIMPLE:
 
                     HandleAlias(resolved, globals);
+
                     break;
 
                 case SymbolType.GLOBAL_SCOPE:
@@ -416,18 +417,11 @@ namespace Dialogic
                             resolved = Properties.Get(resolved, parts[i]);
                         }
 
-                        if (resolved == null)
-                        {
-                            if (context.runtime.strictMode)
-                            {
-                                throw new UnboundSymbol(name, context, globals);
-                            }
-                            Console.WriteLine("WARN: ALLOWING UNBOUND SYMBOL: "+name.ToUpper());
-                            resolved = name.ToUpper();
-                        }
+                        if (resolved == null) OnBindError(globals);
 
                         HandleAlias(resolved, globals);
                     }
+
                     break;
 
                 case SymbolType.CHAT_SCOPE:
@@ -441,6 +435,7 @@ namespace Dialogic
                     context = context.runtime.FindChatByLabel(parts[0]);
                     resolved = ResolveSymbol(parts[1], context, globals);
                     HandleAlias(resolved, context.scope);
+
                     break;
             }
 
@@ -459,6 +454,14 @@ namespace Dialogic
             }
 
             return null;
+        }
+
+        internal void OnBindError(IDictionary<string, object> globals)
+        {
+            if (context.runtime.strictMode) throw new UnboundSymbol
+                (name, context, globals);
+
+            Console.WriteLine("[WARN] Unbound symbol: " + name);
         }
 
         private void HandleAlias(object resolved, IDictionary<string, object> scope)

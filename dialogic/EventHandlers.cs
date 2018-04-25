@@ -124,7 +124,6 @@ namespace Dialogic
             }
         }
 
-
         private IUpdateEvent ChoiceHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
             IChoice ic = (IChoice)ea;
@@ -230,13 +229,18 @@ namespace Dialogic
                         ComputeNextEventTime(cmd); // compute delay for next cmd
                     }
                 }
-                else if (cmd is Ask)
+                else if (cmd is Ask) // Ask in immediate-mode
                 {
                     var opt = Util.RandItem(((Ask)cmd).Options());
-                    //Console.WriteLine(opt);
-                    cmd = ((Ask)cmd).ToSay(); // convert Ask to Say
-                    var finder = new Go().Init(opt.action.text);
-                    runtime.FindAsync(finder);  // then do Find
+
+                    // first we convert the Ask to a Say
+                    cmd = ((Ask)cmd).ToSay();
+
+                    // then pick a random option and follow it
+                    if (opt.action != Command.NOP)
+                    {
+                        runtime.FindAsync(new Go().Init(opt.action.text));
+                    }
                 }
 
                 return new UpdateEvent((Dialogic.ISendable)cmd); // fire cmd event

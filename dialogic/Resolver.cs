@@ -42,13 +42,12 @@ namespace Dialogic
                         var symbols = Symbol.Parse(text, parent);
                         if (!symbols.IsNullOrEmpty())
                         {
-                            if (parent.runtime.strictMode) throw new UnboundSymbol
-                                (symbols[0], parent, globals);
-                            
-                            Console.WriteLine("[WARN] Unbound symbol: " 
-                                + symbols[0] + " globals: " + globals.Stringify());
+                            symbols[0].OnBindError(globals);
+                            //throw new UnboundSymbol(symbols[0], parent, globals);
+                            Console.WriteLine("[WARN] Unbound symbol: " + symbols[0]);
                         }
                     }
+
                     if (parent.runtime.strictMode) throw new BindException
                         ("Resolver hit maxRecursionDepth for: " + original);
 

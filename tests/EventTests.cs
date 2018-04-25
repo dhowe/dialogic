@@ -25,7 +25,7 @@ namespace Dialogic
             string[] lines = {
                 "CHAT c",
                 "SAY hello $animal.",
-                "ASK you are a $animal?",
+                "ASK are you a $animal?",
                 "SAY ok.",
                 "CHAT c1",
                 "SAY goodbye."
@@ -34,9 +34,9 @@ namespace Dialogic
 
             ChatRuntime rt = new ChatRuntime();
             rt.ParseText(contents);
-            s = rt.InvokeImmediate(globals);
+            s = rt.InvokeImmediate(globals, "c1");
             //Console.WriteLine(s);
-            Assert.That(s, Is.EqualTo("hello dog.\nyou are a dog?\nok.\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\nok.\ngoodbye."));
         }
 
         [Test]

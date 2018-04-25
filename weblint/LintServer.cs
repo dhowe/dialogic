@@ -95,6 +95,7 @@ namespace Dialogic.Server
             var html = IndexPageContent.Replace("%%URL%%", SERVER_URL);
 
             var kvs = ParsePostData(request);
+
             var path = kvs.ContainsKey("path") ? kvs["path"] : null;
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
             var mode = kvs.ContainsKey("mode") ? kvs["mode"] : "validate";
@@ -127,33 +128,29 @@ namespace Dialogic.Server
                 //Console.WriteLine(runtime);
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
 
+                var result = string.Empty;
                 if (mode == "execute")
                 {
-                    var globals = new Dictionary<string, object>();
-                    runtime.Chats().ForEach(c => c.Realize(globals));
-                    var cmd = runtime.Chats().Last().commands.Last();
-                    var executeContent = cmd.TypeName().ToUpper() + " "
-                        + cmd.text + " -> " + cmd.Text();
-                    html = html.Replace("%%EXECUTE%%", WebUtility.HtmlEncode(executeContent));
+                    // run the chats without any delays, outputting SAY commands
+                    result = WebUtility.HtmlEncode(runtime.InvokeImmediate
+                        (new Dictionary<string, object>())); 
                 }
-                else
-                {
-                    html = html.Replace("%%EXECUTE%%", "");
-                }
-
                 html = html.Replace("%%RESULT%%", WebUtility.HtmlEncode(content));
+                html = html.Replace("%%EXECUTE%%", result);
                 html = html.Replace("%%RCLASS%%", "success");
             }
             catch (ParseException ex)
             {
                 OnError(ref html, ex, ex.lineNumber);
             }
-            catch (DialogicException ex)
-            {
-                OnError(ref html, ex, -1);
-            }
+            //catch (DialogicException ex)
+            //{
+            //    OnError(ref html, ex, -1);
+            //    Console.WriteLine("[ERROR] " + e);
+            //}
             catch (Exception e)
             {
+                OnError(ref html, e, -1);
                 Console.WriteLine("[ERROR] " + e);
             }
 
@@ -165,14 +162,13 @@ namespace Dialogic.Server
             html = html.Replace("%%EXECUTE%%", "");
             html = html.Replace("%%RCLASS%%", "error");
             html = html.Replace("%%RESULT%%", ex.Message);
-            html = html.Replace("%%ERRORLINE%%",
-                (lineno >= 0 ? lineno.ToString() : ""));
+            html = html.Replace("%%COMMENT%%", lineno > -1 ? ex.ToString() : "");
+            html = html.Replace("%%ERRORLINE%%", lineno >= 0 ? lineno.ToString() : "");
         }
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
         {
-
-            IDictionary<string, string> result = new Dictionary<string, string>();
+            var result = new Dictionary<string, string>();
 
             if (request.HasEntityBody)
             {

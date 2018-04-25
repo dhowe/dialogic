@@ -49,7 +49,7 @@ namespace runner
         public MockGameEngine(string fileOrFolder)
         {
             dialogic = new ChatRuntime(AppConfig.Actors);
-dialogic.immediateMode = true;
+            //dialogic.immediateMode = true;
             dialogic.ParseFile(fileOrFolder);
             dialogic.Run("#GScriptTest");
         }
