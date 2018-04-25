@@ -548,7 +548,7 @@ namespace Dialogic
 
         internal static void Info(object msg)
         {
-            if (!ChatRuntime.DebugLifecycle)
+            if (ChatRuntime.DebugLifecycle)
             {
                 ChatRuntime.Info(msg);
             }
