@@ -70,13 +70,13 @@ namespace Dialogic.Server
                             }
                             catch (Exception e)
                             {
-                                Console.WriteLine("[WARN] " + e);
+                                ChatRuntime.Warn(e.ToString());
                             }
                             finally
                             {
-                                // always close the stream
                                 if (ctx != null) ctx.Response.OutputStream.Close();
                             }
+
                         }, listener.GetContext());
                     }
                 }
@@ -184,7 +184,7 @@ namespace Dialogic.Server
                         }
                         else
                         {
-                            Console.WriteLine("[WARN] BAD KV - PAIR: " + p);
+                            //ChatRuntime.Warn("BAD KV - PAIR: " + p);
                             throw new Exception("BAD KV-PAIR: " + p);
                         }
                     }

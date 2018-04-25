@@ -185,7 +185,7 @@ namespace Dialogic
         {
             if (context == null || context.runtime == null)
             {
-                Console.WriteLine("[WARN] Choice.Parse got null context/runtime: " + input);
+                ChatRuntime.Warn("Choice.Parse got null context/runtime: " + input);
             }
             var groups = new List<Choice>();
             Parse(input, groups, context);
@@ -196,7 +196,7 @@ namespace Dialogic
         {
             if (context == null || context.runtime == null)
             {
-                Console.WriteLine("[WARN] Symbol.Parse got null context/runtime: " + input);
+                ChatRuntime.Warn("Symbol.Parse got null context/runtime: " + input);
             }
 
             // Cache the entire match?
@@ -464,7 +464,7 @@ namespace Dialogic
                 throw new UnboundSymbol(name, context, globals);
             }
 
-            Console.WriteLine("[WARN] Unbound symbol: " + name);
+            ChatRuntime.Warn("Unbound symbol: $" + name.TrimFirst(Ch.SYMBOL));
         }
 
         private void HandleAlias(object resolved, IDictionary<string, object> scope)
@@ -511,7 +511,7 @@ namespace Dialogic
             var groups = match.Groups;
             if (groups.Count != expected)
             {
-                Util.ShowMatch(match);
+                //Util.ShowMatch(match);
                 throw new ArgumentException("Invalid group count " + groups.Count);
             }
             return groups;

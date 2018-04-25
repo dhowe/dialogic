@@ -289,7 +289,7 @@ namespace Dialogic
 
             if (match.Groups.Count < 6)
             {
-                Util.ShowMatch(match);
+                //Util.ShowMatch(match);
                 throw new ParseException(line, lineNo, "cannot be parsed");
             }
 

@@ -287,10 +287,9 @@ namespace Dialogic
 
             if (match.Groups.Count != 4)
             {
-                Util.ShowMatch(match);
+                //Util.ShowMatch(match);
                 throw new ParseException("Invalid SET args: '" + txt + "'");
             }
-
 
             var tmp = match.Groups[1].Value.Trim();
 

@@ -47,7 +47,10 @@ namespace Dialogic
             rt.immediateMode = true;
             rt.strictMode = false;
 
+            ChatRuntime.SILENT = true;
             s = rt.InvokeImmediate(null);
+            ChatRuntime.SILENT = false;
+
             Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\nok.\ngoodbye."));
         }
 

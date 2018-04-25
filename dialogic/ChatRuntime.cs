@@ -25,6 +25,7 @@ namespace Dialogic
     public class ChatRuntime
     {
         public static string LOG_FILE, CHAT_FILE_EXT = ".gs";
+        public static bool SILENT = false;
 
         internal static bool DebugLifecycle = false;
 
@@ -328,6 +329,22 @@ namespace Dialogic
         {
             return FuzzySearch.FindAll(Chats(), ToList(f.realized), f.parent, globals);
         }
+
+        internal static void Info(object msg)
+        {
+            if (!ChatRuntime.SILENT)
+            {
+                Console.WriteLine(msg);
+            }
+        }
+
+        internal static void Warn(object msg)
+        {
+            if (!ChatRuntime.SILENT)
+            {
+                Console.WriteLine("[WARN] " + msg);
+            }
+        }
     }
 
     /// <summary>
@@ -427,7 +444,7 @@ namespace Dialogic
             {
                 if (!chat.interruptable)
                 {
-                    Console.WriteLine("Cannot interrupt #" + chat.text + "!");
+                    ChatRuntime.Warn("Cannot interrupt #" + chat.text);
                     return;
                 }
                 resumables.Push(chat);
@@ -529,17 +546,17 @@ namespace Dialogic
             if (resumesAfter) this.Resume();
         }
 
-        internal void Info(object msg)
+        internal static void Info(object msg)
         {
-            if (ChatRuntime.DebugLifecycle)
+            if (!ChatRuntime.DebugLifecycle)
             {
-                Console.WriteLine(msg);
+                ChatRuntime.Info(msg);
             }
         }
 
         internal void Warn(object msg)
         {
-            Console.WriteLine("[WARN] " + msg);
+            ChatRuntime.Warn(msg);
         }
 
         internal bool Waiting()

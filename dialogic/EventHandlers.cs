@@ -133,7 +133,7 @@ namespace Dialogic
             if (idx < 0 || idx >= scheduler.prompt.Options().Count)
             {
                 // bad index, so reprompt for now
-                Console.WriteLine("Invalid index " + idx + ", reprompting\n");
+                ChatRuntime.Info("Invalid index " + idx + ", reprompting\n");
                 scheduler.prompt.Realize(globals); // re-realize
                 return new UpdateEvent(scheduler.prompt);
             }

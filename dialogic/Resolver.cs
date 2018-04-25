@@ -44,7 +44,7 @@ namespace Dialogic
                         {
                             symbols[0].OnBindError(globals);
                             //throw new UnboundSymbol(symbols[0], parent, globals);
-                            Console.WriteLine("[WARN] Unbound symbol: " + symbols[0]);
+                            ChatRuntime.Warn("Unbound symbol: " + symbols[0]);
                         }
                     }
 
@@ -120,7 +120,7 @@ namespace Dialogic
                 if (!(text.Contains(Ch.OGROUP) && text.Contains(Ch.CGROUP)))
                 {
                     text = Ch.OGROUP + text + Ch.CGROUP;
-                    Console.WriteLine("[WARN] BindGroups added parens to: " + text);
+                    ChatRuntime.Warn("BindGroups added parens to: " + text);
                 }
 
                 var choices = Choice.Parse(text, context);
