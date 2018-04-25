@@ -60,9 +60,9 @@ namespace Dialogic
         [Test]
         public void Exceptions()
         {
-            //// no replace to be made
+            //// no resolution to be made
             Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<UnboundSymbol>(() => Resolver.Bind("$a", null, globals));
+            Assert.Throws<UnboundSymbol>(() => Resolver.Bind("$a", CreateParentChat("c"), globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",
@@ -385,6 +385,7 @@ namespace Dialogic
             Assert.That(options[1].Text(), Is.EqualTo("4"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
         }
+
         private static Chat CreateParentChat(string name)
         {
             // create a realized Chat with the full set of global props

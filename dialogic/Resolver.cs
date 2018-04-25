@@ -40,11 +40,18 @@ namespace Dialogic
                     if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
                     {
                         var symbols = Symbol.Parse(text, parent);
-                        if (!symbols.IsNullOrEmpty()) throw new UnboundSymbol
-                            (symbols[0], parent, globals);
+                        if (!symbols.IsNullOrEmpty())
+                        {
+                            symbols[0].OnBindError(globals);
+                            //throw new UnboundSymbol(symbols[0], parent, globals);
+                            Console.WriteLine("[WARN] Unbound symbol: " + symbols[0]);
+                        }
                     }
-                    throw new BindException
+
+                    if (parent.runtime.strictMode) throw new BindException
                         ("Resolver hit maxRecursionDepth for: " + original);
+
+                    break;
                 }
 
             } while (IsDynamic(text));

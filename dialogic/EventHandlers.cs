@@ -19,12 +19,16 @@ namespace Dialogic
 
         internal IUpdateEvent OnEvent(ref EventArgs ea, IDictionary<string, object> globals)
         {
+            if (runtime.immediateMode) return null; // ignore all app events
+
             if (ea is IChatUpdate) return ChatUpdateHandler(ref ea, globals);
             if (ea is IUserEvent) return UserActionHandler(ref ea, globals);
             if (ea is ISuspend) return SuspendHandler(ref ea, globals);
             if (ea is IResume) return ResumeHandler(ref ea, globals);
             if (ea is IChoice) return ChoiceHandler(ref ea, globals);
             if (ea is IClear) return ClearHandler(ref ea, globals);
+
+            // ea = null; TODO:
 
             throw new DialogicException("Unexpected event-type: " + ea.GetType());
         }
@@ -120,7 +124,6 @@ namespace Dialogic
             }
         }
 
-
         private IUpdateEvent ChoiceHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
             IChoice ic = (IChoice)ea;
@@ -184,7 +187,7 @@ namespace Dialogic
                 if (cmd != null)
                 {
                     cmd.Realize(globals);
-                    return HandleCommand(cmd);
+                    return HandleCommand(cmd, globals);
                 }
                 else
                 {
@@ -197,30 +200,47 @@ namespace Dialogic
             return null;
         }
 
-        private IUpdateEvent HandleCommand(Command cmd)
+        private IUpdateEvent HandleCommand(Command cmd,
+            IDictionary<string, object> globals)
         {
             if (ChatRuntime.LOG_FILE != null) WriteToLog(cmd);
 
             if (cmd is ISendable)
             {
-                if (cmd.GetType() == typeof(Wait))
+                if (!runtime.immediateMode)
                 {
-                    if (cmd.delay > Util.INFINITE) // non-infinite WAIT?
+                    if (cmd.GetType() == typeof(Wait))
                     {
-                        // just pause internally, no event needs to be fired
-                        ComputeNextEventTime(cmd);
-                        return null;
+                        if (cmd.delay > Util.INFINITE) // non-infinite WAIT?
+                        {
+                            // just pause internally, no event needs to be fired
+                            ComputeNextEventTime(cmd);
+                            return null;
+                        }
+                        scheduler.Suspend();          // suspend on infinite WAIT
                     }
-                    scheduler.Suspend();          // suspend on infinite WAIT
+                    else if (cmd is Ask)
+                    {
+                        scheduler.prompt = (Ask)cmd;
+                        scheduler.Suspend();         // wait on ChoiceEvent
+                    }
+                    else
+                    {
+                        ComputeNextEventTime(cmd); // compute delay for next cmd
+                    }
                 }
-                else if (cmd is Ask)
+                else if (cmd is Ask) // Ask in immediate-mode
                 {
-                    scheduler.prompt = (Ask)cmd;
-                    scheduler.Suspend();         // wait on ChoiceEvent
-                }
-                else
-                {
-                    ComputeNextEventTime(cmd); // compute delay for next cmd
+                    var opt = Util.RandItem(((Ask)cmd).Options());
+
+                    // first we convert the Ask to a Say
+                    cmd = ((Ask)cmd).ToSay();
+
+                    // then pick a random option and follow it
+                    if (opt.action != Command.NOP)
+                    {
+                        runtime.FindAsync(new Go().Init(opt.action.text));
+                    }
                 }
 
                 return new UpdateEvent((Dialogic.ISendable)cmd); // fire cmd event

@@ -3,8 +3,9 @@ Welcome to my $emotion world
 NVM 1.1
 WAIT 3
 DO #Twirl
-//Tendar:DO #TendarSpin
-//Tendar:Thanks
+
+Tendar: DO #TendarSpin
+Tendar: Thanks
 
 WAIT {ForAnimation=true}
 Thanks for visiting $place {speed=fast,style=whisper}
@@ -33,6 +34,6 @@ SAY Ok, I see you!
 SAY Wait, is that (cat | dog | artichoke).articlize()?
 
 CHAT MyWorld {noStart=true,chatMode=grammar}
-start = My world is a <adj>, <adj> place
+start = My world is a $adj, $adj place
 adj = creepy | lonely | dark | forgotten | crepuscular
 SAY $start

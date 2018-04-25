@@ -173,9 +173,7 @@ namespace Dialogic
                 if (!(last is Ask)) throw new ParseException
                     (line, lineNo, "OPT must follow ASK");
 
-                Ask ask = ((Ask)last);
-                opt.parent = ask.parent;
-                ask.AddOption(opt);
+                ((Ask)last).AddOption(opt);
             }
             else  // add command to last Chat
             {
