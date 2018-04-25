@@ -310,7 +310,7 @@ namespace Dialogic
 
             s = Symbol.Parse("#a",c)[0];
             Assert.That(s.text, Is.EqualTo("#a"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
             Assert.That(s.chatScoped, Is.EqualTo(true));
@@ -318,7 +318,7 @@ namespace Dialogic
 
             s = Symbol.Parse("#{a}",c)[0];
             Assert.That(s.text, Is.EqualTo("#{a}"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(true));
             Assert.That(s.chatScoped, Is.EqualTo(true));
@@ -326,56 +326,56 @@ namespace Dialogic
 
             s = Symbol.Parse("((a|b) | #prep)",c)[0];
             Assert.That(s.text, Is.EqualTo("#prep"));
-            Assert.That(s.symbol, Is.EqualTo("prep"));
+            Assert.That(s.name, Is.EqualTo("prep"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("#a",c)[0];
             Assert.That(s.text, Is.EqualTo("#a"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("[bb=#a]",c)[0];
             Assert.That(s.text, Is.EqualTo("[bb=#a]"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.EqualTo("bb"));
             Assert.That(s.bounded, Is.EqualTo(false));
             Assert.That(s.chatScoped, Is.EqualTo(true));
 
             s = Symbol.Parse("#{a}",c)[0];
             Assert.That(s.text, Is.EqualTo("#{a}"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(true));
 
             s = Symbol.Parse("[bb=#{a}]",c)[0];
             Assert.That(s.text, Is.EqualTo("[bb=#{a}]"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.EqualTo("bb"));
             Assert.That(s.bounded, Is.EqualTo(true));
             Assert.That(s.chatScoped, Is.EqualTo(true));
 
             s = Symbol.Parse("#name",c)[0];
             Assert.That(s.text, Is.EqualTo("#name"));
-            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.name, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("#name,",c)[0];
             Assert.That(s.text, Is.EqualTo("#name"));
-            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.name, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("Hello #name,",c)[0];
             Assert.That(s.text, Is.EqualTo("#name"));
-            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.name, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(false));
@@ -383,14 +383,14 @@ namespace Dialogic
 
             s = Symbol.Parse("to #verb you",c)[0];
             Assert.That(s.text, Is.EqualTo("#verb"));
-            Assert.That(s.symbol, Is.EqualTo("verb"));
+            Assert.That(s.name, Is.EqualTo("verb"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("you #prop1!",c)[0];
             Assert.That(s.text, Is.EqualTo("#prop1"));
-            Assert.That(s.symbol, Is.EqualTo("prop1"));
+            Assert.That(s.name, Is.EqualTo("prop1"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(true));
             Assert.That(s.bounded, Is.EqualTo(false));
@@ -426,7 +426,7 @@ namespace Dialogic
 
             s = Symbol.Parse("$a",c)[0];
             Assert.That(s.text, Is.EqualTo("$a"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
             Assert.That(s.chatScoped, Is.EqualTo(false));
@@ -434,7 +434,7 @@ namespace Dialogic
 
             s = Symbol.Parse("#$a",c)[0];
             Assert.That(s.text, Is.EqualTo("$a"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
             Assert.That(s.chatScoped, Is.EqualTo(false));
@@ -442,7 +442,7 @@ namespace Dialogic
 
             s = Symbol.Parse("${a}",c)[0];
             Assert.That(s.text, Is.EqualTo("${a}"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(true));
             Assert.That(s.chatScoped, Is.EqualTo(false));
@@ -450,55 +450,55 @@ namespace Dialogic
 
             s = Symbol.Parse("((a|b) | $prep)",c)[0];
             Assert.That(s.text, Is.EqualTo("$prep"));
-            Assert.That(s.symbol, Is.EqualTo("prep"));
+            Assert.That(s.name, Is.EqualTo("prep"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("$a",c)[0];
             Assert.That(s.text, Is.EqualTo("$a"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("[bb=$a]",c)[0];
             Assert.That(s.text, Is.EqualTo("[bb=$a]"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.EqualTo("bb"));
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("${a}",c)[0];
             Assert.That(s.text, Is.EqualTo("${a}"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(true));
 
             s = Symbol.Parse("[bb=${a}]",c)[0];
             Assert.That(s.text, Is.EqualTo("[bb=${a}]"));
-            Assert.That(s.symbol, Is.EqualTo("a"));
+            Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.EqualTo("bb"));
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(true));
 
             s = Symbol.Parse("$name",c)[0];
             Assert.That(s.text, Is.EqualTo("$name"));
-            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.name, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("$name,",c)[0];
             Assert.That(s.text, Is.EqualTo("$name"));
-            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.name, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("Hello $name,",c)[0];
             Assert.That(s.text, Is.EqualTo("$name"));
-            Assert.That(s.symbol, Is.EqualTo("name"));
+            Assert.That(s.name, Is.EqualTo("name"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(false));
@@ -506,14 +506,14 @@ namespace Dialogic
 
             s = Symbol.Parse("to $verb you",c)[0];
             Assert.That(s.text, Is.EqualTo("$verb"));
-            Assert.That(s.symbol, Is.EqualTo("verb"));
+            Assert.That(s.name, Is.EqualTo("verb"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(false));
 
             s = Symbol.Parse("you $prop1!",c)[0];
             Assert.That(s.text, Is.EqualTo("$prop1"));
-            Assert.That(s.symbol, Is.EqualTo("prop1"));
+            Assert.That(s.name, Is.EqualTo("prop1"));
             Assert.That(s.alias, Is.Null);
             Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.bounded, Is.EqualTo(false));
@@ -545,38 +545,38 @@ namespace Dialogic
 
             var ts = new[] { "", ".", "!", ":", ";", ",", "?", ")", "\"", "'" };
             foreach (var t in ts) Assert.That(Symbol.Parse
-                ("$a" + t, c).First().symbol, Is.EqualTo("a"));
+                ("$a" + t, c).First().name, Is.EqualTo("a"));
 
             foreach (var t in ts) Assert.That(Symbol.Parse
-                ("${a}" + t, c).First().symbol, Is.EqualTo("a"));
+                ("${a}" + t, c).First().name, Is.EqualTo("a"));
 
             foreach (var t in ts) Assert.That(Symbol.Parse
-                ("[b=$a]" + t, c).First().symbol, Is.EqualTo("a"));
+                ("[b=$a]" + t, c).First().name, Is.EqualTo("a"));
 
             foreach (var t in ts) Assert.That(Symbol.Parse
-                ("[b=${a}]" + t, c).First().symbol, Is.EqualTo("a"));
+                ("[b=${a}]" + t, c).First().name, Is.EqualTo("a"));
 
-            Assert.That(Symbol.Parse("${a}",c).First().symbol, Is.EqualTo("a"));
-            Assert.That(Symbol.Parse("${a.b}",c).First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("${a}",c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("${a.b}",c).First().name, Is.EqualTo("a.b"));
 
-            Assert.That(Symbol.Parse("$a.b",c).First().symbol, Is.EqualTo("a.b"));
-            Assert.That(Symbol.Parse("[b=$a]",c).First().symbol, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("$a.b",c).First().name, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("[b=$a]",c).First().name, Is.EqualTo("a"));
 
-            Assert.That(Symbol.Parse("[bc=$a.b]",c).First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("[bc=$a.b]",c).First().name, Is.EqualTo("a.b"));
             Assert.That(Symbol.Parse("[bc=$a.b]",c).First().alias, Is.EqualTo("bc"));
 
-            Assert.That(Symbol.Parse("[c=$a.b]",c).First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("[c=$a.b]",c).First().name, Is.EqualTo("a.b"));
             Assert.That(Symbol.Parse("[c=$a.b]",c).First().alias, Is.EqualTo("c"));
 
 
-            Assert.That(Symbol.Parse("[c=$a.b].",c).First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("[c=$a.b].",c).First().name, Is.EqualTo("a.b"));
             Assert.That(Symbol.Parse("[c=$a.b].",c).First().alias, Is.EqualTo("c"));
 
-            Assert.That(Symbol.Parse("[c=${a.b}].",c).First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("[c=${a.b}].",c).First().name, Is.EqualTo("a.b"));
             Assert.That(Symbol.Parse("[c=${a.b}].",c).First().alias, Is.EqualTo("c"));
 
-            Assert.That(Symbol.Parse("${a}b",c).First().symbol, Is.EqualTo("a"));
-            Assert.That(Symbol.Parse("${a.b}b",c).First().symbol, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("${a}b",c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("${a.b}b",c).First().name, Is.EqualTo("a.b"));
         }
 
         [Test]

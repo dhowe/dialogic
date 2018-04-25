@@ -181,7 +181,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             Assert.Throws<UnboundSymbol>(() =>
-                Resolver.Bind("$animal", null, null));
+                Resolver.Bind("$animal", c1, null));
         }
 
         [Test]

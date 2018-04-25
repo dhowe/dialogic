@@ -66,11 +66,8 @@ namespace Dialogic
         {
             this.firstChat = rt.firstChat;
 
-            this.chatData = new List<ChatData>(rt.chats.Keys.Count);
-            foreach (var chat in rt.chats.Values)
-            {
-                this.chatData.Add(ChatData.Create(chat));
-            }
+            this.chatData = new List<ChatData>(rt.Chats().Count);
+            rt.Chats().ForEach(c => chatData.Add(ChatData.Create(c)));
 
             return this;
         }
