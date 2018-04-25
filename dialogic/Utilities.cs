@@ -1071,6 +1071,16 @@ namespace Dialogic
             return false;
         }
 
+        internal static bool StartsWithAny(this string str, params string[] c)
+        {
+            if (str.IsNullOrEmpty()) return false;
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (str.StartsWith(c[i], Util.IC)) return true;
+            }
+            return false;
+        }
+
         internal static string TrimEnds(this string str, char start, char end)
         {
             str = str.TrimFirst(start);
