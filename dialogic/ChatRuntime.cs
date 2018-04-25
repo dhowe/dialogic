@@ -156,9 +156,7 @@ namespace Dialogic
 
         internal string InvokeImmediate(IDictionary<string, object> globals, string label=null)
         {
-            this.immediateMode = true;
-
-            var theChats = !label.IsNullOrEmpty() ? chats.Values 
+            var theChats = label.IsNullOrEmpty() ? chats.Values 
                 : new Chat[] { this[label] }.ToList();
 
             var result = "";
@@ -174,8 +172,6 @@ namespace Dialogic
                     }
                 }
             }
-
-            this.immediateMode = false;
 
             return result.TrimLast('\n');
         }
@@ -314,7 +310,6 @@ namespace Dialogic
 
         internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
         {
-            f.Realize(globals); // possibly redundant
             return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
@@ -329,9 +324,8 @@ namespace Dialogic
             return FuzzySearch.FindAll(Chats(), constraints.ToList(), parent, globals);
         }
 
-        internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals = null)
+        internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals)
         {
-            f.Realize(globals);  // possibly redundant
             return FuzzySearch.FindAll(Chats(), ToList(f.realized), f.parent, globals);
         }
     }

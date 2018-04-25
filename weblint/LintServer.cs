@@ -102,19 +102,14 @@ namespace Dialogic.Server
 
             if (!String.IsNullOrEmpty(path))
             {
-                // get code from file
-                using (var wb = new WebClient())
-                {
-                    code = wb.DownloadString(path);
-                }
+                // fetch code from file
+                using (var wb = new WebClient()) code = wb.DownloadString(path); 
             }
 
             if (String.IsNullOrEmpty(code))
             {
                 return html.Replace("%%CODE%%", "Enter your code here");
             }
-
-            //Console.WriteLine("mode: " + mode+" code:\n" + code + "\n");
 
             html = html.Replace("%%CODE%%", WebUtility.HtmlEncode(code));
             html = html.Replace("%%CCLASS%%", "shown");
@@ -123,6 +118,8 @@ namespace Dialogic.Server
             {
                 string content = String.Empty;
                 runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+                runtime.strictMode = false; // allow unbound symbols in output
+                runtime.immediateMode = true; // ignore command timings
                 runtime.ParseText(code, false); // true to disable validators
 
                 //Console.WriteLine(runtime);
@@ -143,15 +140,9 @@ namespace Dialogic.Server
             {
                 OnError(ref html, ex, ex.lineNumber);
             }
-            //catch (DialogicException ex)
-            //{
-            //    OnError(ref html, ex, -1);
-            //    Console.WriteLine("[ERROR] " + e);
-            //}
             catch (Exception e)
             {
                 OnError(ref html, e, -1);
-                Console.WriteLine("[ERROR] " + e);
             }
 
             return html;
@@ -161,9 +152,10 @@ namespace Dialogic.Server
         {
             html = html.Replace("%%EXECUTE%%", "");
             html = html.Replace("%%RCLASS%%", "error");
-            html = html.Replace("%%RESULT%%", ex.Message);
-            html = html.Replace("%%COMMENT%%", lineno > -1 ? ex.ToString() : "");
-            html = html.Replace("%%ERRORLINE%%", lineno >= 0 ? lineno.ToString() : "");
+            html = html.Replace("%%RESULT%%", lineno < 0 ? ex.ToString() : ex.Message);
+            html = html.Replace("%%ERRORLINE%%", lineno < 0 ? "" : lineno.ToString());
+
+            if (lineno < 0) Console.WriteLine("[STACK]\n" + ex.Message);
         }
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)

@@ -174,7 +174,7 @@ namespace Dialogic
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
 
-            chats = new ChatRuntime(chats).DoFindAll((Find)finder);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
 
             Assert.That(chats, Is.Not.Null);
             Assert.That(chats.Count, Is.EqualTo(2));
@@ -202,7 +202,7 @@ namespace Dialogic
             Assert.That(cons.IsStrict(), Is.True);
             Assert.That(finder.GetType(), Is.EqualTo(typeof(Find)));
 
-            chats = new ChatRuntime(chats).DoFindAll((Find)finder);
+            chats = new ChatRuntime(chats).DoFindAll((Find)finder, null);
             //chats.ForEach((obj) => Console.WriteLine(obj.text));
 
             Assert.That(chats, Is.Not.Null);
@@ -561,7 +561,8 @@ namespace Dialogic
             Command finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
 
-            var chat = new ChatRuntime(chats).DoFind((Find)finder, null);
+            ChatRuntime rt = new ChatRuntime(chats);
+            var chat = rt.DoFind((Find)finder, null);
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.text, Is.EqualTo("c3"));
 
@@ -580,7 +581,8 @@ namespace Dialogic
             finder = chats[0].commands[0];
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Find)));
 
-            chat = new ChatRuntime(chats).DoFind((Find)finder, null);
+            rt = new ChatRuntime(chats);
+            chat = rt.DoFind((Find)finder, null);
 
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.text, Is.EqualTo("c3"));
@@ -594,7 +596,10 @@ namespace Dialogic
 
             chats = ChatParser.ParseText(String.Join("\n", lines), NO_VALIDATORS);
             finder = chats[0].commands[0];
-            Assert.That(new ChatRuntime(chats).DoFind((Find)finder, null), Is.Null);
+
+            rt = new ChatRuntime(chats);
+            chat = rt.DoFind((Find)finder, null);
+            Assert.That(chat, Is.Null);
 
             Chat c;
             chats = new List<Chat>();
@@ -603,11 +608,10 @@ namespace Dialogic
             chats.Add(c = Chat.Create("c2"));
             c.SetMeta("dev", "2");
             chats.Add(c = Chat.Create("c3"));
-            chat = new ChatRuntime(chats).DoFind
-                                         (null, new Constraint("dev", "1", ConstraintType.Hard));
+            rt = new ChatRuntime(chats);
+            chat = rt.DoFind(null, new Constraint("dev", "1", ConstraintType.Hard));
             Assert.That(chat.text, Is.EqualTo("c3")); // success
         }
-
 
         [Test]
         public void FindAllOpsHard()

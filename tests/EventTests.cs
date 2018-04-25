@@ -30,13 +30,25 @@ namespace Dialogic
                 "CHAT c1",
                 "SAY goodbye."
             };
-            string s, contents = String.Join("\n", lines);
-
             ChatRuntime rt = new ChatRuntime();
-            rt.ParseText(contents);
-            s = rt.InvokeImmediate(globals, "c1");
-            //Console.WriteLine(s);
+            rt.ParseText(String.Join("\n", lines));
+
+            rt.immediateMode = true;
+            rt.strictMode = true;
+
+            var s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\nok.\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c1");
+            Assert.That(s, Is.EqualTo("goodbye."));
+
+            Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
+
+            rt.immediateMode = true;
+            rt.strictMode = false;
+
+            s = rt.InvokeImmediate(null);
+            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\nok.\ngoodbye."));
         }
 
         [Test]
