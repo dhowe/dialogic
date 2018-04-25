@@ -8,12 +8,12 @@ namespace Dialogic
     {
         public static byte[] ToBytes(ChatRuntime rt)
         {
-            return MessagePackSerializer.Serialize(GameState.Create(rt));
+            return MessagePackSerializer.Serialize(Snapshot.Create(rt));
         }
 
         public static void FromBytes(ChatRuntime rt, byte[] bytes)
         {
-            MessagePackSerializer.Deserialize<GameState>(bytes).Update(rt);
+            MessagePackSerializer.Deserialize<Snapshot>(bytes).Update(rt);
         }
 
         public static string ToJSON(ChatRuntime rt)
@@ -24,23 +24,28 @@ namespace Dialogic
 
 
     /// <summary>
-    /// A serializable subset of system properties with which 
-    /// to store/restore instances of Dialogic
+    /// A serializable subset of system properties at a particular moment,
+    /// with which to store/restore instances of Dialogic (ChatRuntime)
     /// </summary>
     [MessagePackObject(keyAsPropertyName: true)]
-    public class GameState
+    public class Snapshot
     {
         /* Issues: 
          *      - metadata values not updating
          *      - default metadata values showing
          */
-
+        public int timestamp;
         public string firstChat;
         public List<ChatData> chatData;
 
-        public static GameState Create(ChatRuntime rt)
+        private Snapshot()
         {
-            return new GameState().FromGameObject(rt);
+            this.timestamp = Util.EpochMs();
+        }
+
+        public static Snapshot Create(ChatRuntime rt)
+        {
+            return new Snapshot().FromGameObject(rt);
         }
 
         public void Update(ChatRuntime rt)
@@ -52,12 +57,12 @@ namespace Dialogic
         public ChatRuntime ToGameObject(List<IActor> actors)
         {
             var runtime = new ChatRuntime(actors);
-            GameState gameState = GameState.Create(runtime);
+            Snapshot gameState = Snapshot.Create(runtime);
             Update(runtime);
             return runtime;
         }
 
-        public GameState FromGameObject(ChatRuntime rt)
+        public Snapshot FromGameObject(ChatRuntime rt)
         {
             this.firstChat = rt.firstChat;
 
