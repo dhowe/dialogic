@@ -588,7 +588,7 @@ namespace Dialogic
             base.SetMeta(key, val, onlyIfNotSet);
         }
 
-        protected override void ParseMeta(string[] pairs)
+        protected internal override void ParseMeta(string[] pairs)
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
@@ -622,7 +622,7 @@ namespace Dialogic
             }
         }
 
-        protected override string MetaStr()
+        protected internal override string MetaStr()
         {
             string s = String.Empty;
             if (HasMeta())
@@ -744,7 +744,7 @@ namespace Dialogic
             meta[key] = val;
         }
 
-        protected virtual string MetaStr()
+        protected internal virtual string MetaStr()
         {
             string s = String.Empty;
             if (HasMeta())
@@ -756,7 +756,7 @@ namespace Dialogic
             return s;
         }
 
-        protected virtual void ParseMeta(string[] pairs)
+        protected internal virtual void ParseMeta(string[] pairs)
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {

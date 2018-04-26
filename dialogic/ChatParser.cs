@@ -105,6 +105,7 @@ namespace Dialogic
                     }
                     catch (Exception ex)
                     {
+                        Console.WriteLine("PREVAL: "+c);
                         throw new Exception("Validator: " + ex.Message);
                     }
                 }
@@ -123,6 +124,9 @@ namespace Dialogic
                     : Chat.DefaultCommandType(ActiveChat());
             
             Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
+
+            if (Snapshot.DBUG && c is Chat) 
+                throw new Exception("BAD chat create: "+lc.text);
             c.lineContext = lc;
 
             HandleActor(lc.actor, c, lc.line, lc.lineNo);
@@ -132,7 +136,7 @@ namespace Dialogic
             return c;
         }
 
-        private string[] SplitMeta(string meta)
+        internal string[] SplitMeta(string meta)
         {
             return meta.IsNullOrEmpty() ? null : RE.MetaSplit.Split(meta);
         }
@@ -152,7 +156,7 @@ namespace Dialogic
             }
         }
 
-        private void HandleCommand(Command c, string line, int lineNo)
+        internal void HandleCommand(Command c, string line, int lineNo)
         {
             parsedCommands.Push(c);
 

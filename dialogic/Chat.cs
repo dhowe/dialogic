@@ -43,6 +43,7 @@ namespace Dialogic
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
             if (rt == null) rt = new ChatRuntime();
+            rt.Parser().HandleCommand(c, null, -1);
             rt.AddChat(c);
             return c;
         }
@@ -52,10 +53,33 @@ namespace Dialogic
             return commands.Count;
         }
 
+
+        public bool Equals(Chat c2)
+        {
+            if (text != c2.text) return false;
+            if (resumable != c2.resumable) return false;
+            if (interruptable != c2.interruptable) return false;
+            if (resumeAfterInt != c2.resumeAfterInt) return false;
+            if (!Util.FloatingEquals(staleness, c2.staleness))
+            {
+                return false;
+            }
+            if (!Util.FloatingEquals(stalenessIncr, c2.stalenessIncr)) return false;
+
+            for (int i = 0; i < commands.Count; i++)
+            {
+                if (commands[i].Equals(c2.commands[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public void AddCommand(Command c)
         {
             c.parent = this;
-            //c.IndexInChat = commands.Count; // ?
             this.commands.Add(c);
         }
 
@@ -92,7 +116,7 @@ namespace Dialogic
             return s;
         }
 
-        protected override string MetaStr()
+        protected internal override string MetaStr()
         {
             string s = String.Empty;
             if (HasMeta())

@@ -30,6 +30,8 @@ namespace Dialogic
     [MessagePackObject(keyAsPropertyName: true)]
     public class Snapshot
     {
+        static public bool DBUG = false;
+
         /* Issues: 
          *      - metadata values not updating
          *      - default metadata values showing
@@ -38,7 +40,7 @@ namespace Dialogic
         public string firstChat;
         public List<ChatData> chatData;
 
-        private Snapshot()
+        public Snapshot()
         {
             this.timestamp = Util.EpochMs();
         }
@@ -50,7 +52,7 @@ namespace Dialogic
 
         public void Update(ChatRuntime rt)
         {
-            chatData.ForEach(cd => rt.AddChat(cd.ToGameObject(rt)));
+            chatData.ForEach(cd => cd.ToGameObject(rt));
             rt.firstChat = this.firstChat;
         }
 
@@ -64,7 +66,7 @@ namespace Dialogic
 
         public Snapshot FromGameObject(ChatRuntime rt)
         {
-            this.firstChat = rt.firstChat;
+            if (rt.firstChat.IsNullOrEmpty()) firstChat = rt.firstChat;
 
             this.chatData = new List<ChatData>(rt.Chats().Count);
             rt.Chats().ForEach(c => chatData.Add(ChatData.Create(c)));
@@ -84,7 +86,7 @@ namespace Dialogic
         public int cursor = 0, lastRunAt = -1;
         public bool allowSmoothingOnResume = true;
 
-        public string text;
+        public string text, meta;
 
         internal static ChatData Create(Chat c)
         {
@@ -94,6 +96,7 @@ namespace Dialogic
         public ChatData FromGameObject(Chat chat)
         {
             this.text = chat.text;
+            this.meta = chat.MetaStr().TrimEnds('{','}');
 
             this.staleness = chat.staleness;
             this.resumable = chat.resumable;
@@ -113,8 +116,9 @@ namespace Dialogic
 
         internal Chat ToGameObject(ChatRuntime rt)
         {
-            Chat chat = Chat.Create(text);
-            chat.runtime = rt;
+            ChatParser parser = rt.Parser();
+            LineContext lc = new LineContext(parser, null, "CHAT", text, null, meta);
+            Chat chat = (Dialogic.Chat)parser.CreateCommand(lc);
 
             chat.Staleness(this.staleness);
             chat.Resumable(this.resumable);
@@ -127,7 +131,7 @@ namespace Dialogic
             chat.allowSmoothingOnResume = this.allowSmoothingOnResume;
 
             chat.commands = new List<Command>(this.commands.Count);
-            this.commands.ForEach(cmd => chat.AddCommand(cmd.ToGameObject(rt)));
+            this.commands.ForEach(cmd => cmd.ToGameObject(rt));
 
             return chat;
         }
@@ -169,15 +173,6 @@ namespace Dialogic
         {
             ChatParser parser = rt.Parser();
             LineContext lc = new LineContext(parser, actor, command, text, label, meta);
-            //Type type = ChatRuntime.TypeMap[lc.command];
-
-            //Command c = Command.Create(type, lc.text, lc.label, parser.SplitMeta(lc.meta));
-            //c.lineContext = lc;
-
-            //parser.HandleActor(lc.actor, c, lc.line, lc.lineNo);
-            //parser.HandleCommand(c, lc.line, lc.lineNo);
-            //parser.RunValidators(c);
-
             return parser.CreateCommand(lc);
         }
     }
