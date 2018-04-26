@@ -952,10 +952,10 @@ namespace Dialogic
 
     public class ObjectPool<T> //@cond unused
     {
-        private Func<T> generator;
-        private Action<T> recycler;
+        private readonly Func<T> generator;
+        private readonly Action<T> recycler;
+        private readonly T[] pool;
 
-        private T[] pool;
         private int cursor = 0;
 
         public ObjectPool(int size, Func<T> generator, Action<T> recycler = null)
@@ -972,7 +972,10 @@ namespace Dialogic
         public T Get()
         {
             T next = pool[cursor];
+
+            // currently recycles the next object, even if it is in use
             if (recycler != null) recycler(next);
+
             cursor = ++cursor < pool.Length ? cursor : 0;
             return next;
         }
