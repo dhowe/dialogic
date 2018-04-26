@@ -29,6 +29,10 @@
          .input-area{
             margin-top: 5px !important;
          }
+         #result {
+            min-width: 620px;
+            display: inline-block !important;
+         }
          #executeResult {
             border: 1px solid transparent;
             margin: 1.6em 0;
@@ -133,13 +137,31 @@
     </div>
 
     <script>
-    $(function () { $(".lined").linedtextarea() });
+
+    jQuery.fn.getSelectedText = function() {
+        var sSelectedText = "";
+        if (window.getSelection) {
+            var sTagName = this.get(0).tagName.toLowerCase();
+            sSelectedText = (
+                sTagName == 'input' || sTagName == 'textarea' ?
+                this.val().substring (
+                    this.get(0).selectionStart
+                    , this.get(0).selectionEnd
+                ) :
+                document.getSelection().toString()
+            );
+        }
+        return sSelectedText;
+    }
 
     $(document).ready(function () {
+      $(".lined").linedtextarea();
 
       $("#clear").click(function () { $("#main").empty(); });
       $("#execute").click(function () { onButtonClicked(true); });
-      $("#validate").click(function () { onButtonClicked(false); });
+      $("#validate").click(function () {
+         onButtonClicked(false);
+      });
 
       // loadURL Dialog Box
       $("#loadURL").click(onLoadURLClicked);
@@ -171,8 +193,8 @@
 
         var qstr = $("#form").serialize() + "&mode="
           + (execute ? 'execute' : 'validate');
-
-        // console.log(qstr);
+        var selection = $('#main').getSelectedText();
+        if(selection) qstr += "&selection=" + selection.replace(/ /g, '+');
         sendRequest(qstr);
       }
 
@@ -203,6 +225,7 @@
 
     });
 
+       
 
     </script>
 </body>
