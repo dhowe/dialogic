@@ -8,6 +8,76 @@ namespace Dialogic
     public class DialogicTests
     {
         [Test]
+        public void TestPluralize()
+        {
+            Assert.That(Pluralizer.Pluralize(""), Is.EqualTo(""));
+            Assert.That(Pluralizer.Pluralize("dog"), Is.EqualTo("dogs"));
+            Assert.That(Pluralizer.Pluralize("eye"), Is.EqualTo("eyes"));
+
+            Assert.That(Pluralizer.Pluralize("blonde"), Is.EqualTo("blondes"));
+            Assert.That(Pluralizer.Pluralize("blond"), Is.EqualTo("blondes"));
+            Assert.That(Pluralizer.Pluralize("foot"), Is.EqualTo("feet"));
+            Assert.That(Pluralizer.Pluralize("man"), Is.EqualTo("men"));
+            Assert.That(Pluralizer.Pluralize("tooth"), Is.EqualTo("teeth"));
+            Assert.That(Pluralizer.Pluralize("cake"), Is.EqualTo("cakes"));
+            Assert.That(Pluralizer.Pluralize("kiss"), Is.EqualTo("kisses"));
+            Assert.That(Pluralizer.Pluralize("child"), Is.EqualTo("children"));
+
+            Assert.That(Pluralizer.Pluralize("louse"), Is.EqualTo("lice"));
+
+            Assert.That(Pluralizer.Pluralize("sheep"), Is.EqualTo("sheep"));
+            Assert.That(Pluralizer.Pluralize("shrimp"), Is.EqualTo("shrimps"));
+            Assert.That(Pluralizer.Pluralize("series"), Is.EqualTo("series"));
+            Assert.That(Pluralizer.Pluralize("mouse"), Is.EqualTo("mice"));
+
+            Assert.That(Pluralizer.Pluralize("beautiful"), Is.EqualTo("beautifuls"));
+
+            Assert.That(Pluralizer.Pluralize("crisis"), Is.EqualTo("crises"));
+            Assert.That(Pluralizer.Pluralize("thesis"), Is.EqualTo("theses"));
+            Assert.That(Pluralizer.Pluralize("apothesis"), Is.EqualTo("apotheses"));
+            Assert.That(Pluralizer.Pluralize("stimulus"), Is.EqualTo("stimuli"));
+            Assert.That(Pluralizer.Pluralize("alumnus"), Is.EqualTo("alumni"));
+            Assert.That(Pluralizer.Pluralize("corpus"), Is.EqualTo("corpora"));
+
+            Assert.That(Pluralizer.Pluralize("woman"), Is.EqualTo("women"));
+            Assert.That(Pluralizer.Pluralize("man"), Is.EqualTo("men"));
+            Assert.That(Pluralizer.Pluralize("congressman"), Is.EqualTo("congressmen"));
+            Assert.That(Pluralizer.Pluralize("alderman"), Is.EqualTo("aldermen"));
+            Assert.That(Pluralizer.Pluralize("freshman"), Is.EqualTo("freshmen"));
+
+            Assert.That(Pluralizer.Pluralize("bikini"), Is.EqualTo("bikinis"));
+            Assert.That(Pluralizer.Pluralize("martini"), Is.EqualTo("martinis"));
+            Assert.That(Pluralizer.Pluralize("menu"), Is.EqualTo("menus"));
+            Assert.That(Pluralizer.Pluralize("guru"), Is.EqualTo("gurus"));
+
+            Assert.That(Pluralizer.Pluralize("medium"), Is.EqualTo("media"));
+            Assert.That(Pluralizer.Pluralize("concerto"), Is.EqualTo("concerti"));
+            Assert.That(Pluralizer.Pluralize("terminus"), Is.EqualTo("termini"));
+
+            Assert.That(Pluralizer.Pluralize("aquatics"), Is.EqualTo("aquatics"));
+            Assert.That(Pluralizer.Pluralize("mechanics"), Is.EqualTo("mechanics"));
+
+            Assert.That(Pluralizer.Pluralize("tomato"), Is.EqualTo("tomatoes"));
+            Assert.That(Pluralizer.Pluralize("toe"), Is.EqualTo("toes"));
+
+            Assert.That(Pluralizer.Pluralize("deer"), Is.EqualTo("deer"));
+            Assert.That(Pluralizer.Pluralize("moose"), Is.EqualTo("moose"));
+            Assert.That(Pluralizer.Pluralize("ox"), Is.EqualTo("oxen"));
+
+            Assert.That(Pluralizer.Pluralize("tobacco"), Is.EqualTo("tobacco"));
+            Assert.That(Pluralizer.Pluralize("cargo"), Is.EqualTo("cargo"));
+            Assert.That(Pluralizer.Pluralize("golf"), Is.EqualTo("golf"));
+            Assert.That(Pluralizer.Pluralize("grief"), Is.EqualTo("grief"));
+            Assert.That(Pluralizer.Pluralize("wildlife"), Is.EqualTo("wildlife"));
+            Assert.That(Pluralizer.Pluralize("taxi"), Is.EqualTo("taxis"));
+            Assert.That(Pluralizer.Pluralize("Chinese"), Is.EqualTo("Chinese"));
+            Assert.That(Pluralizer.Pluralize("bonsai"), Is.EqualTo("bonsai"));
+
+            Assert.That(Pluralizer.Pluralize("gas"), Is.EqualTo("gases"));
+            Assert.That(Pluralizer.Pluralize("bus"), Is.EqualTo("buses"));
+        }
+
+        [Test]
         public void TestGetExtMethods()
         {
             var s = Methods.InvokeExt("animal", "articlize");
