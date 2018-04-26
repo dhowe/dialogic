@@ -432,6 +432,12 @@ namespace Dialogic
 
         ////////////////////////////////////////////////////////////////////
 
+        internal static string JavaSubstr(string s, int beginIndex, int endIndex)
+        {
+            int len = endIndex - beginIndex;
+            return s.Substring(beginIndex, len);
+        }
+
         internal static bool HasOpenGroup(string text)
         {
             return text.IndexOf('|') > -1 &&
@@ -770,11 +776,11 @@ namespace Dialogic
         }
     }
 
-    public static class Html
+    public static class Entities
     {
         private static int MIN_ESCAPE = 2, MAX_ESCAPE = 6;
 
-        static Html()
+        static Entities()
         {
             LOOKUP = ESCAPES.ToLookup(pair => pair.Value, pair => pair.Key);
         }
@@ -823,7 +829,7 @@ namespace Dialogic
                     try
                     {
                         //int entityValue = Int32.Parse(input.Substring(k, j), radix);
-                        int entityValue = Convert.ToInt32(JavaSubstr(input, k, j), radix);
+                        int entityValue = Convert.ToInt32(Util.JavaSubstr(input, k, j), radix);
 
                         if (writer == null) writer = new StringBuilder(input.Length);
 
@@ -848,7 +854,8 @@ namespace Dialogic
                 else
                 {
                     // named escape
-                    string value = LOOKUP[JavaSubstr(input, i, j)].First();
+                    var res = LOOKUP[Util.JavaSubstr(input, i, j)];
+                    string value = res != null ? res.First() : null;
                     if (value == null)
                     {
                         i++;
@@ -856,8 +863,9 @@ namespace Dialogic
                     }
 
                     if (writer == null) writer = new StringBuilder(input.Length);
-                    writer.Append(JavaSubstr(input, st, i - 1));
+                    writer.Append(Util.JavaSubstr(input, st, i - 1));
                     writer.Append(value);
+               
                 }
 
                 // skip escape
@@ -868,7 +876,7 @@ namespace Dialogic
             if (writer != null)
             {
                 //Console.WriteLine("input.Substring(st, input.Length) :: "+input);
-                writer.Append(JavaSubstr(input, st, input.Length));
+                writer.Append(Util.JavaSubstr(input, st, input.Length));
                 return writer.ToString();
             }
 #pragma warning restore XS0001 //  Mono StringBuilder serialization warning
@@ -876,28 +884,30 @@ namespace Dialogic
             return input;
         }
 
-        private static string JavaSubstr(string s, int beginIndex, int endIndex)
-        {
-            int len = endIndex - beginIndex;
-            return s.Substring(beginIndex, len);
-        }
-
         private static ILookup<string, string> LOOKUP;
 
         private static readonly IDictionary<string, string> ESCAPES
             = new Dictionary<string, string>() // replace with C# native?
         {
-            {"\"",     "quot"}, // " - double-quote
-            {"&",      "amp"}, // & - ampersand
-            {"#",      "num"}, // # - hash
-            {"<",      "lt"}, // < - less-than
-            {">",      "gt"}, // > - greater-than
-            {" ",      "nbsp"},// non-breaking space
-            {"\u00A9", "copy"}, // © copyright sign
-            {"\u00A1", "iexcl"}, // inverted exclamation
-            {"\u00A2", "cent"}, // cent sign
-            {"\u00A3", "pound"}, // pound sign
-            {"\u00AE", "reg"}, // ® registered trademark
+            {"\"",     "quot"},
+            {"$",      "dollar"},
+            {"{",      "lcub"},
+            {"}",      "rcub"},
+            {"(",      "lpar"},
+            {")",      "rpar"},
+            {"&",      "amp"},
+            {"!",      "excl"},
+            {"©",      "copy"},
+            {"'",      "apos"},
+            {"#",      "num"},
+            {"<",      "lt"},
+            {">",      "gt"},
+            {" ",      "nbsp"},
+            {"®",      "reg"},
+            {"™",      "tm"},
+            {"|",      "vert"},
+            {"*",      "ast"},
+            {":",      "colon"}
         };
     }
 

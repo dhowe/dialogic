@@ -33,6 +33,22 @@ namespace Dialogic
         }
 
         [Test]
+        public void GroupsWithEmptyStr()
+        {
+            string res;
+            var c = CreateParentChat("c");
+            for (int i = 0; i < 10; i++)
+            {             
+                res = Resolver.Bind("The almost( | \" dog\" | \" cat\").", c, null);
+                Console.WriteLine(i+") '"+res+"'");
+                Assert.That(res, Is.EqualTo("The almost.").
+                            Or.EqualTo("The almost dog.").
+                            Or.EqualTo("The almost cat."));
+            }
+       
+        }
+
+        [Test]
         public void GroupRecursionDepth()
         {
             var str = "CHAT c\n(I | (You | (doh | why | no) | ouY) | They)";
