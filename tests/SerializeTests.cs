@@ -22,7 +22,7 @@ namespace Dialogic
                 { "count", 4 }
          };
 
-        [Test]
+        //[Test]
         public void SaveRestoreChat()
         {
             var lines = new[] {
@@ -56,7 +56,7 @@ namespace Dialogic
             Console.WriteLine(c2.ToTree());
         }
 
-        [Test]
+        //[Test]
         public void SaveRestoreChats()
         {
             var testfile = AppDomain.CurrentDomain.BaseDirectory;

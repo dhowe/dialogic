@@ -425,6 +425,7 @@ namespace Dialogic
             Symbol s;
 
             s = Symbol.Parse("$a",c)[0];
+
             Assert.That(s.text, Is.EqualTo("$a"));
             Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);

@@ -44,7 +44,7 @@ namespace Dialogic
             c.Init(name, String.Empty, new string[0]);
             if (rt == null) rt = new ChatRuntime();
             rt.Parser().HandleCommand(c, null, -1);
-            rt.AddChat(c);
+            //rt.AddChat(c);
             return c;
         }
 
@@ -54,21 +54,27 @@ namespace Dialogic
         }
 
 
-        public bool Equals(Chat c2)
+        public bool Equals(Chat chat)
         {
-            if (text != c2.text) return false;
-            if (resumable != c2.resumable) return false;
-            if (interruptable != c2.interruptable) return false;
-            if (resumeAfterInt != c2.resumeAfterInt) return false;
-            if (!Util.FloatingEquals(staleness, c2.staleness))
+            if (text != chat.text) return false;
+            if (resumable != chat.resumable) return false;
+            if (interruptable != chat.interruptable) return false;
+            if (resumeAfterInt != chat.resumeAfterInt) return false;
+
+            if (!Util.FloatingEquals(staleness, chat.staleness))
             {
                 return false;
             }
-            if (!Util.FloatingEquals(stalenessIncr, c2.stalenessIncr)) return false;
+
+            if (!Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))
+            {
+                return false;
+            }
+
 
             for (int i = 0; i < commands.Count; i++)
             {
-                if (commands[i].Equals(c2.commands[i]))
+                if (commands[i].Equals(chat.commands[i]))
                 {
                     return false;
                 }
@@ -135,7 +141,7 @@ namespace Dialogic
             return s.ReplaceFirst("{}", string.Empty);
         }
 
-        private bool HasDefaultPropValue(string key, object val) 
+        private bool HasDefaultPropValue(string key, object val)
         {
             if (key == Meta.STALENESS && Util.FloatingEquals
                 (staleness, Defaults.CHAT_STALENESS))
@@ -147,7 +153,7 @@ namespace Dialogic
             {
                 return true;
             }
-            else if ((key == Meta.RESUMABLE && resumable) || 
+            else if ((key == Meta.RESUMABLE && resumable) ||
                      (key == Meta.INTERRUPTIBLE && interruptable) ||
                      (key == Meta.RESUME_AFTER_INT && resumeAfterInt))
             {
@@ -357,7 +363,7 @@ namespace Dialogic
         internal void OnCompletion()
         {
             // clear any local scope
-            this.scope.Clear(); 
+            this.scope.Clear();
 
             // and realized command data
             commands.ForEach(c => c.realized.Clear()); //tmp

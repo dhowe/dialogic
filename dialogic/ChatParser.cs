@@ -105,7 +105,6 @@ namespace Dialogic
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("PREVAL: "+c);
                         throw new Exception("Validator: " + ex.Message);
                     }
                 }
