@@ -56,9 +56,11 @@ namespace Dialogic
 
             } while (IsDynamic(text));
 
+            text = text.Replace("\"", "");
+
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
-            return Html.Decode(text); // resolve any encoded entities
+            return Entities.Decode(text);
         }
 
         private static string Info(string text, Chat parent)

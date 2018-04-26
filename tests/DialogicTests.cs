@@ -29,8 +29,14 @@ namespace Dialogic
         [Test]
         public void EntityDecodeTest()
         {
-            Assert.That(Html.Decode("&amp;"), Is.EqualTo("&"));
-            Assert.That(Html.Decode("&nbsp;"), Is.EqualTo(" "));
+            Assert.That(Entities.Decode(""), Is.EqualTo(""));
+            Assert.That(Entities.Decode(null), Is.EqualTo(null));
+
+            Assert.That(Entities.Decode("&amp;"), Is.EqualTo("&"));
+            Assert.That(Entities.Decode("&nbsp;"), Is.EqualTo(" "));
+            Assert.That(Entities.Decode("&quot;"), Is.EqualTo("\""));
+
+            Assert.That(Entities.Decode("&invalid;"), Is.EqualTo("&invalid;"));
         }
 
         [Test]
