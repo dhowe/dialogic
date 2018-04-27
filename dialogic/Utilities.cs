@@ -183,8 +183,116 @@ namespace Dialogic
     public static class RiTa//@cond hidden
     {
         public const string VOWELS = "aeiou";
+        public const string ANY_STEM = "^((\\w+)(-\\w+)*)(\\s((\\w+)(-\\w+)*))*$";
+        public const string C = "[bcdfghjklmnpqrstvwxyz]", VL = "[lraeiou]";
+        public static string[] MODALS = { "shall", "would", "may", "might", "ought", "should" };
+        public static RegexRule DEFAULT_PLURAL_RULE = new RegexRule(RiTa.ANY_STEM, 0, "s");
+        public static RegexRule NULL_PLURALS = new RegexRule(
+      "^(bantu|bengalese|bengali|beninese|boche|bonsai|booze|cellulose|digitalis|mess|moose|"
+      + "burmese|chinese|colossus|congolese|discus|emphasis|expertise|finess|fructose|"
+      + "gabonese|gauze|glucose|grease|guyanese|haze|incense|japanese|javanese|journalese|"
+      + "lebanese|malaise|manganese|mayonnaise|maltese|menopause|merchandise|nitrocellulose|"
+      + "olympics|overuse|paradise|poise|polymerase|portuguese|prose|recompense|remorse|repose|senegalese|siamese|singhalese|innings|"
+      + "sleaze|sinhalese|sioux|sudanese|suspense|swiss|taiwanese|togolese|vietnamese|unease|aircraft|anise|antifreeze|applause|archdiocese|"
+      + "anopheles|apparatus|asparagus|barracks|bellows|bison|bluefish|bob|bourgeois|"
+      + "bream|brill|butterfingers|cargo|carp|catfish|chassis|clothes|chub|cod|codfish|"
+      + "coley|contretemps|corps|crawfish|crayfish|crossroads|cuttlefish|dace|deer|dice|"
+      + "dogfish|doings|dory|downstairs|eldest|earnings|economics|electronics|finnan|"
+      + "firstborn|fish|flatfish|flounder|fowl|fry|fries|works|globefish|goldfish|golf|"
+      + "grand|grief|gudgeon|gulden|haddock|hake|halibut|headquarters|herring|hertz|horsepower|"
+      + "goods|hovercraft|hundredweight|ironworks|jackanapes|kilohertz|kurus|kwacha|ling|lungfish|"
+      + "mackerel|means|megahertz|moorfowl|moorgame|mullet|nepalese|offspring|pampas|parr|pants|"
+      + "patois|pekinese|penn'orth|perch|pickerel|pike|pince-nez|plaice|precis|quid|rand|"
+      + "rendezvous|revers|roach|roux|salmon|samurai|series|seychelles|seychellois|shad|"
+      + "sheep|shellfish|smelt|spacecraft|species|starfish|stockfish|sunfish|superficies|"
+      + "sweepstakes|swordfish|tench|tennis|[a-z]+osis|[a-z]+itis|[a-z]+ness|"
+      + "tobacco|tope|triceps|trout|tuna|tunafish|tunny|turbot|trousers|"
+      + "undersigned|veg|waterfowl|waterworks|waxworks|whiting|wildfowl|woodworm|"
+      + "yen|aries|pisces|forceps|lieder|jeans|physics|mathematics|news|odds|politics|remains|"
+      + "acoustics|aesthetics|aquatics|basics|ceramics|classics|cosmetics|dialectics|dynamics|ethics|"
+      + "harmonics|heroics|mechanics|metrics|optics|physics|polemics|pyrotechnics|"
+            + "surroundings|thanks|statistics|goods|aids|wildlife)$", 0, "");
+       
+        public static  RegexRule[] PLURAL_RULES = new RegexRule[] { NULL_PLURALS,
+      new RegexRule("^concerto$", 1, "i"),
+      new RegexRule("^(piano|photo|solo|ego|tobacco|cargo|golf|grief)$", 0,
+      "s"),
+      new RegexRule("^(wildlife)$", 0, "s"), new RegexRule(C + "o$", 0, "es"),
+      new RegexRule(C + "y$", 1, "ies"), new RegexRule("^ox$", 0, "en"),
+      new RegexRule("^(stimul|alumn|termin)us$", 2, "i"),
+      new RegexRule("^corpus$", 2, "ora"), new RegexRule("(xis|sis)$", 2, "es"),
+      new RegexRule("([zsx]|ch|sh)$", 0, "es"),
+      new RegexRule(VL + "fe$", 2, "ves"), new RegexRule(VL + "f$", 1, "ves"),
+      new RegexRule("(eu|eau)$", 0, "x"),
+
+      new RegexRule("(man|woman)$", 2, "en"), new RegexRule("money$", 2, "ies"),
+      new RegexRule("person$", 4, "ople"), new RegexRule("motif$", 0, "s"),
+      new RegexRule("^meninx|phalanx$", 1, "ges"),
+
+      new RegexRule("schema$", 0, "ta"), new RegexRule("^bus$", 0, "ses"),
+      new RegexRule("child$", 0, "ren"),
+      new RegexRule("^(curi|formul|vertebr|larv|uln|alumn|signor|alg|minuti)a$",
+      0, "e"),
+      new RegexRule("^(maharaj|raj|myn|mull)a$", 0, "hs"),
+      new RegexRule("^aide-de-camp$", 8, "s-de-camp"),
+      new RegexRule("^apex|cortex$", 2, "ices"),
+      new RegexRule("^weltanschauung$", 0, "en"),
+      new RegexRule("^lied$", 0, "er"), new RegexRule("^tooth$", 4, "eeth"),
+      new RegexRule("^[lm]ouse$", 4, "ice"), new RegexRule("^foot$", 3, "eet"),
+      new RegexRule("femur", 2, "ora"), new RegexRule("goose", 4, "eese"),
+      new RegexRule("(human|german|roman)$", 0, "s"),
+      new RegexRule("^(monarch|loch|stomach)$", 0, "s"),
+      new RegexRule("^(taxi|chief|proof|ref|relief|roof|belief)$", 0, "s"),
+      new RegexRule("^(co|no)$", 0, "'s"), new RegexRule("^blond$", 0, "es"),
+      new RegexRule("^(medi|millenni|consorti|sept|memorabili|ser)um$", 2, "a"),
+
+      // Latin stems
+      new RegexRule("^(memorandum|bacterium|curriculum|minimum|"
+      + "maximum|referendum|spectrum|phenomenon|criterion)$", 2, "a"),
+      new RegexRule("^(appendix|index|matrix)", 2, "ices")
+    };
+
+
     }//@endcond
 
+    public class RegexRule {
+       
+        private Regex regExp;
+        private int offset;
+        private String suffix;
+
+        public RegexRule(String regex, int truncate, String suff)
+        {
+            regExp = new Regex(regex,RegexOptions.IgnoreCase);
+            offset = truncate;
+            suffix = suff;
+        }
+
+        public bool applies(String word)
+        {
+            word = word.Trim();
+            return this.regExp.IsMatch(word);
+        }
+
+        public String fire(String word)
+        {
+            word = word.Trim();
+            String t = truncate(word);
+            return t + suffix;
+        }
+
+        public bool analyse(String word)
+        {   
+            CultureInfo ci = new CultureInfo("en-US");
+            return ((this.suffix != "") && word.EndsWith(this.suffix, true, ci)) ? true : false;
+        }
+
+        private String truncate(String word)
+        {
+            return (this.offset == 0) ? word : word.Substring(0, word.Length - this.offset);
+        }
+        
+    }
     /// <summary>
     /// Static utility functions for Dialogic
     /// </summary>
