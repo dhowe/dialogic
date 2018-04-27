@@ -77,7 +77,7 @@ namespace Dialogic
             rt.ParseText(contents);
             var finder = new Find().Init("{!!type=tap,!stage=CORE}");
 
-            var chat = rt.DoFind((Dialogic.Find)finder.Realize(globals));
+            var chat = rt.DoFind((Dialogic.Find)finder);
             Console.WriteLine(chat);
             Assert.That(chat.text, Is.EqualTo("CORE_Tap"));
         }
