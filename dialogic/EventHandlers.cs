@@ -104,7 +104,7 @@ namespace Dialogic
             {
                 scheduler.Suspend();
                 UpdateFinder(ref findDelegate, label);
-                runtime.FindAsync(findDelegate, globals);
+                runtime.Find(findDelegate, globals);
             }
 
             return null;
@@ -146,7 +146,7 @@ namespace Dialogic
                 {
                     // We've gotten a response with a branch, so finish & take it
                     scheduler.Completed(false);
-                    runtime.FindAsync((Find)opt.action); // find next
+                    runtime.Find((Find)opt.action); // find next
                 }
                 else
                 {
@@ -239,16 +239,16 @@ namespace Dialogic
                     // then pick a random option and follow it
                     if (opt.action != Command.NOP)
                     {
-                        runtime.FindAsync(new Go().Init(opt.action.text));
+                        runtime.Find(new Go().Init(opt.action.text));
                     }
                 }
 
                 return new UpdateEvent((Dialogic.ISendable)cmd); // fire cmd event
             }
-            else if (cmd is Find && !runtime.immediateMode) // fix to 
+            else if (cmd is Find)// && !runtime.immediateMode)
             {
                 scheduler.Completed(false); // finish 
-                runtime.FindAsync((Find)cmd);  // then do Find
+                runtime.Find((Find)cmd);  // then do Find
             }
 
             return null;

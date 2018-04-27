@@ -50,13 +50,13 @@ namespace Dialogic
         internal string firstChat;
 
         private List<IActor> actors;
+        private List<Action<Chat>> findListeners;
         private List<Func<Command, bool>> validators;
         private IDictionary<string, Chat> chats;
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private Thread searchThread;
         private ChatParser parser;
-
 
         public ChatRuntime() : this(null, null) { }
 
@@ -122,7 +122,7 @@ namespace Dialogic
         }
 
         public void Run(string chatLabel = null)
-        {            
+        {
             if (chats.Count < 1) throw new Exception("No chats found");
 
             scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
@@ -155,9 +155,9 @@ namespace Dialogic
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal string InvokeImmediate(IDictionary<string, object> globals, string label=null)
+        internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
         {
-            var theChats = label.IsNullOrEmpty() ? chats.Values 
+            var theChats = label.IsNullOrEmpty() ? chats.Values
                 : new Chat[] { this[label] }.ToList();
 
             var result = "";
@@ -187,7 +187,7 @@ namespace Dialogic
             }
             chats.Add(c.text, c);
         }
-         
+
         internal Chat AddNewChat(string name) // testing only
         {
             Chat c = new Chat();
@@ -212,7 +212,7 @@ namespace Dialogic
         /// <param name="finder">Finder.</param>
         /// <param name="action">Action.</param>
         /// <param name="globals">Globals.</param>
-        internal void FindAllAsync(Find finder, Action<Chat> action, 
+        internal void FindAllAsync(Find finder, Action<Chat> action,
             IDictionary<string, object> globals = null)
         {
             (searchThread = new Thread(() =>
@@ -230,18 +230,28 @@ namespace Dialogic
             })).Start();
         }
 
-        internal void FindAsync(Find finder, 
-            IDictionary<string, object> globals = null)
+        internal void Find(Find find, IDictionary<string, object> globals = null)
         {
-            int ts = Util.Millis();
+            if (find is Go)
+            {
+                scheduler.Launch(FindChatByLabel(find.text));
+                return;
+            }
+
+            FindAsync(find, globals); // this may take time, so do it async
+        }
+
+        private void FindAsync(Find f, IDictionary<string, object> globals = null)
+        {
             (searchThread = new Thread(() =>
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = (finder is Go) ? FindChatByLabel(((Go)finder).text) :
-                    this.DoFind(finder, globals);
+                Chat chat = this.DoFind(f, globals);
 
-                if (chat == null) throw new FindException(finder);
+                if (chat == null) throw new FindException(f);
+
+                if (findListeners != null) findListeners.ForEach(l => l.Invoke(chat));
 
                 scheduler.Launch(chat);
 
@@ -280,6 +290,10 @@ namespace Dialogic
             cdict = new Dictionary<Constraint, bool>();
             foreach (var val in f.realized.Values)
             {
+                if (!(val is Constraint))
+                {
+                    throw new DialogicException("type:" + val.GetType());
+                }
                 Constraint c = (Constraint)val;
                 cdict.Add(c, c.IsRelaxable());
             }
@@ -295,6 +309,12 @@ namespace Dialogic
         }
 
         // for testing ------------------------------------------
+
+        internal void AddFindListener(Action<Chat> callback)
+        {
+            if (findListeners == null) findListeners = new List<Action<Chat>>();
+            findListeners.Add(callback);
+        }
 
         internal Chat DoFind(Chat parent, params Constraint[] constraints)
         {
@@ -562,7 +582,7 @@ namespace Dialogic
 
         internal bool Ready()
         {
-            return chat != null && !Waiting() && 
+            return chat != null && !Waiting() &&
                 (runtime.immediateMode || Util.Millis() >= nextEventTime);
         }
     }

@@ -20,6 +20,51 @@ namespace Dialogic
         };
 
         [Test]
+        public void ResumeWithHardConstraints()
+        {
+            string[] lines = {
+                "CHAT CORE_Shake {type=shake, stage=CORE}",
+                "SAY Core shake!",
+
+                "CHAT CORE_Tap {type=tap, stage=CORE}",
+                "SAY Core tap!",
+
+                "CHAT CORE_Stale_Fast {type=critic, stage=CORE}",
+                "SAY Core critic!",
+
+                "CHAT NV_Shake {type=shake, stage=NV}",
+                "SAY NV shake!",
+
+                "CHAT NV_Tap {type=tap, stage=NV}",
+                "SAY NV tap!",
+
+                "CHAT NV_Stale_Fast {type=critic, stage=NV}",
+                "SAY NV critic!",
+            };
+
+            bool ok = false;
+            string contents = String.Join("\n", lines);
+            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+
+            rt.AddFindListener((c) => {
+                ok = true;
+                Assert.That(c, Is.Not.EqualTo(null));
+                Assert.That(c.text, Is.EqualTo("CORE_Tap"));
+            });
+            rt.ParseText(contents);
+            rt.Run();
+
+            EventArgs gameEvent = new ResumeEvent("{!!type=tap,!stage=CORE}");
+            var ue = rt.Update(globals, ref gameEvent);
+
+            var tries = 0;  // TODO: yuck
+            while (++tries < 20) Thread.Sleep(1);
+
+            Assert.That(ok, Is.True);
+        }
+
+
+        [Test]
         public void RuntimeModesTest()
         {
             string[] lines = {
