@@ -51,7 +51,39 @@ namespace Dialogic
         }*/
 
         [Test]
-        public void FindChatByName()
+        public void SearchWithHardConstraint()
+        {
+            string[] lines = {
+                "CHAT CORE_Shake {type=shake, stage=CORE}",
+                "SAY Core shake!",
+
+                "CHAT CORE_Tap {type=tap, stage=CORE}",
+                "SAY Core tap!",
+
+                "CHAT CORE_Stale_Fast {type=critic, stage=CORE}",
+                "SAY Core critic!",
+
+                "CHAT NV_Shake {type=shake, stage=NV}",
+                "SAY NV shake!",
+
+                "CHAT NV_Tap {type=tap, stage=NV}",
+                "SAY NV tap!",
+
+                "CHAT NV_Stale_Fast {type=critic, stage=NV}",
+                "SAY NV critic!",
+            };
+            string contents = String.Join("\n", lines);
+            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt.ParseText(contents);
+            var finder = new Find().Init("{!!type=tap,!stage=CORE}");
+
+            var chat = rt.DoFind((Dialogic.Find)finder.Realize(globals));
+            Console.WriteLine(chat);
+            Assert.That(chat.text, Is.EqualTo("CORE_Tap"));
+        }
+
+        [Test]
+        public void FindChatByLabel()
         {
             string[] lines = {
                 "CHAT c1 {day=fri}",
@@ -320,7 +352,7 @@ namespace Dialogic
                 "CHAT c3 {}"
             };
 
-            var chats = ChatParser.ParseText(String.Join("\n", lines), NO_VALIDATORS); 
+            var chats = ChatParser.ParseText(String.Join("\n", lines), NO_VALIDATORS);
             chats.ForEach(c => c.Realize(null));
 
             //chats.ForEach((ch) => Console.WriteLine(ch.ToTree()));

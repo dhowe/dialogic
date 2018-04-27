@@ -311,6 +311,7 @@ namespace Dialogic
 
         internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
         {
+            if (f.realized.Count < 0) f.Realize(globals);
             return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
@@ -327,23 +328,18 @@ namespace Dialogic
 
         internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals)
         {
+            if (f.realized.Count < 0) f.Realize(globals);
             return FuzzySearch.FindAll(Chats(), ToList(f.realized), f.parent, globals);
         }
 
         internal static void Info(object msg)
         {
-            if (!ChatRuntime.SILENT)
-            {
-                Console.WriteLine(msg);
-            }
+            if (!ChatRuntime.SILENT) Console.WriteLine(msg);
         }
 
         internal static void Warn(object msg)
         {
-            if (!ChatRuntime.SILENT)
-            {
-                Console.WriteLine("[WARN] " + msg);
-            }
+            if (!ChatRuntime.SILENT) Console.WriteLine("[WARN] " + msg);
         }
     }
 

@@ -4,8 +4,8 @@ NVM 1.1
 WAIT 3
 DO #Twirl
 
-Tendar: DO #TendarSpin
-Tendar: Thanks
+//Tendar: DO #TendarSpin
+//Tendar: Thanks
 
 WAIT {ForAnimation=true}
 Thanks for visiting $place {speed=fast,style=whisper}
