@@ -127,6 +127,9 @@ namespace Dialogic.Server
             html = html.Replace("%%CODE%%", WebUtility.HtmlEncode(code));
             html = html.Replace("%%CCLASS%%", "shown");
 
+            // only process the selection if there is one
+            code = kvs.ContainsKey("selection") ? kvs["selection"] : code;
+
             try
             {
                 string content = String.Empty;
