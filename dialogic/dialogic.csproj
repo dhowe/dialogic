@@ -70,7 +70,6 @@
     <Compile Include="Interfaces.cs" />
     <Compile Include="Dynamics.cs" />
     <Compile Include="GameState.cs" />
-    <Compile Include="Pluralizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

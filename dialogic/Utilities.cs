@@ -180,119 +180,102 @@ namespace Dialogic
     }
 
 
-    public static class RiTa//@cond hidden
+    public static class RiTa //@cond hidden
     {
-        public const string VOWELS = "aeiou";
-        public const string ANY_STEM = "^((\\w+)(-\\w+)*)(\\s((\\w+)(-\\w+)*))*$";
-        public const string C = "[bcdfghjklmnpqrstvwxyz]", VL = "[lraeiou]";
-        public static string[] MODALS = { "shall", "would", "may", "might", "ought", "should" };
-        public static RegexRule DEFAULT_PLURAL_RULE = new RegexRule(RiTa.ANY_STEM, 0, "s");
-        public static RegexRule NULL_PLURALS = new RegexRule(
-      "^(bantu|bengalese|bengali|beninese|boche|bonsai|booze|cellulose|digitalis|mess|moose|"
-      + "burmese|chinese|colossus|congolese|discus|emphasis|expertise|finess|fructose|"
-      + "gabonese|gauze|glucose|grease|guyanese|haze|incense|japanese|javanese|journalese|"
-      + "lebanese|malaise|manganese|mayonnaise|maltese|menopause|merchandise|nitrocellulose|"
-      + "olympics|overuse|paradise|poise|polymerase|portuguese|prose|recompense|remorse|repose|senegalese|siamese|singhalese|innings|"
-      + "sleaze|sinhalese|sioux|sudanese|suspense|swiss|taiwanese|togolese|vietnamese|unease|aircraft|anise|antifreeze|applause|archdiocese|"
-      + "anopheles|apparatus|asparagus|barracks|bellows|bison|bluefish|bob|bourgeois|"
-      + "bream|brill|butterfingers|cargo|carp|catfish|chassis|clothes|chub|cod|codfish|"
-      + "coley|contretemps|corps|crawfish|crayfish|crossroads|cuttlefish|dace|deer|dice|"
-      + "dogfish|doings|dory|downstairs|eldest|earnings|economics|electronics|finnan|"
-      + "firstborn|fish|flatfish|flounder|fowl|fry|fries|works|globefish|goldfish|golf|"
-      + "grand|grief|gudgeon|gulden|haddock|hake|halibut|headquarters|herring|hertz|horsepower|"
-      + "goods|hovercraft|hundredweight|ironworks|jackanapes|kilohertz|kurus|kwacha|ling|lungfish|"
-      + "mackerel|means|megahertz|moorfowl|moorgame|mullet|nepalese|offspring|pampas|parr|pants|"
-      + "patois|pekinese|penn'orth|perch|pickerel|pike|pince-nez|plaice|precis|quid|rand|"
-      + "rendezvous|revers|roach|roux|salmon|samurai|series|seychelles|seychellois|shad|"
-      + "sheep|shellfish|smelt|spacecraft|species|starfish|stockfish|sunfish|superficies|"
-      + "sweepstakes|swordfish|tench|tennis|[a-z]+osis|[a-z]+itis|[a-z]+ness|"
-      + "tobacco|tope|triceps|trout|tuna|tunafish|tunny|turbot|trousers|"
-      + "undersigned|veg|waterfowl|waterworks|waxworks|whiting|wildfowl|woodworm|"
-      + "yen|aries|pisces|forceps|lieder|jeans|physics|mathematics|news|odds|politics|remains|"
-      + "acoustics|aesthetics|aquatics|basics|ceramics|classics|cosmetics|dialectics|dynamics|ethics|"
-      + "harmonics|heroics|mechanics|metrics|optics|physics|polemics|pyrotechnics|"
-            + "surroundings|thanks|statistics|goods|aids|wildlife)$", 0, "");
-       
-        public static  RegexRule[] PLURAL_RULES = new RegexRule[] { NULL_PLURALS,
-      new RegexRule("^concerto$", 1, "i"),
-      new RegexRule("^(piano|photo|solo|ego|tobacco|cargo|golf|grief)$", 0,
-      "s"),
-      new RegexRule("^(wildlife)$", 0, "s"), new RegexRule(C + "o$", 0, "es"),
-      new RegexRule(C + "y$", 1, "ies"), new RegexRule("^ox$", 0, "en"),
-      new RegexRule("^(stimul|alumn|termin)us$", 2, "i"),
-      new RegexRule("^corpus$", 2, "ora"), new RegexRule("(xis|sis)$", 2, "es"),
-      new RegexRule("([zsx]|ch|sh)$", 0, "es"),
-      new RegexRule(VL + "fe$", 2, "ves"), new RegexRule(VL + "f$", 1, "ves"),
-      new RegexRule("(eu|eau)$", 0, "x"),
+        internal const string VOWELS = "aeiou";
+        internal const string ANY_STEM = "^((\\w+)(-\\w+)*)(\\s((\\w+)(-\\w+)*))*$";
+        internal const string C = "[bcdfghjklmnpqrstvwxyz]", VL = "[lraeiou]";
 
-      new RegexRule("(man|woman)$", 2, "en"), new RegexRule("money$", 2, "ies"),
-      new RegexRule("person$", 4, "ople"), new RegexRule("motif$", 0, "s"),
-      new RegexRule("^meninx|phalanx$", 1, "ges"),
+        internal static string[] MODALS = { "shall", "would", "may", "might", "ought", "should" };
 
-      new RegexRule("schema$", 0, "ta"), new RegexRule("^bus$", 0, "ses"),
-      new RegexRule("child$", 0, "ren"),
-      new RegexRule("^(curi|formul|vertebr|larv|uln|alumn|signor|alg|minuti)a$",
-      0, "e"),
-      new RegexRule("^(maharaj|raj|myn|mull)a$", 0, "hs"),
-      new RegexRule("^aide-de-camp$", 8, "s-de-camp"),
-      new RegexRule("^apex|cortex$", 2, "ices"),
-      new RegexRule("^weltanschauung$", 0, "en"),
-      new RegexRule("^lied$", 0, "er"), new RegexRule("^tooth$", 4, "eeth"),
-      new RegexRule("^[lm]ouse$", 4, "ice"), new RegexRule("^foot$", 3, "eet"),
-      new RegexRule("femur", 2, "ora"), new RegexRule("goose", 4, "eese"),
-      new RegexRule("(human|german|roman)$", 0, "s"),
-      new RegexRule("^(monarch|loch|stomach)$", 0, "s"),
-      new RegexRule("^(taxi|chief|proof|ref|relief|roof|belief)$", 0, "s"),
-      new RegexRule("^(co|no)$", 0, "'s"), new RegexRule("^blond$", 0, "es"),
-      new RegexRule("^(medi|millenni|consorti|sept|memorabili|ser)um$", 2, "a"),
+        internal static Regex WORD = new Regex(RiTa.ANY_STEM, RegexOptions.IgnoreCase);
 
-      // Latin stems
-      new RegexRule("^(memorandum|bacterium|curriculum|minimum|"
-      + "maximum|referendum|spectrum|phenomenon|criterion)$", 2, "a"),
-      new RegexRule("^(appendix|index|matrix)", 2, "ices")
-    };
-
+        internal static RegexRule DEFAULT_PLURAL = new RegexRule(RiTa.ANY_STEM, 0, "s");
+        internal static RegexRule NULL_PLURALS = new RegexRule("^(bengali|bonsai|booze|cellulose|digitalis|mess|moose|burmese|colossus|discus|emphasis|expertise|finess|fructose|gauze|glucose|grease|haze|incense|malaise|mayonnaise|maltese|menopause|merchandise|nitrocellulose|olympics|overuse|paradise|poise|polymerase|portuguese|prose|recompense|remorse|repose|siamese|innings|sleaze|sioux|suspense|swiss|vietnamese|unease|aircraft|anise|antifreeze|applause|archdiocese|apparatus|asparagus|barracks|bellows|bison|bob|bourgeois|bream|brill|butterfingers|cargo|carp|chassis|clothes|chub|cod|contretemps|corps|crossroads|dace|deer|dice|doings|dory|downstairs|eldest|earnings|economics|electronics|finnan|firstborn|flounder|fowl|fry|fries||golf|grand|grief|gudgeon|gulden|haddock|hake|halibut|headquarters|herring|hertz|horsepower|goods|hovercraft|kilohertz|mackerel|means|megahertz|mullet|offspring|pants|patois|perch|pickerel|pike|pince-nez|quid|rand|rendezvous|roach|salmon|samurai|series|seychelles|shad|sheep|smelt|spacecraft|species|[a-z]+fish|sweepstakes|swordfish|tench|tennis|[a-z]+osis|[a-z]+itis|[a-z]+ness|tobacco|tope|triceps|trout|tuna|tunny|turbot|trousers|undersigned|[a-z+]fowl|[a-z*]works|whiting|woodworm|yen|aries|pisces|forceps|jeans|physics|mathematics|news|odds|politics|remains|acoustics|aesthetics|aquatics|basics|ceramics|classics|cosmetics|dialectics|dynamics|ethics|harmonics|heroics|mechanics|metrics|optics|physics|polemics|pyrotechnics|surroundings|thanks|statistics|goods|aids|wildlife|[a-z]+[ln]ese)$", 0, "");
+        internal static RegexRule[] PLURAL_RULES = new RegexRule[] {
+            NULL_PLURALS,
+            new RegexRule("^concerto$", 1, "i"),
+            new RegexRule("^(piano|photo|solo|ego|tobacco|cargo|golf|grief)$", 0, "s"),
+            new RegexRule("^(wildlife)$", 0, "s"), 
+            new RegexRule(C + "o$", 0, "es"),
+            new RegexRule(C + "y$", 1, "ies"), 
+            new RegexRule("^ox$", 0, "en"),
+            new RegexRule("^(stimul|alumn|termin)us$", 2, "i"),
+            new RegexRule("^corpus$", 2, "ora"), 
+            new RegexRule("(xis|sis)$", 2, "es"),
+            new RegexRule("([zsx]|ch|sh)$", 0, "es"),
+            new RegexRule(VL + "fe$", 2, "ves"), 
+            new RegexRule(VL + "f$", 1, "ves"),
+            new RegexRule("(eu|eau)$", 0, "x"),
+            new RegexRule("(man|woman)$", 2, "en"), 
+            new RegexRule("money$", 2, "ies"),
+            new RegexRule("person$", 4, "ople"), 
+            new RegexRule("motif$", 0, "s"),
+            new RegexRule("^meninx|phalanx$", 1, "ges"),
+            new RegexRule("schema$", 0, "ta"), 
+            new RegexRule("^bus$", 0, "ses"),
+            new RegexRule("child$", 0, "ren"),
+            new RegexRule("^(curi|formul|vertebr|larv|uln|alumn|signor|alg|minuti)a$", 0, "e"),
+            new RegexRule("^(maharaj|raj|myn|mull)a$", 0, "hs"),
+            new RegexRule("^apex|cortex$", 2, "ices"),
+            new RegexRule("^weltanschauung$", 0, "en"),
+            new RegexRule("^lied$", 0, "er"), 
+            new RegexRule("^tooth$", 4, "eeth"),
+            new RegexRule("^[lm]ouse$", 4, "ice"), 
+            new RegexRule("^foot$", 3, "eet"),
+            new RegexRule("femur", 2, "ora"), 
+            new RegexRule("goose", 4, "eese"),
+            new RegexRule("(human|german|roman)$", 0, "s"),
+            new RegexRule("^(monarch|loch|stomach)$", 0, "s"),
+            new RegexRule("^(taxi|chief|proof|ref|relief|roof|belief)$", 0, "s"),
+            new RegexRule("^(co|no)$", 0, "'s"), 
+            new RegexRule("^blond$", 0, "es"),
+            new RegexRule("^(medi|millenni|consorti|sept|memorabili|ser)um$", 2, "a"),
+            new RegexRule("^(memorandum|bacterium|curriculum|minimum|maximum|referendum|spectrum|phenomenon|criterion)$", 2, "a"),
+            new RegexRule("^(appendix|index|matrix)", 2, "ices")
+        };
 
     }//@endcond
 
-    public class RegexRule {
-       
-        private Regex regExp;
-        private int offset;
-        private String suffix;
+    public class RegexRule
+    {
+        private readonly int offset;
+        private readonly string suffix;
+        private readonly Regex re;
 
-        public RegexRule(String regex, int truncate, String suff)
+        public RegexRule(string regex, int truncate, string suff)
         {
-            regExp = new Regex(regex,RegexOptions.IgnoreCase);
+            re = new Regex(regex, RegexOptions.IgnoreCase);
             offset = truncate;
             suffix = suff;
         }
 
-        public bool applies(String word)
+        public bool applies(string word)
         {
             word = word.Trim();
-            return this.regExp.IsMatch(word);
+            return re.IsMatch(word);
         }
 
-        public String fire(String word)
+        public string fire(string word)
         {
             word = word.Trim();
-            String t = truncate(word);
+            string t = truncate(word);
             return t + suffix;
         }
 
-        public bool analyse(String word)
-        {   
-            CultureInfo ci = new CultureInfo("en-US");
-            return ((this.suffix != "") && word.EndsWith(this.suffix, true, ci)) ? true : false;
+        public bool analyse(string word)
+        {
+            return ((suffix != string.Empty) && word.EndsWith
+                (suffix, true, CultureInfo.InvariantCulture));
         }
 
-        private String truncate(String word)
+        private string truncate(string word)
         {
-            return (this.offset == 0) ? word : word.Substring(0, word.Length - this.offset);
+            return (offset == 0) ? word :
+                word.Substring(0, word.Length - offset);
         }
-        
     }
+
     /// <summary>
     /// Static utility functions for Dialogic
     /// </summary>
@@ -1305,7 +1288,7 @@ namespace Dialogic
         /// <summary>
         /// Capitalizes the first character.
         /// </summary>
-        public static string capitalize(string str)
+        public static string capitalize(this string str)
         {
             return char.ToUpper(str[0]) + str.Substring(1);
         }
@@ -1313,9 +1296,34 @@ namespace Dialogic
         /// <summary>
         /// Wraps the given string in double-quotes.
         /// </summary>
-        public static string quotify(string str)
+        public static string quotify(this string str)
         {
             return "\"" + str + "\"";
+        }
+
+        /// <summary>
+        /// Pluralizes a single word according to english regular/irregular rules.
+        /// </summary>
+        public static string pluralize(this string word)
+        {
+            RegexRule[] rules = RiTa.PLURAL_RULES;
+
+            var lword = word.ToLower();
+            if (!RiTa.WORD.IsMatch(word) ||
+                Array.IndexOf(RiTa.MODALS, lword) > -1)
+            {
+                return word;
+            }
+
+            for (int i = 0; i < rules.Length; i++)
+            {
+                if (rules[i].applies(lword))
+                {
+                    return rules[i].fire(word);
+                }
+            }
+
+            return RiTa.DEFAULT_PLURAL.fire(word);
         }
 
     }//@endcond
