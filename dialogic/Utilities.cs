@@ -171,13 +171,16 @@ namespace Dialogic
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        public static Regex TestTubeChatBaby = new Regex(@"^C[0-9]+$");
 
         // ChatParser.lineParser Regex
         internal const string MTD = @"(?:\{(.+?)\})?\s*";
         internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
         internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
         internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
-    }
+
+
+	}
 
 
     public static class RiTa //@cond hidden

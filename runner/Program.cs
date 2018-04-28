@@ -49,9 +49,8 @@ namespace runner
         public MockGameEngine(string fileOrFolder)
         {
             dialogic = new ChatRuntime(AppConfig.Actors);
-            //dialogic.immediateMode = true;
             dialogic.ParseFile(fileOrFolder);
-            dialogic.Run("#GScriptTest");
+            dialogic.Run();//"#GScriptTest");
         }
 
         /// <summary>
@@ -72,10 +71,10 @@ namespace runner
              });
 
             // a 'Resume' event
-            if (false) Timers.SetTimeout(3000, () =>
+            if (false) Timers.SetInterval(1000, () =>
             {
                 interrupted = true;
-                var data = "{type = shake}";
+                var data = "{!!type = tap,!stage = CORE}";
                 Console.WriteLine("\n<resume-event#"+data+">" +
                     " after " + Util.Millis(now) + "ms\n");
 

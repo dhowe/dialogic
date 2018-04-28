@@ -461,16 +461,6 @@ namespace Dialogic
             return this;
         }
 
-        protected internal Say ToSay() // for immediate mode only
-        {
-            Say say = new Say();
-            say.parent = parent;
-            say.realized[Meta.TYPE] = say.TypeName();
-            say.realized[Meta.TEXT] = say.text = (string)realized[Meta.TEXT];
-
-            return say;
-        }
-
         public override string ToString()
         {
             string s = base.ToString();

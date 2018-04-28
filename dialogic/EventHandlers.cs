@@ -19,8 +19,6 @@ namespace Dialogic
 
         internal IUpdateEvent OnEvent(ref EventArgs ea, IDictionary<string, object> globals)
         {
-            if (runtime.immediateMode) return null; // ignore all app events
-
             if (ea is IChatUpdate) return ChatUpdateHandler(ref ea, globals);
             if (ea is IUserEvent) return UserActionHandler(ref ea, globals);
             if (ea is ISuspend) return SuspendHandler(ref ea, globals);
@@ -104,7 +102,7 @@ namespace Dialogic
             {
                 scheduler.Suspend();
                 UpdateFinder(ref findDelegate, label);
-                runtime.Find(findDelegate, globals);
+                runtime.FindAsync(findDelegate, globals);
             }
 
             return null;
@@ -146,7 +144,7 @@ namespace Dialogic
                 {
                     // We've gotten a response with a branch, so finish & take it
                     scheduler.Completed(false);
-                    runtime.Find((Find)opt.action); // find next
+                    runtime.FindAsync((Find)opt.action); // find next
                 }
                 else
                 {
@@ -200,55 +198,39 @@ namespace Dialogic
             return null;
         }
 
-        private IUpdateEvent HandleCommand(Command cmd,
+        internal IUpdateEvent HandleCommand(Command cmd,
             IDictionary<string, object> globals)
         {
             if (ChatRuntime.LOG_FILE != null) WriteToLog(cmd);
 
             if (cmd is ISendable)
             {
-                if (!runtime.immediateMode)
+                if (cmd.GetType() == typeof(Wait))
                 {
-                    if (cmd.GetType() == typeof(Wait))
+                    if (cmd.delay > Util.INFINITE) // non-infinite WAIT?
                     {
-                        if (cmd.delay > Util.INFINITE) // non-infinite WAIT?
-                        {
-                            // just pause internally, no event needs to be fired
-                            ComputeNextEventTime(cmd);
-                            return null;
-                        }
-                        scheduler.Suspend();          // suspend on infinite WAIT
+                        // just pause internally, no event needs to be fired
+                        ComputeNextEventTime(cmd);
+                        return null;
                     }
-                    else if (cmd is Ask)
-                    {
-                        scheduler.prompt = (Ask)cmd;
-                        scheduler.Suspend();         // wait on ChoiceEvent
-                    }
-                    else
-                    {
-                        ComputeNextEventTime(cmd); // compute delay for next cmd
-                    }
+                    scheduler.Suspend();          // suspend on infinite WAIT
                 }
-                else if (cmd is Ask) // Ask in immediate-mode
+                else if (cmd is Ask)
                 {
-                    var opt = Util.RandItem(((Ask)cmd).Options());
-
-                    // first we convert the Ask to a Say
-                    cmd = ((Ask)cmd).ToSay();
-
-                    // then pick a random option and follow it
-                    if (opt.action != Command.NOP)
-                    {
-                        runtime.Find(new Go().Init(opt.action.text));
-                    }
+                    scheduler.prompt = (Ask)cmd;
+                    scheduler.Suspend();         // wait on ChoiceEvent
+                }
+                else
+                {
+                    ComputeNextEventTime(cmd); // compute delay for next cmd
                 }
 
-                return new UpdateEvent((Dialogic.ISendable)cmd); // fire cmd event
+                return new UpdateEvent((Dialogic.ISendable)cmd); // fire event
             }
-            else if (cmd is Find)// && !runtime.immediateMode)
+            else if (cmd is Find)
             {
-                scheduler.Completed(false); // finish 
-                runtime.Find((Find)cmd);  // then do Find
+                scheduler.Completed(false);
+                runtime.FindAsync((Find)cmd);  // finish, then do the Find
             }
 
             return null;

@@ -616,6 +616,7 @@ namespace Dialogic
                 "SAY $review",
             };
             var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
+
             //Console.WriteLine(chat.ToTree());
             var last = chat.commands[chat.commands.Count - 1];
             Assert.That(last, Is.Not.Null);

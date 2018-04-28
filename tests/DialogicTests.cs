@@ -7,6 +7,172 @@ namespace Dialogic
     [TestFixture]
     public class DialogicTests
     {
+        const bool NO_VALIDATORS = true;
+
+        static IDictionary<string, object> globals
+            = new Dictionary<string, object>
+        {
+            { "animal", "dog" },
+            { "group", "(a|b)" },
+            { "count", 4 },
+        };
+
+        [Test]
+        public void ImmediateModeTest()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello $animal.",
+                "SAY ok.",
+                "CHAT c1",
+                "SAY goodbye."
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+               
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello dog.\nok."));
+
+            s = rt.InvokeImmediate(globals, "c");
+            Assert.That(s, Is.EqualTo("hello dog.\nok."));
+
+            s = rt.InvokeImmediate(globals, "c1");
+            Assert.That(s, Is.EqualTo("goodbye."));
+
+            Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
+
+            ChatRuntime.SILENT = true;
+            rt.strictMode = false;
+            s = rt.InvokeImmediate(null);
+            ChatRuntime.SILENT = false;
+            Assert.That(s, Is.EqualTo("hello $animal.\nok."));
+        }
+
+        [Test]
+        public void ImmediateGoTest()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello $animal.",
+                "SAY ok.",
+                "GO c1",
+                "CHAT c1",
+                "SAY goodbye."
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello dog.\nok.\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c");
+            Assert.That(s, Is.EqualTo("hello dog.\nok.\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c1");
+            Assert.That(s, Is.EqualTo("goodbye."));
+
+            Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
+
+
+            ChatRuntime.SILENT = true;
+            rt.strictMode = false;
+            s = rt.InvokeImmediate(null);
+            ChatRuntime.SILENT = false;
+            Assert.That(s, Is.EqualTo("hello $animal.\nok.\ngoodbye."));
+        }
+
+        [Test]
+        public void ImmediateGoFails()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello $animal.",
+                "SAY ok.",
+                "GO c2",
+                "CHAT c1",
+                "SAY goodbye."
+            };
+
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            ChatRuntime.SILENT = true;
+            rt.strictMode = false;
+            var s = rt.InvokeImmediate(globals);
+            ChatRuntime.SILENT = false;
+            Assert.That(s, Is.EqualTo("hello dog.\nok.\n\nGO #c2 failed"));
+        }
+
+        [Test]
+        public void ImmediateAskTest()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello $animal.",
+                "ASK are you a $animal?",
+                "OPT Yes #c2",
+                "OPT No #c2",
+                "CHAT c1 {a=b}",
+                "SAY nope.",
+                "CHAT c2 {a=b}",
+                "SAY goodbye."
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c");
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c2");
+            Assert.That(s, Is.EqualTo("goodbye."));
+
+            Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
+
+
+            ChatRuntime.SILENT = true;
+            rt.strictMode = false;
+            s = rt.InvokeImmediate(null);
+            ChatRuntime.SILENT = false;
+            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\ngoodbye."));
+        }
+
+        [Test]
+        public void ImmediateFindTest()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello $animal.",
+                "ASK are you a $animal?",
+                "FIND {a=b}",
+                "CHAT c1 {a=b}",
+                "SAY goodbye."
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c");
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c1");
+            Assert.That(s, Is.EqualTo("goodbye."));
+
+            Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
+
+
+            ChatRuntime.SILENT = true;
+            rt.strictMode = false;
+
+            s = rt.InvokeImmediate(null);
+            ChatRuntime.SILENT = false;
+            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\ngoodbye."));
+        }
+
         [Test]
         public void TestPluralize()
         {

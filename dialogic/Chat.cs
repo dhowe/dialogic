@@ -35,6 +35,7 @@ namespace Dialogic
             stalenessIncr = Defaults.CHAT_STALENESS_INCR;
             staleness = Defaults.CHAT_STALENESS;
             scope = new Dictionary<string, object>();
+
             realized = null; // not relevant for chats
         }
 
@@ -44,7 +45,6 @@ namespace Dialogic
             c.Init(name, String.Empty, new string[0]);
             if (rt == null) rt = new ChatRuntime();
             rt.Parser().HandleCommand(c, null, -1);
-            //rt.AddChat(c);
             return c;
         }
 
@@ -52,7 +52,6 @@ namespace Dialogic
         {
             return commands.Count;
         }
-
 
         public bool Equals(Chat chat)
         {
@@ -80,7 +79,11 @@ namespace Dialogic
                 }
             }
 
-            return true;
+            // TODO: working here on serialization
+
+            //return true;
+
+            throw new NotImplementedException("In progress for serialization testing");
         }
 
         public void AddCommand(Command c)
@@ -194,6 +197,31 @@ namespace Dialogic
 
             LastRunAt(Util.EpochMs());
         }
+
+        //internal static string RunImmediate(Chat c, IDictionary<string, object> globals)
+        //{
+        //    var result = "";
+        //    c.RunImmediate(globals, ref result);//!= null) {}
+        //    return result;
+        //}
+
+        //internal void RunImmediate(IDictionary<string, object> globals, ref string result)
+        //{
+        //    var c = this;
+        //    for (int i = 0; i <= c.commands.Count; i++)
+        //    {
+        //        var cmd = c.commands[i];
+        //        var ue = runtime.chatEvents.HandleCommand(cmd.Realize(globals), globals);
+        //        if (ue != null && ue.Type() == "Say")
+        //        {
+        //            result += ue.Text() + '\n';
+        //        }
+        //        if (ue != null && ue.Type() == "Chat")
+        //        {
+        //            runtime[ue.Text()].RunImmediate(globals, ref result);
+        //        }
+        //    }
+        //}
 
         internal static Type DefaultCommandType(Chat chat)
         {

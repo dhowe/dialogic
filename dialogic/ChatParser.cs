@@ -123,9 +123,6 @@ namespace Dialogic
                     : Chat.DefaultCommandType(ActiveChat());
             
             Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
-
-            if (Snapshot.DBUG && c is Chat) 
-                throw new Exception("BAD chat create: "+lc.text);
             c.lineContext = lc;
 
             HandleActor(lc.actor, c, lc.line, lc.lineNo);

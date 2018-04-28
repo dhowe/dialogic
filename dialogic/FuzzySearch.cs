@@ -33,6 +33,9 @@ namespace Dialogic
             IDictionary<Constraint, bool> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
+            if (constraints.IsNullOrEmpty()) throw new FindException
+                ("FuzzySearch.Find() called without constraints");
+
             var resetRequired = false; // opt
             var clist = constraints.Keys.ToList();
 
@@ -79,7 +82,6 @@ namespace Dialogic
                 }
             }
 
-            //Console.WriteLine("Find -> "+chat);
             return chat;
         }
 
@@ -166,14 +168,12 @@ namespace Dialogic
             bool hasStaleness = false;
             foreach (var constraint in constraints)
             {
-                if (constraint.name == Meta.STALENESS)
-                {
-                    hasStaleness = true;
-                }
+                hasStaleness |= constraint.name == Meta.STALENESS;
             }
 
             if (!hasStaleness) // TODO: tmp
-            {   //throw new FindException("No staleness threshold: " + constraints.Stringify());
+            {
+                //throw new FindException("No staleness threshold: " + constraints.Stringify());
                 constraints.Add(new Constraint(Operator.LT, Meta.STALENESS,
                     Defaults.FIND_STALENESS.ToString()));
             }

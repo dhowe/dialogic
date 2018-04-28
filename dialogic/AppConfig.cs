@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Dialogic;
 
 namespace Tendar
@@ -25,13 +26,15 @@ namespace Tendar
         {
             if (c.GetType() == typeof(Chat))
             {
+                if (RE.TestTubeChatBaby.IsMatch(c.text)) return true;
+
                 if (!(c.HasMeta("NoStart") || c.HasMeta("noStart")))
                 {
                     if (!c.HasMeta(TYPE)) throw new ParseException
-                        ("missing required meta-key '" + TYPE + "'");
+                        ("missing required meta-key '" + TYPE + "' or 'noStart'");
 
                     if (!c.HasMeta(STAGE)) throw new ParseException
-                        ("missing required meta-key '" + STAGE + "'");
+                        ("missing required meta-key '" + STAGE + "' or 'noStart'");
                 }
             }
 

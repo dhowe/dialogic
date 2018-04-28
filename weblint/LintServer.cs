@@ -107,7 +107,15 @@ namespace Dialogic.Server
         {
             var html = IndexPageContent.Replace("%%URL%%", SERVER_URL);
 
-            var kvs = ParsePostData(request);
+            IDictionary<string, string> kvs = new Dictionary<string, string>();
+            try
+            {
+                kvs = ParsePostData(request);
+            }
+            catch (Exception ex)
+            {
+                ChatRuntime.Warn(ex);
+            }
 
             var path = kvs.ContainsKey("path") ? kvs["path"] : null;
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
@@ -116,7 +124,7 @@ namespace Dialogic.Server
             if (!String.IsNullOrEmpty(path))
             {
                 // fetch code from file
-                using (var wb = new WebClient()) code = wb.DownloadString(path); 
+                using (var wb = new WebClient()) code = wb.DownloadString(path);
             }
 
             if (String.IsNullOrEmpty(code))
@@ -135,7 +143,6 @@ namespace Dialogic.Server
                 string content = String.Empty;
                 runtime = new ChatRuntime(Tendar.AppConfig.Actors);
                 runtime.strictMode = false; // allow unbound symbols in output
-                runtime.immediateMode = true; // ignore command timings
                 runtime.ParseText(code, false); // true to disable validators
 
                 //Console.WriteLine(runtime);
@@ -144,13 +151,15 @@ namespace Dialogic.Server
                 var result = string.Empty;
                 if (mode == "execute")
                 {
-                    // run the chats without delays, outputting SAY/ASK commands
+                    // run the first chats with all timing disabled
                     result = WebUtility.HtmlEncode(runtime.InvokeImmediate
-                        (new Dictionary<string, object>())); 
+                        (new Dictionary<string, object>()));
                 }
                 html = html.Replace("%%RESULT%%", WebUtility.HtmlEncode(content));
                 html = html.Replace("%%EXECUTE%%", result);
                 html = html.Replace("%%RCLASS%%", "success");
+
+                //Console.WriteLine(html);
             }
             catch (ParseException ex)
             {
@@ -166,6 +175,8 @@ namespace Dialogic.Server
 
         private static void OnError(ref string html, Exception ex, int lineno = -1)
         {
+            Console.WriteLine("[CAUGHT] " + ex);
+
             html = html.Replace("%%EXECUTE%%", "");
             html = html.Replace("%%RCLASS%%", "error");
             html = html.Replace("%%RESULT%%", lineno < 0 ? ex.ToString() : ex.Message);
@@ -194,14 +205,14 @@ namespace Dialogic.Server
                         var pair = p.Split('=');
                         if (pair.Length == 2)
                         {
-                            //Console.WriteLine(pair[0] + ": " + pair[1]);
+                            Console.WriteLine(pair[0] + ": " + pair[1]);
                             result.Add(WebUtility.UrlDecode(pair[0]),
                                 WebUtility.UrlDecode(pair[1]));
                         }
                         else
                         {
-                            //ChatRuntime.Warn("BAD KV - PAIR: " + p);
-                            throw new Exception("BAD KV-PAIR: " + p);
+                            ChatRuntime.Warn("BAD KV - PAIR: " + p);
+                            throw new Exception("BAD-PAIR: " + p);
                         }
                     }
                 }
@@ -229,3 +240,4 @@ namespace Dialogic.Server
         }
     }
 }
+

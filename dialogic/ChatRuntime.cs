@@ -43,7 +43,7 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal bool immediateMode, strictMode = true;
+        internal bool strictMode = true;
         internal IDictionary<string, Choice> choiceCache;
         internal ChatScheduler scheduler;
         internal bool validatorsDisabled;
@@ -73,6 +73,58 @@ namespace Dialogic
             this.actors = InitActors(theActors);
 
             if (!theChats.IsNullOrEmpty()) theChats.ForEach(AddChat);
+        }
+
+        internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
+        {
+            var chat = (label.IsNullOrEmpty() ? chats.Values :
+                new Chat[] { this[label] }.ToList()).First();
+
+            var result = string.Empty;
+
+            chat.Run();
+
+            if (!chat.HasNext()) return result;
+
+            while (chat != null)
+            {
+                var cmd = chat.Next().Realize(globals);
+
+                ProcessSay(ref result, ref cmd);
+
+                if (cmd is Find)
+                {
+                    var toFind = cmd.ToString();
+                    try
+                    {
+                        // a chat calling itself in immediate mode can cause
+                        // an infinite loop; guard against it here
+                        var find = Find((Find)cmd, globals);
+                        if (find != chat) (chat = find).Run();
+                    }
+                    catch (Exception ex)
+                    {
+                        Warn(ex);
+                        return result + "\n" + toFind + " failed";
+                    }
+                }
+
+                chat = chat.HasNext() ? chat : null;
+            }
+
+            return result.TrimLast('\n');
+        }
+
+        private static void ProcessSay(ref string result, ref Command cmd)
+        {
+            if (cmd is Say)
+            {
+                result += cmd.Text() + "\n";
+                if (cmd is Ask)
+                {
+                    cmd = Util.RandItem(((Ask)cmd).Options()).action;
+                }
+            }
         }
 
         public Chat this[string key] // string indexer -> runtime["chat4"]
@@ -155,28 +207,6 @@ namespace Dialogic
 
         ///////////////////////////////////////////////////////////////////////
 
-        internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
-        {
-            var theChats = label.IsNullOrEmpty() ? chats.Values
-                : new Chat[] { this[label] }.ToList();
-
-            var result = "";
-            foreach (var c in theChats)
-            {
-                this.Run(c.text);
-                for (int i = 0; i <= c.commands.Count; i++)
-                {
-                    var ue = chatEvents.OnEvent(globals);
-                    if (ue != null && ue.Type() == "Say")
-                    {
-                        result += ue.Text() + '\n';
-                    }
-                }
-            }
-
-            return result.TrimLast('\n');
-        }
-
         internal void AddChat(Chat c)
         {
             c.runtime = this;
@@ -230,28 +260,20 @@ namespace Dialogic
             })).Start();
         }
 
-        internal void Find(Find find, IDictionary<string, object> globals = null)
+        internal Chat Find(Find f, IDictionary<string, object> globals = null)
         {
-            if (find is Go)
-            {
-                scheduler.Launch(FindChatByLabel(find.text));
-                return;
-            }
-
-            FindAsync(find, globals); // this may take time, so do it async
+            var chat = (f is Go) ? FindChatByLabel(f.text) : DoFind(f, globals);
+            if (chat == null) throw new FindException(f);
+            return chat;
         }
 
-        private void FindAsync(Find f, IDictionary<string, object> globals = null)
+        internal void FindAsync(Find f, IDictionary<string, object> globals = null)
         {
             (searchThread = new Thread(() =>
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = this.DoFind(f, globals);
-
-                if (chat == null) throw new FindException(f);
-
-                if (findListeners != null) findListeners.ForEach(l => l.Invoke(chat));
+                Chat chat = Find(f, globals);
 
                 scheduler.Launch(chat);
 
@@ -454,8 +476,6 @@ namespace Dialogic
 
         internal void Suspend()
         {
-            if (runtime.immediateMode) return;
-
             if (chat != null)
             {
                 if (!chat.interruptable)
@@ -477,8 +497,6 @@ namespace Dialogic
 
         internal int Resume()
         {
-            if (runtime.immediateMode) return -1;
-
             if (chat != null && !Waiting())
             {
                 Warn("Ignoring attempt to resume while Chat#"
@@ -582,8 +600,8 @@ namespace Dialogic
 
         internal bool Ready()
         {
-            return chat != null && !Waiting() &&
-                (runtime.immediateMode || Util.Millis() >= nextEventTime);
+            return chat != null && !Waiting()
+                && Util.Millis() >= nextEventTime;
         }
     }
 }
