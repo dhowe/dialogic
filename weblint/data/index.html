@@ -210,9 +210,9 @@
         if (input.length && input != 'Enter your code here')
         {
           $("#validate").prop("disabled", false);
-          /* $main.selectionStart = 1;
-          $main.selectionEnd = input.length-1;
-          $main.focus(); */
+          $main[0].selectionStart = 0;
+          $main[0].selectionEnd = input.length;
+          $main[0].focus();
         }
 
         var resText = $("#result").text(),

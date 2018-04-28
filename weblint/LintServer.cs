@@ -13,7 +13,8 @@ namespace Dialogic.Server
 {
     public class LintServer
     {
-        public static string SERVER_URL = "http://" + LocalIPAddress() + ":8080/glint/";
+        public static string SERVER_URL = "http://" + 
+            LocalIPAddress() + ":8080/glint/";
 
         static Regex Brackets = new Regex(@"(\]|\[)");
         static string IndexPageContent;
@@ -23,11 +24,16 @@ namespace Dialogic.Server
 
         static ChatRuntime runtime;
 
-        public LintServer(Func<HttpListenerRequest, string> func, params string[] prefixes)
+        public LintServer(Func<HttpListenerRequest, string> func, 
+            params string[] prefixes)
         {
-            if (prefixes == null || prefixes.Length == 0) throw new ArgumentException("URI required");
+            if (prefixes == null || prefixes.Length == 0)
+            {
+                throw new ArgumentException("URI required");
+            }
 
-            if (func == null) throw new ArgumentException("responder required");
+            if (func == null) throw new ArgumentException
+                ("Responder Func required");
 
             foreach (var s in prefixes) listener.Prefixes.Add(s);
 
@@ -121,9 +127,8 @@ namespace Dialogic.Server
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
             var mode = kvs.ContainsKey("mode") ? kvs["mode"] : "validate";
 
-            if (!String.IsNullOrEmpty(path))
+            if (!String.IsNullOrEmpty(path)) // fetch code from file
             {
-                // fetch code from file
                 using (var wb = new WebClient()) code = wb.DownloadString(path);
             }
 
@@ -145,7 +150,6 @@ namespace Dialogic.Server
                 runtime.strictMode = false; // allow unbound symbols in output
                 runtime.ParseText(code, false); // true to disable validators
 
-                //Console.WriteLine(runtime);
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
 
                 var result = string.Empty;
@@ -155,11 +159,10 @@ namespace Dialogic.Server
                     result = WebUtility.HtmlEncode(runtime.InvokeImmediate
                         (new Dictionary<string, object>()));
                 }
+
                 html = html.Replace("%%RESULT%%", WebUtility.HtmlEncode(content));
                 html = html.Replace("%%EXECUTE%%", result);
                 html = html.Replace("%%RCLASS%%", "success");
-
-                //Console.WriteLine(html);
             }
             catch (ParseException ex)
             {
@@ -205,14 +208,14 @@ namespace Dialogic.Server
                         var pair = p.Split('=');
                         if (pair.Length == 2)
                         {
-                            Console.WriteLine(pair[0] + ": " + pair[1]);
+                            //Console.WriteLine(pair[0] + ": " + pair[1]);
                             result.Add(WebUtility.UrlDecode(pair[0]),
                                 WebUtility.UrlDecode(pair[1]));
                         }
                         else
                         {
                             ChatRuntime.Warn("BAD KV - PAIR: " + p);
-                            throw new Exception("BAD-PAIR: " + p);
+                            //throw new Exception("BAD-PAIR: " + p);
                         }
                     }
                 }

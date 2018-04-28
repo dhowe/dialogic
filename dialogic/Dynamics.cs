@@ -40,6 +40,8 @@ namespace Dialogic
 
         internal static bool Set(Object target, string property, object value, bool onlyIfExists = false)
         {
+            if (target == null) throw new BindException("Null Set target");
+
             var lookup = Lookup(target.GetType());
 
             if (lookup != null && lookup.ContainsKey(property))
@@ -57,6 +59,8 @@ namespace Dialogic
 
         internal static object Get(Object target, string property, object defaultVal = null)
         {
+            if (target == null) throw new BindException("Null Get target");
+
             var lookup = Lookup(target.GetType());
 
             if (lookup != null && lookup.ContainsKey(property))
@@ -325,7 +329,7 @@ namespace Dialogic
     internal class Symbol
     {
         public string text, alias, name;
-        public bool bounded, chatScoped;
+        public bool bounded;// chatScoped;
         public Chat context;
 
         private Symbol(Chat context, params string[] parts) :
@@ -340,7 +344,7 @@ namespace Dialogic
             this.name = theSymbol.Trim();
             this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
-            this.chatScoped = (typeChar == Ch.LABEL.ToString());
+            //this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
 
         public override string ToString()
@@ -352,8 +356,7 @@ namespace Dialogic
 
         internal string SymbolText()
         {
-            return (chatScoped ? Ch.LABEL : Ch.SYMBOL)
-                + (bounded ? "{" + name + '}' : name);
+            return Ch.SYMBOL+ (bounded ? "{" + name + '}' : name);
         }
 
         public static List<Symbol> Parse(string text, Chat context)
@@ -381,8 +384,8 @@ namespace Dialogic
         {
             string[] parts = name.Split(Ch.SCOPE);
 
-            if (parts.Length == 1 && chatScoped) throw new BindException
-                ("Illegally-scoped variable: " + this);
+            //if (parts.Length == 1 && chatScoped) throw new BindException
+                //("Illegally-scoped variable: " + this);
 
             object resolved = ResolveSymbol(parts[0], context, globals);
             switch (this.Type())
@@ -395,48 +398,23 @@ namespace Dialogic
 
                 case SymbolType.GLOBAL_SCOPE:
 
-                    // Dynamically resolve the object path 
-                    for (int i = 1; i < parts.Length; i++)
-                    {
-                        if (parts[i].EndsWith(Ch.CGROUP))
-                        {
-                            var func = parts[i].Replace("()", "");
-                            if (resolved.ToString().Contains(Ch.OR))
-                            {
-                                // delay the method call until fully resolved
-                                resolved = resolved + "." + parts[i];
-                            }
-                            else
-                            {   // nothing more to resolve, so invoke
-                                resolved = Methods.Invoke(resolved, func, null);
-                            }
-                            // TODO: handle other signatures
-                        }
-                        else
-                        {
-                            resolved = Properties.Get(resolved, parts[i]);
-                        }
-
-                        if (resolved == null) OnBindError(globals);
-
-                        HandleAlias(resolved, globals);
-                    }
+                    resolved = GetViaPath(resolved, parts, globals);
 
                     break;
 
-                case SymbolType.CHAT_SCOPE:
+                    /*case SymbolType.CHAT_SCOPE:
 
-                    if (context == null || context.runtime == null)
-                    {
-                        throw new BindException("Null context/runtime: " + this);
-                    }
+						if (context == null || context.runtime == null)
+						{
+							throw new BindException("Null context/runtime: " + this);
+						}
 
-                    // Find/store the correct scope for the lookup
-                    context = context.runtime.FindChatByLabel(parts[0]);
-                    resolved = ResolveSymbol(parts[1], context, globals);
-                    HandleAlias(resolved, context.scope);
+						// Find/store the correct scope for the lookup
+						context = context.runtime.FindChatByLabel(parts[0]);
+						resolved = ResolveSymbol(parts[1], context, globals);
+						HandleAlias(resolved, context.scope);
 
-                    break;
+						break;*/
             }
 
             if (resolved != null)
@@ -454,6 +432,57 @@ namespace Dialogic
             }
 
             return null;
+        }
+
+        internal static bool SetViaPath(object parent, string[] paths, object val,
+            IDictionary<string, object> globals)
+        {
+            if (parent == null) throw new BindException("null parent");
+
+            // Dynamically resolve the object path 
+            for (int i = 1; i < paths.Length-1; i++)
+            {
+                parent = Properties.Get(parent, paths[i]);
+                if (parent == null) throw new BindException("bad parent"+paths.Stringify());//OnBindError(globals);
+            }
+
+            return Properties.Set(parent, paths[paths.Length-1], val);
+        }
+
+        private object GetViaPath(object parent, string[] paths,
+            IDictionary<string, object> globals)
+        {
+            if (parent == null) throw new BindException("null parent");
+
+            // Dynamically resolve the object path 
+            for (int i = 1; i < paths.Length; i++)
+            {
+                if (paths[i].EndsWith(Ch.CGROUP))
+                {
+                    var func = paths[i].Replace("()", "");
+                    if (parent.ToString().Contains(Ch.OR))
+                    {
+                        // delay the method call until fully resolved
+                        parent = parent + "." + paths[i];
+                    }
+                    else
+                    {   // nothing more to resolve, so invoke
+                        parent = Methods.Invoke(parent, func, null);
+                    }
+
+                    // TODO: handle other modifier signatures
+                }
+                else
+                {
+                    parent = Properties.Get(parent, paths[i]);
+                }
+
+                if (parent == null) OnBindError(globals);
+
+                HandleAlias(parent, globals);
+            }
+
+            return parent;
         }
 
         internal void OnBindError(IDictionary<string, object> globals)
@@ -524,11 +553,10 @@ namespace Dialogic
 
         internal SymbolType Type()
         {
-            return this.name.Contains(Ch.SCOPE) ? (this.chatScoped ?
-                SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE) : SymbolType.SIMPLE;
+            return this.name.Contains(Ch.SCOPE) ? SymbolType.GLOBAL_SCOPE : SymbolType.SIMPLE;
         }
 
-        internal enum SymbolType { SIMPLE, CHAT_SCOPE, GLOBAL_SCOPE }
+        internal enum SymbolType { SIMPLE, GLOBAL_SCOPE }
     }
 
 

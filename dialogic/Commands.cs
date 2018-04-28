@@ -283,6 +283,8 @@ namespace Dialogic
 
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
+            Console.WriteLine("SET: " + txt);
+
             var match = RE.ParseSetArgs.Match(txt);
 
             if (match.Groups.Count != 4)
@@ -293,44 +295,64 @@ namespace Dialogic
 
             var tmp = match.Groups[1].Value.Trim();
 
-            var symbol = Symbol.Parse(tmp, parent); // CHANGED from above ???
+            //var symbols = Symbol.Parse(tmp, parent); // CHANGED from above ???
+            //if (symbols.Count != 1) throw new ParseException
+            //("Unable to parse SET args: '" + txt + "'");
 
+            //Console.WriteLine("parsed-sym: " + symbols[0]);
+
+            //this.text = symbols[0].name; 
             this.text = tmp.TrimFirst(Ch.SYMBOL);
-            this.global = (tmp != text) && !text.Contains(".");
+            //Console.WriteLine("text: " + text);
+            this.global = tmp.StartsWith('$');//(tmp != text) && !text.Contains(".");
             this.value = match.Groups[3].Value.Trim();
             this.op = Assignment.FromString(match.Groups[2].Value.Trim());
         }
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
-            if (global && globals == null) throw new DialogicException
-                ("Invalid call to Set.Realize() with null argument"); // needed?
+            var symStr = text;
 
-            var symbol = text;
-            var context = parent;
-
-            Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
-
-            // Here we check if the set matches a dynamic parent property
-            //if (context != null)
-            //{
-            //    IDictionary<string, PropertyInfo> mm = Properties.Lookup(typeof(Chat));
-
-            //    // If so, we don't create a new symbol, but instead set the property
-            //    if (mm.ContainsKey(symbol))
-            //    {
-            //        context.DynamicSet(symbol, value);
-            //        return this;
-            //    }
-            //}
-
-            // Here we check if the set matches a dynamic parent propert
-            // If so, we don't recreate it, but instead set the property
-            if (!context.Update(symbol, value))
+            if (symStr.Contains(Ch.SCOPE))
             {
-                // Invoke the assignment in the correct scope
-                //Console.WriteLine("$#" + symbol + " = " + value);
-                op.Invoke(symbol, value, (global ? globals : context.scope));
+                if (!global) throw new BindException
+                    ("Invalid scoped-local symbol" + symStr);
+
+                var parts = symStr.Split(Ch.SCOPE);
+                if (parts.Length > 2) throw new BindException
+                    ("Unexpected variable format: " + symStr);
+
+                if (globals.ContainsKey(parts[0]))
+                {
+                    if (!Symbol.SetViaPath(globals[parts[0]], parts, value, globals))
+                    {
+                        throw new BindException("Unable to global symbol: " + text);
+                    }
+                }
+                else
+                {
+                    // Try to set chat-local persistent property, eg '$c1.delay'
+                    if (!parent.runtime.ContainsKey(parts[0]))
+                    {
+                        throw new BindException("Unable to resolve path" +
+                            " in global or chat-scope: " + text);
+                    }
+
+                    Chat context = parent.runtime[parts[0]];
+                    if (parts.Length != 2) throw new BindException
+                        ("Bad chat-scoped path: " + text);
+
+                    if (!context.Update(parts[1], value))
+                    {
+                        throw new BindException("Illegal attempt to access " +
+                            "chat-local scope: $" + context.text + "." + parts[1]);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invoke unscoped");
+                op.Invoke(symStr, value, (global ? globals : parent.scope));
             }
 
             return this;

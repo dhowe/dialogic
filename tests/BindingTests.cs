@@ -79,18 +79,6 @@ namespace Dialogic
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("dog"));
 
-            // cross-chat-scope
-            lines = new[] {
-                "CHAT c1",
-                "SET ab = hello",
-                "CHAT c2",
-                "SAY #c1.ab",
-            };
-            text = String.Join("\n", lines);
-            var chats = ChatParser.ParseText(text, true);
-            chats.ForEach(c => c.Realize(globals));
-            Assert.That(chats[1].commands[0].Text(), Is.EqualTo("hello"));
-
             // global-properties
             lines = new[] {
                 "CHAT c1",
@@ -126,6 +114,19 @@ namespace Dialogic
             text = String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
+
+            // cross-chat-global
+            lines = new[] {
+                "CHAT c1",
+                "SET $c1_ab = hello",
+                "CHAT c2",
+                "SAY $c1_ab",
+            };
+            text = String.Join("\n", lines);
+            var chats = ChatParser.ParseText(text, true);
+            chats.ForEach(c => c.Realize(globals));
+            Assert.That(chats[1].commands[0].Text(), Is.EqualTo("hello"));
+
 
             return; // TODO
 
@@ -223,6 +224,7 @@ namespace Dialogic
             Assert.That(res, Is.EqualTo("c"));
         }
 
+        /*
         [Test]
         public void CrossLocalScope()
         {
@@ -278,7 +280,7 @@ namespace Dialogic
             c2.scope.Add("a", "b");
             var res = Resolver.Bind("#c1.a", c2, globals);
             Assert.That(res, Is.EqualTo("b"));
-        }
+        }*/
 
 
     }

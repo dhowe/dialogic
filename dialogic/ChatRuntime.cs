@@ -44,6 +44,7 @@ namespace Dialogic
         };
 
         internal bool strictMode = true;
+        internal IDictionary<string, Chat> chats;
         internal IDictionary<string, Choice> choiceCache;
         internal ChatScheduler scheduler;
         internal bool validatorsDisabled;
@@ -52,7 +53,6 @@ namespace Dialogic
         private List<IActor> actors;
         private List<Action<Chat>> findListeners;
         private List<Func<Command, bool>> validators;
-        private IDictionary<string, Chat> chats;
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private Thread searchThread;
@@ -132,6 +132,11 @@ namespace Dialogic
             get { return this.chats[key]; }
         }
 
+        public bool ContainsKey(string v) // convenience check for indexer
+        {
+            return this.chats.ContainsKey(v);
+        }
+
         public void ParseText(string text, bool disableValidators = false)
         {
             this.validatorsDisabled = disableValidators;
@@ -176,6 +181,8 @@ namespace Dialogic
         public void Run(string chatLabel = null)
         {
             if (chats.Count < 1) throw new Exception("No chats found");
+
+            // TODO: separate and run any 'preload' chats here
 
             scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
         }
@@ -357,7 +364,7 @@ namespace Dialogic
             return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
-        internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
+		internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
         {
             return DoFindAll(parent, null, constraints);
         }

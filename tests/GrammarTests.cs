@@ -479,12 +479,12 @@ namespace Dialogic
         {
             string[] lines = {
                 "CHAT WineReview {type=a,stage=b}",
-                "SET review=$desc $fortune $ending",
-                "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
-                "SET fortune=Under your skin, tears undulate like a leaky eel.",
-                "SET ending=And thats the end of the story...",
+                "SET $review=$desc $fortune $ending",
+                "SET $desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
+                "SET $fortune=Under your skin, tears undulate like a leaky eel.",
+                "SET $ending=And thats the end of the story...",
                 "CHAT External {type=a,stage=b}",
-                "SAY #WineReview.review",
+                "SAY $review",
             };
             ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
             rt.ParseText(String.Join("\n", lines));
@@ -496,9 +496,6 @@ namespace Dialogic
 
             chat1.commands.ForEach(c => c.Realize(globals));
             chat2.commands.ForEach(c => c.Realize(globals));
-
-            Assert.That(chat1.scope.ContainsKey("review"), Is.True);
-            Assert.That(chat1.scope.ContainsKey("ending"), Is.True);
 
             Assert.That(say.Text(), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
@@ -699,11 +696,11 @@ namespace Dialogic
         {
             string[] lines = {
                 "CHAT c1 {chatMode=grammar}",
-                "review=$greeting",
-                "greeting = (Hello | Goodbye)",
+                "$review=$greeting",
+                "$greeting = (Hello | Goodbye)",
                 "",
                 "CHAT c2",
-                "#c1.review",
+                "$review",
             };
 
             var chats = ChatParser.ParseText(String.Join("\n", lines), true);
@@ -1018,6 +1015,105 @@ namespace Dialogic
             chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
             Console.WriteLine(chat.Expand(globals, "$start"));
             Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (A | B)")); */
+        }
+
+        [Test]
+        public void GrammarExpandWithOrEqualsGlobal()
+        {
+            string[] lines;
+            string text;
+            Chat chat;
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C | D",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
+
+//TODO: working here ****
+return;
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C",
+                "$c |= D",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C | D",
+                "$c |= E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = (C | D)",
+                "$c |= E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C (C | D)",
+                "$c |= E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C (C | D) | E)"));
+
+            lines = new[] {
+                "$start = $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = D | E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (D | E)"));
+
+            lines = new[] {
+                "$start = $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = $d | $e",
+                "$d = D",
+                "$e = E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (D | E)"));
+
+            lines = new[] {
+                "$start = $desc $fortune $ending",
+                "$ending = $score | $end-phrase",
+                "$desc = A",
+                "$fortune = B",
+                "$score = C",
+                "$end-phrase = D"
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
         }
 
         [Test]

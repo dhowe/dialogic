@@ -105,7 +105,7 @@ namespace Dialogic
 
             if (DBUG) Console.WriteLine("\nFIND: " + constraints.Stringify());
 
-            ValidateConstraints(parent, constraints);
+            ValidateConstraints(constraints);
 
             for (int i = 0; i < chats.Count; i++)
             {
@@ -160,20 +160,16 @@ namespace Dialogic
             return (from kvp in list select kvp.Key).ToList();
         }
 
-        private static void ValidateConstraints(Chat parent, List<Constraint> constraints)
+        private static void ValidateConstraints(List<Constraint> constraints) // TODO: tmp
         {
-            //if (parent == null) throw new FindException
-                //("Null Chat parent in Find: " + constraints.Stringify());
-
             bool hasStaleness = false;
             foreach (var constraint in constraints)
             {
                 hasStaleness |= constraint.name == Meta.STALENESS;
             }
 
-            if (!hasStaleness) // TODO: tmp
+            if (!hasStaleness)
             {
-                //throw new FindException("No staleness threshold: " + constraints.Stringify());
                 constraints.Add(new Constraint(Operator.LT, Meta.STALENESS,
                     Defaults.FIND_STALENESS.ToString()));
             }
@@ -190,16 +186,6 @@ namespace Dialogic
         }
 
         // --------------------------------------------------------------------
-
-        internal class SearchContext // TODO:
-        {
-            /*
-             * 1. Try normal search
-             * 2. If failed, create a SearchContext(SC)
-             * 3. If (relaxables) relaxEach until empty
-             * 4. If failed, unrelax, relax staleness, & repeat
-             */
-        }
 
         private static int RelaxableCount(IDictionary<Constraint, bool> constraints)
         {
@@ -246,10 +232,13 @@ namespace Dialogic
             }
         }
 
+        // --------------  various sorts --------------------------------------
+
         /// <summary>
         /// Sort by points, highest first, break ties with a coin-flip
         /// </summary>
-        internal static List<KeyValuePair<Chat, double>> DescendingRandomizedSort(Dictionary<Chat, double> d)
+        internal static List<KeyValuePair<Chat, double>> 
+            DescendingRandomizedSort(Dictionary<Chat, double> d)
         {
             List<KeyValuePair<Chat, double>> list = d.ToList();
             list.Sort((p1, p2) => CompareWithRandomizedTies(p1.Value, p2.Value));
@@ -259,7 +248,8 @@ namespace Dialogic
         /// <summary>
         /// Sort by points, highest first, break ties with Chat.Staleness(), then coin-flip
         /// </summary>
-        internal static List<KeyValuePair<Chat, double>> DescendingStalenessRandomizedSort(Dictionary<Chat, double> d)
+        internal static List<KeyValuePair<Chat, double>> 
+            DescendingStalenessRandomizedSort(Dictionary<Chat, double> d)
         {
             List<KeyValuePair<Chat, double>> list = d.ToList();
             list.Sort(CompareStalenessTies);
@@ -269,7 +259,8 @@ namespace Dialogic
         /// <summary>
         /// Sort by points, highest first, break ties with the lastRunAt time, then coin-flip
         /// </summary>
-        internal static List<KeyValuePair<Chat, double>> DescendingScoreLastRunAtRandomizedSort(Dictionary<Chat, double> d)
+        internal static List<KeyValuePair<Chat, double>> 
+            DescendingScoreLastRunAtRandomizedSort(Dictionary<Chat, double> d)
         {
             List<KeyValuePair<Chat, double>> list = d.ToList();
             list.Sort(CompareLastRunAtTies);
@@ -279,7 +270,8 @@ namespace Dialogic
         /// <summary>
         /// Sort descending based on score with ties decided by lastRunAt, then a coin-flip
         /// </summary>
-        internal static int CompareLastRunAtTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
+        internal static int CompareLastRunAtTies
+            (KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
         {
             if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
             {
@@ -292,12 +284,14 @@ namespace Dialogic
         /// <summary>
         /// Sort descending based on score with ties decided by lastRunAt, then a coin-flip
         /// </summary>
-        internal static int CompareStalenessTies(KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
+        internal static int CompareStalenessTies
+            (KeyValuePair<Chat, double> i, KeyValuePair<Chat, double> j)
         {
             if (Util.FloatingEquals(i.Value, j.Value)) // tie on score
             {
                 // check staleness and randomize ties
-                return CompareWithRandomizedTies(i.Key.Staleness(), j.Key.Staleness());
+                return CompareWithRandomizedTies
+                    (i.Key.Staleness(), j.Key.Staleness());
             }
             return j.Value.CompareTo(i.Value);
         }
@@ -315,7 +309,8 @@ namespace Dialogic
         /// </summary> 
         internal static int CompareWithRandomizedTies(double i, double j)
         {
-            return Util.FloatingEquals(i, j) ? (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
+            return Util.FloatingEquals(i, j) ? 
+                (Util.Rand() < .5 ? 1 : -1) : i.CompareTo(j);
         }
     }
 }
