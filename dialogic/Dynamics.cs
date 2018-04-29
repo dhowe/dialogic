@@ -40,6 +40,8 @@ namespace Dialogic
 
         internal static bool Set(Object target, string property, object value, bool onlyIfExists = false)
         {
+            if (target == null) throw new BindException("Null Set target");
+
             var lookup = Lookup(target.GetType());
 
             if (lookup != null && lookup.ContainsKey(property))
@@ -57,6 +59,8 @@ namespace Dialogic
 
         internal static object Get(Object target, string property, object defaultVal = null)
         {
+            if (target == null) throw new BindException("Null Get target");
+
             var lookup = Lookup(target.GetType());
 
             if (lookup != null && lookup.ContainsKey(property))
@@ -325,7 +329,7 @@ namespace Dialogic
     internal class Symbol
     {
         public string text, alias, name;
-        public bool bounded, chatScoped;
+        public bool bounded;// chatScoped;
         public Chat context;
 
         private Symbol(Chat context, params string[] parts) :
@@ -340,7 +344,7 @@ namespace Dialogic
             this.name = theSymbol.Trim();
             this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
-            this.chatScoped = (typeChar == Ch.LABEL.ToString());
+            //this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
 
         public override string ToString()
@@ -352,8 +356,7 @@ namespace Dialogic
 
         internal string SymbolText()
         {
-            return (chatScoped ? Ch.LABEL : Ch.SYMBOL)
-                + (bounded ? "{" + name + '}' : name);
+            return Ch.SYMBOL+ (bounded ? "{" + name + '}' : name);
         }
 
         public static List<Symbol> Parse(string text, Chat context)
@@ -381,8 +384,8 @@ namespace Dialogic
         {
             string[] parts = name.Split(Ch.SCOPE);
 
-            if (parts.Length == 1 && chatScoped) throw new BindException
-                ("Illegally-scoped variable: " + this);
+            //if (parts.Length == 1 && chatScoped) throw new BindException
+                //("Illegally-scoped variable: " + this);
 
             object resolved = ResolveSymbol(parts[0], context, globals);
             switch (this.Type())
@@ -424,7 +427,7 @@ namespace Dialogic
 
                     break;
 
-                case SymbolType.CHAT_SCOPE:
+                /*case SymbolType.CHAT_SCOPE:
 
                     if (context == null || context.runtime == null)
                     {
@@ -436,7 +439,7 @@ namespace Dialogic
                     resolved = ResolveSymbol(parts[1], context, globals);
                     HandleAlias(resolved, context.scope);
 
-                    break;
+                    break;*/
             }
 
             if (resolved != null)
@@ -524,11 +527,10 @@ namespace Dialogic
 
         internal SymbolType Type()
         {
-            return this.name.Contains(Ch.SCOPE) ? (this.chatScoped ?
-                SymbolType.CHAT_SCOPE : SymbolType.GLOBAL_SCOPE) : SymbolType.SIMPLE;
+            return this.name.Contains(Ch.SCOPE) ? SymbolType.GLOBAL_SCOPE : SymbolType.SIMPLE;
         }
 
-        internal enum SymbolType { SIMPLE, CHAT_SCOPE, GLOBAL_SCOPE }
+        internal enum SymbolType { SIMPLE, GLOBAL_SCOPE }
     }
 
 

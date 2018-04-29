@@ -479,12 +479,12 @@ namespace Dialogic
         {
             string[] lines = {
                 "CHAT WineReview {type=a,stage=b}",
-                "SET review=$desc $fortune $ending",
-                "SET desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
-                "SET fortune=Under your skin, tears undulate like a leaky eel.",
-                "SET ending=And thats the end of the story...",
+                "SET $review=$desc $fortune $ending",
+                "SET $desc=You look tasty: gushing blackberry into the rind of day-old ennui.",
+                "SET $fortune=Under your skin, tears undulate like a leaky eel.",
+                "SET $ending=And thats the end of the story...",
                 "CHAT External {type=a,stage=b}",
-                "SAY #WineReview.review",
+                "SAY $review",
             };
             ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
             rt.ParseText(String.Join("\n", lines));
@@ -496,9 +496,6 @@ namespace Dialogic
 
             chat1.commands.ForEach(c => c.Realize(globals));
             chat2.commands.ForEach(c => c.Realize(globals));
-
-            Assert.That(chat1.scope.ContainsKey("review"), Is.True);
-            Assert.That(chat1.scope.ContainsKey("ending"), Is.True);
 
             Assert.That(say.Text(), Is.EqualTo("You look tasty: gushing blackberry into the rind of day-old ennui. Under your skin, tears undulate like a leaky eel. And thats the end of the story..."));
         }
@@ -699,11 +696,11 @@ namespace Dialogic
         {
             string[] lines = {
                 "CHAT c1 {chatMode=grammar}",
-                "review=$greeting",
-                "greeting = (Hello | Goodbye)",
+                "$review=$greeting",
+                "$greeting = (Hello | Goodbye)",
                 "",
                 "CHAT c2",
-                "#c1.review",
+                "$review",
             };
 
             var chats = ChatParser.ParseText(String.Join("\n", lines), true);

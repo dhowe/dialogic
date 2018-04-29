@@ -155,8 +155,7 @@ namespace Dialogic
         internal const string MP3 = @"(?:\.(" + SYM + @")\(\))?";
         public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
 
-        internal const string PV1 = @"((?:\[([^=]+)=)?([$#])\{?";
-        //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @")*)(&" + SYM + @")*\}?\]?)";
+        internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";
         internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
         public static Regex ParseVars = new Regex(PV1 + PV2);
 
@@ -170,7 +169,7 @@ namespace Dialogic
         public static Regex GrammarRules = new Regex(@"\s*<([^>]+)>\s*");
         public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
-        public static Regex ParseSetArgs = new Regex(@"([$#]?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+        public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
         public static Regex TestTubeChatBaby = new Regex(@"^C[0-9]+$");
 
         // ChatParser.lineParser Regex
@@ -178,8 +177,6 @@ namespace Dialogic
         internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
         internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
         internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
-
-
 	}
 
 

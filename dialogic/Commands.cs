@@ -311,19 +311,6 @@ namespace Dialogic
 
             Resolver.ContextSwitch(ref symbol, ref context); // new Symbol() ?
 
-            // Here we check if the set matches a dynamic parent property
-            //if (context != null)
-            //{
-            //    IDictionary<string, PropertyInfo> mm = Properties.Lookup(typeof(Chat));
-
-            //    // If so, we don't create a new symbol, but instead set the property
-            //    if (mm.ContainsKey(symbol))
-            //    {
-            //        context.DynamicSet(symbol, value);
-            //        return this;
-            //    }
-            //}
-
             // Here we check if the set matches a dynamic parent propert
             // If so, we don't recreate it, but instead set the property
             if (!context.Update(symbol, value))
