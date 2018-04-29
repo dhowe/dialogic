@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
@@ -293,85 +292,86 @@ namespace Dialogic
                 throw new ParseException("Invalid SET args: '" + txt + "'");
             }
 
-            var tmp = match.Groups[1].Value.Trim();
+            var sym = match.Groups[1].Value.Trim();
 
-            //var symbols = Symbol.Parse(tmp, parent); // CHANGED from above ???
-            //if (symbols.Count != 1) throw new ParseException
-            //("Unable to parse SET args: '" + txt + "'");
-
-            //Console.WriteLine("parsed-sym: " + symbols[0]);
-
-            //this.text = symbols[0].name; 
-            this.text = tmp.TrimFirst(Ch.SYMBOL);
-            //Console.WriteLine("text: " + text);
-            this.global = tmp.StartsWith('$');//(tmp != text) && !text.Contains(".");
+            this.text = sym.TrimFirst(Ch.SYMBOL);
+            this.global = sym.StartsWith('$');
             this.value = match.Groups[3].Value.Trim();
             this.op = Assignment.FromString(match.Groups[2].Value.Trim());
         }
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {
-            var symStr = text;
-
-            if (symStr.Contains(Ch.SCOPE))
+            if (text.Contains(Ch.SCOPE)) // scoped
             {
                 if (!global) throw new BindException
-                    ("Invalid scoped-local symbol" + symStr);
+                    ("Invalid locally-scoped symbol" + text);
 
-                var parts = symStr.Split(Ch.SCOPE);
-                if (parts.Length > 2) throw new BindException
-                    ("Unexpected variable format: " + symStr);
+                var path = text.Split(Ch.SCOPE);
+                if (path.Length > 2) throw new BindException
+                    ("Unexpected variable format: " + text);
 
-                if (globals.ContainsKey(parts[0]))
+                if (globals.ContainsKey(path[0])) // global objects
                 {
-                    if (!Symbol.SetViaPath(globals[parts[0]], parts, value, globals))
+                    if (!SetPathValue(globals[path[0]], path, value, globals))
                     {
-                        throw new BindException("Unable to global symbol: " + text);
+                        throw new BindException("Failed to update global: " + text);
                     }
                 }
-                else
+                else  // property on a remote chat (only allow property updates)
                 {
                     // Try to set chat-local persistent property, eg '$c1.delay'
-                    if (!parent.runtime.ContainsKey(parts[0]))
+                    if (!parent.runtime.ContainsKey(path[0]))
                     {
-                        throw new BindException("Unable to resolve path" +
-                            " in global or chat-scope: " + text);
+                        throw new BindException("Failed to resolve path: " + text);
                     }
 
-                    Chat context = parent.runtime[parts[0]];
-                    if (parts.Length != 2) throw new BindException
+                    Chat context = parent.runtime[path[0]];
+                    if (path.Length != 2) throw new BindException
                         ("Bad chat-scoped path: " + text);
 
-                    if (!context.Update(parts[1], value))
+                    if (!context.Update(path[1], value))
                     {
-                        throw new BindException("Illegal attempt to access " +
-                            "chat-local scope: $" + context.text + "." + parts[1]);
+                        throw new BindException("Invalid attempt to access " +
+                            "chat-local scope: $" + context.text + "." + path[1]);
                     }
                 }
             }
             else
             {
-                Console.WriteLine("Invoke unscoped");
-                op.Invoke(symStr, value, (global ? globals : parent.scope));
+                if (!global)
+                {
+                    // unscoped local, check chat properties
+                    if (!parent.Update(text, value))
+                    {
+                        // set if not found as property
+                        op.Invoke(text, value, parent.scope);
+                    }
+                }
+                else
+                {
+                    // unscoped global, just do the set
+                    op.Invoke(text, value, globals);
+                }
             }
 
             return this;
         }
 
-        private string HandleGrammarTag(string val)
+        internal static bool SetPathValue(object parent, string[] paths, object val,
+            IDictionary<string, object> globals)
         {
-            MatchCollection matches = RE.GrammarRules.Matches(val);
+            if (parent == null) throw new BindException("null parent");
 
-            if (matches.Count > 0)
+            // Dynamically resolve the object path 
+            for (int i = 1; i < paths.Length - 1; i++)
             {
-                var rules = matches.Cast<Match>()
-                    .Select(match => match.Groups[1].Value).ToList();
-
-                rules.ForEach(rule => val = val.Replace("<"
-                    + rule + ">", "$" + rule));
+                parent = Properties.Get(parent, paths[i]);
+                if (parent == null) throw new BindException
+                    ("bad parent" + paths.Stringify());
             }
 
-            return val;
+            return Properties.Set(parent, paths[paths.Length - 1], val);
         }
 
         public override string ToString()

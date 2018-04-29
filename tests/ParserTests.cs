@@ -367,31 +367,25 @@ namespace Dialogic
             chats = ChatParser.ParseText("CHAT c1\nSET $c1.staleness=2", NO_VALIDATORS);
             c1 = (Dialogic.Chat)chats[0].Realize(null);
 
-            Console.WriteLine(c1 + " c1.scope=" + chats[0].scope.Stringify());
             Assert.That(c1, Is.Not.Null);
             Assert.That(c1.staleness, Is.EqualTo(2));
             Assert.That(c1.Staleness(), Is.EqualTo(2));
             Assert.That(c1.GetMeta(Meta.STALENESS), Is.EqualTo("2"));
-return;
+
             chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
             c1 = (Dialogic.Chat)chats[0].Realize(null);
 
-            Console.WriteLine(c1+" c1.scope="+chats[0].scope.Stringify());
             Assert.That(c1, Is.Not.Null);
-            Assert.That(c1.staleness, Is.EqualTo(2));
+
             Assert.That(c1.Staleness(), Is.EqualTo(2));
             Assert.That(c1.GetMeta(Meta.STALENESS), Is.EqualTo("2"));
+            Assert.That(c1.staleness, Is.EqualTo(2));
        
             chats = ChatParser.ParseText("CHAT c1\nCHAT c2\nSET $c1.staleness=2", NO_VALIDATORS);
           
             c1 = (Dialogic.Chat)chats[0].Realize(null);
             c2 = (Dialogic.Chat)chats[1].Realize(null);
 
-            Console.WriteLine(c1 + " c1.scope=" + chats[0].scope.Stringify());
-            Console.WriteLine(c2 + " c2.scope=" + chats[0].scope.Stringify());
-
-
-            return;
             Assert.That(c2.staleness, Is.EqualTo(0));
             Assert.That(c2.Staleness(), Is.EqualTo(0));
             Assert.That(c2.GetMeta(Meta.STALENESS), Is.EqualTo("0"));
