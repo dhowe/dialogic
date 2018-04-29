@@ -282,8 +282,6 @@ namespace Dialogic
 
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            Console.WriteLine("SET: " + txt);
-
             var match = RE.ParseSetArgs.Match(txt);
 
             if (match.Groups.Count != 4)
