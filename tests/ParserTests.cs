@@ -372,7 +372,7 @@ namespace Dialogic
             Assert.That(c1.staleness, Is.EqualTo(2));
             Assert.That(c1.Staleness(), Is.EqualTo(2));
             Assert.That(c1.GetMeta(Meta.STALENESS), Is.EqualTo("2"));
-return;
+
             chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
             c1 = (Dialogic.Chat)chats[0].Realize(null);
 
@@ -391,7 +391,6 @@ return;
             Console.WriteLine(c2 + " c2.scope=" + chats[0].scope.Stringify());
 
 
-            return;
             Assert.That(c2.staleness, Is.EqualTo(0));
             Assert.That(c2.Staleness(), Is.EqualTo(0));
             Assert.That(c2.GetMeta(Meta.STALENESS), Is.EqualTo("0"));

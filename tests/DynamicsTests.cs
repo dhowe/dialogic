@@ -130,40 +130,18 @@ namespace Dialogic
         }
 
         [Test]
-        public void ResolveSetSymbolTraversal()
+        public void SetPathValueTest()
         {
             object result;
             Chat c1 = null;
 
             var symbol = Symbol.Parse("$fish.name = Mary", c1)[0];
 
-            Symbol.SetViaPath(globals["fish"], new[]{"fish","name"}, "Mary", globals);
-            //Console.WriteLine(symbol);
-            //symbol.Resolve(globals);
-
-            Console.WriteLine(globals["fish"]);
+            Set.SetPathValue(globals["fish"], new[]{"fish","name"}, "Mary", globals);
 
             result = Symbol.Parse("you $fish.name?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Mary"));
         }
-
-        //[Test]
-        //public void ResolveSetSymbolTraversal2()
-        //{
-        //    object result;
-        //    Chat c1 = null;
-        //    Console.WriteLine(globals["fish"]);
-
-        //    var symbol = Symbol.Parse("$fish.name = Mary", c1)[0];
-
-        //    Console.WriteLine(symbol);
-        //    //symbol.SetValue(globals);
-
-        //    Console.WriteLine(globals["fish"]);
-
-        //    result = Symbol.Parse("you $fish.name?", c1)[0].Resolve(globals);
-        //    Assert.That(result.ToString(), Is.EqualTo("Mary"));
-        //}
 
         [Test]
         public void SetGlobalsOnPath()
@@ -209,7 +187,6 @@ namespace Dialogic
 
             chat2.Realize(globals);
 
-            Console.WriteLine(chat.Staleness());
             Assert.That(chat.Staleness(), Is.EqualTo(2));
         }
 
@@ -267,6 +244,7 @@ namespace Dialogic
         {
             var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
             code += "\nCHAT c2\nSET $c1.staleness=2";
+
             var rt = new ChatRuntime(null);
             rt.ParseText(code, NO_VALIDATORS);
 
@@ -281,11 +259,35 @@ namespace Dialogic
             Assert.That(chat2, Is.Not.Null);
             Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
 
-            Assert.That(chat.Staleness(), Is.EqualTo(0));
+            Assert.That(chat.Staleness(), Is.EqualTo(Defaults.CHAT_STALENESS));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), Is.EqualTo(Defaults.CHAT_STALENESS));
 
             chat2.Realize(globals);
-
             Assert.That(chat.Staleness(), Is.EqualTo(2));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), Is.EqualTo(2));
+
+
+            code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.stalenessIncr=2";
+
+            rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Realize(globals);
+
+            chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+
+            // no need to check metadata, except for staleness
+            Assert.That(chat.StalenessIncr(), Is.EqualTo(Defaults.CHAT_STALENESS_INCR));
+            chat2.Realize(globals);
+            Assert.That(chat.StalenessIncr(), Is.EqualTo(2));
         }
 
         [Test]
@@ -769,38 +771,6 @@ namespace Dialogic
             Assert.That(s, Is.EqualTo("a a").Or.EqualTo("b b").Or.EqualTo("c c"));
         }
             
-        //[Test]
-        //public void MultiGroupResolve()
-        //{
-        //    List<Choice> choices;
-
-        //    choices = Choice.Parse("(c | (a | b))");
-        //    Console.WriteLine(choices.Stringify() + "\n");
-        //    //Assert.That(choices.Count, Is.EqualTo(2));
-        //    //return;
-
-        //    choices = Choice.Parse("(a | b)");
-        //    Console.WriteLine(choices.Stringify()+ "\n");
-        //    //Assert.That(choices.Count, Is.EqualTo(1));
-
-        //    choices = Choice.Parse("[d=(a | b)]");
-        //    Console.WriteLine(choices.Stringify()+"\n");
-        //    //Assert.That(choices.Count, Is.EqualTo(1));
-
-        //    choices = Choice.Parse("[d=(c | (a | b))]");
-        //    Console.WriteLine(choices.Stringify()+ "\n");
-        //    //Assert.That(choices.Count, Is.EqualTo(2));
-
-        //    choices = Choice.Parse("(c | [d=(a | b)])");
-        //    Console.WriteLine(choices.Stringify()+ "\n");
-        //    //Assert.That(choices.Count, Is.EqualTo(2));
-        //    //expected = new[] { "a", "b" };
-        //    //Assert.That(choices.Text(), Is.EqualTo("(a | b)"));
-        //    //Assert.That(choices.options.Count, Is.EqualTo(2));
-        //    //Assert.That(choices.options, Is.EqualTo(expected));
-        //    //CollectionAssert.Contains(expected, choices.Resolve());
-        //}
-
         [Test]
         public void SingleGroupResolve()
         {

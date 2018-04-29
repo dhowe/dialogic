@@ -329,12 +329,11 @@ namespace Dialogic
     internal class Symbol
     {
         public string text, alias, name;
-        public bool bounded;// chatScoped;
+        public bool bounded;
         public Chat context;
 
         private Symbol(Chat context, params string[] parts) :
-            this(context, parts[0], parts[3], parts[1], parts[2])
-        { }
+            this(context, parts[0], parts[3], parts[1], parts[2]) { }
 
         private Symbol(Chat context, string theText, string theSymbol,
             string alias = null, string typeChar = null)
@@ -344,7 +343,6 @@ namespace Dialogic
             this.name = theSymbol.Trim();
             this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
             this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
-            //this.chatScoped = (typeChar == Ch.LABEL.ToString());
         }
 
         public override string ToString()
@@ -384,37 +382,18 @@ namespace Dialogic
         {
             string[] parts = name.Split(Ch.SCOPE);
 
-            //if (parts.Length == 1 && chatScoped) throw new BindException
-                //("Illegally-scoped variable: " + this);
-
             object resolved = ResolveSymbol(parts[0], context, globals);
             switch (this.Type())
             {
                 case SymbolType.SIMPLE:
 
                     HandleAlias(resolved, globals);
-
                     break;
 
                 case SymbolType.GLOBAL_SCOPE:
 
                     resolved = GetViaPath(resolved, parts, globals);
-
                     break;
-
-                    /*case SymbolType.CHAT_SCOPE:
-
-						if (context == null || context.runtime == null)
-						{
-							throw new BindException("Null context/runtime: " + this);
-						}
-
-						// Find/store the correct scope for the lookup
-						context = context.runtime.FindChatByLabel(parts[0]);
-						resolved = ResolveSymbol(parts[1], context, globals);
-						HandleAlias(resolved, context.scope);
-
-						break;*/
             }
 
             if (resolved != null)
@@ -432,21 +411,6 @@ namespace Dialogic
             }
 
             return null;
-        }
-
-        internal static bool SetViaPath(object parent, string[] paths, object val,
-            IDictionary<string, object> globals)
-        {
-            if (parent == null) throw new BindException("null parent");
-
-            // Dynamically resolve the object path 
-            for (int i = 1; i < paths.Length-1; i++)
-            {
-                parent = Properties.Get(parent, paths[i]);
-                if (parent == null) throw new BindException("bad parent"+paths.Stringify());//OnBindError(globals);
-            }
-
-            return Properties.Set(parent, paths[paths.Length-1], val);
         }
 
         private object GetViaPath(object parent, string[] paths,

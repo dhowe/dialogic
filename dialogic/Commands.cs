@@ -283,8 +283,6 @@ namespace Dialogic
 
         protected internal override void Init(string txt, string lbl, string[] metas)
         {
-            Console.WriteLine("SET: " + txt);
-
             var match = RE.ParseSetArgs.Match(txt);
 
             if (match.Groups.Count != 4)
@@ -293,18 +291,10 @@ namespace Dialogic
                 throw new ParseException("Invalid SET args: '" + txt + "'");
             }
 
-            var tmp = match.Groups[1].Value.Trim();
+            var sym = match.Groups[1].Value.Trim();
 
-            //var symbols = Symbol.Parse(tmp, parent); // CHANGED from above ???
-            //if (symbols.Count != 1) throw new ParseException
-            //("Unable to parse SET args: '" + txt + "'");
-
-            //Console.WriteLine("parsed-sym: " + symbols[0]);
-
-            //this.text = symbols[0].name; 
-            this.text = tmp.TrimFirst(Ch.SYMBOL);
-            //Console.WriteLine("text: " + text);
-            this.global = tmp.StartsWith('$');//(tmp != text) && !text.Contains(".");
+            this.text = sym.TrimFirst(Ch.SYMBOL);
+            this.global = sym.StartsWith('$');
             this.value = match.Groups[3].Value.Trim();
             this.op = Assignment.FromString(match.Groups[2].Value.Trim());
         }
@@ -315,6 +305,8 @@ namespace Dialogic
 
             if (symStr.Contains(Ch.SCOPE))
             {
+                if (symStr.Contains("|=")) Console.WriteLine("SCOPED != *********");
+
                 if (!global) throw new BindException
                     ("Invalid scoped-local symbol" + symStr);
 
@@ -324,7 +316,7 @@ namespace Dialogic
 
                 if (globals.ContainsKey(parts[0]))
                 {
-                    if (!Symbol.SetViaPath(globals[parts[0]], parts, value, globals))
+                    if (!SetPathValue(globals[parts[0]], parts, value, globals))
                     {
                         throw new BindException("Unable to global symbol: " + text);
                     }
@@ -351,27 +343,32 @@ namespace Dialogic
             }
             else
             {
-                Console.WriteLine("Invoke unscoped");
+                //if (op != Assignment.EQ) Console.WriteLine(symStr + " = " + (global ? 
+                //  globals : parent.scope)[symStr]+"\n" + symStr + " " + op+ " " + value);
+
                 op.Invoke(symStr, value, (global ? globals : parent.scope));
+
+                //if (op != Assignment.EQ) Console.WriteLine(s + symStr + " = " + 
+                    // (global ? globals : parent.scope)[symStr]+"\n");
             }
 
             return this;
         }
 
-        private string HandleGrammarTag(string val)
+        internal static bool SetPathValue(object parent, string[] paths, object val,
+            IDictionary<string, object> globals)
         {
-            MatchCollection matches = RE.GrammarRules.Matches(val);
+            if (parent == null) throw new BindException("null parent");
 
-            if (matches.Count > 0)
+            // Dynamically resolve the object path 
+            for (int i = 1; i < paths.Length - 1; i++)
             {
-                var rules = matches.Cast<Match>()
-                    .Select(match => match.Groups[1].Value).ToList();
-
-                rules.ForEach(rule => val = val.Replace("<"
-                    + rule + ">", "$" + rule));
+                parent = Properties.Get(parent, paths[i]);
+                if (parent == null) throw new BindException
+                    ("bad parent" + paths.Stringify());
             }
 
-            return val;
+            return Properties.Set(parent, paths[paths.Length - 1], val);
         }
 
         public override string ToString()

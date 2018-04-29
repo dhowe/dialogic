@@ -106,6 +106,7 @@ namespace Dialogic
             if (text.IndexOf(' ') > -1) throw BadArg
                 ("CHAT name '" + text + "' contains spaces");
 
+            // Every chat must have a staleness value
             SetMeta(Meta.STALENESS, Defaults.CHAT_STALENESS.ToString(), true);
 
             return this;
@@ -149,7 +150,7 @@ namespace Dialogic
             if (key == Meta.STALENESS && Util.FloatingEquals
                 (staleness, Defaults.CHAT_STALENESS))
             {
-                return true;  // refactor this ugly thing
+                return true;  
             }
             else if (key == Meta.STALENESS_INCR && Util.FloatingEquals
                      (stalenessIncr, Defaults.CHAT_STALENESS_INCR))
@@ -163,7 +164,7 @@ namespace Dialogic
                 return true;
             }
 
-            return false;
+            return false; // refactor this ugliness
         }
 
         internal Chat LastRunAt(int ms)
@@ -332,38 +333,6 @@ namespace Dialogic
             s.parent = this;
             s.Realize(globals);
             return s.Text();
-        }
-
-        internal string _ExpandNoGroups(IDictionary<string, object> globals, string start)
-        {
-            start = start.TrimFirst(Ch.SYMBOL);
-
-            var re = new Regex(@"\$([^ \(\)]+)");
-
-            if (!scope.ContainsKey(start)) throw new DialogicException
-                ("_ExpandNoGroups: No key -> '"+start+"'");
-
-            string sofar = scope[start].ToString();
-
-            var recursions = 0;
-            while (++recursions < 10)
-            {
-                foreach (Match match in re.Matches(sofar))
-                {
-                    var v = match.Groups[1].Value;
-                    if (!scope.ContainsKey(v)) throw new DialogicException
-                        ("No match for " + v + " in: " + scope.Stringify());
-                    sofar = sofar.Replace(Ch.SYMBOL + v, (string)scope[v]);
-                }
-
-                if (sofar.IndexOf(Ch.SYMBOL) < 0) break;
-            }
-
-            if (recursions >= 10) Console.WriteLine("[WARN] Max recursion level"
-                + " reached: " + start + " -> " + sofar);
-
-
-            return sofar;
         }
 
         protected internal string _GrammarToJson(IDictionary<string, object>
