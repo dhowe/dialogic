@@ -20,36 +20,6 @@ namespace Dialogic
                 { "count", 4 }
          };
 
-        /*[Test]
-        public void FindChatByMeta()
-        {
-            string[] lines = {
-                "CHAT c1 {type=a}",
-                "CHAT c2 {type=a,day=fri}",
-                "CHAT c3 {type=b,day=thurs}",
-                "CHAT c4"
-            };
-            string contents = String.Join("\n", lines);
-            List<Chat> chats = ChatParser.ParseText(contents, NO_VALIDATORS);
-            List<Chat> result = new ChatRuntime(chats).FindChatByMeta("type", "a");
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result.Count, Is.EqualTo(2));
-            List<string> labels = result.Select(o => o.text).ToList();
-            Assert.That(labels, Is.EquivalentTo(new string[] { "c2", "c1" }));
-
-            result = new ChatRuntime(chats).FindChatByMeta("day", "fri");
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result.Count, Is.EqualTo(1));
-            labels = result.Select(o => o.text).ToList();
-            Assert.That(labels, Is.EquivalentTo(new string[] { "c2" }));
-
-            result = new ChatRuntime(chats).FindChatByMeta("type", "c");
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result.Count, Is.EqualTo(0));
-            labels = result.Select(o => o.text).ToList();
-            Assert.That(labels, Is.EquivalentTo(new string[] { }));
-        }*/
-
         [Test]
         public void SearchWithHardConstraint()
         {
