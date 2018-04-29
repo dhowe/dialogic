@@ -199,9 +199,6 @@ namespace Dialogic
     /// </summary>
     public class Say : Command, ISendable, IAssignable
     {
-        //protected string lastSpoken;
-        //protected bool disableUniqueness = false;
-
         public Say() : base()
         {
             this.delay = Util.ToMillis(Defaults.SAY_DURATION);
@@ -705,6 +702,7 @@ namespace Dialogic
 
         public const string ACTOR = "actor";
         public const string DELAY = "delay";
+        public const string PRELOAD = "preload";
         public const string TIMEOUT = "timeout";
         public const string ON_RESUME = "onResume";
         public const string CHAT_MODE = "chatMode";

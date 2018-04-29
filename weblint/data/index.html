@@ -210,9 +210,9 @@
         if (input.length && input != 'Enter your code here')
         {
           $("#validate").prop("disabled", false);
-          $main[0].selectionStart = 0;
-          $main[0].selectionEnd = input.length;
-          $main[0].focus();
+          // $main[0].selectionStart = 0;
+          // $main[0].selectionEnd = input.length;
+          // $main[0].focus();
         }
 
         var resText = $("#result").text(),
@@ -304,7 +304,6 @@
 
       jQuery.fn.getSelectedText = function (startIdx, endIdx)
       {
-        console.log("getSelectedText" + startIdx + "," + endIdx);
         if (window.getSelection)
         {
           var code = this.val();

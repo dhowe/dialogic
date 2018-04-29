@@ -178,11 +178,27 @@ namespace Dialogic
                 (ref ge, globals) : chatEvents.OnEvent(globals);
         }
 
+        private void RunPreloading(IDictionary<string, object> globals)
+        {
+            // TODO: separate and run any 'preload' chats here
+            foreach (var chat in chats.Values)
+            {
+                if (chat.IsPreload()) {
+                    chat.commands.ForEach(c =>
+                    {
+                        if (!(c is Set)) throw new DialogicException
+                            ("Invalid command type="+c.TypeName().ToUpper()+"\nChats "
+                             + "marked with 'preload' can only contain SET commands");
+
+                        c.Realize(globals); // Execute each Set
+                    });
+                }
+            }
+        }
+
         public void Run(string chatLabel = null)
         {
             if (chats.Count < 1) throw new Exception("No chats found");
-
-            // TODO: separate and run any 'preload' chats here
 
             scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
         }

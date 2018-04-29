@@ -158,6 +158,8 @@ namespace Dialogic.Server
                     // run the first chats with all timing disabled
                     result = WebUtility.HtmlEncode(runtime.InvokeImmediate
                         (new Dictionary<string, object>()));
+
+                    if (result.IsNullOrEmpty()) result = "[empty-string]";
                 }
 
                 html = html.Replace("%%RESULT%%", WebUtility.HtmlEncode(content));

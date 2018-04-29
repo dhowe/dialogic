@@ -164,7 +164,6 @@ namespace Dialogic
 
             Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
 
-
             ChatRuntime.SILENT = true;
             rt.strictMode = false;
 
