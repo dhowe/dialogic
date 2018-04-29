@@ -1018,6 +1018,105 @@ namespace Dialogic
         }
 
         [Test]
+        public void GrammarExpandWithOrEqualsGlobal()
+        {
+            string[] lines;
+            string text;
+            Chat chat;
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C | D",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
+
+//TODO: working here ****
+return;
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C",
+                "$c |= D",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C | D",
+                "$c |= E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = (C | D)",
+                "$c |= E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D | E)"));
+
+            lines = new[] {
+                "$start =  $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = C (C | D)",
+                "$c |= E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C (C | D) | E)"));
+
+            lines = new[] {
+                "$start = $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = D | E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (D | E)"));
+
+            lines = new[] {
+                "$start = $a $b $c",
+                "$a = A",
+                "$b = B",
+                "$c = $d | $e",
+                "$d = D",
+                "$e = E",
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (D | E)"));
+
+            lines = new[] {
+                "$start = $desc $fortune $ending",
+                "$ending = $score | $end-phrase",
+                "$desc = A",
+                "$fortune = B",
+                "$score = C",
+                "$end-phrase = D"
+            };
+            text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0].Realize(globals);
+            Assert.That(chat._ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (C | D)"));
+        }
+
+        [Test]
         public void GrammarExpandWithOrEquals()
         {
             string[] lines;

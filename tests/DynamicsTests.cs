@@ -50,6 +50,10 @@ namespace Dialogic
                 this.name = name;
                 this.flipper = new Flipper(1.1);
             }
+
+            public override string ToString() {
+                return species + ": " + name;
+            }
         }
 
         class Flipper
@@ -126,7 +130,166 @@ namespace Dialogic
         }
 
         [Test]
-        public void ResolveSymbolTraversal()
+        public void ResolveSetSymbolTraversal()
+        {
+            object result;
+            Chat c1 = null;
+
+            var symbol = Symbol.Parse("$fish.name = Mary", c1)[0];
+
+            Symbol.SetViaPath(globals["fish"], new[]{"fish","name"}, "Mary", globals);
+            //Console.WriteLine(symbol);
+            //symbol.Resolve(globals);
+
+            Console.WriteLine(globals["fish"]);
+
+            result = Symbol.Parse("you $fish.name?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Mary"));
+        }
+
+        //[Test]
+        //public void ResolveSetSymbolTraversal2()
+        //{
+        //    object result;
+        //    Chat c1 = null;
+        //    Console.WriteLine(globals["fish"]);
+
+        //    var symbol = Symbol.Parse("$fish.name = Mary", c1)[0];
+
+        //    Console.WriteLine(symbol);
+        //    //symbol.SetValue(globals);
+
+        //    Console.WriteLine(globals["fish"]);
+
+        //    result = Symbol.Parse("you $fish.name?", c1)[0].Resolve(globals);
+        //    Assert.That(result.ToString(), Is.EqualTo("Mary"));
+        //}
+
+        [Test]
+        public void SetGlobalsOnPath()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            Chat chat = ChatParser.ParseText(code, NO_VALIDATORS)[0];
+
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            Set set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("fish.name"));
+            Assert.That(set.value, Is.EqualTo("Mary"));
+
+            Say say = (Dialogic.Say)chat.commands[1];
+            Assert.That(say.text, Is.EqualTo("Hi $fish.name"));
+
+            chat.Realize(globals);
+            Assert.That(say.Text(), Is.EqualTo("Hi Mary"));
+        }
+
+        [Test]
+        public void SetRemoteChatProperty()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.staleness=2";
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Realize(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+
+            Assert.That(chat.Staleness(), Is.EqualTo(0));
+
+            chat2.Realize(globals);
+
+            Console.WriteLine(chat.Staleness());
+            Assert.That(chat.Staleness(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void SetRemoteChatNonProperty()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.happiness=2";
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Realize(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.Staleness(), Is.EqualTo(0));
+
+            // throw b/c we only allow setting of persistent properties 
+            // (staleness, etc) on remote chats
+            Assert.Throws<BindException>(() => chat2.Realize(globals));
+        }
+
+        [Test]
+        public void SetBadRemoteChatProperty()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $WRONG.staleness=2";
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Realize(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.Staleness(), Is.EqualTo(0));
+
+            // throw b/c $WRONG.staleness doesn't exist in any scope
+            Assert.Throws<BindException>(() => chat2.Realize(globals));
+        }
+
+        [Test]
+        public void SetChatLocalPath()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.staleness=2";
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Realize(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+
+            Assert.That(chat.Staleness(), Is.EqualTo(0));
+
+            chat2.Realize(globals);
+
+            Assert.That(chat.Staleness(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ResolveGetSymbolTraversal()
         {
             object result;
             Chat c1 = null;

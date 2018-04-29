@@ -339,7 +339,11 @@ namespace Dialogic
             start = start.TrimFirst(Ch.SYMBOL);
 
             var re = new Regex(@"\$([^ \(\)]+)");
-            string sofar = (string)scope[start];
+
+            if (!scope.ContainsKey(start)) throw new DialogicException
+                ("_ExpandNoGroups: No key -> '"+start+"'");
+
+            string sofar = scope[start].ToString();
 
             var recursions = 0;
             while (++recursions < 10)

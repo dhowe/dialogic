@@ -132,6 +132,11 @@ namespace Dialogic
             get { return this.chats[key]; }
         }
 
+        public bool ContainsKey(string v) // convenience check for indexer
+        {
+            return this.chats.ContainsKey(v);
+        }
+
         public void ParseText(string text, bool disableValidators = false)
         {
             this.validatorsDisabled = disableValidators;
@@ -359,7 +364,7 @@ namespace Dialogic
             return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
-        internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
+		internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
         {
             return DoFindAll(parent, null, constraints);
         }
