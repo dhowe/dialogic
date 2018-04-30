@@ -21,6 +21,13 @@ namespace Dialogic
          };
 
         [Test]
+        public void SearchFailWithHardConstraint()
+        {
+            var finder = "{!!stage*=(NV|S3|CORE),!!type=return,joy=true,staleness<10}";
+
+        }
+            
+        [Test]
         public void SearchWithHardConstraint()
         {
             string[] lines = {

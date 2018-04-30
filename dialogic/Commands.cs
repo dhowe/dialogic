@@ -544,7 +544,11 @@ namespace Dialogic
 
         internal Find Init(string metadata)
         {
-            if (meta != null) meta.Clear();
+            if (meta != null) // need to clear both here
+            {
+                meta.Clear();
+                realized.Clear();
+            }
 
             Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
 

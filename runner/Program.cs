@@ -70,11 +70,16 @@ namespace runner
                  gameEvent = new UserEvent("Tap");
              });
 
+            var types = new[]{ "critic", "shake", "tap" };
+            var count = 0;
+
             // a 'Resume' event
             if (true) Timers.SetInterval(1000, () =>
             {
                 interrupted = true;
-                var data = "{!!type = tap,!stage = CORE}";
+                var data = "{!!type = TYPE,!stage = CORE}";
+                data = data.Replace("TYPE", types[++count % 3]);
+
                 Console.WriteLine("\n<resume-event#"+data+">" +
                     " after " + Util.Millis(now) + "ms\n");
 

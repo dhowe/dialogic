@@ -20,49 +20,45 @@ namespace Dialogic
             { "count", 4 },
         };
 
-        [Test]
-        public async Task ResumeWithHardConstraintsASync()
+        //[Test]
+        public void ResumeEventTest()
         {
             string[] lines = {
-                "CHAT CORE_Shake {type=shake, stage=CORE}",
-                "SAY Core shake!",
-
-                "CHAT CORE_Tap {type=tap, stage=CORE}",
-                "SAY Core tap!",
-
-                "CHAT CORE_Stale_Fast {type=critic, stage=CORE}",
-                "SAY Core critic!",
-
-                "CHAT NV_Shake {type=shake, stage=NV}",
-                "SAY NV shake!",
-
-                "CHAT NV_Tap {type=tap, stage=NV}",
-                "SAY NV tap!",
-
-                "CHAT NV_Stale_Fast {type=critic, stage=NV}",
-                "SAY NV critic!",
+                "CHAT c1 {type=a}",
+                "CHAT c2 {type=b,day=fri}",
+                "CHAT c3 {type=c,day=thurs}",
             };
 
             string contents = String.Join("\n", lines);
-            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            List<Chat> chats = ChatParser.ParseText(contents, NO_VALIDATORS);
+            ChatRuntime rt = new ChatRuntime(chats);
 
-            //rt.AddFindListener((c) =>
-            //{
-            //    //ok = true;
-            //    Console.WriteLine("OUT: " + c);
-            //    Assert.That(c, Is.Not.EqualTo(null));
-            //});
-            rt.ParseText(contents);
-            rt.Run();
+            for (int i = 0; i < 3; i++)
+            {
+                EventArgs icu = new ResumeEvent("{}");
+                rt.Update(null, ref icu);
+            }
 
+            //TODO:
+     
+            //chats.ForEach(c => Assert.That(c.Staleness(), Is.EqualTo(5)));
 
-            //await rt.FindAsync(new Find().Init("{!!type=tap,!stage=CORE}"), globals);
+            //icu = new StalenessUpdate(100, "#c4");
+            //rt.Update(null, ref icu);
+            //Assert.That(rt.FindChatByLabel("c1").Staleness(), Is.EqualTo(5));
+            //Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
 
-            //EventArgs gameEvent = new ResumeEvent("{!!type=tap,!stage=CORE}");
-            //var ue = await rt.Update(globals, ref gameEvent);
+            //icu = new StalenessUpdate(10, "{!type=a}");
+            //rt.Update(null, ref icu);
+
+            //new AutoResetEvent(false).WaitOne(20); // async hack for C# 4.0
+
+            ////chats.ForEach(Console.WriteLine);
+            //Assert.That(rt.FindChatByLabel("c1").Staleness(), Is.EqualTo(10));
+            //Assert.That(rt.FindChatByLabel("c2").Staleness(), Is.EqualTo(10));
+            //Assert.That(rt.FindChatByLabel("c3").Staleness(), Is.EqualTo(5));
+            //Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
         }
-
-
        
         [Test]
         public void StalenessEventTest()
@@ -99,12 +95,6 @@ namespace Dialogic
             Assert.That(rt.FindChatByLabel("c2").Staleness(), Is.EqualTo(10));
             Assert.That(rt.FindChatByLabel("c3").Staleness(), Is.EqualTo(5));
             Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
-        }
-
-        [Test]
-        public void ResumeEventTest()
-        {
-            // pending
         }
 
     }
