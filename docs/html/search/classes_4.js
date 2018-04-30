@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['gameevent',['GameEvent',['../class_dialogic_1_1_game_event.html',1,'Dialogic']]],
-  ['go',['Go',['../class_dialogic_1_1_go.html',1,'Dialogic']]]
+  ['find',['Find',['../class_dialogic_1_1_find.html',1,'Dialogic']]],
+  ['fuzzysearch',['FuzzySearch',['../class_dialogic_1_1_fuzzy_search.html',1,'Dialogic']]]
 ];
