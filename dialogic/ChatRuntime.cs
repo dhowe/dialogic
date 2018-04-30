@@ -158,7 +158,7 @@ namespace Dialogic
         /// <param name="transformFunction">Transform function.</param>
         public void AddTransform(string name, Func<string, string> transformFunction)
         {
-            Transforms.Instance.Add(name, transformFunction);
+            Transforms.Add(name, transformFunction);
         }
 
         public Chat FindChatByLabel(string label)
@@ -204,7 +204,7 @@ namespace Dialogic
             {
                 var cmd = chat.Next().Realize(globals);
 
-                ProcessSay(ref result, ref cmd);
+                ProcessSay(ref result, ref cmd, globals);
 
                 if (cmd is Find)
                 {
@@ -213,7 +213,7 @@ namespace Dialogic
                     {
                         // a chat calling itself in immediate mode can cause
                         // an infinite loop; guard against it here
-                        var find = Find((Find)cmd, globals);
+                        var find = FindSync((Find)cmd, globals);
                         if (find != chat) (chat = find).Run();
                     }
                     catch (Exception ex)
@@ -229,7 +229,8 @@ namespace Dialogic
             return result.TrimLast('\n');
         }
 
-        private static void ProcessSay(ref string result, ref Command cmd)
+        private static void ProcessSay(ref string result, 
+            ref Command cmd, IDictionary<string, object> globals)
         {
             if (cmd is Say)
             {
@@ -237,6 +238,7 @@ namespace Dialogic
                 if (cmd is Ask)
                 {
                     cmd = Util.RandItem(((Ask)cmd).Options()).action;
+                    cmd.Realize(globals);
                 }
             }
         }
@@ -294,9 +296,9 @@ namespace Dialogic
             })).Start();
         }
 
-        internal Chat Find(Find f, IDictionary<string, object> globals = null)
+        internal Chat FindSync(Find f, IDictionary<string, object> globals = null)
         {
-            var chat = (f is Go) ? FindChatByLabel(f.text) : DoFind(f, globals);
+            var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
             if (chat == null) throw new FindException(f);
             return chat;
         }
@@ -307,7 +309,7 @@ namespace Dialogic
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = Find(f, globals);
+                Chat chat = FindSync(f, globals);
 
                 scheduler.Launch(chat);
 

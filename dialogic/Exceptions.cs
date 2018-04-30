@@ -15,19 +15,39 @@ namespace Dialogic
         public BindException(string msg = "") : base(msg) { }
     }
 
+    public class UnboundFunction : BindException
+    {
+        public UnboundFunction(string name, string tname = null) :
+            base(GetMessage(name, tname, null, "")) { }
+
+        public UnboundFunction(string name, string tname = null, 
+            Type[] args = null, string msg = "") :
+                base(GetMessage(name, tname, args, msg)) { }
+
+        internal static string GetMessage(string name, string tname,
+            Type[] args, string msg = "")
+        {
+            var s = (tname != null ? tname + "." + name : name) + "(";
+            if (!args.IsNullOrEmpty()) s += args.Stringify();
+            return s + ") " + msg;
+        }
+    }
+
     public class UnboundSymbol : BindException
     {
-        public UnboundSymbol(string symbol, Chat context, 
-            IDictionary<string, object> globals, string msg = "") : 
-            base(GetMessage(symbol, context, globals)) {}
+        public UnboundSymbol(string symbol, Chat context,
+            IDictionary<string, object> globals, string msg = "") :
+            base(GetMessage(symbol, context, globals))
+        { }
 
         internal UnboundSymbol(Symbol symbol, Chat context,
             IDictionary<string, object> globals, string msg = "") :
-            base(GetMessage(symbol.SymbolText(), context, globals)) { }
+            base(GetMessage(symbol.SymbolText(), context, globals))
+        { }
 
         private static string GetMessage(string s, Chat c, IDictionary<string, object> g)
         {
-            return s + "\nglobals: " + g.Stringify() + (c != null ? "\nchat#" 
+            return s + "\nglobals: " + g.Stringify() + (c != null ? "\nchat#"
                 + c.text + ":" + c.scope.Stringify() : string.Empty);
         }
     }

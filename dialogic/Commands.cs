@@ -90,8 +90,8 @@ namespace Dialogic
         {
             if (!realized.ContainsKey(Meta.TEXT))
             {
-                throw new DialogicException("Text() called on unrealized cmd: "
-                    + this + "\nCall Realize() first");
+                throw new DialogicException("Text() called on unrealized"
+                    + " Command: " + this + "\nCall Realize() first");
             }
             return (string)realized[Meta.TEXT];
         }
@@ -455,14 +455,13 @@ namespace Dialogic
         protected internal Opt Selected(int i)
         {
             this.selectedIdx = i;
-            if (i >= 0 && i < options.Count) return Selected();
-
-            return null;
+            return (i >= 0 && i < options.Count) ? Selected() : null;
         }
 
         protected internal void AddOption(Opt o)
         {
-            o.parent = this.parent;
+            // set parent for Opt and Opt.action
+            o.parent = o.action.parent = this.parent;
             options.Add(o);
         }
 
@@ -525,8 +524,8 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return TypeName().ToUpper() + " " + text
-                + (action is NoOp ? String.Empty : " #" + action.text);
+            return TypeName().ToUpper() + " " + text + (action is NoOp ?
+                String.Empty : " " + Ch.LABEL + action.text.TrimFirst(Ch.LABEL));
         }
     }
 
@@ -662,12 +661,12 @@ namespace Dialogic
                 ("GO does not accept metadata");
         }
 
-        public new Go Init(string label)
-        {
-            Init(String.Empty, label, null);
+        //public new Go Init(string label)
+        //{
+        //    Init(String.Empty, label, null);
 
-            return this;
-        }
+        //    return this;
+        //}
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {

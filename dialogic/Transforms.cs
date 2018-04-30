@@ -68,35 +68,32 @@ namespace Dialogic
 
         private Transforms()
         {
-            functions = new ConcurrentDictionary<string, Func<string, string>>();
+            lookup = new ConcurrentDictionary<string, Func<string, string>>();
 
-            Add("pluralize", pluralize);
-            Add("articlize", articlize);
-            Add("capitalize", capitalize);
-            Add("quotify", quotify);
+            lookup.TryAdd("pluralize", pluralize);
+            lookup.TryAdd("articlize", articlize);
+            lookup.TryAdd("capitalize", capitalize);
+            lookup.TryAdd("quotify", quotify);
         }
 
         private static readonly Lazy<Transforms> lazy =
             new Lazy<Transforms>(() => new Transforms());
 
-        private readonly ConcurrentDictionary<string, Func<string, string>> functions;
+        private readonly ConcurrentDictionary<string, Func<string, string>> lookup;
 
-        internal void Add(string name, Func<string, string> value)
+        internal static void Add(string name, Func<string, string> value)
         {
-            functions.TryAdd(name, value);
+            Transforms.Instance.lookup.TryAdd(name, value);
         }
 
-        private Func<string, string> Get(string name)
+        internal static Func<string, string> Get(string name)
         {
             Func<string, string> value;
-            functions.TryGetValue(name, out value);
+            Instance.lookup.TryGetValue(name, out value);
             return value;
         }
 
-        internal Func<string, string> this[string index]
-        {
-            get { return Get(index); }
-        }
+        // --------------------------------------------------------------------
 
         internal static string[] MODALS = { "shall", "would", "may", "might", "ought", "should" };
 

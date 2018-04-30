@@ -18,6 +18,28 @@ namespace Dialogic
         };
 
         [Test]
+        public void ImmediateBug()
+        {
+            // TODO: WORKING HERE
+
+            string[] lines = {
+                "CHAT c1",
+                "GO #(line1|line2)",
+                "CHAT line1",
+                "Done",
+                "CHAT line2",
+                "Done"
+            };
+
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(globals);
+            Console.WriteLine(s);
+            Assert.That(s, Is.EqualTo("Done"));
+        }
+
+        [Test]
         public void ImmediateModeTest()
         {
             string[] lines = {
@@ -47,6 +69,7 @@ namespace Dialogic
             ChatRuntime.SILENT = false;
             Assert.That(s, Is.EqualTo("hello $animal.\nok."));
         }
+
 
         [Test]
         public void ImmediateGoTest()
@@ -79,6 +102,27 @@ namespace Dialogic
             s = rt.InvokeImmediate(null);
             ChatRuntime.SILENT = false;
             Assert.That(s, Is.EqualTo("hello $animal.\nok.\ngoodbye."));
+        }
+
+        [Test]
+        public void ImmediateTransformFails()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello (a | a).noFun(),",
+                "SAY ok.",
+            };
+
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            Assert.Throws<UnboundFunction>(() => rt.InvokeImmediate(null));
+
+            ChatRuntime.SILENT = true;
+            rt.strictMode = false;
+            var s = rt.InvokeImmediate(globals);
+            ChatRuntime.SILENT = false;
+            Assert.That(s, Is.EqualTo("hello a.noFun(),\nok."));
         }
 
         [Test]
@@ -131,6 +175,41 @@ namespace Dialogic
 
             Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
 
+
+            ChatRuntime.SILENT = true;
+            rt.strictMode = false;
+            s = rt.InvokeImmediate(null);
+            ChatRuntime.SILENT = false;
+            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\ngoodbye."));
+        }
+
+        [Test]
+        public void ImmediateDynamicAsk()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello $animal.",
+                "ASK are you a $animal?",
+                "OPT Yes #(c2|c2)",
+                "OPT No #(c2|c2)",
+                "CHAT c1 {a=b}",
+                "SAY nope.",
+                "CHAT c2 {a=b}",
+                "SAY goodbye."
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c");
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+
+            s = rt.InvokeImmediate(globals, "c2");
+            Assert.That(s, Is.EqualTo("goodbye."));
+
+            Assert.Throws<UnboundSymbol>(() => rt.InvokeImmediate(null));
 
             ChatRuntime.SILENT = true;
             rt.strictMode = false;
@@ -245,20 +324,20 @@ namespace Dialogic
         [Test]
         public void TestGetExtMethods()
         {
-            var s = Methods.InvokeExt("animal", "articlize");
+            var s = Methods.InvokeTransform("animal", "articlize");
             Assert.That(s, Is.EqualTo("an animal"));
 
-            s = Methods.InvokeExt("cat", "articlize");
+            s = Methods.InvokeTransform("cat", "articlize");
             Assert.That(s, Is.EqualTo("a cat"));
 
-            Assert.That(Methods.InvokeExt("tobacco","pluralize"), Is.EqualTo("tobacco"));
-            Assert.That(Methods.InvokeExt("cargo", "pluralize"), Is.EqualTo("cargo"));
-            Assert.That(Methods.InvokeExt("golf", "pluralize"), Is.EqualTo("golf"));
-            Assert.That(Methods.InvokeExt("grief", "pluralize"), Is.EqualTo("grief"));
-            Assert.That(Methods.InvokeExt("wildlife", "pluralize"), Is.EqualTo("wildlife"));
-            Assert.That(Methods.InvokeExt("taxi", "pluralize"), Is.EqualTo("taxis"));
-            Assert.That(Methods.InvokeExt("Chinese", "pluralize"), Is.EqualTo("Chinese"));
-            Assert.That(Methods.InvokeExt("bonsai", "pluralize"), Is.EqualTo("bonsai"));
+            Assert.That(Methods.InvokeTransform("tobacco","pluralize"), Is.EqualTo("tobacco"));
+            Assert.That(Methods.InvokeTransform("cargo", "pluralize"), Is.EqualTo("cargo"));
+            Assert.That(Methods.InvokeTransform("golf", "pluralize"), Is.EqualTo("golf"));
+            Assert.That(Methods.InvokeTransform("grief", "pluralize"), Is.EqualTo("grief"));
+            Assert.That(Methods.InvokeTransform("wildlife", "pluralize"), Is.EqualTo("wildlife"));
+            Assert.That(Methods.InvokeTransform("taxi", "pluralize"), Is.EqualTo("taxis"));
+            Assert.That(Methods.InvokeTransform("Chinese", "pluralize"), Is.EqualTo("Chinese"));
+            Assert.That(Methods.InvokeTransform("bonsai", "pluralize"), Is.EqualTo("bonsai"));
 
         }
 

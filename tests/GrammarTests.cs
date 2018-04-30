@@ -9,11 +9,6 @@ namespace Dialogic
     [TestFixture]
     class GrammarTests
     {
-        void HandleFunc()
-        {
-        }
-
-
         const bool NO_VALIDATORS = true;
 
         static IDictionary<string, object> globals

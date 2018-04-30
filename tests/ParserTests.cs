@@ -1205,8 +1205,11 @@ namespace Dialogic
         [Test]
         public void Exceptions()
         {
-            //var ff = "SAY $hello";
-            //Console.WriteLine("\n"+ChatParser.ParseText(ff)[0].Realize(null)); return;
+            //var ff = "SAY (a|b).notFound";
+            //var chat = (Chat)ChatParser.ParseText(ff)[0].Realize(null);
+            //Console.WriteLine("\n"+chat.commands[0].Text()); 
+            //return;
+
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A ="));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A 3"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A: 3"));
@@ -1243,6 +1246,8 @@ namespace Dialogic
 
             Assert.Throws<UnboundSymbol>(() => ChatParser.ParseText("SAY $hello")[0].Realize(null));
 
+            Assert.Throws<UnboundFunction>(() => ChatParser.ParseText("SAY (a|b).notFound()")[0].Realize(null));
+
             string[] lines = {
                 "CHAT c1 {type=a,stage=b}","SAY Thank you","SAY Hello",
                 "//SAY And Goodbye","SAY Done1","SAY And//Goodbye","SAY Done2",
@@ -1261,6 +1266,7 @@ namespace Dialogic
                 //Console.WriteLine(e);
                 Assert.That(e.lineNumber, Is.EqualTo(lines.Length));
             }
+
         }
     }
 }

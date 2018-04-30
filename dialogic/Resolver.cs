@@ -63,12 +63,6 @@ namespace Dialogic
             return Entities.Decode(text);
         }
 
-        private static string Info(string text, Chat parent)
-        {
-            return text + " :: " + (parent == null ? "{}" :
-                parent.text + parent.scope.Stringify());
-        }
-
         ///// <summary>
         ///// Iteratively resolve any variables in the text 
         ///// via the appropriate context
@@ -140,37 +134,15 @@ namespace Dialogic
             return text;
         }
 
-        /// <summary>
-        /// Handles Chat-scoping of variables by updating symbol name and switching to specified context
-        /// </summary>
-        internal static bool ContextSwitch(ref string symbol, ref Chat context) // TODO: replace with Symbol
-        {
-            if (symbol.Contains(Ch.SCOPE))
-            {
-                if (context == null) throw new BindException
-                    ("Null context for chat-scoped symbol: " + symbol);
-
-                // need to process a chat-scoped symbol
-                var parts = symbol.Split(Ch.SCOPE);
-                if (parts.Length > 2) throw new BindException
-                    ("Unexpected variable format: " + symbol);
-
-                var chat = context.runtime.FindChatByLabel(parts[0]);
-                if (chat == null) throw new BindException
-                    ("No Chat found with label #" + parts[0]);
-
-                symbol = parts[1];
-                context = chat;
-
-                return true;
-            }
-
-            return false;
-        }
-
         private static bool IsDynamic(string text)
         {
             return text != null && text.Contains(Ch.OR, Ch.SYMBOL, Ch.LABEL);
+        }
+
+        private static string Info(string text, Chat parent)
+        {
+            return text + " :: " + (parent == null ? "{}" :
+                parent.text + parent.scope.Stringify());
         }
     }
 }

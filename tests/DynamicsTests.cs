@@ -323,76 +323,7 @@ namespace Dialogic
             result = Symbol.Parse("you ${fish.flipper.speed}?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
         }
-
-        /*[Test]
-        public void Exceptions()
-        {
-            Chat c1 = null;
-            Assert.Throws<BindException>(() => Symbol.Parse("#chat", c1)[0].Resolve(globals));
-            Assert.Throws<BindException>(() => Symbol.Parse("#{chat}", c1)[0].Resolve(globals));
-        }
-
-        [Test]
-        public void SingleHashSymbolResolve()
-        {
-            Chat c1 = CreateParentChat("c1");
-
-            object result;
-            result = Symbol.Parse("you #c1.prop1?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("you #{c1.prop1}?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("you #c1.prop1!", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("you #{c1.prop1}!", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("hum"));
-
-            result = Symbol.Parse("#c1.a", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("#{c1.a}", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("#c1.a", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("((a|b) | #c1.prep)", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("then"));
-
-            result = Symbol.Parse("[bb=#c1.a]", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("[bb=#{c1.a}]", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("A"));
-
-            result = Symbol.Parse("#c1.name", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("#c1.name,", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("Hello #c1.name,", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("to #c1.verb you", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("melt"));
-
-            result = Symbol.Parse("#{c1.name}", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("Hello #{c1.name},", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-
-            result = Symbol.Parse("to #{c1.verb} you", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("melt"));
-
-            result = Symbol.Parse("#{c1.name},", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Jon"));
-        }*/
-
+       
         private static Chat CreateParentChat(string name)
         {
             // create a realized Chat with the full set of global props

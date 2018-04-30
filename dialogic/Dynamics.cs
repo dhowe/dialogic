@@ -101,11 +101,17 @@ namespace Dialogic
                 method = type.GetMethod(methodName, ArgsToTypes(args));
                 if (method == null && target is string)
                 {
-                    return InvokeExt(target, methodName);
+                    var transformed = InvokeTransform(target, methodName);
+
+                    if (transformed != null) return transformed;
+
+                    throw new UnboundFunction(methodName, null, null,
+                        "\nDid you mean to call ChatRuntime.AddTransform"
+                           + "("+ methodName + ", ...)?");
                 }
 
-                if (method == null) throw new BindException
-                    ("Invoke -> no method " + type + "." + key);
+                if (method == null) throw new UnboundFunction
+                    (methodName, type.Name, ArgsToTypes(args));
 
                 Cache[type][key] = method;
             }
@@ -120,7 +126,7 @@ namespace Dialogic
          * OPT: note that we don't need reflection here, but could directly
          * call Func.Invoke(), which is likely faster
          */
-        internal static object InvokeExt(object target, string methodName)
+        internal static object InvokeTransform(object target, string methodName)
         {
             var type = typeof(Transforms);
             if (!Cache.ContainsKey(type))
@@ -134,38 +140,14 @@ namespace Dialogic
 
             if (!Cache[type].ContainsKey(key))
             {
-                transform = Transforms.Instance[methodName];
+                transform = Transforms.Get(methodName);
 
-                if (transform == null) throw new BindException
-                    ("InvokeExt -> no method " + type + "." + key);
+                if (transform == null) return null;
 
-                Cache[type][key] = transform.GetMethodInfo();;
+                Cache[type][key] = transform.GetMethodInfo(); ;
             }
 
             return Cache[type][key].Invoke(null, args); // OPT: see note above
-        }
-
-        internal static object InvokeExtOrig(object target, string methodName)
-        {
-            var type = typeof(Transforms);
-            if (!Cache.ContainsKey(type))
-            {
-                Cache[type] = new Dictionary<string, MethodInfo>();
-            }
-
-            var args = new[] { target };
-            var key = CacheKey(methodName, args);
-
-            if (!Cache[type].ContainsKey(key))
-            {
-                var method = type.GetMethod(methodName, ArgsToTypes(args));
-                if (method == null) throw new BindException
-                    ("InvokeExt -> no method " + type + "." + key);
-                
-                Cache[type][key] = method;
-            }
-
-            return Cache[type][key].Invoke(null, args);
         }
 
         internal static Type[] ArgsToTypes(object[] args)
@@ -199,7 +181,7 @@ namespace Dialogic
         {
             this.text = text;
             this.context = context;
-            this.modifier = method; 
+            this.modifier = method;
             this.options = RE.SplitOr.Split(groups);
             this.alias = alias.IsNullOrEmpty() ? null : alias;
         }
@@ -211,7 +193,7 @@ namespace Dialogic
 
         private string Modifier()
         {
-            return modifier.IsNullOrEmpty() ? string.Empty : '.'+modifier + "()";
+            return modifier.IsNullOrEmpty() ? string.Empty : '.' + modifier + "()";
         }
 
         public static List<Choice> Parse(string input, Chat context)
@@ -240,8 +222,9 @@ namespace Dialogic
                 var full = m.Groups[0].Value;
                 var alias = m.Groups[1].Value;
                 var method = m.Groups[3].Value;
-      
-                if (!method.IsNullOrEmpty()) {
+
+                if (!method.IsNullOrEmpty())
+                {
                     var didx = full.LastIndexOf('.');
                     full = full.Substring(0, didx);
                 }
@@ -325,12 +308,21 @@ namespace Dialogic
 
         private string HandleModifier(string resolved)
         {
-            var res = modifier.IsNullOrEmpty() ? resolved : 
-                Methods.Invoke(resolved, modifier, null).Stringify();
-
+            if (!modifier.IsNullOrEmpty())
+            {
+                try
+                {
+                    resolved = Methods.Invoke(resolved, modifier, null).Stringify();
+                }
+                catch (UnboundFunction e)
+                {
+                    if (context.runtime.strictMode) throw e;
+                    resolved += (Ch.SCOPE + modifier + Ch.OGROUP) + Ch.CGROUP;
+                }
+            }
             //Console.WriteLine("HandleModifier: " + resolved+ " -> "+res);
 
-            return res;
+            return resolved;
         }
 
         private void HandleAlias(object resolved, Chat ctx)
@@ -362,7 +354,8 @@ namespace Dialogic
         public Chat context;
 
         private Symbol(Chat context, params string[] parts) :
-            this(context, parts[0], parts[3], parts[1], parts[2]) { }
+            this(context, parts[0], parts[3], parts[1], parts[2])
+        { }
 
         private Symbol(Chat context, string theText, string theSymbol,
             string alias = null, string typeChar = null)
@@ -383,7 +376,7 @@ namespace Dialogic
 
         internal string SymbolText()
         {
-            return Ch.SYMBOL+ (bounded ? "{" + name + '}' : name);
+            return Ch.SYMBOL + (bounded ? "{" + name + '}' : name);
         }
 
         public static List<Symbol> Parse(string text, Chat context)
