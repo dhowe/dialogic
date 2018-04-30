@@ -1,7 +1,7 @@
 ROOT=$HOME/git/dialogic
 DIA=$HOME/git/dialogic/dialogic
 LNT=$DIA/../weblint
-CSC=/Library/Frameworks/Mono.framework/Versions/Current/Commands/csc
+CSC=/Library/Frameworks/Mono.framework/Versions/5.8.1/lib/mono/4.5/csc.exe
 
 # build dialogic
 rm $DIA/bin/Debug/Dialogic.* 2> /dev/null

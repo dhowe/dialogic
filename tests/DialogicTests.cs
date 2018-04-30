@@ -385,13 +385,13 @@ namespace Dialogic
         [Test]
         public void UpdateEventTest()
         {
-            var globals = new Dictionary<string, object>() {
+            var globs = new Dictionary<string, object>() {
                 { "animal", "dog" },
                 { "temp", "23.3" },
                 { "isok", "true" },
                 { "count", "4" }
              };
-            UpdateEvent ue = new UpdateEvent(globals);
+            UpdateEvent ue = new UpdateEvent(globs);
             Assert.That(ue.Data().Count, Is.EqualTo(4));
 
             Assert.That(ue.Get("animal"), Is.EqualTo("dog"));

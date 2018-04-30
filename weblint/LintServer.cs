@@ -8,12 +8,13 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Linq;
 using Dialogic;
+using System.Threading.Tasks;
 
 namespace Dialogic.Server
 {
     public class LintServer
     {
-        public static string SERVER_URL = "http://" + 
+        public static string SERVER_URL = "http://" +
             LocalIPAddress() + ":8080/glint/";
 
         static Regex Brackets = new Regex(@"(\]|\[)");
@@ -24,7 +25,7 @@ namespace Dialogic.Server
 
         static ChatRuntime runtime;
 
-        public LintServer(Func<HttpListenerRequest, string> func, 
+        public LintServer(Func<HttpListenerRequest, string> func,
             params string[] prefixes)
         {
             if (prefixes == null || prefixes.Length == 0)
@@ -61,10 +62,10 @@ namespace Dialogic.Server
 
         public void Run()
         {
-            ThreadPool.QueueUserWorkItem(o =>
-            {
-                try
-                {
+            //ThreadPool.QueueUserWorkItem(o =>
+            //{
+                //try
+                //{
                     while (listener.IsListening)
                     {
                         ThreadPool.QueueUserWorkItem(c =>
@@ -94,13 +95,15 @@ namespace Dialogic.Server
 
                         }, listener.GetContext());
                     }
-                }
-                catch (Exception) { /* ignored */ }
-            });
+                    Console.WriteLine("DONE");
+                //}
+                //catch (Exception) { /* ignored */ }
+            //});
         }
 
         public void Stop()
         {
+            Console.WriteLine("STOP");
             try
             {
                 listener.Stop();
@@ -231,16 +234,19 @@ namespace Dialogic.Server
 
         public static void Main()
         {
+            //var task = Task.Run(() =>
+            //{
             string html = String.Join("\n",
-                File.ReadAllLines("data/index.html", Encoding.UTF8));
+            File.ReadAllLines("data/index.html", Encoding.UTF8));
 
             LintServer ws = new LintServer(SendResponse, SERVER_URL);
             LintServer.IndexPageContent = html;
-            ws.Run();
 
-            Console.WriteLine("LintServer running on "
-                + SERVER_URL + " - press any key to quit");
-            Console.ReadKey();
+            Console.WriteLine("LintServer running on " + SERVER_URL);// + " - press any key to quit");
+
+            ws.Run();
+            //});
+            //Console.ReadKey();
             //ws.Stop();
         }
     }

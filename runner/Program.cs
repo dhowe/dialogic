@@ -13,7 +13,7 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
+            new MockGameEngine(srcpath + "/data/resume.gs").Run();
         }
 
         public static string srcpath = "../../../dialogic";
@@ -61,7 +61,7 @@ namespace runner
             var now = Util.Millis();
 
             // a 'Tap' event
-            if (true) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
+            if (false) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
              {
                  interrupted = true;
                  Console.WriteLine("\n<user-event#tap>" +
@@ -71,7 +71,7 @@ namespace runner
              });
 
             // a 'Resume' event
-            if (false) Timers.SetInterval(1000, () =>
+            if (true) Timers.SetInterval(1000, () =>
             {
                 interrupted = true;
                 var data = "{!!type = tap,!stage = CORE}";
