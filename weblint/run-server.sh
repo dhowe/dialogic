@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# first make in this directory with $ msbuild 
+
 export TERM=xterm-color
 
 # start with: screen -S lint ./run-server.sh, then do: ctrl-a d
