@@ -116,9 +116,38 @@ namespace Dialogic
                          method.Invoke(target, args);
         }
 
+        /* 
+         * OPT: note that we don't need reflection here, but could directly
+         * call Func.Invoke(), which is likely faster
+         */
         internal static object InvokeExt(object target, string methodName)
         {
-            var type = typeof(Modifiers);
+            var type = typeof(Transforms);
+            if (!Cache.ContainsKey(type))
+            {
+                Cache[type] = new Dictionary<string, MethodInfo>();
+            }
+
+            var args = new[] { target };
+            var key = CacheKey(methodName, args);
+            Func<string, string> transform = null;
+
+            if (!Cache[type].ContainsKey(key))
+            {
+                transform = Transforms.Instance[methodName];
+
+                if (transform == null) throw new BindException
+                    ("InvokeExt -> no method " + type + "." + key);
+
+                Cache[type][key] = transform.GetMethodInfo();;
+            }
+
+            return Cache[type][key].Invoke(null, args); // OPT: see note above
+        }
+
+        internal static object InvokeExtOrig(object target, string methodName)
+        {
+            var type = typeof(Transforms);
             if (!Cache.ContainsKey(type))
             {
                 Cache[type] = new Dictionary<string, MethodInfo>();

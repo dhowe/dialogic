@@ -114,6 +114,118 @@ namespace Dialogic
         }
 
         [Test]
+        public void ResolveWithCustomTransform()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            lines = new[] {
+                "SET hero = artist",
+                "SAY She was an $hero.capify().",
+            };
+            runtime = new ChatRuntime();
+            runtime.AddTransform("capify", _AllCaps);
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text();
+            //Console.WriteLine(res);
+            Assert.That(res, Is.EqualTo("She was an ARTIST."));
+        }
+
+        [Test]
+        public void ResolveWithCustomChainedString()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            lines = new[] {
+                "SET hero = artist",
+                "SAY She was $hero.articlize().ToUpper().",
+            };
+            runtime = new ChatRuntime();
+            runtime.AddTransform("capify", _AllCaps);
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text();
+            //Console.WriteLine(res);
+            Assert.That(res, Is.EqualTo("She was AN ARTIST."));
+        }
+
+        [Test]
+        public void ResolveWithStringCustomChained()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            lines = new[] {
+                "SET hero = artist",
+                "SAY She was $hero.ToUpper().articlize().",
+            };
+            runtime = new ChatRuntime();
+            runtime.AddTransform("capify", _AllCaps);
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text();
+            //Console.WriteLine(res);
+            Assert.That(res, Is.EqualTo("She was an ARTIST."));
+        }
+
+        [Test]
+        public void ResolveWithCustomChainedTransform()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            lines = new[] {
+                "SET hero = artist",
+                "SAY She was $hero.articlize().capify().",
+            };
+            runtime = new ChatRuntime();
+            runtime.AddTransform("capify", _AllCaps);
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text();
+            //Console.WriteLine(res);
+            Assert.That(res, Is.EqualTo("She was AN ARTIST."));
+
+
+            lines = new[] {
+                "SET hero = artist",
+                "SAY She was $hero.capify().articlize().",
+            };
+            runtime = new ChatRuntime();
+            runtime.AddTransform("capify", _AllCaps);
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Realize(null);
+            res = chat.commands[1].Text();
+            //Console.WriteLine(res);
+            Assert.That(res, Is.EqualTo("She was an ARTIST."));
+        }
+
+        public static string _AllCaps(string s) // used above
+        {
+            return s.ToUpper();
+        }
+
+        [Test]
         public void ResolveWithArticlize()
         {
             string[] lines;
@@ -153,31 +265,6 @@ namespace Dialogic
                                  Or.EqualTo("She was a person.").
                                  Or.EqualTo("She was a banker."));
                 last = res;
-            }
-
-            if (false)
-            {
-                // TODO: support multiple functions
-
-                lines = new[] {
-                "SET hero = (animal | artist | person | banker)",
-                "SAY She was $hero.articlize().capitalize().",
-            };
-                runtime = new ChatRuntime();
-                runtime.ParseText(string.Join("\n", lines));
-                chat = runtime.Chats()[0];
-                Assert.That(chat, Is.Not.Null);
-                for (int i = 0; i < 5; i++)
-                {
-                    chat.Realize(null);
-                    res = chat.commands[1].Text();
-                    Assert.That(res, Is.Not.EqualTo(last));
-                    Assert.That(res, Is.EqualTo("She was an artist.").
-                                     Or.EqualTo("She was an animal.").
-                                     Or.EqualTo("She was a person.").
-                                     Or.EqualTo("She was a banker."));
-                    last = res;
-                }
             }
         }
 

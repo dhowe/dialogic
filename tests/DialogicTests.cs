@@ -175,71 +175,71 @@ namespace Dialogic
         [Test]
         public void TestPluralize()
         {
-            Assert.That(Modifiers.pluralize(""), Is.EqualTo(""));
-            Assert.That(Modifiers.pluralize("dog"), Is.EqualTo("dogs"));
-            Assert.That(Modifiers.pluralize("eye"), Is.EqualTo("eyes"));
+            Assert.That(Transforms.pluralize(""), Is.EqualTo(""));
+            Assert.That(Transforms.pluralize("dog"), Is.EqualTo("dogs"));
+            Assert.That(Transforms.pluralize("eye"), Is.EqualTo("eyes"));
 
-            Assert.That(Modifiers.pluralize("blonde"), Is.EqualTo("blondes"));
-            Assert.That(Modifiers.pluralize("blond"), Is.EqualTo("blondes"));
-            Assert.That(Modifiers.pluralize("foot"), Is.EqualTo("feet"));
-            Assert.That(Modifiers.pluralize("man"), Is.EqualTo("men"));
-            Assert.That(Modifiers.pluralize("tooth"), Is.EqualTo("teeth"));
-            Assert.That(Modifiers.pluralize("cake"), Is.EqualTo("cakes"));
-            Assert.That(Modifiers.pluralize("kiss"), Is.EqualTo("kisses"));
-            Assert.That(Modifiers.pluralize("child"), Is.EqualTo("children"));
+            Assert.That(Transforms.pluralize("blonde"), Is.EqualTo("blondes"));
+            Assert.That(Transforms.pluralize("blond"), Is.EqualTo("blondes"));
+            Assert.That(Transforms.pluralize("foot"), Is.EqualTo("feet"));
+            Assert.That(Transforms.pluralize("man"), Is.EqualTo("men"));
+            Assert.That(Transforms.pluralize("tooth"), Is.EqualTo("teeth"));
+            Assert.That(Transforms.pluralize("cake"), Is.EqualTo("cakes"));
+            Assert.That(Transforms.pluralize("kiss"), Is.EqualTo("kisses"));
+            Assert.That(Transforms.pluralize("child"), Is.EqualTo("children"));
 
-            Assert.That(Modifiers.pluralize("louse"), Is.EqualTo("lice"));
+            Assert.That(Transforms.pluralize("louse"), Is.EqualTo("lice"));
 
-            Assert.That(Modifiers.pluralize("sheep"), Is.EqualTo("sheep"));
-            Assert.That(Modifiers.pluralize("shrimp"), Is.EqualTo("shrimps"));
-            Assert.That(Modifiers.pluralize("series"), Is.EqualTo("series"));
-            Assert.That(Modifiers.pluralize("mouse"), Is.EqualTo("mice"));
+            Assert.That(Transforms.pluralize("sheep"), Is.EqualTo("sheep"));
+            Assert.That(Transforms.pluralize("shrimp"), Is.EqualTo("shrimps"));
+            Assert.That(Transforms.pluralize("series"), Is.EqualTo("series"));
+            Assert.That(Transforms.pluralize("mouse"), Is.EqualTo("mice"));
 
-            Assert.That(Modifiers.pluralize("beautiful"), Is.EqualTo("beautifuls"));
+            Assert.That(Transforms.pluralize("beautiful"), Is.EqualTo("beautifuls"));
 
-            Assert.That(Modifiers.pluralize("crisis"), Is.EqualTo("crises"));
-            Assert.That(Modifiers.pluralize("thesis"), Is.EqualTo("theses"));
-            Assert.That(Modifiers.pluralize("apothesis"), Is.EqualTo("apotheses"));
-            Assert.That(Modifiers.pluralize("stimulus"), Is.EqualTo("stimuli"));
-            Assert.That(Modifiers.pluralize("alumnus"), Is.EqualTo("alumni"));
-            Assert.That(Modifiers.pluralize("corpus"), Is.EqualTo("corpora"));
+            Assert.That(Transforms.pluralize("crisis"), Is.EqualTo("crises"));
+            Assert.That(Transforms.pluralize("thesis"), Is.EqualTo("theses"));
+            Assert.That(Transforms.pluralize("apothesis"), Is.EqualTo("apotheses"));
+            Assert.That(Transforms.pluralize("stimulus"), Is.EqualTo("stimuli"));
+            Assert.That(Transforms.pluralize("alumnus"), Is.EqualTo("alumni"));
+            Assert.That(Transforms.pluralize("corpus"), Is.EqualTo("corpora"));
 
-            Assert.That(Modifiers.pluralize("woman"), Is.EqualTo("women"));
-            Assert.That(Modifiers.pluralize("man"), Is.EqualTo("men"));
-            Assert.That(Modifiers.pluralize("congressman"), Is.EqualTo("congressmen"));
-            Assert.That(Modifiers.pluralize("alderman"), Is.EqualTo("aldermen"));
-            Assert.That(Modifiers.pluralize("freshman"), Is.EqualTo("freshmen"));
+            Assert.That(Transforms.pluralize("woman"), Is.EqualTo("women"));
+            Assert.That(Transforms.pluralize("man"), Is.EqualTo("men"));
+            Assert.That(Transforms.pluralize("congressman"), Is.EqualTo("congressmen"));
+            Assert.That(Transforms.pluralize("alderman"), Is.EqualTo("aldermen"));
+            Assert.That(Transforms.pluralize("freshman"), Is.EqualTo("freshmen"));
 
-            Assert.That(Modifiers.pluralize("bikini"), Is.EqualTo("bikinis"));
-            Assert.That(Modifiers.pluralize("martini"), Is.EqualTo("martinis"));
-            Assert.That(Modifiers.pluralize("menu"), Is.EqualTo("menus"));
-            Assert.That(Modifiers.pluralize("guru"), Is.EqualTo("gurus"));
+            Assert.That(Transforms.pluralize("bikini"), Is.EqualTo("bikinis"));
+            Assert.That(Transforms.pluralize("martini"), Is.EqualTo("martinis"));
+            Assert.That(Transforms.pluralize("menu"), Is.EqualTo("menus"));
+            Assert.That(Transforms.pluralize("guru"), Is.EqualTo("gurus"));
 
-            Assert.That(Modifiers.pluralize("medium"), Is.EqualTo("media"));
-            Assert.That(Modifiers.pluralize("concerto"), Is.EqualTo("concerti"));
-            Assert.That(Modifiers.pluralize("terminus"), Is.EqualTo("termini"));
+            Assert.That(Transforms.pluralize("medium"), Is.EqualTo("media"));
+            Assert.That(Transforms.pluralize("concerto"), Is.EqualTo("concerti"));
+            Assert.That(Transforms.pluralize("terminus"), Is.EqualTo("termini"));
 
-            Assert.That(Modifiers.pluralize("aquatics"), Is.EqualTo("aquatics"));
-            Assert.That(Modifiers.pluralize("mechanics"), Is.EqualTo("mechanics"));
+            Assert.That(Transforms.pluralize("aquatics"), Is.EqualTo("aquatics"));
+            Assert.That(Transforms.pluralize("mechanics"), Is.EqualTo("mechanics"));
 
-            Assert.That(Modifiers.pluralize("tomato"), Is.EqualTo("tomatoes"));
-            Assert.That(Modifiers.pluralize("toe"), Is.EqualTo("toes"));
+            Assert.That(Transforms.pluralize("tomato"), Is.EqualTo("tomatoes"));
+            Assert.That(Transforms.pluralize("toe"), Is.EqualTo("toes"));
 
-            Assert.That(Modifiers.pluralize("deer"), Is.EqualTo("deer"));
-            Assert.That(Modifiers.pluralize("moose"), Is.EqualTo("moose"));
-            Assert.That(Modifiers.pluralize("ox"), Is.EqualTo("oxen"));
+            Assert.That(Transforms.pluralize("deer"), Is.EqualTo("deer"));
+            Assert.That(Transforms.pluralize("moose"), Is.EqualTo("moose"));
+            Assert.That(Transforms.pluralize("ox"), Is.EqualTo("oxen"));
 
-            Assert.That(Modifiers.pluralize("tobacco"), Is.EqualTo("tobacco"));
-            Assert.That(Modifiers.pluralize("cargo"), Is.EqualTo("cargo"));
-            Assert.That(Modifiers.pluralize("golf"), Is.EqualTo("golf"));
-            Assert.That(Modifiers.pluralize("grief"), Is.EqualTo("grief"));
-            Assert.That(Modifiers.pluralize("wildlife"), Is.EqualTo("wildlife"));
-            Assert.That(Modifiers.pluralize("taxi"), Is.EqualTo("taxis"));
-            Assert.That(Modifiers.pluralize("Chinese"), Is.EqualTo("Chinese"));
-            Assert.That(Modifiers.pluralize("bonsai"), Is.EqualTo("bonsai"));
+            Assert.That(Transforms.pluralize("tobacco"), Is.EqualTo("tobacco"));
+            Assert.That(Transforms.pluralize("cargo"), Is.EqualTo("cargo"));
+            Assert.That(Transforms.pluralize("golf"), Is.EqualTo("golf"));
+            Assert.That(Transforms.pluralize("grief"), Is.EqualTo("grief"));
+            Assert.That(Transforms.pluralize("wildlife"), Is.EqualTo("wildlife"));
+            Assert.That(Transforms.pluralize("taxi"), Is.EqualTo("taxis"));
+            Assert.That(Transforms.pluralize("Chinese"), Is.EqualTo("Chinese"));
+            Assert.That(Transforms.pluralize("bonsai"), Is.EqualTo("bonsai"));
 
-            Assert.That(Modifiers.pluralize("gas"), Is.EqualTo("gases"));
-            Assert.That(Modifiers.pluralize("bus"), Is.EqualTo("buses"));
+            Assert.That(Transforms.pluralize("gas"), Is.EqualTo("gases"));
+            Assert.That(Transforms.pluralize("bus"), Is.EqualTo("buses"));
         }
 
         [Test]
@@ -250,6 +250,16 @@ namespace Dialogic
 
             s = Methods.InvokeExt("cat", "articlize");
             Assert.That(s, Is.EqualTo("a cat"));
+
+            Assert.That(Methods.InvokeExt("tobacco","pluralize"), Is.EqualTo("tobacco"));
+            Assert.That(Methods.InvokeExt("cargo", "pluralize"), Is.EqualTo("cargo"));
+            Assert.That(Methods.InvokeExt("golf", "pluralize"), Is.EqualTo("golf"));
+            Assert.That(Methods.InvokeExt("grief", "pluralize"), Is.EqualTo("grief"));
+            Assert.That(Methods.InvokeExt("wildlife", "pluralize"), Is.EqualTo("wildlife"));
+            Assert.That(Methods.InvokeExt("taxi", "pluralize"), Is.EqualTo("taxis"));
+            Assert.That(Methods.InvokeExt("Chinese", "pluralize"), Is.EqualTo("Chinese"));
+            Assert.That(Methods.InvokeExt("bonsai", "pluralize"), Is.EqualTo("bonsai"));
+
         }
 
         [Test]

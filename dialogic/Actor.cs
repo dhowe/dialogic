@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using MessagePack;
 
 namespace Dialogic
 {
@@ -8,7 +7,6 @@ namespace Dialogic
     /// Represents a character in the system, capable of being assigned
     /// commands such as SAY, ASK, and DO
     /// </summary>
-    [MessagePackObject(keyAsPropertyName: true)]
     public class Actor : IActor
     {
         public static IActor Default;

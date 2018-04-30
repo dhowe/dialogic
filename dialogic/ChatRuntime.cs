@@ -75,58 +75,6 @@ namespace Dialogic
             if (!theChats.IsNullOrEmpty()) theChats.ForEach(AddChat);
         }
 
-        internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
-        {
-            var chat = (label.IsNullOrEmpty() ? chats.Values :
-                new Chat[] { this[label] }.ToList()).First();
-
-            var result = string.Empty;
-
-            chat.Run();
-
-            if (!chat.HasNext()) return result;
-
-            while (chat != null)
-            {
-                var cmd = chat.Next().Realize(globals);
-
-                ProcessSay(ref result, ref cmd);
-
-                if (cmd is Find)
-                {
-                    var toFind = cmd.ToString();
-                    try
-                    {
-                        // a chat calling itself in immediate mode can cause
-                        // an infinite loop; guard against it here
-                        var find = Find((Find)cmd, globals);
-                        if (find != chat) (chat = find).Run();
-                    }
-                    catch (Exception ex)
-                    {
-                        Warn(ex);
-                        return result + "\n" + toFind + " failed";
-                    }
-                }
-
-                chat = chat.HasNext() ? chat : null;
-            }
-
-            return result.TrimLast('\n');
-        }
-
-        private static void ProcessSay(ref string result, ref Command cmd)
-        {
-            if (cmd is Say)
-            {
-                result += cmd.Text() + "\n";
-                if (cmd is Ask)
-                {
-                    cmd = Util.RandItem(((Ask)cmd).Options()).action;
-                }
-            }
-        }
-
         public Chat this[string key] // string indexer -> runtime["chat4"]
         {
             get { return this.chats[key]; }
@@ -203,6 +151,16 @@ namespace Dialogic
             scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
         }
 
+        /// <summary>
+        /// Adds the transform.
+        /// </summary>
+        /// <param name="name">Name.</param>
+        /// <param name="transformFunction">Transform function.</param>
+        public void AddTransform(string name, Func<string, string> transformFunction)
+        {
+            Transforms.Instance.Add(name, transformFunction);
+        }
+
         public Chat FindChatByLabel(string label)
         {
             Util.ValidateLabel(ref label);
@@ -229,6 +187,59 @@ namespace Dialogic
         }
 
         ///////////////////////////////////////////////////////////////////////
+
+
+        internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
+        {
+            var chat = (label.IsNullOrEmpty() ? chats.Values :
+                new Chat[] { this[label] }.ToList()).First();
+
+            var result = string.Empty;
+
+            chat.Run();
+
+            if (!chat.HasNext()) return result;
+
+            while (chat != null)
+            {
+                var cmd = chat.Next().Realize(globals);
+
+                ProcessSay(ref result, ref cmd);
+
+                if (cmd is Find)
+                {
+                    var toFind = cmd.ToString();
+                    try
+                    {
+                        // a chat calling itself in immediate mode can cause
+                        // an infinite loop; guard against it here
+                        var find = Find((Find)cmd, globals);
+                        if (find != chat) (chat = find).Run();
+                    }
+                    catch (Exception ex)
+                    {
+                        Warn(ex);
+                        return result + "\n" + toFind + " failed";
+                    }
+                }
+
+                chat = chat.HasNext() ? chat : null;
+            }
+
+            return result.TrimLast('\n');
+        }
+
+        private static void ProcessSay(ref string result, ref Command cmd)
+        {
+            if (cmd is Say)
+            {
+                result += cmd.Text() + "\n";
+                if (cmd is Ask)
+                {
+                    cmd = Util.RandItem(((Ask)cmd).Options()).action;
+                }
+            }
+        }
 
         internal void AddChat(Chat c)
         {

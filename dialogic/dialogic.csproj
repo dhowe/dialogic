@@ -69,6 +69,7 @@
     <Compile Include="Interfaces.cs" />
     <Compile Include="Dynamics.cs" />
     <Compile Include="Snapshot.cs" />
+    <Compile Include="Transforms.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
