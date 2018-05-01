@@ -8,6 +8,8 @@ namespace Dialogic
     [TestFixture]
     public class SearchTests
     {
+        // TODO: test each event with a single find+go
+
         const bool NO_VALIDATORS = true;
 
         public static IDictionary<string, object> globals
