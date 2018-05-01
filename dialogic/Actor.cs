@@ -50,5 +50,16 @@ namespace Dialogic
         {
             return commands;
         }
+
+        public override bool Equals(object o)
+        {
+            Actor a = (Actor)o;
+            return name == a.name && a.IsDefault() == this.IsDefault();
+        }
+
+        public override int GetHashCode()
+        {
+            return name.GetHashCode() ^ isDefault.GetHashCode();
+        }
     }
 }

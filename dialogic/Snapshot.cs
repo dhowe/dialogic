@@ -103,7 +103,7 @@ namespace Dialogic
         public ChatData FromGameObject(Chat chat)
         {
             this.text = chat.text;
-            this.meta = chat.MetaStr().TrimEnds('{','}');
+            this.meta = chat.MetaStr().TrimEnds('{', '}');
 
             this.staleness = chat.staleness;
             this.resumable = chat.resumable;
@@ -154,8 +154,10 @@ namespace Dialogic
         //public string type;
         //public string actorName;
         //public string parentName;
+        public static char OPT_DELIM = '\n';
 
         public string actor, command, text, label, meta;
+        public string[] options;
 
         internal static CommandData Create(Command c)
         {
@@ -172,6 +174,18 @@ namespace Dialogic
             this.label = lc.label;
             this.meta = lc.meta;
 
+            if (c is Ask)
+            {
+                var opts = ((Ask)c).Options();
+                options = new string[opts.Count];
+                var i = 0;
+                opts.ForEach(o =>
+                {
+                    //Console.WriteLine("ADD: "+o.text + "\\n" + o.action);
+                    options[i++] = o.text + OPT_DELIM + o.action.text;
+                });
+            }
+
             return this;
         }
 
@@ -180,7 +194,22 @@ namespace Dialogic
         {
             ChatParser parser = rt.Parser();
             LineContext lc = new LineContext(parser, actor, command, text, label, meta);
-            return parser.CreateCommand(lc);
+            var cmd = parser.CreateCommand(lc);
+
+            if (cmd is Ask)
+            {
+                Opt opt;
+                Ask ask = (Dialogic.Ask)cmd;
+                for (int i = 0; i < options.Length; i++)
+                {
+                    var parts = options[i].Split(OPT_DELIM);
+                    if (parts.Length != 2) throw new DialogicException
+                        ("Bad option:" + options[i]);
+                    ask.AddOption(opt = new Opt());
+                    opt.Init(parts[0], Ch.LABEL + parts[1], null);
+                }
+            }
+            return cmd;
         }
     }
 

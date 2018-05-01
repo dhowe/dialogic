@@ -35,7 +35,7 @@ namespace Dialogic
             rt.ParseText(String.Join("\n", lines));
 
             var s = rt.InvokeImmediate(globals);
-            Console.WriteLine(s);
+            //Console.WriteLine(s);
             Assert.That(s, Is.EqualTo("Done"));
         }
 

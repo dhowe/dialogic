@@ -55,7 +55,19 @@ namespace Dialogic
 
         public override bool Equals(Object o)
         {
-            return (text == ((Chat)o).text); // unique-id
+            var chat = ((Chat)o);
+
+            if (resumable != chat.resumable) return false;
+            if (interruptable != chat.interruptable) return false;
+            if (resumeAfterInt != chat.resumeAfterInt) return false;
+            if (!Util.FloatingEquals(staleness, chat.staleness))return false;
+            if (!Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))return false;
+            for (int i = 0; i < commands.Count; i++) {
+                if (!commands[i].Equals(chat.commands[i])) return false;
+            }
+            //if (ToTree() != chat.ToTree()) return false;
+
+            return (text == chat.text && ToTree() == chat.ToTree()); 
 
             //if (resumable != chat.resumable) return false;
             //if (interruptable != chat.interruptable) return false;
@@ -67,7 +79,7 @@ namespace Dialogic
             //}
         }
 
-        public override int GetHashCode() => text.GetHashCode();
+        public override int GetHashCode() => ToTree().GetHashCode();
 
         public void AddCommand(Command c)
         {

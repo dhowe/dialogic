@@ -31,14 +31,17 @@ namespace Dialogic
             this.realized = new Dictionary<string, object>();
         }
 
-        public override bool Equals(Object o) // ?
+        public override bool Equals(Object o) 
         {
             var c = (Command)o;
-            if (c.text != text) return false;
-            if (c.delay != delay) return false;
-            if (c.actor != actor) return false;
-            if (c.MetaStr() != MetaStr()) return false;
-            return true;
+            return !(c.text != text || c.delay != delay || 
+                c.actor != actor || c.MetaStr() != MetaStr());
+        }
+
+        public override int GetHashCode()
+        {
+            return text.GetHashCode() ^ delay.GetHashCode() 
+                ^ actor.GetHashCode() ^ MetaStr().GetHashCode();
         }
 
         protected double Delay() // TODO: test from meta

@@ -185,15 +185,7 @@ namespace Dialogic
 
                 if (cmd != null)
                 {
-                    if (cmd is Go)
-                    {
-                        Console.WriteLine(cmd + " " + cmd.realized.Stringify());
-                    }
                     cmd.Realize(globals);
-                    if (cmd is Go)
-                    {
-                        Console.WriteLine(cmd + " " + cmd.realized.Stringify());
-                    }
                     return HandleCommand(cmd, globals);
                 }
                 else
@@ -210,10 +202,6 @@ namespace Dialogic
         internal IUpdateEvent HandleCommand(Command cmd,
             IDictionary<string, object> globals)
         {
-            if (cmd is Find)
-            {
-                Console.WriteLine(cmd + " " + cmd.realized.Stringify());
-            }
             if (ChatRuntime.LOG_FILE != null) WriteToLog(cmd);
 
             if (cmd is ISendable)
@@ -231,21 +219,19 @@ namespace Dialogic
                 else if (cmd is Ask)
                 {
                     scheduler.prompt = (Ask)cmd;
-                    scheduler.Suspend();         // wait on ChoiceEvent
+                    scheduler.Suspend();          // wait on ChoiceEvent
                 }
                 else
                 {
-                    ComputeNextEventTime(cmd); // compute delay for next cmd
+                    ComputeNextEventTime(cmd);   // compute delay for next cmd
                 }
 
                 return new UpdateEvent((Dialogic.ISendable)cmd); // fire event
             }
             else if (cmd is Find)
             {
-                Console.WriteLine(cmd + " " + cmd.realized.Stringify());
                 scheduler.Completed(false);
-                Console.WriteLine(cmd + " " + cmd.realized.Stringify());
-                runtime.FindAsync((Find)cmd);  // finish, then do the Find
+                runtime.FindAsync((Find)cmd);      // finish, then do the Find
             }
 
             return null;
