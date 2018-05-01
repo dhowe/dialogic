@@ -24,7 +24,7 @@ Welcome to your first Dialogic script!
 
 A COMMAND must begin a line
 
-COMMANDS include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [GO](https://github.com/dhowe/dialogic/wiki/Command-Reference#go), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
+COMMANDS include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
 
 Here is a short example:
 
@@ -66,9 +66,7 @@ Elements between the | operators are randomly selected, so the line above will g
 
 ````
 You look sad.
- 
 You look gloomy.
- 
 You look depressed.
 ````
 
@@ -80,36 +78,84 @@ SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 
 &nbsp;
 
+You can also save the results of these expansions for later use. Lets say that you wanted to pick a character to be reused seveal times in a paragraph. You could do the following:
+
+````
+SAY Once there was a girl called [hero=(Jane | Mary)].
+SAY $hero lived in [home=(Neverland | Nowhereland)].
+SAY $hero liked living in $home.
+````
+
+Outputs would include:
+
+````
+Once there was a girl called Jane.
+Jane lived in Neverland.
+Jane liked living in Neverland.
+````
+
+OR
+
+````
+Once there was a girl called Mary.
+Mary lived in Nowhereland.
+Mary liked living in Nowhereland.
+````
+
+You could also use the [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set) command to similar effect:
+
+````
+SET hero = (Jane | Mary)
+SET home = (Neverland | Nowhereland)
+SAY Once there was a girl called $hero
+SAY $hero lived in $home.
+SAY $hero liked living in $home.
+````
+
+&nbsp;
+
 ### Transforms
 
-Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and capitalize() which can be called as follows:
+Dialogic also supports _transformation functions_ (called Transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), capitalize(), and others, which can be called as follows:
+
+````
+ASK How many (tooth, menu, child).pluralize() do you have?
+````
+
+which will result in one of the following: 
+
+````
+How many teeth do you have?
+How many menus do you have?
+How many children do you have?
+````
+
+OR 
 
 ````
 SAY Are you (dog | cat | ant).articlize()?
 ````
 
-which will result in on of the following: 
+which gives: 
 
 ````
 Are you a dog?
- 
 Are you a cat?
- 
 Are you an ant?
 ````
 
 &nbsp;
 
-Coders can also add custom transforms as follows:
+Coders can also add custom transforms as follows, which can then be called from Dialogic scripts:
 
 ```
 chatRuntime.AddTransform("transformName", transformFunction);
 ```
 
-Transform functions should be static functions that take and return string:
+Transform functions should be static functions that take and return string, as follows:
 
 ````
-public static string transformFunction(string str)
+public static string transformFunction(string str) { ... }
 ````
 
 [tbc]
