@@ -138,12 +138,13 @@ namespace Dialogic
             else
             {
                 Opt opt = scheduler.prompt.Selected(idx);
-                //opt.Realize(globals); // not needed
+
 
                 if (opt.action != Command.NOP)
                 {
                     // We've gotten a response with a branch, so finish & take it
                     scheduler.Completed(false);
+                    opt.action.Realize(globals);
                     runtime.FindAsync((Find)opt.action); // find next
                 }
                 else
@@ -184,7 +185,15 @@ namespace Dialogic
 
                 if (cmd != null)
                 {
+                    if (cmd is Go)
+                    {
+                        Console.WriteLine(cmd + " " + cmd.realized.Stringify());
+                    }
                     cmd.Realize(globals);
+                    if (cmd is Go)
+                    {
+                        Console.WriteLine(cmd + " " + cmd.realized.Stringify());
+                    }
                     return HandleCommand(cmd, globals);
                 }
                 else
@@ -201,6 +210,10 @@ namespace Dialogic
         internal IUpdateEvent HandleCommand(Command cmd,
             IDictionary<string, object> globals)
         {
+            if (cmd is Find)
+            {
+                Console.WriteLine(cmd + " " + cmd.realized.Stringify());
+            }
             if (ChatRuntime.LOG_FILE != null) WriteToLog(cmd);
 
             if (cmd is ISendable)
@@ -229,7 +242,9 @@ namespace Dialogic
             }
             else if (cmd is Find)
             {
+                Console.WriteLine(cmd + " " + cmd.realized.Stringify());
                 scheduler.Completed(false);
+                Console.WriteLine(cmd + " " + cmd.realized.Stringify());
                 runtime.FindAsync((Find)cmd);  // finish, then do the Find
             }
 

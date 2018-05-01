@@ -24,7 +24,7 @@ namespace Dialogic
     /// </summary>
     public class ChatRuntime
     {
-        public static string LOG_FILE, CHAT_FILE_EXT = ".gs";
+        public static string LOG_FILE;
         public static bool SILENT = false;
 
         internal static bool DebugLifecycle = false;
@@ -58,6 +58,18 @@ namespace Dialogic
         private Thread searchThread;
         private ChatParser parser;
 
+        /// <summary>
+        /// Create a new runtime from previously serialized bytes, using the specified actors.
+        /// </summary>
+        /// <param name="bytes">Bytes serialized via runtime.</param>
+        /// <param name="theActors">The actors.</param>
+        public static ChatRuntime Create(byte[] bytes, List<IActor> theActors)
+        {
+            ChatRuntime rt = new ChatRuntime(theActors);
+            Serializer.FromBytes(rt, bytes);
+            return rt;
+        }
+
         public ChatRuntime() : this(null, null) { }
 
         public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
@@ -72,33 +84,48 @@ namespace Dialogic
             this.choiceCache = new Dictionary<string, Choice>();
             this.actors = InitActors(theActors);
 
-            if (!theChats.IsNullOrEmpty()) theChats.ForEach(AddChat);
+            if (!theChats.IsNullOrEmpty()) AppendChats(theChats);
         }
 
+        /// <summary>
+        /// Indexer for chat-names, allows for myRuntime["chatName"];
+        /// </summary>
         public Chat this[string key] // string indexer -> runtime["chat4"]
         {
             get { return this.chats[key]; }
         }
 
-        public bool ContainsKey(string v) // convenience check for indexer
+        /// <summary>
+        /// Returns true if the runtime contains a chat with this name
+        /// </summary>
+        public bool ContainsKey(string chatName) // convenience check for indexer
         {
-            return this.chats.ContainsKey(v);
+            return this.chats.ContainsKey(chatName);
         }
 
+        /// <summary>
+        /// Parse a string of text continuing chat definitions
+        /// </summary>
         public void ParseText(string text, bool disableValidators = false)
         {
+            if (text.EndsWith(".gs")) Warn("This text looks like "
+                + "a file name, did you mean to use ParseFile()?\n");
             this.validatorsDisabled = disableValidators;
-            var lines = text.Split(ChatParser.LineBreaks, StringSplitOptions.None);
-            parser.Parse(lines);
+            parser.Parse(text.Split(ChatParser.LineBreaks, StringSplitOptions.None));
         }
 
-        public void ParseFile(string fileOrFolder, bool disableValidators = false)
+        /// <summary>
+        /// Parse chat definitions from a file (or folder of files) ending with
+        /// '*.gs', or the specified extension
+        /// </summary>
+        /// <param name="fileOrFolder">File (or folder of files) to parse</param>
+        /// <param name="disableValidators">If set to <c>true</c> disable app-specific validators (default=false).</param>
+        /// <param name="fileExt">File extension to load (empty-string for all files, default is ".gs")</param>
+        public void ParseFile(string fileOrFolder, 
+            bool disableValidators = false, string fileExt = null)
         {
-            var ext = '*' + (CHAT_FILE_EXT != null ? CHAT_FILE_EXT : string.Empty);
-
-            var files = Directory.Exists(fileOrFolder) ?
-                Directory.GetFiles(fileOrFolder, '*' + ext) :
-                new string[] { fileOrFolder };
+            var files = Directory.Exists(fileOrFolder) ? Directory.GetFiles
+                (fileOrFolder, '*' + (fileExt ?? ".gs")) : new[] { fileOrFolder };
 
             this.validatorsDisabled = disableValidators;
 
@@ -111,39 +138,26 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Returns the current context for the runtime, consisting of its current
-        /// state, the current Chat, and the offset until the next scheduled event
+        /// Returns the current context for the runtime, consisting of its current state, the current Chat, and the offset until the next scheduled event
         /// </summary>
         /// <returns>The context.</returns>
-        public RuntimeContext CurrentContext()
-        {
-            return RuntimeContext.Update(scheduler);
-        }
+        public RuntimeContext CurrentContext() => RuntimeContext.Update(scheduler);
 
+        /// <summary>
+        /// To be called bt client application each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occurred during that frame. If a Dialogic event (e.g., a Chat command) occurs during the frame it is returned from the Update function.
+        /// </summary>
+        /// <returns>The update.</returns>
+        /// <param name="globals">Globals.</param>
+        /// <param name="ge">Ge.</param>
         public IUpdateEvent Update(IDictionary<string, object> globals, ref EventArgs ge)
         {
             return ge != null ? appEvents.OnEvent
                 (ref ge, globals) : chatEvents.OnEvent(globals);
         }
 
-        private void RunPreloading(IDictionary<string, object> globals)
-        {
-            // TODO: separate and run any 'preload' chats here
-            foreach (var chat in chats.Values)
-            {
-                if (chat.IsPreload()) {
-                    chat.commands.ForEach(c =>
-                    {
-                        if (!(c is Set)) throw new DialogicException
-                            ("Invalid command type="+c.TypeName().ToUpper()+"\nChats "
-                             + "marked with 'preload' can only contain SET commands");
-
-                        c.Realize(globals); // Execute each Set
-                    });
-                }
-            }
-        }
-
+        /// <summary>
+        /// Start the runtime schedule, executing the installed chats
+        /// </summary>
         public void Run(string chatLabel = null)
         {
             if (chats.Count < 1) throw new Exception("No chats found");
@@ -152,7 +166,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Adds the transform.
+        /// Register the transform function, allowing it to be invoked by scripts
         /// </summary>
         /// <param name="name">Name.</param>
         /// <param name="transformFunction">Transform function.</param>
@@ -175,16 +189,66 @@ namespace Dialogic
             return actors.FirstOrDefault(c => c.Name() == name);
         }
 
+        /// <summary>
+        /// Converts the current chat data to a flat List
+        /// </summary>
+        public List<Chat> Chats() => chats.Values.ToList();
+
+        /// <summary>
+        /// Save this instance to a serialized byte array
+        /// </summary>
+        public byte[] Save() => Serializer.ToBytes(this);
+
+        /// <summary>
+        /// Update this instance with new data from a serialized byte array
+        /// </summary>
+        public void Update(byte[] bytes) => Serializer.FromBytes(this, bytes);
+
+        /// <summary>
+        /// Serialize this runtime and return the data as a JSON string
+        /// </summary>
+        public string ToJSON() => Serializer.ToJSON(this);
+
         public override string ToString()
         {
             return "{ context: " + CurrentContext() +
                 ", chats:" + Chats().Stringify() + " }";
         }
 
-        public List<Chat> Chats()
+        public override int GetHashCode()
         {
-            return chats.Values.ToList();
+            var hash = firstChat.GetHashCode()
+                ^ validatorsDisabled.GetHashCode()
+                ^ strictMode.GetHashCode();
+
+            foreach (var chat in chats.Values) hash ^= chat.GetHashCode();
+
+            return hash;
         }
+
+        public override bool Equals(Object o)
+        {
+            ChatRuntime rt = (Dialogic.ChatRuntime)o;
+
+            if (rt.firstChat != firstChat || rt.strictMode != strictMode
+                || rt.validatorsDisabled != validatorsDisabled)
+            {
+                return false;
+            }
+
+            if (rt.chats.Count != chats.Count) return false;
+
+            foreach (var key in chats.Keys)
+            {
+                if (!(rt.ContainsKey(key) && rt.chats[key].Equals(chats[key])))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -213,7 +277,7 @@ namespace Dialogic
                     {
                         // a chat calling itself in immediate mode can cause
                         // an infinite loop; guard against it here
-                        var find = FindSync((Find)cmd, globals);
+                        var find = FindSync((Find)cmd, false, globals);
                         if (find != chat) (chat = find).Run();
                     }
                     catch (Exception ex)
@@ -229,7 +293,12 @@ namespace Dialogic
             return result.TrimLast('\n');
         }
 
-        private static void ProcessSay(ref string result, 
+        private void AppendChats(List<Chat> theChats)
+        {
+            theChats.ForEach(AddChat);
+        }
+
+        private static void ProcessSay(ref string result,
             ref Command cmd, IDictionary<string, object> globals)
         {
             if (cmd is Say)
@@ -243,14 +312,18 @@ namespace Dialogic
             }
         }
 
-        internal void AddChat(Chat c)
+        internal void AddChat(Chat c)//, bool resetFirst = true)
         {
             c.runtime = this;
+
             if (chats.Count < 1) firstChat = c.text;
-            if (c.text == null)
-            {
-                throw new DialogicException("Invalid Chat (no-name): " + c);
-            }
+
+            if (c.text.IsNullOrEmpty()) throw new ParseException
+                ("Invalid chat name: " + c.text);
+
+            if (chats.ContainsKey(c.text)) throw new ParseException
+                ("Duplicate chat names: " + c.text);
+
             chats.Add(c.text, c);
         }
 
@@ -296,26 +369,56 @@ namespace Dialogic
             })).Start();
         }
 
-        internal Chat FindSync(Find f, IDictionary<string, object> globals = null)
+        internal Chat FindSync(Find f, bool launchScheduler, IDictionary<string, object> globals = null)
         {
+            if (f.realized.Count < 1) f.Realize(globals); // tmp
+
             var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
             if (chat == null) throw new FindException(f);
+            if (launchScheduler) scheduler.Launch(chat);
             return chat;
         }
 
         internal void FindAsync(Find f, IDictionary<string, object> globals = null)
         {
+            //if (f is Go) // no need for a thread here ?
+            //{
+            //    scheduler.Launch(FindChatByLabel(f.Text()));
+            //    return;
+            //}
+
+            if (f.realized.Count < 1) f.Realize(globals); // tmp
+
             (searchThread = new Thread(() =>
             {
                 Thread.CurrentThread.IsBackground = true;
 
-                Chat chat = FindSync(f, globals);
+                //Chat chat = DoFind(f, globals);
+                var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
 
                 scheduler.Launch(chat);
 
             })).Start();
         }
 
+        private void RunPreloaders(IDictionary<string, object> globals)
+        {
+            // TODO: separate and run any 'preload' chats here
+            foreach (var chat in chats.Values)
+            {
+                if (chat.IsPreload())
+                {
+                    chat.commands.ForEach(c =>
+                    {
+                        if (!(c is Set)) throw new DialogicException
+                            ("Invalid command type=" + c.TypeName().ToUpper() + "\nChats "
+                             + "marked with 'preload' can only contain SET commands");
+
+                        c.Realize(globals); // Execute each Set
+                    });
+                }
+            }
+        }
         private List<IActor> InitActors(List<IActor> iActors)
         {
             if (iActors.IsNullOrEmpty()) return null;
@@ -366,9 +469,11 @@ namespace Dialogic
             return ic;
         }
 
-        // for testing ------------------------------------------
 
-        internal void AddFindListener(Action<Chat> callback)
+        ///////////////////////////// testing /////////////////////////////////
+
+
+        internal void AddFindListener(Action<Chat> callback) // ?
         {
             if (findListeners == null) findListeners = new List<Action<Chat>>();
             findListeners.Add(callback);
@@ -393,7 +498,7 @@ namespace Dialogic
             return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
-		internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
+        internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
         {
             return DoFindAll(parent, null, constraints);
         }

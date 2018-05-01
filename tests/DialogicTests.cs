@@ -18,7 +18,7 @@ namespace Dialogic
         };
 
         [Test]
-        public void ImmediateBug()
+        public void ImmediateWithDynamicGo()
         {
             // TODO: WORKING HERE
 

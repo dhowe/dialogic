@@ -31,7 +31,17 @@ namespace Dialogic
             this.realized = new Dictionary<string, object>();
         }
 
-        protected double Delay()
+        public override bool Equals(Object o) // ?
+        {
+            var c = (Command)o;
+            if (c.text != text) return false;
+            if (c.delay != delay) return false;
+            if (c.actor != actor) return false;
+            if (c.MetaStr() != MetaStr()) return false;
+            return true;
+        }
+
+        protected double Delay() // TODO: test from meta
         {
             return delay;
         }
@@ -664,13 +674,6 @@ namespace Dialogic
             if (!metas.IsNullOrEmpty()) throw new ParseException
                 ("GO does not accept metadata");
         }
-
-        //public new Go Init(string label)
-        //{
-        //    Init(String.Empty, label, null);
-
-        //    return this;
-        //}
 
         protected internal override Command Realize(IDictionary<string, object> globals)
         {

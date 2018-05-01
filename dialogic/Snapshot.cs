@@ -32,10 +32,6 @@ namespace Dialogic
     {
         static public bool DBUG = false;
 
-        /* Issues: 
-         *      - metadata values not updating
-         *      - default metadata values showing
-         */
         public int timestamp;
         public string firstChat;
         public List<ChatData> chatData;
@@ -45,34 +41,45 @@ namespace Dialogic
             this.timestamp = Util.EpochMs();
         }
 
+        /// <summary>
+        /// Create a new snapshot from the specified runtime
+        /// </summary>
         public static Snapshot Create(ChatRuntime rt)
         {
-            return new Snapshot().FromGameObject(rt);
+            Snapshot snap = new Snapshot();
+            snap.firstChat = rt.firstChat;
+            snap.chatData = new List<ChatData>(rt.Chats().Count);
+            rt.Chats().ForEach(c => snap.chatData.Add(ChatData.Create(c)));
+            return snap;
         }
 
+        /// <summary>
+        /// Update this snapshot with data from the specified runtime
+        /// </summary>
         public void Update(ChatRuntime rt)
         {
             chatData.ForEach(cd => cd.ToGameObject(rt));
             rt.firstChat = this.firstChat;
         }
 
-        public ChatRuntime ToGameObject(List<IActor> actors)
-        {
-            var runtime = new ChatRuntime(actors);
-            Snapshot gameState = Snapshot.Create(runtime);
-            Update(runtime);
-            return runtime;
-        }
-
-        public Snapshot FromGameObject(ChatRuntime rt)
-        {
-            if (rt.firstChat.IsNullOrEmpty()) firstChat = rt.firstChat;
-
-            this.chatData = new List<ChatData>(rt.Chats().Count);
-            rt.Chats().ForEach(c => chatData.Add(ChatData.Create(c)));
-
-            return this;
-        }
+        ///// <summary>
+        ///// Create a new ChatRuntime from this snapshot
+        ///// </summary>
+        //public ChatRuntime ToGameObject(List<IActor> actors)
+        //{
+        //    var runtime = new ChatRuntime(actors);
+        //    Update(runtime);
+        //    return runtime;
+        //}
+        ///// <summary>
+        ///// Create a new snapshot from the specified 
+        ///// </summary>
+        //public vpod FromGameObject(ChatRuntime rt)
+        //{
+        //    this.firstChat = rt.firstChat;
+        //    this.chatData = new List<ChatData>(rt.Chats().Count);
+        //    rt.Chats().ForEach(c => chatData.Add(ChatData.Create(c)));
+        //}
     }
 
     [MessagePackObject(keyAsPropertyName: true)]

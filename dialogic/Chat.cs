@@ -53,38 +53,21 @@ namespace Dialogic
             return commands.Count;
         }
 
-        public bool Equals(Chat chat)
+        public override bool Equals(Object o)
         {
-            if (text != chat.text) return false;
-            if (resumable != chat.resumable) return false;
-            if (interruptable != chat.interruptable) return false;
-            if (resumeAfterInt != chat.resumeAfterInt) return false;
+            return (text == ((Chat)o).text); // unique-id
 
-            if (!Util.FloatingEquals(staleness, chat.staleness))
-            {
-                return false;
-            }
-
-            if (!Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))
-            {
-                return false;
-            }
-
-
-            for (int i = 0; i < commands.Count; i++)
-            {
-                if (commands[i].Equals(chat.commands[i]))
-                {
-                    return false;
-                }
-            }
-
-            // TODO: working here on serialization
-
-            //return true;
-
-            throw new NotImplementedException("In progress for serialization testing");
+            //if (resumable != chat.resumable) return false;
+            //if (interruptable != chat.interruptable) return false;
+            //if (resumeAfterInt != chat.resumeAfterInt) return false;
+            //if (!Util.FloatingEquals(staleness, chat.staleness))return false;
+            //if (!Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))return false;
+            //for (int i = 0; i < commands.Count; i++) {
+            //    if (!commands[i].Equals(chat.commands[i])) return false;
+            //}
         }
+
+        public override int GetHashCode() => text.GetHashCode();
 
         public void AddCommand(Command c)
         {
@@ -150,7 +133,7 @@ namespace Dialogic
             if (key == Meta.STALENESS && Util.FloatingEquals
                 (staleness, Defaults.CHAT_STALENESS))
             {
-                return true;  
+                return true;
             }
             else if (key == Meta.STALENESS_INCR && Util.FloatingEquals
                      (stalenessIncr, Defaults.CHAT_STALENESS_INCR))
@@ -248,30 +231,15 @@ namespace Dialogic
 
         // meta-settable properties -------------------------------------------
 
-        internal double Staleness()
-        {
-            return staleness;
-        }
+        internal double Staleness() => staleness;
 
-        internal double StalenessIncr()
-        {
-            return stalenessIncr;
-        }
+        internal double StalenessIncr() => stalenessIncr;
 
-        internal bool Interruptable()
-        {
-            return interruptable;
-        }
+        internal bool Interruptable() => interruptable;
 
-        internal bool ResumeAfterInterrupting()
-        {
-            return resumeAfterInt;
-        }
+        internal bool ResumeAfterInterrupting() => resumeAfterInt;
 
-        internal bool Resumable()
-        {
-            return this.resumable;
-        }
+        internal bool Resumable() => this.resumable;
 
         internal Chat Resumable(bool b)
         {
@@ -347,7 +315,7 @@ namespace Dialogic
             this.scope.Clear();
 
             // and realized command data
-            commands.ForEach(c => c.realized.Clear()); //tmp
+            //commands.ForEach(c => c.realized.Clear()); //tmp
         }
     }
 }
