@@ -76,6 +76,7 @@ Writers may also specify probability weightings for various choices, as well as 
 SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 ````
 
+&nbsp;
 
 You can also save the results of these expansions for later use. Lets say that you wanted to pick a character to be reused seveal times in a paragraph. You could do the following:
 
