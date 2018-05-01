@@ -80,11 +80,35 @@ SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 
 &nbsp;
 
+### Transforms
+
+Dialogic also supports transformation functions for modifying the results of expanded symbols and groups. Built-in Transforms include pluralize(), articlize(), and capitalize() which can be called as follows:
+
+````
+SAY Are you (dog | cat | ant).articlize()?
+````
+
+which will result in on of the following: 
+
+````
+Are you a dog?
+ 
+Are you a cat?
+ 
+Are you an ant?
+````
+
+[tbc]
+
+&nbsp;
+
+
 ### Interruption / Smoothing
 
 Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be added in order to make transitions more natural, i.e., 'so as I was saying'.
 
 &nbsp;
+
 
 ### Integrating Dialogic
 
@@ -113,6 +137,8 @@ The application calls the runtime's Update() function each frame, passing the cu
      ...
  }
 ````
+
+&nbsp;
 
 ## Building Dialogic with Visual Studio (OS X)
 
