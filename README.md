@@ -82,7 +82,7 @@ SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 
 ### Transforms
 
-Dialogic also supports transformation functions for modifying the results of expanded symbols and groups. Built-in Transforms include pluralize(), articlize(), and capitalize() which can be called as follows:
+Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and capitalize() which can be called as follows:
 
 ````
 SAY Are you (dog | cat | ant).articlize()?
@@ -96,6 +96,19 @@ Are you a dog?
 Are you a cat?
  
 Are you an ant?
+````
+
+
+You can also add your own custom transforms as follows:
+
+```
+chatRuntime.AddTransform("transformName", transformFunction);
+```
+
+Transform functions should be static functions that take and return string:
+
+````
+public static string transformFunction(string str)
 ````
 
 [tbc]
