@@ -24,7 +24,7 @@ Welcome to your first Dialogic script!
 
 A COMMAND must begin a line
 
-COMMANDS include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [GO](https://github.com/dhowe/dialogic/wiki/Command-Reference#go), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
+COMMANDS include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
 
 Here is a short example:
 
@@ -100,6 +100,16 @@ OR
 Once there was a girl called Mary.
 Mary lived in Nowhereland.
 Mary liked living in Nowhereland.
+````
+
+You could also use the [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set) command to similar effect:
+
+````
+SET hero = (Jane | Mary)
+SET home = (Neverland | Nowhereland)
+SAY Once there was a girl called $hero
+SAY $hero lived in $home.
+SAY $hero liked living in $home.
 ````
 
 &nbsp;
