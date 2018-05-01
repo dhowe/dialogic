@@ -116,7 +116,7 @@ SAY $hero liked living in $home.
 
 ### Transforms
 
-Dialogic also supports _transformation functions_ (called Transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), capitalize(), and others, which can be called as follows:
+Dialogic also supports _transformation functions_ (called Transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and [others](http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html), which can be called as follows:
 
 ````
 ASK How many (tooth, menu, child).pluralize() do you have?
