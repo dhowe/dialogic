@@ -20,8 +20,6 @@ namespace Dialogic
         [Test]
         public void ImmediateWithDynamicGo()
         {
-            // TODO: WORKING HERE
-
             string[] lines = {
                 "CHAT c1",
                 "GO #(line1|line2)",

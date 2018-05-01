@@ -11,7 +11,7 @@ namespace Dialogic
     /// New Transforms can be added by calling ChatRuntime.AddTransform(). 
     /// Implemented as sealed, thread-safe (lazy) singleton
     /// </summary>
-    internal sealed class Transforms
+    public sealed class Transforms
     {
         internal static Transforms Instance { get { return lazy.Value; } }
 

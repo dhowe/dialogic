@@ -1,10 +1,12 @@
 var searchData=
 [
-  ['save',['Save',['../class_dialogic_1_1_chat_runtime.html#aef1db06df0e23b9613c4b6ff0a26a0a2',1,'Dialogic::ChatRuntime']]],
-  ['say_5fduration',['SAY_DURATION',['../class_dialogic_1_1_defaults.html#ad8ef6a7453dcac7a87b5304c3590a3fa',1,'Dialogic::Defaults']]],
-  ['serializer',['Serializer',['../class_dialogic_1_1_serializer.html',1,'Dialogic']]],
-  ['set',['Set',['../class_dialogic_1_1_set.html',1,'Dialogic']]],
-  ['snapshot',['Snapshot',['../class_dialogic_1_1_snapshot.html',1,'Dialogic']]],
-  ['stalenessupdate',['StalenessUpdate',['../class_dialogic_1_1_staleness_update.html',1,'Dialogic']]],
-  ['suspendevent',['SuspendEvent',['../class_dialogic_1_1_suspend_event.html',1,'Dialogic']]]
+  ['rand',['Rand',['../class_dialogic_1_1_util.html#ad3756e2bdfb7c38ef9ff07b457bffc51',1,'Dialogic.Util.Rand(int min, int max)'],['../class_dialogic_1_1_util.html#a62bf750a02349fb1ee11cc4d6ceecbdc',1,'Dialogic.Util.Rand(int max)'],['../class_dialogic_1_1_util.html#a1c0a2e7c745e6402a6e96c60cb8f19d8',1,'Dialogic.Util.Rand()'],['../class_dialogic_1_1_util.html#aa89b14917300ac1b97cdc0a6d5d6034a',1,'Dialogic.Util.Rand(double min, double max)'],['../class_dialogic_1_1_util.html#af1b90cd8b59890294d13deba2a1010b1',1,'Dialogic.Util.Rand(double max)']]],
+  ['randitem',['RandItem',['../class_dialogic_1_1_util.html#aa616e37687406132dc2f97aec4688601',1,'Dialogic::Util']]],
+  ['randitem_3c_20t_20_3e',['RandItem&lt; T &gt;',['../class_dialogic_1_1_util.html#a1277b5761b1ede721df5bba06e7f8a4e',1,'Dialogic::Util']]],
+  ['re',['RE',['../class_dialogic_1_1_r_e.html',1,'Dialogic']]],
+  ['resolver',['Resolver',['../class_dialogic_1_1_resolver.html',1,'Dialogic']]],
+  ['resumeevent',['ResumeEvent',['../class_dialogic_1_1_resume_event.html',1,'Dialogic']]],
+  ['run',['Run',['../class_dialogic_1_1_chat_runtime.html#a6739443890fb3601799da7c68543e304',1,'Dialogic::ChatRuntime']]],
+  ['runtimecontext',['RuntimeContext',['../class_dialogic_1_1_runtime_context.html',1,'Dialogic']]],
+  ['runtimestate',['RuntimeState',['../namespace_dialogic.html#a3beee1d517562f373f1a84fd0e58cd2b',1,'Dialogic']]]
 ];

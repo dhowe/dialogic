@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['capitalize',['capitalize',['../class_dialogic_1_1_transforms.html#ac726eb1cc1187cab6860347bf2d94cc8',1,'Dialogic::Transforms']]],
   ['chats',['Chats',['../class_dialogic_1_1_chat_runtime.html#a85f723d0b3156a8de035772dc07365dc',1,'Dialogic::ChatRuntime']]],
   ['constrain',['Constrain',['../class_dialogic_1_1_util.html#a62bf6e95d663b41267ba58f4e2176dad',1,'Dialogic::Util']]],
   ['containskey',['ContainsKey',['../class_dialogic_1_1_chat_runtime.html#a1b622bd2bc0ac3d0d3628bb8cb7bf02f',1,'Dialogic::ChatRuntime']]],

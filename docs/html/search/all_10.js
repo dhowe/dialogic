@@ -1,7 +1,12 @@
 var searchData=
 [
-  ['update',['Update',['../class_dialogic_1_1_chat_runtime.html#aef00f833ff5eeb0625ddfbefd6da47cd',1,'Dialogic.ChatRuntime.Update(IDictionary&lt; string, object &gt; globals, ref EventArgs ge)'],['../class_dialogic_1_1_chat_runtime.html#a076d974941037bd1fc0d1dcf6389f7fd',1,'Dialogic.ChatRuntime.Update(byte[] bytes)'],['../class_dialogic_1_1_snapshot.html#aa8bb991fd4de8d79fee37d9f26f2cd96',1,'Dialogic.Snapshot.Update()']]],
-  ['updateevent',['UpdateEvent',['../class_dialogic_1_1_update_event.html',1,'Dialogic']]],
-  ['userevent',['UserEvent',['../class_dialogic_1_1_user_event.html',1,'Dialogic']]],
-  ['util',['Util',['../class_dialogic_1_1_util.html',1,'Dialogic']]]
+  ['tendar',['Tendar',['../namespace_tendar.html',1,'']]],
+  ['text',['Text',['../class_dialogic_1_1_chat.html#a16fff9365f2cd8a9e35d84e1c28bffbb',1,'Dialogic.Chat.Text()'],['../class_dialogic_1_1_command.html#a2f0d2008a75524201d5760844064bd58',1,'Dialogic.Command.Text()']]],
+  ['this_5bstring_20key_5d',['this[string key]',['../class_dialogic_1_1_chat_runtime.html#addc40533bd6cdad85225e24e1f580255',1,'Dialogic::ChatRuntime']]],
+  ['tojson',['ToJSON',['../class_dialogic_1_1_chat_runtime.html#aef40a47912ac3677d22520fc30f1794d',1,'Dialogic::ChatRuntime']]],
+  ['tomillis',['ToMillis',['../class_dialogic_1_1_util.html#a37840bebacbbc886a2f8aa4e61022aec',1,'Dialogic::Util']]],
+  ['tosec',['ToSec',['../class_dialogic_1_1_util.html#a751f2c3ec959c4d67e13c388f04f0642',1,'Dialogic::Util']]],
+  ['transforms',['Transforms',['../class_dialogic_1_1_transforms.html',1,'Dialogic']]],
+  ['trimfirst',['TrimFirst',['../class_dialogic_1_1_util.html#aa5d692b014000f14242bbac95c8ae9bc',1,'Dialogic::Util']]],
+  ['trimlast',['TrimLast',['../class_dialogic_1_1_util.html#a913c5e22d8656af9263c9fb442e4d351',1,'Dialogic::Util']]]
 ];

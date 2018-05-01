@@ -1,5 +1,6 @@
 var searchData=
 [
   ['parsefile',['ParseFile',['../class_dialogic_1_1_chat_runtime.html#a44559af3aae941638119718e94976ad6',1,'Dialogic::ChatRuntime']]],
-  ['parsetext',['ParseText',['../class_dialogic_1_1_chat_runtime.html#a60822e7b5eb485c21ddbc4a9c35154f0',1,'Dialogic::ChatRuntime']]]
+  ['parsetext',['ParseText',['../class_dialogic_1_1_chat_runtime.html#a60822e7b5eb485c21ddbc4a9c35154f0',1,'Dialogic::ChatRuntime']]],
+  ['pluralize',['pluralize',['../class_dialogic_1_1_transforms.html#aec268354ec66601431c68326883c4353',1,'Dialogic::Transforms']]]
 ];
