@@ -76,24 +76,48 @@ Writers may also specify probability weightings for various choices, as well as 
 SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 ````
 
+
+You can also save the results of these expansions for later use. Lets say that you wanted to pick a character to be reused seveal times in a paragraph. You could do the following:
+
+````
+SAY Once there was a girl called [hero=(Jane | Mary)].
+SAY $hero lived in [home=(Neverland | Nowhereland)].
+SAY $hero liked living in $home.
+````
+
+Outputs would include:
+
+````
+Once there was a girl called Jane.
+Jane lived in Neverland.
+Jane liked living in Neverland.
+````
+
+OR
+
+````
+Once there was a girl called Mary.
+Mary lived in Nowhereland.
+Mary liked living in Nowhereland.
+````
+
 &nbsp;
 
 ### Transforms
 
-Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), capitalize(), and others, which can be called as follows:
+Dialogic also supports _transformation functions_ (called Transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), capitalize(), and others, which can be called as follows:
 
 ````
-ASK How many (tooth, menu, child, mouse).pluralize() were there?
+ASK How many (tooth, menu, child).pluralize() do you have?
 ````
 
 which will result in one of the following: 
 
 ````
-How many teeth were there?
-How many menus were there?
-How many children were there?
-How many mice were there?
-```
+How many teeth do you have?
+How many menus do you have?
+How many children do you have?
+````
 
 OR 
 
