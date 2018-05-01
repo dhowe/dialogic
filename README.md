@@ -98,8 +98,9 @@ Are you a cat?
 Are you an ant?
 ````
 
+&nbsp;
 
-You can also add your own custom transforms as follows:
+Coders can also add custom transforms as follows:
 
 ```
 chatRuntime.AddTransform("transformName", transformFunction);
