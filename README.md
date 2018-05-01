@@ -66,9 +66,7 @@ Elements between the | operators are randomly selected, so the line above will g
 
 ````
 You look sad.
- 
 You look gloomy.
- 
 You look depressed.
 ````
 
@@ -82,34 +80,32 @@ SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 
 ### Transforms
 
-Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and capitalize() which can be called as follows:
+Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), capitalize(), and others, which can be called as follows:
 
 ````
 SAY Are you (dog | cat | ant).articlize()?
 ````
 
-which will result in on of the following: 
+which will result in one of the following: 
 
 ````
 Are you a dog?
- 
 Are you a cat?
- 
 Are you an ant?
 ````
 
 &nbsp;
 
-Coders can also add custom transforms as follows:
+Coders can also add custom transforms as follows, which can then be called from Dialogic scripts:
 
 ```
 chatRuntime.AddTransform("transformName", transformFunction);
 ```
 
-Transform functions should be static functions that take and return string:
+Transform functions should be static functions that take and return string, as follows:
 
 ````
-public static string transformFunction(string str)
+public static string transformFunction(string str) { ... }
 ````
 
 [tbc]
