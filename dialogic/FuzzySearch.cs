@@ -7,9 +7,12 @@ namespace Dialogic
     /// <summary>
     /// Handles fuzzy logic for Find commands containing one or more constraints to be matched in candidate Chats.
     /// </summary>
-    public static class FuzzySearch
+    public class FuzzySearch
     {
         public static bool DBUG = false;
+
+        private bool stalenessMiss = false;
+        private bool resetRequired = false; // opt
 
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
@@ -29,14 +32,15 @@ namespace Dialogic
         /// <param name="constraints">Constraints.</param>
         /// <param name="parent">Parent.</param>
         /// <param name="globals">Globals.</param>
-        public static Chat Find(List<Chat> chats,
+        public Chat Find(List<Chat> chats,
             IDictionary<Constraint, bool> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
             if (constraints.IsNullOrEmpty()) throw new FindException
                 ("FuzzySearch.Find() called without constraints");
 
-            var resetRequired = false; // opt
+            this.stalenessMiss = this.resetRequired = false;
+
             var clist = constraints.Keys.ToList();
 
             Chat chat = FindAll(chats, clist, parent, globals).FirstOrDefault();
@@ -58,8 +62,11 @@ namespace Dialogic
                         continue;
                     }
                 }
-                else    // no more constraints, reset & try staleness
+                else    // no more hard constraints, reset & try staleness
                 {
+                    if (!stalenessMiss) break;
+
+                    // TODO: only try staleness if some chat failed b/c of staleness
                     if (chat == null)
                     {
                         if (resetRequired)
@@ -97,7 +104,7 @@ namespace Dialogic
         /// <param name="constraints">Constraints.</param>
         /// <param name="parent">Parent.</param>
         /// <param name="globals">Globals.</param>
-        internal static List<Chat> FindAll(List<Chat> chats,
+        internal List<Chat> FindAll(List<Chat> chats,
             List<Constraint> constraints,
             Chat parent, IDictionary<string, object> globals)
         {
@@ -129,6 +136,7 @@ namespace Dialogic
                         if (!(constraint.Check(chatPropVal, globals)))
                         {
                             if (DBUG) Console.WriteLine("    FAIL: " + constraint);
+                            stalenessMiss |= (key == "staleness");
                             hits = -1;
                             break;
                         }

@@ -56,6 +56,7 @@ namespace Dialogic
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private Thread searchThread;
+        private FuzzySearch search;
         private ChatParser parser;
 
         /// <summary>
@@ -93,6 +94,7 @@ namespace Dialogic
             this.chats = new Dictionary<string, Chat>();
             this.choiceCache = new Dictionary<string, Choice>();
             this.actors = InitActors(theActors);
+            this.search = new FuzzySearch();
 
             if (!theChats.IsNullOrEmpty()) AppendChats(theChats);
         }
@@ -298,9 +300,10 @@ namespace Dialogic
                     var toFind = cmd.ToString();
                     try
                     {
+                        var find = FindSync((Find)cmd, false, globals);
+
                         // a chat calling itself in immediate mode can cause
                         // an infinite loop; guard against it here
-                        var find = FindSync((Find)cmd, false, globals);
                         if (find != chat) (chat = find).Run();
                     }
                     catch (Exception ex)
@@ -513,13 +516,13 @@ namespace Dialogic
         {
             IDictionary<Constraint, bool> cdict = new Dictionary<Constraint, bool>();
             foreach (var c in constraints) cdict.Add(c, c.IsRelaxable());
-            return FuzzySearch.Find(Chats(), cdict, parent, globals);
+            return search.Find(Chats(), cdict, parent, globals);
         }
 
         internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
         {
             if (f.Realized().Count == 0) f.Realize(globals);
-            return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
+            return search.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
         internal List<Chat> DoFindAll(Chat parent, params Constraint[] constraints)
@@ -530,13 +533,13 @@ namespace Dialogic
         internal List<Chat> DoFindAll(Chat parent,
             IDictionary<string, object> globals, params Constraint[] constraints)
         {
-            return FuzzySearch.FindAll(Chats(), constraints.ToList(), parent, globals);
+            return search.FindAll(Chats(), constraints.ToList(), parent, globals);
         }
 
         internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals)
         {
             if (f.Realized().Count == 0) f.Realize(globals);
-            return FuzzySearch.FindAll(Chats(), ToList(f.Realized()), f.parent, globals);
+            return search.FindAll(Chats(), ToList(f.Realized()), f.parent, globals);
         }
 
         internal static void Info(object msg)

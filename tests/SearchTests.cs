@@ -23,10 +23,55 @@ namespace Dialogic
          };
 
         [Test]
-        public void SearchFailWithHardConstraint()
+        public void SearchFailWithConstraint()
         {
-            var finder = "{!!stage*=(NV|S3|CORE),!!type=return,joy=true,staleness<10}";
+            var lines = new[] {
+                 "CHAT Test {type=a,stage=b}",
+                 "SAY Find",
+                 "FIND {type=a,x=b}",
+                 "CHAT next {type=a,stage=b}",
+                 "SAY Done",
+             };
 
+            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(null);
+            Assert.That(s, Is.EqualTo("Find\nDone"));
+
+            //FuzzySearch.DBUG = true;
+
+            lines = new[] {
+                 "CHAT Test {type=a,stage=b}",
+                 "SAY Find",
+                 "FIND {type=a,staleness<5}",
+                 "CHAT next {type=a,stage=b,staleness=5}",
+                 "SAY Done",
+             };
+
+            rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt.ParseText(String.Join("\n", lines));
+
+            s = rt.InvokeImmediate(null);
+            Assert.That(s, Is.EqualTo("Find\nDone"));
+        }
+
+        [Test]
+        public void SearchImmediateWithBusyLoop()
+        {
+            var lines = new[] {
+                 "CHAT Test {type=a,stage=b}",
+                 "SAY Find",
+                 "GO #Test"
+             };
+
+            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(null);
+
+            // Note: exits before GO to avoid infinite loop
+            Assert.That(s, Is.EqualTo("Find"));
         }
             
         [Test]

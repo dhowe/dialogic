@@ -157,14 +157,31 @@ namespace Dialogic
         [Test]
         public void AppendChatsToExistingRuntime()
         {
-            // Working here...
+            var lines = new[] {
+                 "CHAT Test {type=a,stage=b}",
+                 "SAY Find",
+                 "FIND {type=a,stage=b,other=c}",
+                 "CHAT next {type=a,stage=b}",
+                 "SAY Done",
+             };
+
+            ChatRuntime rt;
+
+            rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt.ParseText(String.Join("\n", lines));
+
+            // serialize the runtime to bytes
+            var bytes = serializer.ToBytes(rt);
+
+            var s = rt.InvokeImmediate(null);
+            Assert.That(s, Is.EqualTo("Find\nDone"));
         }
 
         // Implement ISerializer and then instance to ChatRuntime methods...
         private class SerializerMessagePack : ISerializer
         {
-            IFormatterResolver ifr =
-                MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Instance;
+            static readonly IFormatterResolver ifr = MessagePack.Resolvers
+                .ContractlessStandardResolverAllowPrivate.Instance;
 
             public byte[] ToBytes(ChatRuntime rt)
             {
