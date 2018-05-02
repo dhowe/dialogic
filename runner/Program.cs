@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using Dialogic;
 using Tendar;
@@ -13,7 +14,9 @@ namespace runner
     {
         public static void Main(string[] args)
         {
-            new MockGameEngine(srcpath + "/data/gscript.gs").Run();
+            FileInfo file = new FileInfo(srcpath + "/data/gscript.gs");
+
+            new MockGameEngine(file).Run();
         }
 
         public static string srcpath = "../../../dialogic";
@@ -46,11 +49,25 @@ namespace runner
         /// Create an engine from a script file or folder script files
         /// </summary>
         /// <param name="fileOrFolder">File or folder.</param>
-        public MockGameEngine(string fileOrFolder)
+        public MockGameEngine(FileInfo fileOrFolder)
         {
-            dialogic = new ChatRuntime(AppConfig.Actors);
-            dialogic.ParseFile(fileOrFolder);
-            dialogic.Run();//"#GScriptTest");
+            if (false)
+            {
+                dialogic = new ChatRuntime(AppConfig.Actors);
+                dialogic.ParseFile(fileOrFolder);
+                dialogic.Run();//"#GScriptTest");
+            }
+            else // use a serialized/deserialized runtime
+            {
+                var saveFile = new FileInfo("./runtime.ser");
+
+                ChatRuntime tmp = new ChatRuntime(Tendar.AppConfig.Actors);
+                tmp.ParseFile(fileOrFolder);
+                tmp.Save(saveFile);
+
+                dialogic = ChatRuntime.Create(saveFile, AppConfig.Actors);
+                dialogic.Run();
+            }
         }
 
         /// <summary>

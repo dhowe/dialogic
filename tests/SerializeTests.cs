@@ -119,7 +119,7 @@ namespace Dialogic
         }
 
 
-        [Test] // TODO: working here
+        [Test]
         public void SaveRestoreChats()
         {
             ChatRuntime rtOut, rtIn;
@@ -136,16 +136,16 @@ namespace Dialogic
             // check they are identical
             Assert.That(rtIn, Is.EqualTo(rtOut));
 
-            var inl = rtIn.Chats();
-            var outl = rtOut.Chats();
+            var inCmds = rtIn.Chats();
+            var outCmds = rtOut.Chats();
 
-            Assert.That(inl.Count, Is.EqualTo(outl.Count));
             Assert.That(rtOut.ToString(), Is.EqualTo(rtIn.ToString()));
 
-            for (int i = 0; i < inl.Count; i++)
+            Assert.That(inCmds.Count, Is.EqualTo(outCmds.Count));
+            for (int i = 0; i < inCmds.Count; i++)
             {
-                var chat1 = inl.ElementAt(i);
-                var chat2 = outl.ElementAt(i);
+                var chat1 = inCmds.ElementAt(i);
+                var chat2 = outCmds.ElementAt(i);
                 Assert.That(chat1.text, Is.EqualTo(chat2.text));
                 Assert.That(chat1.commands.Count, Is.EqualTo(chat2.commands.Count));
                 Assert.That(chat1.ToTree(), Is.EqualTo(chat2.ToTree()));

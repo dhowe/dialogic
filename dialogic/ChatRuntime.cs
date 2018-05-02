@@ -59,6 +59,16 @@ namespace Dialogic
         private ChatParser parser;
 
         /// <summary>
+        /// Create a new runtime from previously serialized bytes loaded from a file, using the specified actors.
+        /// </summary>
+        /// <param name="file">File.</param>
+        /// <param name="theActors">The actors.</param>
+        public static ChatRuntime Create(FileInfo file, List<IActor> theActors)
+        {
+            return Create(File.ReadAllBytes(file.FullName), theActors);
+        }
+
+        /// <summary>
         /// Create a new runtime from previously serialized bytes, using the specified actors.
         /// </summary>
         /// <param name="bytes">Bytes serialized via runtime.</param>
@@ -108,10 +118,16 @@ namespace Dialogic
         /// </summary>
         public void ParseText(string text, bool disableValidators = false)
         {
-            if (text.EndsWith(".gs")) Warn("This text looks like "
-                + "a file name, did you mean to use ParseFile()?\n");
+            if (text.EndsWith(".gs", Util.IC)) Warn("This text looks "
+                + "like a file name, did you mean to use ParseFile()?\n");
             this.validatorsDisabled = disableValidators;
             parser.Parse(text.Split(ChatParser.LineBreaks, StringSplitOptions.None));
+        }
+
+        public void ParseFile(string s, bool dv = false, string fe = null) { // tmp
+            Warn("ParseFile(string, ...) has been deprecated and will soon be"
+                 + " removed; please use ParseFile(FileInfo f, ...) instead");
+            ParseFile(new FileInfo(s), dv, fe);
         }
 
         /// <summary>
@@ -121,11 +137,12 @@ namespace Dialogic
         /// <param name="fileOrFolder">File (or folder of files) to parse</param>
         /// <param name="disableValidators">If set to <c>true</c> disable app-specific validators (default=false).</param>
         /// <param name="fileExt">File extension to load (empty-string for all files, default is ".gs")</param>
-        public void ParseFile(string fileOrFolder, 
+        public void ParseFile(FileInfo fileOrFolder,
             bool disableValidators = false, string fileExt = null)
         {
-            var files = Directory.Exists(fileOrFolder) ? Directory.GetFiles
-                (fileOrFolder, '*' + (fileExt ?? ".gs")) : new[] { fileOrFolder };
+            var file = fileOrFolder.FullName;
+            var files = Directory.Exists(file) ? Directory.GetFiles
+                (file, '*' + (fileExt ?? ".gs")) : new[] { file };
 
             this.validatorsDisabled = disableValidators;
 
@@ -197,7 +214,15 @@ namespace Dialogic
         /// <summary>
         /// Save this instance to a serialized byte array
         /// </summary>
-        public byte[] Save() => Serializer.ToBytes(this);
+        public byte[] Save(FileInfo file = null)
+        {
+            byte[] bytes = Serializer.ToBytes(this);
+            if (file != null)
+            {
+                File.WriteAllBytes(file.FullName, bytes);
+            }
+            return bytes;
+        }
 
         /// <summary>
         /// Update this instance with new data from a serialized byte array
