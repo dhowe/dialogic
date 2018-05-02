@@ -119,14 +119,9 @@ namespace Dialogic
     {
         private readonly IDictionary<string, object> data;
 
-        public UpdateEvent(ISendable c)
+        public UpdateEvent(IDictionary<string, object> realizedCmdData)
         {
-            this.data = c.Realized();
-        }
-
-        protected internal UpdateEvent(IDictionary<string, object> data)
-        {
-            this.data = data;
+            this.data = realizedCmdData;
         }
 
         public IDictionary<string, object> Data()

@@ -87,12 +87,13 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        protected internal override Command Realize(IDictionary<string, object> globals)
+        protected internal override IDictionary<string, object> Realize
+            (IDictionary<string, object> globals)
         {
             //Console.WriteLine("[WARN] Chats need not be realized, doing commands instead");
             if (globals == null) globals = new Dictionary<string, object>();
             commands.ForEach(c => c.Realize(globals));
-            return this;
+            return null; // nothing to return;
         }
 
         ///  All Chats must have a valid unique label, and a staleness value

@@ -184,13 +184,13 @@ namespace Dialogic
             Say say = (Dialogic.Say)chat.commands[0];
             Assert.That(say, Is.Not.Null);
             Assert.That(say.meta, Is.Not.Null);
-            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.Realized(), Is.Empty);
             Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
             Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
 
             say.Realize(null);
             Assert.That(say, Is.Not.Null);
-            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.Realized(), Is.Not.Null);
             Assert.That(say.Realized("type"), Is.EqualTo("a"));
             Assert.That(say.Realized("stage"), Is.EqualTo("b"));
             Assert.That(say.delay, Is.EqualTo(2000));
@@ -201,7 +201,7 @@ namespace Dialogic
             say = (Dialogic.Say)chat.commands[0];
             Assert.That(say, Is.Not.Null);
             Assert.That(say.meta, Is.Not.Null);
-            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.Realized(), Is.Empty);
             Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
             Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
             Assert.That(say.GetMeta("delay"), Is.EqualTo("1.01"));
@@ -209,7 +209,7 @@ namespace Dialogic
 
             say.Realize(null);
             Assert.That(say, Is.Not.Null);
-            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.Realized(), Is.Not.Null);
             Assert.That(say.Realized("type"), Is.EqualTo("a"));
             Assert.That(say.Realized("stage"), Is.EqualTo("b"));
             Assert.That(say.Realized("delay"), Is.EqualTo("1.01"));
@@ -221,7 +221,7 @@ namespace Dialogic
             say = (Dialogic.Say)chat.commands[0];
             Assert.That(say, Is.Not.Null);
             Assert.That(say.meta, Is.Not.Null);
-            Assert.That(say.realized, Is.Empty);
+            Assert.That(say.Realized(), Is.Empty);
             Assert.That(say.GetMeta("type"), Is.EqualTo("a"));
             Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
             Assert.That(say.GetMeta("delay"), Is.EqualTo("1"));
@@ -231,7 +231,7 @@ namespace Dialogic
 
             say.Realize(null);
             Assert.That(say, Is.Not.Null);
-            Assert.That(say.realized, Is.Not.Null);
+            Assert.That(say.Realized(), Is.Not.Null);
             Assert.That(say.Realized("type"), Is.EqualTo("a"));
             Assert.That(say.Realized("stage"), Is.EqualTo("b"));
             Assert.That(say.Realized("delay"), Is.EqualTo("1"));
@@ -251,7 +251,7 @@ namespace Dialogic
             chat = ChatParser.ParseText("CHAT c1", NO_VALIDATORS)[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.meta, Is.Not.Null);
-            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Realized(), Is.Null);
             Assert.That(chat.staleness, Is.EqualTo(Defaults.CHAT_STALENESS));
             Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
                 Is.EqualTo(Convert.ToDouble(Defaults.CHAT_STALENESS)));
@@ -259,7 +259,7 @@ namespace Dialogic
             chat = ChatParser.ParseText("CHAT c1 { type = a, stage = b }")[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.meta, Is.Not.Null);
-            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Realized(), Is.Null);
             Assert.That(chat.staleness, Is.EqualTo(Defaults.CHAT_STALENESS));
             Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
                 Is.EqualTo(Convert.ToDouble(Defaults.CHAT_STALENESS)));
@@ -269,7 +269,7 @@ namespace Dialogic
             chat = ChatParser.ParseText("CHAT c1 { staleness = 1,type = a,stage = b}")[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.meta, Is.Not.Null);
-            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Realized(), Is.Null);
             Assert.That(chat.staleness, Is.EqualTo(1));
             Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)),
                 Is.EqualTo(Convert.ToDouble("1")));
@@ -279,7 +279,7 @@ namespace Dialogic
             chat = ChatParser.ParseText("CHAT c1 { resumeAfterInt=false,type = a,stage = b}")[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.meta, Is.Not.Null);
-            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Realized(), Is.Null);
             Assert.That(chat.resumeAfterInt, Is.EqualTo(false));
             Assert.That(chat.resumable, Is.EqualTo(true));
             Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUME_AFTER_INT)),
@@ -290,7 +290,7 @@ namespace Dialogic
             chat = ChatParser.ParseText("CHAT c1 { resumable=false,type = a,stage = b}")[0];
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.meta, Is.Not.Null);
-            Assert.That(chat.realized, Is.Null);
+            Assert.That(chat.Realized(), Is.Null);
             Assert.That(chat.resumable, Is.EqualTo(false));
             Assert.That(Convert.ToBoolean(chat.GetMeta(Meta.RESUMABLE)),
                 Is.EqualTo(Convert.ToBoolean("false")));
@@ -346,7 +346,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0], Is.Not.Null);
             Say say = (Say)chats[0].commands[0];
             say.Realize(null);
-            var ue = new UpdateEvent(say);
+            var ue = new UpdateEvent(say.Realize(globals));
             Assert.That(ue, Is.Not.Null);
             //Console.WriteLine(ue.Data().Stringify());
             Assert.That(ue.Data(), Is.Not.Null);
@@ -376,7 +376,8 @@ namespace Dialogic
             List<Chat> chats; Chat c2, c1;
 
             chats = ChatParser.ParseText("CHAT c1\nSET $c1.staleness=2", NO_VALIDATORS);
-            c1 = (Dialogic.Chat)chats[0].Realize(null);
+            c1 = (Dialogic.Chat)chats[0];
+            c1.Realize(null);
 
             Assert.That(c1, Is.Not.Null);
             Assert.That(c1.staleness, Is.EqualTo(2));
@@ -384,7 +385,8 @@ namespace Dialogic
             Assert.That(c1.GetMeta(Meta.STALENESS), Is.EqualTo("2"));
 
             chats = ChatParser.ParseText("CHAT c1\nSET staleness=2", NO_VALIDATORS);
-            c1 = (Dialogic.Chat)chats[0].Realize(null);
+            c1 = (Dialogic.Chat)chats[0];
+            c1.Realize(null);
 
             Assert.That(c1, Is.Not.Null);
 
@@ -394,8 +396,8 @@ namespace Dialogic
        
             chats = ChatParser.ParseText("CHAT c1\nCHAT c2\nSET $c1.staleness=2", NO_VALIDATORS);
           
-            c1 = (Dialogic.Chat)chats[0].Realize(null);
-            c2 = (Dialogic.Chat)chats[1].Realize(null);
+            c1 = (Dialogic.Chat)chats[0]; c1.Realize(null);
+            c2 = (Dialogic.Chat)chats[1]; c2.Realize(null);
 
             Assert.That(c2.staleness, Is.EqualTo(0));
             Assert.That(c2.Staleness(), Is.EqualTo(0));
@@ -461,9 +463,9 @@ namespace Dialogic
             Assert.That(say.text, Is.EqualTo("Hello from Guppy"));
             Assert.That(say.actor.Name(), Is.EqualTo("Guppy"));
             say.Realize(null);
-            Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
-            Assert.That(say.realized[Meta.TEXT], Is.EqualTo("Hello from Guppy"));
-            Assert.That(say.realized[Meta.ACTOR], Is.EqualTo("Guppy"));
+            Assert.That(say.Realized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(say.Realized(Meta.TEXT), Is.EqualTo("Hello from Guppy"));
+            Assert.That(say.Realized(Meta.ACTOR), Is.EqualTo("Guppy"));
 
             chats = ChatParser.ParseText("Guppy:DO #HelloSpin");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -474,9 +476,9 @@ namespace Dialogic
             Assert.That(doo.text, Is.EqualTo("HelloSpin"));
             Assert.That(doo.actor.Name(), Is.EqualTo("Guppy"));
             doo.Realize(null);
-            Assert.That(doo.realized[Meta.TYPE], Is.EqualTo("Do"));
-            Assert.That(doo.realized[Meta.TEXT], Is.EqualTo("HelloSpin"));
-            Assert.That(doo.realized[Meta.ACTOR], Is.EqualTo("Guppy"));
+            Assert.That(doo.Realized(Meta.TYPE), Is.EqualTo("Do"));
+            Assert.That(doo.Realized(Meta.TEXT), Is.EqualTo("HelloSpin"));
+            Assert.That(doo.Realized(Meta.ACTOR), Is.EqualTo("Guppy"));
 
             chats = ChatParser.ParseText("GO #HelloSpin");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -486,8 +488,8 @@ namespace Dialogic
             Go go = (Dialogic.Go)chats[0].commands[0];
             Assert.That(doo.text, Is.EqualTo("HelloSpin"));
             go.Realize(null);
-            Assert.That(go.realized[Meta.TYPE], Is.EqualTo("Go"));
-            Assert.That(go.realized[Meta.TEXT], Is.EqualTo("HelloSpin"));
+            Assert.That(go.Realized(Meta.TYPE), Is.EqualTo("Go"));
+            Assert.That(go.Realized(Meta.TEXT), Is.EqualTo("HelloSpin"));
 
             chats = ChatParser.ParseText("Guppy: Hello from Guppy");
             Assert.That(chats.Count, Is.EqualTo(1));
@@ -726,7 +728,7 @@ namespace Dialogic
             Assert.That(constraint.name, Is.EqualTo("a"));
             Assert.That(constraint.op, Is.EqualTo(Operator.RE));
             Assert.That(constraint.value, Is.EqualTo("(hot|cool)"));
-            var real = chats[0].commands[0].realized;
+            var real = chats[0].commands[0].Realized();
             Assert.That(real.Count, Is.EqualTo(2)); // a,staleness
         }
 

@@ -1,7 +1,7 @@
 ﻿CHAT GScriptTest {type=a,stage=b}
 Welcome to my $emotion world
-NVM 1.1
-WAIT 3
+NVM .1
+WAIT .3
 DO #Twirl
 
 //Tendar: DO #TendarSpin
@@ -18,7 +18,7 @@ OPT sure #Game
 OPT $neg #RePrompt
 
 CHAT Prompt {notPlayed=true,type=a,stage=b}
-ASK Do you want to $verb a game? {timeout=4,speed=fast }
+ASK Do you want to $verb a game? {timeout=1,speed=fast }
 OPT Sure #Game
 OPT Nope #RePrompt
 

@@ -266,7 +266,8 @@ namespace Dialogic
 
             while (chat != null)
             {
-                var cmd = chat.Next().Realize(globals);
+                var cmd = chat.Next();
+                cmd.Realize(globals);
 
                 ProcessSay(ref result, ref cmd, globals);
 
@@ -371,7 +372,7 @@ namespace Dialogic
 
         internal Chat FindSync(Find f, bool launchScheduler, IDictionary<string, object> globals = null)
         {
-            if (f.realized.Count < 1) f.Realize(globals); // tmp
+            if (f.Realized().Count < 1) f.Realize(globals); // tmp
 
             var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
             if (chat == null) throw new FindException(f);
@@ -387,7 +388,7 @@ namespace Dialogic
             //    return;
             //}
 
-            if (f.realized.Count < 1) f.Realize(globals); // tmp
+            if (f.Realized().Count < 1) f.Realize(globals); // tmp
 
             (searchThread = new Thread(() =>
             {
@@ -449,7 +450,8 @@ namespace Dialogic
         {
             IDictionary<Constraint, bool> cdict;
             cdict = new Dictionary<Constraint, bool>();
-            foreach (var val in f.realized.Values)
+            var realized = f.Realized();
+            foreach (var val in realized.Values)
             {
                 if (!(val is Constraint))
                 {
@@ -494,7 +496,7 @@ namespace Dialogic
 
         internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
         {
-            if (f.realized.Count == 0) f.Realize(globals);
+            if (f.Realized().Count == 0) f.Realize(globals);
             return FuzzySearch.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
@@ -511,8 +513,8 @@ namespace Dialogic
 
         internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals)
         {
-            if (f.realized.Count == 0) f.Realize(globals);
-            return FuzzySearch.FindAll(Chats(), ToList(f.realized), f.parent, globals);
+            if (f.Realized().Count == 0) f.Realize(globals);
+            return FuzzySearch.FindAll(Chats(), ToList(f.Realized()), f.parent, globals);
         }
 
         internal static void Info(object msg)

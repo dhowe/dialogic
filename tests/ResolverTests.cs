@@ -70,7 +70,7 @@ namespace Dialogic
             Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
             say.Realize(globals);
             Assert.That(say.Text(), Is.EqualTo("Thank 4"));
-            Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
+            Assert.That(say.Realized(Meta.TYPE), Is.EqualTo("Say"));
         }
 
         [Test]
@@ -106,8 +106,8 @@ namespace Dialogic
             c.SetMeta("pace", "slow");
 
             Assert.That(c.Text(), Is.EqualTo("Thank you"));
-            Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
-            Assert.That(c.realized["pace"], Is.EqualTo("fast"));
+            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.Realized("pace"), Is.EqualTo("fast"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
 
             chat = ChatParser.ParseText("SAY Thank you { pace=$animal}")[0];
@@ -144,8 +144,8 @@ namespace Dialogic
             Assert.That(say.Text(), Is.EqualTo("Thank 4"));
             say.text = "Thank you";
             Assert.That(say.text, Is.EqualTo("Thank you"));
-            Assert.That(say.realized[Meta.TYPE], Is.EqualTo("Say"));
-            Assert.That(say.realized["pace"], Is.EqualTo("dog"));
+            Assert.That(say.Realized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(say.Realized("pace"), Is.EqualTo("dog"));
         }
 
         [Test]
@@ -157,7 +157,7 @@ namespace Dialogic
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             c.Realize(globals);
-            Assert.That(c.realized[Meta.TYPE], Is.EqualTo("Say"));
+            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
             CollectionAssert.Contains(ok, c.Text());
         }
 

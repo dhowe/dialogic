@@ -31,16 +31,16 @@ namespace Dialogic
             this.realized = new Dictionary<string, object>();
         }
 
-        public override bool Equals(Object o) 
+        public override bool Equals(object obj)
         {
-            var c = (Command)o;
-            return !(c.text != text || c.delay != delay || 
-                c.actor != actor || c.MetaStr() != MetaStr());
+            var c = (Command)obj;
+            return c.text == text && c.actor == actor && c.MetaStr() == 
+                MetaStr() && Util.FloatingEquals(c.delay, delay);
         }
 
         public override int GetHashCode()
         {
-            return text.GetHashCode() ^ delay.GetHashCode() 
+            return (text ?? "").GetHashCode() ^ delay.GetHashCode()
                 ^ actor.GetHashCode() ^ MetaStr().GetHashCode();
         }
 
@@ -52,7 +52,8 @@ namespace Dialogic
         /// <summary>
         /// Will update the value of the property (and meta if syncMeta=true) if it exists, and return true, else false if it does not
         /// </summary>
-        protected internal bool Update(string property, object value, bool syncMeta = true)
+        protected internal bool Update
+            (string property, object value, bool syncMeta = true)
         {
             // will only set if it exists
             bool updated = Properties.Set(this, property, value, true);
@@ -142,7 +143,8 @@ namespace Dialogic
             return this.GetType().Name;
         }
 
-        protected internal virtual Command Realize(IDictionary<string, object> globals)
+        protected internal virtual IDictionary<string, object> Realize
+            (IDictionary<string, object> globals)
         {
             realized.Clear();
 
@@ -160,7 +162,7 @@ namespace Dialogic
                     realized[Meta.ACTOR] = GetActor().Name();
                 }
             }
-            return this;
+            return realized;
         }
 
         protected virtual void RealizeMeta(IDictionary<string, object> globals)
@@ -306,9 +308,12 @@ namespace Dialogic
             this.global = sym.StartsWith('$');
             this.value = match.Groups[3].Value.Trim();
             this.op = Assignment.FromString(match.Groups[2].Value.Trim());
+
+            this.realized = null; // not relevant for Set
         }
 
-        protected internal override Command Realize(IDictionary<string, object> globals)
+        protected internal override IDictionary<string, object> Realize
+            (IDictionary<string, object> globals)
         {
             if (text.Contains(Ch.SCOPE)) // scoped
             {
@@ -363,7 +368,7 @@ namespace Dialogic
                 }
             }
 
-            return this;
+            return realized; // nothing to return here
         }
 
         internal static bool SetPathValue(object parent, string[] paths, object val,
@@ -479,15 +484,18 @@ namespace Dialogic
         }
 
         // Call Realize() on text and options, then add both to realized
-        protected internal override Command Realize(IDictionary<string, object> globals)
+        protected internal override IDictionary<string, object> Realize
+            (IDictionary<string, object> globals)
         {
+            realized.Clear();
+
             base.Realize(globals);
 
             Options().ForEach(o => o.Realize(globals));
             realized[Meta.TIMEOUT] = timeout.ToString();
             realized[Meta.OPTS] = JoinOptions();
 
-            return this;
+            return realized;
         }
 
         public override string ToString()
@@ -576,12 +584,13 @@ namespace Dialogic
             ParseMeta(metas);
         }
 
-        protected internal override Command Realize(IDictionary<string, object> globals)
+        protected internal override IDictionary<string, object> Realize
+            (IDictionary<string, object> globals)
         {
             realized.Clear();
             RealizeMeta(globals); // only realize meta
 
-            return this;
+            return realized;
         }
 
         ///  All Find commands must have a 'staleness' value
@@ -602,7 +611,8 @@ namespace Dialogic
             return this;
         }
 
-        protected internal override void SetMeta(string key, object val, bool onlyIfNotSet = false)
+        protected internal override void SetMeta
+            (string key, object val, bool onlyIfNotSet = false)
         {
             if (val is string || val.IsNumber())
             {
@@ -678,14 +688,15 @@ namespace Dialogic
                 ("GO does not accept metadata");
         }
 
-        protected internal override Command Realize(IDictionary<string, object> globals)
+        protected internal override IDictionary<string, object> Realize
+            (IDictionary<string, object> globals)
         {
             realized.Clear();
             //RealizeMeta(globals); // no meta
             realized[Meta.TYPE] = TypeName();
             realized[Meta.TEXT] = Resolver.BindGroups(text, parent);
 
-            return this;
+            return realized;
         }
 
         protected internal override Command Validate()
@@ -722,7 +733,8 @@ namespace Dialogic
         public const string STALENESS_INCR = "stalenessIncr";
         public const string RESUME_AFTER_INT = "resumeAfterInt";
 
-        protected internal IDictionary<string, object> meta, realized;
+        protected internal IDictionary<string, object> meta;
+        protected IDictionary<string, object> realized;
 
         protected internal virtual bool HasMeta()
         {
@@ -749,12 +761,14 @@ namespace Dialogic
             return realized;
         }
 
-        protected internal void SetMeta(Constraint constraint, bool onlyIfNotSet = false)
+        protected internal void SetMeta
+            (Constraint constraint, bool onlyIfNotSet = false)
         {
             this.SetMeta(constraint.name, constraint, onlyIfNotSet);
         }
 
-        protected internal virtual void SetMeta(string key, object val, bool onlyIfNotSet = false)
+        protected internal virtual void SetMeta
+            (string key, object val, bool onlyIfNotSet = false)
         {
             if (meta == null) meta = new Dictionary<string, object>();
             if (onlyIfNotSet && HasMeta(key)) return;
