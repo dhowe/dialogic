@@ -1,33 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using MessagePack;
 
 namespace Dialogic
 {
-    public static class Serializer
-    {
-        public static byte[] ToBytes(ChatRuntime rt)
-        {
-            return MessagePackSerializer.Serialize(Snapshot.Create(rt));
-        }
+    //public static class Serializer
+    //{
+    //    public static byte[] ToBytes(ChatRuntime rt)
+    //    {
+    //        return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt));
+    //    }
 
-        public static void FromBytes(ChatRuntime rt, byte[] bytes)
-        {
-            MessagePackSerializer.Deserialize<Snapshot>(bytes).Update(rt);
-        }
+    //    public static void FromBytes(ChatRuntime rt, byte[] bytes)
+    //    {
+    //        MessagePackSerializer.Deserialize<Snapshot>(bytes).Update(rt);
+    //    }
 
-        public static string ToJSON(ChatRuntime rt)
-        {
-            return MessagePackSerializer.ToJson(ToBytes(rt));
-        }
-    }
+    //    public static string ToJSON(ChatRuntime rt)
+    //    {
+    //        return MessagePackSerializer.ToJson(ToBytes(rt));
+    //    }
+    //}
 
 
     /// <summary>
     /// A serializable subset of system properties at a particular moment,
     /// with which to store/restore instances of Dialogic (ChatRuntime)
     /// </summary>
-    [MessagePackObject(keyAsPropertyName: true)]
+    //[MessagePackObject(keyAsPropertyName: true)]
     public class Snapshot
     {
         static public bool DBUG = false;
@@ -82,7 +81,7 @@ namespace Dialogic
         //}
     }
 
-    [MessagePackObject(keyAsPropertyName: true)]
+    //[MessagePackObject(keyAsPropertyName: true)]
     public class ChatData
     {
         public List<CommandData> commands;
@@ -145,7 +144,7 @@ namespace Dialogic
     }
 
 
-    [MessagePackObject(keyAsPropertyName: true)]
+    //[MessagePackObject(keyAsPropertyName: true)]
     public class CommandData
     {
         //Dictionary<string, string> meta;
@@ -214,7 +213,7 @@ namespace Dialogic
     }
 
     /*
-    [MessagePackObject(keyAsPropertyName: true)]
+    //[MessagePackObject(keyAsPropertyName: true)]
     public class ActorData
     {
         public string name;

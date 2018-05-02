@@ -63,9 +63,9 @@ namespace Dialogic
         /// </summary>
         /// <param name="file">File.</param>
         /// <param name="theActors">The actors.</param>
-        public static ChatRuntime Create(FileInfo file, List<IActor> theActors)
+        public static ChatRuntime Create(ISerializer serializer, FileInfo file, List<IActor> theActors)
         {
-            return Create(File.ReadAllBytes(file.FullName), theActors);
+            return Create(serializer, File.ReadAllBytes(file.FullName), theActors);
         }
 
         /// <summary>
@@ -73,10 +73,10 @@ namespace Dialogic
         /// </summary>
         /// <param name="bytes">Bytes serialized via runtime.</param>
         /// <param name="theActors">The actors.</param>
-        public static ChatRuntime Create(byte[] bytes, List<IActor> theActors)
+        public static ChatRuntime Create(ISerializer serializer, byte[] bytes, List<IActor> theActors)
         {
             ChatRuntime rt = new ChatRuntime(theActors);
-            Serializer.FromBytes(rt, bytes);
+            serializer.FromBytes(rt, bytes);
             return rt;
         }
 
@@ -118,7 +118,7 @@ namespace Dialogic
         /// </summary>
         public void ParseText(string text, bool disableValidators = false)
         {
-            if (text.EndsWith(".gs", Util.IC)) Warn("This text looks "
+            if (text.EndsWith(".gs", Util.IC)) Warn("This text looks " // tmp
                 + "like a file name, did you mean to use ParseFile()?\n");
             this.validatorsDisabled = disableValidators;
             parser.Parse(text.Split(ChatParser.LineBreaks, StringSplitOptions.None));
@@ -214,25 +214,22 @@ namespace Dialogic
         /// <summary>
         /// Save this instance to a serialized byte array
         /// </summary>
-        public byte[] Save(FileInfo file = null)
+        public byte[] Save(ISerializer serializer, FileInfo file = null)
         {
-            byte[] bytes = Serializer.ToBytes(this);
-            if (file != null)
-            {
-                File.WriteAllBytes(file.FullName, bytes);
-            }
+            byte[] bytes = serializer.ToBytes(this);
+            if (file != null) File.WriteAllBytes(file.FullName, bytes);
             return bytes;
         }
 
         /// <summary>
         /// Update this instance with new data from a serialized byte array
         /// </summary>
-        public void Update(byte[] bytes) => Serializer.FromBytes(this, bytes);
+        public void Update(ISerializer serializer, byte[] bytes) => serializer.FromBytes(this, bytes);
 
         /// <summary>
         /// Serialize this runtime and return the data as a JSON string
         /// </summary>
-        public string ToJSON() => Serializer.ToJSON(this);
+        public string ToJSON(ISerializer serializer) => serializer.ToJSON(this);
 
         public override string ToString()
         {

@@ -128,7 +128,7 @@ namespace Dialogic
             Assert.That(chats[1].commands[0].Text(), Is.EqualTo("hello"));
 
 
-            return; // TODO
+            return; // TODO: add chats to globals, remove special-case code 
 
             // chat-direct access
             lines = new[] {

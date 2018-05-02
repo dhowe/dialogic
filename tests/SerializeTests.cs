@@ -2,14 +2,17 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using Dialogic;
+using System.IO;
 using Tendar;
+using MessagePack;
 
 namespace Dialogic
 {
     [TestFixture]
     public class SerializeTests
     {
+        static ISerializer serializer = new SerializerMessagePack();
+
         const bool NO_VALIDATORS = true;
 
         public static IDictionary<string, object> globals
@@ -39,10 +42,10 @@ namespace Dialogic
             rtIn.ParseText(text);
 
             // serialize the runtime to bytes
-            var bytes = Serializer.ToBytes(rtIn);
+            var bytes = serializer.ToBytes(rtIn);
 
             // create a new runtime from the bytes
-            rtOut = ChatRuntime.Create(bytes, AppConfig.Actors);
+            rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
 
             // check they are identical
             Assert.That(rtIn, Is.EqualTo(rtOut));
@@ -87,10 +90,10 @@ namespace Dialogic
             rtIn.ParseText(text);
 
             // serialize the runtime to bytes
-            var bytes = Serializer.ToBytes(rtIn);
+            var bytes = serializer.ToBytes(rtIn);
 
             // create a new runtime from the bytes
-            rtOut = ChatRuntime.Create(bytes, AppConfig.Actors);
+            rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
 
             // check they are identical
             //Assert.That(rtIn, Is.EqualTo(rtOut));
@@ -105,7 +108,6 @@ namespace Dialogic
             Assert.That(c1.ToTree(), Is.EqualTo(c2.ToTree()));
             Assert.That(c1.text, Is.EqualTo(c2.text));
             for (int i = 0; i < c1.commands.Count; i++)
-
             {
                 var cmd1 = c1.commands[i];
                 var cmd2 = c2.commands[i];
@@ -127,11 +129,11 @@ namespace Dialogic
             testfile += "../dialogic/data/noglobal.gs";
 
             rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
-            rtIn.ParseFile(testfile);
+            rtIn.ParseFile(new FileInfo(testfile));
 
-            var bytes = Serializer.ToBytes(rtIn);
+            var bytes = serializer.ToBytes(rtIn);
 
-            rtOut = ChatRuntime.Create(bytes, AppConfig.Actors);
+            rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
 
             // check they are identical
             Assert.That(rtIn, Is.EqualTo(rtOut));
@@ -149,6 +151,34 @@ namespace Dialogic
                 Assert.That(chat1.text, Is.EqualTo(chat2.text));
                 Assert.That(chat1.commands.Count, Is.EqualTo(chat2.commands.Count));
                 Assert.That(chat1.ToTree(), Is.EqualTo(chat2.ToTree()));
+            }
+        }
+
+        [Test]
+        public void AppendChatsToExistingRuntime()
+        {
+            // Working here...
+        }
+
+        // Implement ISerializer and then instance to ChatRuntime methods...
+        private class SerializerMessagePack : ISerializer
+        {
+            IFormatterResolver ifr =
+                MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Instance;
+
+            public byte[] ToBytes(ChatRuntime rt)
+            {
+                return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
+            }
+
+            public void FromBytes(ChatRuntime rt, byte[] bytes)
+            {
+                MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
+            }
+
+            public string ToJSON(ChatRuntime rt)
+            {
+                return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
             }
         }
     }

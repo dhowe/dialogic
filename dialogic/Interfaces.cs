@@ -4,9 +4,18 @@ using System.Collections.Generic;
 namespace Dialogic
 {
     /// <summary>
+    /// A class responsible for serializing and deserializing system state
+    /// </summary>
+    public interface ISerializer
+    {
+        byte[] ToBytes(ChatRuntime rt);
+        void FromBytes(ChatRuntime rt, byte[] bytes);
+        string ToJSON(ChatRuntime rt);
+    }
+
+    /// <summary>
     /// An Actor to which IAssignable Commands can be assigned; may also include custom Commands and validators specific to the client application
     /// </summary>
-
     public interface IActor
     {
         string Name();

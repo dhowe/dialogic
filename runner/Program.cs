@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Dialogic;
+using MessagePack;
 using Tendar;
 
 namespace runner
@@ -51,23 +52,15 @@ namespace runner
         /// <param name="fileOrFolder">File or folder.</param>
         public MockGameEngine(FileInfo fileOrFolder)
         {
-            if (false)
-            {
-                dialogic = new ChatRuntime(AppConfig.Actors);
-                dialogic.ParseFile(fileOrFolder);
-                dialogic.Run();//"#GScriptTest");
-            }
-            else // use a serialized/deserialized runtime
-            {
-                var saveFile = new FileInfo("./runtime.ser");
+            var saveFile = new FileInfo("./runtime.ser");
 
-                ChatRuntime tmp = new ChatRuntime(Tendar.AppConfig.Actors);
-                tmp.ParseFile(fileOrFolder);
-                tmp.Save(saveFile);
+            ISerializer serializer = new SerializerMessagePack();
+            ChatRuntime tmp = new ChatRuntime(Tendar.AppConfig.Actors);
+            tmp.ParseFile(fileOrFolder);
+            tmp.Save(serializer, saveFile);
 
-                dialogic = ChatRuntime.Create(saveFile, AppConfig.Actors);
-                dialogic.Run();
-            }
+            dialogic = ChatRuntime.Create(serializer, saveFile, AppConfig.Actors);
+            dialogic.Run();
         }
 
         /// <summary>
@@ -87,7 +80,7 @@ namespace runner
                  gameEvent = new UserEvent("Tap");
              });
 
-            var types = new[]{ "critic", "shake", "tap" };
+            var types = new[] { "critic", "shake", "tap" };
             var count = 0;
 
             // a 'Resume' event
@@ -97,7 +90,7 @@ namespace runner
                 var data = "{!!type = TYPE,!stage = CORE}";
                 data = data.Replace("TYPE", types[++count % 3]);
 
-                Console.WriteLine("\n<resume-event#"+data+">" +
+                Console.WriteLine("\n<resume-event#" + data + ">" +
                     " after " + Util.Millis(now) + "ms\n");
 
                 gameEvent = new ResumeEvent(data);
@@ -226,5 +219,26 @@ namespace runner
             }
         }
 
+        // Implement ISerializer and then instance to ChatRuntime methods...
+        private class SerializerMessagePack : ISerializer
+        {
+            IFormatterResolver ifr =
+                MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Instance;
+
+            public byte[] ToBytes(ChatRuntime rt)
+            {
+                return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
+            }
+
+            public void FromBytes(ChatRuntime rt, byte[] bytes)
+            {
+                MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
+            }
+
+            public string ToJSON(ChatRuntime rt)
+            {
+                return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
+            }
+        }
     }
 }
