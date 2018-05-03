@@ -302,6 +302,8 @@ namespace Dialogic
                 throw new ParseException("Invalid SET args: '" + txt + "'");
             }
 
+            // use Symbol here?
+
             var sym = match.Groups[1].Value.Trim();
 
             this.text = sym.TrimFirst(Ch.SYMBOL);

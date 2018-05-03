@@ -145,22 +145,17 @@ namespace Dialogic
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
-        internal const string XP1 = @"\(([^()]+|(?<Level>\()|";
-        internal const string XP2 = @"(?<-Level>\)))+(?(Level)(?!))\)";
-        public static Regex MatchParensX = new Regex(XP1 + XP2);
-
         internal const string MP0 = @"(?:\[([^=()]+)=)?";
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
         internal const string MP3 = @"(?:\.(" + SYM + @")\(\))?";
         public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
 
-        internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";
-        internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
-        public static Regex ParseVars = new Regex(PV1 + PV2);
+        //internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";
+        //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
+        //public static Regex ParseVars = new Regex(PV1 + PV2);
+        public static Regex ParseVars = new Regex(@"(?:\[([^=]+)=)?(?:\$(\{?)("+SYM+@")(\}?))(?:\.([^(]+)\(\))*\]?");
 
-        public static Regex ParseAlias = new Regex(@"\[([^=]+)=([^\]]+)\]");
-        public static Regex SaveState = new Regex(@"\[\s*([^= ]+)\s*=\s*([^\]]+)\s*\]");
 
         public static Regex SplitOr = new Regex(@"\s*\|\s*");
         public static Regex HasParens = new Regex(@"[\(\)]");
@@ -480,6 +475,7 @@ namespace Dialogic
         internal static void ShowMatches(MatchCollection matches)
         {
             int i = 0;
+            if (matches.Count < 1) Console.WriteLine("<empty>");
             foreach (Match match in matches) ShowMatch(match, i++);
         }
 

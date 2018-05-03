@@ -333,6 +333,18 @@ namespace Dialogic
             return c;
         }
 
+
+        [Test]
+        public void MultipleSymbolsWithTransform()
+        {
+            Chat c1 = null;
+
+            var symbols = Symbol.Parse("A $thing1 $thing2.pluralize()", c1);
+            Assert.That(symbols.Count, Is.EqualTo(2));
+            Assert.That(symbols[1].transform, Is.EqualTo("pluralize"));
+            //Console.WriteLine(symbols.Stringify());
+        }
+
         [Test]
         public void SingleDollarSymbolResolve()
         {

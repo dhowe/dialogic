@@ -107,7 +107,7 @@ namespace Dialogic
 
                     throw new UnboundFunction(methodName, null, null,
                         "\nDid you mean to call ChatRuntime.AddTransform"
-                           + "("+ methodName + ", ...)?");
+                           + "(" + methodName + ", ...)?");
                 }
 
                 if (method == null) throw new UnboundFunction
@@ -168,10 +168,10 @@ namespace Dialogic
         }
     }
 
-    internal class Choice
+    internal class Choice : IResolvable
     {
         public string alias;
-        private string text, modifier;
+        private string text, transform; // multiple?
         public readonly string[] options;
 
         private string lastResolved;
@@ -181,19 +181,19 @@ namespace Dialogic
         {
             this.text = text;
             this.context = context;
-            this.modifier = method;
+            this.transform = method;
             this.options = RE.SplitOr.Split(groups);
             this.alias = alias.IsNullOrEmpty() ? null : alias;
         }
 
         public string Text()
         {
-            return text + Modifier();
+            return text + Transform();
         }
 
-        private string Modifier()
+        private string Transform()
         {
-            return modifier.IsNullOrEmpty() ? string.Empty : '.' + modifier + "()";
+            return transform.IsNullOrEmpty() ? string.Empty : '.' + transform + "()";
         }
 
         public static List<Choice> Parse(string input, Chat context)
@@ -226,10 +226,10 @@ namespace Dialogic
                 if (!method.IsNullOrEmpty())
                 {
                     var didx = full.LastIndexOf('.');
-                    full = full.Substring(0, didx);
+                    if (didx > 0) full = full.Substring(0, didx);
                 }
 
-                //Console.WriteLine("full:"+full+" alias="+alias+" method="+method);
+                //Console.WriteLine("full:" + full + " alias=" + alias + " method=" + method);
 
                 var oidx = full.IndexOf(Ch.OGROUP);
                 var cidx = full.LastIndexOf(Ch.CGROUP);
@@ -245,14 +245,19 @@ namespace Dialogic
                     {
                         var cache = context.runtime.choiceCache;
 
-                        // cache our prior Choice objects here
-                        var choiceKey = context.text + Ch.LABEL + full;
+                        // cache our prior Choice objects here, 
+                        var choiceKey = context.text + Ch.LABEL + full;//+ method + alias;
                         if (!cache.ContainsKey(choiceKey))
                         {
+                            //Console.WriteLine("CACHE-add: " + choiceKey);
                             cache.Add(choiceKey, new Choice(context, full, expr, alias, method));
                         }
-                        //else Console.WriteLine("CACHE-HIT: "+choiceKey);
+                        ///else Console.WriteLine("CACHE-HIT: " + choiceKey);
                         results.Add(cache[choiceKey]);
+
+                        // note: this data is not in the cache, so we reset it here
+                        cache[choiceKey].transform = method;
+                        cache[choiceKey].alias = alias;
                     }
                     else  // no cache
                     {
@@ -266,6 +271,12 @@ namespace Dialogic
         {
             return context != null && context.runtime != null
                 && context.runtime.choiceCache != null;
+        }
+
+        internal static bool IsStrictMode(Chat context)
+        {
+            return context != null && context.runtime != null
+                && context.runtime.strictMode;
         }
 
         internal string Resolve()
@@ -303,26 +314,9 @@ namespace Dialogic
             lastResolved = resolved;
 
             //Console.WriteLine("last="+lastResolved+" res="+resolved);
-            return HandleModifier(resolved);
-        }
 
-        private string HandleModifier(string resolved)
-        {
-            if (!modifier.IsNullOrEmpty())
-            {
-                try
-                {
-                    resolved = Methods.Invoke(resolved, modifier, null).Stringify();
-                }
-                catch (UnboundFunction e)
-                {
-                    if (context.runtime.strictMode) throw e;
-                    resolved += (Ch.SCOPE + modifier + Ch.OGROUP) + Ch.CGROUP;
-                }
-            }
-            //Console.WriteLine("HandleModifier: " + resolved+ " -> "+res);
-
-            return resolved;
+            return Transforms.HandleTransform
+                (transform, resolved, IsStrictMode(context));
         }
 
         private void HandleAlias(object resolved, Chat ctx)
@@ -347,9 +341,9 @@ namespace Dialogic
         }
     }
 
-    internal class Symbol
+    internal class Symbol : IResolvable
     {
-        public string text, alias, name;
+        public string text, alias, name, transform;
         public bool bounded;
         public Chat context;
 
@@ -435,10 +429,10 @@ namespace Dialogic
             return null;
         }
 
-        private object GetViaPath(object parent, string[] paths,
+        private object GetViaPath(object start, string[] paths,
             IDictionary<string, object> globals)
         {
-            if (parent == null) throw new BindException("null parent");
+            if (start == null) OnBindError(globals);
 
             // Dynamically resolve the object path 
             for (int i = 1; i < paths.Length; i++)
@@ -446,35 +440,40 @@ namespace Dialogic
                 if (paths[i].EndsWith(Ch.CGROUP))
                 {
                     var func = paths[i].Replace("()", "");
-                    if (parent.ToString().Contains(Ch.OR))
+                    if (start.ToString().Contains(Ch.OR))
                     {
                         // delay the method call until fully resolved
-                        parent = parent + "." + paths[i];
+                        start = start + "." + paths[i];
                     }
                     else
                     {   // nothing more to resolve, so invoke
-                        parent = Methods.Invoke(parent, func, null);
+                        start = Methods.Invoke(start, func, null);
                     }
 
                     // TODO: handle other modifier signatures
                 }
                 else
                 {
-                    parent = Properties.Get(parent, paths[i]);
+                    start = Properties.Get(start, paths[i]);
                 }
 
-                if (parent == null) OnBindError(globals);
+                if (start == null) OnBindError(globals);
 
-                HandleAlias(parent, globals);
+                HandleAlias(start, globals);
             }
 
-            return parent;
+            return start;
+        }
+
+        internal static bool IsStrictMode(Chat context)
+        {
+            return context != null && context.runtime != null
+                && context.runtime.strictMode;
         }
 
         internal void OnBindError(IDictionary<string, object> globals)
         {
-            if (context == null || context.runtime == null
-                || context.runtime.strictMode)
+            if (IsStrictMode(context))
             {
                 throw new UnboundSymbol(name, context, globals);
             }
@@ -512,7 +511,7 @@ namespace Dialogic
         private static MatchCollection GetMatches(string text)
         {
             var matches = RE.ParseVars.Matches(text);
-
+            Util.ShowMatches(matches);
             if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
             {
                 throw new BindException("Unable to parse symbol: " + text);
@@ -537,6 +536,21 @@ namespace Dialogic
             return (from s in syms orderby s.name.Length ascending select s).ToList();
         }
 
+        internal static List<string> ParseTransforms(Group g)
+        {
+            List<string> transforms = null;
+            if (g.Value.Length > 0)
+            {
+                transforms = new List<string>();
+                for (int i = 0; i < g.Captures.Count; i++)
+                {
+                    transforms.Add(g.Captures[i].Value);
+                }
+            }
+
+            return transforms;
+        }
+
         internal SymbolType Type()
         {
             return this.name.Contains(Ch.SCOPE) ? SymbolType.GLOBAL_SCOPE : SymbolType.SIMPLE;
@@ -544,7 +558,6 @@ namespace Dialogic
 
         internal enum SymbolType { SIMPLE, GLOBAL_SCOPE }
     }
-
 
     /// <summary>
     /// Represents an atomic operation on a pair of metadata string that when invoked returns a boolean

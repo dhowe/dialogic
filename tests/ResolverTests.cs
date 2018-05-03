@@ -21,6 +21,81 @@ namespace Dialogic
         };
 
         [Test]
+        public void TransformBugs()
+        {
+            ChatRuntime rt;
+            string res, txt;
+            Say say;
+            Chat chat;
+
+            if (1 == 2)
+            {
+                txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.pluralize()";
+                //var txt = "SET $thing1 = (cat | cat)\nSAY Some $thing1.pluralize()";
+                rt = new ChatRuntime();
+                rt.ParseText(txt);
+                chat = rt.Chats().First();
+                say = (Say)chat.commands[1];
+                chat.Realize(globals);
+                res = say.Text();
+                //Console.WriteLine(res);
+                Assert.That(res, Is.EqualTo("A cat, many cats"));
+
+                // same as above, unbound
+                txt = "SET $thing1 = (cat | crow | ant)\nSAY A ${thing1}, many ${thing1}.pluralize()";
+                rt = new ChatRuntime();
+                rt.ParseText(txt);
+                chat = rt.Chats().First();
+                say = (Say)chat.commands[1];
+                chat.Realize(globals);
+                //Console.WriteLine(say.Text());
+            }
+
+            // throws spurious exception (see ticket)
+            txt = "SET $thing1 = (cat | crow | bluebird)\nA $thing1 $thing2.pluralize()";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            chat.Realize(globals);
+            say = (Say)chat.commands[1];
+            Console.WriteLine(say.Text());
+            if (1 == 2)
+            {
+
+
+                // throws spurious exception (see ticket)
+                txt = "SET $thing1 = (cat | crow | bluebird)\nA $thing1 $thing2.pluralize()";
+                rt = new ChatRuntime();
+                rt.ParseText(txt);
+                chat = rt.Chats().First();
+                say = (Say)chat.commands[1];
+                chat.Realize(globals);
+                Console.WriteLine(say.Text());
+
+
+                // should throw exception if globals is null!
+                txt = "SET $thing1 = (cat | crow | ant)\nSAY A ${thing1}, many ${thing1}.pluralize()";
+                rt = new ChatRuntime();
+                rt.ParseText(txt);
+                chat = rt.Chats().First();
+                say = (Say)chat.commands[1];
+                chat.Realize(null);
+                Console.WriteLine(say.Text());
+                Assert.That(res, Is.EqualTo("hello!"));
+
+
+                // throws spurious "Max limit: (cat | cat | cat)"
+                txt = "SET $thing1 = (cat | cat | cat)\nSAY A $thing1 $thing1";
+                rt = new ChatRuntime();
+                rt.ParseText(txt);
+                chat = rt.Chats().First();
+                say = (Say)chat.commands[1];
+                chat.Realize(globals);
+                Console.WriteLine(say.Text());
+            }
+        }
+
+        [Test]
         public void ASimpleVar()
         {
             var res = Resolver.BindSymbols("$a", null, new Dictionary<string, object>()
@@ -31,6 +106,20 @@ namespace Dialogic
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello!"));
         }
+
+
+        [Test]
+        public void SimpleTransforms()
+        {
+            var res = Resolver.BindSymbols("$a.pluralize()", null, 
+                new Dictionary<string, object>(){{ "a", "cat" }});
+            Assert.That(res, Is.EqualTo("cats"));
+
+            res = Resolver.BindSymbols("$a.articlize().pluralize()", null,
+                new Dictionary<string, object>() { { "a", "ant" } });
+            Assert.That(res, Is.EqualTo("an ants"));
+        }
+
 
         [Test]
         public void GroupsWithEmptyStr()
@@ -180,8 +269,15 @@ namespace Dialogic
             }
         }
 
+
         [Test]
-        public void ComplexPlusModifier()
+        public void InvokeTransformTest()
+        {
+            Assert.That(Methods.InvokeTransform("cat", "pluralize"), Is.EqualTo("cats"));
+        }
+            
+        [Test]
+        public void ComplexPlusTransform()
         {
             // "cmplx" -> "($group | $prep)" 
             // "prep"  -> "then" },
@@ -194,7 +290,7 @@ namespace Dialogic
             {
                 c.Realize(globals);
                 var txt = c.Text();
-                //Console.WriteLine(i+") "+txt);
+                Console.WriteLine(i+") "+txt);break;
                 CollectionAssert.Contains(ok, txt);
             }
         }
