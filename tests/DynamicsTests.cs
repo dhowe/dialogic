@@ -70,18 +70,10 @@ namespace Dialogic
         }
 
         [Test]
-        public void ResolveTraversalWithParameters()
-        {
-            // TODO:
-            //Chat c1 = null;
-        }
-
-        [Test]
         public void ResolveTraversalWithFunctions()
         {
             object result;
             Chat c1 = null;
-
             result = Symbol.Parse("The $fish.Id()", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
@@ -127,6 +119,15 @@ namespace Dialogic
             result = Symbol.Parse("#$fish.Id()", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
+            var symbols = Symbol.Parse("The [aly=$fish.Id()] $aly", c1);
+            Assert.That(symbols.Count, Is.EqualTo(2));
+            result = symbols[1].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+            Assert.That(globals["aly"], Is.EqualTo(9));
+
+            symbols = Symbol.Parse("The $fish.Id() $fish.name", c1);
+            result = symbols[0].Resolve(globals) + symbols[1].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9Fred"));
         }
 
         [Test]
@@ -333,6 +334,19 @@ namespace Dialogic
             return c;
         }
 
+
+        [Test]
+        public void MultipleSymbolsWithTransform()
+        {
+            Chat c1 = null;
+
+            var symbols = Symbol.Parse("A $thing1 $thing2.pluralize()", c1);
+            Assert.That(symbols.Count, Is.EqualTo(2));
+            Assert.That(symbols[1].transforms.ToArray(), 
+                        Is.EquivalentTo(new[] { "pluralize()" }));
+            //Console.WriteLine(symbols.Stringify());
+        }
+
         [Test]
         public void SingleDollarSymbolResolve()
         {
@@ -514,6 +528,34 @@ namespace Dialogic
         }
 
         [Test]
+        public void SymbolSortTest()
+        {
+            var syms = Symbol.Parse("$a $a2", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a2"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+
+            syms = Symbol.Parse("$a $aa $aaa", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aaa"));
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aa"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+
+
+            syms = Symbol.Parse("[b=$a] $aa $aaa", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(2).name, Is.EqualTo("a"));
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aaa"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aa"));
+
+            syms = Symbol.Parse("[b=$a] [cc=$aa] $aaa", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aa"));
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aaa"));
+        }
+
+        [Test]
         public void SingleDollarSymbolParsing()
         {
             Chat c = CreateParentChat("c");
@@ -653,27 +695,29 @@ namespace Dialogic
             foreach (var t in ts) Assert.That(Symbol.Parse
                 ("[b=${a}]" + t, c).First().name, Is.EqualTo("a"));
 
-            Assert.That(Symbol.Parse("${a}",c).First().name, Is.EqualTo("a"));
-            Assert.That(Symbol.Parse("${a.b}",c).First().name, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("${a}", c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("[b=$a]", c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("[b=$a]", c).First().alias, Is.EqualTo("b"));
+            Assert.That(Symbol.Parse("${a}b", c).First().name, Is.EqualTo("a"));
 
-            Assert.That(Symbol.Parse("$a.b",c).First().name, Is.EqualTo("a.b"));
-            Assert.That(Symbol.Parse("[b=$a]",c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("${a.b}", c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("${a.b}", c).First().transforms.ToArray(), Is.EqualTo(new[] { "b" }));
 
-            Assert.That(Symbol.Parse("[bc=$a.b]",c).First().name, Is.EqualTo("a.b"));
-            Assert.That(Symbol.Parse("[bc=$a.b]",c).First().alias, Is.EqualTo("bc"));
+            Assert.That(Symbol.Parse("$a.b", c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("$a.b", c).First().transforms.ToArray(), Is.EqualTo(new[] { "b" }));
 
-            Assert.That(Symbol.Parse("[c=$a.b]",c).First().name, Is.EqualTo("a.b"));
-            Assert.That(Symbol.Parse("[c=$a.b]",c).First().alias, Is.EqualTo("c"));
+            Assert.That(Symbol.Parse("[bc=$a.b]", c).First().name, Is.EqualTo("a"));
+
+            Assert.That(Symbol.Parse("[bc=$a.b]", c).First().alias, Is.EqualTo("bc"));
+            Assert.That(Symbol.Parse("[bc=$a.b]", c).First().transforms.ToArray(), Is.EqualTo(new[] { "b" }));
+
+            Assert.That(Symbol.Parse("[c=${a.b}].", c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("[c=${a.b}].", c).First().alias, Is.EqualTo("c"));
+            Assert.That(Symbol.Parse("[c=${a.b}]", c).First().transforms.ToArray(), Is.EqualTo(new[] { "b" }));
 
 
-            Assert.That(Symbol.Parse("[c=$a.b].",c).First().name, Is.EqualTo("a.b"));
-            Assert.That(Symbol.Parse("[c=$a.b].",c).First().alias, Is.EqualTo("c"));
-
-            Assert.That(Symbol.Parse("[c=${a.b}].",c).First().name, Is.EqualTo("a.b"));
-            Assert.That(Symbol.Parse("[c=${a.b}].",c).First().alias, Is.EqualTo("c"));
-
-            Assert.That(Symbol.Parse("${a}b",c).First().name, Is.EqualTo("a"));
-            Assert.That(Symbol.Parse("${a.b}b",c).First().name, Is.EqualTo("a.b"));
+            Assert.That(Symbol.Parse("${a.b}b", c).First().name, Is.EqualTo("a"));
+            Assert.That(Symbol.Parse("${a.b}", c).First().transforms.ToArray(), Is.EqualTo(new[] { "b" }));
         }
 
         [Test]

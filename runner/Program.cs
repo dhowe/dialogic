@@ -60,7 +60,6 @@ namespace runner
             tmp.Save(serializer, saveFile);
 
             dialogic = ChatRuntime.Create(serializer, saveFile, AppConfig.Actors);
-            Console.WriteLine(dialogic);
             dialogic.Run();
         }
 

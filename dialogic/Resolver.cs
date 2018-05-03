@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
@@ -48,15 +46,13 @@ namespace Dialogic
                         }
                     }
 
-                    if (parent.runtime.strictMode) throw new BindException
-                        ("Resolver hit maxRecursionDepth for: " + original);
-
                     break;
                 }
 
             } while (IsDynamic(text));
 
-            text = text.Replace("\"", "");
+            // replace any literal quotation marks
+            text = text.Replace("\"", string.Empty);
 
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
@@ -78,6 +74,7 @@ namespace Dialogic
                 if (DBUG) Console.WriteLine("    Found: " + symbols.Stringify());
 
                 var symbol = symbols.Pop();
+                if (DBUG) Console.WriteLine("    Pop:    " + symbol);
 
                 var result = symbol.Resolve(globals);
                 if (result != null)
@@ -125,7 +122,7 @@ namespace Dialogic
 
                 foreach (var choice in choices)
                 {
-                    var pick = choice.Resolve();
+                    var pick = choice.Resolve(); // handles transforms
                     if (DBUG) Console.WriteLine("      " + choice + " -> " + pick);
                     text = text.ReplaceFirst(choice.Text(), pick);
                 }
@@ -136,13 +133,14 @@ namespace Dialogic
 
         private static bool IsDynamic(string text)
         {
-            return text != null && text.Contains(Ch.OR, Ch.SYMBOL, Ch.LABEL);
+            return text != null && (text.Contains("()")
+                || text.Contains(Ch.OR, Ch.SYMBOL, Ch.LABEL));
         }
 
         private static string Info(string text, Chat parent)
         {
             return text + " :: " + (parent == null ? "{}" :
-                parent.text + parent.scope.Stringify());
+                parent.text +  " "+parent.scope.Stringify());
         }
     }
 }

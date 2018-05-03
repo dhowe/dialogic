@@ -66,6 +66,28 @@ namespace Dialogic
 
         // --------------------------------------------------------------------
 
+        internal static string HandleTransform
+            (string transform, string resolved, bool throwOnError=true)
+        {
+            //Console.Write("HandleTransform: "+resolved+" mod="+transform);
+            var input = resolved;
+            if (!transform.IsNullOrEmpty())
+            {
+                try
+                {
+                    resolved = Methods.Invoke(resolved, transform, null).Stringify();
+                }
+                catch (UnboundFunction e)
+                {
+                    if (throwOnError) throw e;
+                    resolved += (Ch.SCOPE + transform + Ch.OGROUP) + Ch.CGROUP;
+                }
+            }
+            //Console.WriteLine(" in=" + input+ " out="+resolved);
+
+            return resolved;
+        }
+
         private Transforms()
         {
             lookup = new ConcurrentDictionary<string, Func<string, string>>();

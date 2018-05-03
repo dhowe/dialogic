@@ -24,6 +24,9 @@ namespace Dialogic
         Func<Command, bool> Validator();
     }
 
+    internal interface IResolvable // Choice and Symbol
+    {
+    }
 
     ////////////////////////////// Commands ///////////////////////////////////
 
