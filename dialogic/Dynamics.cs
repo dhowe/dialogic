@@ -182,7 +182,10 @@ namespace Dialogic
             this.text = text;
             this.context = context;
             this.transform = method;
-            this.options = RE.SplitOr.Split(groups);
+            HashSet<string> set = new HashSet<string>();
+            var opts = RE.SplitOr.Split(groups);
+            foreach (var o in opts) set.Add(o);
+            this.options = set.ToArray();
             this.alias = alias.IsNullOrEmpty() ? null : alias;
         }
 
@@ -402,20 +405,18 @@ namespace Dialogic
         public static List<Symbol> Parse(string text, Chat context)
         {
             var symbols = new List<Symbol>();
-            var matches = GetMatches(text);
+            var matches = RE.ParseVars.Matches(text);
 
             foreach (Match match in matches)
             {
-                //GroupCollection groups = GetGroups(match, 8);
-
                 // Create a new Symbol and add it to the result
                 symbols.Add(new Symbol(context, match));
             }
 
-            // OPT: we can sort here to avoid symbols which are substrings of other
-            // symbols causing incorrect replacements ($a being replaced in $ant, 
-            // for example), however should be avoided by using Regex.Replace 
-            // instead of String.Replace() in BindSymbols
+            // OPT: we must sort here to avoid symbols which are substrings of 
+            // other symbols causing incorrect replacements ($a being replaced
+            // in $ant,for example), however should be avoided by using 
+            // Regex.Replace instead of String.Replace() in BindSymbols
             return SortByLength(symbols);
         }
 
@@ -441,26 +442,15 @@ namespace Dialogic
             {
                 var result = resolved.ToString();
 
-                if (result.Contains(Ch.OR, Ch.SYMBOL))
+                if (alias != null && result.Contains(Ch.OR, Ch.SYMBOL))
                 {
                     // if we have an alias, but the replacement is not fully resolved
                     // then we keep the alias in the text for later resolution
-                    if (alias != null)
-                    {
-                        //result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
-                        result = text.Replace(name, result);
-                    }
+               
+                    result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
+                    //result = text.Replace(Ch.SYMBOL+name, result);
+               
                 }
-
-                //if (transforms != null)
-                //{
-                //    transforms.ForEach(t =>
-                //    {
-                //        Console.Write("Transform: "+t+"("+result+") -> ");
-                //        result = Methods.Invoke(result, t).ToString();
-                //        Console.WriteLine(result);
-                //    });
-                //}
 
                 return result;
             }
@@ -545,29 +535,6 @@ namespace Dialogic
                 result = globals[text];
             }
             return result;
-        }
-
-        private static MatchCollection GetMatches(string text)
-        {
-            var matches = RE.ParseVars.Matches(text);
-            //Util.ShowMatches(matches);
-            if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
-            {
-                throw new BindException("Unable to parse symbol: " + text);
-            }
-
-            return matches;
-        }
-
-        private static GroupCollection GetGroups(Match match, int expected)
-        {
-            var groups = match.Groups;
-            if (groups.Count != expected)
-            {
-                //Util.ShowMatch(match);
-                throw new ArgumentException("Invalid group count " + groups.Count);
-            }
-            return groups;
         }
 
         private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)

@@ -9,7 +9,7 @@ namespace Dialogic
     /// </summary>
     public static class Resolver
     {
-        public static bool DBUG = false;
+        public static bool DBUG = true;
 
         /// <summary>
         /// Iteratively resolve any variables or groups in the specified text 

@@ -24,75 +24,37 @@ namespace Dialogic
         public void TransformBugs()
         {
             ChatRuntime rt;
-            string res, txt;
+            string res = null, txt;
             Say say;
             Chat chat;
 
-            if (1 == 2)
-            {
-                txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.pluralize()";
-                //var txt = "SET $thing1 = (cat | cat)\nSAY Some $thing1.pluralize()";
-                rt = new ChatRuntime();
-                rt.ParseText(txt);
-                chat = rt.Chats().First();
-                say = (Say)chat.commands[1];
-                chat.Realize(globals);
-                res = say.Text();
-                //Console.WriteLine(res);
-                Assert.That(res, Is.EqualTo("A cat, many cats"));
 
-                // same as above, unbound
-                txt = "SET $thing1 = (cat | crow | ant)\nSAY A ${thing1}, many ${thing1}.pluralize()";
-                rt = new ChatRuntime();
-                rt.ParseText(txt);
-                chat = rt.Chats().First();
-                say = (Say)chat.commands[1];
-                chat.Realize(globals);
-                //Console.WriteLine(say.Text());
-            }
-
-            // throws spurious exception (see ticket)
-            txt = "SET $thing1 = (cat | crow | bluebird)\nA $thing1 $thing2.pluralize()";
+            txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.pluralize()";
             rt = new ChatRuntime();
             rt.ParseText(txt);
             chat = rt.Chats().First();
-            chat.Realize(globals);
             say = (Say)chat.commands[1];
+            chat.Realize(globals);
+            res = say.Text();
+            //Console.WriteLine(res);
+            Assert.That(res, Is.EqualTo("A cat, many cats"));
+
+            // same as above, unbound
+            txt = "SET $thing1 = (cat | crow | ant)\nSAY A ${thing1}, many ${thing1}.pluralize()";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            say = (Say)chat.commands[1];
+            chat.Realize(globals);
+
+            // throws spurious "Max limit: (cat | cat | cat)"
+            txt = "SET $thing1 = (cat | cat | cat)\nSAY A $thing1 $thing1";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            say = (Say)chat.commands[1];
+            chat.Realize(globals);
             Console.WriteLine(say.Text());
-            if (1 == 2)
-            {
-
-
-                // throws spurious exception (see ticket)
-                txt = "SET $thing1 = (cat | crow | bluebird)\nA $thing1 $thing2.pluralize()";
-                rt = new ChatRuntime();
-                rt.ParseText(txt);
-                chat = rt.Chats().First();
-                say = (Say)chat.commands[1];
-                chat.Realize(globals);
-                Console.WriteLine(say.Text());
-
-
-                // should throw exception if globals is null!
-                txt = "SET $thing1 = (cat | crow | ant)\nSAY A ${thing1}, many ${thing1}.pluralize()";
-                rt = new ChatRuntime();
-                rt.ParseText(txt);
-                chat = rt.Chats().First();
-                say = (Say)chat.commands[1];
-                chat.Realize(null);
-                Console.WriteLine(say.Text());
-                Assert.That(res, Is.EqualTo("hello!"));
-
-
-                // throws spurious "Max limit: (cat | cat | cat)"
-                txt = "SET $thing1 = (cat | cat | cat)\nSAY A $thing1 $thing1";
-                rt = new ChatRuntime();
-                rt.ParseText(txt);
-                chat = rt.Chats().First();
-                say = (Say)chat.commands[1];
-                chat.Realize(globals);
-                Console.WriteLine(say.Text());
-            }
         }
 
         [Test]
@@ -111,8 +73,8 @@ namespace Dialogic
         [Test]
         public void SimpleTransforms()
         {
-            var res = Resolver.BindSymbols("$a.pluralize()", null, 
-                new Dictionary<string, object>(){{ "a", "cat" }});
+            var res = Resolver.BindSymbols("$a.pluralize()", null,
+                new Dictionary<string, object>() { { "a", "cat" } });
             Assert.That(res, Is.EqualTo("cats"));
 
             res = Resolver.BindSymbols("$a.articlize().pluralize()", null,
@@ -127,14 +89,14 @@ namespace Dialogic
             string res;
             var c = CreateParentChat("c");
             for (int i = 0; i < 10; i++)
-            {             
+            {
                 res = Resolver.Bind("The almost( | \" dog\" | \" cat\").", c, null);
                 //Console.WriteLine(i+") '"+res+"'");
                 Assert.That(res, Is.EqualTo("The almost.").
                             Or.EqualTo("The almost dog.").
                             Or.EqualTo("The almost cat."));
             }
-       
+
         }
 
         [Test]
@@ -275,7 +237,7 @@ namespace Dialogic
         {
             Assert.That(Methods.InvokeTransform("cat", "pluralize"), Is.EqualTo("cats"));
         }
-            
+
         [Test]
         public void ComplexPlusTransform()
         {
@@ -290,7 +252,7 @@ namespace Dialogic
             {
                 c.Realize(globals);
                 var txt = c.Text();
-                Console.WriteLine(i+") "+txt);break;
+                Console.WriteLine(i + ") " + txt); break;
                 CollectionAssert.Contains(ok, txt);
             }
         }
@@ -372,7 +334,7 @@ namespace Dialogic
 
             Chat c1 = CreateParentChat("c1");
 
-   
+
             s = @"SAY The $animal woke and $prep (ate|ate)";
             s = Resolver.Bind(s, c1, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));

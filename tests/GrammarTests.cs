@@ -42,27 +42,27 @@ namespace Dialogic
             string res;
 
 
-            lines = new[] {
-                "SAY A girl [selected=$fish.name] $selected",
-            };
-            runtime = new ChatRuntime();
-            runtime.ParseText(string.Join("\n", lines));
-            chat = runtime.Chats()[0];
-            Assert.That(chat, Is.Not.Null);
-            chat.Realize(globals);
-            res = chat.commands[0].Text();
-            Assert.That(res, Is.EqualTo("A girl Fred Fred"));
+            //lines = new[] {
+            //    "SAY A girl [selected=$fish.name] $selected",
+            //};
+            //runtime = new ChatRuntime();
+            //runtime.ParseText(string.Join("\n", lines));
+            //chat = runtime.Chats()[0];
+            //Assert.That(chat, Is.Not.Null);
+            //chat.Realize(globals);
+            //res = chat.commands[0].Text();
+            //Assert.That(res, Is.EqualTo("A girl Fred Fred"));
 
-            lines = new[] {
-                "SAY A girl [selected=$fish.name] $selected.ToUpper()",
-            };
-            runtime = new ChatRuntime();
-            runtime.ParseText(string.Join("\n", lines));
-            chat = runtime.Chats()[0];
-            Assert.That(chat, Is.Not.Null);
-            chat.Realize(globals);
-            res = chat.commands[0].Text();
-            Assert.That(res, Is.EqualTo("A girl Fred FRED"));
+            //lines = new[] {
+            //    "SAY A girl [selected=$fish.name] $selected.ToUpper()",
+            //};
+            //runtime = new ChatRuntime();
+            //runtime.ParseText(string.Join("\n", lines));
+            //chat = runtime.Chats()[0];
+            //Assert.That(chat, Is.Not.Null);
+            //chat.Realize(globals);
+            //res = chat.commands[0].Text();
+            //Assert.That(res, Is.EqualTo("A girl Fred FRED"));
 
             lines = new[] {
                 "SAY A girl [selected=$fish.name.ToUpper()] $selected",
@@ -281,7 +281,12 @@ namespace Dialogic
             runtime.ParseText(string.Join("\n", lines));
             chat = runtime.Chats()[0];
             Assert.That(chat, Is.Not.Null);
-            chat.Realize(null);
+            chat.commands[0].Realize(null);
+            Assert.That(chat.scope["hero"], Is.EqualTo("(Jane | Jill)"));
+            chat.commands[1].Realize(null);
+            Assert.That(chat.commands[1].Text(), Is.EqualTo("A girl Jane ").Or.EqualTo("A girl Jill "));
+            Assert.That(chat.scope["selected"], Is.EqualTo("Jane").Or.EqualTo("Jill"));
+            chat.commands[2].Realize(null);
             res = chat.commands[1].Text() + chat.commands[2].Text();
             Assert.That(res, Is.EqualTo("A girl Jane Jane").
                              Or.EqualTo("A girl Jill Jill"));
