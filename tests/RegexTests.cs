@@ -172,74 +172,264 @@ namespace Dialogic
         }
 
         [Test]
+        public void DollarPathVariations()
+        {
+            string text;
+            MatchCollection matches;
+
+            System.Console.WriteLine(RE.ParseVars);
+
+            text = "[alias=${name.prop.articlize()}]";
+            matches = RE.ParseVars.Matches(text);
+            //Util.ShowMatches(matches);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop", "articlize()" }));
+
+            text = "[alias=${name.prop.articlize().pluralize()}]";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop", "articlize()", "pluralize()" }));
+
+            text = "${name.prop.articlize()}";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop","articlize()" }));
+
+            text = "${name.prop.articlize().pluralize()}";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop","articlize()", "pluralize()" }));
+
+            text = "${name.prop}";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop" }));
+
+            // ----------------------------------------------------------
+
+            text = "[alias=$name.prop.articlize()]";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop","articlize()" }));
+
+            text = "[alias=$name.prop.articlize().pluralize()]";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop","articlize()", "pluralize()" }));
+
+            text = "[alias=$name.prop]";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop" }));
+
+            text = "$name.prop.articlize()";
+            matches = RE.ParseVars.Matches(text);
+            //Util.ShowMatches(matches);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop","articlize()" }));
+
+            text = "$name.prop.articlize().pluralize()";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop","articlize()", "pluralize()" }));
+
+            text = "$name.prop";
+            matches = RE.ParseVars.Matches(text);
+            //Util.ShowMatches(matches);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "prop" }));
+        }
+
+        [Test]
         public void DollarVarVariations()
         {
             string text;
             MatchCollection matches;
 
-            text = "[alias=${name}.articlize()]";
+            System.Console.WriteLine(RE.ParseVars);
+
+            text = "[alias=${name.articlize()}]";
             matches = RE.ParseVars.Matches(text);
-
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
-            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("alias"));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("{"));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                        Is.EquivalentTo(new[] { "articlize" }));
+                        Is.EquivalentTo(new[] { "articlize()" }));
 
-            text = "[alias=${name}.articlize().pluralize()]";
-            matches = RE.ParseVars.Matches(text);
-
-            Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
-            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
-            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("alias"));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("{"));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("}"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                        Is.EquivalentTo(new[] { "articlize", "pluralize" }));
-
-            text = "${name}.articlize()";
-            matches = RE.ParseVars.Matches(text);
-
-            Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
-            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
-            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("{"));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("}"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                        Is.EquivalentTo(new[] { "articlize" }));
-
-            text = "${name}.articlize().pluralize()";
-            matches = RE.ParseVars.Matches(text);
-
-            Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
-            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
-            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("{"));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("}"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                        Is.EquivalentTo(new[] { "articlize", "pluralize"  }));
-
-            text = "${name}";
+            text = "[alias=${name.articlize().pluralize()}]";
             matches = RE.ParseVars.Matches(text);
             //Util.ShowMatches(matches);
 
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "articlize()", "pluralize()" }));
+
+            text = "${name.articlize()}";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
             Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("{"));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "articlize()" }));
+
+            text = "${name.articlize().pluralize()}";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
+            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+                        Is.EquivalentTo(new[] { "articlize()", "pluralize()"  }));
+
+            text = "${name}";
+            matches = RE.ParseVars.Matches(text);
+
+            Assert.That(matches.Count, Is.EqualTo(1));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
+            Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("{"));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]), Is.Null);
 
             // ----------------------------------------------------------
@@ -248,38 +438,44 @@ namespace Dialogic
             matches = RE.ParseVars.Matches(text);
 
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
-            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("alias"));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                        Is.EquivalentTo(new[] { "articlize" }));
+                        Is.EquivalentTo(new[] { "articlize()" }));
 
             text = "[alias=$name.articlize().pluralize()]";
             matches = RE.ParseVars.Matches(text);
 
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
-            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("alias"));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                        Is.EquivalentTo(new[] { "articlize","pluralize" }));
+                        Is.EquivalentTo(new[] { "articlize()","pluralize()" }));
 
             text = "[alias=$name]";
             matches = RE.ParseVars.Matches(text);
 
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
-            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("alias"));
-            Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[1].Value, Is.EqualTo("["));
+            Assert.That(matches[0].Groups[2].Value, Is.EqualTo("alias"));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]), Is.Null);
 
             text = "$name.articlize()";
@@ -287,39 +483,45 @@ namespace Dialogic
             //Util.ShowMatches(matches);
 
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
             Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                Is.EquivalentTo(new[] { "articlize" }));
+                Is.EquivalentTo(new[] { "articlize()" }));
 
             text = "$name.articlize().pluralize()";
             matches = RE.ParseVars.Matches(text);
 
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
             Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
-                        Is.EquivalentTo(new[] { "articlize", "pluralize" }));
+                        Is.EquivalentTo(new[] { "articlize()", "pluralize()" }));
 
             text = "$name";
             matches = RE.ParseVars.Matches(text);
             //Util.ShowMatches(matches);
 
             Assert.That(matches.Count, Is.EqualTo(1));
-            Assert.That(matches[0].Groups.Count, Is.EqualTo(6));
+            Assert.That(matches[0].Groups.Count, Is.EqualTo(8));
             Assert.That(matches[0].Groups[0].Value, Is.EqualTo(text));
             Assert.That(matches[0].Groups[1].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[2].Value, Is.EqualTo(""));
-            Assert.That(matches[0].Groups[3].Value, Is.EqualTo("name"));
-            Assert.That(matches[0].Groups[4].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[3].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
+            Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
+            Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
             Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]), Is.Null);
         }
 
@@ -330,7 +532,7 @@ namespace Dialogic
             List<string> vars;
             MatchCollection matches;
 
-            int i=0, symNameIdx = 3; // Note will break if the regex is changed
+            int i=0, symNameIdx = 4; // Note will break if the regex is changed
 
             text = "Hello $name, nice to $verb you $chat1";
             matches = RE.ParseVars.Matches(text);
@@ -432,21 +634,21 @@ namespace Dialogic
             ParseOneVar("$end-phrase.a()", "end-phrase");
             ParseOneVar("(a | $end-phrase.a())", "end-phrase");
             ParseOneVar("Want a $animal.a()?", "animal");
-            ParseOneVar("${a}.a()", "a");
+            ParseOneVar("${a.a()}", "a");
             ParseOneVar("$end-phrase.a()", "end-phrase");
             ParseOneVar("(a | $end-phrase.a())", "end-phrase");
             ParseOneVar("What an $animal.a()!", "animal");
-            ParseOneVar("Want an ${animal}.a()!", "animal");
+            ParseOneVar("Want an ${animal.a()}!", "animal");
             ParseOneVar("\"Want an $animal.a(),\" he asked", "animal");
             ParseOneVar("\"Want an $animal.a()\" he asked", "animal");
             ParseOneVar("It was an $animal.a(); he said", "animal");
         }
 
-        private static void ParseOneVar(string text, string expected, string[] transforms=null, int symbolMatchIndex=3)
+        private static void ParseOneVar(string text, string expected, string[] transforms=null, int symNameIdx=4)
         {
             var matches = RE.ParseVars.Matches(text);
             Assert.That(matches.Count, Is.EqualTo(1), "FAIL: "+text);
-            Assert.That(matches[0].Groups[symbolMatchIndex].Value, Is.EqualTo(expected));
+            Assert.That(matches[0].Groups[symNameIdx].Value, Is.EqualTo(expected));
         }
 
         [Test]

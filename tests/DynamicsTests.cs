@@ -341,7 +341,8 @@ namespace Dialogic
 
             var symbols = Symbol.Parse("A $thing1 $thing2.pluralize()", c1);
             Assert.That(symbols.Count, Is.EqualTo(2));
-            Assert.That(symbols[1].transform, Is.EqualTo("pluralize"));
+            Assert.That(symbols[1].transforms.ToArray(), 
+                Is.EquivalentTo(new[] { "pluralize" }));
             //Console.WriteLine(symbols.Stringify());
         }
 

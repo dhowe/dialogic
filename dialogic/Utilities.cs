@@ -154,8 +154,10 @@ namespace Dialogic
         //internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";
         //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
         //public static Regex ParseVars = new Regex(PV1 + PV2);
-        public static Regex ParseVars = new Regex(@"(?:\[([^=]+)=)?(?:\$(\{?)("+SYM+@")(\}?))(?:\.([^(]+)\(\))*\]?");
-
+        //public static Regex ParseVars = new Regex(@"(?:\[([^=]+)=)?(?:\$(\{?)("+SYM+@")(\}?))(?:\.([^(]+)\(\))*\]?");
+        //public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?(?:\$(\{?)([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*))(?:\.([^(]+)\(\))*(\}?)(\]?)");
+        //public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?(?:\$(\{?)([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*))(?:\.([^(]+)\(\))*(\}?)(\]?)");
+        public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?");
 
         public static Regex SplitOr = new Regex(@"\s*\|\s*");
         public static Regex HasParens = new Regex(@"[\(\)]");
@@ -172,7 +174,7 @@ namespace Dialogic
         internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
         internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
         internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
-	}
+    }
 
     /// <summary>
     /// Static utility functions for Dialogic
@@ -855,7 +857,7 @@ namespace Dialogic
                     if (writer == null) writer = new StringBuilder(input.Length);
                     writer.Append(Util.JavaSubstr(input, st, i - 1));
                     writer.Append(value);
-               
+
                 }
 
                 // skip escape

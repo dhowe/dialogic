@@ -139,7 +139,7 @@ namespace Dialogic
         private static string Info(string text, Chat parent)
         {
             return text + " :: " + (parent == null ? "{}" :
-                parent.text + parent.scope.Stringify());
+                parent.text +  " "+parent.scope.Stringify());
         }
     }
 }

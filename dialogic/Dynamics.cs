@@ -343,23 +343,49 @@ namespace Dialogic
 
     internal class Symbol : IResolvable
     {
-        public string text, alias, name, transform;
+        public string text, alias, name;
+        public List<string> transforms;
         public bool bounded;
         public Chat context;
 
-        private Symbol(Chat context, params string[] parts) :
-            this(context, parts[0], parts[3], parts[1], parts[2])
-        { }
+        //private Symbol(Chat context, params string[] parts) :
+        //    this(context, parts[0], parts[3], parts[1], parts[2])
+        //{ }
 
-        private Symbol(Chat context, string theText, string theSymbol,
-            string alias = null, string typeChar = null)
+        private Symbol(Chat context, Match m) : this(context, m.Groups) { }
+
+        private Symbol(Chat context, GroupCollection parts)
         {
+            if (parts.Count != 8) throw new BindException("Unable to parse");
+
+            this.text = parts[0].Value;
+            this.alias = (parts[1].Value == "[" && parts[7].Value == "]"
+                && !parts[2].Value.IsNullOrEmpty()) ? parts[2].Value : null;
+            this.bounded = (parts[3].Value == "{" && parts[6].Value == "}");
+            this.name = parts[4].Value;
             this.context = context;
-            this.text = theText.Trim();
-            this.name = theSymbol.Trim();
-            this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
-            this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
+            this.transforms = ParseTransforms(parts[5]);
         }
+
+        //private Symbol(Chat context, string theText, 
+        //    string theSymbol, bool bounded = false, string alias = null)
+        //{
+        //    this.context = context;
+        //    this.text = theText.Trim();
+        //    this.name = theSymbol.Trim();
+        //    this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
+        //    this.bounded = bounded;
+        //}
+
+        //private Symbol(Chat context, string theText, string theSymbol,
+        //    string alias = null, string typeChar = null)
+        //{
+        //    this.context = context;
+        //    this.text = theText.Trim();
+        //    this.name = theSymbol.Trim();
+        //    this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
+        //    this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
+        //}
 
         public override string ToString()
         {
@@ -380,11 +406,10 @@ namespace Dialogic
 
             foreach (Match match in matches)
             {
-                GroupCollection groups = GetGroups(match, 5);
+                //GroupCollection groups = GetGroups(match, 8);
 
                 // Create a new Symbol and add it to the result
-                var args = groups.Values().Skip(1).ToArray();
-                symbols.Add(new Symbol(context, args));
+                symbols.Add(new Symbol(context, match));
             }
 
             // OPT: we can sort here to avoid symbols which are substrings of other
@@ -416,11 +441,25 @@ namespace Dialogic
             {
                 var result = resolved.ToString();
 
-                // if we have an alias, but the replacement is not fully resolved
-                // then we keep the alias in the text for later resolution
-                if (alias != null && result.Contains(Ch.OR, Ch.SYMBOL))
+                if (result.Contains(Ch.OR, Ch.SYMBOL))
                 {
-                    result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
+                    // if we have an alias, but the replacement is not fully resolved
+                    // then we keep the alias in the text for later resolution
+                    if (alias != null)
+                    {
+                        //result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
+                        result = text.Replace(name, result);
+                    }
+                }
+
+                if (transforms != null)
+                {
+                    transforms.ForEach(t =>
+                    {
+                        Console.Write("Transform: "+t+"("+result+") -> ");
+                        result = Methods.Invoke(result, t).ToString();
+                        Console.WriteLine(result);
+                    });
                 }
 
                 return result;
@@ -511,7 +550,7 @@ namespace Dialogic
         private static MatchCollection GetMatches(string text)
         {
             var matches = RE.ParseVars.Matches(text);
-            Util.ShowMatches(matches);
+            //Util.ShowMatches(matches);
             if (matches.Count == 0 && text.Contains(Ch.SYMBOL, Ch.LABEL))
             {
                 throw new BindException("Unable to parse symbol: " + text);
@@ -539,12 +578,17 @@ namespace Dialogic
         internal static List<string> ParseTransforms(Group g)
         {
             List<string> transforms = null;
-            if (g.Value.Length > 0)
+            if (!g.Value.IsNullOrEmpty())
             {
-                transforms = new List<string>();
-                for (int i = 0; i < g.Captures.Count; i++)
+                var parts = g.Value.TrimFirst(Ch.SCOPE).Split(Ch.SCOPE);
+
+                if (parts.Length > 0)
                 {
-                    transforms.Add(g.Captures[i].Value);
+                    transforms = new List<string>();
+                    for (int i = 0; i < parts.Length; i++)
+                    {
+                        transforms.Add(parts[i]);
+                    }
                 }
             }
 
