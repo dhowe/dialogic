@@ -177,8 +177,6 @@ namespace Dialogic
             string text;
             MatchCollection matches;
 
-            System.Console.WriteLine(RE.ParseVars);
-
             text = "[alias=${name.prop.articlize()}]";
             matches = RE.ParseVars.Matches(text);
             //Util.ShowMatches(matches);
@@ -355,8 +353,6 @@ namespace Dialogic
         {
             string text;
             MatchCollection matches;
-
-            System.Console.WriteLine(RE.ParseVars);
 
             text = "[alias=${name.articlize()}]";
             matches = RE.ParseVars.Matches(text);

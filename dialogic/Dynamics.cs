@@ -421,9 +421,9 @@ namespace Dialogic
 
         internal string Resolve(IDictionary<string, object> globals)
         {
-            string[] parts = name.Split(Ch.SCOPE);
+            //string[] parts = name.Split(Ch.SCOPE);
 
-            object resolved = ResolveSymbol(parts[0], context, globals);
+            object resolved = ResolveSymbol(name, context, globals);
             switch (this.Type())
             {
                 case SymbolType.SIMPLE:
@@ -433,7 +433,7 @@ namespace Dialogic
 
                 case SymbolType.GLOBAL_SCOPE:
 
-                    resolved = GetViaPath(resolved, parts, globals);
+                    resolved = GetViaPath(resolved, transforms.ToArray(), globals);
                     break;
             }
 
@@ -452,15 +452,15 @@ namespace Dialogic
                     }
                 }
 
-                if (transforms != null)
-                {
-                    transforms.ForEach(t =>
-                    {
-                        Console.Write("Transform: "+t+"("+result+") -> ");
-                        result = Methods.Invoke(result, t).ToString();
-                        Console.WriteLine(result);
-                    });
-                }
+                //if (transforms != null)
+                //{
+                //    transforms.ForEach(t =>
+                //    {
+                //        Console.Write("Transform: "+t+"("+result+") -> ");
+                //        result = Methods.Invoke(result, t).ToString();
+                //        Console.WriteLine(result);
+                //    });
+                //}
 
                 return result;
             }
@@ -474,7 +474,7 @@ namespace Dialogic
             if (start == null) OnBindError(globals);
 
             // Dynamically resolve the object path 
-            for (int i = 1; i < paths.Length; i++)
+            for (int i = 0; i < paths.Length; i++)
             {
                 if (paths[i].EndsWith(Ch.CGROUP))
                 {
@@ -597,7 +597,8 @@ namespace Dialogic
 
         internal SymbolType Type()
         {
-            return this.name.Contains(Ch.SCOPE) ? SymbolType.GLOBAL_SCOPE : SymbolType.SIMPLE;
+            return transforms.IsNullOrEmpty() ? 
+                SymbolType.SIMPLE : SymbolType.GLOBAL_SCOPE;
         }
 
         internal enum SymbolType { SIMPLE, GLOBAL_SCOPE }
