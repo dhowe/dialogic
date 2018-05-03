@@ -74,6 +74,7 @@ namespace Dialogic
                 if (DBUG) Console.WriteLine("    Found: " + symbols.Stringify());
 
                 var symbol = symbols.Pop();
+                if (DBUG) Console.WriteLine("    Pop:    " + symbol);
 
                 var result = symbol.Resolve(globals);
                 if (result != null)

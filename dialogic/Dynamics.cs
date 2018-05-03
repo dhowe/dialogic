@@ -351,10 +351,6 @@ namespace Dialogic
         public bool bounded;
         public Chat context;
 
-        //private Symbol(Chat context, params string[] parts) :
-        //    this(context, parts[0], parts[3], parts[1], parts[2])
-        //{ }
-
         private Symbol(Chat context, Match m) : this(context, m.Groups) { }
 
         private Symbol(Chat context, GroupCollection parts)
@@ -370,30 +366,11 @@ namespace Dialogic
             this.transforms = ParseTransforms(parts[5]);
         }
 
-        //private Symbol(Chat context, string theText, 
-        //    string theSymbol, bool bounded = false, string alias = null)
-        //{
-        //    this.context = context;
-        //    this.text = theText.Trim();
-        //    this.name = theSymbol.Trim();
-        //    this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
-        //    this.bounded = bounded;
-        //}
-
-        //private Symbol(Chat context, string theText, string theSymbol,
-        //    string alias = null, string typeChar = null)
-        //{
-        //    this.context = context;
-        //    this.text = theText.Trim();
-        //    this.name = theSymbol.Trim();
-        //    this.alias = alias.IsNullOrEmpty() ? null : alias.Trim();
-        //    this.bounded = text.Contains(Ch.OBOUND) && text.Contains(Ch.CBOUND);
-        //}
-
         public override string ToString()
         {
             var s = SymbolText();
             if (text != s) s += " text='" + text + "'";
+            if (transforms != null) s += " transforms=" + transforms.Stringify();
             return s += (alias != null ? " alias=" + alias : "");
         }
 
@@ -417,14 +394,20 @@ namespace Dialogic
             // other symbols causing incorrect replacements ($a being replaced
             // in $ant,for example), however should be avoided by using 
             // Regex.Replace instead of String.Replace() in BindSymbols
-            return SortByLength(symbols);
+            //return SortByLength(symbols);
+            symbols.Sort((s1, s2) =>
+            {
+                if (s1.alias != null && s2.alias == null) return 1;
+                if (s1.alias == null && s2.alias != null) return -1;
+                return string.Compare(s1.name, s2.name, StringComparison.Ordinal);
+            });
+
+            return symbols;
         }
 
         internal string Resolve(IDictionary<string, object> globals)
         {
-            //string[] parts = name.Split(Ch.SCOPE);
-
-            object resolved = ResolveSymbol(name, context, globals);
+             object resolved = ResolveSymbol(name, context, globals);
             switch (this.Type())
             {
                 case SymbolType.SIMPLE:
@@ -537,10 +520,29 @@ namespace Dialogic
             return result;
         }
 
-        private static List<Symbol> SortByLength(IEnumerable<Symbol> syms)
-        {
-            return (from s in syms orderby s.name.Length ascending select s).ToList();
-        }
+        //internal static List<Symbol> SortByLength(List<Symbol> syms)
+        //{
+        //    //return (from s in syms orderby s.alias.Length ascending select s).ToList();
+        //    //return (from s in syms orderby s.name.Length ascending select s).ToList();
+        //    syms.Sort((s1, s2) =>
+        //    {
+        //        int val = s1.alias
+        //    }
+        //    );
+        //}
+
+        //public static void Sort(List<Symbol> l)
+        //{
+        //    l.Sort(CompareEntries);
+        //}
+
+        //public static int CompareEntries(Symbol s1, Symbol s2)
+        //{
+        //    if (s1.alias != null && s2.alias == null) return -1;
+        //    if (s1.alias == null && s2.alias != null) return 1;
+        //    return string.Compare(s2.name, s1.name, StringComparison.Ordinal);
+        //}
+
 
         internal static List<string> ParseTransforms(Group g)
         {
@@ -564,7 +566,7 @@ namespace Dialogic
 
         internal SymbolType Type()
         {
-            return transforms.IsNullOrEmpty() ? 
+            return transforms.IsNullOrEmpty() ?
                 SymbolType.SIMPLE : SymbolType.GLOBAL_SCOPE;
         }
 

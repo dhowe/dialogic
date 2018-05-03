@@ -70,18 +70,10 @@ namespace Dialogic
         }
 
         [Test]
-        public void ResolveTraversalWithParameters()
-        {
-            // TODO:
-            //Chat c1 = null;
-        }
-
-        [Test]
         public void ResolveTraversalWithFunctions()
         {
             object result;
             Chat c1 = null;
-
             result = Symbol.Parse("The $fish.Id()", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
@@ -127,6 +119,15 @@ namespace Dialogic
             result = Symbol.Parse("#$fish.Id()", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
+            var symbols = Symbol.Parse("The [aly=$fish.Id()] $aly", c1);
+            Assert.That(symbols.Count, Is.EqualTo(2));
+            result = symbols[1].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+            Assert.That(globals["aly"], Is.EqualTo(9));
+
+            symbols = Symbol.Parse("The $fish.Id() $fish.name", c1);
+            result = symbols[0].Resolve(globals) + symbols[1].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9Fred"));
         }
 
         [Test]
@@ -524,6 +525,34 @@ namespace Dialogic
 
             Properties.Set(fish, "name", "Bill");
             Assert.That(fish.name, Is.EqualTo("Bill"));
+        }
+
+        [Test]
+        public void SymbolSortTest()
+        {
+            var syms = Symbol.Parse("$a $a2", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a2"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+
+            syms = Symbol.Parse("$a $aa $aaa", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aaa"));
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aa"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+
+
+            syms = Symbol.Parse("[b=$a] $aa $aaa", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(2).name, Is.EqualTo("a"));
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aaa"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aa"));
+
+            syms = Symbol.Parse("[b=$a] [cc=$aa] $aaa", null);
+            //Symbol.Sort(syms);
+            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aa"));
+            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a"));
+            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aaa"));
         }
 
         [Test]

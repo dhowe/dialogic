@@ -24,10 +24,9 @@ namespace Dialogic
         public void TransformBugs()
         {
             ChatRuntime rt;
-            string res = null, txt;
+            string txt;
             Say say;
             Chat chat;
-
 
             txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.pluralize()";
             rt = new ChatRuntime();
@@ -35,26 +34,25 @@ namespace Dialogic
             chat = rt.Chats().First();
             say = (Say)chat.commands[1];
             chat.Realize(globals);
-            res = say.Text();
             //Console.WriteLine(res);
-            Assert.That(res, Is.EqualTo("A cat, many cats"));
+            Assert.That(say.Text(), Is.EqualTo("A cat, many cats"));
 
             // same as above, unbound
-            txt = "SET $thing1 = (cat | crow | ant)\nSAY A ${thing1}, many ${thing1}.pluralize()";
+            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=${thing1}], many $save.pluralize()";
             rt = new ChatRuntime();
             rt.ParseText(txt);
             chat = rt.Chats().First();
             say = (Say)chat.commands[1];
             chat.Realize(globals);
+            Assert.That(say.Text(), Is.EqualTo("A cat, many cats").Or.EqualTo("A crow, many crow").Or.EqualTo("A cow, many cows"));
 
-            // throws spurious "Max limit: (cat | cat | cat)"
             txt = "SET $thing1 = (cat | cat | cat)\nSAY A $thing1 $thing1";
             rt = new ChatRuntime();
             rt.ParseText(txt);
             chat = rt.Chats().First();
             say = (Say)chat.commands[1];
             chat.Realize(globals);
-            Console.WriteLine(say.Text());
+            Assert.That(say.Text(), Is.EqualTo("A cat cat"));
         }
 
         [Test]
@@ -252,7 +250,7 @@ namespace Dialogic
             {
                 c.Realize(globals);
                 var txt = c.Text();
-                Console.WriteLine(i + ") " + txt); break;
+                //Console.WriteLine(i + ") " + txt);
                 CollectionAssert.Contains(ok, txt);
             }
         }
