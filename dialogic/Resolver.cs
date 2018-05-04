@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
@@ -68,6 +69,7 @@ namespace Dialogic
         {
             if (DBUG) Console.WriteLine("  Symbols(" + level + "): " + Info(text, context));
 
+            Regex replace = null;
             var symbols = Symbol.Parse(text, context);
             while (symbols.Count > 0)
             {
@@ -79,9 +81,12 @@ namespace Dialogic
                 var result = symbol.Resolve(globals);
                 if (result != null)
                 {
-                    string pretext = text, toReplace = symbol.text;
+                    string pretext = text;  // TODO: OPT (move into Symbol)
+                    replace = new Regex(@"\$"+symbol.text.TrimFirst(Ch.SYMBOL)+ @"(?![A-Za-z_-])");
 
-                    text = text.Replace(symbol.text, result);
+                    text = replace.Replace(text, result);
+                    //Console.WriteLine("'"+pretext + "'.Replace(" + replace + ") -> "+text);
+                    //text = text.Replace(symbol.text, result);
 
                     if (DBUG) Console.WriteLine("      " + symbol.SymbolText() + " -> " + result);
 

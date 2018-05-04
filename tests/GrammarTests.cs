@@ -389,9 +389,9 @@ namespace Dialogic
         {
             var lines = new[] {
                 "CHAT wine1 {noStart=true}",
-                "SET a = $a2",
-                "SET a2 = C",
-                "SAY $a $a2"
+                "SET ant = $antelope",
+                "SET antelope = C",
+                "SAY $ant $antelope"
             };
             ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
             runtime.ParseText(string.Join("\n", lines), false);

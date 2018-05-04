@@ -348,7 +348,37 @@ namespace Dialogic
         }
 
         [Test]
-        public void SingleDollarSymbolResolve()
+        public void SubstringSymbolResolve()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            rt.strictMode = false;
+
+            Assert.That(DoSay(rt, "SAY $ant $antelope"), Is.EqualTo("hello $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant$antelope"), Is.EqualTo("hello$antelope"));
+            Assert.That(DoSay(rt, "SAY $ant. $antelope"), Is.EqualTo("hello. $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant! $antelope"), Is.EqualTo("hello! $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant? $antelope"), Is.EqualTo("hello? $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant, $antelope"), Is.EqualTo("hello, $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant; $antelope"), Is.EqualTo("hello; $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant: $antelope"), Is.EqualTo("hello: $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant $ant-"), Is.EqualTo("hello $ant-"));
+            Assert.That(DoSay(rt, "SAY $ant $ant_"), Is.EqualTo("hello $ant_"));
+        }
+
+        private static string DoSay(ChatRuntime rt, string s)
+        {
+            var globs = new Dictionary<string, object> { { "ant", "hello" } };
+            rt.chats = new Dictionary<string, Chat>();
+            rt.ParseText(s);
+            Say say = (Dialogic.Say)rt.Chats().First().commands.First();
+            say.Realize(globs);
+            s = say.Text();
+            Console.WriteLine(s);
+            return s;
+        }
+
+        [Test]
+        public void SingleSymbolResolve()
         {
             object result;
             Chat c1 = null;
@@ -528,7 +558,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void SymbolSortTest()
+        public void SymbolSortTest() // remove
         {
             var syms = Symbol.Parse("$a $a2", null);
             //Symbol.Sort(syms);
@@ -556,7 +586,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void SingleDollarSymbolParsing()
+        public void SingleSymbolParsing()
         {
             Chat c = CreateParentChat("c");
 

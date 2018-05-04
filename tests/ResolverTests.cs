@@ -70,9 +70,9 @@ namespace Dialogic
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello"));
 
-            //res = Resolver.BindSymbols("$a!", null, new Dictionary<string, object>()
-            //    {{ "a", "hello" }, { "b", "32" }});
-            //Assert.That(res, Is.EqualTo("hello!"));
+            res = Resolver.BindSymbols("$a!", null, new Dictionary<string, object>()
+                {{ "a", "hello" }, { "b", "32" }});
+            Assert.That(res, Is.EqualTo("hello!"));
         }
 
 

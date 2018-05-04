@@ -258,7 +258,7 @@ namespace Dialogic
                         ///else Console.WriteLine("CACHE-HIT: " + choiceKey);
                         results.Add(cache[choiceKey]);
 
-                        // note: this data is not in the cache, so we reset it here
+                        // note: this data is not in the cache key, so we reset it here
                         cache[choiceKey].transform = method;
                         cache[choiceKey].alias = alias;
                     }
@@ -395,12 +395,15 @@ namespace Dialogic
             // in $ant,for example), however should be avoided by using 
             // Regex.Replace instead of String.Replace() in BindSymbols
             //return SortByLength(symbols);
-            symbols.Sort((s1, s2) =>
+            if (1 == 0)
             {
-                if (s1.alias != null && s2.alias == null) return 1;
-                if (s1.alias == null && s2.alias != null) return -1;
-                return string.Compare(s1.name, s2.name, StringComparison.Ordinal);
-            });
+                symbols.Sort((s1, s2) =>
+                {
+                    if (s1.alias != null && s2.alias == null) return 1;
+                    if (s1.alias == null && s2.alias != null) return -1;
+                    return string.Compare(s1.name, s2.name, StringComparison.Ordinal);
+                });
+            }
 
             return symbols;
         }
