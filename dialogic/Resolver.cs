@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
     /// <summary>
-    /// Handles resolution of variables, probabilistic groups, and grammar rules
+    /// Handles resolution of symbols, probabilistic groups, transforms, and grammar production
     /// </summary>
     public static class Resolver
     {
@@ -76,14 +77,15 @@ namespace Dialogic
                 var symbol = symbols.Pop();
                 if (DBUG) Console.WriteLine("    Pop:    " + symbol);
 
+                string pretext = text; 
+
                 var result = symbol.Resolve(globals);
+
+                if (DBUG) Console.WriteLine("      "+ symbol.Name() + " -> " + result);
+                
                 if (result != null)
                 {
-                    string pretext = text, toReplace = symbol.text;
-
-                    text = text.Replace(symbol.text, result);
-
-                    if (DBUG) Console.WriteLine("      " + symbol.SymbolText() + " -> " + result);
+                    text = symbol.Replace(text, result);
 
                     if (pretext != text && text.Contains(Ch.SYMBOL))
                     {
@@ -122,9 +124,11 @@ namespace Dialogic
 
                 foreach (var choice in choices)
                 {
-                    var pick = choice.Resolve(); // handles transforms
-                    if (DBUG) Console.WriteLine("      " + choice + " -> " + pick);
-                    text = text.ReplaceFirst(choice.Text(), pick);
+                    var result = choice.Resolve(); // handles transforms
+                    if (DBUG) Console.WriteLine("      " + choice + " -> " + result);
+                    //text = text.ReplaceFirst(choice.Text(), result);
+                    if (result != null)
+                        text = choice.Replace(text, result);
                 }
             }
 

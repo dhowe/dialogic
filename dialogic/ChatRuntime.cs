@@ -87,16 +87,8 @@ namespace Dialogic
 
         public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
         {
-            this.parser = new ChatParser(this);
-            this.scheduler = new ChatScheduler(this);
-            this.appEvents = new AppEventHandler(this);
-            this.chatEvents = new ChatEventHandler(this);
-            this.chats = new Dictionary<string, Chat>();
-            this.choiceCache = new Dictionary<string, Choice>();
+            this.Reset(theChats);
             this.actors = InitActors(theActors);
-            this.search = new FuzzySearch();
-
-            if (!theChats.IsNullOrEmpty()) AppendChats(theChats);
         }
 
         /// <summary>
@@ -113,6 +105,22 @@ namespace Dialogic
         public bool ContainsKey(string chatName) // convenience check for indexer
         {
             return this.chats.ContainsKey(chatName);
+        }
+
+        /// <summary>
+        /// Clear all chats and resets all runtime state
+        /// </summary>
+        public void Reset(List<Chat> theChats = null)
+        {
+            this.parser = new ChatParser(this);
+            this.scheduler = new ChatScheduler(this);
+            this.appEvents = new AppEventHandler(this);
+            this.chatEvents = new ChatEventHandler(this);
+            this.chats = new Dictionary<string, Chat>();
+            this.choiceCache = new Dictionary<string, Choice>();
+            this.search = new FuzzySearch();
+
+            if (!theChats.IsNullOrEmpty()) AppendChats(theChats);
         }
 
         /// <summary>

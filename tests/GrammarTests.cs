@@ -74,7 +74,7 @@ namespace Dialogic
             Chat chat;
             string res;
             lines = new[] {
-                "SAY A girl [select2=$fish.name] $select2.ToUpper()",
+                "SAY A girl [select=$fish.name] $select.ToUpper()",
             };
             runtime = new ChatRuntime();
             runtime.ParseText(string.Join("\n", lines));
@@ -269,10 +269,11 @@ namespace Dialogic
             runtime.ParseText(string.Join("\n", lines));
             chat = runtime.Chats()[0];
             Assert.That(chat, Is.Not.Null);
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 15; i++)
             {
                 chat.Realize(null);
                 res = chat.commands[1].Text();
+                //Console.WriteLine(i+") "+res);
                 Assert.That(res, Is.Not.EqualTo(last));
                 Assert.That(res, Is.EqualTo("She was an artist.").
                                  Or.EqualTo("She was an animal.").
@@ -389,9 +390,9 @@ namespace Dialogic
         {
             var lines = new[] {
                 "CHAT wine1 {noStart=true}",
-                "SET a = $a2",
-                "SET a2 = C",
-                "SAY $a $a2"
+                "SET ant = $antelope",
+                "SET antelope = C",
+                "SAY $ant $antelope"
             };
             ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
             runtime.ParseText(string.Join("\n", lines), false);

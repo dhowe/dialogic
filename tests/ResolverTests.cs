@@ -70,22 +70,30 @@ namespace Dialogic
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello"));
 
-            //res = Resolver.BindSymbols("$a!", null, new Dictionary<string, object>()
-            //    {{ "a", "hello" }, { "b", "32" }});
-            //Assert.That(res, Is.EqualTo("hello!"));
+            res = Resolver.BindSymbols("$a!", null, new Dictionary<string, object>()
+                {{ "a", "hello" }, { "b", "32" }});
+            Assert.That(res, Is.EqualTo("hello!"));
         }
 
 
         [Test]
         public void SimpleTransforms()
         {
-            var res = Resolver.BindSymbols("$a.pluralize()", null,
+            var c = CreateParentChat("c");
+
+            var res = Resolver.BindSymbols("$a.pluralize()", c,
                 new Dictionary<string, object>() { { "a", "cat" } });
             Assert.That(res, Is.EqualTo("cats"));
 
-            res = Resolver.BindSymbols("$a.articlize().pluralize()", null,
+            res = Resolver.BindSymbols("$a.pluralize().articlize()", c,
                 new Dictionary<string, object>() { { "a", "ant" } });
             Assert.That(res, Is.EqualTo("an ants"));
+
+            res = Resolver.BindGroups("(cat | cat).pluralize()", c);
+            Assert.That(res, Is.EqualTo("cats"));
+
+            res = Resolver.BindGroups("(cat | cat).pluralize().articlize()", c);
+            Assert.That(res, Is.EqualTo("a cats"));
         }
 
 
@@ -102,7 +110,6 @@ namespace Dialogic
                             Or.EqualTo("The almost dog.").
                             Or.EqualTo("The almost cat."));
             }
-
         }
 
         [Test]
@@ -337,7 +344,6 @@ namespace Dialogic
         public void ReplaceVarsGroups()
         {
             string s;
-
             Chat c1 = CreateParentChat("c1");
 
 
@@ -360,17 +366,17 @@ namespace Dialogic
                     Is.EqualTo("letter a").Or.EqualTo("letter b"));
             }
 
+            //Resolver.DBUG = true;
+
             var txt2 = "letter $cmplx";
             var ok = new string[] { "letter a", "letter b", "letter then" };
-            string[] res = new string[10];
-            for (int i = 0; i < res.Length; i++)
+
+            for (int i = 0; i < 10; i++)
             {
-                res[i] = Resolver.Bind(txt2, c1, globals);
+                var res = Resolver.Bind(txt2, c1, globals);
+                CollectionAssert.Contains(ok, res);
             }
-            for (int i = 0; i < res.Length; i++)
-            {
-                CollectionAssert.Contains(ok, res[i]);
-            }
+
         }
 
         [Test]

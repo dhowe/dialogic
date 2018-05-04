@@ -145,11 +145,14 @@ namespace Dialogic
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
-        internal const string MP0 = @"(?:\[([^=()]+)=)?";
-        internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
-        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
-        internal const string MP3 = @"(?:\.(" + SYM + @")\(\))?";
-        public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
+        //internal const string MP0 = @"(?:\[([^=()]+)=)?";
+        //internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
+        //internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
+        //internal const string MP3 = @"(?:\.(" + SYM + @")\(\))*\]?";
+        //public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
+
+        public static Regex MatchParens = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?");
+
 
         //internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";
         //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";

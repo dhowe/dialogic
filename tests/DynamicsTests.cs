@@ -120,8 +120,10 @@ namespace Dialogic
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
             var symbols = Symbol.Parse("The [aly=$fish.Id()] $aly", c1);
+            //Console.WriteLine(symbols.Stringify());
             Assert.That(symbols.Count, Is.EqualTo(2));
-            result = symbols[1].Resolve(globals);
+            result = symbols[0].Resolve(globals);
+            //Console.WriteLine("result="+result);
             Assert.That(result.ToString(), Is.EqualTo("9"));
             Assert.That(globals["aly"], Is.EqualTo(9));
 
@@ -348,7 +350,39 @@ namespace Dialogic
         }
 
         [Test]
-        public void SingleDollarSymbolResolve()
+        public void SubstringSymbolResolve()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            rt.strictMode = false;
+
+            ChatRuntime.SILENT = true;
+            Assert.That(DoSay(rt, "SAY $ant $antelope"), Is.EqualTo("hello $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant$antelope"), Is.EqualTo("hello$antelope"));
+            Assert.That(DoSay(rt, "SAY $ant. $antelope"), Is.EqualTo("hello. $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant! $antelope"), Is.EqualTo("hello! $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant? $antelope"), Is.EqualTo("hello? $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant, $antelope"), Is.EqualTo("hello, $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant; $antelope"), Is.EqualTo("hello; $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant: $antelope"), Is.EqualTo("hello: $antelope"));
+            Assert.That(DoSay(rt, "SAY $ant $ant-"), Is.EqualTo("hello $ant-"));
+            Assert.That(DoSay(rt, "SAY $ant $ant_"), Is.EqualTo("hello $ant_"));
+            ChatRuntime.SILENT = false;
+        }
+
+        private static string DoSay(ChatRuntime rt, string s)
+        {
+            var globs = new Dictionary<string, object> { { "ant", "hello" } };
+            rt.chats = new Dictionary<string, Chat>();
+            rt.ParseText(s);
+            Say say = (Dialogic.Say)rt.Chats().First().commands.First();
+            say.Realize(globs);
+            s = say.Text();
+            //Console.WriteLine(s);
+            return s;
+        }
+
+        [Test]
+        public void SingleSymbolResolve()
         {
             object result;
             Chat c1 = null;
@@ -527,36 +561,36 @@ namespace Dialogic
             Assert.That(fish.name, Is.EqualTo("Bill"));
         }
 
+        //[Test]
+        //public void SymbolSortTest() // remove
+        //{
+        //    var syms = Symbol.Parse("$a $a2", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("a2"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+
+        //    syms = Symbol.Parse("$a $aa $aaa", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(2).name, Is.EqualTo("aaa"));
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("aa"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+
+
+        //    syms = Symbol.Parse("[b=$a] $aa $aaa", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(2).name, Is.EqualTo("a"));
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("aaa"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("aa"));
+
+        //    syms = Symbol.Parse("[b=$a] [cc=$aa] $aaa", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(2).name, Is.EqualTo("aa"));
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("a"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("aaa"));
+        //}
+
         [Test]
-        public void SymbolSortTest()
-        {
-            var syms = Symbol.Parse("$a $a2", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a2"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
-
-            syms = Symbol.Parse("$a $aa $aaa", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aaa"));
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aa"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
-
-
-            syms = Symbol.Parse("[b=$a] $aa $aaa", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(2).name, Is.EqualTo("a"));
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aaa"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aa"));
-
-            syms = Symbol.Parse("[b=$a] [cc=$aa] $aaa", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aa"));
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aaa"));
-        }
-
-        [Test]
-        public void SingleDollarSymbolParsing()
+        public void SingleSymbolParsing()
         {
             Chat c = CreateParentChat("c");
 
@@ -726,6 +760,7 @@ namespace Dialogic
             ChatRuntime rt;
             string s;
 
+            //Resolver.DBUG = true;
             (rt = new ChatRuntime()).ParseText("CHAT c1\n(a | (b | c))", true);
             rt["c1"].Realize(null);
             s = rt["c1"].commands[0].Text();
@@ -745,51 +780,195 @@ namespace Dialogic
             s = rt["c3"].commands[0].Text();
             Assert.That(s, Is.EqualTo("a a").Or.EqualTo("b b").Or.EqualTo("c c"));
         }
+
+        [Test]
+        public void ParseChoices()
+        {
+            Chat c = CreateParentChat("c");
+            List<Choice> choices;
+            Choice choice;
+
+            choices = Choice.Parse("you (a | b | c) a", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(a | b | c)"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b", "c" }));
+
+
+            choices = Choice.Parse("you (a | (b | c)) a", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(b | c)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "b", "c" }));
+
+            choices = Choice.Parse("you (then | (a | b))", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(a | b)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
+
+            choices = Choice.Parse("you ((a | b) | then) a", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(a | b)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
+        }
             
         [Test]
-        public void SingleGroupResolve()
+        public void GroupParseAndResolve()
         {
             Chat c = CreateParentChat("c");
 
-            Choice choices;
+            Choice choice;
             string[] expected;
 
-            choices = Choice.Parse("you (a | b) a ",c)[0];
+            choice = Choice.Parse("you (a | b) a ",c,false)[0];
             expected = new[] { "a", "b" };
-            Assert.That(choices.Text(), Is.EqualTo("(a | b)"));
-            Assert.That(choices.options.Count, Is.EqualTo(2));
-            Assert.That(choices.options, Is.EqualTo(expected));
-            CollectionAssert.Contains(expected, choices.Resolve());
+            Assert.That(choice.Text(), Is.EqualTo("(a | b)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(expected, choice.Resolve());
 
-            choices = Choice.Parse("you (a|b) are",c)[0];
+            //Resolver.DBUG = true;
+            choice = Choice.Parse("you (a | b).ToUpper() a ", c, false)[0];
             expected = new[] { "a", "b" };
-            Assert.That(choices.Text(), Is.EqualTo("(a|b)"));
-            Assert.That(choices.options.Count, Is.EqualTo(2));
-            Assert.That(choices.options, Is.EqualTo(expected));
-            CollectionAssert.Contains(expected, choices.Resolve());
+            Assert.That(choice.Text(), Is.EqualTo("(a | b).ToUpper()"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(new[] { "A", "B" }, choice.Resolve());
 
-            choices = Choice.Parse("you (a | b |c). are",c)[0];
-            expected = new[] { "a", "b", "c" };
-            Assert.That(choices.Text(), Is.EqualTo("(a | b |c)"));
-            Assert.That(choices.options.Count, Is.EqualTo(3));
-            Assert.That(choices.options, Is.EqualTo(expected));
-            CollectionAssert.Contains(expected, choices.Resolve());
+            choice = Choice.Parse("you (a|b) are",c)[0];
+            expected = new[] { "a", "b" };
+            Assert.That(choice.Text(), Is.EqualTo("(a|b)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(expected, choice.Resolve());
 
-            choices = Choice.Parse("you [d=(a | b | c)]. The",c)[0];
-            expected = new[] { "a", "b", "c" };
-            Assert.That(choices.Text(), Is.EqualTo("[d=(a | b | c)]"));
-            Assert.That(choices.options.Count, Is.EqualTo(3));
-            Assert.That(choices.alias, Is.EqualTo("d"));
-            Assert.That(choices.options, Is.EqualTo(expected));
-            CollectionAssert.Contains(expected, choices.Resolve());
+            //Resolver.DBUG = true;
+            choice = Choice.Parse("you (a|b).ToUpper() are", c)[0];
+            expected = new[] { "a", "b" };
+            Assert.That(choice.Text(), Is.EqualTo("(a|b).ToUpper()"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            Assert.That(choice.transforms.ToArray(), Is.EquivalentTo(new[] { "ToUpper" }));
+            CollectionAssert.Contains(new[] { "A", "B" }, choice.Resolve());
 
-            choices = Choice.Parse("you [selected=(a | b | c)]. The",c)[0];
+            //Resolver.DBUG = true;
+            choice = Choice.Parse("you (a|b).ToUpper().articlize() are", c)[0];
+            expected = new[] { "a", "b" };
+            Assert.That(choice.Text(), Is.EqualTo("(a|b).ToUpper().articlize()"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            Assert.That(choice.transforms.ToArray(), Is.EquivalentTo(new[] { "ToUpper", "articlize" }));
+            CollectionAssert.Contains(new[] { "an A", "a B" }, choice.Resolve());
+
+            choice = Choice.Parse("you (a | b |c). are",c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choices.Text(), Is.EqualTo("[selected=(a | b | c)]"));
-            Assert.That(choices.options.Count, Is.EqualTo(3));
-            Assert.That(choices.alias, Is.EqualTo("selected"));
-            Assert.That(choices.options, Is.EqualTo(expected));
-            CollectionAssert.Contains(expected, choices.Resolve());
+            Assert.That(choice.Text(), Is.EqualTo("(a | b |c)"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(expected, choice.Resolve());
+
+            //Resolver.DBUG = true;
+            choice = Choice.Parse("you (a | b |c).ToUpper(). are", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("(a | b |c).ToUpper()"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(new[] { "A", "B","C" }, choice.Resolve());
+
+            choice = Choice.Parse("you (a | b |c).ToUpper().articlize(). are", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("(a | b |c).ToUpper().articlize()"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(new[] { "an A", "a B", "a C" }, choice.Resolve());
+
+            choice = Choice.Parse("you [d=(a | b | c)]. The",c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c)]"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.alias, Is.EqualTo("d"));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(expected, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("d"), Is.True);
+            c.scope.Remove("d");
+
+            //Resolver.DBUG = true;
+            choice = Choice.Parse("you [d=(a | b | c).ToUpper()]. The", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c).ToUpper()]"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.alias, Is.EqualTo("d"));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(new[] { "A", "B", "C" }, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("d"), Is.True);
+            c.scope.Remove("d");
+
+            choice = Choice.Parse("you [d=(a | b | c).ToUpper().articlize()]. The", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c).ToUpper().articlize()]"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.alias, Is.EqualTo("d"));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(new[] { "an A", "a B", "a C"}, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("d"), Is.True);
+            c.scope.Remove("d");
+
+            choice = Choice.Parse("you [d=(a | b | c)].ToUpper(). The", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c)].ToUpper()"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            Assert.That(choice.alias, Is.EqualTo("d"));
+            CollectionAssert.Contains(new[] { "A", "B", "C" }, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("d"), Is.True);
+            c.scope.Remove("d");
+
+            choice = Choice.Parse("you [d=(a | b | c)].ToUpper().articlize(). The", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c)].ToUpper().articlize()"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            Assert.That(choice.alias, Is.EqualTo("d"));
+            CollectionAssert.Contains(new[] { "an A", "a B", "a C"}, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("d"), Is.True);
+            c.scope.Remove("d");
+
+            choice = Choice.Parse("you [selected=(a | b | c)]. The",c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[selected=(a | b | c)]"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.alias, Is.EqualTo("selected"));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(expected, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("selected"), Is.True);
+            c.scope.Remove("selected");
+
+            //Resolver.DBUG = true;
+            choice = Choice.Parse("you [selected=(a | b | c).ToUpper()]. The", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[selected=(a | b | c).ToUpper()]"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.alias, Is.EqualTo("selected"));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(new[] { "A", "B", "C" }, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("selected"), Is.True);
+            c.scope.Remove("selected");
+
+            choice = Choice.Parse("you [selected=(a | b | c).ToUpper().articlize()]. The", c)[0];
+            expected = new[] { "a", "b", "c" };
+            Assert.That(choice.Text(), Is.EqualTo("[selected=(a | b | c).ToUpper().articlize()]"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.alias, Is.EqualTo("selected"));
+            Assert.That(choice.options, Is.EqualTo(expected));
+            CollectionAssert.Contains(new[] { "an A", "a B", "a C"}, choice.Resolve());
+            Assert.That(c.scope.ContainsKey("selected"), Is.True);
+            c.scope.Remove("selected");
         }
     }
 }
