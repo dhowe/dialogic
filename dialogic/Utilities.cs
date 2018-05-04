@@ -131,6 +131,7 @@ namespace Dialogic
         internal const char OBOUND = '{';
         internal const char CBOUND = '}';
         internal const char LABEL = '#';
+        internal const char NOT = '!';
         internal const char EQ = '=';
         internal const char OR = '|';
     }
@@ -145,11 +146,14 @@ namespace Dialogic
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
-        internal const string MP0 = @"(?:\[([^=()]+)=)?";
-        internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
-        internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
-        internal const string MP3 = @"(?:\.(" + SYM + @")\(\))?";
-        public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
+        //internal const string MP0 = @"(?:\[([^=()]+)=)?";
+        //internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
+        //internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
+        //internal const string MP3 = @"(?:\.(" + SYM + @")\(\))*\]?";
+        //public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
+
+        public static Regex MatchParens = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?");
+
 
         //internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";
         //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
@@ -632,12 +636,29 @@ namespace Dialogic
     /// </summary>
     public class Constraint
     {
-        public static char TypeSetChar = '!';
-
         public readonly string name;
         public readonly Operator op;
         public ConstraintType type;
         public string value;
+
+        public Constraint(string key, string val,
+            ConstraintType type = ConstraintType.Soft) :
+            this(Operator.EQ, key, val, type)
+        { }
+
+        public Constraint(Operator op, string key, string val,
+            ConstraintType type = ConstraintType.Soft)
+        {
+            this.type = type;
+            this.value = val;
+            this.name = key;
+            this.op = op;
+
+            if (val.Contains(Ch.OR) && op != Operator.RE)
+            {
+                throw new ParseException("Regex operator (*=) expected with |");
+            }
+        }
 
         public static IDictionary<string, object> AsDict(params Constraint[] c)
         {
@@ -649,34 +670,23 @@ namespace Dialogic
             return dict;
         }
 
-        public Constraint(string key, string val, ConstraintType type = ConstraintType.Soft) :
-            this(Operator.EQ, key, val, type)
-        { }
-
-        public Constraint(Operator op, string key, string val, ConstraintType type = ConstraintType.Soft)
-        {
-            this.type = type;
-            this.value = val;
-            this.name = key;
-            this.op = op;
-
-            if (val.Contains("|") && op != Operator.RE)
-            {
-                throw new ParseException("Regex operator (*=) expected with |");
-            }
-        }
-
-        public bool Check(string check, IDictionary<string, object> globals = null)
+        public bool Check(Resolver resolver, string check, IDictionary<string, object> globals = null)
         {
             string rval = value;
+
             if (globals != null)
             {
-                if (check.Contains(Ch.SYMBOL)) check = Resolver.BindSymbols(check, null, globals);
-                if (value.Contains(Ch.SYMBOL)) rval = Resolver.BindSymbols(value, null, globals);
+                if (check.Contains(Ch.SYMBOL))
+                {
+                    check = resolver.BindSymbols(check, null, globals);
+                }
+                if (value.Contains(Ch.SYMBOL))
+                {
+                    rval = resolver.BindSymbols(value, null, globals);
+                }
             }
-            var passed = op.Invoke(check, rval);
-            //Console.WriteLine(check+" "+op+" "+ value + " -> "+passed);
-            return passed;
+
+            return op.Invoke(check, rval);
         }
 
         public override string ToString()
@@ -688,14 +698,9 @@ namespace Dialogic
         {
             switch (type)
             {
-                case ConstraintType.Hard:
-                    return TypeSetChar.ToString();
-
-                case ConstraintType.Absolute:
-                    return TypeSetChar.ToString() + TypeSetChar;
-
-                default:
-                    return String.Empty;
+                case ConstraintType.Hard: return Ch.NOT.ToString();
+                case ConstraintType.Absolute: return Ch.NOT.ToString() + Ch.NOT;
+                default: return String.Empty;
             }
         }
 

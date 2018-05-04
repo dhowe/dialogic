@@ -197,15 +197,15 @@ namespace Dialogic
 
             if (cmd is Ask)
             {
-                Opt opt;
                 Ask ask = (Dialogic.Ask)cmd;
                 for (int i = 0; i < options.Length; i++)
                 {
                     var parts = options[i].Split(OPT_DELIM);
                     if (parts.Length != 2) throw new DialogicException
                         ("Bad option:" + options[i]);
-                    ask.AddOption(opt = new Opt());
+                    Opt opt = new Opt();
                     opt.Init(parts[0], Ch.LABEL + parts[1], null);
+                    ask.AddOption(opt);
                 }
             }
             return cmd;

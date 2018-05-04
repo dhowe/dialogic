@@ -5,18 +5,8 @@ using System;
 namespace Dialogic
 {
     [TestFixture]
-    public class DialogicTests
+    public class DialogicTests : GenericTests
     {
-        const bool NO_VALIDATORS = true;
-
-        static IDictionary<string, object> globals
-            = new Dictionary<string, object>
-        {
-            { "animal", "dog" },
-            { "group", "(a|b)" },
-            { "count", 4 },
-        };
-
         [Test]
         public void ImmediateWithDynamicGo()
         {

@@ -28,13 +28,22 @@ namespace Dialogic
         {
             this.delay = 0;
             this.id = ++IDGEN;
-            this.realized = new Dictionary<string, object>();
+            this.resolved = new Dictionary<string, object>();
+        }
+
+        protected Resolver Resolver()
+        {
+            if (parent == null || parent.runtime == null)
+            {
+                throw new Exception("Null parent/context: " + this);
+            }
+            return this.parent.runtime.resolver;
         }
 
         public override bool Equals(object obj)
         {
             var c = (Command)obj;
-            return c.text == text && c.actor == actor && c.MetaStr() == 
+            return c.text == text && c.actor == actor && c.MetaStr() ==
                 MetaStr() && Util.FloatingEquals(c.delay, delay);
         }
 
@@ -97,17 +106,17 @@ namespace Dialogic
         }
 
         /// <summary>
-        ///  Returns realized text for this object, equivalent to this.Realized(Meta.TEXT);
+        ///  Returns realized text for this object, equivalent to this.Resolved(Meta.TEXT);
         /// </summary>
         /// <returns>The text.</returns>
         public virtual string Text()
         {
-            if (!realized.ContainsKey(Meta.TEXT))
+            if (!resolved.ContainsKey(Meta.TEXT))
             {
-                throw new DialogicException("Text() called on unrealized"
-                    + " Command: " + this + "\nCall Realize() first");
+                throw new DialogicException("Text() called on unresolved"
+                    + " Command: " + this + "\nCall Resolve() first");
             }
-            return (string)realized[Meta.TEXT];
+            return (string)resolved[Meta.TEXT];
         }
 
         /// <summary>
@@ -143,10 +152,10 @@ namespace Dialogic
             return this.GetType().Name;
         }
 
-        protected internal virtual IDictionary<string, object> Realize
+        protected internal virtual IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
-            realized.Clear();
+            resolved.Clear();
 
             RealizeMeta(globals);
 
@@ -155,14 +164,14 @@ namespace Dialogic
                 if (parent == null) throw new DialogicException
                     ("Null Chat parent for: " + this);
 
-                realized[Meta.TEXT] = Resolver.Bind(text, parent, globals);
-                realized[Meta.TYPE] = TypeName();
+                resolved[Meta.TEXT] = Resolver().Bind(text, parent, globals);
+                resolved[Meta.TYPE] = TypeName();
                 if (this is IAssignable && actor != null)
                 {
-                    realized[Meta.ACTOR] = GetActor().Name();
+                    resolved[Meta.ACTOR] = GetActor().Name();
                 }
             }
-            return realized;
+            return resolved;
         }
 
         protected virtual void RealizeMeta(IDictionary<string, object> globals)
@@ -176,7 +185,7 @@ namespace Dialogic
                     if (val is string)
                     {
                         // Q: should we resolve on parent for meta ?
-                        val = Resolver.Bind((string)val, parent, globals);
+                        val = Resolver().Bind((string)val, parent, globals);
                     }
                     else if (!(val is Constraint)) // don't replace constraints
                     {
@@ -184,7 +193,7 @@ namespace Dialogic
                             + val.GetType() + " -> " + val);
                     }
 
-                    realized[pair.Key] = val;
+                    resolved[pair.Key] = val;
                 }
             }
         }
@@ -311,10 +320,10 @@ namespace Dialogic
             this.value = match.Groups[3].Value.Trim();
             this.op = Assignment.FromString(match.Groups[2].Value.Trim());
 
-            this.realized = null; // not relevant for Set
+            this.resolved = null; // not relevant for Set
         }
 
-        protected internal override IDictionary<string, object> Realize
+        protected internal override IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
             if (text.Contains(Ch.SCOPE)) // scoped
@@ -370,7 +379,7 @@ namespace Dialogic
                 }
             }
 
-            return realized; // nothing to return here
+            return resolved; // nothing to return here
         }
 
         internal static bool SetPathValue(object parent, string[] paths, object val,
@@ -486,18 +495,18 @@ namespace Dialogic
         }
 
         // Call Realize() on text and options, then add both to realized
-        protected internal override IDictionary<string, object> Realize
+        protected internal override IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
-            realized.Clear();
+            resolved.Clear();
 
-            base.Realize(globals);
+            base.Resolve(globals);
 
-            Options().ForEach(o => o.Realize(globals));
-            realized[Meta.TIMEOUT] = timeout.ToString();
-            realized[Meta.OPTS] = JoinOptions();
+            Options().ForEach(o => o.Resolve(globals));
+            resolved[Meta.TIMEOUT] = timeout.ToString();
+            resolved[Meta.OPTS] = JoinOptions();
 
-            return realized;
+            return resolved;
         }
 
         public override string ToString()
@@ -548,7 +557,7 @@ namespace Dialogic
         public override string ToString()
         {
             return TypeName().ToUpper() + " " + text + (action is NoOp ?
-                String.Empty : " " + Ch.LABEL + action.text.TrimFirst(Ch.LABEL));
+                "" : " " + Ch.LABEL + action.text.TrimFirst(Ch.LABEL));
         }
     }
 
@@ -570,7 +579,7 @@ namespace Dialogic
             if (meta != null) // need to clear both here
             {
                 meta.Clear();
-                realized.Clear();
+                resolved.Clear();
             }
 
             Init(null, null, metadata.Trim().TrimEnds('{', '}').Split(','));
@@ -586,20 +595,18 @@ namespace Dialogic
             ParseMeta(metas);
         }
 
-        protected internal override IDictionary<string, object> Realize
+        protected internal override IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
-            realized.Clear();
+            resolved.Clear();
             RealizeMeta(globals); // only realize meta
 
-            return realized;
+            return resolved;
         }
 
         ///  All Find commands must have a 'staleness' value
         protected internal override Command Validate()
         {
-            //Console.WriteLine("Find.Validate: "+this);
-
             SetMeta(new Constraint(Operator.LT, Meta.STALENESS,
                     Defaults.FIND_STALENESS.ToString()), true);
 
@@ -641,10 +648,10 @@ namespace Dialogic
                 string key = match.Groups[1].Value;
                 ConstraintType ctype = ConstraintType.Soft;
 
-                if (Util.TrimFirst(ref key, Constraint.TypeSetChar))
+                if (Util.TrimFirst(ref key, Ch.NOT))
                 {
                     ctype = ConstraintType.Hard;
-                    if (Util.TrimFirst(ref key, '!'))
+                    if (Util.TrimFirst(ref key, Ch.NOT))
                     {
                         ctype = ConstraintType.Absolute;
                     }
@@ -690,15 +697,14 @@ namespace Dialogic
                 ("GO does not accept metadata");
         }
 
-        protected internal override IDictionary<string, object> Realize
+        protected internal override IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
-            realized.Clear();
-            //RealizeMeta(globals); // no meta
-            realized[Meta.TYPE] = TypeName();
-            realized[Meta.TEXT] = Resolver.BindGroups(text, parent);
+            resolved.Clear(); // no need to resolve meta here
+            resolved[Meta.TYPE] = TypeName();
+            resolved[Meta.TEXT] = Resolver().BindGroups(text, parent);
 
-            return realized;
+            return resolved;
         }
 
         protected internal override Command Validate()
@@ -736,7 +742,7 @@ namespace Dialogic
         public const string RESUME_AFTER_INT = "resumeAfterInt";
 
         protected internal IDictionary<string, object> meta;
-        protected IDictionary<string, object> realized;
+        protected IDictionary<string, object> resolved;
 
         protected internal virtual bool HasMeta()
         {
@@ -753,14 +759,14 @@ namespace Dialogic
             return meta != null && meta.ContainsKey(key) ? meta[key] : defaultVal;
         }
 
-        protected internal object Realized(string key, object defaultVal = null)
+        protected internal object Resolved(string key, object defaultVal = null)
         {
-            return realized.ContainsKey(key) ? realized[key] : defaultVal;
+            return resolved.ContainsKey(key) ? resolved[key] : defaultVal;
         }
 
-        public IDictionary<string, object> Realized()
+        public IDictionary<string, object> Resolved()
         {
-            return realized;
+            return resolved;
         }
 
         protected internal void SetMeta
@@ -793,7 +799,6 @@ namespace Dialogic
         {
             for (int i = 0; pairs != null && i < pairs.Length; i++)
             {
-                //Console.WriteLine(i+") "+pairs[i]);
                 if (!string.IsNullOrEmpty(pairs[i]))
                 {
                     string[] parts = pairs[i].Split('=');

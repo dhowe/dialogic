@@ -6,39 +6,22 @@ using System.Linq;
 namespace Dialogic
 {
     [TestFixture]
-    public class ResolverTests
+    public class ResolverTests : GenericTests
     {
-        const bool NO_VALIDATORS = true;
-
-        public static IDictionary<string, object> globals
-            = new Dictionary<string, object>() {
-                { "obj-prop", "dog" },
-                { "animal", "dog" },
-                { "prep", "then" },
-                { "group", "(a|b)" },
-                { "cmplx", "($group | $prep)" },
-                { "count", 4 }
-        };
-
-        // TODO: fix symbol sorting problem [Test]
-        public void TransformBugStillFailing()
+        [Test]
+        public void SimpleSymbolTraversal()
         {
-            ChatRuntime rt;
-            string txt;
-            Say say;
-            Chat chat;
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res = rt.resolver.Bind("Hello $fish.name", c1, globals);
+            Assert.That(res, Is.EqualTo("Hello Fred"));
 
-            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=${thing1}], many $save.pluralize()";
-            rt = new ChatRuntime();
-            rt.ParseText(txt);
-            chat = rt.Chats().First();
-            say = (Say)chat.commands[1];
-            chat.Realize(globals);
-            Assert.That(say.Text(), Is.EqualTo("A cat, many cats").Or.EqualTo("A crow, many crow").Or.EqualTo("A cow, many cows"));
+            res = rt.resolver.Bind("Hello $fish.name.", c1, globals);
+            Assert.That(res, Is.EqualTo("Hello Fred."));
         }
 
         [Test]
-        public void TransformBugs()
+        public void TransformIssues()
         {
             ChatRuntime rt;
             string txt;
@@ -50,7 +33,7 @@ namespace Dialogic
             rt.ParseText(txt);
             chat = rt.Chats().First();
             say = (Say)chat.commands[1];
-            chat.Realize(globals);
+            chat.Resolve(globals);
             //Console.WriteLine(res);
             Assert.That(say.Text(), Is.EqualTo("A cat, many cats"));
 
@@ -59,33 +42,50 @@ namespace Dialogic
             rt.ParseText(txt);
             chat = rt.Chats().First();
             say = (Say)chat.commands[1];
-            chat.Realize(globals);
+            chat.Resolve(globals);
             Assert.That(say.Text(), Is.EqualTo("A cat cat"));
+
+
+            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=${thing1}], many $save.pluralize()";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            say = (Say)chat.commands[1];
+            chat.Resolve(globals);
+            Assert.That(say.Text(), Is.EqualTo("A cat, many cats").Or.EqualTo("A crow, many crows").Or.EqualTo("A cow, many cows"));
         }
 
         [Test]
         public void ASimpleVar()
         {
-            var res = Resolver.BindSymbols("$a", null, new Dictionary<string, object>()
+            var res = new Resolver(null).BindSymbols("$a", null, new Dictionary<string, object>()
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello"));
 
-            //res = Resolver.BindSymbols("$a!", null, new Dictionary<string, object>()
-            //    {{ "a", "hello" }, { "b", "32" }});
-            //Assert.That(res, Is.EqualTo("hello!"));
+            res = new Resolver(null).BindSymbols("$a!", null, new Dictionary<string, object>()
+                {{ "a", "hello" }, { "b", "32" }});
+            Assert.That(res, Is.EqualTo("hello!"));
         }
 
 
         [Test]
         public void SimpleTransforms()
         {
-            var res = Resolver.BindSymbols("$a.pluralize()", null,
+            var c = CreateParentChat("c");
+
+            var res = new Resolver(null).BindSymbols("$a.pluralize()", c,
                 new Dictionary<string, object>() { { "a", "cat" } });
             Assert.That(res, Is.EqualTo("cats"));
 
-            res = Resolver.BindSymbols("$a.articlize().pluralize()", null,
+            res = new Resolver(null).BindSymbols("$a.pluralize().articlize()", c,
                 new Dictionary<string, object>() { { "a", "ant" } });
             Assert.That(res, Is.EqualTo("an ants"));
+
+            res = new Resolver(null).BindGroups("(cat | cat).pluralize()", c);
+            Assert.That(res, Is.EqualTo("cats"));
+
+            res = new Resolver(null).BindGroups("(cat | cat).pluralize().articlize()", c);
+            Assert.That(res, Is.EqualTo("a cats"));
         }
 
 
@@ -96,13 +96,12 @@ namespace Dialogic
             var c = CreateParentChat("c");
             for (int i = 0; i < 10; i++)
             {
-                res = Resolver.Bind("The almost( | \" dog\" | \" cat\").", c, null);
+                res = new Resolver(null).Bind("The almost( | \" dog\" | \" cat\").", c, null);
                 //Console.WriteLine(i+") '"+res+"'");
                 Assert.That(res, Is.EqualTo("The almost.").
                             Or.EqualTo("The almost dog.").
                             Or.EqualTo("The almost cat."));
             }
-
         }
 
         [Test]
@@ -113,7 +112,7 @@ namespace Dialogic
             Chat chat = ChatParser.ParseText(str, NO_VALIDATORS)[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Say say = (Dialogic.Say)chat.commands[0];
-            say.Realize(null);
+            say.Resolve(null);
             var s = say.Text();
             Assert.That(s, Is.Not.EqualTo(""));
         }
@@ -125,17 +124,18 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command say = chat.commands[0];
             Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
-            say.Realize(globals);
+            say.Resolve(globals);
             Assert.That(say.Text(), Is.EqualTo("Thank 4"));
-            Assert.That(say.Realized(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(say.Resolved(Meta.TYPE), Is.EqualTo("Say"));
         }
 
         [Test]
         public void Exceptions()
         {
             //// no resolution to be made
-            Assert.That(globals.ContainsKey("a"), Is.False);
-            Assert.Throws<UnboundSymbol>(() => Resolver.Bind("$a", CreateParentChat("c"), globals));
+            globals.Remove("a");
+            Assert.Throws<UnboundSymbol>(() => new Resolver(null).Bind
+                ("$a", CreateParentChat("c"), globals));
 
             //// replacement leads to infinite loop
             //Assert.Throws<RealizeException>(() => realizer.Do("$a",
@@ -159,34 +159,34 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            c.Realize(globals);
+            c.Resolve(globals);
             c.SetMeta("pace", "slow");
 
             Assert.That(c.Text(), Is.EqualTo("Thank you"));
-            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
-            Assert.That(c.Realized("pace"), Is.EqualTo("fast"));
+            Assert.That(c.Resolved(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.Resolved("pace"), Is.EqualTo("fast"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
 
             chat = ChatParser.ParseText("SAY Thank you { pace=$animal}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            c.Realize(globals);
+            c.Resolve(globals);
             c.SetMeta("pace", "slow");
-            Assert.That(c.Realized(Meta.TEXT), Is.EqualTo("Thank you"));
-            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
-            Assert.That(c.Realized("pace"), Is.EqualTo("dog"));
+            Assert.That(c.Resolved(Meta.TEXT), Is.EqualTo("Thank you"));
+            Assert.That(c.Resolved(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.Resolved("pace"), Is.EqualTo("dog"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
 
             chat = ChatParser.ParseText("SAY Thank you { pace=$obj-prop}")[0];
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            c.Realize(globals);
+            c.Resolve(globals);
             c.SetMeta("pace", "slow");
-            Assert.That(c.Realized(Meta.TEXT), Is.EqualTo("Thank you"));
-            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
-            Assert.That(c.Realized("pace"), Is.EqualTo("dog"));
+            Assert.That(c.Resolved(Meta.TEXT), Is.EqualTo("Thank you"));
+            Assert.That(c.Resolved(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(c.Resolved("pace"), Is.EqualTo("dog"));
             Assert.That(c.GetMeta("pace"), Is.EqualTo("slow"));
         }
 
@@ -197,12 +197,12 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command say = chat.commands[0];
             Assert.That(say.GetType(), Is.EqualTo(typeof(Say)));
-            say.Realize(globals);
+            say.Resolve(globals);
             Assert.That(say.Text(), Is.EqualTo("Thank 4"));
             say.text = "Thank you";
             Assert.That(say.text, Is.EqualTo("Thank you"));
-            Assert.That(say.Realized(Meta.TYPE), Is.EqualTo("Say"));
-            Assert.That(say.Realized("pace"), Is.EqualTo("dog"));
+            Assert.That(say.Resolved(Meta.TYPE), Is.EqualTo("Say"));
+            Assert.That(say.Resolved("pace"), Is.EqualTo("dog"));
         }
 
         [Test]
@@ -213,8 +213,8 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
             Command c = (Say)chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            c.Realize(globals);
-            Assert.That(c.Realized(Meta.TYPE), Is.EqualTo("Say"));
+            c.Resolve(globals);
+            Assert.That(c.Resolved(Meta.TYPE), Is.EqualTo("Say"));
             CollectionAssert.Contains(ok, c.Text());
         }
 
@@ -230,7 +230,7 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             for (int i = 0; i < 10; i++)
             {
-                c.Realize(globals);
+                c.Resolve(globals);
                 var txt = c.Text();
                 //Console.WriteLine(i+") "+txt);
                 CollectionAssert.Contains(ok, txt);
@@ -256,7 +256,7 @@ namespace Dialogic
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
             for (int i = 0; i < 10; i++)
             {
-                c.Realize(globals);
+                c.Resolve(globals);
                 var txt = c.Text();
                 //Console.WriteLine(i + ") " + txt);
                 CollectionAssert.Contains(ok, txt);
@@ -272,14 +272,14 @@ namespace Dialogic
             string[] ok = { "The boy was sad", "The boy was happy" };
             for (int i = 0; i < 10; i++)
             {
-                CollectionAssert.Contains(ok, Resolver.BindGroups(txt, c1));
+                CollectionAssert.Contains(ok, new Resolver(null).BindGroups(txt, c1));
             }
 
             txt = "The boy was (sad | happy | dead)";
             ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
             for (int i = 0; i < 10; i++)
             {
-                string s = Resolver.BindGroups(txt, c1);
+                string s = new Resolver(null).BindGroups(txt, c1);
                 //Console.WriteLine(i + ") " + s);
                 CollectionAssert.Contains(ok, s);
             }
@@ -300,10 +300,10 @@ namespace Dialogic
 
             for (int i = 0; i < 10; i++)
             {
-                doo.Realize(globals);
+                doo.Resolve(globals);
                 Assert.That(doo.Text(), Is.EqualTo("emote"));
-                //Console.WriteLine(doo.GetRealized("type"));
-                Assert.That(doo.Realized("type"), Is.EqualTo("A").Or.EqualTo("B"));
+                //Console.WriteLine(doo.GetResolved("type"));
+                Assert.That(doo.Resolved("type"), Is.EqualTo("A").Or.EqualTo("B"));
             }
         }
 
@@ -316,7 +316,7 @@ namespace Dialogic
              };
 
             var s = @"SAY $a $a2";
-            s = Resolver.Bind(s, CreateParentChat("c"), globs);
+            s = new Resolver(null).Bind(s, CreateParentChat("c"), globs);
             Assert.That(s, Is.EqualTo("SAY C C"));
         }
 
@@ -325,11 +325,11 @@ namespace Dialogic
         public void ReplaceVars()
         {
             var s = @"SAY The $animal woke $count times";
-            s = Resolver.BindSymbols(s, CreateParentChat("c"), globals);
+            s = new Resolver(null).BindSymbols(s, CreateParentChat("c"), globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
 
             s = @"SAY The $obj-prop woke $count times";
-            s = Resolver.BindSymbols(s, CreateParentChat("c"), globals);
+            s = new Resolver(null).BindSymbols(s, CreateParentChat("c"), globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke 4 times"));
         }
 
@@ -337,16 +337,15 @@ namespace Dialogic
         public void ReplaceVarsGroups()
         {
             string s;
-
             Chat c1 = CreateParentChat("c1");
 
 
             s = @"SAY The $animal woke and $prep (ate|ate)";
-            s = Resolver.Bind(s, c1, globals);
+            s = new Resolver(null).Bind(s, c1, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             s = @"SAY The $obj-prop woke and $prep (ate|ate)";
-            s = Resolver.Bind(s, c1, globals);
+            s = new Resolver(null).Bind(s, c1, globals);
             Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
             //s = realizer.Do("$a", new Dictionary<string, object>()
@@ -356,21 +355,21 @@ namespace Dialogic
             string txt = "letter $group";
             for (int i = 0; i < 10; i++)
             {
-                Assert.That(Resolver.Bind(txt, c1, globals),
+                Assert.That(new Resolver(null).Bind(txt, c1, globals),
                     Is.EqualTo("letter a").Or.EqualTo("letter b"));
             }
 
+            //new Resolver(null).DBUG = true;
+
             var txt2 = "letter $cmplx";
             var ok = new string[] { "letter a", "letter b", "letter then" };
-            string[] res = new string[10];
-            for (int i = 0; i < res.Length; i++)
+
+            for (int i = 0; i < 10; i++)
             {
-                res[i] = Resolver.Bind(txt2, c1, globals);
+                var res = new Resolver(null).Bind(txt2, c1, globals);
+                CollectionAssert.Contains(ok, res);
             }
-            for (int i = 0; i < res.Length; i++)
-            {
-                CollectionAssert.Contains(ok, res[i]);
-            }
+
         }
 
         [Test]
@@ -385,7 +384,7 @@ namespace Dialogic
             string last = "";
             for (int i = 0; i < 10; i++)
             {
-                say.Realize(globals);
+                say.Resolve(globals);
                 string said = say.Text();
                 //System.Console.WriteLine(i+") "+said);
                 Assert.That(said, Is.Not.EqualTo(last));
@@ -405,7 +404,7 @@ namespace Dialogic
             string last = "", lastOpts = "";
             for (int i = 0; i < 10; i++)
             {
-                ask.Realize(globals);
+                ask.Resolve(globals);
                 string asked = ask.Text();
                 string opts = ask.JoinOptions();
                 //Console.WriteLine(i+") "+asked+" "+opts);
@@ -427,7 +426,7 @@ namespace Dialogic
 
             Ask ask = (Ask)chats[0].commands[0];
             Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
-            ask.Realize(globals);
+            ask.Resolve(globals);
 
             Assert.That(ask.text, Is.EqualTo("Want a $animal?"));
             Assert.That(ask.Text(), Is.EqualTo("Want a dog?"));
@@ -450,7 +449,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Ask)));
 
             ask = (Ask)chats[0].commands[0];
-            ask.Realize(globals);
+            ask.Resolve(globals);
             Assert.That(ask.text, Is.EqualTo("Want a $obj-prop?"));
             Assert.That(ask.Text(), Is.EqualTo("Want a dog?"));
 
@@ -466,12 +465,71 @@ namespace Dialogic
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
         }
 
+
+
+        [Test]
+        public void EmptyGlobalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            Assert.Throws<UnboundSymbol>(() =>
+                                         rt.resolver.Bind("$animal", c1, null));
+        }
+
+        [Test]
+        public void EmptyGlobalLocalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            Assert.Throws<UnboundSymbol>(() =>
+                                         rt.resolver.Bind("$animal", c1, null));
+        }
+
+        [Test]
+        public void SimpleGlobalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res =rt.resolver.Bind("$animal", c1, globals);
+            Assert.That(res, Is.EqualTo("dog"));
+        }
+
+        [Test]
+        public void ComplexGlobalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res = rt.resolver.Bind("$cmplx", c1, globals);
+            Assert.That(res, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("then"));
+        }
+
+        [Test]
+        public void SimpleLocalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            c1.scope.Add("a", "b");
+            var res = rt.resolver.Bind("$a", c1, globals);
+            Assert.That(res, Is.EqualTo("b"));
+        }
+
+        [Test]
+        public void ComplexLocalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            c1.scope.Add("a", "$b");
+            c1.scope.Add("b", "c");
+            var res = rt.resolver.Bind("$a", c1, globals);
+            Assert.That(res, Is.EqualTo("c"));
+        }
+
         private static Chat CreateParentChat(string name)
         {
             // create a realized Chat with the full set of global props
             var c = Chat.Create(name);
             foreach (var prop in globals.Keys) c.SetMeta(prop, globals[prop]);
-            c.Realize(globals);
+            c.Resolve(globals);
             return c;
         }
     }

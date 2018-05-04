@@ -9,7 +9,6 @@ namespace Dialogic
     [TestFixture]
     public class OperatorTests
     {
-
         [Test]
         public void AssignmentTests()
         {

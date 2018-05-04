@@ -43,11 +43,11 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal bool strictMode = true;
+        internal bool validatorsDisabled, strictMode = true;
         internal IDictionary<string, Chat> chats;
         internal IDictionary<string, Choice> choiceCache;
         internal ChatScheduler scheduler;
-        internal bool validatorsDisabled;
+        internal Resolver resolver;
         internal string firstChat;
 
         private List<IActor> actors;
@@ -87,16 +87,8 @@ namespace Dialogic
 
         public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
         {
-            this.parser = new ChatParser(this);
-            this.scheduler = new ChatScheduler(this);
-            this.appEvents = new AppEventHandler(this);
-            this.chatEvents = new ChatEventHandler(this);
-            this.chats = new Dictionary<string, Chat>();
-            this.choiceCache = new Dictionary<string, Choice>();
+            this.Reset(theChats);
             this.actors = InitActors(theActors);
-            this.search = new FuzzySearch();
-
-            if (!theChats.IsNullOrEmpty()) AppendChats(theChats);
         }
 
         /// <summary>
@@ -113,6 +105,23 @@ namespace Dialogic
         public bool ContainsKey(string chatName) // convenience check for indexer
         {
             return this.chats.ContainsKey(chatName);
+        }
+
+        /// <summary>
+        /// Clear all chats and resets all runtime state
+        /// </summary>
+        public void Reset(List<Chat> theChats = null)
+        {
+            this.resolver = new Resolver(this);
+            this.parser = new ChatParser(this);
+            this.search = new FuzzySearch(this);
+            this.scheduler = new ChatScheduler(this);
+            this.appEvents = new AppEventHandler(this);
+            this.chatEvents = new ChatEventHandler(this);
+            this.chats = new Dictionary<string, Chat>();
+            this.choiceCache = new Dictionary<string, Choice>();
+
+            if (!theChats.IsNullOrEmpty()) AppendChats(theChats);
         }
 
         /// <summary>
@@ -291,7 +300,7 @@ namespace Dialogic
             while (chat != null)
             {
                 var cmd = chat.Next();
-                cmd.Realize(globals);
+                cmd.Resolve(globals);
 
                 ProcessSay(ref result, ref cmd, globals);
 
@@ -333,7 +342,7 @@ namespace Dialogic
                 if (cmd is Ask)
                 {
                     cmd = Util.RandItem(((Ask)cmd).Options()).action;
-                    cmd.Realize(globals);
+                    cmd.Resolve(globals);
                 }
             }
         }
@@ -397,7 +406,7 @@ namespace Dialogic
 
         internal Chat FindSync(Find f, bool launchScheduler, IDictionary<string, object> globals = null)
         {
-            if (f.Realized().Count < 1) f.Realize(globals); // tmp
+            if (f.Resolved().Count < 1) f.Resolve(globals); // tmp
 
             var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
             if (chat == null) throw new FindException(f);
@@ -413,7 +422,7 @@ namespace Dialogic
             //    return;
             //}
 
-            if (f.Realized().Count < 1) f.Realize(globals); // tmp
+            if (f.Resolved().Count < 1) f.Resolve(globals); // tmp
 
             (searchThread = new Thread(() =>
             {
@@ -440,7 +449,7 @@ namespace Dialogic
                             ("Invalid command type=" + c.TypeName().ToUpper() + "\nChats "
                              + "marked with 'preload' can only contain SET commands");
 
-                        c.Realize(globals); // Execute each Set
+                        c.Resolve(globals); // Execute each Set
                     });
                 }
             }
@@ -475,7 +484,7 @@ namespace Dialogic
         {
             IDictionary<Constraint, bool> cdict;
             cdict = new Dictionary<Constraint, bool>();
-            var realized = f.Realized();
+            var realized = f.Resolved();
             foreach (var val in realized.Values)
             {
                 if (!(val is Constraint))
@@ -521,7 +530,7 @@ namespace Dialogic
 
         internal Chat DoFind(Find f, IDictionary<string, object> globals = null)
         {
-            if (f.Realized().Count == 0) f.Realize(globals);
+            if (f.Resolved().Count == 0) f.Resolve(globals);
             return search.Find(Chats(), ToConstraintMap(f), f.parent, globals);
         }
 
@@ -538,8 +547,8 @@ namespace Dialogic
 
         internal List<Chat> DoFindAll(Find f, IDictionary<string, object> globals)
         {
-            if (f.Realized().Count == 0) f.Realize(globals);
-            return search.FindAll(Chats(), ToList(f.Realized()), f.parent, globals);
+            if (f.Resolved().Count == 0) f.Resolve(globals);
+            return search.FindAll(Chats(), ToList(f.Resolved()), f.parent, globals);
         }
 
         internal static void Info(object msg)

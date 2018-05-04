@@ -9,21 +9,9 @@ using MessagePack;
 namespace Dialogic
 {
     [TestFixture]
-    public class SerializeTests
+    public class SerializeTests : GenericTests
     {
         static ISerializer serializer = new SerializerMessagePack();
-
-        const bool NO_VALIDATORS = true;
-
-        public static IDictionary<string, object> globals
-             = new Dictionary<string, object>() {
-                { "obj-prop", "dog" },
-                { "animal", "dog" },
-                { "prep", "then" },
-                { "group", "(a|b)" },
-                { "cmplx", "($group | $prep)" },
-                { "count", 4 }
-         };
 
         [Test]
         public void SaveRestoreChat()
@@ -110,7 +98,11 @@ namespace Dialogic
             for (int i = 0; i < c1.commands.Count; i++)
             {
                 var cmd1 = c1.commands[i];
+                Assert.That(cmd1.parent, Is.Not.Null);
+
                 var cmd2 = c2.commands[i];
+                Assert.That(cmd2.parent, Is.Not.Null);
+
                 Assert.That(c1.commands[i], Is.EqualTo(c2.commands[i]));
             }
 
@@ -175,6 +167,8 @@ namespace Dialogic
 
             var s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nDone"));
+
+            // TODO: add more chats via Update, with higher search score
         }
 
         // Implement ISerializer and then instance to ChatRuntime methods...

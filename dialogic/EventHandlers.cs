@@ -133,7 +133,7 @@ namespace Dialogic
                 // bad index, so reprompt for now
                 ChatRuntime.Info("Invalid index " + idx + ", reprompting\n");
                 //scheduler.prompt.Realize(globals); // re-realize
-                return new UpdateEvent(scheduler.prompt.Realize(globals));
+                return new UpdateEvent(scheduler.prompt.Resolve(globals));
             }
             else
             {
@@ -144,7 +144,7 @@ namespace Dialogic
                 {
                     // We've gotten a response with a branch, so finish & take it
                     scheduler.Completed(false);
-                    opt.action.Realize(globals);
+                    opt.action.Resolve(globals);
                     runtime.FindAsync((Find)opt.action); // find next
                 }
                 else
@@ -203,7 +203,7 @@ namespace Dialogic
         {
             if (ChatRuntime.LOG_FILE != null) WriteToLog(cmd);
 
-            cmd.Realize(globals);
+            cmd.Resolve(globals);
 
             if (cmd is ISendable)
             {
@@ -227,7 +227,7 @@ namespace Dialogic
                     ComputeNextEventTime(cmd);   // compute delay for next cmd
                 }
 
-                return new UpdateEvent(cmd.Realize(globals)); // fire event
+                return new UpdateEvent(cmd.Resolve(globals)); // fire event
             }
             else if (cmd is Find)
             {
