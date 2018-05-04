@@ -127,7 +127,8 @@ namespace Dialogic
                     var result = choice.Resolve(); // handles transforms
                     if (DBUG) Console.WriteLine("      " + choice + " -> " + result);
                     //text = text.ReplaceFirst(choice.Text(), result);
-                    text = choice.Replace(text, result);
+                    if (result != null)
+                        text = choice.Replace(text, result);
                 }
             }
 

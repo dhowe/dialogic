@@ -148,7 +148,7 @@ namespace Dialogic
         internal const string MP0 = @"(?:\[([^=()]+)=)?";
         internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
         internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
-        internal const string MP3 = @"(?:\.(" + SYM + @")\(\))*";
+        internal const string MP3 = @"(?:\.(" + SYM + @")\(\))*\]?";
         public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
 
         //internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";

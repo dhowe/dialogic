@@ -144,11 +144,11 @@ namespace Dialogic
 
                 if (transform == null) return null;
 
-                Cache[type][key] = transform.GetMethodInfo(); ;
+                Cache[type][key] = transform.GetMethodInfo();
             }
 
             // OPT: see note above...
-            return Cache[type][key].Invoke(null, args); 
+            return Cache[type][key].Invoke(null, args);
         }
 
         internal static Type[] ArgsToTypes(object[] args)
@@ -171,76 +171,77 @@ namespace Dialogic
 
     internal class Choice : IResolvable
     {
+        public readonly string text;
         public string alias;
-        private string text;
-        private List<string> transforms;
+        internal List<string> transforms;
         public readonly string[] options;
 
+        private HashSet<string> unique;
         private string lastResolved;
         private Chat context;
 
-        private Choice(Chat context, string text, 
+        private Choice(Chat context, string text,
             string groups, string alias, List<string> transforms)
         {
             this.text = text;
             this.context = context;
             this.transforms = transforms;
-            HashSet<string> set = new HashSet<string>();
-            var opts = RE.SplitOr.Split(groups);
-            foreach (var o in opts) set.Add(o);
-            this.options = set.ToArray();
+            this.options = ParseOptions(groups);
+            Console.WriteLine(options.Stringify()+" :: "+text);
             this.alias = alias.IsNullOrEmpty() ? null : alias;
         }
 
-        public string Text()
-        {
-            var s = text;
-            transforms.ForEach(t => s += Ch.SCOPE + t + "()");
-            return s;
+        private string[] ParseOptions(string groups)
+        {   
+            if (unique == null) unique = new HashSet<string>();
+            if (unique.Count > 0) unique.Clear();
+            var opts = RE.SplitOr.Split(groups);
+            foreach (var o in opts) unique.Add(o);
+            return unique.ToArray();
         }
 
-        //private string Transform()
-        //{
-        //    return transform.IsNullOrEmpty() ? string.Empty : '.' + transform + "()";
-        //}
+        public string Text() // remove
+        {
+            return text;
+        }
 
-        public static List<Choice> Parse(string input, Chat context)
+        /// <summary>
+        /// Parse Choice objects from the specified input. Note that for nested groups, only the innermost group will be parsed.
+        /// </summary>
+        public static List<Choice> Parse(string input, 
+            Chat context, bool showMatch = false)
         {
             if (context == null || context.runtime == null)
             {
                 ChatRuntime.Warn("Choice.Parse got null context/runtime: " + input);
             }
             var groups = new List<Choice>();
-            Parse(input, groups, context);
+            Parse(input, groups, context, showMatch);
             return groups;
         }
 
-        private static void Parse(string input, List<Choice> results, Chat context)
+        private static void Parse(string input, 
+            List<Choice> results, Chat context, bool showMatch = false)
         {
-            if (context == null || context.runtime == null)
-            {
-                ChatRuntime.Warn("Choice.Parse got null context/runtime: " + input);
-            }
-
-            // Cache the entire match?
+            // OPT: Cache the entire match?
             foreach (Match m in RE.MatchParens.Matches(input))
             {
-                //Util.ShowMatch(m);   // TODO: redo this
-
+                if (showMatch) Util.ShowMatch(m);
                 var full = m.Groups[0].Value;
                 var alias = m.Groups[1].Value;
-                var trans = InitTransforms(m.Groups[3]);
+                var expr = m.Groups[2].Value;
+                var trans = ParseTransforms(m.Groups[3]);
 
-                if (!trans.IsNullOrEmpty()) { 
-                    var didx = full.IndexOf('.');
-                    if (didx > 0) full = full.Substring(0, didx);
+                if (showMatch) Console.WriteLine("expr1="+expr);
+
+                if (expr.Contains(Ch.CGROUP)) // TODO: fix this hack
+                {
+                    var oidx = full.IndexOf(Ch.OGROUP);
+                    var cidx = full.LastIndexOf(Ch.CGROUP);
+                    expr = full.Substring(oidx + 1, cidx - oidx - 1);
                 }
 
-                Console.WriteLine("full:" + full + " alias=" + alias + " transforms=" + trans.Stringify());
-
-                var oidx = full.IndexOf(Ch.OGROUP);
-                var cidx = full.LastIndexOf(Ch.CGROUP);
-                var expr = full.Substring(oidx + 1, cidx - oidx - 1);
+                if (showMatch) Console.WriteLine("expr2=" + expr);
 
                 if (RE.HasParens.IsMatch(expr))
                 {
@@ -274,20 +275,14 @@ namespace Dialogic
             }
         }
 
-        private static List<string> InitTransforms(Group g)
+        private static List<string> ParseTransforms(Group g)
         {
             List<string> transforms = null;
-
             if (!g.Value.IsNullOrEmpty())
             {
-                var parts = g.Value.TrimFirst(Ch.SCOPE).Split(Ch.SCOPE);
-
-                if (parts.Length > 0)
-                {
-                    if (transforms == null) transforms = new List<string>();
-                    if (transforms.Count > 0) transforms.Clear();
-                    foreach (var part in parts) transforms.Add(part);
-                }
+                if (transforms == null) transforms = new List<string>();
+                if (transforms.Count > 0) transforms.Clear();
+                foreach (Capture c in g.Captures) transforms.Add(c.Value);
             }
             return transforms;
         }
@@ -341,20 +336,22 @@ namespace Dialogic
             }
 
             HandleAlias(resolved, context);
-            lastResolved = resolved;
+            lastResolved = resolved = HandleTransforms(resolved);
 
-            return HandleTransforms(resolved);
+            return resolved;
         }
 
         internal string HandleTransforms(string resolved)
         {
-            //Console.Write("HandleTransform: "+resolved+" mod="+transform);
-            var input = resolved;
-            transforms.ForEach(trans => {
+            if (transforms == null) return resolved;
+
+            transforms.ForEach(trans =>
+            {
                 try
                 {
+                    //Console.Write("Trans=" + trans + " in=" + resolved);
                     resolved = Methods.Invoke(resolved, trans, null).Stringify();
-                    //Console.WriteLine(" in=" + input+ " out="+resolved);
+                    //Console.WriteLine(" out=" + resolved);
                 }
                 catch (UnboundFunction e)
                 {
@@ -362,6 +359,7 @@ namespace Dialogic
                     resolved += (Ch.SCOPE + trans + Ch.OGROUP) + Ch.CGROUP;
                 }
             });
+
             return resolved;
         }
 
@@ -404,7 +402,7 @@ namespace Dialogic
             this.bounded = (parts[3].Value == "{" && parts[6].Value == "}");
             this.name = parts[4].Value;
             this.context = context;
-            InitTransforms(parts[5]);
+            ParseTransforms(parts[5]);
         }
 
         public override string ToString()
@@ -412,7 +410,7 @@ namespace Dialogic
             var s = Name();
             if (text != s) s += " text='" + text + "'";
             if (transforms != null) s += " transforms=" + transforms.Stringify();
-            return s += (alias != null ? " alias=[" + alias +"]": "");
+            return s += (alias != null ? " alias=[" + alias + "]" : "");
         }
 
         internal string Name()
@@ -559,7 +557,7 @@ namespace Dialogic
             return result;
         }
 
-        private void InitTransforms(Group g)
+        private void ParseTransforms(Group g)
         {
             if (!g.Value.IsNullOrEmpty())
             {
