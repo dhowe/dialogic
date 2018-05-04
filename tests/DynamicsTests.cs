@@ -120,8 +120,10 @@ namespace Dialogic
             Assert.That(result.ToString(), Is.EqualTo("9"));
 
             var symbols = Symbol.Parse("The [aly=$fish.Id()] $aly", c1);
+            //Console.WriteLine(symbols.Stringify());
             Assert.That(symbols.Count, Is.EqualTo(2));
-            result = symbols[1].Resolve(globals);
+            result = symbols[0].Resolve(globals);
+            //Console.WriteLine("result="+result);
             Assert.That(result.ToString(), Is.EqualTo("9"));
             Assert.That(globals["aly"], Is.EqualTo(9));
 
@@ -353,6 +355,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime();
             rt.strictMode = false;
 
+            ChatRuntime.SILENT = true;
             Assert.That(DoSay(rt, "SAY $ant $antelope"), Is.EqualTo("hello $antelope"));
             Assert.That(DoSay(rt, "SAY $ant$antelope"), Is.EqualTo("hello$antelope"));
             Assert.That(DoSay(rt, "SAY $ant. $antelope"), Is.EqualTo("hello. $antelope"));
@@ -363,6 +366,7 @@ namespace Dialogic
             Assert.That(DoSay(rt, "SAY $ant: $antelope"), Is.EqualTo("hello: $antelope"));
             Assert.That(DoSay(rt, "SAY $ant $ant-"), Is.EqualTo("hello $ant-"));
             Assert.That(DoSay(rt, "SAY $ant $ant_"), Is.EqualTo("hello $ant_"));
+            ChatRuntime.SILENT = false;
         }
 
         private static string DoSay(ChatRuntime rt, string s)
@@ -373,7 +377,7 @@ namespace Dialogic
             Say say = (Dialogic.Say)rt.Chats().First().commands.First();
             say.Realize(globs);
             s = say.Text();
-            Console.WriteLine(s);
+            //Console.WriteLine(s);
             return s;
         }
 
@@ -557,33 +561,33 @@ namespace Dialogic
             Assert.That(fish.name, Is.EqualTo("Bill"));
         }
 
-        [Test]
-        public void SymbolSortTest() // remove
-        {
-            var syms = Symbol.Parse("$a $a2", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a2"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+        //[Test]
+        //public void SymbolSortTest() // remove
+        //{
+        //    var syms = Symbol.Parse("$a $a2", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("a2"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
 
-            syms = Symbol.Parse("$a $aa $aaa", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aaa"));
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aa"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
+        //    syms = Symbol.Parse("$a $aa $aaa", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(2).name, Is.EqualTo("aaa"));
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("aa"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("a"));
 
 
-            syms = Symbol.Parse("[b=$a] $aa $aaa", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(2).name, Is.EqualTo("a"));
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("aaa"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aa"));
+        //    syms = Symbol.Parse("[b=$a] $aa $aaa", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(2).name, Is.EqualTo("a"));
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("aaa"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("aa"));
 
-            syms = Symbol.Parse("[b=$a] [cc=$aa] $aaa", null);
-            //Symbol.Sort(syms);
-            Assert.That(syms.ElementAt(2).name, Is.EqualTo("aa"));
-            Assert.That(syms.ElementAt(1).name, Is.EqualTo("a"));
-            Assert.That(syms.ElementAt(0).name, Is.EqualTo("aaa"));
-        }
+        //    syms = Symbol.Parse("[b=$a] [cc=$aa] $aaa", null);
+        //    //Symbol.Sort(syms);
+        //    Assert.That(syms.ElementAt(2).name, Is.EqualTo("aa"));
+        //    Assert.That(syms.ElementAt(1).name, Is.EqualTo("a"));
+        //    Assert.That(syms.ElementAt(0).name, Is.EqualTo("aaa"));
+        //}
 
         [Test]
         public void SingleSymbolParsing()

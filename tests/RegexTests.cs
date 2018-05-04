@@ -190,7 +190,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop", "articlize()" }));
 
             text = "[alias=${name.prop.articlize().pluralize()}]";
@@ -205,7 +205,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop", "articlize()", "pluralize()" }));
 
             text = "${name.prop.articlize()}";
@@ -220,7 +220,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop","articlize()" }));
 
             text = "${name.prop.articlize().pluralize()}";
@@ -235,7 +235,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop","articlize()", "pluralize()" }));
 
             text = "${name.prop}";
@@ -250,7 +250,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop" }));
 
             // ----------------------------------------------------------
@@ -267,7 +267,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop","articlize()" }));
 
             text = "[alias=$name.prop.articlize().pluralize()]";
@@ -282,7 +282,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop","articlize()", "pluralize()" }));
 
             text = "[alias=$name.prop]";
@@ -297,7 +297,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop" }));
 
             text = "$name.prop.articlize()";
@@ -313,7 +313,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop","articlize()" }));
 
             text = "$name.prop.articlize().pluralize()";
@@ -328,7 +328,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop","articlize()", "pluralize()" }));
 
             text = "$name.prop";
@@ -344,7 +344,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "prop" }));
         }
 
@@ -365,7 +365,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "articlize()" }));
 
             text = "[alias=${name.articlize().pluralize()}]";
@@ -381,7 +381,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "articlize()", "pluralize()" }));
 
             text = "${name.articlize()}";
@@ -396,7 +396,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "articlize()" }));
 
             text = "${name.articlize().pluralize()}";
@@ -411,7 +411,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "articlize()", "pluralize()"  }));
 
             text = "${name}";
@@ -426,7 +426,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo("}"));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]), Is.Null);
+            Assert.That(ParseTransforms(matches[0].Groups[5]), Is.Null);
 
             // ----------------------------------------------------------
 
@@ -442,7 +442,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "articlize()" }));
 
             text = "[alias=$name.articlize().pluralize()]";
@@ -457,7 +457,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "articlize()","pluralize()" }));
 
             text = "[alias=$name]";
@@ -472,7 +472,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo("]"));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]), Is.Null);
+            Assert.That(ParseTransforms(matches[0].Groups[5]), Is.Null);
 
             text = "$name.articlize()";
             matches = RE.ParseVars.Matches(text);
@@ -487,7 +487,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                 Is.EquivalentTo(new[] { "articlize()" }));
 
             text = "$name.articlize().pluralize()";
@@ -502,7 +502,7 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]).ToArray(),
+            Assert.That(ParseTransforms(matches[0].Groups[5]).ToArray(),
                         Is.EquivalentTo(new[] { "articlize()", "pluralize()" }));
 
             text = "$name";
@@ -518,7 +518,23 @@ namespace Dialogic
             Assert.That(matches[0].Groups[4].Value, Is.EqualTo("name"));
             Assert.That(matches[0].Groups[6].Value, Is.EqualTo(""));
             Assert.That(matches[0].Groups[7].Value, Is.EqualTo(""));
-            Assert.That(Symbol.ParseTransforms(matches[0].Groups[5]), Is.Null);
+            Assert.That(ParseTransforms(matches[0].Groups[5]), Is.Null);
+        }
+
+        internal static List<string> ParseTransforms(Group g) // testing-only
+        {
+            List<string> transforms = null;
+            if (!g.Value.IsNullOrEmpty())
+            {
+                var parts = g.Value.TrimFirst(Ch.SCOPE).Split(Ch.SCOPE);
+
+                if (parts.Length > 0)
+                {
+                    if (transforms == null) transforms = new List<string>();
+                    foreach (var part in parts) transforms.Add(part);
+                }
+            }
+            return transforms;
         }
 
         [Test]
@@ -528,7 +544,7 @@ namespace Dialogic
             List<string> vars;
             MatchCollection matches;
 
-            int i=0, symNameIdx = 4; // Note will break if the regex is changed
+            int symNameIdx = 4; // Note will break if the regex is changed
 
             text = "Hello $name, nice to $verb you $chat1";
             matches = RE.ParseVars.Matches(text);
@@ -588,7 +604,6 @@ namespace Dialogic
             matches = RE.ParseVars.Matches(text);
             Assert.That(matches.Count, Is.EqualTo(3));
             vars = new List<string>();
-            i = 0;
             foreach (Match match in matches)
             {
                 //System.Console.WriteLine((i++) + ") " + match.Groups[symNameIdx].Value);

@@ -83,9 +83,15 @@ namespace Dialogic
                 new Dictionary<string, object>() { { "a", "cat" } });
             Assert.That(res, Is.EqualTo("cats"));
 
-            res = Resolver.BindSymbols("$a.articlize().pluralize()", null,
+            res = Resolver.BindSymbols("$a.pluralize().articlize()", null,
                 new Dictionary<string, object>() { { "a", "ant" } });
             Assert.That(res, Is.EqualTo("an ants"));
+
+            res = Resolver.BindGroups("(cat | cat).pluralize()");
+            Assert.That(res, Is.EqualTo("cats"));
+
+            res = Resolver.BindGroups("(cat | cat).pluralize().articlize()");
+            Assert.That(res, Is.EqualTo("a cats"));
         }
 
 
@@ -102,7 +108,6 @@ namespace Dialogic
                             Or.EqualTo("The almost dog.").
                             Or.EqualTo("The almost cat."));
             }
-
         }
 
         [Test]

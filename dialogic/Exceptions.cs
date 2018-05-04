@@ -15,6 +15,11 @@ namespace Dialogic
         public BindException(string msg = "") : base(msg) { }
     }
 
+    public class TransformException : DialogicException
+    {
+        public TransformException(string msg = "") : base(msg) { }
+    }
+
     public class UnboundFunction : BindException
     {
         public UnboundFunction(string name, string tname = null) :
@@ -42,7 +47,7 @@ namespace Dialogic
 
         internal UnboundSymbol(Symbol symbol, Chat context,
             IDictionary<string, object> globals, string msg = "") :
-            base(GetMessage(symbol.SymbolText(), context, globals))
+            base(GetMessage(symbol.Name(), context, globals))
         { }
 
         private static string GetMessage(string s, Chat c, IDictionary<string, object> g)

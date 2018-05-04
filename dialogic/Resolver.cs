@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace Dialogic
 {
     /// <summary>
-    /// Handles resolution of variables, probabilistic groups, and grammar rules
+    /// Handles resolution of symbols, probabilistic groups, transforms, and grammar production
     /// </summary>
     public static class Resolver
     {
@@ -69,7 +69,6 @@ namespace Dialogic
         {
             if (DBUG) Console.WriteLine("  Symbols(" + level + "): " + Info(text, context));
 
-            Regex replace = null;
             var symbols = Symbol.Parse(text, context);
             while (symbols.Count > 0)
             {
@@ -78,17 +77,15 @@ namespace Dialogic
                 var symbol = symbols.Pop();
                 if (DBUG) Console.WriteLine("    Pop:    " + symbol);
 
+                string pretext = text; 
+
                 var result = symbol.Resolve(globals);
+
+                if (DBUG) Console.WriteLine("      "+ symbol.Name() + " -> " + result);
+                
                 if (result != null)
                 {
-                    string pretext = text;  // TODO: OPT (move into Symbol)
-                    replace = new Regex(@"\$"+symbol.text.TrimFirst(Ch.SYMBOL)+ @"(?![A-Za-z_-])");
-
-                    text = replace.Replace(text, result);
-                    //Console.WriteLine("'"+pretext + "'.Replace(" + replace + ") -> "+text);
-                    //text = text.Replace(symbol.text, result);
-
-                    if (DBUG) Console.WriteLine("      " + symbol.SymbolText() + " -> " + result);
+                    text = symbol.Replace(text, result);
 
                     if (pretext != text && text.Contains(Ch.SYMBOL))
                     {
@@ -127,9 +124,10 @@ namespace Dialogic
 
                 foreach (var choice in choices)
                 {
-                    var pick = choice.Resolve(); // handles transforms
-                    if (DBUG) Console.WriteLine("      " + choice + " -> " + pick);
-                    text = text.ReplaceFirst(choice.Text(), pick);
+                    var result = choice.Resolve(); // handles transforms
+                    if (DBUG) Console.WriteLine("      " + choice + " -> " + result);
+                    //text = text.ReplaceFirst(choice.Text(), result);
+                    text = choice.Replace(text, result);
                 }
             }
 

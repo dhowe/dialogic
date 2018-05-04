@@ -147,7 +147,8 @@ namespace Dialogic
                 Cache[type][key] = transform.GetMethodInfo(); ;
             }
 
-            return Cache[type][key].Invoke(null, args); // OPT: see note above
+            // OPT: see note above...
+            return Cache[type][key].Invoke(null, args); 
         }
 
         internal static Type[] ArgsToTypes(object[] args)
@@ -171,17 +172,19 @@ namespace Dialogic
     internal class Choice : IResolvable
     {
         public string alias;
-        private string text, transform; // multiple?
+        private string text;
+        private List<string> transforms;
         public readonly string[] options;
 
         private string lastResolved;
         private Chat context;
 
-        private Choice(Chat context, string text, string groups, string alias = null, string method = null)
+        private Choice(Chat context, string text, 
+            string groups, string alias, List<string> transforms)
         {
             this.text = text;
             this.context = context;
-            this.transform = method;
+            this.transforms = transforms;
             HashSet<string> set = new HashSet<string>();
             var opts = RE.SplitOr.Split(groups);
             foreach (var o in opts) set.Add(o);
@@ -191,13 +194,15 @@ namespace Dialogic
 
         public string Text()
         {
-            return text + Transform();
+            var s = text;
+            transforms.ForEach(t => s += Ch.SCOPE + t + "()");
+            return s;
         }
 
-        private string Transform()
-        {
-            return transform.IsNullOrEmpty() ? string.Empty : '.' + transform + "()";
-        }
+        //private string Transform()
+        //{
+        //    return transform.IsNullOrEmpty() ? string.Empty : '.' + transform + "()";
+        //}
 
         public static List<Choice> Parse(string input, Chat context)
         {
@@ -214,7 +219,7 @@ namespace Dialogic
         {
             if (context == null || context.runtime == null)
             {
-                ChatRuntime.Warn("Symbol.Parse got null context/runtime: " + input);
+                ChatRuntime.Warn("Choice.Parse got null context/runtime: " + input);
             }
 
             // Cache the entire match?
@@ -224,15 +229,14 @@ namespace Dialogic
 
                 var full = m.Groups[0].Value;
                 var alias = m.Groups[1].Value;
-                var method = m.Groups[3].Value;
+                var trans = InitTransforms(m.Groups[3]);
 
-                if (!method.IsNullOrEmpty())
-                {
-                    var didx = full.LastIndexOf('.');
+                if (!trans.IsNullOrEmpty()) { 
+                    var didx = full.IndexOf('.');
                     if (didx > 0) full = full.Substring(0, didx);
                 }
 
-                //Console.WriteLine("full:" + full + " alias=" + alias + " method=" + method);
+                Console.WriteLine("full:" + full + " alias=" + alias + " transforms=" + trans.Stringify());
 
                 var oidx = full.IndexOf(Ch.OGROUP);
                 var cidx = full.LastIndexOf(Ch.CGROUP);
@@ -253,21 +257,39 @@ namespace Dialogic
                         if (!cache.ContainsKey(choiceKey))
                         {
                             //Console.WriteLine("CACHE-add: " + choiceKey);
-                            cache.Add(choiceKey, new Choice(context, full, expr, alias, method));
+                            cache.Add(choiceKey, new Choice(context, full, expr, alias, trans));
                         }
                         ///else Console.WriteLine("CACHE-HIT: " + choiceKey);
                         results.Add(cache[choiceKey]);
 
                         // note: this data is not in the cache key, so we reset it here
-                        cache[choiceKey].transform = method;
+                        cache[choiceKey].transforms = trans;
                         cache[choiceKey].alias = alias;
                     }
                     else  // no cache
                     {
-                        results.Add(new Choice(context, full, expr, alias, method));
+                        results.Add(new Choice(context, full, expr, alias, trans));
                     }
                 }
             }
+        }
+
+        private static List<string> InitTransforms(Group g)
+        {
+            List<string> transforms = null;
+
+            if (!g.Value.IsNullOrEmpty())
+            {
+                var parts = g.Value.TrimFirst(Ch.SCOPE).Split(Ch.SCOPE);
+
+                if (parts.Length > 0)
+                {
+                    if (transforms == null) transforms = new List<string>();
+                    if (transforms.Count > 0) transforms.Clear();
+                    foreach (var part in parts) transforms.Add(part);
+                }
+            }
+            return transforms;
         }
 
         internal static bool CacheEnabled(Chat context)
@@ -280,6 +302,11 @@ namespace Dialogic
         {
             return context != null && context.runtime != null
                 && context.runtime.strictMode;
+        }
+
+        internal string Replace(string full, string replaceWith)
+        {
+            return full.ReplaceFirst(this.Text(), replaceWith);
         }
 
         internal string Resolve()
@@ -316,10 +343,26 @@ namespace Dialogic
             HandleAlias(resolved, context);
             lastResolved = resolved;
 
-            //Console.WriteLine("last="+lastResolved+" res="+resolved);
+            return HandleTransforms(resolved);
+        }
 
-            return Transforms.HandleTransform
-                (transform, resolved, IsStrictMode(context));
+        internal string HandleTransforms(string resolved)
+        {
+            //Console.Write("HandleTransform: "+resolved+" mod="+transform);
+            var input = resolved;
+            transforms.ForEach(trans => {
+                try
+                {
+                    resolved = Methods.Invoke(resolved, trans, null).Stringify();
+                    //Console.WriteLine(" in=" + input+ " out="+resolved);
+                }
+                catch (UnboundFunction e)
+                {
+                    if (IsStrictMode(context)) throw e;
+                    resolved += (Ch.SCOPE + trans + Ch.OGROUP) + Ch.CGROUP;
+                }
+            });
+            return resolved;
         }
 
         private void HandleAlias(object resolved, Chat ctx)
@@ -331,8 +374,6 @@ namespace Dialogic
 
                 if (!resolved.ToString().Contains(Ch.OR))
                 {
-                    //Console.WriteLine("      Choice.Push: " + alias + "=" 
-                    //+ resolved +" "+ctx.text + scope.Stringify()));
                     scope[alias] = resolved;
                 }
             }
@@ -363,54 +404,52 @@ namespace Dialogic
             this.bounded = (parts[3].Value == "{" && parts[6].Value == "}");
             this.name = parts[4].Value;
             this.context = context;
-            this.transforms = ParseTransforms(parts[5]);
+            InitTransforms(parts[5]);
         }
 
         public override string ToString()
         {
-            var s = SymbolText();
+            var s = Name();
             if (text != s) s += " text='" + text + "'";
             if (transforms != null) s += " transforms=" + transforms.Stringify();
-            return s += (alias != null ? " alias=" + alias : "");
+            return s += (alias != null ? " alias=[" + alias +"]": "");
         }
 
-        internal string SymbolText()
+        internal string Name()
         {
             return Ch.SYMBOL + (bounded ? "{" + name + '}' : name);
         }
 
         public static List<Symbol> Parse(string text, Chat context)
         {
-            var symbols = new List<Symbol>();
             var matches = RE.ParseVars.Matches(text);
 
+            var symbols = new List<Symbol>();
             foreach (Match match in matches)
             {
                 // Create a new Symbol and add it to the result
                 symbols.Add(new Symbol(context, match));
             }
 
-            // OPT: we must sort here to avoid symbols which are substrings of 
-            // other symbols causing incorrect replacements ($a being replaced
-            // in $ant,for example), however should be avoided by using 
-            // Regex.Replace instead of String.Replace() in BindSymbols
-            //return SortByLength(symbols);
-            if (1 == 0)
+            return symbols;
+        }
+
+        internal string Replace(string full, string replaceWith)
+        {
+            Regex replaceRE = null;
+            if (replaceWith != null)
             {
-                symbols.Sort((s1, s2) =>
-                {
-                    if (s1.alias != null && s2.alias == null) return 1;
-                    if (s1.alias == null && s2.alias != null) return -1;
-                    return string.Compare(s1.name, s2.name, StringComparison.Ordinal);
-                });
+                replaceRE = new Regex(Regex.Escape(this.text) + @"(?![A-Za-z_-])");
+
+                full = replaceRE.Replace(full, replaceWith);
             }
 
-            return symbols;
+            return full;
         }
 
         internal string Resolve(IDictionary<string, object> globals)
         {
-             object resolved = ResolveSymbol(name, context, globals);
+            object resolved = ResolveSymbol(name, context, globals);
             switch (this.Type())
             {
                 case SymbolType.SIMPLE:
@@ -432,10 +471,7 @@ namespace Dialogic
                 {
                     // if we have an alias, but the replacement is not fully resolved
                     // then we keep the alias in the text for later resolution
-               
                     result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
-                    //result = text.Replace(Ch.SYMBOL+name, result);
-               
                 }
 
                 return result;
@@ -447,7 +483,7 @@ namespace Dialogic
         private object GetViaPath(object start, string[] paths,
             IDictionary<string, object> globals)
         {
-            if (start == null) OnBindError(globals);
+            if (start == null) return null;//OnBindError(globals);
 
             // Dynamically resolve the object path 
             for (int i = 0; i < paths.Length; i++)
@@ -465,7 +501,7 @@ namespace Dialogic
                         start = Methods.Invoke(start, func, null);
                     }
 
-                    // TODO: handle other modifier signatures
+                    // TODO: handle other signatures
                 }
                 else
                 {
@@ -523,48 +559,19 @@ namespace Dialogic
             return result;
         }
 
-        //internal static List<Symbol> SortByLength(List<Symbol> syms)
-        //{
-        //    //return (from s in syms orderby s.alias.Length ascending select s).ToList();
-        //    //return (from s in syms orderby s.name.Length ascending select s).ToList();
-        //    syms.Sort((s1, s2) =>
-        //    {
-        //        int val = s1.alias
-        //    }
-        //    );
-        //}
-
-        //public static void Sort(List<Symbol> l)
-        //{
-        //    l.Sort(CompareEntries);
-        //}
-
-        //public static int CompareEntries(Symbol s1, Symbol s2)
-        //{
-        //    if (s1.alias != null && s2.alias == null) return -1;
-        //    if (s1.alias == null && s2.alias != null) return 1;
-        //    return string.Compare(s2.name, s1.name, StringComparison.Ordinal);
-        //}
-
-
-        internal static List<string> ParseTransforms(Group g)
+        private void InitTransforms(Group g)
         {
-            List<string> transforms = null;
             if (!g.Value.IsNullOrEmpty())
             {
                 var parts = g.Value.TrimFirst(Ch.SCOPE).Split(Ch.SCOPE);
 
                 if (parts.Length > 0)
                 {
-                    transforms = new List<string>();
-                    for (int i = 0; i < parts.Length; i++)
-                    {
-                        transforms.Add(parts[i]);
-                    }
+                    if (transforms == null) transforms = new List<string>();
+                    if (transforms.Count > 0) transforms.Clear();
+                    foreach (var part in parts) transforms.Add(part);
                 }
             }
-
-            return transforms;
         }
 
         internal SymbolType Type()

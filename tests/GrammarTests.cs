@@ -74,7 +74,7 @@ namespace Dialogic
             Chat chat;
             string res;
             lines = new[] {
-                "SAY A girl [select2=$fish.name] $select2.ToUpper()",
+                "SAY A girl [select=$fish.name] $select.ToUpper()",
             };
             runtime = new ChatRuntime();
             runtime.ParseText(string.Join("\n", lines));
