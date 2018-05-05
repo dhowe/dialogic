@@ -234,11 +234,6 @@ namespace Dialogic
             Assert.That(res, Is.EqualTo("She was an ARTIST."));
         }
 
-        public static string _AllCaps(string s) // used above
-        {
-            return s.ToUpper();
-        }
-
         [Test]
         public void ResolveWithArticlize()
         {
@@ -257,7 +252,6 @@ namespace Dialogic
             Assert.That(chat, Is.Not.Null);
             chat.Realize(null);
             res = chat.commands[1].Text();
-            //Console.WriteLine(res);
             Assert.That(res, Is.EqualTo("She was an artist."));
 
 
@@ -273,7 +267,6 @@ namespace Dialogic
             {
                 chat.Realize(null);
                 res = chat.commands[1].Text();
-                //Console.WriteLine(i+") "+res);
                 Assert.That(res, Is.Not.EqualTo(last));
                 Assert.That(res, Is.EqualTo("She was an artist.").
                                  Or.EqualTo("She was an animal.").
@@ -1470,8 +1463,10 @@ namespace Dialogic
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Realize(globals);
             Assert.That(chat._Expand(globals, "$start"),
-                        Is.EqualTo("The hungry dog bit the tiny child")
-                        .Or.EqualTo("The angry cat bit the tiny child"));
+                Is.EqualTo("The hungry dog bit the tiny child")
+                .Or.EqualTo("The angry cat bit the tiny child"));
         }
+
+        public static string _AllCaps(string s) => s.ToUpper();
     }
 }

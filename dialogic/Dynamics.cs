@@ -171,11 +171,11 @@ namespace Dialogic
 
     internal class Choice : IResolvable
     {
+        public readonly string[] options;
         public readonly string text;
         public string alias;
-        internal List<string> transforms;
-        public readonly string[] options;
 
+        private List<string> transforms;
         private HashSet<string> unique;
         private string lastResolved;
         private Chat context;
@@ -192,7 +192,7 @@ namespace Dialogic
         }
 
         private string[] ParseOptions(string groups)
-        {   
+        {
             if (unique == null) unique = new HashSet<string>();
             if (unique.Count > 0) unique.Clear();
             var opts = RE.SplitOr.Split(groups);
@@ -208,20 +208,20 @@ namespace Dialogic
         /// <summary>
         /// Parse Choice objects from the specified input. Note that for nested groups, only the innermost group will be parsed.
         /// </summary>
-        public static List<Choice> Parse(string input, 
+        internal static List<Choice> Parse(string input,
             Chat context, bool showMatch = false)
         {
             if (context == null || context.runtime == null)
             {
                 ChatRuntime.Warn("Choice.Parse got null context/runtime: " + input);
             }
-            var groups = new List<Choice>();
-            Parse(input, groups, context, showMatch);
-            return groups;
+            var choices = new List<Choice>();
+            Parse(choices, input, context, showMatch);
+            return choices;
         }
 
-        private static void Parse(string input, 
-            List<Choice> results, Chat context, bool showMatch = false)
+        public static void Parse(List<Choice> results, string input,
+            Chat context, bool showMatch = false)
         {
             // OPT: Cache the entire match?
             foreach (Match m in RE.MatchParens.Matches(input))
@@ -240,35 +240,30 @@ namespace Dialogic
                     expr = full.Substring(oidx + 1, cidx - oidx - 1);
                 }
 
-                if (RE.HasParens.IsMatch(expr))
+                if (RE.HasParens.IsMatch(expr)) throw new Exception
+                    ("INVALID STATE"); //Parse(expr, results, context);
+
+                if (CacheEnabled(context))
                 {
-                    throw new Exception("INVALID STATE!!!");
-                    //Parse(expr, results, context);
+                    var cache = context.runtime.choiceCache;
+
+                    // cache our prior Choice objects here, 
+                    var choiceKey = context.text + Ch.LABEL + full;
+                    if (!cache.ContainsKey(choiceKey))
+                    {
+                        //Console.WriteLine("CACHE-add: " + choiceKey);
+                        cache.Add(choiceKey, new Choice(context, full, expr, alias, trans));
+                    }
+                    ///else Console.WriteLine("CACHE-HIT: " + choiceKey);
+                    results.Add(cache[choiceKey]);
+
+                    // this data is not in the cache key, so we reset it here
+                    cache[choiceKey].transforms = trans;
+                    cache[choiceKey].alias = alias;
                 }
-                else
+                else  // no cache
                 {
-                    if (CacheEnabled(context))
-                    {
-                        var cache = context.runtime.choiceCache;
-
-                        // cache our prior Choice objects here, 
-                        var choiceKey = context.text + Ch.LABEL + full;//+ method + alias;
-                        if (!cache.ContainsKey(choiceKey))
-                        {
-                            //Console.WriteLine("CACHE-add: " + choiceKey);
-                            cache.Add(choiceKey, new Choice(context, full, expr, alias, trans));
-                        }
-                        ///else Console.WriteLine("CACHE-HIT: " + choiceKey);
-                        results.Add(cache[choiceKey]);
-
-                        // note: this data is not in the cache key, so we reset it here
-                        cache[choiceKey].transforms = trans;
-                        cache[choiceKey].alias = alias;
-                    }
-                    else  // no cache
-                    {
-                        results.Add(new Choice(context, full, expr, alias, trans));
-                    }
+                    results.Add(new Choice(context, full, expr, alias, trans));
                 }
             }
         }
@@ -309,9 +304,8 @@ namespace Dialogic
 
             HandleAlias(resolved, context); // push alias value into scope
 
-            return HandleTransforms(resolved);; // do functions and return
+            return HandleTransforms(resolved); ; // do functions and return
         }
-
 
         internal static List<string> ParseTransforms(Group g)
         {
@@ -340,6 +334,11 @@ namespace Dialogic
         internal string Replace(string full, string replaceWith)
         {
             return full.ReplaceFirst(this.Text(), replaceWith);
+        }
+
+        internal string[] _TransArray() // test only
+        {
+            return transforms.ToArray();
         }
 
         internal string HandleTransforms(string resolved)
@@ -378,10 +377,7 @@ namespace Dialogic
             }
         }
 
-        public override string ToString()
-        {
-            return Text();
-        }
+        public override string ToString() => text;
     }
 
     internal class Symbol : IResolvable
@@ -419,17 +415,22 @@ namespace Dialogic
             return Ch.SYMBOL + (bounded ? "{" + name + '}' : name);
         }
 
-        public static List<Symbol> Parse(string text, Chat context)
+        public static void Parse(List<Symbol> symbols, string text, Chat context)
         {
             var matches = RE.ParseVars.Matches(text);
 
-            var symbols = new List<Symbol>();
             foreach (Match match in matches)
             {
                 // Create a new Symbol and add it to the result
                 symbols.Add(new Symbol(context, match));
             }
+        }
 
+        public static List<Symbol> Parse(string text, Chat context)
+        {
+
+            var symbols = new List<Symbol>();
+            Parse(symbols, text, context);
             return symbols;
         }
 
@@ -449,17 +450,14 @@ namespace Dialogic
         internal string Resolve(IDictionary<string, object> globals)
         {
             object resolved = ResolveSymbol(name, context, globals);
-            switch (this.Type())
+
+            if (!transforms.IsNullOrEmpty())
             {
-                case SymbolType.SIMPLE:
-
-                    HandleAlias(resolved, globals);
-                    break;
-
-                case SymbolType.GLOBAL_SCOPE:
-
-                    resolved = GetViaPath(resolved, transforms.ToArray(), globals);
-                    break;
+                resolved = GetViaPath(resolved, transforms.ToArray(), globals);
+            }
+            else
+            {
+                HandleAlias(resolved, globals);
             }
 
             if (resolved != null)
@@ -572,14 +570,6 @@ namespace Dialogic
                 }
             }
         }
-
-        internal SymbolType Type()
-        {
-            return transforms.IsNullOrEmpty() ?
-                SymbolType.SIMPLE : SymbolType.GLOBAL_SCOPE;
-        }
-
-        internal enum SymbolType { SIMPLE, GLOBAL_SCOPE }
     }
 
     /// <summary>

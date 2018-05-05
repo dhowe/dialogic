@@ -12,15 +12,18 @@ namespace Dialogic
     {
         public static bool DBUG = false;
 
+        private static List<Symbol> symbols = new List<Symbol>();
+        private static List<Choice> choices = new List<Choice>();
+
         /// <summary>
         /// Iteratively resolve any variables or groups in the specified text 
         /// in the appropriate context
         /// </summary>
-        public static string Bind(string text, Chat parent, IDictionary<string, object> globals)
+        public static string Bind(string text, Chat context, IDictionary<string, object> globals)
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, parent));
+            if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, context));
 
             var original = text;
             int depth = 0, maxRecursionDepth = Defaults.BIND_MAX_DEPTH;
@@ -28,17 +31,17 @@ namespace Dialogic
             do
             {
                 // resolve any symbols in the input
-                text = BindSymbols(text, parent, globals, depth);
+                text = BindSymbols(text, context, globals, depth);
 
                 // resolve any groups in the input
-                text = BindGroups(text, parent, depth);
+                text = BindGroups(text, context, depth);
 
                 // throw if we've hit max recursion depth
                 if (++depth > maxRecursionDepth)
                 {
                     if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
                     {
-                        var symbols = Symbol.Parse(text, parent);
+                        ParseSymbols(text, context);
                         if (!symbols.IsNullOrEmpty())
                         {
                             symbols[0].OnBindError(globals);
@@ -69,7 +72,7 @@ namespace Dialogic
         {
             if (DBUG) Console.WriteLine("  Symbols(" + level + "): " + Info(text, context));
 
-            var symbols = Symbol.Parse(text, context);
+            ParseSymbols(text, context);
             while (symbols.Count > 0)
             {
                 if (DBUG) Console.WriteLine("    Found: " + symbols.Stringify());
@@ -77,12 +80,12 @@ namespace Dialogic
                 var symbol = symbols.Pop();
                 if (DBUG) Console.WriteLine("    Pop:    " + symbol);
 
-                string pretext = text; 
+                string pretext = text;
 
                 var result = symbol.Resolve(globals);
 
-                if (DBUG) Console.WriteLine("      "+ symbol.Name() + " -> " + result);
-                
+                if (DBUG) Console.WriteLine("      " + symbol.Name() + " -> " + result);
+
                 if (result != null)
                 {
                     text = symbol.Replace(text, result);
@@ -90,7 +93,7 @@ namespace Dialogic
                     if (pretext != text && text.Contains(Ch.SYMBOL))
                     {
                         // repeat if we've made progress but still have symbols
-                        symbols = Symbol.Parse(text, symbol.context);
+                        ParseSymbols(text, context);
                         continue;
                     }
                 }
@@ -118,21 +121,29 @@ namespace Dialogic
                     ChatRuntime.Warn("BindGroups added parens to: " + text);
                 }
 
-                var choices = Choice.Parse(text, context);
-
+                ParseChoices(text, context);
                 if (DBUG) Console.WriteLine("    Found: " + choices.Stringify());
-
                 foreach (var choice in choices)
                 {
                     var result = choice.Resolve(); // handles transforms
                     if (DBUG) Console.WriteLine("      " + choice + " -> " + result);
-                    //text = text.ReplaceFirst(choice.Text(), result);
-                    if (result != null)
-                        text = choice.Replace(text, result);
+                    if (result != null) text = choice.Replace(text, result);
                 }
             }
 
             return text;
+        }
+
+        private static void ParseSymbols(string text, Chat context)
+        {
+            symbols.Clear();
+            Symbol.Parse(symbols, text, context);
+        }
+
+        private static void ParseChoices(string text, Chat context)
+        {
+            choices.Clear();
+            Choice.Parse(choices, text, context);
         }
 
         private static bool IsDynamic(string text)
@@ -144,7 +155,7 @@ namespace Dialogic
         private static string Info(string text, Chat parent)
         {
             return text + " :: " + (parent == null ? "{}" :
-                parent.text +  " "+parent.scope.Stringify());
+                parent.text + " " + parent.scope.Stringify());
         }
     }
 }

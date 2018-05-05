@@ -692,25 +692,6 @@ namespace Dialogic
             Assert.That(s.bounded, Is.EqualTo(false));
         }
 
-        //[Test]
-        //public void ParseSymbolWithMod()
-        //{
-        //    var ts = new[] { "", ".", "!", ":", ";", ",", "?", ")", "\"", "'" };
-        //    foreach (var t in ts)
-        //    {
-        //        var sy = Symbol.Parse("$ab&c" + t).First();
-        //        Assert.That(sy.symbol, Is.EqualTo("ab"));
-        //        Assert.That(sy.modifiers.Count, Is.EqualTo(1));
-        //        Assert.That(sy.modifiers[0], Is.EqualTo("c"));
-        //    }
-
-        //    var sym = Symbol.Parse("$ab&mod1&mod2.").First();
-        //    Assert.That(sym.symbol, Is.EqualTo("ab"));
-        //    Assert.That(sym.modifiers.Count, Is.EqualTo(2));
-        //    Assert.That(sym.modifiers[0], Is.EqualTo("mod1"));
-        //    Assert.That(sym.modifiers[1], Is.EqualTo("mod2"));
-        //}
-
         [Test]
         public void ParseSymbols()
         {
@@ -828,7 +809,7 @@ namespace Dialogic
 
             choice = Choice.Parse("you (a | b) a ",c,false)[0];
             expected = new[] { "a", "b" };
-            Assert.That(choice.Text(), Is.EqualTo("(a | b)"));
+            Assert.That(choice.text, Is.EqualTo("(a | b)"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EqualTo(expected));
             CollectionAssert.Contains(expected, choice.Resolve());
@@ -836,14 +817,14 @@ namespace Dialogic
             //Resolver.DBUG = true;
             choice = Choice.Parse("you (a | b).ToUpper() a ", c, false)[0];
             expected = new[] { "a", "b" };
-            Assert.That(choice.Text(), Is.EqualTo("(a | b).ToUpper()"));
+            Assert.That(choice.text, Is.EqualTo("(a | b).ToUpper()"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EqualTo(expected));
             CollectionAssert.Contains(new[] { "A", "B" }, choice.Resolve());
 
             choice = Choice.Parse("you (a|b) are",c)[0];
             expected = new[] { "a", "b" };
-            Assert.That(choice.Text(), Is.EqualTo("(a|b)"));
+            Assert.That(choice.text, Is.EqualTo("(a|b)"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EqualTo(expected));
             CollectionAssert.Contains(expected, choice.Resolve());
@@ -851,24 +832,24 @@ namespace Dialogic
             //Resolver.DBUG = true;
             choice = Choice.Parse("you (a|b).ToUpper() are", c)[0];
             expected = new[] { "a", "b" };
-            Assert.That(choice.Text(), Is.EqualTo("(a|b).ToUpper()"));
+            Assert.That(choice.text, Is.EqualTo("(a|b).ToUpper()"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EqualTo(expected));
-            Assert.That(choice.transforms.ToArray(), Is.EquivalentTo(new[] { "ToUpper" }));
+            Assert.That(choice._TransArray(), Is.EquivalentTo(new[] { "ToUpper" }));
             CollectionAssert.Contains(new[] { "A", "B" }, choice.Resolve());
 
             //Resolver.DBUG = true;
             choice = Choice.Parse("you (a|b).ToUpper().articlize() are", c)[0];
             expected = new[] { "a", "b" };
-            Assert.That(choice.Text(), Is.EqualTo("(a|b).ToUpper().articlize()"));
+            Assert.That(choice.text, Is.EqualTo("(a|b).ToUpper().articlize()"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EqualTo(expected));
-            Assert.That(choice.transforms.ToArray(), Is.EquivalentTo(new[] { "ToUpper", "articlize" }));
+            Assert.That(choice._TransArray(), Is.EquivalentTo(new[] { "ToUpper", "articlize" }));
             CollectionAssert.Contains(new[] { "an A", "a B" }, choice.Resolve());
 
             choice = Choice.Parse("you (a | b |c). are",c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("(a | b |c)"));
+            Assert.That(choice.text, Is.EqualTo("(a | b |c)"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.options, Is.EqualTo(expected));
             CollectionAssert.Contains(expected, choice.Resolve());
@@ -876,21 +857,21 @@ namespace Dialogic
             //Resolver.DBUG = true;
             choice = Choice.Parse("you (a | b |c).ToUpper(). are", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("(a | b |c).ToUpper()"));
+            Assert.That(choice.text, Is.EqualTo("(a | b |c).ToUpper()"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.options, Is.EqualTo(expected));
             CollectionAssert.Contains(new[] { "A", "B","C" }, choice.Resolve());
 
             choice = Choice.Parse("you (a | b |c).ToUpper().articlize(). are", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("(a | b |c).ToUpper().articlize()"));
+            Assert.That(choice.text, Is.EqualTo("(a | b |c).ToUpper().articlize()"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.options, Is.EqualTo(expected));
             CollectionAssert.Contains(new[] { "an A", "a B", "a C" }, choice.Resolve());
 
             choice = Choice.Parse("you [d=(a | b | c)]. The",c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c)]"));
+            Assert.That(choice.text, Is.EqualTo("[d=(a | b | c)]"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.alias, Is.EqualTo("d"));
             Assert.That(choice.options, Is.EqualTo(expected));
@@ -901,7 +882,7 @@ namespace Dialogic
             //Resolver.DBUG = true;
             choice = Choice.Parse("you [d=(a | b | c).ToUpper()]. The", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c).ToUpper()]"));
+            Assert.That(choice.text, Is.EqualTo("[d=(a | b | c).ToUpper()]"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.alias, Is.EqualTo("d"));
             Assert.That(choice.options, Is.EqualTo(expected));
@@ -911,7 +892,7 @@ namespace Dialogic
 
             choice = Choice.Parse("you [d=(a | b | c).ToUpper().articlize()]. The", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c).ToUpper().articlize()]"));
+            Assert.That(choice.text, Is.EqualTo("[d=(a | b | c).ToUpper().articlize()]"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.alias, Is.EqualTo("d"));
             Assert.That(choice.options, Is.EqualTo(expected));
@@ -921,7 +902,7 @@ namespace Dialogic
 
             choice = Choice.Parse("you [d=(a | b | c)].ToUpper(). The", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c)].ToUpper()"));
+            Assert.That(choice.text, Is.EqualTo("[d=(a | b | c)].ToUpper()"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.options, Is.EqualTo(expected));
             Assert.That(choice.alias, Is.EqualTo("d"));
@@ -931,7 +912,7 @@ namespace Dialogic
 
             choice = Choice.Parse("you [d=(a | b | c)].ToUpper().articlize(). The", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[d=(a | b | c)].ToUpper().articlize()"));
+            Assert.That(choice.text, Is.EqualTo("[d=(a | b | c)].ToUpper().articlize()"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.options, Is.EqualTo(expected));
             Assert.That(choice.alias, Is.EqualTo("d"));
@@ -941,7 +922,7 @@ namespace Dialogic
 
             choice = Choice.Parse("you [selected=(a | b | c)]. The",c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[selected=(a | b | c)]"));
+            Assert.That(choice.text, Is.EqualTo("[selected=(a | b | c)]"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.alias, Is.EqualTo("selected"));
             Assert.That(choice.options, Is.EqualTo(expected));
@@ -952,7 +933,7 @@ namespace Dialogic
             //Resolver.DBUG = true;
             choice = Choice.Parse("you [selected=(a | b | c).ToUpper()]. The", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[selected=(a | b | c).ToUpper()]"));
+            Assert.That(choice.text, Is.EqualTo("[selected=(a | b | c).ToUpper()]"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.alias, Is.EqualTo("selected"));
             Assert.That(choice.options, Is.EqualTo(expected));
@@ -962,7 +943,7 @@ namespace Dialogic
 
             choice = Choice.Parse("you [selected=(a | b | c).ToUpper().articlize()]. The", c)[0];
             expected = new[] { "a", "b", "c" };
-            Assert.That(choice.Text(), Is.EqualTo("[selected=(a | b | c).ToUpper().articlize()]"));
+            Assert.That(choice.text, Is.EqualTo("[selected=(a | b | c).ToUpper().articlize()]"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.alias, Is.EqualTo("selected"));
             Assert.That(choice.options, Is.EqualTo(expected));

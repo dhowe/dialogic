@@ -20,25 +20,20 @@ namespace Dialogic
                 { "count", 4 }
         };
 
-        // TODO: fix symbol sorting problem [Test]
-        public void TransformBugStillFailing()
+        [Test]
+        public void SimpleSymbolTraversal()
         {
-            ChatRuntime rt;
-            string txt;
-            Say say;
-            Chat chat;
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res = Resolver.Bind("Hello $fish.name", c1, globals);
+            Assert.That(res, Is.EqualTo("Hello Fred"));
 
-            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=${thing1}], many $save.pluralize()";
-            rt = new ChatRuntime();
-            rt.ParseText(txt);
-            chat = rt.Chats().First();
-            say = (Say)chat.commands[1];
-            chat.Realize(globals);
-            Assert.That(say.Text(), Is.EqualTo("A cat, many cats").Or.EqualTo("A crow, many crow").Or.EqualTo("A cow, many cows"));
+            res = Resolver.Bind("Hello $fish.name.", c1, globals);
+            Assert.That(res, Is.EqualTo("Hello Fred."));
         }
 
         [Test]
-        public void TransformBugs()
+        public void TransformIssues()
         {
             ChatRuntime rt;
             string txt;
@@ -61,6 +56,15 @@ namespace Dialogic
             say = (Say)chat.commands[1];
             chat.Realize(globals);
             Assert.That(say.Text(), Is.EqualTo("A cat cat"));
+
+
+            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=${thing1}], many $save.pluralize()";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            say = (Say)chat.commands[1];
+            chat.Realize(globals);
+            Assert.That(say.Text(), Is.EqualTo("A cat, many cats").Or.EqualTo("A crow, many crow").Or.EqualTo("A cow, many cows"));
         }
 
         [Test]
@@ -470,6 +474,65 @@ namespace Dialogic
             Assert.That(options[1].GetType(), Is.EqualTo(typeof(Opt)));
             Assert.That(options[1].Text(), Is.EqualTo("4"));
             Assert.That(options[1].action.GetType(), Is.EqualTo(typeof(Go)));
+        }
+
+
+
+        [Test]
+        public void EmptyGlobalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            Assert.Throws<UnboundSymbol>(() =>
+                Resolver.Bind("$animal", c1, null));
+        }
+
+        [Test]
+        public void EmptyGlobalLocalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            Assert.Throws<UnboundSymbol>(() =>
+                Resolver.Bind("$animal", c1, null));
+        }
+
+        [Test]
+        public void SimpleGlobalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res = Resolver.Bind("$animal", c1, globals);
+            Assert.That(res, Is.EqualTo("dog"));
+        }
+
+        [Test]
+        public void ComplexGlobalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res = Resolver.Bind("$cmplx", c1, globals);
+            Assert.That(res, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("then"));
+        }
+
+        [Test]
+        public void SimpleLocalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            c1.scope.Add("a", "b");
+            var res = Resolver.Bind("$a", c1, globals);
+            Assert.That(res, Is.EqualTo("b"));
+        }
+
+        [Test]
+        public void ComplexLocalScope()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            c1.scope.Add("a", "$b");
+            c1.scope.Add("b", "c");
+            var res = Resolver.Bind("$a", c1, globals);
+            Assert.That(res, Is.EqualTo("c"));
         }
 
         private static Chat CreateParentChat(string name)
