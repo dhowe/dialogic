@@ -269,10 +269,11 @@ namespace Dialogic
             runtime.ParseText(string.Join("\n", lines));
             chat = runtime.Chats()[0];
             Assert.That(chat, Is.Not.Null);
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 15; i++)
             {
                 chat.Realize(null);
                 res = chat.commands[1].Text();
+                //Console.WriteLine(i+") "+res);
                 Assert.That(res, Is.Not.EqualTo(last));
                 Assert.That(res, Is.EqualTo("She was an artist.").
                                  Or.EqualTo("She was an animal.").

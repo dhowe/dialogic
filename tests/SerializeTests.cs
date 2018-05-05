@@ -175,6 +175,8 @@ namespace Dialogic
 
             var s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nDone"));
+
+            // TODO: add more chats via Update, with higher search score
         }
 
         // Implement ISerializer and then instance to ChatRuntime methods...

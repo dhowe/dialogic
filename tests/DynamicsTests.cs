@@ -784,10 +784,6 @@ namespace Dialogic
         [Test]
         public void ParseChoices()
         {
-            //TODO: working here,  on innmerost parens
-
-            var tryMe = "https://stackoverflow.com/questions/20906479/javascript-regex-innermost-parentheses-not-surrounded-by-quotes";
-
             Chat c = CreateParentChat("c");
             List<Choice> choices;
             Choice choice;

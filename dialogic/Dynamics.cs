@@ -227,12 +227,11 @@ namespace Dialogic
             foreach (Match m in RE.MatchParens.Matches(input))
             {
                 if (showMatch) Util.ShowMatch(m);
+
                 var full = m.Groups[0].Value;
                 var alias = m.Groups[1].Value;
                 var expr = m.Groups[2].Value;
                 var trans = ParseTransforms(m.Groups[3]);
-
-                if (showMatch) Console.WriteLine("expr1="+expr);
 
                 if (expr.Contains(Ch.CGROUP)) // TODO: fix this hack
                 {
@@ -241,11 +240,10 @@ namespace Dialogic
                     expr = full.Substring(oidx + 1, cidx - oidx - 1);
                 }
 
-                if (showMatch) Console.WriteLine("expr2=" + expr);
-
                 if (RE.HasParens.IsMatch(expr))
                 {
-                    Parse(expr, results, context);
+                    throw new Exception("INVALID STATE!!!");
+                    //Parse(expr, results, context);
                 }
                 else
                 {
@@ -275,34 +273,6 @@ namespace Dialogic
             }
         }
 
-        internal static List<string> ParseTransforms(Group g)
-        {
-            List<string> transforms = null;
-            if (!g.Value.IsNullOrEmpty())
-            {
-                if (transforms == null) transforms = new List<string>();
-                if (transforms.Count > 0) transforms.Clear();
-                foreach (Capture c in g.Captures) transforms.Add(c.Value);
-            }
-            return transforms;
-        }
-
-        internal static bool CacheEnabled(Chat context)
-        {
-            return context != null && context.runtime != null
-                && context.runtime.choiceCache != null;
-        }
-
-        internal static bool IsStrictMode(Chat context)
-        {
-            return context != null && context.runtime != null
-                && context.runtime.strictMode;
-        }
-
-        internal string Replace(string full, string replaceWith)
-        {
-            return full.ReplaceFirst(this.Text(), replaceWith);
-        }
 
         internal string Resolve()
         {
@@ -335,10 +305,41 @@ namespace Dialogic
                     break;
             }
 
-            HandleAlias(resolved, context);
-            lastResolved = resolved = HandleTransforms(resolved);
+            lastResolved = resolved; // store the result for next time
 
-            return resolved;
+            HandleAlias(resolved, context); // push alias value into scope
+
+            return HandleTransforms(resolved);; // do functions and return
+        }
+
+
+        internal static List<string> ParseTransforms(Group g)
+        {
+            List<string> transforms = null;
+            if (!g.Value.IsNullOrEmpty())
+            {
+                if (transforms == null) transforms = new List<string>();
+                if (transforms.Count > 0) transforms.Clear();
+                foreach (Capture c in g.Captures) transforms.Add(c.Value);
+            }
+            return transforms;
+        }
+
+        internal static bool CacheEnabled(Chat context)
+        {
+            return context != null && context.runtime != null
+                && context.runtime.choiceCache != null;
+        }
+
+        internal static bool IsStrictMode(Chat context)
+        {
+            return context != null && context.runtime != null
+                && context.runtime.strictMode;
+        }
+
+        internal string Replace(string full, string replaceWith)
+        {
+            return full.ReplaceFirst(this.Text(), replaceWith);
         }
 
         internal string HandleTransforms(string resolved)

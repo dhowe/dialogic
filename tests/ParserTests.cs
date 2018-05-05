@@ -364,7 +364,7 @@ namespace Dialogic
         [Test]
         public void ChatPreloadMeta()
         {
-            List<Chat> chats; Chat c2, c1;
+            List<Chat> chats; //Chat c2, c1;
 
             chats = ChatParser.ParseText("CHAT c1 {preload=true}\nSET $c1.staleness=2", NO_VALIDATORS);
             Assert.That(chats[0].IsPreload(), Is.True);
