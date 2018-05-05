@@ -8,18 +8,24 @@ namespace Dialogic
     /// <summary>
     /// Handles resolution of symbols, probabilistic groups, transforms, and grammar production
     /// </summary>
-    public static class Resolver
+    public class Resolver
     {
         public static bool DBUG = false;
 
-        private static List<Symbol> symbols = new List<Symbol>();
-        private static List<Choice> choices = new List<Choice>();
+        private List<Symbol> symbols = new List<Symbol>();
+        private List<Choice> choices = new List<Choice>();
+        private ChatRuntime chatRuntime;
+
+        public Resolver(ChatRuntime chatRuntime)
+        {
+            this.chatRuntime = chatRuntime;
+        }
 
         /// <summary>
         /// Iteratively resolve any variables or groups in the specified text 
         /// in the appropriate context
         /// </summary>
-        public static string Bind(string text, Chat context, IDictionary<string, object> globals)
+        public string Bind(string text, Chat context, IDictionary<string, object> globals)
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
@@ -67,7 +73,7 @@ namespace Dialogic
         ///// Iteratively resolve any variables in the text 
         ///// via the appropriate context
         ///// </summary>
-        public static string BindSymbols(string text, Chat context,
+        public string BindSymbols(string text, Chat context,
             IDictionary<string, object> globals, int level = 0)
         {
             if (DBUG) Console.WriteLine("  Symbols(" + level + "): " + Info(text, context));
@@ -107,7 +113,7 @@ namespace Dialogic
         /// in the appropriate context, creating and caching Resolution
         /// objects as necessary
         /// </summary>
-        public static string BindGroups(string text, Chat context = null, int level = 0)
+        public string BindGroups(string text, Chat context = null, int level = 0)
         {
             if (text.Contains(Ch.OR))
             {
@@ -134,13 +140,13 @@ namespace Dialogic
             return text;
         }
 
-        private static void ParseSymbols(string text, Chat context)
+        private void ParseSymbols(string text, Chat context)
         {
             symbols.Clear();
             Symbol.Parse(symbols, text, context);
         }
 
-        private static void ParseChoices(string text, Chat context)
+        private void ParseChoices(string text, Chat context)
         {
             choices.Clear();
             Choice.Parse(choices, text, context);

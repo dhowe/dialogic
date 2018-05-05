@@ -11,8 +11,13 @@ namespace Dialogic
     {
         public static bool DBUG = false;
 
-        private bool stalenessMiss = false;
-        private bool resetRequired = false; // opt
+        private bool stalenessMiss,resetRequired;
+        private ChatRuntime runtime;
+
+        public FuzzySearch(ChatRuntime chatRuntime)
+        {
+            this.runtime = chatRuntime;
+        }
 
         /// <summary>
         /// Finds the highest scoring chat which does not violate any of the constraints.
@@ -23,10 +28,11 @@ namespace Dialogic
         /// unrelax hard constraints, lower the staleness threshold, and repeat.
         /// 
         /// Break ties based on milliseconds since the Chat was last run. If there
-        /// are still ties, break them with coin-flip.
+        /// are still ties, break them with a coin-flip.
         /// 
         /// Note that the Chat containing the Find object is never returned.
         /// </summary>
+        /// 
         /// <returns>Chat</returns>
         /// <param name="chats">Chats.</param>
         /// <param name="constraints">Constraints.</param>
@@ -133,7 +139,7 @@ namespace Dialogic
                     if (chatMeta != null && chatMeta.ContainsKey(key)) // has-key
                     {
                         var chatPropVal = (string)chatMeta[key];
-                        if (!(constraint.Check(chatPropVal, globals)))
+                        if (!(constraint.Check(runtime.resolver, chatPropVal, globals)))
                         {
                             if (DBUG) Console.WriteLine("    FAIL: " + constraint);
                             stalenessMiss |= (key == "staleness");

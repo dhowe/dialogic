@@ -36,7 +36,7 @@ namespace Dialogic
             staleness = Defaults.CHAT_STALENESS;
             scope = new Dictionary<string, object>();
 
-            realized = null; // not relevant for chats
+            resolved = null; // not relevant for chats
         }
 
         internal static Chat Create(string name, ChatRuntime rt = null)
@@ -87,16 +87,14 @@ namespace Dialogic
             this.commands.Add(c);
         }
 
-        protected internal override IDictionary<string, object> Realize
+        protected internal override IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
-            //Console.WriteLine("[WARN] Chats need not be realized, doing commands instead");
             if (globals == null) globals = new Dictionary<string, object>();
-            commands.ForEach(c => c.Realize(globals));
+            commands.ForEach(c => c.Resolve(globals));
             return null; // nothing to return;
         }
 
-        ///  All Chats must have a valid unique label, and a staleness value
         protected internal override Command Validate()
         {
             if (text.IndexOf(' ') > -1) throw BadArg
@@ -292,7 +290,7 @@ namespace Dialogic
             s.Init(start, string.Empty, new string[0]);
             s.SetActor(Dialogic.Actor.Default);
             s.parent = this;
-            s.Realize(globals);
+            s.Resolve(globals);
             return s.Text();
         }
 

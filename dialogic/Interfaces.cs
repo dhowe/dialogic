@@ -36,7 +36,7 @@ namespace Dialogic
     /// </summary>
     public interface ISendable {
 
-        IDictionary<string, object> Realized();
+        IDictionary<string, object> Resolved();
     }
 
     /// <summary>

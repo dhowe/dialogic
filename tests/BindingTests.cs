@@ -57,7 +57,7 @@ namespace Dialogic
                 "SAY $ab",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Resolve(globals);
             Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
 
             // global-miss
@@ -67,7 +67,7 @@ namespace Dialogic
                 "SAY $ab",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Resolve(globals);
             Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
 
             // global-hit
@@ -76,7 +76,7 @@ namespace Dialogic
                 "SAY $animal",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Resolve(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("dog"));
 
             // global-properties
@@ -85,7 +85,7 @@ namespace Dialogic
                 "SAY $fish.name",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Resolve(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
 
             // global-bounded
@@ -94,7 +94,7 @@ namespace Dialogic
                 "SAY ${fish.name}",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Resolve(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
 
             // global-nested
@@ -103,7 +103,7 @@ namespace Dialogic
                 "SAY $fish.flipper.speed",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Resolve(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
             // global-nested-bounded
@@ -112,7 +112,7 @@ namespace Dialogic
                 "SAY ${fish.flipper.speed}",
             };
             text = String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Resolve(globals);
             Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
             // cross-chat-global
@@ -124,7 +124,7 @@ namespace Dialogic
             };
             text = String.Join("\n", lines);
             var chats = ChatParser.ParseText(text, true);
-            chats.ForEach(c => c.Realize(globals));
+            chats.ForEach(c => c.Resolve(globals));
             Assert.That(chats[1].commands[0].Text(), Is.EqualTo("hello"));
 
 
@@ -139,7 +139,7 @@ namespace Dialogic
             };
             text = String.Join("\n", lines);
             chats = ChatParser.ParseText(text, true);
-            chats.ForEach(c => c.Realize(globals));
+            chats.ForEach(c => c.Resolve(globals));
             Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
 
             // chat-direct bounded
@@ -151,7 +151,7 @@ namespace Dialogic
             };
             text = String.Join("\n", lines);
             chats = ChatParser.ParseText(text, true);
-            chats.ForEach(c => c.Realize(globals));
+            chats.ForEach(c => c.Resolve(globals));
             Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
         }
     }

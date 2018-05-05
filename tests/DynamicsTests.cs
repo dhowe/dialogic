@@ -163,7 +163,7 @@ namespace Dialogic
             Say say = (Dialogic.Say)chat.commands[1];
             Assert.That(say.text, Is.EqualTo("Hi $fish.name"));
 
-            chat.Realize(globals);
+            chat.Resolve(globals);
             Assert.That(say.Text(), Is.EqualTo("Hi Mary"));
         }
 
@@ -180,7 +180,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chat.Realize(globals);
+            chat.Resolve(globals);
 
             var chat2 = rt["c2"];
             Assert.That(chat2, Is.Not.Null);
@@ -188,7 +188,7 @@ namespace Dialogic
 
             Assert.That(chat.Staleness(), Is.EqualTo(0));
 
-            chat2.Realize(globals);
+            chat2.Resolve(globals);
 
             Assert.That(chat.Staleness(), Is.EqualTo(2));
         }
@@ -206,7 +206,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chat.Realize(globals);
+            chat.Resolve(globals);
 
             var chat2 = rt["c2"];
             Assert.That(chat2, Is.Not.Null);
@@ -215,7 +215,7 @@ namespace Dialogic
 
             // throw b/c we only allow setting of persistent properties 
             // (staleness, etc) on remote chats
-            Assert.Throws<BindException>(() => chat2.Realize(globals));
+            Assert.Throws<BindException>(() => chat2.Resolve(globals));
         }
 
         [Test]
@@ -231,7 +231,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chat.Realize(globals);
+            chat.Resolve(globals);
 
             var chat2 = rt["c2"];
             Assert.That(chat2, Is.Not.Null);
@@ -239,7 +239,7 @@ namespace Dialogic
             Assert.That(chat.Staleness(), Is.EqualTo(0));
 
             // throw b/c $WRONG.staleness doesn't exist in any scope
-            Assert.Throws<BindException>(() => chat2.Realize(globals));
+            Assert.Throws<BindException>(() => chat2.Resolve(globals));
         }
 
         [Test]
@@ -256,7 +256,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chat.Realize(globals);
+            chat.Resolve(globals);
 
             var chat2 = rt["c2"];
             Assert.That(chat2, Is.Not.Null);
@@ -265,7 +265,7 @@ namespace Dialogic
             Assert.That(chat.Staleness(), Is.EqualTo(Defaults.CHAT_STALENESS));
             Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), Is.EqualTo(Defaults.CHAT_STALENESS));
 
-            chat2.Realize(globals);
+            chat2.Resolve(globals);
             Assert.That(chat.Staleness(), Is.EqualTo(2));
             Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), Is.EqualTo(2));
 
@@ -281,7 +281,7 @@ namespace Dialogic
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
 
-            chat.Realize(globals);
+            chat.Resolve(globals);
 
             chat2 = rt["c2"];
             Assert.That(chat2, Is.Not.Null);
@@ -289,7 +289,7 @@ namespace Dialogic
 
             // no need to check metadata, except for staleness
             Assert.That(chat.StalenessIncr(), Is.EqualTo(Defaults.CHAT_STALENESS_INCR));
-            chat2.Realize(globals);
+            chat2.Resolve(globals);
             Assert.That(chat.StalenessIncr(), Is.EqualTo(2));
         }
 
@@ -332,7 +332,7 @@ namespace Dialogic
             // create a realized Chat with the full set of global props
             var c = Chat.Create(name);
             foreach (var prop in globals.Keys) c.SetMeta(prop, globals[prop]);
-            c.Realize(globals);
+            c.Resolve(globals);
             return c;
         }
 
@@ -375,7 +375,7 @@ namespace Dialogic
             rt.chats = new Dictionary<string, Chat>();
             rt.ParseText(s);
             Say say = (Dialogic.Say)rt.Chats().First().commands.First();
-            say.Realize(globs);
+            say.Resolve(globs);
             s = say.Text();
             //Console.WriteLine(s);
             return s;
@@ -743,21 +743,21 @@ namespace Dialogic
 
             //Resolver.DBUG = true;
             (rt = new ChatRuntime()).ParseText("CHAT c1\n(a | (b | c))", true);
-            rt["c1"].Realize(null);
+            rt["c1"].Resolve(null);
             s = rt["c1"].commands[0].Text();
             Assert.That(s, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("c"));
 
             //chat = ChatParser.ParseText("CHAT c2\n[d=(a | b)] $d", true)[0];
             //chat.Realize(globals);
             (rt = new ChatRuntime()).ParseText("CHAT c2\n[d=(a | b)] $d", true);
-            rt["c2"].Realize(null);
+            rt["c2"].Resolve(null);
             s = rt["c2"].commands[0].Text();
             Assert.That(s, Is.EqualTo("a a").Or.EqualTo("b b"));
 
             //chat = ChatParser.ParseText("CHAT c3\n[d=(a | (b | c))] $d", true)[0];
             //chat.Realize(globals);
             (rt = new ChatRuntime()).ParseText("CHAT c3\n[d=(a | (b | c))] $d", true);
-            rt["c3"].Realize(null);
+            rt["c3"].Resolve(null);
             s = rt["c3"].commands[0].Text();
             Assert.That(s, Is.EqualTo("a a").Or.EqualTo("b b").Or.EqualTo("c c"));
         }
