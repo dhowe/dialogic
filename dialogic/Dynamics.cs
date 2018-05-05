@@ -187,7 +187,7 @@ namespace Dialogic
             this.context = context;
             this.transforms = transforms;
             this.options = ParseOptions(groups);
-            Console.WriteLine(options.Stringify()+" :: "+text);
+            //Console.WriteLine(options.Stringify()+" :: "+text);
             this.alias = alias.IsNullOrEmpty() ? null : alias;
         }
 
@@ -275,7 +275,7 @@ namespace Dialogic
             }
         }
 
-        private static List<string> ParseTransforms(Group g)
+        internal static List<string> ParseTransforms(Group g)
         {
             List<string> transforms = null;
             if (!g.Value.IsNullOrEmpty())

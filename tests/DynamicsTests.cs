@@ -784,6 +784,10 @@ namespace Dialogic
         [Test]
         public void ParseChoices()
         {
+            //TODO: working here,  on innmerost parens
+
+            var tryMe = "https://stackoverflow.com/questions/20906479/javascript-regex-innermost-parentheses-not-surrounded-by-quotes";
+
             Chat c = CreateParentChat("c");
             List<Choice> choices;
             Choice choice;
@@ -805,17 +809,17 @@ namespace Dialogic
 
             choices = Choice.Parse("you (then | (a | b))", c, false);
             choice = choices[0];
-            //Assert.That(choices.Count, Is.EqualTo(1));
-            //Assert.That(choice.text, Is.EqualTo("(b | c)"));
-            //Assert.That(choice.options.Count, Is.EqualTo(2));
-            //Assert.That(choice.options, Is.EquivalentTo(new[] { "b", "c" }));
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(a | b)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
 
             choices = Choice.Parse("you ((a | b) | then) a", c, false);
             choice = choices[0];
             Assert.That(choices.Count, Is.EqualTo(1));
-            Assert.That(choice.text, Is.EqualTo("(b | c)"));
+            Assert.That(choice.text, Is.EqualTo("(a | b)"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
-            Assert.That(choice.options, Is.EquivalentTo(new[] { "b", "c" }));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
         }
             
         [Test]

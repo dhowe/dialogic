@@ -346,29 +346,27 @@ namespace Dialogic
             string s;
             Chat c1 = CreateParentChat("c1");
 
-if (1 == 0)
-{
 
-                s = @"SAY The $animal woke and $prep (ate|ate)";
-                s = Resolver.Bind(s, c1, globals);
-                Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
+            s = @"SAY The $animal woke and $prep (ate|ate)";
+            s = Resolver.Bind(s, c1, globals);
+            Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
-                s = @"SAY The $obj-prop woke and $prep (ate|ate)";
-                s = Resolver.Bind(s, c1, globals);
-                Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
+            s = @"SAY The $obj-prop woke and $prep (ate|ate)";
+            s = Resolver.Bind(s, c1, globals);
+            Assert.That(s, Is.EqualTo("SAY The dog woke and then ate"));
 
-                //s = realizer.Do("$a", new Dictionary<string, object>()
-                //    {{ "a", "($a | $b)" }, { "b", "32" }});
-                //Assert.That(s, Is.EqualTo("32"));
+            //s = realizer.Do("$a", new Dictionary<string, object>()
+            //    {{ "a", "($a | $b)" }, { "b", "32" }});
+            //Assert.That(s, Is.EqualTo("32"));
 
-                string txt = "letter $group";
-                for (int i = 0; i < 10; i++)
-                {
-                    Assert.That(Resolver.Bind(txt, c1, globals),
-                        Is.EqualTo("letter a").Or.EqualTo("letter b"));
-                }
-}
-            Resolver.DBUG = true;
+            string txt = "letter $group";
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.That(Resolver.Bind(txt, c1, globals),
+                    Is.EqualTo("letter a").Or.EqualTo("letter b"));
+            }
+
+            //Resolver.DBUG = true;
 
             var txt2 = "letter $cmplx";
             var ok = new string[] { "letter a", "letter b", "letter then" };
@@ -378,7 +376,7 @@ if (1 == 0)
                 var res = Resolver.Bind(txt2, c1, globals);
                 CollectionAssert.Contains(ok, res);
             }
-       
+
         }
 
         [Test]
