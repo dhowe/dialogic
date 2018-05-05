@@ -355,7 +355,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void RealizeSubstringSymbols()
+        public void ResolveSubstringSymbols()
         {
             var lines = new[] {
                 "CHAT wine1 {noStart=true}",
@@ -735,7 +735,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void RealizeWithNullGlobals()
+        public void ResolveWithNullGlobals()
         {
             var lines = new[] {
                 "CHAT wine1 {noStart=true}",
@@ -783,7 +783,7 @@ namespace Dialogic
             var chats = ChatParser.ParseText(String.Join("\n", lines), true);
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Set)));
             Assert.That(chats[1].commands[0].GetType(), Is.EqualTo(typeof(Say)));
-            //chats[0].commands.ForEach(c => c.Realize(globals));
+            //chats[0].commands.ForEach(c => c.Resolve(globals));
         }
 
         [Test]
@@ -801,7 +801,6 @@ namespace Dialogic
             var last = chat.commands[chat.commands.Count - 1];
             Assert.That(last, Is.Not.Null);
             Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));
-            //chat.Realize(globals);
             chat.commands.ForEach(c => c.Resolve(globals));
 
             Assert.That(chat.scope.ContainsKey("review"), Is.True);
@@ -878,7 +877,7 @@ namespace Dialogic
             chat.commands.ForEach(c => c.Resolve(globals));
             //Console.WriteLine(chat.AsGrammar(globals), false);
 
-            Say say = (Say)chat.commands.Last();//.Realize()
+            Say say = (Say)chat.commands.Last();//.Resolve()
 
             for (int i = 0; i < 10; i++)
             {

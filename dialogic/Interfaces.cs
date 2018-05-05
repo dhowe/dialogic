@@ -9,7 +9,8 @@ namespace Dialogic
     public interface ISerializer
     {
         byte[] ToBytes(ChatRuntime rt);
-        void FromBytes(ChatRuntime rt, byte[] bytes);
+        //byte[] ToBytes(List<Chat> l);
+        void FromBytes(ChatRuntime rt, byte[] b);
         string ToJSON(ChatRuntime rt);
     }
 

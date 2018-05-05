@@ -239,6 +239,11 @@ namespace runner
             {
                 return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
             }
+
+            public byte[] ToBytes(List<Chat> l)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -106,7 +106,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        ///  Returns realized text for this object, equivalent to this.Resolved(Meta.TEXT);
+        ///  Returns resolved text for this object, equivalent to this.Resolved(Meta.TEXT);
         /// </summary>
         /// <returns>The text.</returns>
         public virtual string Text()
@@ -157,7 +157,7 @@ namespace Dialogic
         {
             resolved.Clear();
 
-            RealizeMeta(globals);
+            ResolveMeta(globals);
 
             if (this is ISendable)
             {
@@ -174,7 +174,7 @@ namespace Dialogic
             return resolved;
         }
 
-        protected virtual void RealizeMeta(IDictionary<string, object> globals)
+        protected virtual void ResolveMeta(IDictionary<string, object> globals)
         {
             if (HasMeta())
             {
@@ -494,7 +494,7 @@ namespace Dialogic
             options.Add(o);
         }
 
-        // Call Realize() on text and options, then add both to realized
+        // Call Resolve() on text and options, then add both to resolved
         protected internal override IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
@@ -599,7 +599,7 @@ namespace Dialogic
             (IDictionary<string, object> globals)
         {
             resolved.Clear();
-            RealizeMeta(globals); // only realize meta
+            ResolveMeta(globals); // only meta
 
             return resolved;
         }

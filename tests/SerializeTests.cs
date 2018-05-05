@@ -84,7 +84,7 @@ namespace Dialogic
             rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
 
             // check they are identical
-            //Assert.That(rtIn, Is.EqualTo(rtOut));
+            Assert.That(rtIn, Is.EqualTo(rtOut));
 
             // double-check the chats themselves
             c1 = rtIn.Chats().First();
@@ -162,16 +162,28 @@ namespace Dialogic
             rt = new ChatRuntime(Tendar.AppConfig.Actors);
             rt.ParseText(String.Join("\n", lines));
 
-            // serialize the runtime to bytes
-            var bytes = serializer.ToBytes(rt);
-
             var s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nDone"));
 
-            // TODO: add more chats via Update, with higher search score
+
+            // Add more chats via Update, with higher search score
+            var lines2 = new[] {
+                 "CHAT switch {type=a,stage=b,other=c,statelness=}",
+                 "SAY Added",
+             };
+
+            ChatRuntime rt2 = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt2.ParseText(String.Join("\n", lines2));
+
+            // append the 2nd runtime to the first
+            rt.UpdateFrom(serializer, rt2);
+
+            s = rt.InvokeImmediate(null);
+            Assert.That(s, Is.EqualTo("Find\nAdded"));
         }
 
-        // Implement ISerializer and then instance to ChatRuntime methods...
+
+        // ass instance to ChatRuntime serialization methods
         private class SerializerMessagePack : ISerializer
         {
             static readonly IFormatterResolver ifr = MessagePack.Resolvers

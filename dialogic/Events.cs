@@ -119,9 +119,9 @@ namespace Dialogic
     {
         private readonly IDictionary<string, object> data;
 
-        public UpdateEvent(IDictionary<string, object> realizedCmdData)
+        public UpdateEvent(IDictionary<string, object> resolvedCommandData)
         {
-            this.data = realizedCmdData;
+            this.data = resolvedCommandData;
         }
 
         public IDictionary<string, object> Data()

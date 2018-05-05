@@ -132,7 +132,7 @@ namespace Dialogic
             {
                 // bad index, so reprompt for now
                 ChatRuntime.Info("Invalid index " + idx + ", reprompting\n");
-                //scheduler.prompt.Realize(globals); // re-realize
+                //scheduler.prompt.Resolve(globals); // re-resolve
                 return new UpdateEvent(scheduler.prompt.Resolve(globals));
             }
             else

@@ -8,6 +8,44 @@ namespace Dialogic
     public class DialogicTests : GenericTests
     {
         [Test]
+        public void ImmediateTripleLoop()
+        {
+            string[] lines = {
+                "CHAT c1",
+                "SAY C1",
+                "GO #c2",
+                "CHAT c2",
+                "SAY C2",
+                "GO #c1",
+            };
+
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("C1\nC2\nC1\n\nGO #c2 looped"));
+        }
+
+
+        [Test]
+        public void ImmediateSimpleLoop()
+        {
+            var lines = new[] {
+                 "CHAT Test {type=a,stage=b}",
+                 "SAY Find",
+                 "GO #Test"
+             };
+
+            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(null);
+
+            // Note: exits before GO to avoid infinite loop
+            Assert.That(s, Is.EqualTo("Find\nFind\n\nGO #Test looped"));
+        }
+
+        [Test]
         public void ImmediateWithDynamicGo()
         {
             string[] lines = {
@@ -28,7 +66,25 @@ namespace Dialogic
         }
 
         [Test]
-        public void ImmediateModeTest()
+        public void ImmediateModeResume()
+        {
+            string[] lines = {
+                "CHAT c",
+                "SAY hello",
+                "GO #c1",
+                "SAY ok",
+                "CHAT c1",
+                "SAY goodbye"
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello\ngoodbye\nok"));
+        }
+
+        [Test]
+        public void ImmediateModeSimple()
         {
             string[] lines = {
                 "CHAT c",
@@ -45,7 +101,6 @@ namespace Dialogic
 
             s = rt.InvokeImmediate(globals, "c");
             Assert.That(s, Is.EqualTo("hello dog.\nok."));
-
             s = rt.InvokeImmediate(globals, "c1");
             Assert.That(s, Is.EqualTo("goodbye."));
 

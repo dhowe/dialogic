@@ -287,7 +287,7 @@ namespace Dialogic
        
         private static Chat CreateParentChat(string name)
         {
-            // create a realized Chat with the full set of global props
+            // create a resolved Chat with the full set of global props
             var c = Chat.Create(name);
             foreach (var prop in globals.Keys) c.SetMeta(prop, globals[prop]);
             c.Resolve(globals);
@@ -705,8 +705,6 @@ namespace Dialogic
             s = rt["c1"].commands[0].Text();
             Assert.That(s, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("c"));
 
-            //chat = ChatParser.ParseText("CHAT c2\n[d=(a | b)] $d", true)[0];
-            //chat.Realize(globals);
             (rt = new ChatRuntime()).ParseText("CHAT c2\n[d=(a | b)] $d", true);
             rt["c2"].Resolve(null);
             s = rt["c2"].commands[0].Text();

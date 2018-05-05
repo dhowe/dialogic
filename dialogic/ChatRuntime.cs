@@ -44,8 +44,8 @@ namespace Dialogic
         };
 
         internal bool validatorsDisabled, strictMode = true;
-        internal IDictionary<string, Chat> chats;
         internal IDictionary<string, Choice> choiceCache;
+        internal IDictionary<string, Chat> chats;
         internal ChatScheduler scheduler;
         internal Resolver resolver;
         internal string firstChat;
@@ -135,9 +135,10 @@ namespace Dialogic
             parser.Parse(text.Split(ChatParser.LineBreaks, StringSplitOptions.None));
         }
 
-        public void ParseFile(string s, bool dv = false, string fe = null) { // tmp
+        public void ParseFile(string s, bool dv = false, string fe = null)
+        {
             Warn("ParseFile(string, ...) has been deprecated and will soon be"
-                 + " removed; please use ParseFile(FileInfo f, ...) instead");
+                 + " removed; please use ParseFile(FileInfo f, ...) instead"); // tmp
             ParseFile(new FileInfo(s), dv, fe);
         }
 
@@ -233,9 +234,26 @@ namespace Dialogic
         }
 
         /// <summary>
+        /// Save all chats in the runtime to a serialized byte array
+        /// </summary>
+        /*public byte[] SaveChats(ISerializer serializer, FileInfo file = null)
+        {
+            byte[] bytes = serializer.ToBytes(Chats());
+            if (file != null) File.WriteAllBytes(file.FullName, bytes);
+            return bytes;
+        }*/
+
+        /// <summary>
         /// Update this instance with new data from a serialized byte array
         /// </summary>
-        public void Update(ISerializer serializer, byte[] bytes) => serializer.FromBytes(this, bytes);
+        public void UpdateFrom(ISerializer serializer, byte[] bytes)
+            => serializer.FromBytes(this, bytes);
+
+        /// <summary>
+        /// Update this instance with new data from a serialized byte array
+        /// </summary>
+        public void UpdateFrom(ISerializer serializer, ChatRuntime rt)
+            => serializer.FromBytes(this, serializer.ToBytes(rt));
 
         /// <summary>
         /// Serialize this runtime and return the data as a JSON string
@@ -250,11 +268,13 @@ namespace Dialogic
 
         public override int GetHashCode()
         {
+#pragma warning disable RECS0025 // Non-readonly field referenced in 'GetHashCode()'
             var hash = firstChat.GetHashCode()
                 ^ validatorsDisabled.GetHashCode()
                 ^ strictMode.GetHashCode();
 
             foreach (var chat in chats.Values) hash ^= chat.GetHashCode();
+#pragma warning restore RECS0025 // Non-readonly field referenced in 'GetHashCode()'
 
             return hash;
         }
@@ -288,15 +308,21 @@ namespace Dialogic
 
         internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
         {
+            if (chats.Count < 1) throw new DialogicException("No chats");
+
+            ResetChats(); // reset all chat cursors
+
             var chat = (label.IsNullOrEmpty() ? chats.Values :
                 new Chat[] { this[label] }.ToList()).First();
 
             var result = string.Empty;
 
+            if (chat == null || !chat.HasNext()) return result;
+
             chat.Run();
 
-            if (!chat.HasNext()) return result;
-
+            Stack<Chat> resumables = new Stack<Chat>();
+            HashSet<string> visited = new HashSet<string>();
             while (chat != null)
             {
                 var cmd = chat.Next();
@@ -306,26 +332,48 @@ namespace Dialogic
 
                 if (cmd is Find)
                 {
+                    Chat next = null;
                     var toFind = cmd.ToString();
                     try
                     {
-                        var find = FindSync((Find)cmd, false, globals);
+                        next = FindSync((Find)cmd, false, globals);
 
-                        // a chat calling itself in immediate mode can cause
-                        // an infinite loop; guard against it here
-                        if (find != chat) (chat = find).Run();
+                        // if unfinished, save for later
+                        if (chat.HasNext()) resumables.Push(chat);
+
+                        (chat = next).Run();
                     }
                     catch (Exception ex)
                     {
                         Warn(ex);
                         return result + "\n" + toFind + " failed";
                     }
+
+                    // make sure we haven't gotten into an infinite loop
+                    if (visited.Contains(next.text))
+                    {
+                        return result + "\n" + toFind + " looped";
+                    }
+
+                    visited.Add(next.text);
                 }
 
-                chat = chat.HasNext() ? chat : null;
+                if (!chat.HasNext()) chat = resumables.Count > 0
+                    ? resumables.Pop() : null; // continue pending chats
             }
 
             return result.TrimLast('\n');
+        }
+
+        /// <summary>
+        /// Resets the cursor for each Chat.
+        /// </summary>
+        internal void ResetChats()
+        {
+            if (!chats.IsNullOrEmpty())
+            {
+                foreach (var c in chats.Values) c.Reset();
+            }
         }
 
         private void AppendChats(List<Chat> theChats)
@@ -347,8 +395,10 @@ namespace Dialogic
             }
         }
 
-        internal void AddChat(Chat c)//, bool resetFirst = true)
+        internal void AddChat(Chat c)
         {
+            //Console.WriteLine("ADD: "+c.text);
+
             c.runtime = this;
 
             if (chats.Count < 1) firstChat = c.text;
@@ -484,8 +534,8 @@ namespace Dialogic
         {
             IDictionary<Constraint, bool> cdict;
             cdict = new Dictionary<Constraint, bool>();
-            var realized = f.Resolved();
-            foreach (var val in realized.Values)
+            var resolved = f.Resolved();
+            foreach (var val in resolved.Values)
             {
                 if (!(val is Constraint))
                 {

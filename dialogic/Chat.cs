@@ -11,13 +11,11 @@ namespace Dialogic
     {
         internal List<Command> commands;
 
-        protected internal double staleness { get; protected set; }
         protected internal bool resumable { get; protected set; }
         protected internal bool interruptable { get; protected set; }
         protected internal bool resumeAfterInt { get; protected set; }
         protected internal double stalenessIncr { get; protected set; }
-        //protected internal string chatMode { get; protected set; }
-        //private enum Mode { DEFAULT, GRAMMAR };
+        protected internal double staleness { get; protected set; }
 
         internal int cursor = 0, lastRunAt = -1;
         internal bool allowSmoothingOnResume = true;
@@ -28,17 +26,9 @@ namespace Dialogic
         public Chat() : base()
         {
             commands = new List<Command>();
-
-            resumable = true;
-            interruptable = true;
-            resumeAfterInt = true;
-            stalenessIncr = Defaults.CHAT_STALENESS_INCR;
-            staleness = Defaults.CHAT_STALENESS;
-            scope = new Dictionary<string, object>();
-
             resolved = null; // not relevant for chats
+            Reset();
         }
-
         internal static Chat Create(string name, ChatRuntime rt = null)
         {
             Chat c = new Chat();
@@ -46,6 +36,18 @@ namespace Dialogic
             if (rt == null) rt = new ChatRuntime();
             rt.Parser().HandleCommand(c, null, -1);
             return c;
+        }
+
+        public void Reset()
+        {
+            resumable = true;
+            interruptable = true;
+            resumeAfterInt = true;
+            stalenessIncr = Defaults.CHAT_STALENESS_INCR;
+            staleness = Defaults.CHAT_STALENESS;
+            scope = new Dictionary<string, object>();
+            //lastRunAt = -1;
+            cursor = 0;
         }
 
         public int Count()
@@ -57,26 +59,28 @@ namespace Dialogic
         {
             var chat = ((Chat)o);
 
-            if (resumable != chat.resumable) return false;
-            if (interruptable != chat.interruptable) return false;
-            if (resumeAfterInt != chat.resumeAfterInt) return false;
-            if (!Util.FloatingEquals(staleness, chat.staleness))return false;
-            if (!Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))return false;
-            for (int i = 0; i < commands.Count; i++) {
-                if (!commands[i].Equals(chat.commands[i])) return false;
+            if (resumable != chat.resumable ||
+                interruptable != chat.interruptable ||
+                resumeAfterInt != chat.resumeAfterInt)
+            {
+                return false;
             }
-            //if (ToTree() != chat.ToTree()) return false;
 
-            return (text == chat.text && ToTree() == chat.ToTree()); 
+            if (!Util.FloatingEquals(staleness, chat.staleness) ||
+                !Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))
+            {
+                return false;
+            }
 
-            //if (resumable != chat.resumable) return false;
-            //if (interruptable != chat.interruptable) return false;
-            //if (resumeAfterInt != chat.resumeAfterInt) return false;
-            //if (!Util.FloatingEquals(staleness, chat.staleness))return false;
-            //if (!Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))return false;
-            //for (int i = 0; i < commands.Count; i++) {
-            //    if (!commands[i].Equals(chat.commands[i])) return false;
-            //}
+            for (int i = 0; i < commands.Count; i++)
+            {
+                if (!commands[i].Equals(chat.commands[i]))
+                {
+                    return false;
+                }
+            }
+
+            return (text == chat.text && ToTree() == chat.ToTree());
         }
 
         public override int GetHashCode() => ToTree().GetHashCode();
@@ -325,8 +329,8 @@ namespace Dialogic
             // clear any local scope
             this.scope.Clear();
 
-            // and realized command data
-            //commands.ForEach(c => c.realized.Clear()); //tmp
+            // and resolved command data
+            //commands.ForEach(c => c.resolved.Clear()); //tmp
         }
     }
 }

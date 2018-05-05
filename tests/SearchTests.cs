@@ -43,24 +43,6 @@ namespace Dialogic
             s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nDone"));
         }
-
-        [Test]
-        public void SearchImmediateWithBusyLoop()
-        {
-            var lines = new[] {
-                 "CHAT Test {type=a,stage=b}",
-                 "SAY Find",
-                 "GO #Test"
-             };
-
-            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
-            rt.ParseText(String.Join("\n", lines));
-
-            var s = rt.InvokeImmediate(null);
-
-            // Note: exits before GO to avoid infinite loop
-            Assert.That(s, Is.EqualTo("Find"));
-        }
             
         [Test]
         public void SearchWithHardConstraint()
