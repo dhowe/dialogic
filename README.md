@@ -119,7 +119,7 @@ SAY $hero liked living in $home.
 Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and [others](http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html), which can be called from scripts as follows:
 
 ````
-ASK How many (tooth, menu, child).pluralize() do you have?
+ASK How many (tooth | menu | child).pluralize() do you have?
 ````
 
 which will result in one of the following: 
@@ -143,6 +143,25 @@ Are you a dog?
 Are you a cat?
 Are you an ant?
 ````
+
+You can also use transforms on variables:
+````
+SET choices = (tooth | menu | child)
+ASK How many $choices.pluralize() do you have?
+````
+
+You can also use built-in C# string functions:
+````
+SET choices = (tooth | menu | child)
+ASK How many $choices.ToUpper() do you have?
+````
+
+Or arbitrarily chain multiple transforms:
+````
+SET choices = (tooth | menu | child)
+ASK How many $choices.pluralize().ToUpper() do you have?
+````
+
 
 &nbsp;
 
