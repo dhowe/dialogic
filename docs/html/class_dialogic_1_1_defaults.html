@@ -121,7 +121,7 @@ Static Public Attributes</h2></td></tr>
 <tr class="memdesc:ac0d6214e5d44c308d05417609cad194e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to auto-launch 'onResume' smoothing Chats when specified  <a href="#ac0d6214e5d44c308d05417609cad194e">More...</a><br /></td></tr>
 <tr class="separator:ac0d6214e5d44c308d05417609cad194e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac22a4e1637f89177c4e372702dab19e7"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#ac22a4e1637f89177c4e372702dab19e7">BIND_MAX_DEPTH</a> = 10</td></tr>
-<tr class="memdesc:ac22a4e1637f89177c4e372702dab19e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max recursion depth for <a class="el" href="class_dialogic_1_1_resolver.html" title="Handles resolution of variables, probabilistic groups, and grammar rules ">Resolver</a> bindings  <a href="#ac22a4e1637f89177c4e372702dab19e7">More...</a><br /></td></tr>
+<tr class="memdesc:ac22a4e1637f89177c4e372702dab19e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max recursion depth for <a class="el" href="class_dialogic_1_1_resolver.html" title="Handles resolution of symbols, probabilistic groups, transforms, and grammar production ...">Resolver</a> bindings  <a href="#ac22a4e1637f89177c4e372702dab19e7">More...</a><br /></td></tr>
 <tr class="separator:ac22a4e1637f89177c4e372702dab19e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e1efc14c32dfb55082833945fae7cac"><td class="memItemLeft" align="right" valign="top"><a id="a1e1efc14c32dfb55082833945fae7cac"></a>
 static double&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_FAST_MULT</b> = 0.5</td></tr>
@@ -141,6 +141,9 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MAX_LINE_LE
 <tr class="memitem:ab095c80f657409e95aaef8e9d723bd6c"><td class="memItemLeft" align="right" valign="top"><a id="ab095c80f657409e95aaef8e9d723bd6c"></a>
 static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LEN</b> = 2</td></tr>
 <tr class="separator:ab095c80f657409e95aaef8e9d723bd6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a085895f7a332661ebb384226b02c76a8"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_defaults.html#a085895f7a332661ebb384226b02c76a8">INITIAL_DICT_SIZE</a> = 11</td></tr>
+<tr class="memdesc:a085895f7a332661ebb384226b02c76a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The initial size of the meta and resolved <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> dictionaries (should be prime).  <a href="#a085895f7a332661ebb384226b02c76a8">More...</a><br /></td></tr>
+<tr class="separator:a085895f7a332661ebb384226b02c76a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A (temporary) container for runtime-settable defaults </p>
@@ -213,7 +216,7 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
 </table>
 </div><div class="memdoc">
 
-<p>Max recursion depth for <a class="el" href="class_dialogic_1_1_resolver.html" title="Handles resolution of variables, probabilistic groups, and grammar rules ">Resolver</a> bindings </p>
+<p>Max recursion depth for <a class="el" href="class_dialogic_1_1_resolver.html" title="Handles resolution of symbols, probabilistic groups, transforms, and grammar production ...">Resolver</a> bindings </p>
 
 </div>
 </div>
@@ -430,6 +433,30 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>SAY_MIN_LINE_LE
 </div><div class="memdoc">
 
 <p>Default scale for all <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> durations </p>
+
+</div>
+</div>
+<a id="a085895f7a332661ebb384226b02c76a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a085895f7a332661ebb384226b02c76a8">&#9670;&nbsp;</a></span>INITIAL_DICT_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Dialogic.Defaults.INITIAL_DICT_SIZE = 11</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The initial size of the meta and resolved <a class="el" href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first...">Command</a> dictionaries (should be prime). </p>
 
 </div>
 </div>

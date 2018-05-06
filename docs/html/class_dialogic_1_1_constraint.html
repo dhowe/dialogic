@@ -72,7 +72,6 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="class_dialogic_1_1_constraint-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Dialogic.Constraint Class Reference</div>  </div>
@@ -90,9 +89,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0b1d7cf5d531e436f2335049290254f7"><td class="memItemLeft" align="right" valign="top"><a id="a0b1d7cf5d531e436f2335049290254f7"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Constraint</b> (<a class="el" href="class_dialogic_1_1_operator.html">Operator</a> op, string key, string val, <a class="el" href="namespace_dialogic.html#a6c19a14a5b18a1d8eedc29ce8c163631">ConstraintType</a> type=ConstraintType.Soft)</td></tr>
 <tr class="separator:a0b1d7cf5d531e436f2335049290254f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a834c747d4e9a863feb139b06b7c1d8f8"><td class="memItemLeft" align="right" valign="top"><a id="a834c747d4e9a863feb139b06b7c1d8f8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>Check</b> (string check, IDictionary&lt; string, object &gt; globals=null)</td></tr>
-<tr class="separator:a834c747d4e9a863feb139b06b7c1d8f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c05b9c986344584e5c7a13a696c2c0c"><td class="memItemLeft" align="right" valign="top"><a id="a7c05b9c986344584e5c7a13a696c2c0c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>Check</b> (<a class="el" href="class_dialogic_1_1_resolver.html">Resolver</a> resolver, string check, IDictionary&lt; string, object &gt; globals=null)</td></tr>
+<tr class="separator:a7c05b9c986344584e5c7a13a696c2c0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb1bc57a9df15378a2f0b1227cdd2704"><td class="memItemLeft" align="right" valign="top"><a id="adb1bc57a9df15378a2f0b1227cdd2704"></a>
 override string&#160;</td><td class="memItemRight" valign="bottom"><b>ToString</b> ()</td></tr>
 <tr class="separator:adb1bc57a9df15378a2f0b1227cdd2704"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,12 +134,6 @@ readonly <a class="el" href="class_dialogic_1_1_operator.html">Operator</a>&#160
 <tr class="memitem:a97e42cdc51538cf7e01acb42b2321d14"><td class="memItemLeft" align="right" valign="top"><a id="a97e42cdc51538cf7e01acb42b2321d14"></a>
 string&#160;</td><td class="memItemRight" valign="bottom"><b>value</b></td></tr>
 <tr class="separator:a97e42cdc51538cf7e01acb42b2321d14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
-<tr class="memitem:a1299ec6ec843f778222f1e4a493d23b6"><td class="memItemLeft" align="right" valign="top"><a id="a1299ec6ec843f778222f1e4a493d23b6"></a>
-static char&#160;</td><td class="memItemRight" valign="bottom"><b>TypeSetChar</b> = '!'</td></tr>
-<tr class="separator:a1299ec6ec843f778222f1e4a493d23b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Implements a <a class="el" href="class_dialogic_1_1_constraint.html" title="Implements a Constraint (a name, a value, an Operator) that can be checked ">Constraint</a> (a name, a value, an <a class="el" href="class_dialogic_1_1_operator.html" title="Represents an atomic operation on a pair of metadata string that when invoked returns a boolean ...">Operator</a>) that can be checked </p>

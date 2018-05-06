@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['find',['Find',['../class_dialogic_1_1_find.html',1,'Dialogic.Find'],['../class_dialogic_1_1_fuzzy_search.html#ab6e76cec5cbc0bce540b8428e0d0fe08',1,'Dialogic.FuzzySearch.Find()']]],
+  ['find',['Find',['../class_dialogic_1_1_find.html',1,'Dialogic.Find'],['../class_dialogic_1_1_fuzzy_search.html#a313d21803d6367c9d3f074b0217e3fdb',1,'Dialogic.FuzzySearch.Find()']]],
   ['find_5fmax_5fstaleness',['FIND_MAX_STALENESS',['../class_dialogic_1_1_defaults.html#ab56fd4a024e341edeae89f4fe382d1d9',1,'Dialogic::Defaults']]],
   ['find_5fnormalize_5fscores',['FIND_NORMALIZE_SCORES',['../class_dialogic_1_1_defaults.html#a2617e2e2d427a1c553717033cf10b323',1,'Dialogic::Defaults']]],
   ['find_5frelaxation_5fincr',['FIND_RELAXATION_INCR',['../class_dialogic_1_1_defaults.html#a45ccbaa7895aeebc49a49acfa74578f1',1,'Dialogic::Defaults']]],

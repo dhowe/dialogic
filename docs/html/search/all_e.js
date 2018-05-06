@@ -4,6 +4,7 @@ var searchData=
   ['randitem',['RandItem',['../class_dialogic_1_1_util.html#aa616e37687406132dc2f97aec4688601',1,'Dialogic::Util']]],
   ['randitem_3c_20t_20_3e',['RandItem&lt; T &gt;',['../class_dialogic_1_1_util.html#a1277b5761b1ede721df5bba06e7f8a4e',1,'Dialogic::Util']]],
   ['re',['RE',['../class_dialogic_1_1_r_e.html',1,'Dialogic']]],
+  ['reset',['Reset',['../class_dialogic_1_1_chat_runtime.html#ab8b6a17584e0d1f9421beb76845feedb',1,'Dialogic::ChatRuntime']]],
   ['resolver',['Resolver',['../class_dialogic_1_1_resolver.html',1,'Dialogic']]],
   ['resumeevent',['ResumeEvent',['../class_dialogic_1_1_resume_event.html',1,'Dialogic']]],
   ['run',['Run',['../class_dialogic_1_1_chat_runtime.html#a6739443890fb3601799da7c68543e304',1,'Dialogic::ChatRuntime']]],

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Dialogic v0.5.91</title>
+<title>Dialogic v0.5.96</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -76,7 +76,7 @@ $(function() {
 <div class="fragment"><div class="line">SAY Welcome to your first Dialogic script!</div></div><!-- fragment --><p>Because the system is designed for handling text, no quotations are needed around strings. In fact, the SAY keyword itself is even optional. So the simplest <a class="el" href="namespace_dialogic.html">Dialogic</a> script is just a single line of text:</p>
 <div class="fragment"><div class="line">Welcome to your first Dialogic script!</div></div><!-- fragment --><h3>Basic Commands</h3>
 <p>A COMMAND must begin a line</p>
-<p>COMMANDS include <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#say">SAY</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#do">DO</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#ask">ASK</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#opt">OPT</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#find">FIND</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#go">GO</a>, and <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference">others</a></p>
+<p>COMMANDS include <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#say">SAY</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#do">DO</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#ask">ASK</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#opt">OPT</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#find">FIND</a>, <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#set">SET</a>, and <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference">others</a></p>
 <p>Here is a short example:</p>
 <div class="fragment"><div class="line">CHAT Start</div><div class="line">SAY Welcome to my world</div><div class="line">WAIT 1.2</div><div class="line">SAY Thanks for Visiting</div><div class="line">ASK Do you want to play a game?</div><div class="line">OPT Sure</div><div class="line">OPT No Thanks</div></div><!-- fragment --><p>This script is called "Start" and performs a few simple functions; welcoming a visitor, pausing, then prompting for a response.</p>
 <p>Of course in most cases we would want to <em>do something</em> with this response.</p>
@@ -86,15 +86,22 @@ $(function() {
 <h3>Generative Elements</h3>
 <p><a class="el" href="namespace_dialogic.html">Dialogic</a> is designed to smoothly blend scripted and generated text to create the type of variation found in natural-sounding dialog. The simplest way to blend generative elements into a response is via the | OR operator, grouped with parentheses as follows:</p>
 <div class="fragment"><div class="line">SAY You look (sad | gloomy | depressed).</div></div><!-- fragment --><p>Elements between the | operators are randomly selected, so the line above will generate each of the following 3 outputs with equal probability:</p>
-<div class="fragment"><div class="line">You look sad.</div><div class="line"></div><div class="line">You look gloomy.</div><div class="line"></div><div class="line">You look depressed.</div></div><!-- fragment --><p>Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:</p>
+<div class="fragment"><div class="line">You look sad.</div><div class="line">You look gloomy.</div><div class="line">You look depressed.</div></div><!-- fragment --><p>Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:</p>
 <div class="fragment"><div class="line">SAY I&#39;m (very | super | really) glad to ((meet | know) you | learn about you).</div></div><!-- fragment --><p>&#160;</p>
+<p>You can also save the results of these expansions for later use. Lets say that you wanted to pick a character to be reused seveal times in a paragraph. You could do the following:</p>
+<div class="fragment"><div class="line">SAY Once there was a girl called [hero=(Jane | Mary)].</div><div class="line">SAY $hero lived in [home=(Neverland | Nowhereland)].</div><div class="line">SAY $hero liked living in $home.</div></div><!-- fragment --><p>Outputs would include:</p>
+<div class="fragment"><div class="line">Once there was a girl called Jane.</div><div class="line">Jane lived in Neverland.</div><div class="line">Jane liked living in Neverland.</div></div><!-- fragment --><p>OR</p>
+<div class="fragment"><div class="line">Once there was a girl called Mary.</div><div class="line">Mary lived in Nowhereland.</div><div class="line">Mary liked living in Nowhereland.</div></div><!-- fragment --><p>You could also use the <a href="https://github.com/dhowe/dialogic/wiki/Command-Reference#set">SET</a> command to similar effect:</p>
+<div class="fragment"><div class="line">SET hero = (Jane | Mary)</div><div class="line">SET home = (Neverland | Nowhereland)</div><div class="line">SAY Once there was a girl called $hero</div><div class="line">SAY $hero lived in $home.</div><div class="line">SAY $hero liked living in $home.</div></div><!-- fragment --><p>&#160;</p>
 <h3>Transforms</h3>
-<p><a class="el" href="namespace_dialogic.html">Dialogic</a> also supports <em>transformation functions</em> (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and capitalize() which can be called as follows:</p>
-<div class="fragment"><div class="line">SAY Are you (dog | cat | ant).articlize()?</div></div><!-- fragment --><p>which will result in on of the following:</p>
-<div class="fragment"><div class="line">Are you a dog?</div><div class="line"></div><div class="line">Are you a cat?</div><div class="line"></div><div class="line">Are you an ant?</div></div><!-- fragment --><p>&#160;</p>
-<p>Coders can also add custom transforms as follows:</p>
-<div class="fragment"><div class="line">chatRuntime.AddTransform(&quot;transformName&quot;, transformFunction);</div></div><!-- fragment --><p>Transform functions should be static functions that take and return string:</p>
-<div class="fragment"><div class="line">public static string transformFunction(string str)</div></div><!-- fragment --><p>[tbc]</p>
+<p><a class="el" href="namespace_dialogic.html">Dialogic</a> also supports <em>transformation functions</em> (called Transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and <a href="http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html">others</a>, which can be called as follows:</p>
+<div class="fragment"><div class="line">ASK How many (tooth, menu, child).pluralize() do you have?</div></div><!-- fragment --><p>which will result in one of the following:</p>
+<div class="fragment"><div class="line">How many teeth do you have?</div><div class="line">How many menus do you have?</div><div class="line">How many children do you have?</div></div><!-- fragment --><p>OR</p>
+<div class="fragment"><div class="line">SAY Are you (dog | cat | ant).articlize()?</div></div><!-- fragment --><p>which gives:</p>
+<div class="fragment"><div class="line">Are you a dog?</div><div class="line">Are you a cat?</div><div class="line">Are you an ant?</div></div><!-- fragment --><p>&#160;</p>
+<p>Coders can also add custom transforms as follows, which can then be called from <a class="el" href="namespace_dialogic.html">Dialogic</a> scripts:</p>
+<div class="fragment"><div class="line">chatRuntime.AddTransform(&quot;transformName&quot;, transformFunction);</div></div><!-- fragment --><p>Transform functions should be static functions that take and return string, as follows:</p>
+<div class="fragment"><div class="line">public static string transformFunction(string str) { ... }</div></div><!-- fragment --><p>[tbc]</p>
 <p>&#160;</p>
 <h3>Interruption / Smoothing</h3>
 <p><a class="el" href="namespace_dialogic.html">Dialogic</a> is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be added in order to make transitions more natural, i.e., 'so as I was saying'.</p>
