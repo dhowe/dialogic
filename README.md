@@ -24,7 +24,7 @@ Welcome to your first Dialogic script!
 
 ### Basic Commands
 
-A COMMAND must begin a line. Commands include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
+COMMANDs generally begin a line. Common COMMANDs include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
 
 Here is a short example:
 
