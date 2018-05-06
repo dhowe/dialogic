@@ -228,7 +228,7 @@ The application calls the runtime's Update() function each frame, passing the cu
 
 &nbsp;
 
-### Building Dialogic with Visual Studio (OS X)
+### Building Dialogic w' Visual Studio (OSX)
 
 1. Clone this respository to your local file system ```` $ git clone https://github.com/dhowe/dialogic.git````
 
