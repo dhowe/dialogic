@@ -20,6 +20,8 @@ Because the system is designed for handling text, no quotations are needed aroun
 Welcome to your first Dialogic script!
 ````
 
+&nbsp;
+
 ### Basic Commands
 
 A COMMAND must begin a line
