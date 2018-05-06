@@ -12,6 +12,7 @@ using System.Globalization;
 
 [assembly: InternalsVisibleTo("tests")]
 [assembly: InternalsVisibleTo("weblint")]
+[assembly: InternalsVisibleTo("benchmarks")]
 
 namespace Dialogic
 {
