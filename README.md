@@ -6,7 +6,7 @@
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
 
-Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each CHAT has a unique LABEL and contains one or more COMMANDs. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system jumps to a new CHAT. 
+Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each CHAT has a unique LABEL and contains one or more COMMANDs. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system branches to a new CHAT. 
 
 The simplest command is [SAY](https://github.com/dhowe/dialogic/wiki/Commands#say) which simply echoes the given output:
 
@@ -116,7 +116,7 @@ SAY $hero liked living in $home.
 
 ### Transforms
 
-Dialogic also supports _transformation functions_ (called Transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and [others](http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html), which can be called as follows:
+Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and [others](http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html), which can be called as follows:
 
 ````
 ASK How many (tooth, menu, child).pluralize() do you have?
@@ -167,7 +167,26 @@ public static string transformFunction(string str) { ... }
 
 Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be added in order to make transitions more natural, i.e., 'so as I was saying'.
 
-&nbsp;
+To add smoothing to a Chat, use the 'onResume' metadata tag, specifying either the label of the smoothing Chat, or a set of FIND constraints to use in locating it. In the example below, each time the #Long Chat is interrupted, #Resume1 will be triggered before it resumes once again.
+
+````
+CHAT Long13 {onResume=#Resume1}
+SAY Oh, it's you...
+SAY It's been a long time. How have you been?
+SAY I've been really busy being dead.
+SAY You know
+SAY After you MURDERED ME
+SAY Okay. Look. We both said a lot of things that you're going to regret.
+SAY But I think we can put our differences behind us.
+SAY For the sake of science... You monster.
+
+CHAT Resume1 {noStart=true}
+SAY Where was I? Oh, yes
+````
+
+
+### Special Characters
+As in most scripting languages, certain charactes have special meaning in Dialogic scripts. These include the following: !, #, }, {, ", =, etc. If you need to use these characters in your scripts, you can use HTML entities, which will be replaced in Dialogic output. 
 
 
 ### Integrating Dialogic
@@ -200,7 +219,7 @@ The application calls the runtime's Update() function each frame, passing the cu
 
 &nbsp;
 
-## Building Dialogic with Visual Studio (OS X)
+### Building Dialogic with Visual Studio (OS X)
 
 1. Clone this respository to your local file system ```` $ git clone https://github.com/dhowe/dialogic.git````
 
