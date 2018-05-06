@@ -64,7 +64,7 @@ SAY You look (sad | gloomy | depressed).
 
 Elements between the | operators are randomly selected, so the line above will generate each of the following 3 outputs with equal probability:
 
-```AspectJ
+```
 You look sad.
 You look gloomy.
 You look depressed.
