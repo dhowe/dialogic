@@ -64,11 +64,11 @@ SAY You look (sad | gloomy | depressed).
 
 Elements between the | operators are randomly selected, so the line above will generate each of the following 3 outputs with equal probability:
 
-```
-You look sad.
-You look gloomy.
-You look depressed.
-````
+
+:arrow_right: You look sad.
+:arrow_right: You look gloomy.
+:arrow_right: You look depressed.
+
 
 Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
 
