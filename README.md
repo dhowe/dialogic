@@ -182,9 +182,13 @@ CHAT Resume1 {noStart=true}
 SAY Where was I? Oh, yes
 ````
 
+&nbsp;
+
 
 ### Special Characters
-As in most scripting languages, certain charactes have special meaning in Dialogic scripts. These include the following: !, #, }, {, ", =, etc. If you need to use these characters in your scripts, you can use HTML entities, which will be replaced in Dialogic output. 
+As in most scripting languages, certain charactes have special meaning in Dialogic scripts. These include the following: !, #, }, {, ", =, etc. If you need to use these characters in your scripts, you can use [HTML entities](https://dev.w3.org/html5/html-author/charref), which will be replaced in Dialogic output. 
+
+&nbsp;
 
 
 ### Integrating Dialogic
