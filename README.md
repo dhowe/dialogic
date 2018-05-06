@@ -1,4 +1,4 @@
-# Dialogic
+# Dialogic :fish:
 
 [![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) ![license](https://img.shields.io/badge/license-GPL-orange.svg)
 
@@ -19,8 +19,6 @@ Because the system is designed for handling text, no quotations are needed aroun
 ````
 Welcome to your first Dialogic script!
 ````
-
-:fish:
 
 &nbsp;
 
