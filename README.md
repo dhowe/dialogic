@@ -58,18 +58,18 @@ If the user selects the first option, Dialogic jumps to the CHAT named "Game1". 
 
 Dialogic is designed to smoothly blend scripted and generated text to create the type of variation found in natural-sounding dialog. The simplest way to blend generative elements into a response is via the | OR operator, grouped with parentheses as follows:
 
-````
+```
 SAY You look (sad | gloomy | depressed).
-````
+```
 
 Elements between the | operators are randomly selected, so the line above will generate each of the following 3 outputs with equal probability:
 
 
-:fish: You look sad.
-
-:fish: You look gloomy.
-
-:fish: You look depressed.
+```
+You look sad.
+You look gloomy.
+You look depressed.
+```
 
 
 Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
