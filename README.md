@@ -211,9 +211,13 @@ As in most scripting languages, certain charactes have special meaning in Dialog
 CHAT TestSpecial
 SAY &num; is usually a label
 ````
+which will output: 
+
+````
+# is usually a label
+```
 
 &nbsp;
-
 
 ### Integrating Dialogic
 
