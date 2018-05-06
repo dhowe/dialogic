@@ -239,7 +239,7 @@ ChatRuntime rt1 = new ChatRuntime();
 rt1.ParseFile(fileOrFolder);
 
 // Now serialize its state to a file
-var saveFile = new FileInfo("./runtime.ser");
+FileInfo saveFile = new FileInfo("./runtime.ser");
 ISerializer serializer = new SerializerMessagePack();
 tmp.Save(serializer, saveFile);
 
