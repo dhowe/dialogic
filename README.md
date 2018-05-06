@@ -158,8 +158,6 @@ Transform functions should be static functions that take and return string, as f
 public static string transformFunction(string str) { ... }
 ````
 
-[tbc]
-
 &nbsp;
 
 
