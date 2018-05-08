@@ -186,20 +186,18 @@ public static string transformFunction(string str) { ... }
 
 Dialogic is also designed to respond naturally to user interaction and/or interruption. This is enabled primarily via a stack abstraction in which new CHATS are added at top. When an event or other interruption occurs, the response CHAT is pushed atop the stack and the current CHAT marked as 'interrupted'. When the response CHAT is finished, control moves to the next interrupted chat on the stack. Smoothing sections can be added in order to make transitions more natural, i.e., 'so as I was saying'.
 
-To add smoothing to a Chat, use the 'onResume' metadata tag, specifying either the label of the smoothing Chat, or a set of FIND constraints to use in locating it. In the example below, each time the #Long Chat is interrupted, #Resume1 will be triggered before it resumes once again.
+To add smoothing to a Chat, use the 'onResume' metadata tag, specifying either the label of the smoothing Chat, or a set of FIND constraints to use in locating it. In the example below, each time the 'Long' Chat is interrupted, 'Smooth2' will be triggered before it resumes once again.
 
 ````
-CHAT Long13 {onResume=#Resume1}
+CHAT Long {onResume=Smooth2}
 SAY Oh, it's you...
 SAY It's been a long time. How have you been?
-SAY I've been really busy being dead.
-SAY You know
-SAY After you MURDERED ME
-SAY Okay. Look. We both said a lot of things that you're going to regret.
-SAY But I think we can put our differences behind us.
-SAY For the sake of science... You monster.
+...
+...
+SAY You get what I'm saying?
 
-CHAT Resume1 {noStart=true}
+
+CHAT Smooth2 {noStart=true}
 SAY Where was I? Oh, yes
 ````
 
