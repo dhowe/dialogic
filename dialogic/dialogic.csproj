@@ -10,7 +10,7 @@
     <AssemblyName>Dialogic</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <PackageId>org.rednoise.dialogic</PackageId>
-    <PackageVersion>0.5.96</PackageVersion>
+    <PackageVersion>0.6.01</PackageVersion>
     <Authors>Daniel C Howe</Authors>
     <Description>Generative interactive dialog</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -61,6 +61,7 @@
     <Compile Include="Dynamics.cs" />
     <Compile Include="Snapshot.cs" />
     <Compile Include="Transforms.cs" />
+    <Compile Include="ConsoleApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

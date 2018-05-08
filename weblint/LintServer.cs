@@ -4,20 +4,15 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Linq;
-using Dialogic;
-using System.Threading.Tasks;
 
 namespace Dialogic.Server
 {
     public class LintServer
     {
         public static string SERVER_URL = "http://" +
-            LocalIPAddress() + ":8080/glint/";
+            LocalIPAddress() + ":8081/dialogic/editor/";
 
-        static Regex Brackets = new Regex(@"(\]|\[)");
         static string IndexPageContent;
 
         readonly HttpListener listener = new HttpListener();
@@ -50,7 +45,7 @@ namespace Dialogic.Server
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
                     var local = ip.ToString();
-                    if (local.StartsWithAny("192.168", "10.", "172."))
+                    if (local.StartsWithAny("127.", "192.168.", "10.", "172."))
                     {
                         local = "localhost";
                     }
@@ -62,48 +57,39 @@ namespace Dialogic.Server
 
         public void Run()
         {
-            //ThreadPool.QueueUserWorkItem(o =>
-            //{
-                //try
-                //{
-                    while (listener.IsListening)
+            while (listener.IsListening)
+            {
+                ThreadPool.QueueUserWorkItem(c =>
+                {
+                    var ctx = c as HttpListenerContext;
+                    try
                     {
-                        ThreadPool.QueueUserWorkItem(c =>
-                        {
-                            var ctx = c as HttpListenerContext;
-                            try
-                            {
-                                if (ctx == null) return;
+                        if (ctx == null) return;
 
-                                var rstr = responderFunc(ctx.Request);
-                                var buf = Encoding.UTF8.GetBytes(rstr);
-                                ctx.Response.ContentLength64 = buf.Length;
-                                ctx.Response.OutputStream.Write(buf, 0, buf.Length);
-                            }
-                            catch (Exception e)
-                            {
-                                ChatRuntime.Warn(e.ToString());
-                            }
-                            finally
-                            {
-                                try
-                                {
-                                    if (ctx != null) ctx.Response.OutputStream.Close();
-                                }
-                                catch (Exception) { /* ignore */ }
-                            }
-
-                        }, listener.GetContext());
+                        var rstr = responderFunc(ctx.Request);
+                        var buf = Encoding.UTF8.GetBytes(rstr);
+                        ctx.Response.ContentLength64 = buf.Length;
+                        ctx.Response.OutputStream.Write(buf, 0, buf.Length);
                     }
-                    Console.WriteLine("DONE");
-                //}
-                //catch (Exception) { /* ignored */ }
-            //});
+                    catch (Exception e)
+                    {
+                        ChatRuntime.Warn(e.ToString());
+                    }
+                    finally
+                    {
+                        try
+                        {
+                            if (ctx != null) ctx.Response.OutputStream.Close();
+                        }
+                        catch (Exception) { /* ignore */ }
+                    }
+
+                }, listener.GetContext());
+            }
         }
 
         public void Stop()
         {
-            Console.WriteLine("STOP");
             try
             {
                 listener.Stop();
@@ -137,7 +123,7 @@ namespace Dialogic.Server
 
             if (String.IsNullOrEmpty(code))
             {
-                return html.Replace("%%CODE%%", "Enter your code here");
+                return html.Replace("%%CODE%%", "Enter your script here");
             }
 
             html = html.Replace("%%CODE%%", WebUtility.HtmlEncode(code));
@@ -149,8 +135,9 @@ namespace Dialogic.Server
             try
             {
                 string content = String.Empty;
+                var globals = new Dictionary<string, object>();
                 runtime = new ChatRuntime(Tendar.AppConfig.Actors);
-                runtime.strictMode = false; // allow unbound symbols in output
+                runtime.strictMode = false; // allow unbound symbols/functions
                 runtime.ParseText(code, false); // true to disable validators
 
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
@@ -159,8 +146,7 @@ namespace Dialogic.Server
                 if (mode == "execute")
                 {
                     // run the first chats with all timing disabled
-                    result = WebUtility.HtmlEncode(runtime.InvokeImmediate
-                        (new Dictionary<string, object>()));
+                    result = WebUtility.HtmlEncode(runtime.InvokeImmediate(globals));
 
                     if (result.IsNullOrEmpty()) result = "[empty-string]";
                 }
@@ -234,20 +220,15 @@ namespace Dialogic.Server
 
         public static void Main()
         {
-            //var task = Task.Run(() =>
-            //{
             string html = String.Join("\n",
             File.ReadAllLines("data/index.html", Encoding.UTF8));
 
             LintServer ws = new LintServer(SendResponse, SERVER_URL);
             LintServer.IndexPageContent = html;
 
-            Console.WriteLine("LintServer running on " + SERVER_URL);// + " - press any key to quit");
+            Console.WriteLine("LintServer running on " + SERVER_URL);
 
             ws.Run();
-            //});
-            //Console.ReadKey();
-            //ws.Stop();
         }
     }
 }

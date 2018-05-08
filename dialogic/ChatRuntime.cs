@@ -59,9 +59,21 @@ namespace Dialogic
         private FuzzySearch search;
         private ChatParser parser;
 
+        public ChatRuntime() : this(null, null) { }
+
+        public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
+
+        public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
+        {            
+            this.Reset(theChats);
+            this.actors = InitActors(theActors);
+        }
+
         /// <summary>
         /// Create a new runtime from previously serialized bytes loaded from a file, using the specified actors.
         /// </summary>
+        /// <returns>The new ChatRuntime</returns>
+        /// <param name="serializer">Serializer.</param>
         /// <param name="file">File.</param>
         /// <param name="theActors">The actors.</param>
         public static ChatRuntime Create(ISerializer serializer, FileInfo file, List<IActor> theActors)
@@ -72,23 +84,15 @@ namespace Dialogic
         /// <summary>
         /// Create a new runtime from previously serialized bytes, using the specified actors.
         /// </summary>
-        /// <param name="bytes">Bytes serialized via runtime.</param>
+        /// <returns>The new ChatRuntime</returns>
+        /// <param name="serializer">Serializer.</param>
+        /// <param name="bytes">Bytes.</param>
         /// <param name="theActors">The actors.</param>
         public static ChatRuntime Create(ISerializer serializer, byte[] bytes, List<IActor> theActors)
         {
             ChatRuntime rt = new ChatRuntime(theActors);
             serializer.FromBytes(rt, bytes);
             return rt;
-        }
-
-        public ChatRuntime() : this(null, null) { }
-
-        public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
-
-        public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
-        {
-            this.Reset(theChats);
-            this.actors = InitActors(theActors);
         }
 
         /// <summary>
@@ -195,6 +199,40 @@ namespace Dialogic
         }
 
         /// <summary>
+        /// Preload the Chat with the specified label, or if no label is supplied,
+        /// preload all Chats with the 'preload = true' metadata tag.
+        /// </summary>
+        /// <param name="globals">Globals variables</param>
+        /// <param name="chatLabels">Zero or more Chat labels to preload</param>
+        public void Preload(IDictionary<string, object> globals, params string[] chatLabels)
+        {
+            if (chats.Count < 1) throw new Exception("No chats found");
+
+            List<Chat> theChats = null;
+
+            if (!chatLabels.IsNullOrEmpty())
+            {
+                theChats = new List<Chat>();
+                for (int i = 0; i < chatLabels.Length; i++)
+                {
+                    theChats.Add(this[chatLabels[i]]);
+                }
+            }
+            else
+            {
+                theChats = new List<Chat>(chats.Values);
+            }
+
+            foreach (Chat chat in theChats)
+            {
+                if (chat.IsPreload())
+                {
+                    chat.commands.ForEach(c => c.Resolve(globals));
+                }
+            }
+        }
+
+        /// <summary>
         /// Register the transform function, allowing it to be invoked by scripts
         /// </summary>
         /// <param name="name">Name.</param>
@@ -272,7 +310,6 @@ namespace Dialogic
             var hash = firstChat.GetHashCode()
                 ^ validatorsDisabled.GetHashCode()
                 ^ strictMode.GetHashCode();
-
             foreach (var chat in chats.Values) hash ^= chat.GetHashCode();
 #pragma warning restore RECS0025 // Non-readonly field referenced in 'GetHashCode()'
 
@@ -456,7 +493,7 @@ namespace Dialogic
 
         internal Chat FindSync(Find f, bool launchScheduler, IDictionary<string, object> globals = null)
         {
-            if (f.Resolved().Count < 1) f.Resolve(globals); // tmp
+            if (f.Resolved().Count < 1) f.Resolve(globals);
 
             var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
             if (chat == null) throw new FindException(f);
@@ -486,24 +523,6 @@ namespace Dialogic
             })).Start();
         }
 
-        private void RunPreloaders(IDictionary<string, object> globals)
-        {
-            // TODO: separate and run any 'preload' chats here
-            foreach (var chat in chats.Values)
-            {
-                if (chat.IsPreload())
-                {
-                    chat.commands.ForEach(c =>
-                    {
-                        if (!(c is Set)) throw new DialogicException
-                            ("Invalid command type=" + c.TypeName().ToUpper() + "\nChats "
-                             + "marked with 'preload' can only contain SET commands");
-
-                        c.Resolve(globals); // Execute each Set
-                    });
-                }
-            }
-        }
         private List<IActor> InitActors(List<IActor> iActors)
         {
             if (iActors.IsNullOrEmpty()) return null;
@@ -800,7 +819,7 @@ namespace Dialogic
 
             Info("<#" + chat.text + "-finished>");
 
-            this.chat.OnCompletion();
+            this.chat.Complete();
 
             this.chat = null;
 

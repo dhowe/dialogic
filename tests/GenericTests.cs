@@ -28,28 +28,6 @@ namespace Dialogic
             };
         }
 
-        //public class Fish
-        //{
-        //    public string name { get; protected set; }
-        //    public Flipper flipper { get; protected set; }
-
-        //    public Fish(string name)
-        //    {
-        //        this.name = name;
-        //        this.flipper = new Flipper(1.1);
-        //    }
-        //}
-
-        //public class Flipper
-        //{
-        //    public double speed { get; protected set; }
-        //    public Flipper(double s)
-        //    {
-        //        this.speed = s;
-        //    }
-        //}
-
-
         public class Fish
         {
             public static string species { get; protected set; }

@@ -222,8 +222,8 @@ namespace runner
         // Implement ISerializer and then instance to ChatRuntime methods...
         private class SerializerMessagePack : ISerializer
         {
-            IFormatterResolver ifr =
-                MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Instance;
+            IFormatterResolver ifr = MessagePack.Resolvers.
+                ContractlessStandardResolverAllowPrivate.Instance;
 
             public byte[] ToBytes(ChatRuntime rt)
             {
@@ -238,11 +238,6 @@ namespace runner
             public string ToJSON(ChatRuntime rt)
             {
                 return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
-            }
-
-            public byte[] ToBytes(List<Chat> l)
-            {
-                throw new NotImplementedException();
             }
         }
     }

@@ -114,6 +114,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseFile</b> (string
 <tr class="memitem:a6739443890fb3601799da7c68543e304"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a6739443890fb3601799da7c68543e304">Run</a> (string chatLabel=null)</td></tr>
 <tr class="memdesc:a6739443890fb3601799da7c68543e304"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the runtime schedule, executing the installed chats  <a href="#a6739443890fb3601799da7c68543e304">More...</a><br /></td></tr>
 <tr class="separator:a6739443890fb3601799da7c68543e304"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2634ab3cce056756131f15df6e25f2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#ab2634ab3cce056756131f15df6e25f2c">Preload</a> (IDictionary&lt; string, object &gt; globals, params string[] chatLabels)</td></tr>
+<tr class="memdesc:ab2634ab3cce056756131f15df6e25f2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Preload the <a class="el" href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai...">Chat</a> with the specified label, or if no label is supplied, preload all Chats with the 'preload = true' metadata tag.  <a href="#ab2634ab3cce056756131f15df6e25f2c">More...</a><br /></td></tr>
+<tr class="separator:ab2634ab3cce056756131f15df6e25f2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5751813c069194ea06ef219af90b522f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a5751813c069194ea06ef219af90b522f">AddTransform</a> (string name, Func&lt; string, string &gt; transformFunction)</td></tr>
 <tr class="memdesc:a5751813c069194ea06ef219af90b522f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the transform function, allowing it to be invoked by scripts  <a href="#a5751813c069194ea06ef219af90b522f">More...</a><br /></td></tr>
 <tr class="separator:a5751813c069194ea06ef219af90b522f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -480,6 +483,51 @@ Properties</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Parse a string of text continuing chat definitions </p>
+
+</div>
+</div>
+<a id="ab2634ab3cce056756131f15df6e25f2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2634ab3cce056756131f15df6e25f2c">&#9670;&nbsp;</a></span>Preload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Dialogic.ChatRuntime.Preload </td>
+          <td>(</td>
+          <td class="paramtype">IDictionary&lt; string, object &gt;&#160;</td>
+          <td class="paramname"><em>globals</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">params string []&#160;</td>
+          <td class="paramname"><em>chatLabels</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Preload the <a class="el" href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai...">Chat</a> with the specified label, or if no label is supplied, preload all Chats with the 'preload = true' metadata tag. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">globals</td><td>Globals variables</td></tr>
+    <tr><td class="paramname">chatLabels</td><td>Zero or more <a class="el" href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai...">Chat</a> labels to preload</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

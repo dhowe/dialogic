@@ -28,7 +28,8 @@ namespace Dialogic
         {
             this.delay = 0;
             this.id = ++IDGEN;
-            this.resolved = new Dictionary<string, object>();
+            this.resolved = new Dictionary<string, object>
+                (Defaults.INITIAL_DICT_SIZE);
         }
 
         protected Resolver Resolver()
@@ -778,7 +779,8 @@ namespace Dialogic
         protected internal virtual void SetMeta
             (string key, object val, bool onlyIfNotSet = false)
         {
-            if (meta == null) meta = new Dictionary<string, object>();
+            if (meta == null) meta = new Dictionary<string, object>
+                (Defaults.INITIAL_DICT_SIZE);
             if (onlyIfNotSet && HasMeta(key)) return;
             meta[key] = val;
         }

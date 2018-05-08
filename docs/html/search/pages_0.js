@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dialogic',['Dialogic',['../index.html',1,'']]]
+  ['dialogic_20_3afish_3a',['Dialogic :fish:',['../index.html',1,'']]]
 ];

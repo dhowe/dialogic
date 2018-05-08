@@ -15,3 +15,6 @@ perl -i.bak -p0e 's%<p><a href="https://travis.*?</object>\n</div>%%igs' docs/ht
 perl -i.bak -p0e 's%: Dialogic</title>% v$ENV{version}</title>%igs' docs/html/index.html
 rm docs/html/index.html.bak
 
+perl -p0e 's%Dialogic</title>%Dialogic v$ENV{version}</title>%igs' weblint/data/template.html > weblint/data/index.html
+
+#head weblint/data/index.html

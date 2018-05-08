@@ -45,7 +45,7 @@ namespace Dialogic
             resumeAfterInt = true;
             stalenessIncr = Defaults.CHAT_STALENESS_INCR;
             staleness = Defaults.CHAT_STALENESS;
-            scope = new Dictionary<string, object>();
+            scope = new Dictionary<string, object>(Defaults.INITIAL_DICT_SIZE);
             //lastRunAt = -1;
             cursor = 0;
         }
@@ -55,9 +55,9 @@ namespace Dialogic
             return commands.Count;
         }
 
-        public override bool Equals(Object o)
+        public override bool Equals(Object obj)
         {
-            var chat = ((Chat)o);
+            var chat = ((Chat)obj);
 
             if (resumable != chat.resumable ||
                 interruptable != chat.interruptable ||
@@ -133,7 +133,7 @@ namespace Dialogic
                 foreach (var key in meta.Keys)
                 {
                     // no need to show the default properties
-                    if (!HasDefaultPropValue(key, meta[key]))
+                    if (!HasDefaultPropValue(key))
                     {
                         s += key + '=' + meta[key] + ',';
                     }
@@ -143,8 +143,10 @@ namespace Dialogic
             return s.ReplaceFirst("{}", string.Empty);
         }
 
-        private bool HasDefaultPropValue(string key, object val)
+        private bool HasDefaultPropValue(string key)
         {
+            // assumes that meta-values are in sync with properties
+
             if (key == Meta.STALENESS && Util.FloatingEquals
                 (staleness, Defaults.CHAT_STALENESS))
             {
@@ -324,7 +326,7 @@ namespace Dialogic
             return g.Substring(0, g.Length - 2) + "\n}";
         }
 
-        internal void OnCompletion()
+        internal void Complete()
         {
             // clear any local scope
             this.scope.Clear();

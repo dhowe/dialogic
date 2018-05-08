@@ -7,8 +7,7 @@ using System.Timers;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Reflection;
-using System.Globalization;
+using System.Threading;
 
 [assembly: InternalsVisibleTo("tests")]
 [assembly: InternalsVisibleTo("weblint")]
@@ -97,6 +96,11 @@ namespace Dialogic
         public static double SAY_MIN_LEN_MULT = 0.5;
         public static int SAY_MAX_LINE_LEN = 80;
         public static int SAY_MIN_LINE_LEN = 2;
+
+        /// <summary>
+        /// The initial size of the meta and resolved Command dictionaries (should be prime).
+        /// </summary>
+        public static int INITIAL_DICT_SIZE = 11;
     }
 
     /// <summary>
@@ -928,7 +932,8 @@ namespace Dialogic
         private static IInterruptable StartTimer(int interval, Action function, bool autoReset)
         {
             Action functionCopy = (Action)function.Clone();
-            Timer t = new Timer { Interval = interval, AutoReset = autoReset };
+            System.Timers.Timer t = new System.Timers.Timer 
+                { Interval = interval, AutoReset = autoReset };
             t.Elapsed += (sender, e) => functionCopy();
             t.Start();
 
@@ -943,9 +948,9 @@ namespace Dialogic
 
     public class TimerInterrupter : IInterruptable
     {
-        private readonly Timer t;
+        private readonly System.Timers.Timer t;
 
-        public TimerInterrupter(Timer timer)
+        public TimerInterrupter(System.Timers.Timer timer)
         {
             if (timer == null) throw new ArgumentNullException();
             t = timer;
@@ -988,6 +993,7 @@ namespace Dialogic
         }
 
     }//@endcond
+
 
     public static class Exts //@cond hidden
     {
@@ -1189,5 +1195,41 @@ namespace Dialogic
         }
 
     }//@endcond
+
+
+    public static class ConsoleReader //@cond hidden
+    {
+        private static Thread inputThread;
+        private static AutoResetEvent getInput, gotInput;
+        private static string input;
+
+        static ConsoleReader()
+        {
+            getInput = new AutoResetEvent(false);
+            gotInput = new AutoResetEvent(false);
+            inputThread = new Thread(Reader) { IsBackground = true };
+            inputThread.Start();
+        }
+
+        private static void Reader()
+        {
+            while (true)
+            {
+                getInput.WaitOne();
+                input = Console.ReadKey(true).KeyChar.ToString();
+                gotInput.Set();
+            }
+        }
+
+        // omit the parameter to read a line without a timeout
+        public static string ReadLine(Command source, int timeOutMillisecs = -1)
+        {
+            getInput.Set();
+            bool success = gotInput.WaitOne(timeOutMillisecs);
+            if (success) return input;
+            throw new Exception("ReadLine error");
+        }
+
+    } //@endcond
 
 }

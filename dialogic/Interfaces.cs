@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Dialogic
 {
     /// <summary>
-    /// A class responsible for serializing and deserializing system state
+    /// To be implemented by classes handling serializing and deserializing
     /// </summary>
     public interface ISerializer
     {
