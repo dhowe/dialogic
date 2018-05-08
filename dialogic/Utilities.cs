@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 
 [assembly: InternalsVisibleTo("tests")]
-[assembly: InternalsVisibleTo("weblint")]
+[assembly: InternalsVisibleTo("editor")]
 
 namespace Dialogic
 {

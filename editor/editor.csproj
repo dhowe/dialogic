@@ -5,8 +5,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>weblint</RootNamespace>
-    <AssemblyName>weblint</AssemblyName>
+    <RootNamespace>editor</RootNamespace>
+    <AssemblyName>editor</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

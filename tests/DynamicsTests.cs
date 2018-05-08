@@ -9,24 +9,6 @@ namespace Dialogic
     [TestFixture]
     class DynamicsTests : GenericTests
     {
-        const bool NO_VALIDATORS = true;
-
-        //static IDictionary<string, object> globals
-        //    = new Dictionary<string, object>
-        //{
-        //    { "obj-prop", "dog" },
-        //    { "animal", "dog" },
-        //    { "prep", "then" },
-        //    { "name", "Jon" },
-        //    { "verb", "melt" },
-        //    { "prop1", "hum" },
-        //    { "group", "(a|b)" },
-        //    { "cmplx", "($group | $prep)" },
-        //    { "count", 4 },
-        //    { "fish",  new Fish("Fred")},
-        //    { "a",  "A"}
-        //};
-
         [Test]
         public void ResolveTraversalWithFunctions()
         {
