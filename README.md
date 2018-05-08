@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) ![license](https://img.shields.io/badge/license-GPL-orange.svg)
 
-[Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Documentation](http://rednoise.org/dialogic/) &nbsp;::&nbsp; [Web Linter](http://138.16.162.16:8080/glint/) &nbsp;::&nbsp; [NuGet Package](https://www.nuget.org/packages/org.rednoise.dialogic/)
+[Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Documentation](http://rednoise.org/dialogic/) &nbsp;::&nbsp; [Web Editor](http://138.16.162.16:8081/dialogic/editor/) &nbsp;::&nbsp; [NuGet Package](https://www.nuget.org/packages/org.rednoise.dialogic/)
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It makes no assumptions about how generated text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
 
