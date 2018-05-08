@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "weblint\editor.csproj", "{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
