@@ -18,4 +18,4 @@ rm docs/html/index.html.bak
 
 perl -p0e 's%Dialogic</title>%Dialogic v$ENV{version}</title>%igs' editor/data/template.html > editor/data/index.html
 
-head -n 70 docs/html/index.html
+#head -n 70 docs/html/index.html

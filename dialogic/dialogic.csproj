@@ -28,3 +28,4 @@
     <Compile Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 </Project>
+
