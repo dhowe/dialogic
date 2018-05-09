@@ -1,0 +1,18 @@
+#projectlogo img {
+  border: 0px none;
+  max-width: 100px;
+}
+
+.directory td.desc {
+  padding: 6px;
+  font: 400 14px/22px Roboto,sans-serif;
+}
+
+div.contents {
+  width: 700px;
+  margin-left: 24px;
+}
+
+div.fragment {
+  padding: 5px;
+}

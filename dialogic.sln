@@ -1,6 +1,7 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
+<<<<<<< HEAD
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dialogic", "dialogic\dialogic.csproj", "{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{857FA613-475C-4DE5-AD20-381752456DB7}"
@@ -8,6 +9,22 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{495EAA94-F4AE-4348-BF0F-F6DDB6486C9B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo", "demo\demo.csproj", "{571D327C-94C9-409B-AA7B-381F6DF98D8D}"
+=======
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dialogic", "dialogic\dialogic.csproj", "{B3C8B750-DC86-42FD-8FC1-5A81761E698D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{D173C974-F716-4B90-8EF1-0086E3EA6CA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "runner", "runner\runner.csproj", "{A784E61D-65E0-49B5-AD38-34B910864E6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{026B3D3B-089D-4AF0-9D0C-6026E4672FC6}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Doxyfile = docs\Doxyfile
+		docs\doxy.css = docs\doxy.css
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}"
+>>>>>>> 89a96196d84a3d3f70eff2418130f0ac314288ea
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +32,7 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+<<<<<<< HEAD
 		{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -31,5 +49,49 @@ Global
 		{571D327C-94C9-409B-AA7B-381F6DF98D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{571D327C-94C9-409B-AA7B-381F6DF98D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{571D327C-94C9-409B-AA7B-381F6DF98D8D}.Release|Any CPU.Build.0 = Release|Any CPU
+=======
+		{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE589E6E-FAA8-4630-B181-E2FA639CFCD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3C8B750-DC86-42FD-8FC1-5A81761E698D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57F981BB-93E1-47E3-808D-CC515CB921D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D173C974-F716-4B90-8EF1-0086E3EA6CA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A784E61D-65E0-49B5-AD38-34B910864E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A784E61D-65E0-49B5-AD38-34B910864E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A784E61D-65E0-49B5-AD38-34B910864E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A784E61D-65E0-49B5-AD38-34B910864E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B9B4953-F76E-432A-A0A0-A1E94FE2F092}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$0.TextStylePolicy = $2
+		$2.inheritsSet = null
+		$2.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $3
+		$3.scope = text/x-csharp
+		$0.TextStylePolicy = $4
+		$4.FileWidth = 80
+		$4.TabsToSpaces = True
+		$4.scope = text/plain
+		$0.TextStylePolicy = $5
+		$5.inheritsSet = null
+		$5.scope = application/x-sh
+		$0.StandardHeader = $6
+		$0.VersionControlPolicy = $7
+>>>>>>> 89a96196d84a3d3f70eff2418130f0ac314288ea
 	EndGlobalSection
 EndGlobal

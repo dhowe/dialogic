@@ -1,0 +1,8 @@
+language: csharp
+solution: dialogic.sln
+before_install:
+  - sudo apt-get install nunit-console
+before_script:
+  - nuget restore dialogic.sln
+after_script:
+  - nunit-console tests/tests.dll
