@@ -1,0 +1,35 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dialogic", "dialogic\dialogic.csproj", "{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{857FA613-475C-4DE5-AD20-381752456DB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{495EAA94-F4AE-4348-BF0F-F6DDB6486C9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo", "demo\demo.csproj", "{571D327C-94C9-409B-AA7B-381F6DF98D8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E07D6287-4105-4F8F-8278-7A74D9D8A0E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{857FA613-475C-4DE5-AD20-381752456DB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{857FA613-475C-4DE5-AD20-381752456DB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{857FA613-475C-4DE5-AD20-381752456DB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{857FA613-475C-4DE5-AD20-381752456DB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{495EAA94-F4AE-4348-BF0F-F6DDB6486C9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{495EAA94-F4AE-4348-BF0F-F6DDB6486C9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{495EAA94-F4AE-4348-BF0F-F6DDB6486C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{495EAA94-F4AE-4348-BF0F-F6DDB6486C9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{571D327C-94C9-409B-AA7B-381F6DF98D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{571D327C-94C9-409B-AA7B-381F6DF98D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{571D327C-94C9-409B-AA7B-381F6DF98D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{571D327C-94C9-409B-AA7B-381F6DF98D8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

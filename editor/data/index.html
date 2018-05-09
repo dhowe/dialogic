@@ -1,0 +1,380 @@
+<html>
+
+<head>
+  <title>Dialogic v0.6.03</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.js"></script>
+  <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
+  <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
+  <style>
+    body {
+      padding: 0 2em;
+    }
+
+    .line-error {
+      position: absolute;
+      width: 600px;
+      height: 14px;
+      margin-top: -14px;
+      padding-right: 557px !important;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .linedtextarea textarea {
+      outline: none !important;
+      background-color: transparent !important;
+    }
+
+    .sub-title {
+      line-height: 42px;
+      font-size: 20px;
+    }
+
+    .input-area {
+      margin-top: 5px !important;
+    }
+
+    #result {
+      min-width: 620px;
+      display: inline-block !important;
+    }
+
+    #executeResult {
+      border: 1px solid transparent;
+      margin: 1.0 em 0;
+      padding: 0.8em;
+    }
+
+    #executeResult:empty {
+      display: none;
+    }
+
+    #executeResult.success {
+      background: #c3d4ef;
+      color: #144594;
+      border-color: #7ea0d7;
+      max-width: 620px;
+    }
+
+    #executeResult.error {
+      background: #FBE3E4;
+      color: #D12F19;
+      border-color: #FBC2C4;
+    }
+
+    pre.executeResult {
+      white-space: pre-wrap;
+      /* Since CSS 2.1 */
+      white-space: -moz-pre-wrap;
+      /* Mozilla, since 1999 */
+      white-space: -pre-wrap;
+      /* Opera 4-6 */
+      white-space: -o-pre-wrap;
+      /* Opera 7 */
+      word-wrap: break-word;
+      /* Internet Explorer 5.5+ */
+    }
+
+    #loadURLDialog {
+      width: 500px;
+      border: 1px solid #c0c0c0;
+      margin: auto;
+      top: 300px;
+      left: -600px;
+      display: none;
+    }
+
+    #closeDialog {
+      float: right;
+    }
+
+    #loadUrlPathDiv input {
+      margin: 10px 0;
+      font-size: 14px;
+      width: 100% !important;
+    }
+
+    button:disabled {
+      opacity: .5;
+    }
+
+    button:disabled:hover {
+      background: white !important;
+    }
+
+    .navlink:link,
+    .navlink:visited {
+      text-decoration: none;
+      font-size: 12px;
+      font-family: Open Sans, sans-serif;
+      font-weight: 500;
+      color: #2F6465;
+    }
+
+    .navlink:hover,
+    .navlink:active {
+      color: #088;
+    }
+
+    .button:hover,
+    button[type="button"]:hover {
+      background: #f3f3f3 !important;
+    }
+
+    p.navlinks {
+      margin-left: 185px;
+    }
+
+    #button-div {
+      margin-left: 100px;
+    }
+
+    #title {
+      font-family: Open Sans, sans-serif;
+      font-size: 24px;
+      margin-left: -3px;
+    }
+
+    #fish {
+      margin-top: 5px;
+      margin-left: 13px;
+    }
+
+    .button,
+    button[type="button"] {
+      cursor: pointer;
+      background-color: #fff !important;
+      padding: 5px 15px !important;
+      text-decoration: none !important;
+      border: 1px solid #e1e1e1 !important;
+      font-size: 14px !important;
+      font-family: Open Sans, sans-serif !important;
+      font-weight: 500 !important;
+      color: #333 !important;
+      margin: 10px 20px 0 0 !important;
+    }
+  </style>
+</head>
+
+<body>
+  <span class="sub-title">
+        <p class="navlinks">
+          <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/#dialogic">Home</a> &nbsp;|&nbsp;
+          <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/wiki/Command-Reference">Command Reference</a> &nbsp;|&nbsp;
+          <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
+          <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
+        </p>
+        <img id="fish" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
+        <span id="title">Dialogic</b><br>
+  </span>
+
+  <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
+  <form name="main" id="form">
+    <div class="input-area">
+      <textarea id="main" name="code" class="lined" rows="29" cols="100">%%CODE%%</textarea>
+    </div>
+    <div id="button-div" class="validate">
+      <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
+      <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
+      <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
+      <button class="button" type="reset" id="clear">Clear</button>
+    </div>
+  </form>
+  <section id="result-container" class="%%CCLASS%%">
+    <pre id="executeResult" style="font-size: 13px" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
+    <pre id="result" style="font-size: 13px" class="%%RCLASS%%">%%RESULT%%</pre>
+  </section>
+  </div>
+
+  <div class="CodeMirror-dialog" id="loadURLDialog">
+    <div class="CodeMirror-dialog-top">
+      <h4>Enter Url</h4>
+    </div>
+    <form id="loadUrlPathDiv" class="dialog-content">
+      <input type="text" name="path" id="urlPath" placeholder="Paste your url">
+    </form>
+    <div class="CodeMirror-dialog-bottom">
+      <div class="buttonset">
+        <button type="button" id="loadURL">Load</button>
+        <button type="button" id="clearURL">Clear</button>
+        <button type="button" id="closeDialog">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function ()
+    {
+      $(".lined").linedtextarea();
+
+      // setup button handlers
+      $("#clear").click(function ()
+      {
+        $("#main").empty();
+      });
+
+      $("#execute").click(function ()
+      {
+        onButtonClicked(true);
+      });
+
+      $("#validate").click(function ()
+      {
+        onButtonClicked(false);
+      });
+
+      // handle dialog show/hide
+      $("#showDialog").click(function ()
+      {
+        $("#loadURLDialog").show();
+      });
+
+      $("#loadURL").click(onLoadURLClicked);
+
+      $("#clearURL").click(function ()
+      {
+        $("#urlPath").val('');
+      });
+
+      $("#closeDialog").click(closeURLDialog);
+
+      $("#main").on('input', toggleValidateButtons);
+
+      (function ()
+      {
+        toggleValidateButtons();
+
+        // highlight line on which error happened
+        if (!$("#errorLine").text().includes("ERRORLINE"))
+        {
+          var idx = $("#errorLine").text() - 1;
+          $(".lineno:eq(" + idx + ")").append("<div class='line-error'></div>");
+        }
+      })();
+
+      // functions ---------------------------------------------
+
+      function toggleValidateButtons()
+      {
+        var $main = $("#main");
+        var input = $main.val();
+        if (input.length && input != 'Enter your script here')
+        {
+          $("#validate").prop("disabled", false);
+        }
+
+        var resText = $("#result").text(),
+          validated;
+        if (resText.length && resText.indexOf('%RESULT%') < 0)
+        {
+          $("#execute").prop("disabled", false);
+        }
+      }
+
+      function closeURLDialog()
+      {
+        $("#loadURLDialog").hide();
+        $("#urlPath").html("Paste your url");
+      }
+
+      function onButtonClicked(execute)
+      {
+        event.preventDefault();
+
+        var formData = $("#form").serializeArray();
+        formData.push(
+        {
+          name: 'mode',
+          value: execute ? 'execute' : 'validate'
+        });
+
+        if (!execute)
+        {
+
+          var $main = $("#main");
+          var startIdx = $main[0].selectionStart;
+          var endIdx = $main[0].selectionEnd;
+
+          var selection = $main.getSelectedText(startIdx, endIdx);
+
+          if (selection)
+          {
+            formData.push(
+            {
+              name: "selectionStart",
+              value: startIdx
+            });
+            formData.push(
+            {
+              name: "selectionEnd",
+              value: endIdx
+            });
+            formData.push(
+            {
+              name: "selection",
+              value: selection
+            });
+          }
+        }
+        else
+        {
+          formData.push(
+          {
+            name: "selection",
+            value: $("#result").text()
+          });
+        }
+
+        sendRequest(formData);
+      }
+
+      function onLoadURLClicked()
+      {
+        sendRequest($("#loadUrlPathDiv").serialize());
+      }
+
+      function sendRequest(data)
+      {
+        $.ajax(
+        {
+          type: "POST",
+          data: data,
+          url: "%%URL%%",
+          contentType: 'application/x-www-form-urlencoded',
+          success: function (data)
+          {
+            document.open();
+            document.write(data);
+            document.close();
+          }
+        });
+      }
+
+      jQuery.fn.getSelectedText = function (startIdx, endIdx)
+      {
+        if (window.getSelection)
+        {
+          var code = this.val();
+
+          if (startIdx != endIdx)
+          {
+            var lines = code.split("\n"),
+              count = 0;
+
+            for (var i = 0; i < lines.length; i++)
+            {
+              var lastChar = count + lines[i].length;
+              if (lastChar < startIdx) lines[i] = "//" + lines[i];
+              if (endIdx < count) lines[i] = "//" + lines[i];
+              count = lastChar + 1;
+            }
+
+            return lines.join("\n");
+          }
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
