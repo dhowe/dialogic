@@ -1,7 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RootNamespace>Dialogic</RootNamespace>
+    <AssemblyName>Dialogic</AssemblyName>
+    <PackageId>org.rednoise.dialogic</PackageId>
+    <PackageVersion>0.6.04</PackageVersion>
+    <Authors>Daniel C Howe</Authors>
+    <Description>Generative interactive dialog</Description>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageLicenseUrl>https://www.gnu.org/licenses/gpl.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/dhowe/dialogic</PackageProjectUrl>
+    <Title>Dialogic</Title>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PackageIconUrl>http://rednoise.org/images/dialogic.png</PackageIconUrl>
+    <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -10,4 +24,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <LangVersion>6</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
 </Project>
