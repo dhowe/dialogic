@@ -4,4 +4,4 @@ before_install:
 before_script:
   - nuget restore dialogic.sln
 after_script:
-  - dotnet test
+  - dotnet test tests/tests.csproj
