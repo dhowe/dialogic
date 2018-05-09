@@ -148,7 +148,7 @@ namespace Dialogic
         }
 
         [Test]
-        public void AppendChatsToExistingRuntime()
+        public void AppendNewChats()
         {
             var lines = new[] {
                  "CHAT Test {type=a,stage=b}",

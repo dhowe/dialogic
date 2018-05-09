@@ -16,7 +16,7 @@ namespace runner
         public static void Main(string[] args)
         {
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
-            testfile += "../../../../dialogic/data/gscript.gs";
+            testfile += "../../../../dialogic/data/gscript.gs"; 
             new MockGameEngine(new FileInfo(testfile)).Run();
         }
 

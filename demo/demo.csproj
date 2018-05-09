@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dialogic\dialogic.csproj" />
+    <PackageReference Include="MessagePack" Version="1.7.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="1.7.3.4" />
+    <ProjectReference Include="..\dialogic\dialogic.csproj" />
   </ItemGroup>
 </Project>

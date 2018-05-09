@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dialogic\dialogic.csproj" />
+    <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Program.cs" />
+    <ProjectReference Include="..\dialogic\dialogic.csproj" />
   </ItemGroup>
 </Project>
