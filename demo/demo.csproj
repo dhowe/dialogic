@@ -11,4 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="runtime.ser" />
+  </ItemGroup>
 </Project>
