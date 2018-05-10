@@ -6,7 +6,7 @@
     <RootNamespace>Dialogic</RootNamespace>
     <AssemblyName>Dialogic</AssemblyName>
     <PackageId>org.rednoise.dialogic</PackageId>
-    <PackageVersion>0.6.05</PackageVersion>
+    <PackageVersion>0.6.06</PackageVersion>
     <Authors>Daniel C Howe</Authors>
     <Description>A library for generative interactive dialog</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
