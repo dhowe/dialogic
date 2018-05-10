@@ -403,7 +403,7 @@ namespace Dialogic
         {
             var txt = this.text;
             if (global) txt = Ch.SYMBOL + txt;
-            return TypeName().ToUpper() + " " + txt + " = " + value;
+            return TypeName().ToUpper() + " " + txt + " "+op +" "+ value;
         }
     }
 

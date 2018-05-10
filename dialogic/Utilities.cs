@@ -150,21 +150,7 @@ namespace Dialogic
         internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
         public static Regex FindMeta = new Regex(OP1 + OP2);
 
-        //internal const string MP0 = @"(?:\[([^=()]+)=)?";
-        //internal const string MP1 = @"\(([^()]+|(?<Level>\()|";
-        //internal const string MP2 = @"(?<-Level>\)))+(?(Level)(?!))\)\]?";
-        //internal const string MP3 = @"(?:\.(" + SYM + @")\(\))*\]?";
-        //public static Regex MatchParens = new Regex(MP0 + MP1 + MP2 + MP3);
-
         public static Regex MatchParens = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?");
-
-
-        //internal const string PV1 = @"((?:\[([^=]+)=)?(\$)\{?";
-        //internal const string PV2 = @"(" + SYM + @"(?:\." + SYM + @"(?:\([^)]*\))?)*)\}?\]?)";
-        //public static Regex ParseVars = new Regex(PV1 + PV2);
-        //public static Regex ParseVars = new Regex(@"(?:\[([^=]+)=)?(?:\$(\{?)("+SYM+@")(\}?))(?:\.([^(]+)\(\))*\]?");
-        //public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?(?:\$(\{?)([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*))(?:\.([^(]+)\(\))*(\}?)(\]?)");
-        //public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?(?:\$(\{?)([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*))(?:\.([^(]+)\(\))*(\}?)(\]?)");
         public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?");
 
         public static Regex SplitOr = new Regex(@"\s*\|\s*");
@@ -176,6 +162,7 @@ namespace Dialogic
         public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
         public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
         public static Regex TestTubeChatBaby = new Regex(@"^C[0-9]+$");
+        public static Regex MultiSpace = new Regex(@"\s+");
 
         // ChatParser.lineParser Regex
         internal const string MTD = @"(?:\{(.+?)\})?\s*";

@@ -787,7 +787,44 @@ namespace Dialogic
         }
 
         [Test]
-        public void SetOrEquals()
+        public void SetOrEqualsGlobal()
+        {
+            string[] lines = {
+                "CHAT c1 {type=a,stage=b}",
+                "SET $review=$greeting",
+                "SET $greeting = Hello | Goodbye",
+                "SET $greeting |= See you later",
+                "SAY $review",
+            };
+            var chat = ChatParser.ParseText(String.Join("\n", lines))[0];
+            //Console.WriteLine(chat.ToTree());
+            var last = chat.commands[chat.commands.Count - 1];
+            Assert.That(last, Is.Not.Null);
+            Assert.That(last.GetType(), Is.EqualTo(typeof(Say)));
+            chat.commands.ForEach(c => c.Resolve(globals));
+
+            Assert.That(globals.ContainsKey("review"), Is.True);
+            Assert.That(globals.ContainsKey("greeting"), Is.True);
+            Assert.That(globals["greeting"],
+                        Is.EqualTo("(Hello | Goodbye | See you later)"));
+
+            Say say = (Dialogic.Say)last;
+
+            HashSet<String> unique = new HashSet<String>();
+            for (int i = 0; i < 10; i++)
+            {
+                say.Resolve(globals);
+                var said = say.Text();
+                unique.Add(said);
+                //Console.WriteLine(i + ") " + said);
+                Assert.That(said, Is.EqualTo("Hello")
+                    .Or.EqualTo("Goodbye").Or.EqualTo("See you later"));
+            }
+            Assert.That(unique.Count, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void SetOrEqualsLocal()
         {
             string[] lines = {
                 "CHAT c1 {type=a,stage=b}",
@@ -810,15 +847,19 @@ namespace Dialogic
 
             Say say = (Dialogic.Say)last;
 
-            for (int i = 0; i < 10; i++)
+            HashSet<String> unique = new HashSet<String>();
+            for (int i = 0; i < 100; i++)
             {
                 say.Resolve(globals);
                 var said = say.Text();
+                unique.Add(said);
                 //Console.WriteLine(i+") "+said);
                 Assert.That(said, Is.EqualTo("Hello")
                     .Or.EqualTo("Goodbye").Or.EqualTo("See you later"));
             }
+            Assert.That(unique.Count, Is.EqualTo(3));
         }
+
 
         [Test]
         public void SetPlusEquals()

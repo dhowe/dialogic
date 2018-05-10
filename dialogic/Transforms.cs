@@ -77,6 +77,9 @@ namespace Dialogic
             lookup.TryAdd("articlize",  articlize);
             lookup.TryAdd("capitalize", capitalize);
             lookup.TryAdd("quotify",    quotify);
+
+            lookup.TryAdd("an", articlize);
+            lookup.TryAdd("cap", capitalize);
         }
 
         private static readonly Lazy<Transforms> lazy =

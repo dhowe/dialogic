@@ -64,6 +64,9 @@ namespace Dialogic
             // replace any literal quotation marks
             text = text.Replace("\"", string.Empty);
 
+            // replace multiple spaces with single
+            text = RE.MultiSpace.Replace(text, " ");
+
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
             return Entities.Decode(text);

@@ -86,6 +86,13 @@ namespace Dialogic
 
             res = new Resolver(null).BindGroups("(cat | cat).pluralize().articlize()", c);
             Assert.That(res, Is.EqualTo("a cats"));
+
+
+            res = new Resolver(null).BindGroups("(cat | cat).pluralize().articlize()", c);
+            Assert.That(res, Is.EqualTo("a cats"));
+
+            res = new Resolver(null).BindGroups("(cat | cat).pluralize().an()", c);
+            Assert.That(res, Is.EqualTo("a cats"));
         }
 
 

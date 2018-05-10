@@ -12,24 +12,64 @@ namespace Dialogic.Server
     public class Editor
     {
         public static string SERVER_URL;
+        public static int SERVER_PORT;
 
         static string IndexPageContent;
 
-        readonly HttpListener listener = new HttpListener();
+        HttpListener listener;
         readonly Func<HttpListenerRequest, string> responderFunc;
 
         static ChatRuntime runtime;
 
-        public Editor(Func<HttpListenerRequest, string> func, string uri)
+        public Editor(Func<HttpListenerRequest, string> func, string host)
         {
-            if (uri.IsNullOrEmpty()) throw new ArgumentException("URI required");
-
             if (func == null) throw new ArgumentException
                 ("Responder Func required");
 
-            listener.Prefixes.Add(uri);
             responderFunc = func;
-            listener.Start();
+            CreateNewListener(host).Start();
+        }
+
+        static List<int> usedPorts = new List<int>();
+        static Random r = new Random();
+
+        public HttpListener CreateNewListener(string hostname)
+        {
+            string host = null;
+            int newPort = -1;
+            if (hostname == "rednoise.org")  {
+                host = "http://rednoise.org:8082/dialogic/editor/";
+                listener.Prefixes.Add(host);
+                listener.Start();
+                return listener;
+            }
+                
+            while (true) // choose a random port
+            {
+                listener = new HttpListener();
+                // IANA suggests the range 49152 to 65535 for private ports
+                newPort = r.Next(49152, 65535);
+                if (usedPorts.Contains(newPort))
+                {
+                    continue;
+                }
+                host = "http://" + hostname + ":" + newPort + "/dialogic/editor/";
+                Console.WriteLine("Running editor on " + host);
+
+                listener.Prefixes.Add(host);
+                try
+                {
+                    listener.Start();
+                }
+                catch
+                {
+                    continue;
+                }    
+                usedPorts.Add(newPort);
+                break;
+            }
+
+            return listener;
         }
 
         public static string LocalIPAddress()
@@ -219,21 +259,18 @@ namespace Dialogic.Server
             return result;
         }
 
-        private static string MakeServerUrl(string host)
-        {
-            return "http://" + host + ":8082/dialogic/editor/";
-        }
+        //private static string MakeServerUrl(string host)
+        //{
+        //    return "http://" + host + ":8082/dialogic/editor/";
+        //}
 
         public static void Main(string[] args)
         {
-            SERVER_URL = MakeServerUrl
-                (args.Length > 0 ? args[0] : LocalIPAddress());
+            var host = args.Length > 0 ? args[0] : "localhost";
+            Editor ws = new Editor(SendResponse, host);
 
-            Editor ws = new Editor(SendResponse, SERVER_URL);
             Editor.IndexPageContent = String.Join
-                ("\n", File.ReadAllLines("data/index.html", Encoding.UTF8));;
-
-            Console.WriteLine("LintServer running on " + SERVER_URL);
+                ("\n", File.ReadAllLines("data/index.html", Encoding.UTF8));
 
             ws.Run();
         }

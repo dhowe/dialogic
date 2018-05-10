@@ -141,6 +141,11 @@
       margin-left: 13px;
     }
 
+    .linedwrap {
+      width:95% important!;
+      margin-left: 13px;
+    }
+
     .button,
     button[type="button"] {
       cursor: pointer;
@@ -172,7 +177,7 @@
   <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
   <form name="main" id="form">
     <div class="input-area">
-      <textarea id="main" name="code" class="lined" rows="29" cols="100">%%CODE%%</textarea>
+      <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false">%%CODE%%</textarea>
     </div>
     <div id="button-div" class="validate">
       <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
@@ -250,6 +255,9 @@
           var idx = $("#errorLine").text() - 1;
           $(".lineno:eq(" + idx + ")").append("<div class='line-error'></div>");
         }
+
+        $('#main').width(930);
+        $('.linedwrap').width(1000);
       })();
 
       // functions ---------------------------------------------
