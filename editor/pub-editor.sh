@@ -31,7 +31,7 @@ ln -s bin/release/netcoreapp2.0/ubuntu.16.04-x64/publish DialogicEditor
 zip -j -r DialogicEditor-$VERS.zip DialogicEditor/*
 zip -ur DialogicEditor-$VERS.zip data
 
-scp DialogicEditor-$VERS.zip $USER@$RED:~/dialogic-editor
+scp run-editor.sh DialogicEditor-$VERS.zip $USER@$RED:~/dialogic-editor
 
 unlink DialogicEditor
 #ls -l

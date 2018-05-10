@@ -6,7 +6,7 @@ demo/runtime.ser
 tmp
 
 # editor
-nohup.out
+editor/DialogicEditor-*.zip
 
 # tests
 tests/*.xml

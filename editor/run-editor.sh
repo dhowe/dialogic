@@ -1,7 +1,16 @@
-# run from directory with DialogicEditor-X.Y.Z.zip
-# created for the required platform 
+# expects DialogicEditor-X.Y.Z.zip built for the platform 
 
-rm -rf tmp/*
-unzip -d tmp DialogicEditor-0.6.05.zip
-chmod +x tmp/DialogicEditor
-cd tmp && ./DialogicEditor rednoise.org
+if [ $# -lt "1"  ]
+then
+    echo
+    echo "  error:   version required"
+    echo
+    echo "  usage:   exec-editor.sh [1.3.9]"
+    echo
+    exit
+fi
+
+rm -rf exec/*
+unzip -d exec DialogicEditor-$1.zip
+chmod +x exec/DialogicEditor
+cd exec && ./DialogicEditor rednoise.org

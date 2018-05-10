@@ -1,0 +1,17 @@
+# debian: /etc/systemd/system/dialogic-editor.service
+
+[Unit]
+Description=DialogicEditor Service
+After=network.target network-online.target
+
+[Service]
+WorkingDirectory=/home/dhowe/dialogic-editor/exec
+ExecStart=/home/dhowe/dialogic-editor/exec/DialogicEditor rednoise.org
+TimeoutSec=30
+Restart=on-failure
+RestartSec=30
+StartLimitInterval=350
+StartLimitBurst=10
+
+[Install]
+WantedBy=multi-user.target
