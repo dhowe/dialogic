@@ -157,7 +157,6 @@ namespace Dialogic
             (IDictionary<string, object> globals)
         {
             resolved.Clear();
-
             ResolveMeta(globals);
 
             if (this is ISendable)
@@ -292,7 +291,8 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// The Set command is used to create or modify a variable. Variables generally originate from the game environment itself, but can also be created, accessed or modified within Dialogic.
+    /// The Set command is used to create or modify a variable. Variables generally originate in the client environment itself, but can also be created, accessed or modified within Dialogic.
+    /// If it is important that a global variable is in scope before any chats are run, use the {preload=true} metadata tag, and call ChatRuntime.Preload()
     /// </summary>
     public class Set : Command
     {

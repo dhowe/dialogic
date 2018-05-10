@@ -13,7 +13,7 @@ namespace Tendar
     {
         private static Func<Command, bool> Validator = ValidateCommand;
 
-        const string STAGE = "stage", TYPE = "type";
+        const string STAGE = "stage", TYPE = "type", NOSTART = "noStart";
 
         public static Actor GUPPY = new Actor("Guppy",
             true, Validator, new CommandDef("NVM", typeof(Tendar.Nvm)));
@@ -26,19 +26,29 @@ namespace Tendar
         {
             if (c.GetType() == typeof(Chat))
             {
-                if (RE.TestTubeChatBaby.IsMatch(c.text)) return true;
-
-                if (!(c.HasMeta("NoStart") || c.HasMeta("noStart")))
+                if (RE.TestTubeChatBaby.IsMatch(c.text))
                 {
-                    if (!c.HasMeta(TYPE)) throw new ParseException
-                        ("missing required meta-key '" + TYPE + "' or 'noStart'");
-
-                    if (!c.HasMeta(STAGE)) throw new ParseException
-                        ("missing required meta-key '" + STAGE + "' or 'noStart'");
+                    return true;
                 }
+                ValidateMeta(c); // throws if invalid
             }
 
             return true;
+        }
+
+        private static void ValidateMeta(Command c)
+        {
+            if (!c.HasMeta(Meta.PRELOAD) && !c.HasMeta(NOSTART))
+            {
+                ValidateKey(c, TYPE);
+                ValidateKey(c, STAGE);
+            }
+        }
+
+        private static void ValidateKey(Command c, string key)
+        {
+            if (!c.HasMeta(key)) throw new ParseException
+                ("missing required meta-key '" + key + "', 'noStart' or 'preload'");
         }
     }
 

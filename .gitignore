@@ -3,6 +3,7 @@ TODO.txt
 BUILD.txt
 benchmarks
 demo/runtime.ser
+tmp
 
 # Autosave files
 *~

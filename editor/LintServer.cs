@@ -140,12 +140,13 @@ namespace Dialogic.Server
                 runtime = new ChatRuntime(Tendar.AppConfig.Actors);
                 runtime.strictMode = false; // allow unbound symbols/functions
                 runtime.ParseText(code, false); // true to disable validators
-
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
 
                 var result = string.Empty;
                 if (mode == "execute")
                 {
+                    runtime.Preload(globals);       // run any preload=true chats
+                    Console.WriteLine("GLOBALS="+globals.Stringify());
                     // run the first chats with all timing disabled
                     result = WebUtility.HtmlEncode(runtime.InvokeImmediate(globals));
 
