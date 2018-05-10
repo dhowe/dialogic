@@ -9,8 +9,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
-[assembly: InternalsVisibleTo("tests")]
-[assembly: InternalsVisibleTo("editor")]
+[assembly: InternalsVisibleTo("DialogicTests")]
+[assembly: InternalsVisibleTo("DialogicEditor")]
 
 namespace Dialogic
 {

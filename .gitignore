@@ -5,6 +5,15 @@ benchmarks
 demo/runtime.ser
 tmp
 
+# editor
+nohup.out
+
+# tests
+tests/*.xml
+tests/*.pdb
+
+# demo
+
 # Autosave files
 *~
 
@@ -15,8 +24,8 @@ packages/
 TestResults/
 
 # globs
-*.swp
-*.tmp
+**/*.swp
+**/*.tmp
 Makefile.in
 *.DS_Store
 *.sln.cache

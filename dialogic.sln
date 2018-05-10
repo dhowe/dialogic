@@ -5,9 +5,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo", "demo\demo.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dialogic", "dialogic\dialogic.csproj", "{C245A1B1-B170-4CB4-9D19-AE53C5FBE603}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{789FFE33-6775-44F3-98F7-3A8BDBF1F9E8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{9E587B3D-711A-4E97-82CA-15B4ED075FDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{04B2020C-3DE7-4EE5-B846-AB4D00937AD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,13 +23,13 @@ Global
 		{C245A1B1-B170-4CB4-9D19-AE53C5FBE603}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C245A1B1-B170-4CB4-9D19-AE53C5FBE603}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C245A1B1-B170-4CB4-9D19-AE53C5FBE603}.Release|Any CPU.Build.0 = Release|Any CPU
-		{789FFE33-6775-44F3-98F7-3A8BDBF1F9E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{789FFE33-6775-44F3-98F7-3A8BDBF1F9E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{789FFE33-6775-44F3-98F7-3A8BDBF1F9E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{789FFE33-6775-44F3-98F7-3A8BDBF1F9E8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9E587B3D-711A-4E97-82CA-15B4ED075FDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9E587B3D-711A-4E97-82CA-15B4ED075FDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E587B3D-711A-4E97-82CA-15B4ED075FDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E587B3D-711A-4E97-82CA-15B4ED075FDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04B2020C-3DE7-4EE5-B846-AB4D00937AD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04B2020C-3DE7-4EE5-B846-AB4D00937AD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04B2020C-3DE7-4EE5-B846-AB4D00937AD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04B2020C-3DE7-4EE5-B846-AB4D00937AD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

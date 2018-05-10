@@ -21,7 +21,6 @@ namespace Dialogic
         ChatRuntime dialogic;
         EventArgs gameEvent;
 
-        bool interrupted = false;
         string evtText, evtType, evtActor;
         string[] evtOpts;
 
@@ -45,8 +44,6 @@ namespace Dialogic
 
         private void HandleEvent(ref IUpdateEvent ue)
         {
-            interrupted = false;
-
             evtText = ue.Text();
             evtType = ue.Type();
             evtActor = ue.Actor();
