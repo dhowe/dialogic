@@ -39,6 +39,7 @@ namespace Dialogic.Server
             int newPort = -1;
             if (hostname == "rednoise.org")  {
                 host = "http://rednoise.org:8082/dialogic/editor/";
+                listener = new HttpListener();
                 listener.Prefixes.Add(host);
                 listener.Start();
                 return listener;
