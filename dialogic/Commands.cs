@@ -327,6 +327,15 @@ namespace Dialogic
         protected internal override IDictionary<string, object> Resolve
             (IDictionary<string, object> globals)
         {
+            //Console.WriteLine("SET: " + text + " " + op + " " + value);
+            //if (value.Contains(Ch.OR) && !value.StartsWith(Ch.OR) 
+            //    && !value.StartsWith(Ch.OGROUP) && !value.EndsWith(Ch.CGROUP) 
+            //    && !(value.StartsWith(Ch.OGROUP) && value.EndsWith(Ch.CGROUP)))
+            //{
+            //    value = '(' + value + ')';
+            //    Console.WriteLine("     " + text + " " + op + " " + value);
+            //}
+
             if (text.Contains(Ch.SCOPE)) // scoped
             {
                 if (!global) throw new BindException
@@ -403,7 +412,7 @@ namespace Dialogic
         {
             var txt = this.text;
             if (global) txt = Ch.SYMBOL + txt;
-            return TypeName().ToUpper() + " " + txt + " "+op +" "+ value;
+            return TypeName().ToUpper() + " " + txt + " " + op + " " + value;
         }
     }
 

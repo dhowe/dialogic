@@ -3,7 +3,7 @@
 <head>
   <title>Dialogic</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <script src="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.js"></script>
+  <script src="http://rednoise.org/js/jquery-linedtextarea-dialogic.js"></script>
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
   <style>
@@ -13,7 +13,7 @@
 
     .line-error {
       position: absolute;
-      width: 600px;
+      width: 90%;
       height: 14px;
       margin-top: -14px;
       padding-right: 557px !important;
@@ -35,14 +35,15 @@
       margin-top: 5px !important;
     }
 
-    #result {
+    #result-container pre {
+      width:95%;
+      margin-left: 13px;
       min-width: 620px;
-      display: inline-block !important;
+      overflow: auto;
     }
 
     #executeResult {
       border: 1px solid transparent;
-      margin: 1.0 em 0;
       padding: 0.8em;
     }
 
@@ -54,7 +55,6 @@
       background: #c3d4ef;
       color: #144594;
       border-color: #7ea0d7;
-      max-width: 620px;
     }
 
     #executeResult.error {
@@ -141,6 +141,16 @@
       margin-left: 13px;
     }
 
+    .linedwrap {
+      width:95% !important;
+      min-width: 700px;
+      margin-left: 13px;
+    }
+
+    #main {
+      width:90% !important;
+    }
+
     .button,
     button[type="button"] {
       cursor: pointer;
@@ -172,7 +182,7 @@
   <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
   <form name="main" id="form">
     <div class="input-area">
-      <textarea id="main" name="code" class="lined" rows="29" cols="100">%%CODE%%</textarea>
+      <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false">%%CODE%%</textarea>
     </div>
     <div id="button-div" class="validate">
       <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
@@ -205,7 +215,8 @@
   <script>
     $(function ()
     {
-      $(".lined").linedtextarea();
+
+      $("#main").linedtextarea();
 
       // setup button handlers
       $("#clear").click(function ()
@@ -250,9 +261,18 @@
           var idx = $("#errorLine").text() - 1;
           $(".lineno:eq(" + idx + ")").append("<div class='line-error'></div>");
         }
+
+        adjustLineErrorWidth();
       })();
 
+      $(window).resize(function(){
+         adjustLineErrorWidth();
+      })
+
       // functions ---------------------------------------------
+      function adjustLineErrorWidth() {
+        $('.line-error').css('width', $('.linedtextarea').outerWidth().toString());
+      }
 
       function toggleValidateButtons()
       {
@@ -373,8 +393,12 @@
           }
         }
       }
+
+
+
     });
   </script>
+
 </body>
 
 </html>

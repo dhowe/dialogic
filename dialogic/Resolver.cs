@@ -55,19 +55,28 @@ namespace Dialogic
                             ChatRuntime.Warn("Unbound symbol: " + symbols[0]);
                         }
                     }
-
                     break;
                 }
 
             } while (IsDynamic(text));
 
+    
+            if (DBUG) Console.WriteLine("Result: " + text + "\n");
+
+            return PrepareOutput(text);
+        }
+
+        public string PrepareOutput(string text)
+        {
             // replace any literal quotation marks
             text = text.Replace("\"", string.Empty);
 
+            // replace extra grouping operators
+            text = text.Replace("(", string.Empty);
+            text = text.Replace(")", string.Empty);
+
             // replace multiple spaces with single
             text = RE.MultiSpace.Replace(text, " ");
-
-            if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
             return Entities.Decode(text);
         }
@@ -79,7 +88,7 @@ namespace Dialogic
         public string BindSymbols(string text, Chat context,
             IDictionary<string, object> globals, int level = 0)
         {
-            if (DBUG) Console.WriteLine("  Symbols(" + level + "): " + Info(text, context));
+            if (DBUG) Console.WriteLine("  Symbols(" + level + ") "+text);// + Info(text, context));
 
             ParseSymbols(text, context);
             while (symbols.Count > 0)
@@ -97,13 +106,21 @@ namespace Dialogic
 
                 if (result != null)
                 {
+                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP)))
+                    {
+                        result = Ch.OGROUP + result + Ch.CGROUP;
+                        if (DBUG) Console.WriteLine("      pars: " + result);
+                    }
                     text = symbol.Replace(text, result);
 
-                    if (pretext != text && text.Contains(Ch.SYMBOL))
+                    if (pretext != text) // progress?
                     {
-                        // repeat if we've made progress but still have symbols
-                        ParseSymbols(text, context);
-                        continue;
+                        // repeat if still have symbols
+                        if (text.Contains(Ch.SYMBOL))
+                        {
+                            ParseSymbols(text, context);
+                            continue;
+                        }
                     }
                 }
             }
@@ -120,15 +137,15 @@ namespace Dialogic
         {
             if (text.Contains(Ch.OR))
             {
-                if (DBUG) Console.WriteLine("  Groups(" + level + "): " + Info(text, context));
+                if (DBUG) Console.WriteLine("  Groups(" + level + ") "+text);// + Info(text, context));
 
                 var original = text;
 
-                if (!(text.Contains(Ch.OGROUP) && text.Contains(Ch.CGROUP)))
-                {
-                    text = Ch.OGROUP + text + Ch.CGROUP;
-                    ChatRuntime.Warn("BindGroups added parens to: " + text);
-                }
+                //if (!(text.Contains(Ch.OGROUP) && text.Contains(Ch.CGROUP)))
+                //{
+                //    text = Ch.OGROUP + text + Ch.CGROUP;
+                //    ChatRuntime.Warn("BindGroups added parens to: " + text);
+                //}
 
                 ParseChoices(text, context);
                 if (DBUG) Console.WriteLine("    Found: " + choices.Stringify());

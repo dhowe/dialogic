@@ -165,7 +165,7 @@ namespace Dialogic
             rt.strictMode = false;
             var s = rt.InvokeImmediate(globals);
             ChatRuntime.SILENT = false;
-            Assert.That(s, Is.EqualTo("hello a.noFun(),\nok."));
+            Assert.That(s, Is.EqualTo("hello a.noFun,\nok."));
         }
 
         [Test]

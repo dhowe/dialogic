@@ -40,7 +40,37 @@ namespace Dialogic
             Assert.That(res, Is.EqualTo("A girl FRED FRED"));
         }
 
-     
+
+        [Test]
+        public void ReplaceParensGrouping()
+        {
+            var lines = new[] {
+                "CHAT c1",
+                "SET $start = $aa $bb",
+                "SET $aa = Word",
+                "SET $bb = A B (C | D) | A B (C | D)",
+                "SAY $start"
+            };
+
+            ChatRuntime runtime;
+            Chat chat;
+            string res = null;
+
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime["c1"];
+            chat.Resolve(globals);
+            //Console.WriteLine("start="+globals["start"]);
+            //Console.WriteLine("aa="+globals["aa"]);
+            //Console.WriteLine("bb=" + globals["bb"]);
+            for (int i = 0; i < 5; i++)
+            {
+                res = runtime.InvokeImmediate(globals);
+                //Console.WriteLine(i + ") " + res);
+                Assert.That(res, Is.EqualTo("Word A B C").Or.EqualTo("Word A B D"));
+            }
+           
+        }
 
         [Test]
         public void TransformAliasTest()
@@ -633,6 +663,7 @@ namespace Dialogic
 
             Say say = (Dialogic.Say)last;
             var text = say.Text();
+            //Console.WriteLine("GOT: "+text);
             Assert.That(text.StartsWith("You look tasty: gushing", Util.IC), Is.True);
             Assert.That(text.EndsWith("Goodbye!", Util.IC), Is.True);
         }
@@ -1067,7 +1098,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
-            Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B C | D"));
+            Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
             lines = new[] {
                 "start =  $a $b $c",
@@ -1300,7 +1331,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
-            Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D) E"));
+            Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B ((C | D) E)"));
 
             lines = new[] {
                 "start =  $a $b $c",
@@ -1311,7 +1342,7 @@ namespace Dialogic
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
             chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
-            Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B C (C | D) E"));
+            Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C (C | D) E)"));
         }
 
         [Test]

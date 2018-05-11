@@ -94,6 +94,7 @@ namespace Dialogic
             }
 
             MethodInfo method = null;
+            object result = null;
             var key = CacheKey(methodName, args);
 
             if (!Cache[type].ContainsKey(key))
@@ -101,9 +102,16 @@ namespace Dialogic
                 method = type.GetMethod(methodName, ArgsToTypes(args));
                 if (method == null && target is string)
                 {
-                    var transformed = InvokeTransform(target, methodName);
+                    try
+                    {
+                        result = InvokeTransform(target, methodName);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw BadTransform(target, methodName, ex);
+                    }
 
-                    if (transformed != null) return transformed;
+                    if (result != null) return result;
 
                     throw new UnboundFunction(methodName, null, null,
                         "\nDid you mean to call ChatRuntime.AddTransform"
@@ -118,8 +126,24 @@ namespace Dialogic
 
             method = Cache[type][key];
 
-            return method.IsStatic ? method.Invoke(null, args) :
-                         method.Invoke(target, args);
+            try
+            {
+                result = method.IsStatic ? method.Invoke(null, args) :
+                    method.Invoke(target, args);
+            }
+            catch (Exception ex)
+            {
+                throw BadTransform(target, methodName, ex);
+            }
+
+            return result;
+        }
+
+        private static TransformException BadTransform
+            (object target, string methodName, Exception ex)
+        {
+            return new TransformException(methodName +
+                "(" + target + ") threw Exception: " + ex.Message);
         }
 
         /* 
