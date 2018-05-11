@@ -35,40 +35,44 @@ namespace Dialogic.Server
 
         public HttpListener CreateNewListener(string hostname)
         {
-            string host = null;
+            string uri = null;
             int newPort = -1;
-            if (hostname == "rednoise.org")  {
-                host = "http://rednoise.org:8082/dialogic/editor/";
-                listener = new HttpListener();
-                listener.Prefixes.Add(host);
-                listener.Start();
-                return listener;
-            }
-                
-            while (true) // choose a random port
+            if (hostname == "rednoise.org")
             {
+                uri = "http://rednoise.org:8082/dialogic/editor/";
+                Console.WriteLine("Trying: " + uri + "...");
                 listener = new HttpListener();
-                // IANA suggests the range 49152 to 65535 for private ports
-                newPort = r.Next(49152, 65535);
-                if (usedPorts.Contains(newPort))
-                {
-                    continue;
-                }
-                host = "http://" + hostname + ":" + newPort + "/dialogic/editor/";
-                Console.WriteLine("Running editor on " + host);
-
-                listener.Prefixes.Add(host);
-                try
-                {
-                    listener.Start();
-                }
-                catch
-                {
-                    continue;
-                }    
-                usedPorts.Add(newPort);
-                break;
+                listener.Prefixes.Add(uri);
+                listener.Start();
             }
+            else
+            {
+
+                while (true) // choose a random port
+                {
+                    listener = new HttpListener();
+                    // IANA suggests the range 49152 to 65535 for private ports
+                    newPort = r.Next(49152, 65535);
+                    if (usedPorts.Contains(newPort))
+                    {
+                        continue;
+                    }
+                    uri = "http://" + hostname + ":" + newPort + "/dialogic/editor/";
+
+                    listener.Prefixes.Add(uri);
+                    try
+                    {
+                        listener.Start();
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    usedPorts.Add(newPort);
+                    break;
+                }
+            }
+            Console.WriteLine("Running editor on " + uri);
 
             return listener;
         }

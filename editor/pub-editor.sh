@@ -25,6 +25,8 @@ fi
 echo Creating DialogicEditor version=$VERS, target=ubuntu.16.04-x64
 echo
 
+rm DialogicEditor-$VERS.zip
+
 dotnet publish -c release -r ubuntu.16.04-x64
 
 ln -s bin/release/netcoreapp2.0/ubuntu.16.04-x64/publish DialogicEditor
