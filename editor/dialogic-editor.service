@@ -1,15 +1,14 @@
-# debian: /etc/systemd/system/dialogic-editor.service
-
 [Unit]
 Description=DialogicEditor Service
 After=network.target network-online.target
 
 [Service]
-WorkingDirectory=/home/dhowe/dialogic-editor/exec
-ExecStart=/home/dhowe/dialogic-editor/exec/DialogicEditor rednoise.org
+SyslogIdentifier=dialogic-editor
+WorkingDirectory=/var/www/html/dialogic-gh/editor
+ExecStart=/usr/bin/dotnet bin/Debug/netcoreapp2.0/DialogicEditor.dll "rednoise.org"
 TimeoutSec=30
-Restart=on-failure
-RestartSec=30
+Restart=always
+RestartSec=10
 StartLimitInterval=350
 StartLimitBurst=10
 
