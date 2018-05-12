@@ -22,19 +22,9 @@ namespace Tendar // change to TendAR
 
 		public static List<IActor> Actors = new List<IActor> { GUPPY, TENDAR };
 
-		/// <summary>
-		/// Returns a random synonym for an emotion
-		/// </summary>
-		public static string EmoSyn(string str)
-		{
-			return "amused"; // WORKING HERE
-		}
-
 		private static bool ValidateCommand(Command c)
 		{
-
-
-			// hack: as default transforms are uppercase
+			// hack for uppercase transform names
 			if (!(c is Chat))
 			{
 				var rt = c.GetRuntime();
@@ -46,7 +36,8 @@ namespace Tendar // change to TendAR
 					rt.AddTransform("quotify", Transforms.Quotify);
 					rt.AddTransform("cap", Transforms.Capitalize);
 					rt.AddTransform("an", Transforms.Articlize);
-					rt.AddTransform("emosyn", EmoSyn); // defined above
+					rt.AddTransform("emosyn", EmoSyn); // defined below
+					rt.AddTransform("emoadj", EmoAdj); // defined below
 				}
 			}
 
@@ -76,6 +67,56 @@ namespace Tendar // change to TendAR
 			if (!c.HasMeta(key)) throw new ParseException
 				("missing required meta-key '" + key + "', 'noStart' or 'preload'");
 		}
+
+		/// <summary>
+        /// Returns a random synonym for the emotion
+        /// </summary>
+        private static string EmoSyn(string emotion)
+        {
+            return (string)Util.RandItem(synNouns[emotion]);
+        }
+
+        /// <summary>
+        /// Returns a random adjective synonym for the emotion
+        /// </summary>
+		private static string EmoAdj(string emotion)
+        {
+            return (string)Util.RandItem(synAdjs[emotion]);
+        }
+
+		private static IDictionary<string, string[]> synNouns
+	        = new Dictionary<string, string[]>
+        {
+			{"anger",        new[]{ "irritation", "fury", "anger", "outrage", "constipation" }},
+			{"elation",      new[]{ "glee", "elation", "bliss", "whoopee", "euphoria" }},
+			{"sadness",      new[]{ "melancholy", "misery", "woe", "sorrow", "anguish" }},
+			{"surprise",     new[]{ "wonder", "amazement", "surprise", "shock", "awe" }},
+			{"fear",         new[]{ "dread", "dismay", "fear", "panic", "terror" }},
+			{"worry",        new[]{ "concern", "angst", "worry", "anxiety", "skepticism" }},
+			{"amusement",    new[]{ "delight", "mirth", "amusement", "merriment", "hilarity" }},
+			{"ennui",        new[]{ "blah", "indifference", "meh", "ennui", "apathy" }},
+			{"disgust",      new[]{ "dislike", "nausea", "disgust", "repugnance", "revulsion" }},
+			{"desire",       new[]{ "fascination", "passion", "desire", "rapture", "longing" }},
+			{"embarassment", new[]{ "discomfort", "bashfulness", "embarrassment", "chagrin", "mortification" }},
+			{"pride",        new[]{ "satisfaction", "confidence", "pride", "dignity", "ego" }},
+        };
+
+		private static IDictionary<string, string[]> synAdjs
+			= new Dictionary<string, string[]>
+		{
+			{"anger",        new[]{ "irritated", "furious", "angry", "outraged", "pissed" }},
+			{"elation",      new[]{ "blissed", "elated", "blissful", "euphoric", "ecstatic"}},
+			{"sadness",      new[]{ "melancholic", "miserable", "sad", "sorrowful", "anguished" }},
+			{"surprise",     new[]{ "wonderous", "amazed", "surprised", "shocked", "awed" }},
+			{"fear",         new[]{ "dismayed", "afraid", "fearful", "panicked", "scared" }},
+			{"worry",        new[]{ "concerned", "angsty", "worried", "anxious", "skeptical" }},
+			{"amusement",    new[]{ "delighted", "blissed", "amused", "tickled", "pleased" }},
+			{"ennui",        new[]{ "indifferent", "apathetic", "bored", "uninterested", "unenthused"}},
+			{"disgust",      new[]{ "hateful", "nauseous", "disgusted", "repulsed", "revolted" }},
+			{"desire",       new[]{ "fascinated", "passionate", "desirous", "hungry", "horny" }},
+			{"embarassment", new[]{ "discomforted", "bashful", "embarrassed", "shy", "mortified" }},
+			{"pride",        new[]{ "satisfied", "confident", "proud", "dignified", "egotistical" }},
+		};
 	}
 
 	public class Nvm : Command, IAssignable
@@ -88,6 +129,9 @@ namespace Tendar // change to TendAR
 			delay = txt.Length == 0 ? NVM_DURATION : Convert.ToDouble(txt);
 		}
 	}
+
+
+
 
 	//public interface IAppConfig {
 	//    List<IActor> GetActors();
