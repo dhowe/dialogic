@@ -18,15 +18,15 @@ namespace Dialogic
         /// <summary>
         /// Prefixes the string with 'a' or 'an' as appropriate.
         /// </summary>
-        public static string articlize(string str)
+        public static string Articlize(string str)
         {
             return ("aeiou".Contains(str.ToLower()[0]) ? "an " : "a ") + str;
         }
 
-        /// <summary>
-        /// Capitalizes the first character.
-        /// </summary>
-        public static string capitalize(string str)
+		/// <summary>
+		/// Capitalizes the first character.
+		/// </summary>
+		public static string Capitalize(string str)
         {
             return char.ToUpper(str[0]) + str.Substring(1);
         }
@@ -34,7 +34,7 @@ namespace Dialogic
         /// <summary>
         /// Wraps the given string in double-quotes.
         /// </summary>
-        public static string quotify(string str)
+        public static string Quotify(string str)
         {
             return "\"" + str + "\"";
         }
@@ -42,7 +42,7 @@ namespace Dialogic
         /// <summary>
         /// Pluralizes a single word according to english regular/irregular rules.
         /// </summary>
-        public static string pluralize(string word)
+        public static string Pluralize(string word)
         {
             if (word.Contains(' ')) throw new TransformException
                 ("pluralize accepts only single words");
@@ -67,19 +67,23 @@ namespace Dialogic
             return DEFAULT_PLURAL.fire(word);
         }
 
+		public static bool Contains(string v)
+        {
+            return Transforms.Instance.lookup.ContainsKey(v);
+        }
+
         // --------------------------------------------------------------------
 
         private Transforms()
         {
             lookup = new ConcurrentDictionary<string, Func<string, string>>();
 
-            lookup.TryAdd("pluralize",  pluralize);
-            lookup.TryAdd("articlize",  articlize);
-            lookup.TryAdd("capitalize", capitalize);
-            lookup.TryAdd("quotify",    quotify);
-
-            lookup.TryAdd("an", articlize);
-            lookup.TryAdd("cap", capitalize);
+            lookup.TryAdd("Pluralize",  Pluralize);
+            lookup.TryAdd("Articlize",  Articlize);
+            lookup.TryAdd("Capitalize", Capitalize);
+            lookup.TryAdd("Quotify",    Quotify);         
+            lookup.TryAdd("An", Articlize);
+            lookup.TryAdd("Cap", Capitalize);
         }
 
         private static readonly Lazy<Transforms> lazy =

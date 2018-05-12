@@ -28,7 +28,7 @@ namespace Dialogic
         public string Bind(string text, Chat context, IDictionary<string, object> globals)
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
-
+            
             if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, context));
 
             var original = text;
@@ -63,10 +63,10 @@ namespace Dialogic
     
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
-            return PrepareOutput(text);
+            return PostProcess(text);
         }
 
-        public string PrepareOutput(string text)
+		private string PostProcess(string text)
         {
             // replace any literal quotation marks
             text = text.Replace("\"", string.Empty);
