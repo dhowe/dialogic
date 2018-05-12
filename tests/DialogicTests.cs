@@ -49,7 +49,8 @@ namespace Dialogic
 			for (int i = 0; i < 10; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
-				string[] sents = s.Split(new[]{"?","."}, StringSplitOptions.RemoveEmptyEntries);            
+				var opts = StringSplitOptions.RemoveEmptyEntries;
+				string[] sents = s.Split(new[]{"?","."}, opts);            
 				Console.WriteLine(i + "("+sents.Length+"): " + s);
 			}         
 		}
