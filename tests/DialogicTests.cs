@@ -40,8 +40,8 @@ namespace Dialogic
 			var chat = rt["Amusement"];
 			chat.Resolve(globals);
 
-			string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
-			foreach (var k in keys) Console.WriteLine(k + ":" + chat.scope[k]);
+			//string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
+			//foreach (var k in keys) Console.WriteLine(k + ":" + chat.scope[k]);
 
 			Console.WriteLine();
 
