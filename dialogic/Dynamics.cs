@@ -52,7 +52,7 @@ namespace Dialogic
                 return true;
             }
 
-            if (!onlyIfExists) throw new BindException("Invalid Set: " + property);
+			if (!onlyIfExists) throw new BindException("Invalid function call(Set): " + property);
 
             return false;
         }
@@ -72,7 +72,7 @@ namespace Dialogic
 
             if (defaultVal != null) return defaultVal;
 
-            throw new BindException("Invalid Get: " + property);
+			throw new BindException("Invalid function call(Get): " + property);
         }
     }
 
@@ -247,6 +247,8 @@ namespace Dialogic
         public static void Parse(List<Choice> results, string input,
             Chat context, bool showMatch = false)
         {
+			if (!input.Contains(Ch.OR)) return;
+
             // OPT: Cache the entire match?
             foreach (Match m in RE.MatchParens.Matches(input))
             {
@@ -428,10 +430,11 @@ namespace Dialogic
 
         public override string ToString()
         {
-            var s = Name();
-            if (text != s) s += " text='" + text + "'";
-            if (transforms != null) s += " transforms=" + transforms.Stringify();
-            return s += (alias != null ? " alias=[" + alias + "]" : "");
+			//var s = Name();
+			//if (text != s) s += " text='" + text + "'";
+			//if (transforms != null) s += " transforms=" + transforms.Stringify();
+			//return s += (alias != null ? " alias=[" + alias + "]" : "");
+			return Name();
         }
 
         internal string Name()

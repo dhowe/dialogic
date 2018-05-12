@@ -32,13 +32,17 @@ namespace Dialogic
                 (Defaults.INITIAL_DICT_SIZE);
         }
 
+		public ChatRuntime GetRuntime()
+		{
+			if (parent != null) return parent.runtime;
+			throw new Exception("Null parent: " + this);
+		}
+
         protected Resolver Resolver()
         {
-            if (parent == null || parent.runtime == null)
-            {
-                throw new Exception("Null parent/context: " + this);
-            }
-            return this.parent.runtime.resolver;
+			var runtime = GetRuntime();
+			if (runtime != null) return runtime.resolver;
+            throw new Exception("Null runtime: " + this);
         }
 
         public override bool Equals(object obj)

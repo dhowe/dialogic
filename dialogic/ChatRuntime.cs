@@ -316,9 +316,9 @@ namespace Dialogic
             return hash;
         }
 
-        public override bool Equals(Object o)
+        public override bool Equals(Object obj)
         {
-            ChatRuntime rt = (Dialogic.ChatRuntime)o;
+            ChatRuntime rt = (Dialogic.ChatRuntime)obj;
 
             if (rt.firstChat != firstChat || rt.strictMode != strictMode
                 || rt.validatorsDisabled != validatorsDisabled)
