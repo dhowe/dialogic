@@ -36,7 +36,7 @@
     }
 
     #result-container pre {
-      width:95%;
+      width: 95%;
       margin-left: 13px;
       min-width: 620px;
       overflow: auto;
@@ -141,14 +141,53 @@
       margin-left: 13px;
     }
 
-    .linedwrap {
-      width:95% !important;
+    linedwrap {
+      width: 95% !important;
       min-width: 700px;
       margin-left: 13px;
     }
 
     #main {
-      width:90% !important;
+      width: 90% !important;
+    }
+
+    .checkbox {
+      margin-left: 3px;
+      margin-top: 16px;
+      -webkit-appearance: none;
+      background-color: #fafafa;
+      border: 1px solid #cacece;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
+      padding: 9px;
+      border-radius: 3px;
+      display: inline-block;
+      position: relative;
+    }
+
+    .checkbox:active,
+    .checkbox:checked:active {
+      border: 1px solid #cacece;
+    }
+
+    .checkbox:checked {
+      color: #99a1a7;
+      border: 1px solid #cacece;
+    }
+
+    .checkbox:checked:after {
+      content: '\2714';
+      font-size: 14px;
+      position: absolute;
+      top: 0px;
+      left: 3px;
+      color: #99a1a7;
+    }
+
+    #checkText {
+      margin-top: 13px;
+      margin-left: 8px;
+      display: inline-block;
+      position: relative;
     }
 
     .button,
@@ -170,15 +209,14 @@
 <body>
   <span class="sub-title">
         <p class="navlinks">
-          <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/#dialogic">Home</a> &nbsp;|&nbsp;
-          <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/wiki/Command-Reference">Command Reference</a> &nbsp;|&nbsp;
-          <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
-          <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
+            <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/#dialogic">Home</a> &nbsp;|&nbsp;
+            <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/wiki/Command-Reference">Command Reference</a> &nbsp;|&nbsp;
+            <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
+            <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
         </p>
         <img id="fish" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
-        <span id="title">Dialogic</b><br>
+        <span id="title">Dialogic</span><br>
   </span>
-
   <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
   <form name="main" id="form">
     <div class="input-area">
@@ -189,14 +227,13 @@
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
       <button class="button" type="reset" id="clear">Clear</button>
+      <input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br>
     </div>
   </form>
   <section id="result-container" class="%%CCLASS%%">
     <pre id="executeResult" style="font-size: 13px" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
     <pre id="result" style="font-size: 13px" class="%%RCLASS%%">%%RESULT%%</pre>
   </section>
-  </div>
-
   <div class="CodeMirror-dialog" id="loadURLDialog">
     <div class="CodeMirror-dialog-top">
       <h4>Enter Url</h4>
@@ -215,7 +252,6 @@
   <script>
     $(function ()
     {
-
       $("#main").linedtextarea();
 
       // setup button handlers
@@ -265,12 +301,14 @@
         adjustLineErrorWidth();
       })();
 
-      $(window).resize(function(){
-         adjustLineErrorWidth();
+      $(window).resize(function ()
+      {
+        adjustLineErrorWidth();
       })
 
       // functions ---------------------------------------------
-      function adjustLineErrorWidth() {
+      function adjustLineErrorWidth()
+      {
         $('.line-error').css('width', $('.linedtextarea').outerWidth().toString());
       }
 
@@ -310,7 +348,6 @@
 
         if (!execute)
         {
-
           var $main = $("#main");
           var startIdx = $main[0].selectionStart;
           var endIdx = $main[0].selectionEnd;
@@ -394,11 +431,8 @@
         }
       }
 
-
-
     });
   </script>
-
 </body>
 
 </html>

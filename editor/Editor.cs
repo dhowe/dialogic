@@ -46,8 +46,7 @@ namespace Dialogic.Server
                 listener.Start();
             }
             else
-            {
-
+            {            
                 while (true) // choose a random port
                 {
                     listener = new HttpListener();
