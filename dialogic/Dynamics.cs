@@ -292,8 +292,7 @@ namespace Dialogic
                     results.Add(new Choice(context, full, expr, alias, trans));
                 }
             }
-        }
-
+        }      
 
         internal string Resolve()
         {
@@ -473,6 +472,11 @@ namespace Dialogic
 
             return full;
         }
+        
+		protected bool Resolved()
+		{
+			return text != null && !text.Contains(Ch.OR, Ch.SYMBOL, Ch.LABEL);
+		}
 
         internal string Resolve(IDictionary<string, object> globals)
         {
@@ -480,7 +484,17 @@ namespace Dialogic
 
             if (!transforms.IsNullOrEmpty())
             {
-                resolved = GetViaPath(resolved, transforms.ToArray(), globals);
+				// we can only do the transform here if fully resolved
+				if (Resolved())
+				{
+					resolved = GetViaPath(resolved, transforms.ToArray(), globals);
+				} 
+				else {
+					Console.WriteLine("Delay Resolution: "+resolved+" "+transforms.Stringify());
+					resolved = Ch.OGROUP + resolved.ToString() + Ch.CGROUP;
+					transforms.ForEach(t=>resolved+="."+t);
+					Console.WriteLine("               -> " + resolved);
+				}
             }
             else
             {

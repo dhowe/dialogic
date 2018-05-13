@@ -32,12 +32,12 @@ namespace Dialogic
 			ChatRuntime rt;
             
 			var testfile = AppDomain.CurrentDomain.BaseDirectory;
-			testfile += "../../../../dialogic/data/amuse.gs";
+			testfile += "../../../../dialogic/data/judgement/anger.gs";
 
 			rt = new ChatRuntime(Tendar.AppConfig.Actors);
 			rt.ParseFile(new FileInfo(testfile));
 
-			var chat = rt["Amusement"];
+			var chat = rt["judgement"];
 			chat.Resolve(globals);
 
 			//string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
@@ -45,13 +45,13 @@ namespace Dialogic
 
 			Console.WriteLine();
 
-			//Resolver.DBUG = true;
-			for (int i = 0; i < 10; i++)
+			Resolver.DBUG = true;
+			for (int i = 0; i < 1; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
 				var opts = StringSplitOptions.RemoveEmptyEntries;
 				string[] sents = s.Split(new[]{"?","."}, opts);            
-				Console.WriteLine(i + "("+sents.Length+"): " + s);
+				Console.WriteLine(i + "("+sents.Length+"): " + s+"\n");
 			}         
 		}
 

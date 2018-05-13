@@ -1054,6 +1054,11 @@ namespace Dialogic
             return !str.IsNullOrEmpty() && str[str.Length - 1] == c;
         }
 
+		internal static bool EnclosedBy(this string str, char c, char d)
+        {
+            return !str.IsNullOrEmpty() && str[0] == c && str[str.Length - 1] == d;
+        }
+
         internal static bool Contains(this string str, params char[] c)
         {
             if (str.IsNullOrEmpty()) return false;

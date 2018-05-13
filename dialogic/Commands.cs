@@ -116,10 +116,15 @@ namespace Dialogic
         /// <returns>The text.</returns>
         public virtual string Text()
         {
-            if (!resolved.ContainsKey(Meta.TEXT))
+			if (resolved == null || !resolved.ContainsKey(Meta.TEXT))
             {
-                throw new DialogicException("Text() called on unresolved"
-                    + " Command: " + this + "\nCall Resolve() first");
+				var msg = "Text() called on unresolved"
+					+ " Command: " + this + "\nCall Resolve() first";
+				if (this is Chat || this is Set)
+				{
+					msg = "Text() called on invalid object type: " + this;
+				}
+                throw new DialogicException(msg);
             }
             return (string)resolved[Meta.TEXT];
         }

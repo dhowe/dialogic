@@ -189,7 +189,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Start the runtime schedule, executing the installed chats
+        /// Start the runtime scheduler, executing the installed chats
         /// </summary>
         public void Run(string chatLabel = null)
         {

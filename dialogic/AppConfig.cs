@@ -87,7 +87,7 @@ namespace Tendar // change to TendAR
 		private static IDictionary<string, string[]> synNouns
 	        = new Dictionary<string, string[]>
         {
-			{"anger",        new[]{ "irritation", "fury", "anger", "outrage", "constipation" }},
+			{"anger",        new[]{ "irritation", "fury", "anger", "outrage", "tension" }},
 			{"elation",      new[]{ "glee", "elation", "bliss", "whoopee", "euphoria" }},
 			{"sadness",      new[]{ "melancholy", "misery", "woe", "sorrow", "anguish" }},
 			{"surprise",     new[]{ "wonder", "amazement", "surprise", "shock", "awe" }},
@@ -97,7 +97,7 @@ namespace Tendar // change to TendAR
 			{"ennui",        new[]{ "blah", "indifference", "meh", "ennui", "apathy" }},
 			{"disgust",      new[]{ "dislike", "nausea", "disgust", "repugnance", "revulsion" }},
 			{"desire",       new[]{ "fascination", "passion", "desire", "rapture", "longing" }},
-			{"embarassment", new[]{ "discomfort", "bashfulness", "embarrassment", "chagrin", "mortification" }},
+			{"embarassment", new[]{ "discomfort", "bashfulness", "embarrassment", "shame", "mortification" }},
 			{"pride",        new[]{ "satisfaction", "confidence", "pride", "dignity", "ego" }},
         };
 
@@ -114,7 +114,7 @@ namespace Tendar // change to TendAR
 			{"ennui",        new[]{ "indifferent", "apathetic", "bored", "uninterested", "unenthused"}},
 			{"disgust",      new[]{ "hateful", "nauseous", "disgusted", "repulsed", "revolted" }},
 			{"desire",       new[]{ "fascinated", "passionate", "desirous", "hungry", "horny" }},
-			{"embarassment", new[]{ "discomforted", "bashful", "embarrassed", "shy", "mortified" }},
+			{"embarassment", new[]{ "discomforted", "ashamed", "embarrassed", "shy", "mortified" }},
 			{"pride",        new[]{ "satisfied", "confident", "proud", "dignified", "egotistical" }},
 		};
 	}

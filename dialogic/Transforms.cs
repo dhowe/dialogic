@@ -22,12 +22,13 @@ namespace Dialogic
         {
             return ("aeiou".Contains(str.ToLower()[0]) ? "an " : "a ") + str;
         }
-
+        
 		/// <summary>
 		/// Capitalizes the first character.
 		/// </summary>
 		public static string Capitalize(string str)
         {
+			Console.WriteLine("Capitalize: "+str+" -> "+char.ToUpper(str[0]));
             return char.ToUpper(str[0]) + str.Substring(1);
         }
 

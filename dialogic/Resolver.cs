@@ -88,7 +88,7 @@ namespace Dialogic
         public string BindSymbols(string text, Chat context,
             IDictionary<string, object> globals, int level = 0)
         {
-            if (DBUG) Console.WriteLine("  Symbols(" + level + ") "+text);// + Info(text, context));
+            if (DBUG) Console.WriteLine("  Symbols(" + level + ") "+text);
 
             ParseSymbols(text, context);
             while (symbols.Count > 0)
@@ -106,7 +106,7 @@ namespace Dialogic
 
                 if (result != null)
                 {
-                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP)))
+                    if (result.Contains(Ch.OR) && !result.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
                     {
                         result = Ch.OGROUP + result + Ch.CGROUP;
                         if (DBUG) Console.WriteLine("      pars: " + result);
@@ -137,15 +137,9 @@ namespace Dialogic
         {
             if (text.Contains(Ch.OR))
             {
-                if (DBUG) Console.WriteLine("  Groups(" + level + ") "+text);// + Info(text, context));
+                if (DBUG) Console.WriteLine("  Groups(" + level + ") "+text);
 
                 var original = text;
-
-                //if (!(text.Contains(Ch.OGROUP) && text.Contains(Ch.CGROUP)))
-                //{
-                //    text = Ch.OGROUP + text + Ch.CGROUP;
-                //    ChatRuntime.Warn("BindGroups added parens to: " + text);
-                //}
 
                 ParseChoices(text, context);
                 if (DBUG) Console.WriteLine("    Found: " + choices.Stringify());
