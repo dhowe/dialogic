@@ -1199,8 +1199,7 @@ namespace Dialogic
         {
             //var ff = "SAY (a|b).notFound";
             //var chat = (Chat)ChatParser.ParseText(ff)[0].Realize(null);
-            //Console.WriteLine("\n"+chat.commands[0].Text()); 
-            //return;
+            //Console.WriteLine("\n"+chat.commands[0].Text()); return;
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A ="));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A 3"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A: 3"));

@@ -26,18 +26,47 @@ namespace Dialogic
             }          
 		}
 
-		[Test]
-		public void AmusementIssue()
+		//[Test]
+        public void AngerFortunes()
+        {
+            ChatRuntime rt;
+
+            var testfile = AppDomain.CurrentDomain.BaseDirectory;
+            testfile += "../../../../dialogic/data/judgement/anger.gs";
+
+            rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt.ParseFile(new FileInfo(testfile));
+
+            var chat = rt["judgement"];
+            chat.Resolve(globals);
+
+            //string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
+            //foreach (var k in keys) Console.WriteLine(k + ":" + chat.scope[k]);
+
+            Console.WriteLine();
+
+            //Resolver.DBUG = true;
+            for (int i = 0; i < 15; i++)
+            {
+                var s = rt.InvokeImmediate(globals);
+                var opts = StringSplitOptions.RemoveEmptyEntries;
+                string[] sents = s.Split(new[] { "?", "." }, opts);
+                Console.WriteLine(i + "(" + sents.Length + "): " + s);
+            }
+        }
+
+		//[Test]
+		public void AmusementFortunes()
 		{
 			ChatRuntime rt;
             
 			var testfile = AppDomain.CurrentDomain.BaseDirectory;
-			testfile += "../../../../dialogic/data/amuse.gs";
+			testfile += "../../../../dialogic/data/judgement/amusement.gs";
 
 			rt = new ChatRuntime(Tendar.AppConfig.Actors);
 			rt.ParseFile(new FileInfo(testfile));
 
-			var chat = rt["Amusement"];
+			var chat = rt["judgement"];
 			chat.Resolve(globals);
 
 			//string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
@@ -46,7 +75,7 @@ namespace Dialogic
 			Console.WriteLine();
 
 			//Resolver.DBUG = true;
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 15; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
 				var opts = StringSplitOptions.RemoveEmptyEntries;
@@ -209,11 +238,11 @@ namespace Dialogic
 
 			Assert.Throws<UnboundFunction>(() => rt.InvokeImmediate(null));
 
-			ChatRuntime.SILENT = true;
+			//ChatRuntime.SILENT = true;
 			rt.strictMode = false;
 			var s = rt.InvokeImmediate(globals);
-			ChatRuntime.SILENT = false;
-			Assert.That(s, Is.EqualTo("hello a.noFun,\nok."));
+			//ChatRuntime.SILENT = false;
+			Assert.That(s, Is.EqualTo("hello a.noFun(),\nok."));
 		}
 
 		[Test]

@@ -14,6 +14,8 @@ namespace Dialogic
 
         private List<Symbol> symbols = new List<Symbol>();
         private List<Choice> choices = new List<Choice>();
+		private List<Transform> trans = new List<Transform>();
+
         private ChatRuntime chatRuntime;
 
         public Resolver(ChatRuntime chatRuntime)
@@ -31,40 +33,52 @@ namespace Dialogic
             
             if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, context));
 
-            var original = text;
+			string pretext, original = text;
             int depth = 0, maxRecursionDepth = Defaults.BIND_MAX_DEPTH;
 
             do
             {
+				pretext = text;
+
                 // resolve any symbols in the input
                 text = BindSymbols(text, context, globals, depth);
 
                 // resolve any groups in the input
-                text = BindGroups(text, context, depth);
+                text = BindChoices(text, context, depth);
 
                 // throw if we've hit max recursion depth
                 if (++depth > maxRecursionDepth)
-                {
-                    if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
-                    {
-                        ParseSymbols(text, context);
-                        if (!symbols.IsNullOrEmpty())
-                        {
-                            symbols[0].OnBindError(globals);
-                            //throw new UnboundSymbol(symbols[0], parent, globals);
-                            ChatRuntime.Warn("Unbound symbol: " + symbols[0]);
-                        }
-                    }
-                    break;
-                }
+				{
+					HandleFailure(text, context, globals);
+					break;
+				}
 
-            } while (IsDynamic(text));
+			} while (text != pretext && IsDynamic(text));
 
+            // if we still have dynamics, we've failed
+			if (IsDynamic(text)) HandleFailure(text, context, globals);
+
+			// no more dynamics, now handle transforms         
+			text = BindTransforms(text, context);
     
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
             return PostProcess(text);
         }
+
+		private void HandleFailure(string text, Chat context, IDictionary<string, object> globals)
+		{
+			if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
+			{
+				ParseSymbols(text, context);
+				if (!symbols.IsNullOrEmpty())
+				{
+					symbols[0].OnBindSymbolError(symbols[0].name, globals);
+					//throw new UnboundSymbol(symbols[0], parent, globals);
+					ChatRuntime.Warn("Unbound symbol: " + symbols[0]);
+				}
+			}
+		}
 
 		private string PostProcess(string text)
         {
@@ -99,19 +113,19 @@ namespace Dialogic
                 if (DBUG) Console.WriteLine("    Pop:    " + symbol);
 
                 string pretext = text;
-
-                var result = symbol.Resolve(globals);
+                
+				var result = symbol.Resolve(globals, false);
 
                 if (DBUG) Console.WriteLine("      " + symbol.Name() + " -> " + result);
 
                 if (result != null)
                 {
-                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP)))
+                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP))) // remove?
                     {
                         result = Ch.OGROUP + result + Ch.CGROUP;
-                        if (DBUG) Console.WriteLine("      pars: " + result);
+						if (DBUG) Console.WriteLine("      ***PARS: " + result);
                     }
-                    text = symbol.Replace(text, result);
+                    text = symbol.Replace(text, result, globals);
 
                     if (pretext != text) // progress?
                     {
@@ -133,11 +147,11 @@ namespace Dialogic
         /// in the appropriate context, creating and caching Resolution
         /// objects as necessary
         /// </summary>
-        public string BindGroups(string text, Chat context = null, int level = 0)
+        public string BindChoices(string text, Chat context = null, int level = 0)
         {
             if (text.Contains(Ch.OR))
             {
-                if (DBUG) Console.WriteLine("  Groups(" + level + ") "+text);// + Info(text, context));
+                if (DBUG) Console.WriteLine("  Choices(" + level + ") "+text);// + Info(text, context));
 
                 var original = text;
 
@@ -160,6 +174,37 @@ namespace Dialogic
             return text;
         }
 
+		/// <summary>
+        /// Iteratively resolve any transforms in the specified text 
+        /// </summary>
+        private string BindTransforms(string text, Chat context)
+        {
+            //if (DBUG) Console.WriteLine("  Transforms(" + level + ") " + text);
+            if (text.ContainsAny(Ch.OR, Ch.SYMBOL)) return text;
+
+            if (DBUG) Console.WriteLine("  Trans() " + text);
+
+            var original = text;
+
+            ParseTransforms(text, context);
+            if (DBUG) Console.WriteLine("    Found: " + trans.Stringify());
+
+            foreach (var tran in trans)
+            {
+                var result = tran.Resolve(); // handles transforms
+                if (DBUG) Console.WriteLine("      " + tran + " -> " + result);
+                if (result != null) text = tran.Replace(text, result);
+            }
+
+            return text;
+        }
+
+		private void ParseTransforms(string text, Chat context)
+        {
+            trans.Clear();
+            Transform.Parse(trans, text, context);
+        }
+
         private void ParseSymbols(string text, Chat context)
         {
             symbols.Clear();
@@ -175,7 +220,7 @@ namespace Dialogic
         private static bool IsDynamic(string text)
         {
             return text != null && (text.Contains("()")
-                || text.Contains(Ch.OR, Ch.SYMBOL, Ch.LABEL));
+                || text.ContainsAny(Ch.OR, Ch.SYMBOL, Ch.LABEL));
         }
 
         private static string Info(string text, Chat parent)

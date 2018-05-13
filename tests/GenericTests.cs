@@ -1,14 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using NUnit.Framework;
 
 namespace Dialogic
 {
     public class GenericTests
     {
-        public const bool NO_VALIDATORS = true;
+		protected const bool NO_VALIDATORS = true;
 
-        public static IDictionary<string, object> globals;
+		protected static IDictionary<string, object> globals;
 
+		protected static Chat CreateParentChat(string name)
+        {
+            // create a realized Chat with the full set of global props
+            var c = Chat.Create(name);
+            foreach (var prop in globals.Keys) c.SetMeta(prop, globals[prop]);
+            c.Resolve(globals);
+            return c;
+        }
+        
         [SetUp]
         public void Init()
         {
@@ -69,7 +81,29 @@ namespace Dialogic
             {
                 return this.speed.ToString();
             }
+        }      
+    }
+
+	public static class TestExtensions
+    {
+		public static bool IsOneOf<T>(this T candidate, IEnumerable<T> expected)
+        {
+            if (expected.Contains(candidate)) return true;         
+            var msg = string.Format("Expected one of: [{0}]. Actual: '{1}'", ", "
+                .InsertBetween(expected.Select(x => "'"+Convert.ToString(x)+"'")), candidate);
+            Assert.Fail(msg);
+            return false;
         }
 
+        private static string InsertBetween(this string delimiter, IEnumerable<string> items)
+        {
+            var builder = new StringBuilder();
+            foreach (var item in items)
+            {
+                if (builder.Length != 0) builder.Append(delimiter);
+                builder.Append(item);
+            }
+            return builder.ToString();
+        }      
     }
 }

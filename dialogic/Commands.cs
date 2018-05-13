@@ -716,7 +716,7 @@ namespace Dialogic
         {
             resolved.Clear(); // no need to resolve meta here
             resolved[Meta.TYPE] = TypeName();
-            resolved[Meta.TEXT] = Resolver().BindGroups(text, parent);
+            resolved[Meta.TEXT] = Resolver().BindChoices(text, parent);
 
             return resolved;
         }

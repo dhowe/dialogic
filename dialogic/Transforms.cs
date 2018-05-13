@@ -89,7 +89,7 @@ namespace Dialogic
         private static readonly Lazy<Transforms> lazy =
             new Lazy<Transforms>(() => new Transforms());
 
-        private readonly ConcurrentDictionary<string, Func<string, string>> lookup;
+		private readonly ConcurrentDictionary<string, Func<string, string>> lookup;
 
         internal static void Add(string name, Func<string, string> value)
         {

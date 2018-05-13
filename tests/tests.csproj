@@ -21,4 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="BindingTests.cs" />
+    <Compile Remove="EventTests.cs" />
+  </ItemGroup>
 </Project>
