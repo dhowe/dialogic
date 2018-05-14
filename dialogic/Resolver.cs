@@ -106,10 +106,10 @@ namespace Dialogic
 
                 if (result != null)
                 {
-                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP)))
+                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP))) // 
                     {
                         result = Ch.OGROUP + result + Ch.CGROUP;
-                        if (DBUG) Console.WriteLine("      pars: " + result);
+                        if (DBUG) Console.WriteLine("      ***PARS: " + result);
                     }
                     text = symbol.Replace(text, result);
 
@@ -175,7 +175,7 @@ namespace Dialogic
         private static bool IsDynamic(string text)
         {
             return text != null && (text.Contains("()")
-                || text.Contains(Ch.OR, Ch.SYMBOL, Ch.LABEL));
+                || text.ContainsAny(Ch.OR, Ch.SYMBOL, Ch.LABEL));
         }
 
         private static string Info(string text, Chat parent)

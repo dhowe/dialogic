@@ -9,6 +9,47 @@ namespace Dialogic
     [TestFixture]
     class GrammarTests : GenericTests
     {
+		[Test]
+        public void ResolveMultiwordCaps()
+        {
+            string[] lines;
+            ChatRuntime runtime;
+            Chat chat;
+            string res;
+
+            Resolver.DBUG = true;
+            lines = new[] {
+                "SET start = $A $B",
+                "SET A=hello",
+                "SET B=world",
+                "SAY $start.Capitalize()",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Resolve(null);
+            res = chat.commands.Last().Text();
+            Console.WriteLine("OUT: " + res);
+            Assert.That(res, Is.EqualTo("Hello world"));
+			return;         
+            Resolver.DBUG = false;
+            lines = new[] {
+                "SET start = $A $B",
+                "SET A=amazing",
+                "SET B=world",
+                "SAY $start.Articlize().Capitalize()",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Resolve(null);
+            res = chat.commands.Last().Text();
+            //Console.WriteLine("OUT: " + res);
+            Assert.That(res, Is.EqualTo("An amazing world"));
+        }
+
         [Test]
         public void SaveGlobalResolveState()
         {

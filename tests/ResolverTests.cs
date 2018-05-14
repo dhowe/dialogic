@@ -11,13 +11,11 @@ namespace Dialogic
         [Test]
         public void SimpleSymbolTraversal()
         {
+			Resolver.DBUG = true;
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             var res = rt.resolver.Bind("Hello $fish.name", c1, globals);
             Assert.That(res, Is.EqualTo("Hello Fred"));
-
-            res = rt.resolver.Bind("Hello $fish.name.", c1, globals);
-            Assert.That(res, Is.EqualTo("Hello Fred."));
         }
 
         [Test]
@@ -66,32 +64,31 @@ namespace Dialogic
                 {{ "a", "hello" }, { "b", "32" }});
             Assert.That(res, Is.EqualTo("hello!"));
         }
-
+        
 
         [Test]
         public void SimpleTransforms()
         {
             var c = CreateParentChat("c");
 
-            var res = new Resolver(null).BindSymbols("$a.pluralize()", c,
+            var res = new Resolver(null).Bind("$a.pluralize()", c,
                 new Dictionary<string, object>() { { "a", "cat" } });
             Assert.That(res, Is.EqualTo("cats"));
 
-            res = new Resolver(null).BindSymbols("$a.pluralize().articlize()", c,
+            res = new Resolver(null).Bind("$a.pluralize().articlize()", c,
                 new Dictionary<string, object>() { { "a", "ant" } });
             Assert.That(res, Is.EqualTo("an ants"));
 
-            res = new Resolver(null).BindGroups("(cat | cat).pluralize()", c);
+			res = new Resolver(null).Bind("(cat | cat).pluralize()", c, null);
             Assert.That(res, Is.EqualTo("cats"));
 
-            res = new Resolver(null).BindGroups("(cat | cat).pluralize().articlize()", c);
+			res = new Resolver(null).Bind("(cat | cat).pluralize().articlize()", c, null);
+            Assert.That(res, Is.EqualTo("a cats"));
+                     
+			res = new Resolver(null).Bind("(cat | cat).pluralize().articlize()", c, null);
             Assert.That(res, Is.EqualTo("a cats"));
 
-
-            res = new Resolver(null).BindGroups("(cat | cat).pluralize().articlize()", c);
-            Assert.That(res, Is.EqualTo("a cats"));
-
-            res = new Resolver(null).BindGroups("(cat | cat).pluralize().an()", c);
+			res = new Resolver(null).Bind("(cat | cat).pluralize().an()", c, null);
             Assert.That(res, Is.EqualTo("a cats"));
         }
 
@@ -261,12 +258,14 @@ namespace Dialogic
             Chat chat = ChatParser.ParseText("SAY letter $cmplx.articlize()")[0];
             Command c = chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-            for (int i = 0; i < 10; i++)
+			Resolver.DBUG = true;
+            for (int i = 0; i < 1; i++)
             {
                 c.Resolve(globals);
                 var txt = c.Text();
-                //Console.WriteLine(i + ") " + txt);
-                CollectionAssert.Contains(ok, txt);
+				//Console.WriteLine(i + ") " + txt);
+				//CollectionAssert.Contains(ok, txt);
+				Assert.That(txt, Is.SubsetOf(ok));
             }
         }
 
