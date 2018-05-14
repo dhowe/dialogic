@@ -69,25 +69,25 @@ namespace Tendar // change to TendAR
 		}
 
 		/// <summary>
-        /// Returns a random synonym for the emotion
-        /// </summary>
-        private static string EmoSyn(string emotion)
-        {
-            return (string)Util.RandItem(synNouns[emotion]);
-        }
+		/// Returns a random synonym for the emotion
+		/// </summary>
+		private static string EmoSyn(string emotion)
+		{
+			return (string)Util.RandItem(synNouns[emotion]);
+		}
 
-        /// <summary>
-        /// Returns a random adjective synonym for the emotion
-        /// </summary>
+		/// <summary>
+		/// Returns a random adjective synonym for the emotion
+		/// </summary>
 		private static string EmoAdj(string emotion)
-        {
-            return (string)Util.RandItem(synAdjs[emotion]);
-        }
+		{
+			return (string)Util.RandItem(synAdjs[emotion]);
+		}
 
 		private static IDictionary<string, string[]> synNouns
-	        = new Dictionary<string, string[]>
-        {
-			{"anger",        new[]{ "irritation", "fury", "anger", "outrage", "constipation" }},
+			= new Dictionary<string, string[]>
+		{
+			{"anger",        new[]{ "irritation", "fury", "anger", "outrage", "tension" }},
 			{"elation",      new[]{ "glee", "elation", "bliss", "whoopee", "euphoria" }},
 			{"sadness",      new[]{ "melancholy", "misery", "woe", "sorrow", "anguish" }},
 			{"surprise",     new[]{ "wonder", "amazement", "surprise", "shock", "awe" }},
@@ -97,9 +97,9 @@ namespace Tendar // change to TendAR
 			{"ennui",        new[]{ "blah", "indifference", "meh", "ennui", "apathy" }},
 			{"disgust",      new[]{ "dislike", "nausea", "disgust", "repugnance", "revulsion" }},
 			{"desire",       new[]{ "fascination", "passion", "desire", "rapture", "longing" }},
-			{"embarassment", new[]{ "discomfort", "bashfulness", "embarrassment", "chagrin", "mortification" }},
+			{"embarassment", new[]{ "discomfort", "bashfulness", "embarrassment", "shame", "mortification" }},
 			{"pride",        new[]{ "satisfaction", "confidence", "pride", "dignity", "ego" }},
-        };
+		};
 
 		private static IDictionary<string, string[]> synAdjs
 			= new Dictionary<string, string[]>
@@ -114,7 +114,7 @@ namespace Tendar // change to TendAR
 			{"ennui",        new[]{ "indifferent", "apathetic", "bored", "uninterested", "unenthused"}},
 			{"disgust",      new[]{ "hateful", "nauseous", "disgusted", "repulsed", "revolted" }},
 			{"desire",       new[]{ "fascinated", "passionate", "desirous", "hungry", "horny" }},
-			{"embarassment", new[]{ "discomforted", "bashful", "embarrassed", "shy", "mortified" }},
+			{"embarassment", new[]{ "discomforted", "ashamed", "embarrassed", "shy", "mortified" }},
 			{"pride",        new[]{ "satisfied", "confident", "proud", "dignified", "egotistical" }},
 		};
 	}
@@ -130,12 +130,9 @@ namespace Tendar // change to TendAR
 		}
 	}
 
-
-
-
-	//public interface IAppConfig {
+	//public interface IAppConfig
 	//    List<IActor> GetActors();
 	//    List<CommandDef> GetCommands();
+	//    List<Transform> GetTransforms();
 	//    Func<Command, bool>[] GetValidators();
-	//}
 }
