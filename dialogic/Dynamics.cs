@@ -473,126 +473,104 @@ namespace Dialogic
 			return s;
 		}
 
-		internal string Replace(string full, string replaceWith)
+
+
+		internal string Resolve(IDictionary<string, object> globals)
+		{
+			return Resolve(null, globals);
+		}
+
+		/*
+         * resolved is NOT string
+         *     with transforms (take1):  do GetViaPath as is, then convert to string and return
+         *     with transforms (take2):  do GetViaPath, until string and next transform is function (then do below)
+         * 
+         *     w'out transforms: return resolved.ToString
+         *        dynamic: Re-add alias if exists  (&Replace)
+         *        done:    HandleAlias
+         *
+         * resolved is string
+         *     with transforms:  return resolved
+         *        dynamic: Re-add alias/transforms (&Replace)
+         * 
+         *     w'out transforms: return resolved
+         *        dynamic: Re-add alias if exists  (&Replace)
+         *        done:    HandleAlias
+         */
+		internal string Resolve(string full, IDictionary<string, object> globals)
+		{
+			object resolved = ResolveSymbol(name, context, globals);
+
+			if (resolved == null) return null;
+
+			// if we have a transform path, follow it
+			if (!(resolved is string) && !transforms.IsNullOrEmpty())
+			{
+				resolved = GetViaPath(resolved, transforms.ToArray(), globals);
+			}
+
+			return resolved.ToString();
+		}
+
+		internal string Replace(string full, string replaceWith, IDictionary<string, object> globals = null)
 		{
 			Regex replaceRE = null;
 			if (replaceWith != null)
 			{
 				var reText = this.text;
 
-				if (replaceWith.ContainsAny(Ch.OR, Ch.SYMBOL))
-				{
-					reText = Ch.SYMBOL + this.name; // leave any alias and transforms in place     
-				}
-				else if (!transforms.IsNullOrEmpty() && alias == null)
-				{
-					reText = Ch.SYMBOL + this.name; // leave any alias and transforms in place               
+				/*
+                 * STATES:
+                 *   A) Dynamic:                            leave all 
+                 *   B) Non-Dynamic w' transform:           leave all and add group
+                 *   C) Non-Dynamic w' alias:               execute alias, replace all
+                 *   D) Non-Dynamic w' alias and transform: execute alias, replace all, re-add tranform
+                 */
 
+				if (replaceWith.ContainsAny(Ch.OR, Ch.SYMBOL))          // A
+				{
+					// leave any alias and transforms in place
+					reText = Ch.SYMBOL + this.name;
+				}
+				else if (!transforms.IsNullOrEmpty() && alias == null)  // B
+				{
+					// leave the transforms in place
+					reText = Ch.SYMBOL + this.name;
+
+					// add an enclosing group if needed
 					if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
 						replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
-
-					replaceWith += TransformText();
 				}
-				else if (transforms.IsNullOrEmpty() && alias != null)
+				else if (transforms.IsNullOrEmpty() && alias != null)   // C
 				{
-					reText = Ch.SYMBOL + this.name; // leave any alias and transforms in place               
-
-					if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
-						replaceWith = Ch.OSAVE + alias + "=" + replaceWith + Ch.CSAVE;
+					// push the alias into scope
+					HandleAlias(replaceWith, globals);
 				}
-
-				// TODO: WOrking on doubling of transforms
-
-				//Console.WriteLine();
-				/*if (!transforms.IsNullOrEmpty())
+				else if (!transforms.IsNullOrEmpty() && alias != null)  // D
 				{
-					// if we have transforms, but the replacement is not fully resolved
-					// then we keep the transforms in the text for later resolution
-					replaceWith = replaceWith + TransformText();
+					// push the alias into scope
+					HandleAlias(replaceWith, globals);
+
+					// leave the transforms in place
+					replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP + TransformText();
+                }
+            
+				if (false && reText.EndsWith('}')) // handle bounded variables (disabled)
+				{
+					Console.WriteLine("No regex REPLACE!");
+					full = full.Replace(reText, replaceWith);
 				}
-
-				if (alias != null)
+				else
 				{
-					// if we have an alias, but the replacement is not fully resolved
-					// then we keep the alias in the text for later resolution
-					replaceWith = Ch.OSAVE + alias + Ch.EQ + replaceWith + Ch.CSAVE;
-				}*/
+					replaceRE = new Regex(Regex.Escape(reText) + @"(?![A-Za-z_-])");
 
-				replaceRE = new Regex(Regex.Escape(reText) + @"(?![A-Za-z_-])");
-
-				//Console.Write("RE.Replace(" + full + ", " + reText + ", " + replaceWith + ")");
-
-				full = replaceRE.Replace(full, replaceWith);
-
-				//Console.WriteLine(" :: " + full);
+					//Console.Write("RE.Replace(" + full + ", " + reText + ", " + replaceWith + ")");               
+					full = replaceRE.Replace(full, replaceWith);               
+					//Console.WriteLine(" :: " + full);
+				}
 			}
 
 			return full;
-		}
-
-		internal string Resolve(IDictionary<string, object> globals)
-		{
-			Console.WriteLine("TRANSFORMS: " + transforms.Stringify());
-			object resolved = ResolveSymbol(name, context, globals);
-
-			/*
-			 * resolved is NOT string
-			 *     with transforms (take1):  do GetViaPath as is, then convert to string and return
-			 *     with transforms (take2):  do GetViaPath, until string and next transform is function (then do below)
-			 * 
-			 *     w'out transforms: return resolved.ToString
-			 *        dynamic: Re-add alias if exists  (&Replace)
-			 *        done:    HandleAlias
-             *
-			 * resolved is string
-             *     with transforms:  return resolved
-             *        dynamic: Re-add alias/transforms (&Replace)
-             * 
-             *     w'out transforms: return resolved
-             *        dynamic: Re-add alias if exists  (&Replace)
-             *        done:    HandleAlias
-             */
-
-			if (resolved != null)
-			{
-				string result = null;
-
-				if (!(resolved is string))
-				{
-					if (transforms.IsNullOrEmpty())
-					{
-						resolved = resolved.ToString(); // handle below
-					}
-					else // have transforms
-					{
-						resolved = GetViaPath(resolved, transforms.ToArray(), globals).ToString();
-					}
-				}
-
-				if (resolved is string)
-				{
-					result = resolved.ToString();
-
-					if (alias != null && !result.ContainsAny(Ch.OR, Ch.SYMBOL))
-					{
-						HandleAlias(resolved, globals);
-						//if (result.ContainsAny(Ch.OR, Ch.SYMBOL))
-						//{
-						//	// if we have an alias, but the replacement is not fully resolved
-						//	// then we keep the alias in the text for later resolution
-						//	result = Ch.OSAVE + alias + Ch.EQ + result + Ch.CSAVE;
-						//}
-						//else
-						//{s
-						//	HandleAlias(resolved, globals);
-						//}
-					}
-				}
-
-				return result;
-			}
-
-			return null;
 		}
 
 		private void HandleAlias(object resolved, IDictionary<string, object> scope)

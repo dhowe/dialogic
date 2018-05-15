@@ -100,16 +100,16 @@ namespace Dialogic
 
                 string pretext = text;
 
-                var result = symbol.Resolve(globals);
+				var result = symbol.Resolve(text, globals);
 
                 if (DBUG) Console.WriteLine("      " + symbol.Name() + " -> " + result);
 
                 if (result != null)
                 {
-                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP))) // 
+                    if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP))) // remove?
                     {
                         result = Ch.OGROUP + result + Ch.CGROUP;
-                        if (DBUG) Console.WriteLine("      ***PARS: " + result);
+						if (DBUG) ; Console.WriteLine("      ***PARS: " + result);
                     }
                     text = symbol.Replace(text, result);
 
