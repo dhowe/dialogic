@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Dialogic
 {
-	//[TestFixture]
+	[TestFixture]
 	class TransformTests : GenericTests
 	{
 		[Test]

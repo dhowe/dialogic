@@ -164,6 +164,7 @@ namespace Dialogic
 		public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
 		public static Regex TestTubeChatBaby = new Regex(@"^C[0-9]+$");
 		public static Regex MultiSpace = new Regex(@"\s+");
+		public static Regex ResolvePost = new Regex(@"[()""]");
 
 		// ChatParser.lineParser Regex
 		internal const string MTD = @"(?:\{(.+?)\})?\s*";

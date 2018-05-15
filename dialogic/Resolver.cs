@@ -49,48 +49,62 @@ namespace Dialogic
                 // throw if we've hit max recursion depth
                 if (++depth > maxRecursionDepth)
 				{
-					HandleFailure(text, context, globals);
+					HandleFailure(ref text, context, globals);
 					break;
 				}
 
 			} while (text != pretext && IsDynamic(text));
 
             // if we still have dynamics, we've failed
-			if (IsDynamic(text)) HandleFailure(text, context, globals);
+			if (IsDynamic(text)) HandleFailure(ref text, context, globals);
 
 			// no more dynamics, now handle transforms         
 			text = BindTransforms(text, context);
     
-            if (DBUG) Console.WriteLine("Result: " + text + "\n");
+			if (DBUG) Console.WriteLine("Result(pre): " + text);
 
-            return PostProcess(text);
+			text = PostProcess(text);
+
+			if (DBUG) Console.WriteLine("Result(post): " + text + "\n");
+
+			return text;         
+             
         }
 
-		private void HandleFailure(string text, Chat context, IDictionary<string, object> globals)
+		private void HandleFailure(ref string text, Chat context, IDictionary<string, object> globals)
 		{
 			if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
 			{
 				ParseSymbols(text, context);
-				if (!symbols.IsNullOrEmpty())
+
+
+				if (symbols.Any(s => !s.transforms.IsNullOrEmpty()))
 				{
-					symbols[0].OnBindSymbolError(symbols[0].name, globals);
-					//throw new UnboundSymbol(symbols[0], parent, globals);
-					ChatRuntime.Warn("Unbound symbol: " + symbols[0]);
+				    text = text.Replace("()", "&lpar;&rpar;");
 				}
+
+				symbols[0].OnBindSymbolError(symbols[0].name, globals);
+				//throw new UnboundSymbol(symbols[0], parent, globals);
+				ChatRuntime.Warn("Unbound symbol: " + symbols[0]);
 			}
 		}
 
 		private string PostProcess(string text)
         {
             // replace any literal quotation marks
-            text = text.Replace("\"", string.Empty);
-
+            //text = text.Replace("\"", string.Empty);         
             // replace extra grouping operators
-            text = text.Replace("(", string.Empty);
-            text = text.Replace(")", string.Empty);
+            //text = text.Replace("(", string.Empty);
+            //text = text.Replace(")", string.Empty);
+                     
+            text = text.TrimFirst(' ');
+
+			// replace literal quotation marks & extra grouping ops
+			text = RE.ResolvePost.Replace(text, string.Empty);
 
             // replace multiple spaces with single
             text = RE.MultiSpace.Replace(text, " ");
+
 
             return Entities.Decode(text);
         }
@@ -139,7 +153,7 @@ namespace Dialogic
                 }
             }
 
-            return text;
+			return text;
         }
 
         /// <summary>
@@ -165,7 +179,7 @@ namespace Dialogic
                 if (DBUG) Console.WriteLine("    Found: " + choices.Stringify());
                 foreach (var choice in choices)
                 {
-                    var result = choice.Resolve(); // handles transforms
+                    var result = choice.Resolve();
                     if (DBUG) Console.WriteLine("      " + choice + " -> " + result);
                     if (result != null) text = choice.Replace(text, result);
                 }

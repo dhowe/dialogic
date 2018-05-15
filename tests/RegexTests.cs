@@ -20,6 +20,12 @@ namespace Dialogic
         {
             Match match;
 
+            // FAILING, see #96
+			//TestInner(RE.MatchParens, "you ($a | $b.Cap() | c) a", "$a | $b.Cap() | c");
+
+			TestInner(RE.MatchParens, "you ($a | b | c) a", "$a | b | c");
+			TestInner(RE.MatchParens, "you ($a | $b | c) a", "$a | $b | c");
+            
             TestInner(RE.MatchParens, "you (a | b | c) a", "a | b | c");
             TestInner(RE.MatchParens, "you (a | (b | c)) a", "b | c");
             TestInner(RE.MatchParens, "you ((a | b) | c) a", "a | b");

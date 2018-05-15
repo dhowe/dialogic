@@ -329,8 +329,7 @@ namespace Dialogic
 				}
 			}
 		}
-
-
+              
 		internal string Resolve()
 		{
 			string resolved = null;
