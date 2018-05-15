@@ -238,11 +238,11 @@ namespace Dialogic
 
 			Assert.Throws<UnboundFunction>(() => rt.InvokeImmediate(null));
 
-			ChatRuntime.SILENT = true;
+			//ChatRuntime.SILENT = true;
 			rt.strictMode = false;
 			var s = rt.InvokeImmediate(globals);
-			ChatRuntime.SILENT = false;
-			Assert.That(s, Is.EqualTo("hello a.noFun,\nok."));
+			//ChatRuntime.SILENT = false;
+			Assert.That(s, Is.EqualTo("hello a.noFun(),\nok."));
 		}
 
 		[Test]

@@ -30,9 +30,9 @@ namespace Dialogic
             Assert.That(chat, Is.Not.Null);
             chat.Resolve(null);
             res = chat.commands.Last().Text();
-            Console.WriteLine("OUT: " + res);
+            //Console.WriteLine("OUT: " + res);
             Assert.That(res, Is.EqualTo("Hello world"));
-			      
+
             Resolver.DBUG = false;
             lines = new[] {
                 "SET start = $A $B",
@@ -48,6 +48,22 @@ namespace Dialogic
             res = chat.commands.Last().Text();
             //Console.WriteLine("OUT: " + res);
             Assert.That(res, Is.EqualTo("An amazing world"));
+
+			Resolver.DBUG = true;
+            lines = new[] {
+				"SET start = ($A $B | $A $B)",
+                "SET A=hello",
+                "SET B=world",
+                "SAY $start.Capitalize()",
+            };
+            runtime = new ChatRuntime();
+            runtime.ParseText(string.Join("\n", lines));
+            chat = runtime.Chats()[0];
+            Assert.That(chat, Is.Not.Null);
+            chat.Resolve(null);
+            res = chat.commands.Last().Text();
+            Console.WriteLine("OUT: " + res);
+            Assert.That(res, Is.EqualTo("Hello world"));
         }
 
         [Test]
@@ -149,19 +165,22 @@ namespace Dialogic
             ChatRuntime runtime;
             Chat chat;
             string res;
+			if (1 == 2)
+			{
+				lines = new[] {
+				"SAY The girl was $fish.Id().",
+			};
+				runtime = new ChatRuntime();
+				runtime.ParseText(string.Join("\n", lines));
+				chat = runtime.Chats()[0];
+				//Console.WriteLine(chat.ToTree());
+				Assert.That(chat, Is.Not.Null);
+				chat.Resolve(globals);
+				res = chat.commands[0].Text();
+				Assert.That(res, Is.EqualTo("The girl was 9."));
+			}
 
-            lines = new[] {
-                "SAY The girl was $fish.Id().",
-            };
-            runtime = new ChatRuntime();
-            runtime.ParseText(string.Join("\n", lines));
-            chat = runtime.Chats()[0];
-            //Console.WriteLine(chat.ToTree());
-            Assert.That(chat, Is.Not.Null);
-            chat.Resolve(globals);
-            res = chat.commands[0].Text();
-            Assert.That(res, Is.EqualTo("The girl was 9."));
-
+			Resolver.DBUG = true;
             lines = new[] {
                 "SAY A girl [selected=$fish.Id()] $selected",
             };
@@ -921,21 +940,23 @@ namespace Dialogic
         [Test]
         public void ResolveWithNullGlobals()
         {
-            var lines = new[] {
+			string[] lines;         
+			ChatRuntime runtime;
+			Command cmd;
+
+			lines = new[] {
                 "CHAT wine1 {noStart=true}",
                 "SET a = $b",
                 "SET b = c",
                 "SAY $a"
             };
-            ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+            runtime = new ChatRuntime(Tendar.AppConfig.Actors);
             runtime.ParseText(string.Join("\n", lines), false);
             //string content = "";
             //runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
             runtime.Chats().ForEach(c => c.Resolve(null));
-            var cmd = runtime.Chats().Last().commands.Last();
-            var result = cmd.Text();
-            Assert.That(result, Is.EqualTo("c"));
-
+            cmd = runtime.Chats().Last().commands.Last();
+			Assert.That(cmd.Text(), Is.EqualTo("c"));
 
             lines = new[] {
                 "CHAT wine1 {noStart=true}",
@@ -948,8 +969,7 @@ namespace Dialogic
             runtime.ParseText(string.Join("\n", lines), false);
             runtime.Chats().ForEach(c => c.Resolve(null));
             cmd = runtime.Chats().Last().commands.Last();
-            result = cmd.Text();
-            Assert.That(result, Is.EqualTo("c"));
+			Assert.That(cmd.Text(), Is.EqualTo("c"));
         }
 
         [Test]

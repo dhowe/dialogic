@@ -412,7 +412,7 @@ namespace Dialogic
                 foreach (var c in chats.Values) c.Reset();
             }
         }
-
+        
         private void AppendChats(List<Chat> theChats)
         {
             theChats.ForEach(AddChat);
@@ -423,11 +423,11 @@ namespace Dialogic
         {
             if (cmd is Say)
             {
-                result += cmd.Text() + "\n";
+				result += Entities.Decode(cmd.Text()) + "\n";
                 if (cmd is Ask)
                 {
                     cmd = Util.RandItem(((Ask)cmd).Options()).action;
-                    cmd.Resolve(globals);
+                    cmd.Resolve(globals); // follow random option
                 }
             }
         }
