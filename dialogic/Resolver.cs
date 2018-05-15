@@ -14,6 +14,8 @@ namespace Dialogic
 
         private List<Symbol> symbols = new List<Symbol>();
         private List<Choice> choices = new List<Choice>();
+		private List<Transform> trans = new List<Transform>();
+
         private ChatRuntime chatRuntime;
 
         public Resolver(ChatRuntime chatRuntime)
@@ -60,6 +62,7 @@ namespace Dialogic
 
             } while (IsDynamic(text));
 
+			text = BindTransforms(text, context, depth);
     
             if (DBUG) Console.WriteLine("Result: " + text + "\n");
 
@@ -109,9 +112,9 @@ namespace Dialogic
                     if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP))) // remove?
                     {
                         result = Ch.OGROUP + result + Ch.CGROUP;
-						if (DBUG) ; Console.WriteLine("      ***PARS: " + result);
+						if (DBUG) Console.WriteLine("      ***PARS: " + result);
                     }
-                    text = symbol.Replace(text, result);
+                    text = symbol.Replace(text, result, globals);
 
                     if (pretext != text) // progress?
                     {
@@ -158,6 +161,37 @@ namespace Dialogic
             }
 
             return text;
+        }
+
+		/// <summary>
+        /// Iteratively resolve any transforms in the specified text 
+        /// </summary>
+        private string BindTransforms(string text, Chat context, int level = 0)
+        {
+            //if (DBUG) Console.WriteLine("  Transforms(" + level + ") " + text);
+            if (text.ContainsAny(Ch.OR, Ch.SYMBOL)) return text;
+
+            if (DBUG) Console.WriteLine("  Trans(" + level + ") " + text);
+
+            var original = text;
+
+            ParseTransforms(text, context);
+            if (DBUG) Console.WriteLine("    Found: " + trans.Stringify());
+
+            foreach (var tran in trans)
+            {
+                var result = tran.Resolve(); // handles transforms
+                if (DBUG) Console.WriteLine("      " + tran + " -> " + result);
+                if (result != null) text = tran.Replace(text, result);
+            }
+
+            return text;
+        }
+
+		private void ParseTransforms(string text, Chat context)
+        {
+            trans.Clear();
+            Transform.Parse(trans, text, context);
         }
 
         private void ParseSymbols(string text, Chat context)

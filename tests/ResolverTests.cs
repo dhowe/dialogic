@@ -9,16 +9,6 @@ namespace Dialogic
     public class ResolverTests : GenericTests
     {
         [Test]
-        public void SimpleSymbolTraversal()
-        {
-			Resolver.DBUG = true;
-            ChatRuntime rt = new ChatRuntime();
-            Chat c1 = rt.AddNewChat("c1");
-            var res = rt.resolver.Bind("Hello $fish.name", c1, globals);
-            Assert.That(res, Is.EqualTo("Hello Fred"));
-        }
-
-        [Test]
         public void TransformIssues()
         {
             ChatRuntime rt;
@@ -258,7 +248,7 @@ namespace Dialogic
             Chat chat = ChatParser.ParseText("SAY letter $cmplx.articlize()")[0];
             Command c = chat.commands[0];
             Assert.That(c.GetType(), Is.EqualTo(typeof(Say)));
-			Resolver.DBUG = true;
+			Resolver.DBUG = false;
             for (int i = 0; i < 1; i++)
             {
                 c.Resolve(globals);

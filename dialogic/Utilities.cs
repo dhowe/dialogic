@@ -150,6 +150,7 @@ namespace Dialogic
 		internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
 		public static Regex FindMeta = new Regex(OP1 + OP2);
 
+		public static Regex ParseTrans = new Regex(@"\(([^|$()]+)\)((\.[A-Za-z_-]+(?:\(\)))+)");
 		public static Regex MatchParens = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?");
 		public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?");
 

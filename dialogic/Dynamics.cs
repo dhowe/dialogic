@@ -379,9 +379,9 @@ namespace Dialogic
 			{
 				try
 				{
-					Console.Write("      Choice.Transform: " + trans + " in=" + resolved);
+					//Console.Write("      Choice.Transform: " + trans + " in=" + resolved);
 					resolved = Methods.Invoke(resolved, trans, null).Stringify();
-					Console.WriteLine(" out=" + resolved);
+					//Console.WriteLine(" out=" + resolved);
 				}
 				catch (UnboundFunction e)
 				{
@@ -616,8 +616,12 @@ namespace Dialogic
 
 				if (start == null) OnBindError(globals);
 
-				HandleAlias(start, globals);
+				//HandleAlias(start, globals);
 			}
+
+            // we've process all the transforms, either executing them,
+            // or adding them to the output
+			transforms = null;
 
 			return start;
 		}
@@ -668,6 +672,69 @@ namespace Dialogic
 			}
 		}
 	}
+
+	internal class Transform : Resolvable
+    {
+        public string text, content, transformText;
+        public List<string> transforms;
+        public Chat context; // not used?
+
+        private Transform(Chat context, Match m) : this(context, m.Groups) { }
+
+        private Transform(Chat context, GroupCollection gc)
+        {
+			this.context = context;
+            this.text = gc[0].Value;         
+            this.content = gc[1].Value.Trim();
+            this.transformText = gc[2].Value.Trim();
+            if (!this.transformText.IsNullOrEmpty())
+            {
+                if (transforms == null) transforms = new List<string>();
+                if (transforms.Count > 0) transforms.Clear();
+                foreach (Capture c in gc[3].Captures)
+                {
+                    transforms.Add(c.Value.TrimFirst(Ch.SCOPE).Replace("()", ""));
+                }
+            }
+        }
+        
+        public override string ToString()
+        {
+            return content + " -> " + transformText;
+        }
+
+        public static void Parse(List<Transform> tforms, string text, Chat context)
+        {
+            var matches = RE.ParseTrans.Matches(text);
+
+            foreach (Match match in matches)
+            {
+                // Create a new Symbol and add it to the result
+                tforms.Add(new Transform(context, match));
+            }
+        }
+
+        public static List<Transform> Parse(string text, Chat context)
+        {
+            var tforms = new List<Transform>();
+            Parse(tforms, text, context);
+            return tforms;
+        }
+
+        internal string Replace(string full, string replaceWith)
+        {
+            return full.ReplaceFirst(this.text, replaceWith);
+        }
+
+        internal string Resolve()
+        {
+            //Console.WriteLine(text + " " + content + " " + transformText + " " + transforms.Stringify());
+            if (text.ContainsAny(Ch.SYMBOL, Ch.OR)) throw new BindException("Invalid state: " + this);
+            object resolved = content;
+            transforms.ForEach(t => resolved = Methods.Invoke(resolved, t, null));
+            return resolved != null ? resolved.ToString() : null;
+        }
+    }
 
 	/// <summary>
 	/// Represents an atomic operation on a pair of metadata string that when invoked returns a boolean

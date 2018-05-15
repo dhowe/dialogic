@@ -52,7 +52,7 @@ namespace Dialogic
 
         private static string GetMessage(string s, Chat c, IDictionary<string, object> g)
         {
-            return s + "\nglobals: " + g.Stringify() + (c != null ? "\nchat#"
+            return s + "\n  globals: " + g.Stringify() + (c != null ? "\n  chat#"
                 + c.text + ":" + c.scope.Stringify() : string.Empty);
         }
     }

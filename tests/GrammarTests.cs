@@ -17,7 +17,7 @@ namespace Dialogic
             Chat chat;
             string res;
 
-            Resolver.DBUG = true;
+			Resolver.DBUG = false;
             lines = new[] {
                 "SET start = $A $B",
                 "SET A=hello",
@@ -32,7 +32,7 @@ namespace Dialogic
             res = chat.commands.Last().Text();
             Console.WriteLine("OUT: " + res);
             Assert.That(res, Is.EqualTo("Hello world"));
-			return;         
+			      
             Resolver.DBUG = false;
             lines = new[] {
                 "SET start = $A $B",
@@ -195,6 +195,118 @@ namespace Dialogic
             res = chat.commands[1].Text();
             //Console.WriteLine(res);
             Assert.That(res, Is.EqualTo("She was an ARTIST."));
+        }
+
+		[Test]
+        public void SimpleSetExpansions()
+        {
+            string[] lines;
+            string text;
+            Chat chat;
+
+            // local
+            lines = new[] {
+                "CHAT c1",
+                "SET ab = hello",
+                "SAY $ab",
+            };
+            text = String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
+
+            // global-miss
+            lines = new[] {
+                "CHAT c1",
+                "SET ab = hello",
+                "SAY $ab",
+            };
+            text = String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
+
+            // global-hit
+            lines = new[] {
+                "CHAT c1",
+                "SAY $animal",
+            };
+            text = String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            Assert.That(chat.commands[0].Text(), Is.EqualTo("dog"));
+
+            // global-properties
+            lines = new[] {
+                "CHAT c1",
+                "SAY $fish.name",
+            };
+            text = String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
+
+            // global-bounded
+            lines = new[] {
+                "CHAT c1",
+                "SAY ${fish.name}",
+            };
+            text = String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
+
+            // global-nested
+            lines = new[] {
+                "CHAT c1",
+                "SAY $fish.flipper.speed",
+            };
+            text = String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
+
+            // global-nested-bounded
+            lines = new[] {
+                "CHAT c1",
+                "SAY ${fish.flipper.speed}",
+            };
+            text = String.Join("\n", lines);
+            chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
+
+            // cross-chat-global
+            lines = new[] {
+                "CHAT c1",
+                "SET $c1_ab = hello",
+                "CHAT c2",
+                "SAY $c1_ab",
+            };
+            text = String.Join("\n", lines);
+            var chats = ChatParser.ParseText(text, true);
+            chats.ForEach(c => c.Resolve(globals));
+            Assert.That(chats[1].commands[0].Text(), Is.EqualTo("hello"));
+
+
+            return; // TODO: add chats to globals, remove special-case code 
+
+            // chat-direct access
+            lines = new[] {
+                "CHAT c1",
+                "SET foo=bar",
+                "CHAT c2",
+                "SAY $chats.c1.foo",
+            };
+            text = String.Join("\n", lines);
+            chats = ChatParser.ParseText(text, true);
+            chats.ForEach(c => c.Resolve(globals));
+            Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
+
+            // chat-direct bounded
+            lines = new[] {
+                "CHAT c1",
+                "SET foo=bar",
+                "CHAT c2",
+                "SAY ${chats.c1.foo}",
+            };
+            text = String.Join("\n", lines);
+            chats = ChatParser.ParseText(text, true);
+            chats.ForEach(c => c.Resolve(globals));
+            Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
         }
 
         [Test]

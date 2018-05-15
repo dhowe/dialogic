@@ -10,69 +10,6 @@ namespace Dialogic
     class DynamicsTests : GenericTests
     {
         [Test]
-        public void ResolveTraversalWithFunctions()
-        {
-            object result;
-            Chat c1 = null;
-            result = Symbol.Parse("The $fish.Id()", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("9"));
-
-            result = Symbol.Parse("The $fish.GetSpecies()", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Oscar"));
-
-            result = Symbol.Parse("you $fish.GetFlipper()?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-            result = Symbol.Parse("you $fish.GetFlipperSpeed()?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-
-            result = Symbol.Parse("you $fish.GetFlipper().speed?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-            result = Symbol.Parse("you $fish.GetFlipper().ToString()?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-            // bounded ----------------------------------------------------------------
-
-            result = Symbol.Parse("The ${fish.Id()}", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("9"));
-
-            result = Symbol.Parse("The ${fish.GetSpecies()}", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("Oscar"));
-
-            result = Symbol.Parse("you ${fish.GetFlipper()}?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-            result = Symbol.Parse("you ${fish.GetFlipperSpeed()}?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-            result = Symbol.Parse("you ${fish.GetFlipper().speed}?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-            result = Symbol.Parse("you ${fish.GetFlipper().ToString()}?", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("1.1"));
-
-            result = Symbol.Parse("#{$fish.Id()}", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("9"));
-
-            result = Symbol.Parse("#$fish.Id()", c1)[0].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("9"));
-
-            var symbols = Symbol.Parse("The [aly=$fish.Id()] $aly", c1);
-            //Console.WriteLine(symbols.Stringify());
-            Assert.That(symbols.Count, Is.EqualTo(2));
-            result = symbols[0].Resolve(globals);
-            //Console.WriteLine("result="+result);
-            Assert.That(result.ToString(), Is.EqualTo("9"));
-            Assert.That(globals["aly"], Is.EqualTo(9));
-
-            symbols = Symbol.Parse("The $fish.Id() $fish.name", c1);
-            result = symbols[0].Resolve(globals) + symbols[1].Resolve(globals);
-            Assert.That(result.ToString(), Is.EqualTo("9Fred"));
-        }
-
-        [Test]
         public void SetPathValueTest()
         {
             object result;

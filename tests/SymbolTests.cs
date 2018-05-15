@@ -20,6 +20,99 @@ namespace Dialogic
 		  { "fish",  new Fish("Fred")} */
 
 		[Test]
+        public void SymbolTraversalSimple()
+        {
+            Resolver.DBUG = false;
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res = rt.resolver.Bind("Hello $fish.name", c1, globals);
+            Assert.That(res, Is.EqualTo("Hello Fred"));
+        }
+
+		[Test]
+		public void SymbolTraversalWithAlias()
+		{
+			Chat c1 = null;
+			List<Symbol> symbols;
+			string result, text;
+
+            // one round of symbol parsing
+			text = "The [aly=$fish.Id()] $aly";
+			symbols = Symbol.Parse(text, c1);
+            //Console.WriteLine(symbols.Stringify());
+            Assert.That(symbols.Count, Is.EqualTo(2));
+            result = symbols[0].Resolve(globals);
+			Assert.That(result.ToString(), Is.EqualTo("9"));
+
+			result = symbols[0].Replace(text, result, globals);
+			//Console.WriteLine("result="+result);
+			Assert.That(result.ToString(), Is.EqualTo("The 9 $aly"));
+            Assert.That(globals["aly"], Is.EqualTo("9"));
+
+
+			// now try the full resolution
+			ChatRuntime rt = new ChatRuntime();
+            c1 = rt.AddNewChat("c1");
+            var res = rt.resolver.Bind(text, c1, globals);
+			Assert.That(res, Is.EqualTo("The 9 9"));
+		}
+
+		[Test]
+		public void SymbolTraversalComplex()
+        {
+            object result;
+            Chat c1 = null;
+            result = Symbol.Parse("The $fish.Id()", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+
+            result = Symbol.Parse("The $fish.GetSpecies()", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Oscar"));
+
+            result = Symbol.Parse("you $fish.GetFlipper()?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you $fish.GetFlipperSpeed()?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+
+            result = Symbol.Parse("you $fish.GetFlipper().speed?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you $fish.GetFlipper().ToString()?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+			var symbols = Symbol.Parse("The $fish.Id() $fish.name", c1);
+            result = symbols[0].Resolve(globals) + symbols[1].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9Fred"));
+
+            // bounded ----------------------------------------------------------------
+
+            result = Symbol.Parse("The ${fish.Id()}", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+
+            result = Symbol.Parse("The ${fish.GetSpecies()}", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Oscar"));
+
+            result = Symbol.Parse("you ${fish.GetFlipper()}?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.GetFlipperSpeed()}?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.GetFlipper().speed}?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("you ${fish.GetFlipper().ToString()}?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("1.1"));
+
+            result = Symbol.Parse("#{$fish.Id()}", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+
+            result = Symbol.Parse("#$fish.Id()", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("9"));
+        }
+
+		[Test]
 		public void SymbolResolve()
 		{
 			string text;

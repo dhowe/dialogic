@@ -26,7 +26,7 @@ namespace Dialogic
             }          
 		}
 
-		[Test]
+		//[Test]
         public void AngerFortunes()
         {
             ChatRuntime rt;
@@ -55,7 +55,7 @@ namespace Dialogic
             }
         }
 
-		[Test]
+		//[Test]
 		public void AmusementFortunes()
 		{
 			ChatRuntime rt;
