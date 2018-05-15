@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['capitalize',['capitalize',['../class_dialogic_1_1_transforms.html#ac726eb1cc1187cab6860347bf2d94cc8',1,'Dialogic::Transforms']]],
+  ['capitalize',['Capitalize',['../class_dialogic_1_1_transforms.html#aba5a67db03f43b512a028bcde2cad030',1,'Dialogic::Transforms']]],
   ['ch',['Ch',['../class_dialogic_1_1_ch.html',1,'Dialogic']]],
   ['chat',['Chat',['../class_dialogic_1_1_chat.html',1,'Dialogic']]],
   ['chat_5fenable_5fsmoothing',['CHAT_ENABLE_SMOOTHING',['../class_dialogic_1_1_defaults.html#ac0d6214e5d44c308d05417609cad194e',1,'Dialogic::Defaults']]],
