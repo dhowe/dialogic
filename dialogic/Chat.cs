@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Dialogic
@@ -98,6 +99,19 @@ namespace Dialogic
             commands.ForEach(c => c.Resolve(globals));
             return null; // nothing to return;
         }
+
+		internal bool ValidateParens()
+		{
+			int open = 0, close = 0;
+			this.commands.ForEach(c =>{
+				if (c is Set) {
+					open += ((Set)c).value.Count(ch => ch == Ch.OGROUP);
+					close += ((Set)c).value.Count(ch => ch == Ch.CGROUP);               
+				} 
+			});
+			if (open != close) throw new MismatchedParens();
+			return true;
+		}
 
         protected internal override Command Validate()
         {

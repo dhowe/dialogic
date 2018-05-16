@@ -346,8 +346,10 @@ namespace Dialogic
         internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
         {
             if (chats.Count < 1) throw new DialogicException("No chats");
-
+            
             ResetChats(); // reset all chat cursors
+
+			foreach (var c in chats.Values) c.ValidateParens();
 
             var chat = (label.IsNullOrEmpty() ? chats.Values :
                 new Chat[] { this[label] }.ToList()).First();
