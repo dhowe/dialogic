@@ -118,5 +118,19 @@ namespace Dialogic
             //chat = (Chat) .Resolve(globals);
             //Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
         }      
+
+
+        [Test]
+        public void ValidateParensTest()
+        {
+            string[] lines = new[] {
+                "CHAT c1",
+				"SET ab = (a | b))",            
+                "SAY $ab"
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines), true);
+			Assert.Throws<MismatchedParens>(() => rt.InvokeImmediate(globals));
+        }      
     }
 }
