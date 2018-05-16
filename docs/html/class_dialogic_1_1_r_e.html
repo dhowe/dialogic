@@ -84,15 +84,15 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:ae605b2cf7321b5d33b575018656b13e3"><td class="memItemLeft" align="right" valign="top"><a id="ae605b2cf7321b5d33b575018656b13e3"></a>
 static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>FindMeta</b> = new Regex(OP1 + OP2)</td></tr>
 <tr class="separator:ae605b2cf7321b5d33b575018656b13e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bcaf2ea59363426e356363fd5498c95"><td class="memItemLeft" align="right" valign="top"><a id="a4bcaf2ea59363426e356363fd5498c95"></a>
-static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseTrans</b> = new Regex(@&quot;\(([^|$()]+)\)((\.[A-Za-z_-]+(?:\(\)))+)&quot;)</td></tr>
-<tr class="separator:a4bcaf2ea59363426e356363fd5498c95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d26525410491f6f503f140df0abbc47"><td class="memItemLeft" align="right" valign="top"><a id="a9d26525410491f6f503f140df0abbc47"></a>
-static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>MatchParens</b> = new Regex(@&quot;(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(&quot; + SYM + @&quot;)\(\))*\]?&quot;)</td></tr>
-<tr class="separator:a9d26525410491f6f503f140df0abbc47"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4a2cc6b5dc6dda4e2485947b5a0a00b"><td class="memItemLeft" align="right" valign="top"><a id="af4a2cc6b5dc6dda4e2485947b5a0a00b"></a>
-static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseVars</b> = new Regex(@&quot;(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?&quot;)</td></tr>
-<tr class="separator:af4a2cc6b5dc6dda4e2485947b5a0a00b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ada59f2eed36c20b0ca4cf3eff0fa74"><td class="memItemLeft" align="right" valign="top"><a id="a9ada59f2eed36c20b0ca4cf3eff0fa74"></a>
+static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseTransforms</b> = new Regex(@&quot;\(([^|$()]+)\)((\.[A-Za-z_-]+(?:\(\)))+)&quot;)</td></tr>
+<tr class="separator:a9ada59f2eed36c20b0ca4cf3eff0fa74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace680790ceb139d9f842b1901a65efed"><td class="memItemLeft" align="right" valign="top"><a id="ace680790ceb139d9f842b1901a65efed"></a>
+static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseChoices</b> = new Regex(@&quot;(?:\[([^=]+)=)*&quot; + PRN + @&quot;\]?(?:\.(&quot; + SYM + @&quot;)\(\))*\]?&quot;)</td></tr>
+<tr class="separator:ace680790ceb139d9f842b1901a65efed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3f5bab9d7bea829ce54230d4331fa1d"><td class="memItemLeft" align="right" valign="top"><a id="ae3f5bab9d7bea829ce54230d4331fa1d"></a>
+static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseSymbols</b> = new Regex(@&quot;(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?&quot;)</td></tr>
+<tr class="separator:ae3f5bab9d7bea829ce54230d4331fa1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abda38bcaf821c211051898564b4d095e"><td class="memItemLeft" align="right" valign="top"><a id="abda38bcaf821c211051898564b4d095e"></a>
 static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>SplitOr</b> = new Regex(@&quot;\s*\|\s*&quot;)</td></tr>
 <tr class="separator:abda38bcaf821c211051898564b4d095e"><td class="memSeparator" colspan="2">&#160;</td></tr>

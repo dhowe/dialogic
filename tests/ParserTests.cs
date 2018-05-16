@@ -4,12 +4,6 @@ using NUnit.Framework;
 
 namespace Dialogic
 {
-    /*
-     * State: 
-     *   obj-traversal has 2 broken BindingTests
-     *   obj-trav2 has new Properties object which breaks a test in ParserTests
-     *   TODO: (debug Properties object and merge obj-trav2 back into obj-traversal)
-     */
     [TestFixture]
     public class ParserTests : GenericTests
     {
@@ -132,13 +126,8 @@ namespace Dialogic
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("$animal"));
             Assert.That(chat.scope["a"], Is.EqualTo("$animal"));
-            Assert.That(globals["animal"], Is.EqualTo("dog"));
-
+            Assert.That(globals["animal"], Is.EqualTo("dog"));         
             Assert.That(chat.commands[1].Text(), Is.EqualTo("The dog barked"));
-            //globals["animal"] = "cat";
-            //Assert.That(globals["animal"], Is.EqualTo("cat"));
-            //chat.commands[1].Realize(globals); // re-realize
-            //Assert.That(chat.commands[1].Text(), Is.EqualTo("The cat barked"));
         }
 
         [Test]
@@ -151,18 +140,6 @@ namespace Dialogic
             Set set = (Dialogic.Set)chat.commands[0];
             Assert.That(set.text, Is.EqualTo("animal"));
             Assert.That(set.value, Is.EqualTo("cat"));
-            /*
-             * 
-             * TODO: globals and locals
-            set.Realize(globals);
-            object outv = null;
-            globals.TryGetValue("c1.animal", out outv);
-            Assert.That(outv, Is.Null);
-            Assert.That(globals["animal"], Is.EqualTo("cat"));
-
-            globals["animal"] = "dog";
-            Assert.That(globals["animal"], Is.EqualTo("dog"));
-            */
         }
 
         [Test]
@@ -1200,6 +1177,7 @@ namespace Dialogic
             //var ff = "SAY (a|b).notFound";
             //var chat = (Chat)ChatParser.ParseText(ff)[0].Realize(null);
             //Console.WriteLine("\n"+chat.commands[0].Text()); return;
+
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A ="));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A 3"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("SET A: 3"));

@@ -62,7 +62,7 @@ namespace Dialogic
 			Assert.That(chat, Is.Not.Null);
 			chat.Resolve(null);
 			res = chat.commands.Last().Text();
-			Console.WriteLine("OUT: " + res);
+			//Console.WriteLine("OUT: " + res);
 			Assert.That(res, Is.EqualTo("Hello world"));
 		}
 
@@ -298,12 +298,9 @@ namespace Dialogic
 			var chats = ChatParser.ParseText(text, true);
 			chats.ForEach(c => c.Resolve(globals));
 			Assert.That(chats[1].commands[0].Text(), Is.EqualTo("hello"));
-
-
-			return; // TODO: add chats to globals, remove special-case code 
-
+            
 			// chat-direct access
-			lines = new[] {
+			/*lines = new[] {
 				"CHAT c1",
 				"SET foo=bar",
 				"CHAT c2",
@@ -324,7 +321,7 @@ namespace Dialogic
 			text = String.Join("\n", lines);
 			chats = ChatParser.ParseText(text, true);
 			chats.ForEach(c => c.Resolve(globals));
-			Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
+			Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));*/
 		}
 
 		[Test]
@@ -807,7 +804,7 @@ namespace Dialogic
 		}
 
 		[Test]
-		public void SetRules2()
+		public void SetRules2() // causing hangs in nunit tests
 		{
 			string[] lines = {
 				"CHAT WineReview {type=a,stage=b}",
@@ -1099,7 +1096,7 @@ namespace Dialogic
 			}
 		}
 
-		[Test]
+		/*[Test]
 		public void WineReview()
 		{
 			string[] lines = {
@@ -1133,7 +1130,7 @@ namespace Dialogic
 					|| said.EndsWith("time for a cold shower.", Util.IC)
 					|| said.EndsWith("Just give up please.", Util.IC), Is.True);
 			}
-		}
+		}*/
 
 		[Test]
 		public void FullGrammar()

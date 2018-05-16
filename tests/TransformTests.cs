@@ -43,6 +43,13 @@ namespace Dialogic
 			Assert.That(result.ToString(), Is.EqualTo("An ant"));
             result = tran.Replace(text, result);
 			Assert.That(result.ToString(), Is.EqualTo("Today An ant ran."));
+
+			text = "(a (then).Cap())";
+            tran = Transform.Parse(text, c1)[0];
+            result = tran.Resolve();
+            Assert.That(result.ToString(), Is.EqualTo("Then"));
+            result = tran.Replace(text, result);
+			Assert.That(result.ToString(), Is.EqualTo("(a Then)"));
 		}
 	}
 }

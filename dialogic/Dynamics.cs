@@ -149,7 +149,7 @@ namespace Dialogic
 
 		private static object BestGuess(object caller, string methodName)
 		{
-			return caller + "." + methodName + "&lpar;&rpar;";
+			return caller + "." + methodName + "()";
 		}
 
 		private static TransformException BadTransform
@@ -286,7 +286,7 @@ namespace Dialogic
 			if (!input.Contains(Ch.OR)) return;
 
 			// OPT: Cache the entire match?
-			foreach (Match m in RE.MatchParens.Matches(input))
+			foreach (Match m in RE.ParseChoices.Matches(input))
 			{
 				if (showMatch) Util.ShowMatch(m);
 
@@ -301,9 +301,6 @@ namespace Dialogic
 					var cidx = full.LastIndexOf(Ch.CGROUP);
 					expr = full.Substring(oidx + 1, cidx - oidx - 1);
 				}
-
-				if (RE.HasParens.IsMatch(expr)) throw new Exception
-					("INVALID STATE"); //Parse(expr, results, context);
 
 				if (CacheEnabled(context))
 				{
@@ -329,7 +326,7 @@ namespace Dialogic
 				}
 			}
 		}
-              
+
 		internal string Resolve()
 		{
 			string resolved = null;
@@ -483,7 +480,7 @@ namespace Dialogic
 
 		public static void Parse(List<Symbol> symbols, string text, Chat context)
 		{
-			var matches = RE.ParseVars.Matches(text);
+			var matches = RE.ParseSymbols.Matches(text);
 
 			foreach (Match match in matches)
 			{
@@ -574,13 +571,21 @@ namespace Dialogic
 					}
 				}
 				else if (!transforms.IsNullOrEmpty() && alias == null)  // B
-				{
-					// leave the transforms in place
-					reText = Name();
-
+				{               
 					// add an enclosing group if needed
 					if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
 						replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
+
+					if (bounded)
+					{
+						// replace the whole thing with resolved+transforms                  
+						reText = text;
+						replaceWith += TransformText();
+					}
+					else {
+						// leave the transforms in place
+                        reText = Name();
+					}
 				}
 				else if (transforms.IsNullOrEmpty() && alias != null)   // C
 				{
@@ -592,22 +597,20 @@ namespace Dialogic
 					// push the alias into scope
 					HandleAlias(replaceWith, globals);
 
-					// leave the transforms in place
+					// leave the transforms in place               
 					replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP + TransformText();
 				}
 
-				if (false && reText.EndsWith('}')) // handle bounded variables (disabled)
+				if (bounded) // handle bounded variables (disabled)
 				{
-					Console.WriteLine("No regex REPLACE!");
+					//Console.WriteLine("\nB: full=" + full + " toReplace=" + reText + " replaceWith=" + replaceWith + " text=" + text);
 					full = full.Replace(reText, replaceWith);
 				}
 				else
 				{
-					replaceRE = new Regex(Regex.Escape(reText) + @"(?![A-Za-z_-])");
-
-					//Console.Write("RE.Replace(" + full + ", " + reText + ", " + replaceWith + ")");               
-					full = replaceRE.Replace(full, replaceWith);
-					//Console.WriteLine(" :: " + full);
+					replaceRE = new Regex(Regex.Escape(reText) + @"(?![A-Za-z_-])");               
+					//Console.WriteLine("C: full=" + full + " toReplace=/" + reText + "/ replaceWith=" + replaceWith + " text=" + text);                    
+					full = replaceRE.Replace(full, replaceWith);               
 				}
 			}
 
@@ -727,7 +730,7 @@ namespace Dialogic
 
 		public static void Parse(List<Transform> tforms, string text, Chat context)
 		{
-			var matches = RE.ParseTrans.Matches(text);
+			var matches = RE.ParseTransforms.Matches(text);
 
 			foreach (Match match in matches)
 			{

@@ -146,13 +146,11 @@ namespace Dialogic
 	public static class RE
 	{
 		internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";
-		internal const string OP1 = @"^(!?!?$?" + SYM + ")";
-		internal const string OP2 = @"\s*([!*$^=<>]?=|<|>)\s*(\S+)$";
-		public static Regex FindMeta = new Regex(OP1 + OP2);
+		internal const string PRN = @"(?:\()((?>(?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*))(?:\))(?(p)(?!))(?(pipe)|(?!))";
 
-		public static Regex ParseTrans = new Regex(@"\(([^|$()]+)\)((\.[A-Za-z_-]+(?:\(\)))+)");
-		public static Regex MatchParens = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?");
-		public static Regex ParseVars = new Regex(@"(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?");
+		public static Regex ParseTransforms = new Regex(@"\(([^|$()]+)\)((\.[A-Za-z0-9_-]+(?:\(\)))+)");
+		public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*" + PRN + @"\]?(?:\.(" + SYM + @")\(\))*\]?");
+		public static Regex ParseSymbols = new Regex(@"(?:(\[)([^=]+)=)?\$(\{)?(?:(" + SYM + @")((?:\.(?:" + SYM + @")(?:\(\))?)*))(\})?(\])?");
 
 		public static Regex SplitOr = new Regex(@"\s*\|\s*");
 		public static Regex HasParens = new Regex(@"[\(\)]");
@@ -162,11 +160,11 @@ namespace Dialogic
 		public static Regex SingleComment = new Regex(@"//(.*?)(?:$|\r?\n)");
 		public static Regex MultiComment = new Regex(@"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/");
 		public static Regex ParseSetArgs = new Regex(@"(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)");
+		public static Regex FindMeta = new Regex(@"^(!?!?$?" + SYM + @")\s*([!*$^=<>]?=|<|>)\s*(\S+)$");
 		public static Regex TestTubeChatBaby = new Regex(@"^C[0-9]+$");
 		public static Regex MultiSpace = new Regex(@"\s+");
 		public static Regex ResolvePost = new Regex(@"[()""]");
 
-		// ChatParser.lineParser Regex
 		internal const string MTD = @"(?:\{(.+?)\})?\s*";
 		internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
 		internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
@@ -202,6 +200,38 @@ namespace Dialogic
 		public static double Constrain(double n, double low, double high)
 		{
 			return Math.Max(Math.Min(n, high), low);
+		}
+
+		internal static List<String> NestedParens(string value)
+		{
+			List<string> groups = new List<string>();
+
+			if (string.IsNullOrEmpty(value)) return groups;
+
+			Stack<int> brackets = new Stack<int>();
+
+			for (int i = 0; i < value.Length; ++i)
+			{
+				char ch = value[i];
+
+				if (ch == '(')
+				{
+					brackets.Push(i);
+				}
+				else if (ch == ')')
+				{
+					//TODO: you may want to check if close ']' has corresponding open '['
+					// i.e. stack has values: if (!brackets.Any()) throw ...
+					int openBracket = brackets.Pop();
+
+					groups.Add(value.Substring(openBracket + 1, i - openBracket - 1));
+				}
+			}
+
+			//TODO: you may want to check here if there're too many '['
+			// i.e. stack still has values: if (brackets.Any()) throw ... 
+
+			return groups;
 		}
 
 		/// <summary>
@@ -1079,7 +1109,7 @@ namespace Dialogic
 				if (str.IndexOf(c[i]) > -1) return true;
 			}
 			return false;
-		}      
+		}
 
 		internal static bool ContainsAll(this string str, params char[] c)
 		{

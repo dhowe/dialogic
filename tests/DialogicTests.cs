@@ -7,25 +7,7 @@ namespace Dialogic
 {
 	[TestFixture]
 	public class DialogicTests : GenericTests
-	{
-		[Test]
-		public void NextChoiceTest()
-		{
-			var txt = "CHAT c1\nSET A=Its better to ((smile|laugh) well |" 
-				+ " look happy)) than to think well.\nSAY $A";
-			ChatRuntime rt = new ChatRuntime();
-			rt.ParseText(txt);
-            
-			rt["c1"].Resolve(null);         
-            for (int i = 0; i < 10; i++)
-            {
-                var s = rt.InvokeImmediate(globals);
-                //Console.WriteLine(i + ":" + s);
-				Assert.That(s.StartsWith("Its better to", Util.IC));
-				Assert.That(s.EndsWith("than to think well.", Util.IC));
-            }          
-		}
-
+	{      
 		//[Test]
         public void AngerFortunes()
         {
@@ -53,7 +35,7 @@ namespace Dialogic
                 string[] sents = s.Split(new[] { "?", "." }, opts);
                 Console.WriteLine(i + "(" + sents.Length + "): " + s);
             }
-        }
+        }      
 
 		//[Test]
 		public void AmusementFortunes()
@@ -72,7 +54,7 @@ namespace Dialogic
 			//string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
 			//foreach (var k in keys) Console.WriteLine(k + ":" + chat.scope[k]);
 
-			Console.WriteLine();
+			//Console.WriteLine();
 
 			//Resolver.DBUG = true;
 			for (int i = 0; i < 15; i++)
@@ -84,6 +66,187 @@ namespace Dialogic
 			}         
 		}
 
+		[Test]
+        public void SetPathValueTest()
+        {
+            object result;
+            Chat c1 = null;
+
+            var symbol = Symbol.Parse("$fish.name = Mary", c1)[0];
+
+            Set.SetPathValue(globals["fish"], new[] { "fish", "name" }, "Mary", globals);
+
+            result = Symbol.Parse("you $fish.name?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("Mary"));
+        }
+
+        [Test]
+        public void SetGlobalsOnPath()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            Chat chat = ChatParser.ParseText(code, NO_VALIDATORS)[0];
+
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            Set set = (Dialogic.Set)chat.commands[0];
+            Assert.That(set.text, Is.EqualTo("fish.name"));
+            Assert.That(set.value, Is.EqualTo("Mary"));
+
+            Say say = (Dialogic.Say)chat.commands[1];
+            Assert.That(say.text, Is.EqualTo("Hi $fish.name"));
+
+            chat.Resolve(globals);
+            Assert.That(say.Text(), Is.EqualTo("Hi Mary"));
+        }
+
+        [Test]
+        public void SetRemoteChatProperty()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.staleness=2";
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Resolve(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+
+            Assert.That(chat.Staleness(), Is.EqualTo(0));
+
+            chat2.Resolve(globals);
+
+            Assert.That(chat.Staleness(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void SetRemoteChatNonProperty()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.happiness=2";
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Resolve(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.Staleness(), Is.EqualTo(0));
+
+            // throw b/c we only allow setting of persistent properties 
+            // (staleness, etc) on remote chats
+            Assert.Throws<BindException>(() => chat2.Resolve(globals));
+        }
+
+        [Test]
+        public void SetBadRemoteChatProperty()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $WRONG.staleness=2";
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Resolve(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.Staleness(), Is.EqualTo(0));
+
+            // throw b/c $WRONG.staleness doesn't exist in any scope
+            Assert.Throws<BindException>(() => chat2.Resolve(globals));
+        }
+
+        [Test]
+        public void SetChatLocalPath()
+        {
+            var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.staleness=2";
+
+            var rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            var chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Resolve(globals);
+
+            var chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+
+            Assert.That(chat.Staleness(), Is.EqualTo(Defaults.CHAT_STALENESS));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), Is.EqualTo(Defaults.CHAT_STALENESS));
+
+            chat2.Resolve(globals);
+            Assert.That(chat.Staleness(), Is.EqualTo(2));
+            Assert.That(Convert.ToDouble(chat.GetMeta(Meta.STALENESS)), Is.EqualTo(2));
+
+
+            code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
+            code += "\nCHAT c2\nSET $c1.stalenessIncr=2";
+
+            rt = new ChatRuntime(null);
+            rt.ParseText(code, NO_VALIDATORS);
+
+            chat = rt["c1"];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+            Assert.That(chat.commands[1].GetType(), Is.EqualTo(typeof(Say)));
+
+            chat.Resolve(globals);
+
+            chat2 = rt["c2"];
+            Assert.That(chat2, Is.Not.Null);
+            Assert.That(chat2.commands[0].GetType(), Is.EqualTo(typeof(Set)));
+
+            // no need to check metadata, except for staleness
+            Assert.That(chat.StalenessIncr(), Is.EqualTo(Defaults.CHAT_STALENESS_INCR));
+            chat2.Resolve(globals);
+            Assert.That(chat.StalenessIncr(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void MethodsInvoke()
+        {
+            var fish = new Fish("Frank");
+            var obj = Methods.Invoke(fish, "Id");
+            Assert.That(obj.ToString(), Is.EqualTo("9"));
+            Methods.Invoke(fish, "Id", new object[] { 10 });
+            Assert.That(Methods.Invoke(fish, "Id").ToString(), Is.EqualTo("10"));
+        }
+
+        [Test]
+        public void GetSetProperties()
+        {
+            var fish = new Fish("Frank");
+            var obj = Properties.Get(fish, "name");
+            Assert.That(obj.ToString(), Is.EqualTo("Frank"));
+
+            Properties.Set(fish, "name", "Bill");
+            Assert.That(fish.name, Is.EqualTo("Bill"));
+        }
 		[Test]
 		public void ImmediateTripleLoop()
 		{
@@ -623,5 +786,119 @@ namespace Dialogic
 			Assert.That(fast.text, Is.EqualTo(defa.text));
 			Assert.That(slow.text, Is.EqualTo(defa.text));
 		}
+
+		[Test]
+        public void AssignmentTests()
+        {
+            Assert.That(Operator.EQ.Invoke("hello", "hello"), Is.True);
+            Assert.That(Operator.EQ.Invoke("hello", ""), Is.False);
+            Assert.That(Operator.EQ.Invoke("hello", null), Is.False);
+
+            Assert.That(Operator.NE.Invoke("hello", "hello"), Is.False);
+            Assert.That(Operator.NE.Invoke("hello", ""), Is.True);
+            Assert.That(Operator.NE.Invoke("hello", null), Is.True);
+
+            Assert.That(Operator.EQ.Invoke("true", "false"), Is.False);
+            Assert.That(Operator.EQ.Invoke("false", "false"), Is.True);
+            Assert.That(Operator.EQ.Invoke("false", null), Is.False);
+
+            Assert.That(Operator.NE.Invoke("hello", ""), Is.True);
+            Assert.That(Operator.NE.Invoke("hello", "false"), Is.True);
+
+            Assert.Throws<OperatorException>(() => Operator.NE.Invoke(null, null));
+        }
+
+        [Test]
+        public void EqualityTests()
+        {
+            Assert.That(Operator.EQ.Invoke("hello", "hello"), Is.True);
+            Assert.That(Operator.EQ.Invoke("hello", ""), Is.False);
+            Assert.That(Operator.EQ.Invoke("hello", null), Is.False);
+
+            Assert.That(Operator.NE.Invoke("hello", "hello"), Is.False);
+            Assert.That(Operator.NE.Invoke("hello", ""), Is.True);
+            Assert.That(Operator.NE.Invoke("hello", null), Is.True);
+
+            Assert.That(Operator.EQ.Invoke("true", "false"), Is.False);
+            Assert.That(Operator.EQ.Invoke("false", "false"), Is.True);
+            Assert.That(Operator.EQ.Invoke("false", null), Is.False);
+
+            Assert.That(Operator.NE.Invoke("hello", ""), Is.True);
+            Assert.That(Operator.NE.Invoke("hello", "false"), Is.True);
+
+            Assert.Throws<OperatorException>(() => Operator.NE.Invoke(null, null));
+        }
+
+        [Test]
+        public void ComparisonTests()
+        {
+            Assert.That(Operator.GT.Invoke("2", "1"), Is.True);
+            Assert.That(Operator.GT.Invoke("1", "2"), Is.False);
+            Assert.That(Operator.GT.Invoke("1", "1"), Is.False);
+            Assert.That(Operator.GT.Invoke("2.0", "1"), Is.True);
+            Assert.That(Operator.GT.Invoke("1.0", "2"), Is.False);
+            Assert.That(Operator.GT.Invoke("1.0", "1"), Is.False);
+            Assert.That(Operator.GT.Invoke("2.0", "1.00"), Is.True);
+            Assert.That(Operator.GT.Invoke("1.0", "2.00"), Is.False);
+            Assert.That(Operator.GT.Invoke("1.0", "1.00"), Is.False);
+
+            Assert.That(Operator.LT.Invoke("2", "1"), Is.False);
+            Assert.That(Operator.LT.Invoke("1", "2"), Is.True);
+            Assert.That(Operator.LT.Invoke("1", "1"), Is.False);
+            Assert.That(Operator.LT.Invoke("2.0", "1"), Is.False);
+            Assert.That(Operator.LT.Invoke("1.0", "2"), Is.True);
+            Assert.That(Operator.LT.Invoke("1.0", "1"), Is.False);
+            Assert.That(Operator.LT.Invoke("2.0", "1.00"), Is.False);
+            Assert.That(Operator.LT.Invoke("1.0", "2.00"), Is.True);
+            Assert.That(Operator.LT.Invoke("1.0", "1.00"), Is.False);
+
+            Assert.That(Operator.LE.Invoke("2", "1"), Is.False);
+            Assert.That(Operator.LE.Invoke("1", "2"), Is.True);
+            Assert.That(Operator.LE.Invoke("1", "1"), Is.True);
+            Assert.That(Operator.LE.Invoke("2.0", "1"), Is.False);
+            Assert.That(Operator.LE.Invoke("1.0", "2"), Is.True);
+            Assert.That(Operator.LE.Invoke("1.0", "1"), Is.True);
+            Assert.That(Operator.LE.Invoke("2.0", "1.00"), Is.False);
+            Assert.That(Operator.LE.Invoke("1.0", "2.00"), Is.True);
+            Assert.That(Operator.LE.Invoke("1.0", "1.00"), Is.True);
+
+            Assert.Throws<OperatorException>(() => Operator.GT.Invoke("2", ""));
+            Assert.Throws<OperatorException>(() => Operator.LT.Invoke("2", null));
+            Assert.Throws<OperatorException>(() => Operator.LE.Invoke("2", "h"));
+            Assert.Throws<OperatorException>(() => Operator.GE.Invoke("", ""));
+        }
+
+        [Test]
+        public void MatchingTests()
+        {
+            Assert.That(Operator.SW.Invoke("Hello", "He"), Is.True);
+            Assert.That(Operator.SW.Invoke("Hello", "Hello"), Is.True);
+            Assert.That(Operator.SW.Invoke("Hello", "Hej"), Is.False);
+            Assert.That(Operator.SW.Invoke("Hello", null), Is.False);
+            Assert.That(Operator.SW.Invoke("Hello", ""), Is.True);
+
+            Assert.That(Operator.EW.Invoke("Hello", "o"), Is.True);
+            Assert.That(Operator.EW.Invoke("Hello", "Hello"), Is.True);
+            Assert.That(Operator.EW.Invoke("Hello", "l1o"), Is.False);
+            Assert.That(Operator.EW.Invoke("Hello", null), Is.False);
+            Assert.That(Operator.EW.Invoke("Hello", ""), Is.True);
+
+            Assert.That(Operator.RE.Invoke("Hello", "ll"), Is.True);
+            Assert.That(Operator.RE.Invoke("Hello", "e"), Is.True);
+            Assert.That(Operator.RE.Invoke("Hello", "l1"), Is.False);
+            Assert.That(Operator.RE.Invoke("Hello", null), Is.False);
+            Assert.That(Operator.RE.Invoke("Hello", ""), Is.True);
+
+
+            Assert.That(Operator.SW.Invoke("$Hello", "$"), Is.True);
+            Assert.That(Operator.EW.Invoke("$Hello", "$"), Is.False);
+            Assert.That(Operator.RE.Invoke("$Hello", "$"), Is.True);
+            Assert.That(Operator.RE.Invoke("hello", "(hello|bye)"), Is.True);
+            Assert.That(Operator.RE.Invoke("bye", "(hello|bye)"), Is.True);
+            Assert.That(Operator.RE.Invoke("by", "(hello|bye)"), Is.False);
+
+            Assert.Throws<OperatorException>(() => Operator.SW.Invoke(null, "hello"));
+            Assert.Throws<OperatorException>(() => Operator.SW.Invoke(null, null));
+        }
 	}
 }

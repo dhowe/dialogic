@@ -8,8 +8,6 @@ namespace Dialogic
     [TestFixture]
     public class SearchTests : GenericTests
     {
-        // TODO: test each event with a single find+go
-
         [Test]
         public void SearchFailWithConstraint()
         {
