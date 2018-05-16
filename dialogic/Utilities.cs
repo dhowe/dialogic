@@ -152,9 +152,10 @@ namespace Dialogic
 
 		//internal const string PRN = @"\(([^\(\)]+)\)";
 		//internal const string PRN = @"\(((?:[^()]|\(\))+)\)";
-		internal const string PRN = @"\(((?:[^()]|\(\))+\|(?:[^()]|\(\))+)\)";
+		internal const string PRN = @"(?:\()((?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*)(?:\))(?(p)(?!))(?(pipe)|(?!))";
+
 		public static Regex ParseTransforms = new Regex(@"\(([^|$()]+)\)((\.[A-Za-z_-]+(?:\(\)))+)");      
-		//public static Regex ParseTransforms = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?"); // OK
+		//public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?"); // OK
 		public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*" + PRN + @"\]?(?:\.(" + SYM + @")\(\))*\]?");
 		public static Regex ParseSymbols = new Regex(@"(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?");
 		//public static Regex NestedParens = new Regex(@"^[^<>]*(((?'Open'<)[^<>]*)+((?'Close-Open'>)[^<>]*)+)*(?(Open)(?!))$");

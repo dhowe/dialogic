@@ -204,16 +204,6 @@ namespace Dialogic
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
         }
        
-        private static Chat CreateParentChat(string name)
-        {
-            // create a resolved Chat with the full set of global props
-            var c = Chat.Create(name);
-            foreach (var prop in globals.Keys) c.SetMeta(prop, globals[prop]);
-            c.Resolve(globals);
-            return c;
-        }
-
-
         [Test]
         public void MultipleSymbolsWithTransform()
         {

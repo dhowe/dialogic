@@ -931,5 +931,52 @@ namespace Dialogic
             for (int j = 1; j < 6; j++) parts.Add(match.Groups[j].Value.Trim());
             return parts;
         }
+
+
+        //[Test]
+        public void StackRegexTest1()
+        {
+            var bpr = @"\((?>[^()|]+|(?<o>)\(|(?<-o>)\))*(?(o)(?!))\)";
+            var re = new Regex($@"\(((?:[^()]|{bpr})*\|(?:[^()]|{bpr})*)\)");
+            _StackRegexTests(re);
+        }
+
+        //[Test]
+        public void StackRegexTest2()
+        {
+            var re = new Regex(@"(?:\()((?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*)(?:\))(?(p)(?!))(?(pipe)|(?!))");
+            _StackRegexTests(re);
+        }
+        
+        public void _StackRegexTests(Regex re)
+        {
+            string[] tests = {
+                "x () y", "",
+                "x (a) y", "",
+                "x (a.b()) y", "",
+                "x ((a).b() | (b).c()) y", "(a).b() | (b).c()",
+                "x (a|b) y", "a|b",
+                "x ((a|b) | c)", "a|b",
+                "x (a|b|c) y", "a|b|c",
+                "x (a|a.b()|c) y", "a|a.b()|c",
+                "x (a.b()|b.c()) y", "a.b()|b.c()",
+                "x (a.b()|b.c()|c) y", "a.b()|b.c()|c",
+                "x (a|b.c()|c.d()) y", "a|b.c()|c.d()",
+                "x (a|(b.c()|d)) y", "b.c()|d",
+                "x (a|a.b(a)|c) y", "a|a.b(a)|c"
+            };
+
+            for (int i = 0; i < tests.Length; i += 2)
+            {
+                var match = re.Match(tests[i]);
+                if (match.Success)
+                {
+                    var result = match.Groups[1].Value;
+                    Console.WriteLine("{0} => {1}", result, result == tests[i + 1]);
+                }
+                else
+                    Console.WriteLine("{0} => \"\"", tests[i]);
+            }
+        }
     }
 }

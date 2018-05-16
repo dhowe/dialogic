@@ -13,16 +13,16 @@ namespace Dialogic
 		{
 			// WORKING HERE: 
 			// See: https://stackoverflow.com/questions/50358674/c-sharp-regex-for-negated-character-class-unless-chars-are-next-to-one-another
-			var txt = "CHAT c1\nSET a = A ($animal.cap() | $prep.cap())\nSAY $a";
+			var txt = "CHAT c1\nSET a = a ($animal.Cap() | $prep.Cap())\nSAY $a";
 			ChatRuntime rt = new ChatRuntime();
 			rt.ParseText(txt);
-			Resolver.DBUG = true;
+			Resolver.DBUG = false;
 			rt.strictMode = false;
 			for (int i = 0; i < 1; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
 				Console.WriteLine(s);
-				Assert.That(s.IsOneOf(new[] { "Dog", "Then" }));
+				Assert.That(s.IsOneOf(new[] { "a Dog", "a Then" }));
 			}
 		}
 
@@ -31,17 +31,23 @@ namespace Dialogic
 			var match = re.Match(text);
 			//Util.ShowMatch(match);
 			//Assert.That(match.Groups[0].Value, Is.EqualTo("((dog).cap() | (then).cap())"));
-			if (num >= 0) Console.WriteLine(num + ") " + text + " => '" + match.Groups[1].Value+"'");
+			//if (num >= 0) Console.WriteLine(num + ") " + text + " => '" + match.Groups[1].Value + "'");
 			Assert.That(match.Groups[1].Value, Is.EqualTo(expected));
 		}
+
+
 
 		[Test]
 		public void TestNewChoice()
 		{
 			//var re = new Regex(@"\(++\)");
-			var PRN = new Regex(@"\(((?:(?:[^()]|\([^|]*?\))*?\|(?:[^()]|\([^|]*?\))*?))\)");
+			//var PRN = new Regex(@"\(((?:(?:[^()]|\([^|]*?\))*?\|(?:[^()]|\([^|]*?\))*?))\)");
 			//var PRN = new Regex(@"\(((?:(?:[^()]|\(\))*\|(?:[^()]|\(\))*))\)");
+
+			var PRN = new Regex(RE.PRN);
 			string[] tests = {
+				"x (a|) y", "a|",
+				"x (a|b|) y", "a|b|",
 				"x ((a).b() | (b).c()) y", "(a).b() | (b).c()",
 				"x (a|b) y", "a|b",
 				"x (a|b|c) y", "a|b|c",
@@ -50,25 +56,17 @@ namespace Dialogic
 				"x (a.b()|b.c()|c) y", "a.b()|b.c()|c",
 				"x (a|b.c()|c.d()) y", "a|b.c()|c.d()",
 				"x (a|(b.c()|d)) y", "b.c()|d",
-
+            
 				"x () y", "",
 				"x (a) y", "",
 				"x (a.b()) y", "",
-				"x (a|a.b(a)|c) y", "(a|a.b(a)|c)"
-			};
-			//var re = new Regex(@"\(((?:[^()]|\(\))+\|(?:[^()]|\(\))+)\)");
-			//var re = new Regex(@"\(((?:[^()]|\(\))+)\)");
-
+				"x (a|a.b(a)|c) y", "a|a.b(a)|c",
+				"((dog).cap() | (then).cap())", "(dog).cap() | (then).cap()"
+			};         
 			for (int i = 0; i < tests.Length; i += 2)
 			{
 				_TestParseGroup(PRN, tests[i], tests[i + 1], i / 2);
 			}
-			_TestParseGroup(PRN, "((dog).cap() | (then).cap())", "(dog).cap() | (then).cap()",tests.Length/2);
-			////text = "(dog | cat)";
-			//var match = re.Match(text);
-			// Util.ShowMatch(match);
-			//Assert.That(match.Groups[0].Value, Is.EqualTo("((dog).cap() | (then).cap())"));
-			//Assert.That(match.Groups[1].Value, Is.EqualTo("(dog).cap() | (then).cap()"));
 		}
 
 
@@ -80,10 +78,10 @@ namespace Dialogic
 			string[] expected;
 			string text;
 
-			text = "((dog).cap() | (then).cap())";
+			text = "((dog).Cap() | (then).Cap())";
 			choice = Choice.Parse(text, c, false)[0];
-			expected = new[] { "(dog).cap()", "(then).cap()" };
-			Assert.That(choice.text, Is.EqualTo("(dog).cap() | (then).cap()"));
+			expected = new[] { "(dog).Cap()", "(then).Cap()" };
+			Assert.That(choice.text, Is.EqualTo("((dog).Cap() | (then).Cap())"));
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
 			Assert.That(choice.options, Is.EqualTo(expected));
 		}
@@ -95,15 +93,41 @@ namespace Dialogic
 			Choice choice;
 			string[] expected;
 			string text;
-
-			/* FAILING - see #96
+            
 			text = "you ($miss1 | $miss2.Cap() | ok) blah";
             choice = Choice.Parse(text, c, false)[0];
 			expected = new[] { "$miss1", "$miss2.Cap()", "ok" };
 			Assert.That(choice.text, Is.EqualTo("($miss1 | $miss2.Cap() | ok)"));
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
+            Assert.That(choice.options, Is.EqualTo(expected));         
+
+			text = "you (a |) blah";
+            choice = Choice.Parse(text, c, false)[0];
+            expected = new[] { "a", "" };
+            Assert.That(choice.text, Is.EqualTo("(a |)"));
+            Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
             Assert.That(choice.options, Is.EqualTo(expected));
-            */
+
+			text = "you (hello|) blah";
+            choice = Choice.Parse(text, c, false)[0];
+			expected = new[] { "hello", "" };
+			Assert.That(choice.text, Is.EqualTo("(hello|)"));
+            Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
+            Assert.That(choice.options, Is.EqualTo(expected));
+
+			text = "you (hello|hello) blah";
+            choice = Choice.Parse(text, c, false)[0];
+            expected = new[] { "hello", };
+            Assert.That(choice.text, Is.EqualTo("(hello|hello)"));
+            Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
+            Assert.That(choice.options, Is.EqualTo(expected));
+
+			text = "you (hello|hello|) blah";
+            choice = Choice.Parse(text, c, false)[0];
+            expected = new[] { "hello", "" };
+			Assert.That(choice.text, Is.EqualTo("(hello|hello|)"));
+            Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
+            Assert.That(choice.options, Is.EqualTo(expected));
 
 			text = "you ($miss1 | $miss2) blah";
 			choice = Choice.Parse(text, c, false)[0];
@@ -263,12 +287,7 @@ namespace Dialogic
 		[Test]
 		public void BindWithMissingSymbol()
 		{
-			//var c = CreateParentChat("c");
-			var txt = "CHAT c1\nSET a = $object | $object | honk\nSAY $a";
-			//var res = new Resolver(null).Bind(txt, c, null);
-			//Console.WriteLine("GOT: "+res);
-			//Assert.That(res, Is.EqualTo("cats"));
-
+			var txt = "CHAT c1\nSET a = $object | $object.Call() | honk\nSAY $a";
 			ChatRuntime rt = new ChatRuntime();
 			rt.ParseText(txt);
 			//Resolver.DBUG = true;
@@ -276,8 +295,8 @@ namespace Dialogic
 			for (int i = 0; i < 5; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
-				Console.WriteLine(s);
-				Assert.That(s.IsOneOf(new[] { "$object", "honk" }));
+				//Console.WriteLine(s);
+				Assert.That(s.IsOneOf(new[] { "$object", "$object.Call()", "honk" }));
 			}
 		}
 
@@ -303,5 +322,7 @@ namespace Dialogic
 			res = new Resolver(null).Bind("(hello world | hello world).Capitalize()", c, null);
 			Assert.That(res, Is.EqualTo("Hello world"));
 		}
+
+
 	}
 }

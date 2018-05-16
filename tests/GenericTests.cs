@@ -24,6 +24,8 @@ namespace Dialogic
         [SetUp]
         public void Init()
         {
+			Resolver.DBUG = false;
+
             globals = new Dictionary<string, object>
             {
                 { "obj-prop", "dog" },

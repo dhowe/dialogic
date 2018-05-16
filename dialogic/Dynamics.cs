@@ -302,8 +302,8 @@ namespace Dialogic
 					expr = full.Substring(oidx + 1, cidx - oidx - 1);
 				}
 
-				if (RE.HasParens.IsMatch(expr)) throw new Exception
-					("INVALID STATE"); //Parse(expr, results, context);
+				//if (RE.HasParens.IsMatch(expr)) throw new Exception
+					//("INVALID STATE"); //Parse(expr, results, context);
 
 				if (CacheEnabled(context))
 				{

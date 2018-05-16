@@ -13,9 +13,6 @@
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Program.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
   </ItemGroup>
 </Project>

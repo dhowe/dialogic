@@ -14,15 +14,11 @@
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="coverlet.msbuild" Version="1.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="BindingTests.cs" />
-    <Compile Remove="EventTests.cs" />
   </ItemGroup>
 </Project>

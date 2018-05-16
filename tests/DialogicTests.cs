@@ -7,25 +7,7 @@ namespace Dialogic
 {
 	[TestFixture]
 	public class DialogicTests : GenericTests
-	{
-		[Test]
-		public void NextChoiceTest()
-		{
-			var txt = "CHAT c1\nSET A=Its better to ((smile|laugh) well |" 
-				+ " look happy)) than to think well.\nSAY $A";
-			ChatRuntime rt = new ChatRuntime();
-			rt.ParseText(txt);
-            
-			rt["c1"].Resolve(null);         
-            for (int i = 0; i < 10; i++)
-            {
-                var s = rt.InvokeImmediate(globals);
-                //Console.WriteLine(i + ":" + s);
-				Assert.That(s.StartsWith("Its better to", Util.IC));
-				Assert.That(s.EndsWith("than to think well.", Util.IC));
-            }          
-		}
-
+	{      
 		//[Test]
         public void AngerFortunes()
         {
@@ -53,7 +35,7 @@ namespace Dialogic
                 string[] sents = s.Split(new[] { "?", "." }, opts);
                 Console.WriteLine(i + "(" + sents.Length + "): " + s);
             }
-        }
+        }      
 
 		//[Test]
 		public void AmusementFortunes()
@@ -72,7 +54,7 @@ namespace Dialogic
 			//string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
 			//foreach (var k in keys) Console.WriteLine(k + ":" + chat.scope[k]);
 
-			Console.WriteLine();
+			//Console.WriteLine();
 
 			//Resolver.DBUG = true;
 			for (int i = 0; i < 15; i++)
