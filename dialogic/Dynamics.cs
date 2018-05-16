@@ -149,7 +149,7 @@ namespace Dialogic
 
 		private static object BestGuess(object caller, string methodName)
 		{
-			return caller + "." + methodName + "&lpar;&rpar;";
+			return caller + "." + methodName + "()";
 		}
 
 		private static TransformException BadTransform
@@ -286,7 +286,7 @@ namespace Dialogic
 			if (!input.Contains(Ch.OR)) return;
 
 			// OPT: Cache the entire match?
-			foreach (Match m in RE.MatchParens.Matches(input))
+			foreach (Match m in RE.ParseChoices.Matches(input))
 			{
 				if (showMatch) Util.ShowMatch(m);
 
@@ -483,7 +483,7 @@ namespace Dialogic
 
 		public static void Parse(List<Symbol> symbols, string text, Chat context)
 		{
-			var matches = RE.ParseVars.Matches(text);
+			var matches = RE.ParseSymbols.Matches(text);
 
 			foreach (Match match in matches)
 			{
@@ -727,7 +727,7 @@ namespace Dialogic
 
 		public static void Parse(List<Transform> tforms, string text, Chat context)
 		{
-			var matches = RE.ParseTrans.Matches(text);
+			var matches = RE.ParseTransforms.Matches(text);
 
 			foreach (Match match in matches)
 			{

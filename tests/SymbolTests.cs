@@ -29,6 +29,7 @@ namespace Dialogic
             Assert.That(res, Is.EqualTo("Hello Fred"));
         }
 
+
 		[Test]
 		public void SymbolTraversalWithAlias()
 		{

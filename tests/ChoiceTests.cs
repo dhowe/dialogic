@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 
 namespace Dialogic
@@ -8,15 +9,94 @@ namespace Dialogic
 	class ChoiceTests : GenericTests
 	{
 		[Test]
-		public void ChoiceParseTests()
+		public void ATransformWithinAChoice()
+		{
+			// WORKING HERE: 
+			// See: https://stackoverflow.com/questions/50358674/c-sharp-regex-for-negated-character-class-unless-chars-are-next-to-one-another
+			var txt = "CHAT c1\nSET a = A ($animal.cap() | $prep.cap())\nSAY $a";
+			ChatRuntime rt = new ChatRuntime();
+			rt.ParseText(txt);
+			Resolver.DBUG = true;
+			rt.strictMode = false;
+			for (int i = 0; i < 1; i++)
+			{
+				var s = rt.InvokeImmediate(globals);
+				Console.WriteLine(s);
+				Assert.That(s.IsOneOf(new[] { "Dog", "Then" }));
+			}
+		}
+
+		public void _TestParseGroup(Regex re, string text, string expected, int num = -1)
+		{
+			var match = re.Match(text);
+			//Util.ShowMatch(match);
+			//Assert.That(match.Groups[0].Value, Is.EqualTo("((dog).cap() | (then).cap())"));
+			if (num >= 0) Console.WriteLine(num + ") " + text + " => '" + match.Groups[1].Value+"'");
+			Assert.That(match.Groups[1].Value, Is.EqualTo(expected));
+		}
+
+		[Test]
+		public void TestNewChoice()
+		{
+			//var re = new Regex(@"\(++\)");
+			var PRN = new Regex(@"\(((?:(?:[^()]|\([^|]*?\))*?\|(?:[^()]|\([^|]*?\))*?))\)");
+			//var PRN = new Regex(@"\(((?:(?:[^()]|\(\))*\|(?:[^()]|\(\))*))\)");
+			string[] tests = {
+				"x ((a).b() | (b).c()) y", "(a).b() | (b).c()",
+				"x (a|b) y", "a|b",
+				"x (a|b|c) y", "a|b|c",
+				"x (a|a.b()|c) y", "a|a.b()|c",
+				"x (a.b()|b.c()) y", "a.b()|b.c()",
+				"x (a.b()|b.c()|c) y", "a.b()|b.c()|c",
+				"x (a|b.c()|c.d()) y", "a|b.c()|c.d()",
+				"x (a|(b.c()|d)) y", "b.c()|d",
+
+				"x () y", "",
+				"x (a) y", "",
+				"x (a.b()) y", "",
+				"x (a|a.b(a)|c) y", "(a|a.b(a)|c)"
+			};
+			//var re = new Regex(@"\(((?:[^()]|\(\))+\|(?:[^()]|\(\))+)\)");
+			//var re = new Regex(@"\(((?:[^()]|\(\))+)\)");
+
+			for (int i = 0; i < tests.Length; i += 2)
+			{
+				_TestParseGroup(PRN, tests[i], tests[i + 1], i / 2);
+			}
+			_TestParseGroup(PRN, "((dog).cap() | (then).cap())", "(dog).cap() | (then).cap()",tests.Length/2);
+			////text = "(dog | cat)";
+			//var match = re.Match(text);
+			// Util.ShowMatch(match);
+			//Assert.That(match.Groups[0].Value, Is.EqualTo("((dog).cap() | (then).cap())"));
+			//Assert.That(match.Groups[1].Value, Is.EqualTo("(dog).cap() | (then).cap()"));
+		}
+
+
+		[Test]
+		public void ParseNestedChoice()
 		{
 			Chat c = CreateParentChat("c");
-
 			Choice choice;
 			string[] expected;
 			string text;
 
-            /* FAILING - see #96
+			text = "((dog).cap() | (then).cap())";
+			choice = Choice.Parse(text, c, false)[0];
+			expected = new[] { "(dog).cap()", "(then).cap()" };
+			Assert.That(choice.text, Is.EqualTo("(dog).cap() | (then).cap()"));
+			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
+			Assert.That(choice.options, Is.EqualTo(expected));
+		}
+
+		[Test]
+		public void ChoiceParseTests()
+		{
+			Chat c = CreateParentChat("c");
+			Choice choice;
+			string[] expected;
+			string text;
+
+			/* FAILING - see #96
 			text = "you ($miss1 | $miss2.Cap() | ok) blah";
             choice = Choice.Parse(text, c, false)[0];
 			expected = new[] { "$miss1", "$miss2.Cap()", "ok" };
@@ -26,11 +106,11 @@ namespace Dialogic
             */
 
 			text = "you ($miss1 | $miss2) blah";
-            choice = Choice.Parse(text, c, false)[0];
+			choice = Choice.Parse(text, c, false)[0];
 			expected = new[] { "$miss1", "$miss2" };
 			Assert.That(choice.text, Is.EqualTo("($miss1 | $miss2)"));
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
-            Assert.That(choice.options, Is.EqualTo(expected));
+			Assert.That(choice.options, Is.EqualTo(expected));
 
 			text = "you(a | b) a ";
 			choice = Choice.Parse(text, c, false)[0];
@@ -39,9 +119,9 @@ namespace Dialogic
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
 			Assert.That(choice.options, Is.EqualTo(expected));
 			//CollectionAssert.Contains(expected, choice.Resolve());
-                     
+
 			text = "you (a | b).ToUpper() and ...";
-            choice = Choice.Parse(text, c, false)[0];
+			choice = Choice.Parse(text, c, false)[0];
 			expected = new[] { "a", "b" };
 			Assert.That(choice.text, Is.EqualTo("(a | b).ToUpper()"));
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
@@ -50,7 +130,7 @@ namespace Dialogic
 			////CollectionAssert.Contains(new[] { "A", "B" }, choice.Resolve());
 
 			text = "you (a|b) are";
-            choice = Choice.Parse(text, c, false)[0];
+			choice = Choice.Parse(text, c, false)[0];
 			expected = new[] { "a", "b" };
 			Assert.That(choice.text, Is.EqualTo("(a|b)"));
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
@@ -58,7 +138,7 @@ namespace Dialogic
 			//CollectionAssert.Contains(expected, choice.Resolve());
 
 			text = "you (a|b).ToUpper() are";
-            choice = Choice.Parse(text, c, false)[0];
+			choice = Choice.Parse(text, c, false)[0];
 			expected = new[] { "a", "b" };
 			Assert.That(choice.text, Is.EqualTo("(a|b).ToUpper()"));
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
@@ -184,7 +264,7 @@ namespace Dialogic
 		public void BindWithMissingSymbol()
 		{
 			//var c = CreateParentChat("c");
-			var txt = "CHAT c1\nSET a = $object | $object | honk\nSAY $a";         
+			var txt = "CHAT c1\nSET a = $object | $object | honk\nSAY $a";
 			//var res = new Resolver(null).Bind(txt, c, null);
 			//Console.WriteLine("GOT: "+res);
 			//Assert.That(res, Is.EqualTo("cats"));
@@ -193,14 +273,14 @@ namespace Dialogic
 			rt.ParseText(txt);
 			//Resolver.DBUG = true;
 			rt.strictMode = false;
-            for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
-                Console.WriteLine(s);
+				Console.WriteLine(s);
 				Assert.That(s.IsOneOf(new[] { "$object", "honk" }));
-			}         
+			}
 		}
-			
+
 		[Test]
 		public void BindChoicesTest()
 		{

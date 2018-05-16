@@ -67,8 +67,7 @@ namespace Dialogic
 
 			if (DBUG) Console.WriteLine("Result(post): " + text + "\n");
 
-			return text;         
-             
+			return text;
         }
 
 		private void HandleFailure(ref string text, Chat context, IDictionary<string, object> globals)
@@ -76,11 +75,10 @@ namespace Dialogic
 			if (text.Contains(Ch.SYMBOL) || text.Contains(Ch.LABEL))
 			{
 				ParseSymbols(text, context);
-
-
+                            
 				if (symbols.Any(s => !s.transforms.IsNullOrEmpty()))
 				{
-				    text = text.Replace("()", "&lpar;&rpar;");
+				    text = text.Replace("()", "&lpar;&rpar;"); // needed?
 				}
 
 				symbols[0].OnBindSymbolError(symbols[0].name, globals);
@@ -97,16 +95,16 @@ namespace Dialogic
             //text = text.Replace("(", string.Empty);
             //text = text.Replace(")", string.Empty);
                      
-            text = text.TrimFirst(' ');
+			// keep () to display unbound functions
+			text = text.Replace("()", "&lpar;&rpar;");
 
-			// replace literal quotation marks & extra grouping ops
-			text = RE.ResolvePost.Replace(text, string.Empty);
-
+			// replace literal quotes & grouping operators
+            text = RE.ResolvePost.Replace(text, string.Empty);
+            
             // replace multiple spaces with single
             text = RE.MultiSpace.Replace(text, " ");
 
-
-            return Entities.Decode(text);
+            return Entities.Decode(text.Trim());
         }
 
         ///// <summary>
@@ -137,7 +135,7 @@ namespace Dialogic
                     if (result.Contains(Ch.OR) && !(result.StartsWith(Ch.OGROUP) && result.EndsWith(Ch.CGROUP))) // remove?
                     {
                         result = Ch.OGROUP + result + Ch.CGROUP;
-						if (DBUG) Console.WriteLine("      ***PARS: " + result);
+						if (DBUG) Console.WriteLine("      parens: " + result);
                     }
                     text = symbol.Replace(text, result, globals);
 
@@ -167,19 +165,14 @@ namespace Dialogic
             {
                 if (DBUG) Console.WriteLine("  Choices(" + level + ") "+text);// + Info(text, context));
 
-                var original = text;
-
-                //if (!(text.Contains(Ch.OGROUP) && text.Contains(Ch.CGROUP)))
-                //{
-                //    text = Ch.OGROUP + text + Ch.CGROUP;
-                //    ChatRuntime.Warn("BindGroups added parens to: " + text);
-                //}
-
+                var original = text;            
                 ParseChoices(text, context);
-                if (DBUG) Console.WriteLine("    Found: " + choices.Stringify());
+                
+				if (DBUG) Console.WriteLine("    Found: " + choices.Stringify());
+
                 foreach (var choice in choices)
                 {
-                    var result = choice.Resolve();
+					var result = choice.Resolve(); // TODO: combine replace/resolve
                     if (DBUG) Console.WriteLine("      " + choice + " -> " + result);
                     if (result != null) text = choice.Replace(text, result);
                 }
@@ -194,7 +187,7 @@ namespace Dialogic
         private string BindTransforms(string text, Chat context)
         {
             //if (DBUG) Console.WriteLine("  Transforms(" + level + ") " + text);
-            if (text.ContainsAny(Ch.OR, Ch.SYMBOL)) return text;
+            //if (text.ContainsAny(Ch.OR, Ch.SYMBOL)) return text; // remove?
 
             if (DBUG) Console.WriteLine("  Trans() " + text);
 
