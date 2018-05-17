@@ -81,17 +81,14 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:ae605b2cf7321b5d33b575018656b13e3"><td class="memItemLeft" align="right" valign="top"><a id="ae605b2cf7321b5d33b575018656b13e3"></a>
-static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>FindMeta</b> = new Regex(OP1 + OP2)</td></tr>
-<tr class="separator:ae605b2cf7321b5d33b575018656b13e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ada59f2eed36c20b0ca4cf3eff0fa74"><td class="memItemLeft" align="right" valign="top"><a id="a9ada59f2eed36c20b0ca4cf3eff0fa74"></a>
-static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseTransforms</b> = new Regex(@&quot;\(([^|$()]+)\)((\.[A-Za-z_-]+(?:\(\)))+)&quot;)</td></tr>
+static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseTransforms</b> = new Regex(@&quot;\(([^|$()]+)\)((\.[A-Za-z0-9_-]+(?:\(\)))+)&quot;)</td></tr>
 <tr class="separator:a9ada59f2eed36c20b0ca4cf3eff0fa74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace680790ceb139d9f842b1901a65efed"><td class="memItemLeft" align="right" valign="top"><a id="ace680790ceb139d9f842b1901a65efed"></a>
-static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseChoices</b> = new Regex(@&quot;(?:\[([^=]+)=)*&quot; + PRN + @&quot;\]?(?:\.(&quot; + SYM + @&quot;)\(\))*\]?&quot;)</td></tr>
+static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseChoices</b> = new Regex(@&quot;(?:\[([^=]+)=)*&quot; + PRN + @&quot;\]?(?:\.(&quot; +SYM + @&quot;)\(\))*\]?&quot;)</td></tr>
 <tr class="separator:ace680790ceb139d9f842b1901a65efed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3f5bab9d7bea829ce54230d4331fa1d"><td class="memItemLeft" align="right" valign="top"><a id="ae3f5bab9d7bea829ce54230d4331fa1d"></a>
-static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseSymbols</b> = new Regex(@&quot;(?:(\[)([^=]+)=)?\$(\{)?(?:([A-Za-z_][A-Za-z0-9_-]*)((?:\.(?:[A-Za-z_][A-Za-z0-9_-]*)(?:\(\))?)*))(\})?(\])?&quot;)</td></tr>
+static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseSymbols</b> = new Regex(@&quot;(?:(\[)([^=]+)=)?\$(?:(&quot; + SYM + @&quot;)((?:\.(?:&quot; + SYM + @&quot;)(?:\(\))?)*))(\])?&quot;)</td></tr>
 <tr class="separator:ae3f5bab9d7bea829ce54230d4331fa1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abda38bcaf821c211051898564b4d095e"><td class="memItemLeft" align="right" valign="top"><a id="abda38bcaf821c211051898564b4d095e"></a>
 static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>SplitOr</b> = new Regex(@&quot;\s*\|\s*&quot;)</td></tr>
@@ -117,6 +114,9 @@ static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>MultiComment<
 <tr class="memitem:a3e2a463b1f628b0b39ff592397cd32e6"><td class="memItemLeft" align="right" valign="top"><a id="a3e2a463b1f628b0b39ff592397cd32e6"></a>
 static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>ParseSetArgs</b> = new Regex(@&quot;(\$?[A-Za-z_][^ \+\|\=]*)\s*([\+\|]?=)\s*(.+)&quot;)</td></tr>
 <tr class="separator:a3e2a463b1f628b0b39ff592397cd32e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae605b2cf7321b5d33b575018656b13e3"><td class="memItemLeft" align="right" valign="top"><a id="ae605b2cf7321b5d33b575018656b13e3"></a>
+static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>FindMeta</b> = new Regex(@&quot;^(!?!?$?&quot; + SYM + @&quot;)\s*([!*$^=&lt;&gt;]?=|&lt;|&gt;)\s*(\S+)$&quot;)</td></tr>
+<tr class="separator:ae605b2cf7321b5d33b575018656b13e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6c168462e74ad4640ae3d7e8789c256"><td class="memItemLeft" align="right" valign="top"><a id="ab6c168462e74ad4640ae3d7e8789c256"></a>
 static Regex&#160;</td><td class="memItemRight" valign="bottom"><b>TestTubeChatBaby</b> = new Regex(@&quot;^C[0-9]+$&quot;)</td></tr>
 <tr class="separator:ab6c168462e74ad4640ae3d7e8789c256"><td class="memSeparator" colspan="2">&#160;</td></tr>
