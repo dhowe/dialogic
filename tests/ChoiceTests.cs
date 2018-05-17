@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 
@@ -9,10 +10,22 @@ namespace Dialogic
 	class ChoiceTests : GenericTests
 	{
 		[Test]
+		public void ChoiceHangIssue()
+		{
+			var txt = "((amusemen).emoadj().cap()(, (are we |aren't we|I gather)|)?)";
+			Chat c = CreateParentChat("c");   
+			List<Choice> choices = Choice.Parse(txt, c, false);
+			Assert.That(choices[0].text, Is.EqualTo("(are we |aren't we|I gather)"));
+
+            // same with unbalanced parens
+			txt = "((((amusemen).emoadj().cap()(, (are we |aren't we|I gather)|)?)";
+            choices = Choice.Parse(txt, c, false);
+            Assert.That(choices[0].text, Is.EqualTo("(are we |aren't we|I gather)"));
+		}
+
+		[Test]
 		public void ATransformWithinAChoice()
 		{
-			// WORKING HERE: 
-			// See: https://stackoverflow.com/questions/50358674/c-sharp-regex-for-negated-character-class-unless-chars-are-next-to-one-another
 			var txt = "CHAT c1\nSET a = a ($animal.Cap() | $prep.Cap())\nSAY $a";
 			ChatRuntime rt = new ChatRuntime();
 			rt.ParseText(txt);
@@ -21,7 +34,6 @@ namespace Dialogic
 			for (int i = 0; i < 1; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
-				Console.WriteLine(s);
 				Assert.That(s.IsOneOf(new[] { "a Dog", "a Then" }));
 			}
 		}
@@ -34,16 +46,10 @@ namespace Dialogic
 			//if (num >= 0) Console.WriteLine(num + ") " + text + " => '" + match.Groups[1].Value + "'");
 			Assert.That(match.Groups[1].Value, Is.EqualTo(expected));
 		}
-
-
-
+      
 		[Test]
 		public void TestNewChoice()
-		{
-			//var re = new Regex(@"\(++\)");
-			//var PRN = new Regex(@"\(((?:(?:[^()]|\([^|]*?\))*?\|(?:[^()]|\([^|]*?\))*?))\)");
-			//var PRN = new Regex(@"\(((?:(?:[^()]|\(\))*\|(?:[^()]|\(\))*))\)");
-
+		{         
 			var PRN = new Regex(RE.PRN);
 			string[] tests = {
 				"x (a|) y", "a|",
@@ -279,25 +285,86 @@ namespace Dialogic
 			Assert.That(choice.options.Length, Is.EqualTo(expected.Length));
 			Assert.That(choice.alias, Is.EqualTo("selected"));
 			Assert.That(choice.options, Is.EqualTo(expected));
-			//CollectionAssert.Contains(new[] { "an A", "a B", "a C" }, choice.Resolve());
-			//Assert.That(c.scope.ContainsKey("selected"), Is.True);
-			//c.scope.Remove("selected");
 		}
 
 		[Test]
-		public void BindWithMissingSymbol()
+        public void ParseChoices()
+        {
+            Chat c = CreateParentChat("c");
+            List<Choice> choices;
+            Choice choice;
+
+            choices = Choice.Parse("you (a | b | c) a", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(a | b | c)"));
+            Assert.That(choice.options.Count, Is.EqualTo(3));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b", "c" }));
+
+
+            choices = Choice.Parse("you (a | (b | c)) a", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(b | c)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "b", "c" }));
+
+            choices = Choice.Parse("you (then | (a | b))", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(a | b)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
+
+            choices = Choice.Parse("you ((a | b) | then) a", c, false);
+            choice = choices[0];
+            Assert.That(choices.Count, Is.EqualTo(1));
+            Assert.That(choice.text, Is.EqualTo("(a | b)"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
+        }
+
+		[Test]
+        public void ResolveGroupsWithAlias()
+        {
+            ChatRuntime rt;
+            string s;
+
+            //Resolver.DBUG = true;
+            (rt = new ChatRuntime()).ParseText("CHAT c1\n(a | (b | c))", true);
+            rt["c1"].Resolve(null);
+            s = rt["c1"].commands[0].Text();
+            Assert.That(s, Is.EqualTo("a").Or.EqualTo("b").Or.EqualTo("c"));
+
+            (rt = new ChatRuntime()).ParseText("CHAT c2\n[d=(a | b)] $d", true);
+            rt["c2"].Resolve(null);
+            s = rt["c2"].commands[0].Text();
+            Assert.That(s, Is.EqualTo("a a").Or.EqualTo("b b"));
+
+            //chat = ChatParser.ParseText("CHAT c3\n[d=(a | (b | c))] $d", true)[0];
+            //chat.Realize(globals);
+            (rt = new ChatRuntime()).ParseText("CHAT c3\n[d=(a | (b | c))] $d", true);
+            rt["c3"].Resolve(null);
+            s = rt["c3"].commands[0].Text();
+            Assert.That(s, Is.EqualTo("a a").Or.EqualTo("b b").Or.EqualTo("c c"));
+        }
+
+		[Test]
+		public void GroupsWithMissingSymbol()
 		{
 			var txt = "CHAT c1\nSET a = $object | $object.Call() | honk\nSAY $a";
 			ChatRuntime rt = new ChatRuntime();
 			rt.ParseText(txt);
 			//Resolver.DBUG = true;
 			rt.strictMode = false;
+			ChatRuntime.SILENT = true;
 			for (int i = 0; i < 5; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
 				//Console.WriteLine(s);
 				Assert.That(s.IsOneOf(new[] { "$object", "$object.Call()", "honk" }));
 			}
+			ChatRuntime.SILENT = false;
 		}
 
 		[Test]

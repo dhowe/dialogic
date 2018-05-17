@@ -152,7 +152,8 @@ namespace Dialogic
 
 		//internal const string PRN = @"\(([^\(\)]+)\)";
 		//internal const string PRN = @"\(((?:[^()]|\(\))+)\)";
-		internal const string PRN = @"(?:\()((?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*)(?:\))(?(p)(?!))(?(pipe)|(?!))";
+		//internal const string PRN = @"(?:\()((?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*)(?:\))(?(p)(?!))(?(pipe)|(?!))";
+		internal const string PRN = @"(?:\()((?>(?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*))(?:\))(?(p)(?!))(?(pipe)|(?!))";
 
 		public static Regex ParseTransforms = new Regex(@"\(([^|$()]+)\)((\.[A-Za-z_-]+(?:\(\)))+)");      
 		//public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*\(([^\(\)]+)\)\]?(?:\.(" + SYM + @")\(\))*\]?"); // OK
