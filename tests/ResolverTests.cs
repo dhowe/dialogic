@@ -16,7 +16,7 @@ namespace Dialogic
             Say say;
             Chat chat;
 
-            txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.pluralize()";
+            txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.Pluralize()";
             rt = new ChatRuntime();
             rt.ParseText(txt);
             chat = rt.Chats().First();
@@ -34,7 +34,7 @@ namespace Dialogic
             Assert.That(say.Text(), Is.EqualTo("A cat cat"));
 
 
-            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=${thing1}], many $save.pluralize()";
+            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=$thing1], many $save.Pluralize()";
             rt = new ChatRuntime();
             rt.ParseText(txt);
             chat = rt.Chats().First();
@@ -61,11 +61,11 @@ namespace Dialogic
         {
             var c = CreateParentChat("c");
 
-            var res = new Resolver(null).Bind("$a.pluralize()", c,
+            var res = new Resolver(null).Bind("$a.Pluralize()", c,
                 new Dictionary<string, object>() { { "a", "cat" } });
             Assert.That(res, Is.EqualTo("cats"));
 
-            res = new Resolver(null).Bind("$a.pluralize().articlize()", c,
+            res = new Resolver(null).Bind("$a.Pluralize().articlize()", c,
                 new Dictionary<string, object>() { { "a", "ant" } });
             Assert.That(res, Is.EqualTo("an ants"));
         }
@@ -223,7 +223,7 @@ namespace Dialogic
         [Test]
         public void InvokeTransformTest()
         {
-            Assert.That(Methods.InvokeTransform("cat", "pluralize"), Is.EqualTo("cats"));
+            Assert.That(Methods.InvokeTransform("cat", "Pluralize"), Is.EqualTo("cats"));
         }
 
         [Test]

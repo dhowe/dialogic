@@ -11,6 +11,25 @@ namespace Dialogic
 	public class RuntimeTests : GenericTests
 	{
 		[Test]
+        public void PreloadingTests()
+        {
+            string[] lines = new[] {
+                "CHAT c1",
+                "SET ab = hello",
+                "SAY $ab $de",
+
+                "CHAT c2 {preload=true}",
+                "SET $de = preload",
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines), true);
+            rt.Preload(globals);
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello preload"));
+        }
+
+		[Test]
 		public void StalenessEventTest()
 		{
 			string[] lines = {
@@ -47,27 +66,7 @@ namespace Dialogic
 			Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
 		}
 
-		[Test]
-		public void PreloadingTests()
-		{
-			string[] lines = new[] {
-				"CHAT c1",
-				"SET ab = hello",
-				"SAY $ab $de",
 
-				"CHAT c2 {preload=true}",
-				"SET $de = preload",
-			};
-			ChatRuntime rt = new ChatRuntime();
-			rt.ParseText(String.Join("\n", lines), true);
-			rt.Preload(globals);
-
-			//rt["c1"].Resolve(globals);
-			var s = rt.InvokeImmediate(globals);
-			Assert.That(s, Is.EqualTo("hello preload"));
-			//chat = (Chat) .Resolve(globals);
-			//Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
-		}
 
 
 		[Test]

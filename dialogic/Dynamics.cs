@@ -408,28 +408,6 @@ namespace Dialogic
 			return transforms.ToArray();
 		}
 
-		//internal string HandleTransforms(string resolved)
-		//{
-		//	if (transforms == null) return resolved;
-
-		//	transforms.ForEach(trans =>
-		//	{
-		//		try
-		//		{
-		//			//Console.Write("      Choice.Transform: " + trans + " in=" + resolved);
-		//			resolved = Methods.Invoke(resolved, trans, null).Stringify();
-		//			//Console.WriteLine(" out=" + resolved);
-		//		}
-		//		catch (UnboundFunction e)
-		//		{
-		//			if (IsStrictMode(context)) throw e;
-		//			resolved += (Ch.SCOPE + trans + Ch.OGROUP) + Ch.CGROUP;
-		//		}
-		//	});
-
-		//	return resolved;
-		//}
-
 		private void HandleAlias(object resolved, Chat ctx)
 		{
 			var scope = ctx != null ? ctx.scope : null;
@@ -451,21 +429,19 @@ namespace Dialogic
 	{
 		public string alias, name;
 		public List<string> transforms;
-		public bool bounded;
 
 		private Symbol(Chat context, Match m) : this(context, m.Groups) { }
 
 		private Symbol(Chat context, GroupCollection parts) : base(context)
 		{
-			if (parts.Count != 8) throw new BindException("Unable to parse");
+			if (parts.Count != 6) throw new BindException("Unable to parse");
 
 			this.text = parts[0].Value;
-			this.alias = (parts[1].Value == "[" && parts[7].Value == "]"
+			this.alias = (parts[1].Value == "[" && parts[5].Value == "]"
 				&& !parts[2].Value.IsNullOrEmpty()) ? parts[2].Value : null;
-			this.bounded = (parts[3].Value == "{" && parts[6].Value == "}");
-			this.name = parts[4].Value;
+			this.name = parts[3].Value;
 
-			ParseTransforms(parts[5]);
+			ParseTransforms(parts[4]);
 		}
 
 		public override string ToString()
@@ -475,7 +451,7 @@ namespace Dialogic
 
 		internal string Name()
 		{
-			return Ch.SYMBOL + (bounded ? "{" + name + '}' : name);
+			return Ch.SYMBOL + name; 
 		}
 
 		public static void Parse(List<Symbol> symbols, string text, Chat context)
@@ -483,7 +459,7 @@ namespace Dialogic
 			var matches = RE.ParseSymbols.Matches(text);
 
 			foreach (Match match in matches)
-			{
+			{				    
 				// Create a new Symbol and add it to the result
 				symbols.Add(new Symbol(context, match));
 			}
@@ -502,12 +478,7 @@ namespace Dialogic
 			transforms.ForEach(t => s += '.' + t);
 			return s;
 		}
-
-		//internal string Resolve(IDictionary<string, object> globals)
-		//{
-		//	return Resolve(null, globals);
-		//}
-
+      
 		/*
          * resolved is NOT string
          *     with transforms (take1):  do GetViaPath as is, then convert to string and return
@@ -576,7 +547,8 @@ namespace Dialogic
 					if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
 						replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
 
-					if (bounded)
+					reText = Name();
+					/*if (bounded)
 					{
 						// replace the whole thing with resolved+transforms                  
 						reText = text;
@@ -585,7 +557,7 @@ namespace Dialogic
 					else {
 						// leave the transforms in place
                         reText = Name();
-					}
+					}*/
 				}
 				else if (transforms.IsNullOrEmpty() && alias != null)   // C
 				{
@@ -601,15 +573,24 @@ namespace Dialogic
 					replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP + TransformText();
 				}
 
-				if (bounded) // handle bounded variables (disabled)
+                // before replacing, make sure groups are properly bounded
+				if (replaceWith.Contains(Ch.OR) && !replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
+                {
+					replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
+                }
+
+				// Here we handle [$bounded] variables, which don't require regex replacement
+				if (!alias.IsNullOrEmpty())
 				{
-					//Console.WriteLine("\nB: full=" + full + " toReplace=" + reText + " replaceWith=" + replaceWith + " text=" + text);
+					//Console.WriteLine("\nB: full=" + full + " toReplace=" + reText 
+					//  + " replaceWith=" + replaceWith + " text=" + text);
 					full = full.Replace(reText, replaceWith);
 				}
 				else
 				{
 					replaceRE = new Regex(Regex.Escape(reText) + @"(?![A-Za-z_-])");               
-					//Console.WriteLine("C: full=" + full + " toReplace=/" + reText + "/ replaceWith=" + replaceWith + " text=" + text);                    
+					//Console.WriteLine("C: full=" + full + " toReplace=/" + reText
+					//  + "/ replaceWith=" + replaceWith + " text=" + text);                    
 					full = replaceRE.Replace(full, replaceWith);               
 				}
 			}
@@ -625,7 +606,6 @@ namespace Dialogic
 				{
 					//Console.WriteLine("      Symbol.Push: $" + alias + "=" + resolved);
 					scope[alias] = resolved;
-					this.alias = null; // done with the alias
 				}
 			}
 		}

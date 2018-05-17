@@ -145,12 +145,9 @@ namespace Dialogic
 	/// </summary>
 	public static class RE
 	{
-		internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";
-		internal const string PRN = @"(?:\()((?>(?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*))(?:\))(?(p)(?!))(?(pipe)|(?!))";
-
 		public static Regex ParseTransforms = new Regex(@"\(([^|$()]+)\)((\.[A-Za-z0-9_-]+(?:\(\)))+)");
-		public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*" + PRN + @"\]?(?:\.(" + SYM + @")\(\))*\]?");
-		public static Regex ParseSymbols = new Regex(@"(?:(\[)([^=]+)=)?\$(\{)?(?:(" + SYM + @")((?:\.(?:" + SYM + @")(?:\(\))?)*))(\})?(\])?");
+		public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*" + PRN + @"\]?(?:\.(" +SYM + @")\(\))*\]?");
+		public static Regex ParseSymbols = new Regex(@"(?:(\[)([^=]+)=)?\$(?:(" + SYM + @")((?:\.(?:" + SYM + @")(?:\(\))?)*))(\])?");
 
 		public static Regex SplitOr = new Regex(@"\s*\|\s*");
 		public static Regex HasParens = new Regex(@"[\(\)]");
@@ -164,11 +161,13 @@ namespace Dialogic
 		public static Regex TestTubeChatBaby = new Regex(@"^C[0-9]+$");
 		public static Regex MultiSpace = new Regex(@"\s+");
 		public static Regex ResolvePost = new Regex(@"[()""]");
-
+              
 		internal const string MTD = @"(?:\{(.+?)\})?\s*";
 		internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
 		internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
-		internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
+		internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";      
+        internal const string PRN = @"(?:\()((?>(?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*))(?:\))(?(p)(?!))(?(pipe)|(?!))";
+		internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";      
 	}
 
 	/// <summary>

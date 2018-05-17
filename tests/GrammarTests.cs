@@ -260,14 +260,14 @@ namespace Dialogic
 			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
 			Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
 
-			// global-bounded
-			lines = new[] {
-				"CHAT c1",
-				"SAY ${fish.name}",
-			};
-			text = String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
-			Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
+			//// global-bounded
+			//lines = new[] {
+			//	"CHAT c1",
+			//	"SAY ${fish.name}",
+			//};
+			//text = String.Join("\n", lines);
+			//chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			//Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
 
 			// global-nested
 			lines = new[] {
@@ -278,14 +278,14 @@ namespace Dialogic
 			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
 			Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
-			// global-nested-bounded
-			lines = new[] {
-				"CHAT c1",
-				"SAY ${fish.flipper.speed}",
-			};
-			text = String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
-			Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
+			//// global-nested-bounded
+			//lines = new[] {
+			//	"CHAT c1",
+			//	"SAY ${fish.flipper.speed}",
+			//};
+			//text = String.Join("\n", lines);
+			//chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			//Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
 			// cross-chat-global
 			lines = new[] {
@@ -509,19 +509,19 @@ namespace Dialogic
 							 Or.EqualTo("A girl Jill Jill."));
 
 
-			lines = new[] {
-				"SET hero = (Jane | Jill)",
-				"SAY A girl [selected=${hero}]&nbsp;",
-				"SAY $selected."
-			};
-			runtime = new ChatRuntime();
-			runtime.ParseText(string.Join("\n", lines));
-			chat = runtime.Chats()[0];
-			Assert.That(chat, Is.Not.Null);
-			chat.Resolve(null);
-			res = chat.commands[1].Text() + chat.commands[2].Text();
-			Assert.That(res, Is.EqualTo("A girl Jane Jane.").
-							 Or.EqualTo("A girl Jill Jill."));
+			//lines = new[] {
+			//	"SET hero = (Jane | Jill)",
+			//	"SAY A girl [selected=${hero}]&nbsp;",
+			//	"SAY $selected."
+			//};
+			//runtime = new ChatRuntime();
+			//runtime.ParseText(string.Join("\n", lines));
+			//chat = runtime.Chats()[0];
+			//Assert.That(chat, Is.Not.Null);
+			//chat.Resolve(null);
+			//res = chat.commands[1].Text() + chat.commands[2].Text();
+			//Assert.That(res, Is.EqualTo("A girl Jane Jane.").
+							 //Or.EqualTo("A girl Jill Jill."));
 
 			lines = new[] {
 				"SET hero = (Jane | Jill)",
@@ -537,19 +537,19 @@ namespace Dialogic
 			Assert.That(res, Is.EqualTo("A girl Jane Jane.").
 										 Or.EqualTo("A girl Jill Jill."));
 
-			lines = new[] {
-				"SET hero = (Jane | Jill)",
-				"SAY A girl [selected=${hero}] ${selected}."
-			};
+			//lines = new[] {
+			//	"SET hero = (Jane | Jill)",
+			//	"SAY A girl [selected=${hero}] ${selected}."
+			//};
 
-			runtime = new ChatRuntime();
-			runtime.ParseText(string.Join("\n", lines));
-			chat = runtime.Chats()[0];
-			Assert.That(chat, Is.Not.Null);
-			chat.Resolve(null);
-			res = chat.commands[1].Text();// + chat.commands[2].Text();
-			Assert.That(res, Is.EqualTo("A girl Jane Jane.").
-									 Or.EqualTo("A girl Jill Jill."));
+			//runtime = new ChatRuntime();
+			//runtime.ParseText(string.Join("\n", lines));
+			//chat = runtime.Chats()[0];
+			//Assert.That(chat, Is.Not.Null);
+			//chat.Resolve(null);
+			//res = chat.commands[1].Text();// + chat.commands[2].Text();
+			//Assert.That(res, Is.EqualTo("A girl Jane Jane.").
+									 //Or.EqualTo("A girl Jill Jill."));
 		}
 
 		[Test]
@@ -954,18 +954,18 @@ namespace Dialogic
 			cmd = runtime.Chats().Last().commands.Last();
 			Assert.That(cmd.Text(), Is.EqualTo("c"));
 
-			lines = new[] {
-				"CHAT wine1 {noStart=true}",
-				"SET a = $b",
-				"SET b = c",
-				"SAY ${a}"
-			};
+			//lines = new[] {
+			//	"CHAT wine1 {noStart=true}",
+			//	"SET a = $b",
+			//	"SET b = c",
+			//	"SAY ${a}"
+			//};
 
-			runtime = new ChatRuntime(Tendar.AppConfig.Actors);
-			runtime.ParseText(string.Join("\n", lines), false);
-			runtime.Chats().ForEach(c => c.Resolve(null));
-			cmd = runtime.Chats().Last().commands.Last();
-			Assert.That(cmd.Text(), Is.EqualTo("c"));
+			//runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+			//runtime.ParseText(string.Join("\n", lines), false);
+			//runtime.Chats().ForEach(c => c.Resolve(null));
+			//cmd = runtime.Chats().Last().commands.Last();
+			//Assert.That(cmd.Text(), Is.EqualTo("c"));
 		}
 
 		[Test]
