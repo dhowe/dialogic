@@ -13,47 +13,51 @@ namespace Dialogic
 	{
 		static ISerializer serializer = new SerializerMessagePack();
 
-		//[Test]
+		static bool RUN_PROFILING_TESTS = false;
+
+		[Test]
 		public void SerializationPerformance()
 		{
+			if (!RUN_PROFILING_TESTS) return;
+
 			ChatRuntime.DISABLE_UNIQUE_CHAT_LABELS = true;
 
 			ChatRuntime rtOut, rtIn;
-            byte[] bytes = null;
-            int iterations = 10;
+			byte[] bytes = null;
+			int iterations = 10;
 
-            var testfile = AppDomain.CurrentDomain.BaseDirectory;
-            testfile += "../../../../dialogic/data/allchats.gs";
+			var testfile = AppDomain.CurrentDomain.BaseDirectory;
+			testfile += "../../../../dialogic/data/allchats.gs";
 
-            rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
+			rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            for (int i = 0; i < iterations; i++)
-            {
-                rtIn.ParseFile(new FileInfo(testfile));
-            }
-            var numChats = rtIn.Chats().Count;
-            watch.Stop(); Console.WriteLine("Parsed " + numChats 
-                + " chats in " + watch.ElapsedMilliseconds / 1000.0 + "s");
-                     
-            for (int i = 0; i < iterations; i++)
-            {
-                watch = System.Diagnostics.Stopwatch.StartNew();
-                bytes = serializer.ToBytes(rtIn);
-                watch.Stop();
-                Console.WriteLine("Serialize #" + i + ": " 
-                    + watch.ElapsedMilliseconds / 1000.0 + "s");
-            }
+			var watch = System.Diagnostics.Stopwatch.StartNew();
+			for (int i = 0; i < iterations; i++)
+			{
+				rtIn.ParseFile(new FileInfo(testfile));
+			}
+			var numChats = rtIn.Chats().Count;
+			watch.Stop(); Console.WriteLine("Parsed " + numChats
+				+ " chats in " + watch.ElapsedMilliseconds / 1000.0 + "s");
 
-            for (int i = 0; i < iterations; i++)
-            {
-                watch = System.Diagnostics.Stopwatch.StartNew();
-                rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
-                watch.Stop(); Console.WriteLine("Deserialize #" + i + ": " 
-                    + watch.ElapsedMilliseconds / 1000.0 + "s");
-            }
-        }      
-   
+			for (int i = 0; i < iterations; i++)
+			{
+				watch = System.Diagnostics.Stopwatch.StartNew();
+				bytes = serializer.ToBytes(rtIn);
+				watch.Stop();
+				Console.WriteLine("Serialize #" + i + ": "
+					+ watch.ElapsedMilliseconds / 1000.0 + "s");
+			}
+
+			for (int i = 0; i < iterations; i++)
+			{
+				watch = System.Diagnostics.Stopwatch.StartNew();
+				rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
+				watch.Stop(); Console.WriteLine("Deserialize #" + i + ": "
+					+ watch.ElapsedMilliseconds / 1000.0 + "s");
+			}
+		}
+
 		[Test]
 		public void SaveRestoreChat()
 		{
@@ -223,7 +227,7 @@ namespace Dialogic
 			s = rt.InvokeImmediate(null);
 			Assert.That(s, Is.EqualTo("Find\nAdded"));
 		}
-              
+
 		// Pass instance to ChatRuntime serialization methods
 		private class SerializerMessagePack : ISerializer
 		{
