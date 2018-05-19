@@ -67,7 +67,8 @@ namespace Dialogic
             return DEFAULT_PLURAL.fire(word);
         }
         
-		public static bool Contains(string v)//@cond hidden
+		//@cond hidden
+		internal static bool Contains(string v)
         {
             return Transforms.Instance.lookup.ContainsKey(v);
 		}//@endcond
