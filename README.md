@@ -118,10 +118,10 @@ SAY $hero liked living in $home.
 
 ### Transformations
 
-Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include pluralize(), articlize(), and [others](http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html), which can be called from scripts as follows:
+Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include Pluralize(), Articlize(), and [others](http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html), which can be called from scripts as follows:
 
 ````
-ASK How many (tooth | menu | child).pluralize() do you have?
+ASK How many (tooth | menu | child).Pluralize() do you have?
 ````
 
 which will result in one of the following: 
@@ -135,7 +135,7 @@ How many children do you have?
 OR 
 
 ````
-SAY Are you (dog | cat | ant).articlize()?
+SAY Are you (dog | cat | ant).Articlize()?
 ````
 
 which gives: 
@@ -149,7 +149,12 @@ Are you an ant?
 You can also use transforms on variables:
 ````
 SET choices = (tooth | menu | child)
-ASK How many $choices.pluralize() do you have?
+ASK How many $choices.Pluralize() do you have?
+````
+
+Or on parenthesized words or phrases
+````
+ASK How many (octopus).pluralize() do you have?
 ````
 
 You can also use built-in C# string functions:
@@ -170,13 +175,13 @@ ASK How many $choices.pluralize().ToUpper() do you have?
 Coders can also add custom transforms as follows, which can then be called from Dialogic scripts:
 
 ```
-chatRuntime.AddTransform("transformName", transformFunction);
+chatRuntime.AddTransform("MyTrans", MyTransform);
 ```
 
-Transform functions should be static functions that take and return string, as follows:
+Transform functions should be static functions that take and return a string, as follows:
 
 ````
-public static string transformFunction(string str) { ... }
+public static string MyTransform(string str) { ... }
 ````
 
 &nbsp;
@@ -205,7 +210,7 @@ SAY Where was I? Oh, yes
 
 
 ### Special Characters
-As in most scripting languages, certain charactes have special meaning in Dialogic scripts. These include the following: !, #, }, {, ", =, etc. If you need to use these characters in your scripts, you can use [HTML entities](https://dev.w3.org/html5/html-author/charref), which will be replaced in Dialogic's output. 
+As in most scripting languages, certain charactes have special meaning in Dialogic scripts. These include the following: !, #, }, {, ", =, etc. If you need to use these characters in your scripts, you can use [HTML entities](https://dev.w3.org/html5/html-author/charref), which will be replaced in Dialogic's output. This also applies to leading and trailing spaces and multiple consecutive spaces, for which you can use the &nbsp; entity.
 
 ````
 CHAT TestSpecial
@@ -251,7 +256,7 @@ The application calls the runtime's Update() function each frame, passing the cu
 
 
 ### Serialization
-The Dialogic system can be paused and resumed, with state saved to a file or an array of bytes. The specific serialization package is up to you (we generally use [MessagePack](https://github.com/neuecc/MessagePack-CSharp)), but other options can be used, as long as they can implement the [ISerializer](http://rednoise.org/dialogic/interface_dialogic_1_1_i_serializer.html) interface. In the example below, current state is saved to a file, then reloaded into a new ChatRuntime.
+The Dialogic system can be paused and resumed, with state saved to a file or an array of bytes. The specific serialization package is up to you (we generally use [MessagePack](https://github.com/neuecc/MessagePack-CSharp)), but other options can be used, as long as they  implement the [ISerializer](http://rednoise.org/dialogic/interface_dialogic_1_1_i_serializer.html) interface. In the example below, current state is saved to a file, then reloaded into a new ChatRuntime.
 
 ```C#
 
@@ -278,7 +283,7 @@ rt2.Run();
 
 1. Clone this respository to your local file system ```` $ git clone https://github.com/dhowe/dialogic.git````
 
-1. From Visual Studio(7.3.3) do Menu->File->Open, then select dialogic.sln from the top-level of the cloned dir
+1. From Visual Studio 2017 do Menu->File->Open, then select dialogic.sln from the top-level of the cloned dir
 
 1. The solution should open with 3-4 sub-projects, as in the image below. 
 
