@@ -16,6 +16,8 @@ namespace Dialogic
 		//[Test]
 		public void SerializationPerformance()
 		{
+			ChatRuntime.DISABLE_UNIQUE_CHAT_LABELS = true;
+
 			ChatRuntime rtOut, rtIn;
             byte[] bytes = null;
             int iterations = 10;

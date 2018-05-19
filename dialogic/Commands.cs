@@ -368,7 +368,7 @@ namespace Dialogic
 
 				if (globals.ContainsKey(path[0])) // global objects
 				{
-					if (!SetPathValue(globals[path[0]], path, value, globals))
+					if (!SetPathValue(globals[path[0]], path, value))
 					{
 						throw new BindException("Failed to update global: " + text);
 					}
@@ -413,8 +413,7 @@ namespace Dialogic
 			return resolved; // nothing to return here
 		}
 
-		internal static bool SetPathValue(object parent, string[] paths, object val,
-			IDictionary<string, object> globals)
+		internal static bool SetPathValue(object parent, string[] paths, object val)
 		{
 			if (parent == null) throw new BindException("null parent");
 
