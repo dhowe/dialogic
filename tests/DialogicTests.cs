@@ -74,7 +74,7 @@ namespace Dialogic
 
             var symbol = Symbol.Parse("$fish.name = Mary", c1)[0];
 
-            Set.SetPathValue(globals["fish"], new[] { "fish", "name" }, "Mary", globals);
+            Set.SetPathValue(globals["fish"], new[] { "fish", "name" }, "Mary");
 
             result = Symbol.Parse("you $fish.name?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("Mary"));

@@ -179,14 +179,16 @@ namespace Dialogic
 
 		internal static double INFINITE = -1;
 		internal static string LABEL_IDENT = "#";
-
+		internal static DateTime EPOCH = new DateTime(1970, 1, 1, 0, 0, 0);
+			
 		private static int start;
 		private static Random random;
 
 		static Util()
-		{
-			start = EpochMs();
+		{         
+			start = EpochMs();         
 			random = new Random();
+			// TODO: redo timing w' stopwatch
 		}
 
 		/// <summary>
@@ -312,6 +314,15 @@ namespace Dialogic
 		{
 			return Environment.TickCount & Int32.MaxValue;
 		}
+
+		/// <summary>
+        /// Returns the number of nanoseconds elapsed since epoch start
+        /// </summary>
+		/// <returns>The nanoseconds</returns>
+		public static long EpochNs()
+        {
+			return (long)((DateTime.UtcNow - EPOCH).TotalMilliseconds * 1000000.0);
+        }
 
 		/// <summary>
 		/// Returns a random item from the array
