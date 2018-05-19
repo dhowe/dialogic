@@ -52,7 +52,7 @@ OPT No Thanks
 
 If the user selects the first option, Dialogic jumps to the CHAT named "Game1". If not, the CHAT continues.
 
-&nbsp;
+
 
 ### Generative Elements
 
@@ -114,7 +114,7 @@ SAY $hero lived in $home.
 SAY $hero liked living in $home.
 ````
 
-&nbsp;
+
 
 ### Transformations
 
@@ -184,7 +184,7 @@ Transform functions should be static functions that take and return a string, as
 public static string MyTransform(string str) { ... }
 ````
 
-&nbsp;
+
 
 
 ### Interruption / Smoothing
@@ -206,7 +206,7 @@ CHAT Smooth2 {noStart=true}
 SAY Where was I? Oh, yes
 ````
 
-&nbsp;
+
 
 
 ### Special Characters
@@ -222,7 +222,7 @@ which will output:
 # is usually a label
 ````
 
-&nbsp;
+
 
 ### Integrating Dialogic
 
@@ -252,7 +252,7 @@ The application calls the runtime's Update() function each frame, passing the cu
  }
 ````
 
-&nbsp;
+
 
 
 ### Serialization
@@ -275,7 +275,7 @@ rt2.Run();
 
 ```
 
-&nbsp;
+
 
 
 
