@@ -446,7 +446,7 @@ namespace Dialogic
                 ("Invalid chat name: " + c.text);
 
             if (chats.ContainsKey(c.text)) throw new ParseException
-                ("Duplicate chat names: " + c.text);
+				("Duplicate chat names: " + c.text);
 
             chats.Add(c.text, c);
         }

@@ -158,6 +158,7 @@ namespace Dialogic
 
             if (c is Chat) // add chat to runtime list
             {
+				c.text += Util.Millis();
                 runtime.AddChat((Chat)c);
                 return;
             }
