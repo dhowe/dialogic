@@ -36,7 +36,7 @@ namespace Dialogic
         /// </summary>
         public static string Quotify(string str)
         {
-            return "\"" + str + "\"";
+			return "&quot;" + str + "&quot;";
         }
 
         /// <summary>
@@ -66,11 +66,11 @@ namespace Dialogic
 
             return DEFAULT_PLURAL.fire(word);
         }
-
-		public static bool Contains(string v)
+        
+		public static bool Contains(string v)//@cond hidden
         {
             return Transforms.Instance.lookup.ContainsKey(v);
-        }
+		}//@endcond
 
         // --------------------------------------------------------------------
 

@@ -146,7 +146,7 @@ namespace Dialogic
 	public static class RE
 	{
 		public static Regex ParseTransforms = new Regex(@"\(([^|$()]+)\)((\.[A-Za-z0-9_-]+(?:\(\)))+)");
-		public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*" + PRN + @"\]?(?:\.(" +SYM + @")\(\))*\]?");
+		public static Regex ParseChoices = new Regex(@"(?:\[([^=]+)=)*" + PRN + @"\]?(?:\.(" + SYM + @")\(\))*\]?");
 		public static Regex ParseSymbols = new Regex(@"(?:(\[)([^=]+)=)?\$(?:(" + SYM + @")((?:\.(?:" + SYM + @")(?:\(\))?)*))(\])?");
 
 		public static Regex SplitOr = new Regex(@"\s*\|\s*");
@@ -161,13 +161,13 @@ namespace Dialogic
 		public static Regex TestTubeChatBaby = new Regex(@"^C[0-9]+$");
 		public static Regex MultiSpace = new Regex(@"\s+");
 		public static Regex ResolvePost = new Regex(@"[()""]");
-              
+
 		internal const string MTD = @"(?:\{(.+?)\})?\s*";
 		internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
 		internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
-		internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";      
-        internal const string PRN = @"(?:\()((?>(?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*))(?:\))(?(p)(?!))(?(pipe)|(?!))";
-		internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";      
+		internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
+		internal const string PRN = @"(?:\()((?>(?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*))(?:\))(?(p)(?!))(?(pipe)|(?!))";
+		internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";
 	}
 
 	/// <summary>
@@ -180,13 +180,13 @@ namespace Dialogic
 		internal static double INFINITE = -1;
 		internal static string LABEL_IDENT = "#";
 		internal static DateTime EPOCH = new DateTime(1970, 1, 1, 0, 0, 0);
-			
+
 		private static int start;
 		private static Random random;
 
 		static Util()
-		{         
-			start = EpochMs();         
+		{
+			start = EpochMs();
 			random = new Random();
 			// TODO: redo timing w' stopwatch
 		}
@@ -316,13 +316,13 @@ namespace Dialogic
 		}
 
 		/// <summary>
-        /// Returns the number of nanoseconds elapsed since epoch start
-        /// </summary>
+		/// Returns the number of nanoseconds elapsed since epoch start
+		/// </summary>
 		/// <returns>The nanoseconds</returns>
 		public static long EpochNs()
-        {
+		{
 			return (long)((DateTime.UtcNow - EPOCH).TotalMilliseconds * 1000000.0);
-        }
+		}
 
 		/// <summary>
 		/// Returns a random item from the array
@@ -808,6 +808,30 @@ namespace Dialogic
 
 	public static class Entities
 	{
+		private static readonly IDictionary<string, string> ESCAPES
+		    = new Dictionary<string, string>() // replace with C# native?
+            {
+    			{"\"",     "quot"},
+    			{"$",      "dollar"},
+    			{"{",      "lcub"},
+    			{"}",      "rcub"},
+    			{"(",      "lpar"},
+    			{")",      "rpar"},
+    			{"&",      "amp"},
+    			{"!",      "excl"},
+    			{"©",      "copy"},
+    			{"'",      "apos"},
+    			{"#",      "num"},
+    			{"<",      "lt"},
+    			{">",      "gt"},
+    			{" ",      "nbsp"},
+    			{"®",      "reg"},
+    			{"™",      "tm"},
+    			{"|",      "vert"},
+    			{"*",      "ast"},
+    			{":",      "colon"}
+    	    };
+
 		private static int MIN_ESCAPE = 2, MAX_ESCAPE = 6;
 
 		static Entities()
@@ -915,30 +939,6 @@ namespace Dialogic
 		}
 
 		private static ILookup<string, string> LOOKUP;
-
-		private static readonly IDictionary<string, string> ESCAPES
-			= new Dictionary<string, string>() // replace with C# native?
-        {
-			{"\"",     "quot"},
-			{"$",      "dollar"},
-			{"{",      "lcub"},
-			{"}",      "rcub"},
-			{"(",      "lpar"},
-			{")",      "rpar"},
-			{"&",      "amp"},
-			{"!",      "excl"},
-			{"©",      "copy"},
-			{"'",      "apos"},
-			{"#",      "num"},
-			{"<",      "lt"},
-			{">",      "gt"},
-			{" ",      "nbsp"},
-			{"®",      "reg"},
-			{"™",      "tm"},
-			{"|",      "vert"},
-			{"*",      "ast"},
-			{":",      "colon"}
-		};
 	}
 
 	// adapted from:
