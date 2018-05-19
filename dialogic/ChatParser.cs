@@ -19,14 +19,13 @@ namespace Dialogic
 
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
+		private ChatRuntime runtime;
         private Regex lineParser;
-
-        protected ChatRuntime runtime;
-        protected Stack<Command> parsedCommands;
-
+		private Chat activeChat;
+		private Ask lastAsk;
+              
         internal ChatParser(ChatRuntime runtime)
         {
-            this.parsedCommands = new Stack<Command>();
             this.runtime = runtime;
         }
 
@@ -111,22 +110,22 @@ namespace Dialogic
             }
         }
 
-        private Chat ActiveChat()
-        {
-            // Note: can be null if this is the first command
-            return ((Chat)LastOfType(parsedCommands, typeof(Chat)));
-        }
+   //     private Chat ActiveChat()
+   //     {
+   //       // Note: can be null if this is the first command
+			//return active;//((Chat)LastOfType(parsedCommands, typeof(Chat)));
+        //}
 
         internal Command CreateCommand(LineContext lc)
         {
             Type type = lc.command.Length > 0 ? runtime.typeMap[lc.command]
-                    : Chat.DefaultCommandType(ActiveChat());
+                : Chat.DefaultCommandType(activeChat);
             
             Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
             c.lineContext = lc;
-
-            HandleActor(lc.actor, c, lc.line, lc.lineNo);
-            HandleCommand(c, lc.line, lc.lineNo);
+            
+			HandleActor(c, lc.actor);
+            HandleCommand(c);
             RunValidators(c);
 
             return c;
@@ -137,7 +136,7 @@ namespace Dialogic
             return meta.IsNullOrEmpty() ? null : RE.MetaSplit.Split(meta);
         }
 
-        private void HandleActor(string spkr, Command c, string line, int lineNo)
+		private void HandleActor(Command c, string spkr)
         {
             c.SetActor(Actor.Default);
 
@@ -146,39 +145,39 @@ namespace Dialogic
                 c.SetActor(runtime, spkr);
 
                 if (c.actor == null) throw new ParseException
-                    (line, lineNo, "Unknown actor: '" + spkr + "'");
+                    ("Unknown actor: '" + spkr + "'");
 
-                if (!Equals(c.actor, Actor.Default)) c.SetMeta(Meta.ACTOR, c.actor.Name());
+				if (!Equals(c.actor, Actor.Default))
+				{
+					c.SetMeta(Meta.ACTOR, c.actor.Name());
+				}
             }
         }
 
-        internal void HandleCommand(Command c, string line, int lineNo)
+        internal void HandleCommand(Command c)
         {
-            parsedCommands.Push(c);
-
             if (c is Chat) // add chat to runtime list
             {
-				c.text += Util.Millis();
-                runtime.AddChat((Chat)c);
+				activeChat = (Chat)c;            
+				runtime.AddChat(activeChat);
                 return;
             }
 
-            if (runtime.Chats().Count == 0) CreateDefaultChat();
+			if (runtime.chats.Count == 0) CreateDefaultChat();
 
-            if (c is Opt) // add option data to last Ask
-            {
-                Opt opt = (Opt)c;
-
-                Command last = LastOfType(parsedCommands, typeof(Ask));
-
-                if (!(last is Ask)) throw new ParseException
-                    (line, lineNo, "OPT must follow ASK");
-
-                ((Ask)last).AddOption(opt);
-            }
+			// add option data to last Ask
+			if (c is Opt)
+			{
+				lastAsk.AddOption((Opt)c);
+				//Opt opt = (Opt)c;            
+                //Command last = LastOfType(parsedCommands, typeof(Ask));
+                //if (!(last is Ask)) throw new ParseException
+                //(line, lineNo, "OPT must follow ASK");
+			}
             else  // add command to last Chat
             {
-                ActiveChat().AddCommand(c);
+				if (c is Ask) lastAsk = (Ask)c;
+				activeChat.AddCommand(c);
             }
         }
 
@@ -237,21 +236,22 @@ namespace Dialogic
             }
         }
 
-        private static Command LastOfType(Stack<Command> s, Type typeToFind)
-        {
-            foreach (Command c in s)
-            {
-                if (c.GetType() == typeToFind) return c;
-            }
-            return null;
-        }
+        //private static Command LastOfType(Stack<Command> s, Type typeToFind)
+        //{
+        //    foreach (Command c in s)
+        //    {
+        //        if (c.GetType() == typeToFind) return c;
+        //    }
+        //    return null;
+        //}
 
         private void CreateDefaultChat()
         {
             var c = Chat.Create("C" + Util.EpochMs());
             RunInternalValidators(c);
-            parsedCommands.Push(c);
+            //parsedCommands.Push(c);
             runtime.AddChat(c);
+			activeChat = c;
         }
     }
 

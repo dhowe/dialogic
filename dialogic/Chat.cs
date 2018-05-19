@@ -35,7 +35,7 @@ namespace Dialogic
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
             if (rt == null) rt = new ChatRuntime();
-            rt.Parser().HandleCommand(c, null, -1);
+            rt.Parser().HandleCommand(c);
             return c;
         }
 
@@ -241,7 +241,7 @@ namespace Dialogic
                 }
             }
 
-            return typeof(Say);
+            return typeof(Say); // the fallback default
         }
 
         public override string Text()
