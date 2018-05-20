@@ -89,7 +89,7 @@ namespace Dialogic
         [Test]
         public void SymbolBinding()
         {
-            Resolver.DBUG = true;
+            //Resolver.DBUG = true;
             ChatRuntime rt = new ChatRuntime();
             Chat c1 = rt.AddNewChat("c1");
             var res = rt.resolver.Bind("Hello $$recur", c1, globals);
