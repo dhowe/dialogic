@@ -164,8 +164,9 @@ namespace Dialogic
 
 		internal const string MTD = @"(?:\{(.+?)\})?\s*";
 		internal const string ACT = @"(?:([A-Za-z_][A-Za-z0-9_-]+):)?\s*";
-		internal const string TXT = @"((?:(?:[^$}{#])*(?:\$\{[^}]+\})*(?:\$[A-Za-z_][A-Za-z_0-9\-]*)*)*)";
+		internal const string TXT = @"((?:(?:[^$}{#])*(?:\$"+SYM+")*)*)";
 		internal const string LBL = @"((?:#[A-Za-z][\S]*)\s*|(?:#\(\s*[A-Za-z][^\|]*(?:\|\s*[A-Za-z][^\|]*)+\))\s*)?\s*";
+
 		internal const string PRN = @"(?:\()((?>(?:(?<p>\()|(?<-p>\))|[^()|]+|(?(p)(?!))(?<pipe>\|))*))(?:\))(?(p)(?!))(?(pipe)|(?!))";
 		internal const string SYM = "[A-Za-z_][A-Za-z0-9_-]*";
 	}

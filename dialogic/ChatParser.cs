@@ -110,12 +110,6 @@ namespace Dialogic
             }
         }
 
-   //     private Chat ActiveChat()
-   //     {
-   //       // Note: can be null if this is the first command
-			//return active;//((Chat)LastOfType(parsedCommands, typeof(Chat)));
-        //}
-
         internal Command CreateCommand(LineContext lc)
         {
             Type type = lc.command.Length > 0 ? runtime.typeMap[lc.command]

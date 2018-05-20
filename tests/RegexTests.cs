@@ -122,16 +122,16 @@ namespace Dialogic
 			match = regex.Match("a=$b{");
 			Assert.That(match.Value.Trim(), Is.EqualTo("a=$b"));
 
-			match = regex.Match("a=${b}");
-			Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
-			match = regex.Match("a=${b} {}");
-			Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
-			match = regex.Match("a=${b.c} {}");
-			Assert.That(match.Value.Trim(), Is.EqualTo("a=${b.c}"));
-			match = regex.Match("a=${b->c} {");
-			Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
-			match = regex.Match("a=${b->c} #");
-			Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
+			//match = regex.Match("a=${b}");
+			//Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
+			//match = regex.Match("a=${b} {}");
+			//Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
+			//match = regex.Match("a=${b.c} {}");
+			//Assert.That(match.Value.Trim(), Is.EqualTo("a=${b.c}"));
+			//match = regex.Match("a=${b->c} {");
+			//Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
+			//match = regex.Match("a=${b->c} #");
+			//Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
 
 			match = regex.Match("$a=$b");
 			//Util.ShowMatch(match);

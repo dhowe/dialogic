@@ -7,8 +7,49 @@ namespace Dialogic
 {
     [TestFixture]
     class SymbolTests : GenericTests
-    {            
-		[Test]
+    {
+        //[Test]
+        public void DynamicRules()
+        {
+            string[] lines;
+            ChatRuntime rt;
+            string s;
+
+            lines = new[] {
+                "CHAT c",
+                "SET $emo = anger",
+                "SAY ($emo)_rule"
+            };
+            rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("anger_rule"));
+
+            lines = new[] {
+                "CHAT c",
+                "SET $emo = anger",
+                "SAY $($emo)_rule"
+            };
+            rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("$anger_rule"));
+
+            lines = new[] {
+                "CHAT c",
+                "SET $emo = anger",
+                "SET start = $($emo)_rule",
+                "SET anger_rule = I am angry",
+                "SET happy_rule = I am happy",
+                "SAY $start"
+            };
+            rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("I am angry"));
+        }
+
+        [Test]
         public void SymbolTraversalSimple()
         {
             Resolver.DBUG = false;
@@ -17,97 +58,97 @@ namespace Dialogic
             var res = rt.resolver.Bind("Hello $fish.name", c1, globals);
             Assert.That(res, Is.EqualTo("Hello Fred"));
         }
-        
-		[Test]
+
+        [Test]
         public void BoundedVarSolutions()
         {
-			ChatRuntime rt;
-			string[] lines;
-			string s;
-                     
-			lines = new[] {
+            ChatRuntime rt;
+            string[] lines;
+            string s;
+
+            lines = new[] {
                 "CHAT c1",
                 "SET doop = bop",
                 "SET deep = beep",
                 "SAY [a=$deep][b=$doop]"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), true);
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
 
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("beepbop"));
-                        
-			lines = new[] {
+
+            lines = new[] {
                 "CHAT c1",
-				"SET doop = bop",
-				"SET deep = beep",
-				"SAY ($deep)-($doop)"
+                "SET doop = bop",
+                "SET deep = beep",
+                "SAY ($deep)-($doop)"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), true);
-   
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+
             s = rt.InvokeImmediate(globals);
-			Assert.That(s, Is.EqualTo("beep-bop"));
+            Assert.That(s, Is.EqualTo("beep-bop"));
 
 
-			lines = new[] {
+            lines = new[] {
                 "CHAT c1",
                 "SET doop = bop",
                 "SET deep = beep",
                 "SAY ($deep)($doop)"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), true);
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
 
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("beepbop"));
 
 
-			lines = new[] {
+            lines = new[] {
                 "CHAT c1",
                 "SET doop = bop",
                 "SET deep = beep",
                 "SAY [a=$deep]+[b=$doop]"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), true);
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
 
             s = rt.InvokeImmediate(globals);
-            Assert.That(s, Is.EqualTo("beep+bop"));         
+            Assert.That(s, Is.EqualTo("beep+bop"));
         }
 
-		[Test]
-		public void SymbolTraversalWithAlias()
-		{
-			Chat c1 = null;
-			List<Symbol> symbols;
-			string result, text;
+        [Test]
+        public void SymbolTraversalWithAlias()
+        {
+            Chat c1 = null;
+            List<Symbol> symbols;
+            string result, text;
 
             // one round of symbol parsing
-			text = "The [aly=$fish.Id()] $aly";
-			symbols = Symbol.Parse(text, c1);
+            text = "The [aly=$fish.Id()] $aly";
+            symbols = Symbol.Parse(text, c1);
             //Console.WriteLine(symbols.Stringify());
             Assert.That(symbols.Count, Is.EqualTo(2));
             result = symbols[0].Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("9"));
+            Assert.That(result.ToString(), Is.EqualTo("9"));
 
-			result = symbols[0].Replace(text, result, globals);
-			//Console.WriteLine("result="+result);
-			Assert.That(result.ToString(), Is.EqualTo("The 9 $aly"));
+            result = symbols[0].Replace(text, result, globals);
+            //Console.WriteLine("result="+result);
+            Assert.That(result.ToString(), Is.EqualTo("The 9 $aly"));
             Assert.That(globals["aly"], Is.EqualTo("9"));
 
 
-			// now try the full resolution
-			ChatRuntime rt = new ChatRuntime();
+            // now try the full resolution
+            ChatRuntime rt = new ChatRuntime();
             c1 = rt.AddNewChat("c1");
             var res = rt.resolver.Bind(text, c1, globals);
-			Assert.That(res, Is.EqualTo("The 9 9"));
-		}
+            Assert.That(res, Is.EqualTo("The 9 9"));
+        }
 
-		[Test]
+        [Test]
         public void SingleSymbolParsing()
         {
-            Chat c = CreateParentChat("c");        
+            Chat c = CreateParentChat("c");
 
             Symbol s = Symbol.Parse("$a", c)[0];
             Assert.That(s.text, Is.EqualTo("$a"));
@@ -116,7 +157,7 @@ namespace Dialogic
             //Assert.That(s.chatScoped, Is.EqualTo(false));
             Assert.That(s.ToString(), Is.EqualTo(s.text));
 
-			s = Symbol.Parse("[bb=$a]", c)[0];
+            s = Symbol.Parse("[bb=$a]", c)[0];
             Assert.That(s.text, Is.EqualTo("[bb=$a]"));
             Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.EqualTo("bb"));
@@ -148,7 +189,7 @@ namespace Dialogic
             Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
             //Assert.That(s.chatScoped, Is.EqualTo(false));
-         
+
             //s = Symbol.Parse("[bb=${a}]", c)[0];
             //Assert.That(s.text, Is.EqualTo("[bb=${a}]"));
             //Assert.That(s.name, Is.EqualTo("a"));
@@ -341,13 +382,13 @@ namespace Dialogic
                 ("$a" + t, c).First().name, Is.EqualTo("a"));
 
             //foreach (var t in ts) Assert.That(Symbol.Parse
-                //("${a}" + t, c).First().name, Is.EqualTo("a"));
+            //("${a}" + t, c).First().name, Is.EqualTo("a"));
 
             foreach (var t in ts) Assert.That(Symbol.Parse
                 ("[b=$a]" + t, c).First().name, Is.EqualTo("a"));
 
             //foreach (var t in ts) Assert.That(Symbol.Parse
-                //("[b=${a}]" + t, c).First().name, Is.EqualTo("a"));
+            //("[b=${a}]" + t, c).First().name, Is.EqualTo("a"));
 
             //Assert.That(Symbol.Parse("${a}", c).First().name, Is.EqualTo("a"));
             Assert.That(Symbol.Parse("[b=$a]", c).First().name, Is.EqualTo("a"));
@@ -374,8 +415,8 @@ namespace Dialogic
             //Assert.That(Symbol.Parse("${a.b}", c).First().transforms.ToArray(), Is.EqualTo(new[] { "b" }));
         }
 
-		[Test]
-		public void SymbolTraversalComplex()
+        [Test]
+        public void SymbolTraversalComplex()
         {
             object result;
             Chat c1 = null;
@@ -398,7 +439,7 @@ namespace Dialogic
             result = Symbol.Parse("you $fish.GetFlipper().ToString()?", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("1.1"));
 
-			var symbols = Symbol.Parse("The $fish.Id() $fish.name", c1);
+            var symbols = Symbol.Parse("The $fish.Id() $fish.name", c1);
             result = symbols[0].Resolve(globals) + symbols[1].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("9Fred"));
 
@@ -429,93 +470,93 @@ namespace Dialogic
             Assert.That(result.ToString(), Is.EqualTo("9"));*/
         }
 
-		[Test]
-		public void SymbolResolve()
-		{
-			string text;
-			string result;
-			Chat c1 = null;
-			Symbol sym;
+        [Test]
+        public void SymbolResolve()
+        {
+            string text;
+            string result;
+            Chat c1 = null;
+            Symbol sym;
 
-			//Symbol.DBUG = true;
+            //Symbol.DBUG = true;
 
-			text = "The $animal ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("dog"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The dog ran."));
+            text = "The $animal ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("dog"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The dog ran."));
 
-			text = "The $animal.cap() ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("dog"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
+            text = "The $animal.cap() ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("dog"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
 
-			text = "The ($animal).cap() ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("dog"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
+            text = "The ($animal).cap() ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("dog"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
 
-			text = "The $group ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("(a|b)"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The (a|b) ran."));
+            text = "The $group ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("(a|b)"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The (a|b) ran."));
 
-			text = "The $group.cap() ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("(a|b)"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The (a|b).cap() ran."));
+            text = "The $group.cap() ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("(a|b)"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The (a|b).cap() ran."));
 
-			text = "The [selected=$group].cap() ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("(a|b)"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The [selected=(a|b)].cap() ran."));
-			Assert.That(globals.ContainsKey("selected"), Is.False);
+            text = "The [selected=$group].cap() ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("(a|b)"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The [selected=(a|b)].cap() ran."));
+            Assert.That(globals.ContainsKey("selected"), Is.False);
 
-			text = "The [selected=$animal] ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("dog"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The dog ran."));
-			Assert.That(globals["selected"], Is.EqualTo("dog"));
+            text = "The [selected=$animal] ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("dog"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The dog ran."));
+            Assert.That(globals["selected"], Is.EqualTo("dog"));
 
-			text = "The [selected=$animal].cap() ran.";
-			sym = Symbol.Parse(text, c1)[0]; // note: incorrect use of Transform
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("dog"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The dog.cap() ran."));
-			Assert.That(globals["selected"], Is.EqualTo("dog"));
+            text = "The [selected=$animal].cap() ran.";
+            sym = Symbol.Parse(text, c1)[0]; // note: incorrect use of Transform
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("dog"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The dog.cap() ran."));
+            Assert.That(globals["selected"], Is.EqualTo("dog"));
 
-			text = "The ([selected=$animal]).cap() ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("dog"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
-			Assert.That(globals["selected"], Is.EqualTo("dog"));
+            text = "The ([selected=$animal]).cap() ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("dog"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
+            Assert.That(globals["selected"], Is.EqualTo("dog"));
 
-			text = "The [selected=$animal.cap()] ran.";
-			sym = Symbol.Parse(text, c1)[0];
-			result = sym.Resolve(globals);
-			Assert.That(result.ToString(), Is.EqualTo("dog"));
-			result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
-			Assert.That(globals["selected"], Is.EqualTo("dog"));
-		}
+            text = "The [selected=$animal.cap()] ran.";
+            sym = Symbol.Parse(text, c1)[0];
+            result = sym.Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("dog"));
+            result = sym.Replace(text, result, globals);
+            Assert.That(result.ToString(), Is.EqualTo("The (dog).cap() ran."));
+            Assert.That(globals["selected"], Is.EqualTo("dog"));
+        }
 
-		/*[Test]
+        /*[Test]
         public void SymbolResolveBound()
         {
 			// Same tests as above WITH bounded vars
@@ -604,35 +645,35 @@ namespace Dialogic
             Assert.That(globals["selected"], Is.EqualTo("dog")); 
         }*/
 
-		[Test]
-		public void SymbolResolveComplex()
-		{
+        [Test]
+        public void SymbolResolveComplex()
+        {
             string text;
             string result;
             Chat c1 = null;
             Symbol sym;
 
-			text = "The $cmplx ran.";
+            text = "The $cmplx ran.";
             sym = Symbol.Parse(text, c1)[0];
             result = sym.Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("($group | $prep)"));
             result = sym.Replace(text, result, globals);
             Assert.That(result.ToString(), Is.EqualTo("The ($group | $prep) ran."));
-            
+
             text = "The $cmplx.cap() ran.";
-			sym = Symbol.Parse(text, c1)[0];
+            sym = Symbol.Parse(text, c1)[0];
             result = sym.Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("($group | $prep)"));
             result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The ($group | $prep).cap() ran."));
+            Assert.That(result.ToString(), Is.EqualTo("The ($group | $prep).cap() ran."));
 
             text = "The [selected=$cmplx.cap()] ran.";
-			sym = Symbol.Parse(text, c1)[0];
+            sym = Symbol.Parse(text, c1)[0];
             result = sym.Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("($group | $prep)"));
             result = sym.Replace(text, result, globals);
-			Assert.That(result.ToString(), Is.EqualTo("The [selected=($group | $prep).cap()] ran."));       
-		}
+            Assert.That(result.ToString(), Is.EqualTo("The [selected=($group | $prep).cap()] ran."));
+        }
 
     }
 }

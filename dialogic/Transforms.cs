@@ -23,10 +23,10 @@ namespace Dialogic
             return ("aeiou".Contains(str.ToLower()[0]) ? "an " : "a ") + str;
         }
 
-		/// <summary>
-		/// Capitalizes the first character.
-		/// </summary>
-		public static string Capitalize(string str)
+        /// <summary>
+        /// Capitalizes the first character.
+        /// </summary>
+        public static string Capitalize(string str)
         {
             return char.ToUpper(str[0]) + str.Substring(1);
         }
@@ -36,17 +36,21 @@ namespace Dialogic
         /// </summary>
         public static string Quotify(string str)
         {
-			return "&quot;" + str + "&quot;";
+            return "&quot;" + str + "&quot;";
         }
 
         /// <summary>
-        /// Pluralizes a single word according to english regular/irregular rules.
+        /// Pluralizes the word according to english regular/irregular rules.
+        /// If multiple words are supplied, only the last will be pluralized.
         /// </summary>
         public static string Pluralize(string word)
         {
-            if (word.Contains(' ')) throw new TransformException
-                ("pluralize accepts only single words");
-                
+            return word.Contains(' ') ? string.Join(' ', 
+                PluralizePhrase(word.Split(' '))) : PluralizeWord(word);
+        }
+
+        private static string PluralizeWord(string word)
+        {
             RegexRule[] rules = PLURAL_RULES;
 
             var lword = word.ToLower();
@@ -66,12 +70,18 @@ namespace Dialogic
 
             return DEFAULT_PLURAL.fire(word);
         }
-        
-		//@cond hidden
-		internal static bool Contains(string v)
+
+        private static string[] PluralizePhrase(string[] v)
+        {
+            v[v.Length - 1] = PluralizeWord(v[v.Length - 1]);
+            return v;
+        }
+
+        //@cond hidden
+        internal static bool Contains(string v)
         {
             return Transforms.Instance.lookup.ContainsKey(v);
-		}//@endcond
+        }//@endcond
 
         // --------------------------------------------------------------------
 
@@ -79,10 +89,10 @@ namespace Dialogic
         {
             lookup = new ConcurrentDictionary<string, Func<string, string>>();
 
-            lookup.TryAdd("Pluralize",  Pluralize);
-            lookup.TryAdd("Articlize",  Articlize);
+            lookup.TryAdd("Pluralize", Pluralize);
+            lookup.TryAdd("Articlize", Articlize);
             lookup.TryAdd("Capitalize", Capitalize);
-            lookup.TryAdd("Quotify",    Quotify);         
+            lookup.TryAdd("Quotify", Quotify);
             lookup.TryAdd("An", Articlize);
             lookup.TryAdd("Cap", Capitalize);
         }
@@ -90,7 +100,7 @@ namespace Dialogic
         private static readonly Lazy<Transforms> lazy =
             new Lazy<Transforms>(() => new Transforms());
 
-		private readonly ConcurrentDictionary<string, Func<string, string>> lookup;
+        private readonly ConcurrentDictionary<string, Func<string, string>> lookup;
 
         internal static void Add(string name, Func<string, string> value)
         {

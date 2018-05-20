@@ -7,6 +7,16 @@ namespace Dialogic
     [TestFixture]
     public class ParserTests : GenericTests
     {
+        //[Test]
+        public void DynamicSymbolTest()
+        {
+            var chat = ChatParser.ParseText("CHAT c1\nSAY $($a)", NO_VALIDATORS)[0];
+            //Console.WriteLine(chat.ToTree());
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Say)));
+            Assert.That(chat.commands[0].text, Is.EqualTo("$($a)"));
+        }
+
         [Test]
         public void ASimpleTest()
         {

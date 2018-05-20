@@ -59,6 +59,13 @@ namespace Dialogic
 			Assert.That(result.ToString(), Is.EqualTo("(a Then)"));
 		}
 
+        [Test]
+        public void TestPluralizePhrase()
+        {
+            Assert.That(Transforms.Pluralize("coffee cup"), Is.EqualTo("coffee cups"));
+            Assert.That(Transforms.Pluralize("front tooth"), Is.EqualTo("front teeth"));
+        }
+
 		[Test]
         public void TestPluralize()
         {
