@@ -8,12 +8,14 @@ namespace Dialogic
     [TestFixture]
     class SymbolTests : GenericTests
     {
-        //[Test]
+        [Test]
         public void DynamicRules()
         {
             string[] lines;
             ChatRuntime rt;
             string s;
+
+            Resolver.DBUG = false;
 
             lines = new[] {
                 "CHAT c",
@@ -27,12 +29,38 @@ namespace Dialogic
 
             lines = new[] {
                 "CHAT c",
+                "SET $emo = a|a",
+                "SAY $$emo"
+            };
+            rt = new ChatRuntime();
+            rt.strictMode = false;
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("A"));
+
+            lines = new[] {
+                "CHAT c",
+                "SET $emo = a|a",
+                "SAY $($emo)."
+            };
+            rt = new ChatRuntime();
+            rt.strictMode = false;
+            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("A."));
+
+            lines = new[] {
+                "CHAT c",
                 "SET $emo = anger",
                 "SAY $($emo)_rule"
             };
+
             rt = new ChatRuntime();
+            rt.strictMode = false;
             rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            ChatRuntime.SILENT = true;
             s = rt.InvokeImmediate(globals);
+            ChatRuntime.SILENT = false;
             Assert.That(s, Is.EqualTo("$anger_rule"));
 
             lines = new[] {
@@ -48,7 +76,6 @@ namespace Dialogic
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("I am angry"));
         }
-
         [Test]
         public void SymbolTraversalSimple()
         {
@@ -57,6 +84,16 @@ namespace Dialogic
             Chat c1 = rt.AddNewChat("c1");
             var res = rt.resolver.Bind("Hello $fish.name", c1, globals);
             Assert.That(res, Is.EqualTo("Hello Fred"));
+        }
+
+        [Test]
+        public void SymbolBinding()
+        {
+            Resolver.DBUG = true;
+            ChatRuntime rt = new ChatRuntime();
+            Chat c1 = rt.AddNewChat("c1");
+            var res = rt.resolver.Bind("Hello $$recur", c1, globals);
+            Assert.That(res, Is.EqualTo("Hello A"));
         }
 
         [Test]
@@ -148,9 +185,24 @@ namespace Dialogic
         [Test]
         public void SingleSymbolParsing()
         {
+            Symbol s;
             Chat c = CreateParentChat("c");
 
-            Symbol s = Symbol.Parse("$a", c)[0];
+            s = Symbol.Parse("$$a", c)[0];
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.name, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            //Assert.That(s.chatScoped, Is.EqualTo(false));
+            Assert.That(s.ToString(), Is.EqualTo(s.text));
+
+            s = Symbol.Parse("$a]", c)[0];
+            Assert.That(s.text, Is.EqualTo("$a"));
+            Assert.That(s.name, Is.EqualTo("a"));
+            Assert.That(s.alias, Is.Null);
+            //Assert.That(s.chatScoped, Is.EqualTo(false));
+            Assert.That(s.ToString(), Is.EqualTo(s.text));
+
+            s = Symbol.Parse("$a", c)[0];
             Assert.That(s.text, Is.EqualTo("$a"));
             Assert.That(s.name, Is.EqualTo("a"));
             Assert.That(s.alias, Is.Null);
@@ -234,6 +286,26 @@ namespace Dialogic
         {
             object result;
             Chat c1 = null;
+
+            /*
+                { "obj-prop", "dog" },
+                { "animal", "dog" },
+                { "prep", "then" },
+                { "group", "(a|b)" },
+                { "cmplx", "($group | $prep)" },
+                { "count", 4 },
+                { "prop1", "hum" },
+                { "name", "Jon" },
+                { "verb", "melt" },
+                { "a", "A" },
+                { "fish",  new Fish("Fred")}
+             */
+
+            result = Symbol.Parse("$$recur?", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("a"));
+
+            result = Symbol.Parse("#$count", c1)[0].Resolve(globals);
+            Assert.That(result.ToString(), Is.EqualTo("4"));
 
             result = Symbol.Parse("#$count", c1)[0].Resolve(globals);
             Assert.That(result.ToString(), Is.EqualTo("4"));

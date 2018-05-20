@@ -38,6 +38,7 @@ namespace Dialogic
                 { "name", "Jon" },
                 { "verb", "melt" },
                 { "a", "A" },
+                { "recur", "a" },
                 { "fish",  new Fish("Fred")}
             };
         }

@@ -7,7 +7,7 @@ namespace Dialogic
     [TestFixture]
     public class ParserTests : GenericTests
     {
-        //[Test]
+        [Test]
         public void DynamicSymbolTest()
         {
             var chat = ChatParser.ParseText("CHAT c1\nSAY $($a)", NO_VALIDATORS)[0];
