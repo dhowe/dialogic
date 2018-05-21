@@ -214,7 +214,7 @@ namespace Dialogic.Server
 
         private static void OnError(ref string html, Exception ex, int lineno = -1)
         {
-            Console.WriteLine("[CAUGHT] " + ex);
+            Console.WriteLine("[CAUGHT] " + ex.Message);
 
             html = html.Replace("%%EXECUTE%%", "");
             html = html.Replace("%%RCLASS%%", "error");

@@ -24,4 +24,7 @@
   <ItemGroup>
     <Compile Remove="DynamicsTests.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="TestResult.xml" />
+  </ItemGroup>
 </Project>
