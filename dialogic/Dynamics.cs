@@ -206,7 +206,7 @@ namespace Dialogic
         }
     }
 
-    internal class Resolvable : IResolvable
+    public class Resolvable : IResolvable
     {
         protected Chat context;
         public string text;
@@ -496,23 +496,6 @@ namespace Dialogic
             return Replace(fullText, result, globals);
         }
 
-        /*
-         * resolved is NOT string
-         *     with transforms (take1):  do GetViaPath as is, then convert to string and return
-         *     with transforms (take2):  do GetViaPath, until string and next transform is function (then do below)
-         * 
-         *     w'out transforms: return resolved.ToString
-         *        dynamic: Re-add alias if exists  (&Replace)
-         *        done:    HandleAlias
-         *
-         * resolved is string
-         *     with transforms:  return resolved
-         *        dynamic: Re-add alias/transforms (&Replace)
-         * 
-         *     w'out transforms: return resolved
-         *        dynamic: Re-add alias if exists  (&Replace)
-         *        done:    HandleAlias
-         */
         internal string Resolve(IDictionary<string, object> globals,
             bool throwOnNotFound = true)
         {
@@ -571,8 +554,7 @@ namespace Dialogic
 
         private void PreProcess(ref string replaceWith, ref string reText, IDictionary<string, object> globals)
         {
-            /*
-             * STATES:
+            /* STATES:
              *   A) Dynamic:                            leave all 
              *   B) Non-Dynamic w' transform:           leave all and add group
              *   C) Non-Dynamic w' alias:               execute alias, replace all
@@ -700,14 +682,14 @@ namespace Dialogic
         }
     }
 
-    internal class Transform : Resolvable
+    public class TxForm : Resolvable
     {
         public string content, transformText;
         public List<string> transforms;
 
-        private Transform(Chat context, Match m) : this(context, m.Groups) { }
+        private TxForm(Chat context, Match m) : this(context, m.Groups) { }
 
-        private Transform(Chat context, GroupCollection gc) : base(context)
+        private TxForm(Chat context, GroupCollection gc) : base(context)
         {
             this.text = gc[0].Value;
             this.content = gc[1].Value.Trim();
@@ -728,20 +710,20 @@ namespace Dialogic
             return content + " -> " + transformText;
         }
 
-        public static void Parse(List<Transform> tforms, string text, Chat context)
+        public static void Parse(List<TxForm> tforms, string text, Chat context)
         {
             var matches = RE.ParseTransforms.Matches(text);
 
             foreach (Match match in matches)
             {
                 // Create a new Symbol and add it to the result
-                tforms.Add(new Transform(context, match));
+                tforms.Add(new TxForm(context, match));
             }
         }
 
-        public static List<Transform> Parse(string text, Chat context)
+        public static List<TxForm> Parse(string text, Chat context)
         {
-            var tforms = new List<Transform>();
+            var tforms = new List<TxForm>();
             Parse(tforms, text, context);
             return tforms;
         }
@@ -767,7 +749,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// Represents an atomic operation on a pair of metadata string that when invoked returns a boolean
+    /// An atomic operation on a metadata key-value pair that, when invoked, returns a boolean
     /// </summary>
     public class Operator
     {

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace Dialogic
 {
     /// <summary>
-    /// Holds built in transformation functions for expanding symbols / groups, eg pluralize, articlize, etc.
+    /// Holds built in transformation functions for expanding symbols / groups, eg Pluralize, Articlize, etc.
     /// New Transforms can be added by calling ChatRuntime.AddTransform(). 
     /// Implemented as sealed, thread-safe (lazy) singleton
     /// </summary>
@@ -45,36 +45,8 @@ namespace Dialogic
         /// </summary>
         public static string Pluralize(string word)
         {
-            return word.Contains(' ') ? string.Join(' ', 
+            return word.Contains(' ') ? string.Join(' ',
                 PluralizePhrase(word.Split(' '))) : PluralizeWord(word);
-        }
-
-        private static string PluralizeWord(string word)
-        {
-            RegexRule[] rules = PLURAL_RULES;
-
-            var lword = word.ToLower();
-            if (!WORD.IsMatch(word) ||
-                Array.IndexOf(MODALS, lword) > -1)
-            {
-                return word;
-            }
-
-            for (int i = 0; i < rules.Length; i++)
-            {
-                if (rules[i].applies(lword))
-                {
-                    return rules[i].fire(word);
-                }
-            }
-
-            return DEFAULT_PLURAL.fire(word);
-        }
-
-        private static string[] PluralizePhrase(string[] v)
-        {
-            v[v.Length - 1] = PluralizeWord(v[v.Length - 1]);
-            return v;
         }
 
         //@cond hidden
@@ -115,6 +87,34 @@ namespace Dialogic
         }
 
         // --------------------------------------------------------------------
+
+        private static string PluralizeWord(string word)
+        {
+            RegexRule[] rules = PLURAL_RULES;
+
+            var lword = word.ToLower();
+            if (!WORD.IsMatch(word) ||
+                Array.IndexOf(MODALS, lword) > -1)
+            {
+                return word;
+            }
+
+            for (int i = 0; i < rules.Length; i++)
+            {
+                if (rules[i].applies(lword))
+                {
+                    return rules[i].fire(word);
+                }
+            }
+
+            return DEFAULT_PLURAL.fire(word);
+        }
+
+        private static string[] PluralizePhrase(string[] v)
+        {
+            v[v.Length - 1] = PluralizeWord(v[v.Length - 1]);
+            return v;
+        }
 
         internal static string[] MODALS = { "shall", "would", "may", "might", "ought", "should" };
 
