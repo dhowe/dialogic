@@ -1,14 +1,22 @@
+# /etc/systemd/system/dialogic-editor.service
+# LIST: systemctl list-units | grep -E 'service.*running'
+# STATUS: sudo systemctl status dialogic-editor
+# DISABLE: sudo systemctl disable dialogic-editor
+# ENABLE:sudo systemctl enable dialogic-editor
+# START: sudo systemctl start dialogic-editor
+# STOP: sudo systemctl stop dialogic-editor
+
 [Unit]
 Description=DialogicEditor Service
 After=network.target network-online.target
 
 [Service]
-SyslogIdentifier=dialogic-editor
 WorkingDirectory=/var/www/html/dialogic-gh/editor
 ExecStart=/usr/bin/dotnet bin/Debug/netcoreapp2.0/DialogicEditor.dll "rednoise.org"
-TimeoutSec=30
+TimeoutSec=20
 Restart=always
-RestartSec=10
+SyslogIdentifier=dialogic-editor
+RestartSec=5
 StartLimitInterval=350
 StartLimitBurst=10
 
