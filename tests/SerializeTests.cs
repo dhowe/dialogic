@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using Tendar;
+using TendAR;
 using MessagePack;
 
 namespace Dialogic
@@ -29,7 +29,7 @@ namespace Dialogic
 			var testfile = AppDomain.CurrentDomain.BaseDirectory;
 			testfile += "../../../../dialogic/data/allchats.gs";
 
-			rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
+			rtIn = new ChatRuntime(TendAR.Config.TARC);
 
 			var watch = System.Diagnostics.Stopwatch.StartNew();
 			for (int i = 0; i < iterations; i++)
@@ -52,7 +52,7 @@ namespace Dialogic
 			for (int i = 0; i < iterations; i++)
 			{
 				watch = System.Diagnostics.Stopwatch.StartNew();
-				rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
+				rtOut = ChatRuntime.Create(serializer, bytes, Config.TARC);
 				watch.Stop(); Console.WriteLine("Deserialize #" + i + ": "
 					+ watch.ElapsedMilliseconds / 1000.0 + "s");
 			}
@@ -71,14 +71,14 @@ namespace Dialogic
 			ChatRuntime rtOut, rtIn;
 
 			var text = String.Join("\n", lines);
-			rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
+			rtIn = new ChatRuntime(TendAR.Config.TARC);
 			rtIn.ParseText(text);
 
 			// serialize the runtime to bytes
 			var bytes = serializer.ToBytes(rtIn);
 
 			// create a new runtime from the bytes
-			rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
+			rtOut = ChatRuntime.Create(serializer, bytes, Config.TARC);
 
 			// check they are identical
 			Assert.That(rtIn, Is.EqualTo(rtOut));
@@ -119,14 +119,14 @@ namespace Dialogic
 			ChatRuntime rtOut, rtIn;
 
 			var text = String.Join("\n", lines);
-			rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
+			rtIn = new ChatRuntime(TendAR.Config.TARC);
 			rtIn.ParseText(text);
 
 			// serialize the runtime to bytes
 			var bytes = serializer.ToBytes(rtIn);
 
 			// create a new runtime from the bytes
-			rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
+			rtOut = ChatRuntime.Create(serializer, bytes, Config.TARC);
 
 			// check they are identical
 			Assert.That(rtIn, Is.EqualTo(rtOut));
@@ -166,12 +166,12 @@ namespace Dialogic
 			var testfile = AppDomain.CurrentDomain.BaseDirectory;
 			testfile += "../../../../dialogic/data/noglobal.gs";
 
-			rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
+			rtIn = new ChatRuntime(TendAR.Config.TARC);
 			rtIn.ParseFile(new FileInfo(testfile));
 
 			var bytes = serializer.ToBytes(rtIn);
 
-			rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
+			rtOut = ChatRuntime.Create(serializer, bytes, Config.TARC);
 
 			// check they are identical
 			Assert.That(rtIn, Is.EqualTo(rtOut));
@@ -205,7 +205,7 @@ namespace Dialogic
 
 			ChatRuntime rt;
 
-			rt = new ChatRuntime(Tendar.AppConfig.Actors);
+			rt = new ChatRuntime(TendAR.Config.TARC);
 			rt.ParseText(String.Join("\n", lines));
 
 			var s = rt.InvokeImmediate(null);
@@ -218,7 +218,7 @@ namespace Dialogic
 				 "SAY Added",
 			 };
 
-			ChatRuntime rt2 = new ChatRuntime(Tendar.AppConfig.Actors);
+			ChatRuntime rt2 = new ChatRuntime(TendAR.Config.TARC);
 			rt2.ParseText(String.Join("\n", lines2));
 
 			// append the 2nd runtime to the first

@@ -38,10 +38,11 @@ namespace Dialogic
             return lineParser;
         }
 
-        internal static List<Chat> ParseText(string s, bool noValidators = false)
+        internal static List<Chat> ParseText(string s, IAppConfig config = null)
         {
-            ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors); // tmp: testing
-            rt.ParseText(s, noValidators);
+            //ChatRuntime rt = new ChatRuntime(Tendar.TendarConfig.Actors); // tmp: testing
+            ChatRuntime rt = new ChatRuntime(config);
+            rt.ParseText(s, false);
             return rt.Chats();
         }
 

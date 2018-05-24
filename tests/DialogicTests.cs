@@ -16,7 +16,7 @@ namespace Dialogic
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
             testfile += "../../../../dialogic/data/judgement/anger.gs";
 
-            rt = new ChatRuntime(Tendar.AppConfig.Actors);
+            rt = new ChatRuntime(TendAR.Config.TARC);
             rt.ParseFile(new FileInfo(testfile));
 
             var chat = rt["judgement"];
@@ -45,7 +45,7 @@ namespace Dialogic
 			var testfile = AppDomain.CurrentDomain.BaseDirectory;
 			testfile += "../../../../dialogic/data/judgement/amusement.gs";
 
-			rt = new ChatRuntime(Tendar.AppConfig.Actors);
+			rt = new ChatRuntime(TendAR.Config.TARC);
 			rt.ParseFile(new FileInfo(testfile));
 
 			var chat = rt["judgement"];
@@ -84,7 +84,7 @@ namespace Dialogic
         public void SetGlobalsOnPath()
         {
             var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
-            Chat chat = ChatParser.ParseText(code, NO_VALIDATORS)[0];
+            Chat chat = ChatParser.ParseText(code, null)[0];
 
             Assert.That(chat, Is.Not.Null);
             Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Set)));
@@ -107,7 +107,7 @@ namespace Dialogic
             var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
             code += "\nCHAT c2\nSET $c1.staleness=2";
             var rt = new ChatRuntime(null);
-            rt.ParseText(code, NO_VALIDATORS);
+            rt.ParseText(code, true);
 
             var chat = rt["c1"];
             Assert.That(chat, Is.Not.Null);
@@ -133,7 +133,7 @@ namespace Dialogic
             var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
             code += "\nCHAT c2\nSET $c1.happiness=2";
             var rt = new ChatRuntime(null);
-            rt.ParseText(code, NO_VALIDATORS);
+            rt.ParseText(code, true);
 
             var chat = rt["c1"];
             Assert.That(chat, Is.Not.Null);
@@ -158,7 +158,7 @@ namespace Dialogic
             var code = "CHAT c1\nSET $fish.name=Mary\nSAY Hi $fish.name";
             code += "\nCHAT c2\nSET $WRONG.staleness=2";
             var rt = new ChatRuntime(null);
-            rt.ParseText(code, NO_VALIDATORS);
+            rt.ParseText(code, true);
 
             var chat = rt["c1"];
             Assert.That(chat, Is.Not.Null);
@@ -183,7 +183,7 @@ namespace Dialogic
             code += "\nCHAT c2\nSET $c1.staleness=2";
 
             var rt = new ChatRuntime(null);
-            rt.ParseText(code, NO_VALIDATORS);
+            rt.ParseText(code, true);
 
             var chat = rt["c1"];
             Assert.That(chat, Is.Not.Null);
@@ -208,7 +208,7 @@ namespace Dialogic
             code += "\nCHAT c2\nSET $c1.stalenessIncr=2";
 
             rt = new ChatRuntime(null);
-            rt.ParseText(code, NO_VALIDATORS);
+            rt.ParseText(code, true);
 
             chat = rt["c1"];
             Assert.That(chat, Is.Not.Null);
@@ -276,7 +276,7 @@ namespace Dialogic
 				 "GO #Test"
 			 };
 
-			ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+			ChatRuntime rt = new ChatRuntime(TendAR.Config.TARC);
 			rt.ParseText(String.Join("\n", lines));
 
 			var s = rt.InvokeImmediate(null);

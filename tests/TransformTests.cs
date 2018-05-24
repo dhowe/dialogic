@@ -13,46 +13,46 @@ namespace Dialogic
 			var ti = Transforms.Instance;
    
 			string result, text;
-			Transform tran;
+			TxForm tran;
 			Chat c1 = null;
 
 			text = "The so-called (dog).Quotify() ran.";
-            tran = Transform.Parse(text, c1)[0];
+            tran = TxForm.Parse(text, c1)[0];
             result = tran.Resolve();
 			Assert.That(result.ToString(), Is.EqualTo("&quot;dog&quot;"));
             result = tran.Replace(text, result);
 			Assert.That(result.ToString(), Is.EqualTo("The so-called &quot;dog&quot; ran."));
 
 			text = "The (dog).Cap() ran.";
-			tran = Transform.Parse(text, c1)[0];         
+			tran = TxForm.Parse(text, c1)[0];         
 			result = tran.Resolve();
 			Assert.That(result.ToString(), Is.EqualTo("Dog"));
 			result = tran.Replace(text, result);
 			Assert.That(result.ToString(), Is.EqualTo("The Dog ran."));
 
 			text = "(ant).Articlize().Cap() ran.";
-            tran = Transform.Parse(text, c1)[0];
+            tran = TxForm.Parse(text, c1)[0];
             result = tran.Resolve();
 			Assert.That(result.ToString(), Is.EqualTo("An ant"));
             result = tran.Replace(text, result);
 			Assert.That(result.ToString(), Is.EqualTo("An ant ran."));
 
 			text = "Today (ant).Cap().Articlize() ran.";
-            tran = Transform.Parse(text, c1)[0];
+            tran = TxForm.Parse(text, c1)[0];
             result = tran.Resolve();
             Assert.That(result.ToString(), Is.EqualTo("an Ant"));
             result = tran.Replace(text, result);
 			Assert.That(result.ToString(), Is.EqualTo("Today an Ant ran."));
 
 			text = "Today (an ant).Cap() ran.";
-            tran = Transform.Parse(text, c1)[0];
+            tran = TxForm.Parse(text, c1)[0];
             result = tran.Resolve();
 			Assert.That(result.ToString(), Is.EqualTo("An ant"));
             result = tran.Replace(text, result);
 			Assert.That(result.ToString(), Is.EqualTo("Today An ant ran."));
 
 			text = "(a (then).Cap())";
-            tran = Transform.Parse(text, c1)[0];
+            tran = TxForm.Parse(text, c1)[0];
             result = tran.Resolve();
             Assert.That(result.ToString(), Is.EqualTo("Then"));
             result = tran.Replace(text, result);

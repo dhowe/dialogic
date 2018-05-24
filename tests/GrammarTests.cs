@@ -229,7 +229,7 @@ namespace Dialogic
 				"SAY $ab",
 			};
 			text = String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            chat = (Chat)ChatParser.ParseText(text, NO_VALIDATORS)[0]; chat.Resolve(globals);
 			Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
 
 			// global-miss
@@ -239,7 +239,7 @@ namespace Dialogic
 				"SAY $ab",
 			};
 			text = String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            chat = (Chat)ChatParser.ParseText(text, NO_VALIDATORS)[0]; chat.Resolve(globals);
 			Assert.That(chat.commands[1].Text(), Is.EqualTo("hello"));
 
 			// global-hit
@@ -248,7 +248,7 @@ namespace Dialogic
 				"SAY $animal",
 			};
 			text = String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            chat = (Chat)ChatParser.ParseText(text, NO_VALIDATORS)[0]; chat.Resolve(globals);
 			Assert.That(chat.commands[0].Text(), Is.EqualTo("dog"));
 
 			// global-properties
@@ -257,7 +257,7 @@ namespace Dialogic
 				"SAY $fish.name",
 			};
 			text = String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            chat = (Chat)ChatParser.ParseText(text, NO_VALIDATORS)[0]; chat.Resolve(globals);
 			Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
 
 			//// global-bounded
@@ -266,7 +266,7 @@ namespace Dialogic
 			//	"SAY ${fish.name}",
 			//};
 			//text = String.Join("\n", lines);
-			//chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			//chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			//Assert.That(chat.commands[0].Text(), Is.EqualTo("Fred"));
 
 			// global-nested
@@ -275,7 +275,7 @@ namespace Dialogic
 				"SAY $fish.flipper.speed",
 			};
 			text = String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+            chat = (Chat)ChatParser.ParseText(text, NO_VALIDATORS)[0]; chat.Resolve(globals);
 			Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
 			//// global-nested-bounded
@@ -284,7 +284,7 @@ namespace Dialogic
 			//	"SAY ${fish.flipper.speed}",
 			//};
 			//text = String.Join("\n", lines);
-			//chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			//chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			//Assert.That(chat.commands[0].Text(), Is.EqualTo("1.1"));
 
 			// cross-chat-global
@@ -295,7 +295,7 @@ namespace Dialogic
 				"SAY $c1_ab",
 			};
 			text = String.Join("\n", lines);
-			var chats = ChatParser.ParseText(text, true);
+            var chats = ChatParser.ParseText(text, NO_VALIDATORS);
 			chats.ForEach(c => c.Resolve(globals));
 			Assert.That(chats[1].commands[0].Text(), Is.EqualTo("hello"));
             
@@ -307,7 +307,7 @@ namespace Dialogic
 				"SAY $chats.c1.foo",
 			};
 			text = String.Join("\n", lines);
-			chats = ChatParser.ParseText(text, true);
+			chats = ChatParser.ParseText(text);
 			chats.ForEach(c => c.Resolve(globals));
 			Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));
 
@@ -319,7 +319,7 @@ namespace Dialogic
 				"SAY ${chats.c1.foo}",
 			};
 			text = String.Join("\n", lines);
-			chats = ChatParser.ParseText(text, true);
+			chats = ChatParser.ParseText(text);
 			chats.ForEach(c => c.Resolve(globals));
 			Assert.That(chats[1].commands[0].Text(), Is.EqualTo("bar"));*/
 		}
@@ -561,7 +561,7 @@ namespace Dialogic
 				"SET antelope = C",
 				"SAY $ant $antelope"
 			};
-			ChatRuntime runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+			ChatRuntime runtime = new ChatRuntime(TendAR.Config.TARC);
 			runtime.ParseText(string.Join("\n", lines), false);
 			var chat = runtime.Chats()[0];
 
@@ -761,7 +761,7 @@ namespace Dialogic
 				"CHAT External {type=a,stage=b}",
 				"SAY $review",
 			};
-			ChatRuntime rt = new ChatRuntime(Tendar.AppConfig.Actors);
+			ChatRuntime rt = new ChatRuntime(TendAR.Config.TARC);
 			rt.ParseText(String.Join("\n", lines));
 			var chats = rt.Chats();
 			//Console.WriteLine(rt);
@@ -946,7 +946,7 @@ namespace Dialogic
 				"SET b = c",
 				"SAY $a"
 			};
-			runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+			runtime = new ChatRuntime(TendAR.Config.TARC);
 			runtime.ParseText(string.Join("\n", lines), false);
 			//string content = "";
 			//runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
@@ -980,7 +980,7 @@ namespace Dialogic
 				"$review",
 			};
 
-			var chats = ChatParser.ParseText(String.Join("\n", lines), true);
+			var chats = ChatParser.ParseText(String.Join("\n", lines));
 			Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Set)));
 			Assert.That(chats[1].commands[0].GetType(), Is.EqualTo(typeof(Say)));
 			//chats[0].commands.ForEach(c => c.Resolve(globals));
@@ -1171,7 +1171,7 @@ namespace Dialogic
 				"c = C",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B C"));
 
 			lines = new[]{
@@ -1182,7 +1182,7 @@ namespace Dialogic
 				"d = C",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B C"));
 
 			lines = new[]{
@@ -1193,7 +1193,7 @@ namespace Dialogic
 				"d = C",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B C B C"));
 
 			lines = new[]{
@@ -1203,7 +1203,7 @@ namespace Dialogic
 				"c = D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("D"));
 
 			lines = new[]{
@@ -1214,7 +1214,7 @@ namespace Dialogic
 				"d = D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("C D D C"));
 		}
 
@@ -1232,7 +1232,7 @@ namespace Dialogic
 				"c = C | D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
 			//Assert.That(text, Is.EqualTo("A B (C | D)"));
@@ -1244,7 +1244,7 @@ namespace Dialogic
 				"c = (C | D)",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
 			lines = new[] {
@@ -1255,7 +1255,7 @@ namespace Dialogic
 				"c += D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B C D"));
 
 			lines = new[] {
@@ -1266,7 +1266,7 @@ namespace Dialogic
 				"c += | D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
 			lines = new[] {
@@ -1277,7 +1277,7 @@ namespace Dialogic
 				"c += | D)",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
 			lines = new[] {
@@ -1289,7 +1289,7 @@ namespace Dialogic
 				"c += | E)",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D | E)"));
 
 			lines = new[] {
@@ -1299,7 +1299,7 @@ namespace Dialogic
 				"c = (C | D)",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A (B (C | D))"));
 
 			lines = new[] {
@@ -1309,7 +1309,7 @@ namespace Dialogic
 				"c = ($a | $b)",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (A | B)"));
 
 			/* infinite loop
@@ -1320,7 +1320,7 @@ namespace Dialogic
                 "c = ($a | $b | D)",
             };
             text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-            chat = (Chat)ChatParser.ParseText(text, true)[0];chat.Realize(globals);
+            chat = (Chat)ChatParser.ParseText(text)[0];chat.Realize(globals);
             Console.WriteLine(chat.Expand(globals, "$start"));
             Assert.That(chat.ExpandNoGroups(globals, "$start"), Is.EqualTo("A B (A | B)")); */
 		}
@@ -1346,7 +1346,7 @@ namespace Dialogic
 				"$c |= $fish.name",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			//Console.WriteLine(globals.Stringify());
 			//Console.WriteLine(chat.scope.Stringify());
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | Fred)"));
@@ -1359,7 +1359,7 @@ namespace Dialogic
 				"c |= $fish.name",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			//Console.WriteLine(chat);
 			//Console.WriteLine(globals.Stringify());
 			//Console.WriteLine(chat.scope.Stringify());
@@ -1380,7 +1380,7 @@ namespace Dialogic
 				"$c = C | D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
 			lines = new[] {
@@ -1391,7 +1391,7 @@ namespace Dialogic
 				"$c |= D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
 			lines = new[] {
@@ -1402,7 +1402,7 @@ namespace Dialogic
 				"$c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D | E)"));
 
 			lines = new[] {
@@ -1413,7 +1413,7 @@ namespace Dialogic
 				"$c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D | E)"));
 
 			lines = new[] {
@@ -1424,7 +1424,7 @@ namespace Dialogic
 				"$c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C (C | D) | E)"));
 
 			lines = new[] {
@@ -1434,7 +1434,7 @@ namespace Dialogic
 				"$c = D | E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (D | E)"));
 
 			lines = new[] {
@@ -1446,7 +1446,7 @@ namespace Dialogic
 				"$e = E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (D | E)"));
 
 			lines = new[] {
@@ -1458,7 +1458,7 @@ namespace Dialogic
 				"$end-phrase = D"
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 		}
 
@@ -1476,7 +1476,7 @@ namespace Dialogic
 				"c = C | D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
@@ -1488,7 +1488,7 @@ namespace Dialogic
 				"c += D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B C D"));
 
 			lines = new[] {
@@ -1499,7 +1499,7 @@ namespace Dialogic
 				"c += E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B ((C | D) E)"));
 
 			lines = new[] {
@@ -1510,7 +1510,7 @@ namespace Dialogic
 				"c += E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C (C | D) E)"));
 		}
 
@@ -1528,7 +1528,7 @@ namespace Dialogic
 				"c = C | D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
@@ -1540,7 +1540,7 @@ namespace Dialogic
 				"c |= D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 
 			lines = new[] {
@@ -1551,7 +1551,7 @@ namespace Dialogic
 				"c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D | E)"));
 
 			lines = new[] {
@@ -1562,7 +1562,7 @@ namespace Dialogic
 				"c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C (C | D) | E)"));
 		}
 
@@ -1580,7 +1580,7 @@ namespace Dialogic
 				"c = D | E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (D | E)"));
 
 			lines = new[] {
@@ -1592,7 +1592,7 @@ namespace Dialogic
 				"e = E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (D | E)"));
 
 			lines = new[] {
@@ -1604,7 +1604,7 @@ namespace Dialogic
 				"end-phrase = D"
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(BindSymbolsOnly(chat, "$start"), Is.EqualTo("A B (C | D)"));
 		}
 
@@ -1623,7 +1623,7 @@ namespace Dialogic
 				"c |= D",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B C").Or.EqualTo("A B D"));
 
 			lines = new[] {
@@ -1634,7 +1634,7 @@ namespace Dialogic
 				"c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B C").Or.EqualTo("A B D").Or.EqualTo("A B E"));
 
 			lines = new[] {
@@ -1645,7 +1645,7 @@ namespace Dialogic
 				"c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B C").Or.EqualTo("A B D").Or.EqualTo("A B E"));
 
 			lines = new[] {
@@ -1656,7 +1656,7 @@ namespace Dialogic
 				"c |= E",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"), Is.EqualTo("A B E").Or.EqualTo("A B C C").Or.EqualTo("A B C D"));
 
 			lines = new[] {
@@ -1666,7 +1666,7 @@ namespace Dialogic
 				"b = bit the tiny child",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"),
 						Is.EqualTo("The hungry dog bit the tiny child")
 						.Or.EqualTo("The angry cat bit the tiny child"));
@@ -1678,7 +1678,7 @@ namespace Dialogic
 				"b = bit the tiny child",
 			};
 			text = "CHAT X {chatMode=grammar}\n" + String.Join("\n", lines);
-			chat = (Chat)ChatParser.ParseText(text, true)[0]; chat.Resolve(globals);
+			chat = (Chat)ChatParser.ParseText(text)[0]; chat.Resolve(globals);
 			Assert.That(chat._Expand(globals, "$start"),
 				Is.EqualTo("The hungry dog bit the tiny child")
 				.Or.EqualTo("The angry cat bit the tiny child"));

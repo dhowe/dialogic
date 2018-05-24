@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using Dialogic;
 using MessagePack;
-using Tendar;
+using TendAR;
 
 namespace runner
 {
@@ -26,6 +26,7 @@ namespace runner
 		{
 			ChatRuntime.DISABLE_UNIQUE_CHAT_LABELS = true;
 
+            Config config = new Config();
 			ISerializer serializer = new SerializerMessagePack();
 
 			ChatRuntime rtOut, rtIn;
@@ -35,7 +36,7 @@ namespace runner
 			var testfile = AppDomain.CurrentDomain.BaseDirectory;
 			testfile += "../../../../dialogic/data/allchats.gs";
 
-			rtIn = new ChatRuntime(Tendar.AppConfig.Actors);
+            rtIn = new ChatRuntime(config);
 
 			var watch = System.Diagnostics.Stopwatch.StartNew();
 			for (int i = 0; i < iterations; i++)
@@ -58,7 +59,7 @@ namespace runner
 			for (int i = 0; i < iterations; i++)
 			{
 				watch = System.Diagnostics.Stopwatch.StartNew();
-				rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.Actors);
+                rtOut = ChatRuntime.Create(serializer, bytes, config);
 				watch.Stop(); Console.WriteLine("Deserialize #" + i + ": " 
                     + watch.ElapsedMilliseconds / 1000.0 + "s");
 			}
@@ -116,14 +117,15 @@ namespace runner
 		/// <param name="fileOrFolder">File or folder.</param>
 		public MockGameEngine(FileInfo fileOrFolder)
 		{
+            var config = new Config();
 			var saveFile = new FileInfo("./runtime.ser");
 
 			ISerializer serializer = new SerializerMessagePack();
-			ChatRuntime tmp = new ChatRuntime(Tendar.AppConfig.Actors);
+            ChatRuntime tmp = new ChatRuntime(config);
 			tmp.ParseFile(fileOrFolder);
 			tmp.Save(serializer, saveFile);
 
-			dialogic = ChatRuntime.Create(serializer, saveFile, AppConfig.Actors);
+            dialogic = ChatRuntime.Create(serializer, saveFile, config);
 			dialogic.Run();
 		}
 
@@ -170,8 +172,8 @@ namespace runner
 
 		internal void RunInLoop() // repeated events
 		{
-			int ts = 0;
-			int count = 0;
+			//int ts = 0;
+			//int count = 0;
 			while (true)
 			{
 				Thread.Sleep(30);

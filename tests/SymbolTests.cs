@@ -23,7 +23,7 @@ namespace Dialogic
                 "SAY ($emo)_rule"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("anger_rule"));
 
@@ -34,7 +34,7 @@ namespace Dialogic
             };
             rt = new ChatRuntime();
             rt.strictMode = false;
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("A"));
 
@@ -45,7 +45,7 @@ namespace Dialogic
             };
             rt = new ChatRuntime();
             rt.strictMode = false;
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("A."));
 
@@ -57,7 +57,7 @@ namespace Dialogic
 
             rt = new ChatRuntime();
             rt.strictMode = false;
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
             ChatRuntime.SILENT = true;
             s = rt.InvokeImmediate(globals);
             ChatRuntime.SILENT = false;
@@ -72,7 +72,7 @@ namespace Dialogic
                 "SAY $start"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("I am angry"));
         }
@@ -110,7 +110,7 @@ namespace Dialogic
                 "SAY [a=$deep][b=$doop]"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
 
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("beepbop"));
@@ -122,7 +122,7 @@ namespace Dialogic
                 "SAY ($deep)-($doop)"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
 
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("beep-bop"));
@@ -135,7 +135,7 @@ namespace Dialogic
                 "SAY ($deep)($doop)"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
 
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("beepbop"));
@@ -148,7 +148,7 @@ namespace Dialogic
                 "SAY [a=$deep]+[b=$doop]"
             };
             rt = new ChatRuntime();
-            rt.ParseText(String.Join("\n", lines), NO_VALIDATORS);
+            rt.ParseText(String.Join("\n", lines), true);
 
             s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("beep+bop"));

@@ -62,13 +62,47 @@ namespace Dialogic
 
 		public ChatRuntime() : this(null, null) { }
 
-		public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
+		//public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
 
-		public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
-		{
-			this.Reset(theChats);
-			this.actors = InitActors(theActors);
-		}
+		//public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
+		//{
+		//	this.Reset(theChats);
+		//	this.actors = InitActors(theActors);
+		//}
+
+        public ChatRuntime(IAppConfig config) : this(null, config) { }
+
+        public ChatRuntime(List<Chat> theChats, IAppConfig config = null)
+        {
+            this.Reset(theChats);
+
+            if (config != null)
+            {
+                this.actors = config.GetActors();
+                this.validators = config.GetValidators();
+
+                var trans = config.GetTransforms();
+                if (trans != null)
+                {
+                    foreach (var key in trans.Keys)
+                    {
+                        this.AddTransform(key, trans[key]);
+                    }
+                }
+
+                var cmds = config.GetCommands();
+                if (cmds != null)
+                {
+                    foreach (var cmd in cmds)
+                    {
+                        if (!typeMap.ContainsKey(cmd.label))
+                        {
+                            typeMap.Add(cmd.label, cmd.type);
+                        }
+                    }
+                }
+            }
+        }
 
 		/// <summary>
 		/// Create a new runtime from previously serialized bytes loaded from a file, using the specified actors.
@@ -76,22 +110,22 @@ namespace Dialogic
 		/// <returns>The new ChatRuntime</returns>
 		/// <param name="serializer">Serializer.</param>
 		/// <param name="file">File.</param>
-		/// <param name="theActors">The actors.</param>
-		public static ChatRuntime Create(ISerializer serializer, FileInfo file, List<IActor> theActors)
+        /// <param name="config">Config.</param>
+        public static ChatRuntime Create(ISerializer serializer, FileInfo file, IAppConfig config)
 		{
-			return Create(serializer, File.ReadAllBytes(file.FullName), theActors);
+            return Create(serializer, File.ReadAllBytes(file.FullName), config);
 		}
 
-		/// <summary>
-		/// Create a new runtime from previously serialized bytes, using the specified actors.
-		/// </summary>
-		/// <returns>The new ChatRuntime</returns>
-		/// <param name="serializer">Serializer.</param>
-		/// <param name="bytes">Bytes.</param>
-		/// <param name="theActors">The actors.</param>
-		public static ChatRuntime Create(ISerializer serializer, byte[] bytes, List<IActor> theActors)
+        /// <summary>
+        /// Create a new runtime from previously serialized bytes, using the specified config.
+        /// </summary>
+        /// <returns>The create.</returns>
+        /// <param name="serializer">Serializer.</param>
+        /// <param name="bytes">Bytes.</param>
+        /// <param name="config">Config.</param>
+        public static ChatRuntime Create(ISerializer serializer, byte[] bytes, IAppConfig config)
 		{
-			ChatRuntime rt = new ChatRuntime(theActors);
+            ChatRuntime rt = new ChatRuntime(config);
 			serializer.FromBytes(rt, bytes);
 			return rt;
 		}
@@ -253,6 +287,7 @@ namespace Dialogic
 
 		public IActor FindActorByName(string name)
 		{
+            if (actors.IsNullOrEmpty()) return null;
 			Util.ValidateLabel(ref name);
 			return actors.FirstOrDefault(c => c.Name() == name);
 		}

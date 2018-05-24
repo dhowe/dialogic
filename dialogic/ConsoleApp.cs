@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Tendar;
+using TendAR;
 
 namespace Dialogic
 {
@@ -26,7 +26,7 @@ namespace Dialogic
 
         public ConsoleApp(FileInfo fileOrFolder)
         {
-            dialogic = new ChatRuntime(Tendar.AppConfig.Actors);
+            dialogic = new ChatRuntime(new Config());
             dialogic.ParseFile(fileOrFolder);
             dialogic.Preload(globals);
             dialogic.Run();

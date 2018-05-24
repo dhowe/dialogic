@@ -9,9 +9,9 @@ namespace Dialogic
     public interface ISerializer
     {
         byte[] ToBytes(ChatRuntime rt);
-        //byte[] ToBytes(List<Chat> l);
         void FromBytes(ChatRuntime rt, byte[] b);
         string ToJSON(ChatRuntime rt);
+        //byte[] ToBytes(List<Chat> l);
     }
 
     /// <summary>
@@ -25,7 +25,28 @@ namespace Dialogic
         Func<Command, bool> Validator();
     }
 
-    internal interface IResolvable {}// Choice and Symbol
+    /// <summary>
+    /// To be implemented by clients for specific configurations
+    /// </summary>
+    public interface IAppConfig
+    {
+        List<IActor> GetActors();
+        List<CommandDef> GetCommands();
+        List<Func<Command, bool>> GetValidators();
+        IDictionary<string, Func<string, string>> GetTransforms();
+    }
+
+    /// <summary>
+    /// To be subclassed by clients for specific configurations
+    /// </summary>
+    public class ConfigAdaptor
+    {
+        List<IActor> GetActors() { return null; }
+        List<CommandDef> GetCommands() { return null; }
+        List<Func<Command, bool>> GetValidators() { return null; }
+        IDictionary<string, Func<string, string>> GetTransforms() { return null; }
+    }
+
 
     ////////////////////////////// Commands ///////////////////////////////////
 
@@ -33,7 +54,8 @@ namespace Dialogic
     /// <summary>
     /// Tagging interface denoting Commands should be dispatched to clients
     /// </summary>
-    public interface ISendable {
+    public interface ISendable
+    {
 
         IDictionary<string, object> Resolved();
     }
@@ -124,4 +146,7 @@ namespace Dialogic
         float GetFloat(string key, float def = -1);
     }
 
+    /////////////////////////////// Other ////////////////////////////////////
+
+    internal interface IResolvable { }// Choice and Symbol
 }

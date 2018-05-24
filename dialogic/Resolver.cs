@@ -14,7 +14,7 @@ namespace Dialogic
 
         private List<Symbol> symbols = new List<Symbol>();
         private List<Choice> choices = new List<Choice>();
-        private List<Transform> trans = new List<Transform>();
+        private List<TxForm> trans = new List<TxForm>();
 
         private ChatRuntime chatRuntime;
 
@@ -202,7 +202,7 @@ namespace Dialogic
         private void ParseTransforms(string text, Chat context)
         {
             trans.Clear();
-            Transform.Parse(trans, text, context);
+            TxForm.Parse(trans, text, context);
         }
 
         private void ParseSymbols(string text, Chat context)

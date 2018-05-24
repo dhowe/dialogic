@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dialogic", "dialogic\dialog
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{9E587B3D-711A-4E97-82CA-15B4ED075FDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{7D47E212-B9E4-4F2C-AAD7-44439B466D41}"
+Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "editor", "editor\editor.csproj", "{50A676D4-C5A0-47F0-A219-2D296A79EDCB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,9 +27,9 @@ Global
 		{9E587B3D-711A-4E97-82CA-15B4ED075FDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E587B3D-711A-4E97-82CA-15B4ED075FDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E587B3D-711A-4E97-82CA-15B4ED075FDC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7D47E212-B9E4-4F2C-AAD7-44439B466D41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D47E212-B9E4-4F2C-AAD7-44439B466D41}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D47E212-B9E4-4F2C-AAD7-44439B466D41}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D47E212-B9E4-4F2C-AAD7-44439B466D41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50A676D4-C5A0-47F0-A219-2D296A79EDCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A676D4-C5A0-47F0-A219-2D296A79EDCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50A676D4-C5A0-47F0-A219-2D296A79EDCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50A676D4-C5A0-47F0-A219-2D296A79EDCB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

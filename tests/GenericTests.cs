@@ -8,7 +8,7 @@ namespace Dialogic
 {
     public class GenericTests
     {
-		protected const bool NO_VALIDATORS = true;
+        protected const IAppConfig NO_VALIDATORS = null;
 
 		protected static IDictionary<string, object> globals;
 
