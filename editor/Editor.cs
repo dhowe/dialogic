@@ -179,7 +179,7 @@ namespace Dialogic.Server
             {
                 string content = String.Empty;
                 var globals = new Dictionary<string, object>();
-                runtime = new ChatRuntime(Tendar.AppConfig.Actors);
+                runtime = new ChatRuntime(TendAR.Config.TARC);
                 runtime.strictMode = false; // allow unbound symbols/functions
                 runtime.ParseText(code, false); // true to disable validators
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
