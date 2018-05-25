@@ -20,7 +20,7 @@ namespace Dialogic
                  "SAY Done",
              };
 
-            ChatRuntime rt = new ChatRuntime(Config.TARC);
+            ChatRuntime rt = new ChatRuntime(AppConfig.TAC);
             rt.ParseText(String.Join("\n", lines));
 
             var s = rt.InvokeImmediate(null);
@@ -36,7 +36,7 @@ namespace Dialogic
                  "SAY Done",
              };
 
-            rt = new ChatRuntime(Config.TARC);
+            rt = new ChatRuntime(AppConfig.TAC);
             rt.ParseText(String.Join("\n", lines));
 
             s = rt.InvokeImmediate(null);
@@ -66,7 +66,7 @@ namespace Dialogic
                 "SAY NV critic!",
             };
             string contents = String.Join("\n", lines);
-            ChatRuntime rt = new ChatRuntime(Config.TARC);
+            ChatRuntime rt = new ChatRuntime(AppConfig.TAC);
             rt.ParseText(contents);
             var finder = new Find().Init("{!!type=tap,!stage=CORE}");
 

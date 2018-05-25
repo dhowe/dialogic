@@ -26,7 +26,7 @@ namespace Dialogic
 
         public ConsoleApp(FileInfo fileOrFolder)
         {
-            dialogic = new ChatRuntime(new Config());
+            dialogic = new ChatRuntime(AppConfig.TAC);
             dialogic.ParseFile(fileOrFolder);
             dialogic.Preload(globals);
             dialogic.Run();

@@ -26,7 +26,7 @@ namespace runner
 		{
 			ChatRuntime.DISABLE_UNIQUE_CHAT_LABELS = true;
 
-            Config config = new Config();
+            AppConfig config = AppConfig.TAC;
 			ISerializer serializer = new SerializerMessagePack();
 
 			ChatRuntime rtOut, rtIn;
@@ -117,7 +117,7 @@ namespace runner
 		/// <param name="fileOrFolder">File or folder.</param>
 		public MockGameEngine(FileInfo fileOrFolder)
 		{
-            var config = new Config();
+            var config = AppConfig.TAC;
 			var saveFile = new FileInfo("./runtime.ser");
 
 			ISerializer serializer = new SerializerMessagePack();

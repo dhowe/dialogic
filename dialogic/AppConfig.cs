@@ -10,80 +10,65 @@ namespace TendAR
     /// Specifies custom behavior for the Tendar application, including Actors,
     /// validators, and custom command types.
     /// </summary>
-    public class Config : IAppConfig
+    public class AppConfig : IAppConfig
     {
-        public static Config TARC = new Config();
+        public static AppConfig TAC = new AppConfig();
 
-        //--------------------- interface --------------------------//
+        private IDictionary<string, Func<string, string>> transforms;
+        private List<Func<Command, bool>> validators;
+        private List<CommandDef> commands;
+        private List<IActor> actors;
+
+        private static string STAGE = "stage", TYPE = "type", NOSTART = "noStart";
+
+        private AppConfig()
+        {
+            this.actors = new List<IActor> {
+                new Actor("Guppy", true), new Actor("TendAR") };
+
+            this.commands = new List<CommandDef> {
+                new CommandDef("NVM", typeof(TendAR.Nvm)) };
+
+            this.validators = new List<Func<Command, bool>> { ValidateCommand };
+
+            this.transforms = new Dictionary<string, Func<string, string>> {
+                {"pluralize", Transforms.Pluralize},
+                {"articlize", Transforms.Articlize},
+                {"capitalize", Transforms.Capitalize},
+                {"quotify", Transforms.Quotify},
+                {"cap", Transforms.Capitalize},
+                {"an", Transforms.Articlize},
+                {"emosyn", EmoSyn}, // defined below
+                {"emoadj", EmoAdj} // defined below
+            };
+        }
+
+        //--------------------- interface --------------------------
 
         public List<IActor> GetActors()
         {
-            return Actors;
+            return actors;
         }
 
         public List<CommandDef> GetCommands()
         {
-            return GUPPY.Commands().ToList();
+            return commands;
         }
 
         public IDictionary<string, Func<string, string>> GetTransforms()
         {
-            return Trans;
+            return transforms;
         }
 
         public List<Func<Command, bool>> GetValidators()
         {
-            return Validators;
+            return validators;
         }
 
-        //----------------------------------------------------------//
-
-        private static Func<Command, bool> Validator = ValidateCommand;
-        private static List<Func<Command, bool>> Validators
-            = new List<Func<Command, bool>> { Validator };
-
-
-        const string STAGE = "stage", TYPE = "type", NOSTART = "noStart";
-
-        public static Actor GUPPY = new Actor("Guppy",
-            true, Validator, new CommandDef("NVM", typeof(TendAR.Nvm)));
-
-        public static Actor TENDAR = new Actor("Tendar");
-
-        public static List<IActor> Actors = new List<IActor> { GUPPY, TENDAR };
-
-        public static IDictionary<string, Func<string, string>> Trans
-            = new Dictionary<string, Func<string, string>>
-        {
-            {"pluralize", Transforms.Pluralize},
-            {"articlize", Transforms.Articlize},
-            {"capitalize", Transforms.Capitalize},
-            {"quotify", Transforms.Quotify},
-            {"cap", Transforms.Capitalize},
-            {"an", Transforms.Articlize},
-            {"emosyn", EmoSyn}, // defined below
-            {"emoadj", EmoAdj} // defined below
-        };
+        //----------------------------------------------------------
 
         private static bool ValidateCommand(Command c)
         {
-            // hack for uppercase transform names
-            if (!(c is Chat))
-            {
-                var rt = c.GetRuntime();
-                if (rt != null && !Transforms.Contains("pluralize"))
-                {
-                    rt.AddTransform("pluralize", Transforms.Pluralize);
-                    rt.AddTransform("articlize", Transforms.Articlize);
-                    rt.AddTransform("capitalize", Transforms.Capitalize);
-                    rt.AddTransform("quotify", Transforms.Quotify);
-                    rt.AddTransform("cap", Transforms.Capitalize);
-                    rt.AddTransform("an", Transforms.Articlize);
-                    rt.AddTransform("emosyn", EmoSyn); // defined below
-                    rt.AddTransform("emoadj", EmoAdj); // defined below
-                }
-            }
-
             if (c.GetType() == typeof(Chat))
             {
                 if (RE.TestTubeChatBaby.IsMatch(c.text))
