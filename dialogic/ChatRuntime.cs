@@ -241,6 +241,9 @@ namespace Dialogic
 		/// <param name="chatLabels">Zero or more Chat labels to preload</param>
 		public void Preload(IDictionary<string, object> globals, params string[] chatLabels)
 		{
+            bool strict = this.strictMode;
+            this.strictMode = false;
+
 			if (chats.Count < 1) throw new Exception("No chats found");
 
 			List<Chat> theChats = null;
@@ -265,6 +268,8 @@ namespace Dialogic
 					chat.commands.ForEach(c => c.Resolve(globals));
 				}
 			}
+
+            this.strictMode = strict;
 		}
 
 		/// <summary>

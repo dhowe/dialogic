@@ -11,7 +11,7 @@ namespace Dialogic
 	public class RuntimeTests : GenericTests
 	{
 		[Test]
-        public void PreloadingTests()
+        public void PreloadingTest()
         {
             string[] lines = new[] {
                 "CHAT c1",
@@ -28,6 +28,49 @@ namespace Dialogic
             var s = rt.InvokeImmediate(globals);
             Assert.That(s, Is.EqualTo("hello preload"));
         }
+
+        [Test]
+        public void PreloadingBindingTest()
+        {
+            string[] lines = new[] {
+                "CHAT c1",
+                "SAY $d $e",
+
+                "CHAT c2 {preload=true}",
+                "SET $d = hello",
+                "SET $e = $emotion",
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines), true);
+            rt.Preload(globals);
+
+            globals.Add("emotion", "darkness");
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello darkness"));
+        }
+
+        [Test]
+        public void PreloadingBindingFunc()
+        {
+            string[] lines = new[] {
+                "CHAT c1",
+                "SAY $d $e",
+
+                "CHAT c2 {preload=true}",
+                "SET $d = hello",
+                "SET $e = $emotion.Cap()",
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines), true);
+            rt.Preload(globals);
+
+            globals.Add("emotion", "darkness");
+
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("hello Darkness"));
+        }
+
 
 		[Test]
 		public void StalenessEventTest()
