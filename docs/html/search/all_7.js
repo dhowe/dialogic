@@ -1,6 +1,7 @@
 var searchData=
 [
   ['iactor',['IActor',['../interface_dialogic_1_1_i_actor.html',1,'Dialogic']]],
+  ['iappconfig',['IAppConfig',['../interface_dialogic_1_1_i_app_config.html',1,'Dialogic']]],
   ['iassignable',['IAssignable',['../interface_dialogic_1_1_i_assignable.html',1,'Dialogic']]],
   ['ichatupdate',['IChatUpdate',['../interface_dialogic_1_1_i_chat_update.html',1,'Dialogic']]],
   ['ichoice',['IChoice',['../interface_dialogic_1_1_i_choice.html',1,'Dialogic']]],

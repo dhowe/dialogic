@@ -21,5 +21,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="runtime.ser" />
+    <None Remove="Dialogic.dll" />
   </ItemGroup>
 </Project>

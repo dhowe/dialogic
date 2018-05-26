@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Dialogic: Dialogic.IAssignable Interface Reference</title>
+<title>Dialogic: Dialogic.IAppConfig Interface Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -64,42 +64,47 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespace_dialogic.html">Dialogic</a></li><li class="navelem"><a class="el" href="interface_dialogic_1_1_i_assignable.html">IAssignable</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespace_dialogic.html">Dialogic</a></li><li class="navelem"><a class="el" href="interface_dialogic_1_1_i_app_config.html">IAppConfig</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="interface_dialogic_1_1_i_assignable-members.html">List of all members</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="interface_dialogic_1_1_i_app_config-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Dialogic.IAssignable Interface Reference</div>  </div>
+<div class="title">Dialogic.IAppConfig Interface Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Tagging interface denoting Commands that can be assigned an <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>  
- <a href="interface_dialogic_1_1_i_assignable.html#details">More...</a></p>
+<p>To be implemented by clients for specific configurations  
+ <a href="interface_dialogic_1_1_i_app_config.html#details">More...</a></p>
 <div class="dynheader">
-Inheritance diagram for Dialogic.IAssignable:</div>
+Inheritance diagram for Dialogic.IAppConfig:</div>
 <div class="dyncontent">
  <div class="center">
-  <img src="interface_dialogic_1_1_i_assignable.png" usemap="#Dialogic.IAssignable_map" alt=""/>
-  <map id="Dialogic.IAssignable_map" name="Dialogic.IAssignable_map">
-<area href="interface_dialogic_1_1_i_sendable.html" title="Tagging interface denoting Commands should be dispatched to clients " alt="Dialogic.ISendable" shape="rect" coords="205,0,332,24"/>
-<area href="class_dialogic_1_1_ask.html" title="The ASK command is for prompting the user, and is generally followed by one or more OPT commands..." alt="Dialogic.Ask" shape="rect" coords="0,112,127,136"/>
-<area href="class_dialogic_1_1_do.html" title="The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environ..." alt="Dialogic.Do" shape="rect" coords="137,112,264,136"/>
-<area href="class_dialogic_1_1_no_op.html" title="The Say command allows a character to speak. It is the default command. If a line does not start with..." alt="Dialogic.NoOp" shape="rect" coords="274,112,401,136"/>
-<area href="class_tend_a_r_1_1_nvm.html" alt="TendAR.Nvm" shape="rect" coords="411,112,538,136"/>
+  <img src="interface_dialogic_1_1_i_app_config.png" usemap="#Dialogic.IAppConfig_map" alt=""/>
+  <map id="Dialogic.IAppConfig_map" name="Dialogic.IAppConfig_map">
+<area href="class_tend_a_r_1_1_app_config.html" title="Specifies custom behavior for the Tendar application, including Actors, validators, and custom command types. " alt="TendAR.AppConfig" shape="rect" coords="0,56,125,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
-<tr class="inherit_header pub_methods_interface_dialogic_1_1_i_sendable"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_interface_dialogic_1_1_i_sendable')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="interface_dialogic_1_1_i_sendable.html">Dialogic.ISendable</a></td></tr>
-<tr class="memitem:a44d781be6db5d4f856d2ebdaff13da6d inherit pub_methods_interface_dialogic_1_1_i_sendable"><td class="memItemLeft" align="right" valign="top"><a id="a44d781be6db5d4f856d2ebdaff13da6d"></a>
-IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Resolved</b> ()</td></tr>
-<tr class="separator:a44d781be6db5d4f856d2ebdaff13da6d inherit pub_methods_interface_dialogic_1_1_i_sendable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:acd07dec370b2de617aec684632993b5f"><td class="memItemLeft" align="right" valign="top"><a id="acd07dec370b2de617aec684632993b5f"></a>
+List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetActors</b> ()</td></tr>
+<tr class="separator:acd07dec370b2de617aec684632993b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa76b88db850162835823f7f55ddbce76"><td class="memItemLeft" align="right" valign="top"><a id="aa76b88db850162835823f7f55ddbce76"></a>
+List&lt; <a class="el" href="class_dialogic_1_1_command_def.html">CommandDef</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetCommands</b> ()</td></tr>
+<tr class="separator:aa76b88db850162835823f7f55ddbce76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb6ea06dfc5ec5d174ebcc2e76352f22"><td class="memItemLeft" align="right" valign="top"><a id="aeb6ea06dfc5ec5d174ebcc2e76352f22"></a>
+List&lt; Func&lt; <a class="el" href="class_dialogic_1_1_command.html">Command</a>, bool &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetValidators</b> ()</td></tr>
+<tr class="separator:aeb6ea06dfc5ec5d174ebcc2e76352f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a035c7f2167f0c040c3b66cbee44a5071"><td class="memItemLeft" align="right" valign="top"><a id="a035c7f2167f0c040c3b66cbee44a5071"></a>
+IDictionary&lt; string, Func&lt; string, string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetTransforms</b> ()</td></tr>
+<tr class="separator:a035c7f2167f0c040c3b66cbee44a5071"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Tagging interface denoting Commands that can be assigned an <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a> </p>
+<div class="textblock"><p>To be implemented by clients for specific configurations </p>
 </div><hr/>The documentation for this interface was generated from the following file:<ul>
 <li>dialogic/Interfaces.cs</li>
 </ul>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Dialogic: Dialogic.Command Class Reference</title>
+<title>Dialogic: TendAR.Nvm Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -64,97 +64,65 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespace_dialogic.html">Dialogic</a></li><li class="navelem"><a class="el" href="class_dialogic_1_1_command.html">Command</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespace_tend_a_r.html">TendAR</a></li><li class="navelem"><a class="el" href="class_tend_a_r_1_1_nvm.html">Nvm</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pro-methods">Protected Member Functions</a> &#124;
-<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
-<a href="class_dialogic_1_1_command-members.html">List of all members</a>  </div>
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="class_tend_a_r_1_1_nvm-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Dialogic.Command Class Reference</div>  </div>
+<div class="title">TendAR.Nvm Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-
-<p>Superclass for all Commands. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by Validate().  
- <a href="class_dialogic_1_1_command.html#details">More...</a></p>
 <div class="dynheader">
-Inheritance diagram for Dialogic.Command:</div>
+Inheritance diagram for TendAR.Nvm:</div>
 <div class="dyncontent">
  <div class="center">
-  <img src="class_dialogic_1_1_command.png" usemap="#Dialogic.Command_map" alt=""/>
-  <map id="Dialogic.Command_map" name="Dialogic.Command_map">
-<area href="class_dialogic_1_1_meta.html" title="Superclass for all Commands that may be assigned metadata " alt="Dialogic.Meta" shape="rect" coords="317,0,434,24"/>
-<area href="class_dialogic_1_1_chat.html" title="Each section of text in a Dialogic script is known as a Chat. Each Chat has a unique label and contai..." alt="Dialogic.Chat" shape="rect" coords="0,112,117,136"/>
-<area href="class_dialogic_1_1_do.html" title="The Do command is used to trigger actions (animations, transitions, sounds, etc.) in the game environ..." alt="Dialogic.Do" shape="rect" coords="127,112,244,136"/>
-<area href="class_dialogic_1_1_find.html" title="Find is used to do a fuzzy search for the next Chat, according to criteria that you supply..." alt="Dialogic.Find" shape="rect" coords="254,112,371,136"/>
-<area href="class_dialogic_1_1_set.html" title="The Set command is used to create or modify a variable. Variables generally originate in the client e..." alt="Dialogic.Set" shape="rect" coords="381,112,498,136"/>
-<area href="class_dialogic_1_1_wait.html" title="The Wait command is used to pause the runtime for a period of time. It accepts a single number specif..." alt="Dialogic.Wait" shape="rect" coords="508,112,625,136"/>
-<area href="class_tend_a_r_1_1_nvm.html" alt="TendAR.Nvm" shape="rect" coords="635,112,752,136"/>
-<area href="class_dialogic_1_1_go.html" title="The Go command accepts a single label used to specify the next Chat to jump to. When a Go command is ..." alt="Dialogic.Go" shape="rect" coords="254,168,371,192"/>
+  <img src="class_tend_a_r_1_1_nvm.png" usemap="#TendAR.Nvm_map" alt=""/>
+  <map id="TendAR.Nvm_map" name="TendAR.Nvm_map">
+<area href="class_dialogic_1_1_command.html" title="Superclass for all Commands. When created by the parser, the default constructor is called first..." alt="Dialogic.Command" shape="rect" coords="0,56,127,80"/>
+<area href="interface_dialogic_1_1_i_assignable.html" title="Tagging interface denoting Commands that can be assigned an Actor " alt="Dialogic.IAssignable" shape="rect" coords="137,56,264,80"/>
+<area href="class_dialogic_1_1_meta.html" title="Superclass for all Commands that may be assigned metadata " alt="Dialogic.Meta" shape="rect" coords="0,0,127,24"/>
+<area href="interface_dialogic_1_1_i_sendable.html" title="Tagging interface denoting Commands should be dispatched to clients " alt="Dialogic.ISendable" shape="rect" coords="137,0,264,24"/>
 </map>
  </div></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:a70034f62047393f4938e9641cca2e140"><td class="memItemLeft" align="right" valign="top"><a id="a70034f62047393f4938e9641cca2e140"></a>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a7b06fd94fbd68908a915e0601983ee6f"><td class="memItemLeft" align="right" valign="top"><a id="a7b06fd94fbd68908a915e0601983ee6f"></a>
+static double&#160;</td><td class="memItemRight" valign="bottom"><b>NVM_DURATION</b> = 5.0</td></tr>
+<tr class="separator:a7b06fd94fbd68908a915e0601983ee6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_methods_class_dialogic_1_1_command"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_dialogic_1_1_command')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_dialogic_1_1_command.html">Dialogic.Command</a></td></tr>
+<tr class="memitem:a70034f62047393f4938e9641cca2e140 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a70034f62047393f4938e9641cca2e140"></a>
 <a class="el" href="class_dialogic_1_1_chat_runtime.html">ChatRuntime</a>&#160;</td><td class="memItemRight" valign="bottom"><b>GetRuntime</b> ()</td></tr>
-<tr class="separator:a70034f62047393f4938e9641cca2e140"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff11e88917fe51e650d3d8b52a8ec6b1"><td class="memItemLeft" align="right" valign="top"><a id="aff11e88917fe51e650d3d8b52a8ec6b1"></a>
+<tr class="separator:a70034f62047393f4938e9641cca2e140 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff11e88917fe51e650d3d8b52a8ec6b1 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="aff11e88917fe51e650d3d8b52a8ec6b1"></a>
 override bool&#160;</td><td class="memItemRight" valign="bottom"><b>Equals</b> (object obj)</td></tr>
-<tr class="separator:aff11e88917fe51e650d3d8b52a8ec6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7c92a3d20cf7f8ed61fd42bd3006859"><td class="memItemLeft" align="right" valign="top"><a id="ab7c92a3d20cf7f8ed61fd42bd3006859"></a>
+<tr class="separator:aff11e88917fe51e650d3d8b52a8ec6b1 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7c92a3d20cf7f8ed61fd42bd3006859 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="ab7c92a3d20cf7f8ed61fd42bd3006859"></a>
 override int&#160;</td><td class="memItemRight" valign="bottom"><b>GetHashCode</b> ()</td></tr>
-<tr class="separator:ab7c92a3d20cf7f8ed61fd42bd3006859"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f0d2008a75524201d5760844064bd58"><td class="memItemLeft" align="right" valign="top">virtual string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a2f0d2008a75524201d5760844064bd58">Text</a> ()</td></tr>
-<tr class="memdesc:a2f0d2008a75524201d5760844064bd58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns resolved text for this object, equivalent to this.Resolved(Meta.TEXT);  <a href="#a2f0d2008a75524201d5760844064bd58">More...</a><br /></td></tr>
-<tr class="separator:a2f0d2008a75524201d5760844064bd58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a081051f09320a3f4500a829eb527eb80"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a081051f09320a3f4500a829eb527eb80">GetActor</a> ()</td></tr>
-<tr class="memdesc:a081051f09320a3f4500a829eb527eb80"><td class="mdescLeft">&#160;</td><td class="mdescRight">In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.  <a href="#a081051f09320a3f4500a829eb527eb80">More...</a><br /></td></tr>
-<tr class="separator:a081051f09320a3f4500a829eb527eb80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14b619fbe3a23f3578912c7fc05f7fc0"><td class="memItemLeft" align="right" valign="top"><a id="a14b619fbe3a23f3578912c7fc05f7fc0"></a>
+<tr class="separator:ab7c92a3d20cf7f8ed61fd42bd3006859 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f0d2008a75524201d5760844064bd58 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top">virtual string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a2f0d2008a75524201d5760844064bd58">Text</a> ()</td></tr>
+<tr class="memdesc:a2f0d2008a75524201d5760844064bd58 inherit pub_methods_class_dialogic_1_1_command"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns resolved text for this object, equivalent to this.Resolved(Meta.TEXT);  <a href="class_dialogic_1_1_command.html#a2f0d2008a75524201d5760844064bd58">More...</a><br /></td></tr>
+<tr class="separator:a2f0d2008a75524201d5760844064bd58 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a081051f09320a3f4500a829eb527eb80 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_command.html#a081051f09320a3f4500a829eb527eb80">GetActor</a> ()</td></tr>
+<tr class="memdesc:a081051f09320a3f4500a829eb527eb80 inherit pub_methods_class_dialogic_1_1_command"><td class="mdescLeft">&#160;</td><td class="mdescRight">In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command.  <a href="class_dialogic_1_1_command.html#a081051f09320a3f4500a829eb527eb80">More...</a><br /></td></tr>
+<tr class="separator:a081051f09320a3f4500a829eb527eb80 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14b619fbe3a23f3578912c7fc05f7fc0 inherit pub_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a14b619fbe3a23f3578912c7fc05f7fc0"></a>
 override string&#160;</td><td class="memItemRight" valign="bottom"><b>ToString</b> ()</td></tr>
-<tr class="separator:a14b619fbe3a23f3578912c7fc05f7fc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a14b619fbe3a23f3578912c7fc05f7fc0 inherit pub_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_dialogic_1_1_meta"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_dialogic_1_1_meta')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_dialogic_1_1_meta.html">Dialogic.Meta</a></td></tr>
 <tr class="memitem:a4325b64dc551939c371f1c4fdf8248a2 inherit pub_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a4325b64dc551939c371f1c4fdf8248a2"></a>
 IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Resolved</b> ()</td></tr>
 <tr class="separator:a4325b64dc551939c371f1c4fdf8248a2 inherit pub_methods_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
-Protected Member Functions</h2></td></tr>
-<tr class="memitem:a608649c9beb834b9252106fc200f43a6"><td class="memItemLeft" align="right" valign="top"><a id="a608649c9beb834b9252106fc200f43a6"></a>
-<a class="el" href="class_dialogic_1_1_resolver.html">Resolver</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Resolver</b> ()</td></tr>
-<tr class="separator:a608649c9beb834b9252106fc200f43a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac34a7d30dbeff939dbec7569be2e6e21"><td class="memItemLeft" align="right" valign="top"><a id="ac34a7d30dbeff939dbec7569be2e6e21"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>Delay</b> ()</td></tr>
-<tr class="separator:ac34a7d30dbeff939dbec7569be2e6e21"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a710072e994f7a99cd06bf2a78b3ff3a7"><td class="memItemLeft" align="right" valign="top"><a id="a710072e994f7a99cd06bf2a78b3ff3a7"></a>
-<a class="el" href="class_dialogic_1_1_command.html">Command</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Delay</b> (double seconds)</td></tr>
-<tr class="separator:a710072e994f7a99cd06bf2a78b3ff3a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cd7dc129d4ddc1b940f3b047c40366f"><td class="memItemLeft" align="right" valign="top"><a id="a9cd7dc129d4ddc1b940f3b047c40366f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>ValidateTextLabel</b> ()</td></tr>
-<tr class="separator:a9cd7dc129d4ddc1b940f3b047c40366f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af12843f3983abb8e073ddbc0f40285a5"><td class="memItemLeft" align="right" valign="top"><a id="af12843f3983abb8e073ddbc0f40285a5"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResolveMeta</b> (IDictionary&lt; string, object &gt; globals)</td></tr>
-<tr class="separator:af12843f3983abb8e073ddbc0f40285a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09e3e91c0b3aee1bde5bfaa5e4e5ecd9"><td class="memItemLeft" align="right" valign="top"><a id="a09e3e91c0b3aee1bde5bfaa5e4e5ecd9"></a>
-Exception&#160;</td><td class="memItemRight" valign="bottom"><b>BadArg</b> (string msg)</td></tr>
-<tr class="separator:a09e3e91c0b3aee1bde5bfaa5e4e5ecd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pro_methods_class_dialogic_1_1_meta"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_class_dialogic_1_1_meta')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_dialogic_1_1_meta.html">Dialogic.Meta</a></td></tr>
-<tr class="memitem:a8b3b59c6c1619e89b78fb497bc4540f3 inherit pro_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a8b3b59c6c1619e89b78fb497bc4540f3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>ValidateMetaPairs</b> (string[] prs)</td></tr>
-<tr class="separator:a8b3b59c6c1619e89b78fb497bc4540f3 inherit pro_methods_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
-Static Protected Attributes</h2></td></tr>
-<tr class="memitem:a0d498a85ead78487a5ba133e0455e719"><td class="memItemLeft" align="right" valign="top"><a id="a0d498a85ead78487a5ba133e0455e719"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>IDGEN</b> = 0</td></tr>
-<tr class="separator:a0d498a85ead78487a5ba133e0455e719"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_methods_interface_dialogic_1_1_i_sendable"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_interface_dialogic_1_1_i_sendable')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="interface_dialogic_1_1_i_sendable.html">Dialogic.ISendable</a></td></tr>
+<tr class="memitem:a44d781be6db5d4f856d2ebdaff13da6d inherit pub_methods_interface_dialogic_1_1_i_sendable"><td class="memItemLeft" align="right" valign="top"><a id="a44d781be6db5d4f856d2ebdaff13da6d"></a>
+IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Resolved</b> ()</td></tr>
+<tr class="separator:a44d781be6db5d4f856d2ebdaff13da6d inherit pub_methods_interface_dialogic_1_1_i_sendable"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_class_dialogic_1_1_meta"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_class_dialogic_1_1_meta')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_dialogic_1_1_meta.html">Dialogic.Meta</a></td></tr>
 <tr class="memitem:ac218697046cde754ba5ae5a6a5b46c15 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="ac218697046cde754ba5ae5a6a5b46c15"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>TYPE</b> = &quot;__type__&quot;</td></tr>
@@ -201,74 +169,40 @@ const string&#160;</td><td class="memItemRight" valign="bottom"><b>STALENESS_INC
 <tr class="memitem:a30d9ef6e92d5233d53b5e8cce109da69 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a30d9ef6e92d5233d53b5e8cce109da69"></a>
 const string&#160;</td><td class="memItemRight" valign="bottom"><b>RESUME_AFTER_INT</b> = &quot;resumeAfterInt&quot;</td></tr>
 <tr class="separator:a30d9ef6e92d5233d53b5e8cce109da69 inherit pub_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_dialogic_1_1_command"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_class_dialogic_1_1_command')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_dialogic_1_1_command.html">Dialogic.Command</a></td></tr>
+<tr class="memitem:a608649c9beb834b9252106fc200f43a6 inherit pro_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a608649c9beb834b9252106fc200f43a6"></a>
+<a class="el" href="class_dialogic_1_1_resolver.html">Resolver</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Resolver</b> ()</td></tr>
+<tr class="separator:a608649c9beb834b9252106fc200f43a6 inherit pro_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac34a7d30dbeff939dbec7569be2e6e21 inherit pro_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="ac34a7d30dbeff939dbec7569be2e6e21"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>Delay</b> ()</td></tr>
+<tr class="separator:ac34a7d30dbeff939dbec7569be2e6e21 inherit pro_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a710072e994f7a99cd06bf2a78b3ff3a7 inherit pro_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a710072e994f7a99cd06bf2a78b3ff3a7"></a>
+<a class="el" href="class_dialogic_1_1_command.html">Command</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Delay</b> (double seconds)</td></tr>
+<tr class="separator:a710072e994f7a99cd06bf2a78b3ff3a7 inherit pro_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cd7dc129d4ddc1b940f3b047c40366f inherit pro_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a9cd7dc129d4ddc1b940f3b047c40366f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>ValidateTextLabel</b> ()</td></tr>
+<tr class="separator:a9cd7dc129d4ddc1b940f3b047c40366f inherit pro_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af12843f3983abb8e073ddbc0f40285a5 inherit pro_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="af12843f3983abb8e073ddbc0f40285a5"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResolveMeta</b> (IDictionary&lt; string, object &gt; globals)</td></tr>
+<tr class="separator:af12843f3983abb8e073ddbc0f40285a5 inherit pro_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09e3e91c0b3aee1bde5bfaa5e4e5ecd9 inherit pro_methods_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a09e3e91c0b3aee1bde5bfaa5e4e5ecd9"></a>
+Exception&#160;</td><td class="memItemRight" valign="bottom"><b>BadArg</b> (string msg)</td></tr>
+<tr class="separator:a09e3e91c0b3aee1bde5bfaa5e4e5ecd9 inherit pro_methods_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_dialogic_1_1_meta"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_class_dialogic_1_1_meta')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_dialogic_1_1_meta.html">Dialogic.Meta</a></td></tr>
+<tr class="memitem:a8b3b59c6c1619e89b78fb497bc4540f3 inherit pro_methods_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="a8b3b59c6c1619e89b78fb497bc4540f3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>ValidateMetaPairs</b> (string[] prs)</td></tr>
+<tr class="separator:a8b3b59c6c1619e89b78fb497bc4540f3 inherit pro_methods_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_dialogic_1_1_meta"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_class_dialogic_1_1_meta')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_dialogic_1_1_meta.html">Dialogic.Meta</a></td></tr>
 <tr class="memitem:aab8f253ed6249b6603b400435473e9ce inherit pro_attribs_class_dialogic_1_1_meta"><td class="memItemLeft" align="right" valign="top"><a id="aab8f253ed6249b6603b400435473e9ce"></a>
 IDictionary&lt; string, object &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>resolved</b></td></tr>
 <tr class="separator:aab8f253ed6249b6603b400435473e9ce inherit pro_attribs_class_dialogic_1_1_meta"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_static_attribs_class_dialogic_1_1_command"><td colspan="2" onclick="javascript:toggleInherit('pro_static_attribs_class_dialogic_1_1_command')"><img src="closed.png" alt="-"/>&#160;Static Protected Attributes inherited from <a class="el" href="class_dialogic_1_1_command.html">Dialogic.Command</a></td></tr>
+<tr class="memitem:a0d498a85ead78487a5ba133e0455e719 inherit pro_static_attribs_class_dialogic_1_1_command"><td class="memItemLeft" align="right" valign="top"><a id="a0d498a85ead78487a5ba133e0455e719"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>IDGEN</b> = 0</td></tr>
+<tr class="separator:a0d498a85ead78487a5ba133e0455e719 inherit pro_static_attribs_class_dialogic_1_1_command"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Superclass for all Commands. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by Validate(). </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a081051f09320a3f4500a829eb527eb80"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a081051f09320a3f4500a829eb527eb80">&#9670;&nbsp;</a></span>GetActor()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> Dialogic.Command.GetActor </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>In multi-speaker environments, SAY commands (also ASK, DO, and others) can be assigned to a specific <a class="el" href="class_dialogic_1_1_actor.html" title="Represents a character in the system, capable of being assigned commands such as SAY, ASK, and DO ">Actor</a>, which may or may not be the default actor. If no actor is specified, then the default actor is used. To specify a different actor than the default, add the actor's name to the metadata, or prepend it followed by a colon to the command. </p>
-<dl class="section return"><dt>Returns</dt><dd>The actor.</dd></dl>
-
-</div>
-</div>
-<a id="a2f0d2008a75524201d5760844064bd58"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f0d2008a75524201d5760844064bd58">&#9670;&nbsp;</a></span>Text()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual string Dialogic.Command.Text </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Returns resolved text for this object, equivalent to this.Resolved(Meta.TEXT); </p>
-<dl class="section return"><dt>Returns</dt><dd>The text.</dd></dl>
-
-<p>Reimplemented in <a class="el" href="class_dialogic_1_1_chat.html#a16fff9365f2cd8a9e35d84e1c28bffbb">Dialogic.Chat</a>.</p>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>dialogic/Commands.cs</li>
+<li>dialogic/AppConfig.cs</li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

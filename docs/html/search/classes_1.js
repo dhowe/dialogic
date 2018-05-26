@@ -11,6 +11,7 @@ var searchData=
   ['command',['Command',['../class_dialogic_1_1_command.html',1,'Dialogic']]],
   ['commanddata',['CommandData',['../class_dialogic_1_1_command_data.html',1,'Dialogic']]],
   ['commanddef',['CommandDef',['../class_dialogic_1_1_command_def.html',1,'Dialogic']]],
+  ['configadaptor',['ConfigAdaptor',['../class_dialogic_1_1_config_adaptor.html',1,'Dialogic']]],
   ['consoleapp',['ConsoleApp',['../class_dialogic_1_1_console_app.html',1,'Dialogic']]],
   ['constraint',['Constraint',['../class_dialogic_1_1_constraint.html',1,'Dialogic']]]
 ];

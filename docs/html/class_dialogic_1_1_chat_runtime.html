@@ -84,12 +84,12 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa77ba75fb998d91c19da2197cb5ad0c5"><td class="memItemLeft" align="right" valign="top"><a id="aa77ba75fb998d91c19da2197cb5ad0c5"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ChatRuntime</b> (List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt; theActors)</td></tr>
-<tr class="separator:aa77ba75fb998d91c19da2197cb5ad0c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1523a7ee43849de1bcb932d61ea7a574"><td class="memItemLeft" align="right" valign="top"><a id="a1523a7ee43849de1bcb932d61ea7a574"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ChatRuntime</b> (List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt; theChats, List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt; theActors=null)</td></tr>
-<tr class="separator:a1523a7ee43849de1bcb932d61ea7a574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a786facee7326f0082d678ae86a159c6d"><td class="memItemLeft" align="right" valign="top"><a id="a786facee7326f0082d678ae86a159c6d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ChatRuntime</b> (<a class="el" href="interface_dialogic_1_1_i_app_config.html">IAppConfig</a> config)</td></tr>
+<tr class="separator:a786facee7326f0082d678ae86a159c6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7cc0261a16c2d4e0d406ccd4f87d36b"><td class="memItemLeft" align="right" valign="top"><a id="ad7cc0261a16c2d4e0d406ccd4f87d36b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ChatRuntime</b> (List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt; theChats, <a class="el" href="interface_dialogic_1_1_i_app_config.html">IAppConfig</a> config=null)</td></tr>
+<tr class="separator:ad7cc0261a16c2d4e0d406ccd4f87d36b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b622bd2bc0ac3d0d3628bb8cb7bf02f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a1b622bd2bc0ac3d0d3628bb8cb7bf02f">ContainsKey</a> (string chatName)</td></tr>
 <tr class="memdesc:a1b622bd2bc0ac3d0d3628bb8cb7bf02f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the runtime contains a chat with this name  <a href="#a1b622bd2bc0ac3d0d3628bb8cb7bf02f">More...</a><br /></td></tr>
 <tr class="separator:a1b622bd2bc0ac3d0d3628bb8cb7bf02f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,12 +153,12 @@ override bool&#160;</td><td class="memItemRight" valign="bottom"><b>Equals</b> (
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a1e34034892740b878ae7887a1ba5cc77"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_dialogic_1_1_chat_runtime.html">ChatRuntime</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a1e34034892740b878ae7887a1ba5cc77">Create</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, FileInfo file, List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt; theActors)</td></tr>
-<tr class="memdesc:a1e34034892740b878ae7887a1ba5cc77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new runtime from previously serialized bytes loaded from a file, using the specified actors.  <a href="#a1e34034892740b878ae7887a1ba5cc77">More...</a><br /></td></tr>
-<tr class="separator:a1e34034892740b878ae7887a1ba5cc77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12e83b7d2e568aee1ebbfb0bbb577093"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_dialogic_1_1_chat_runtime.html">ChatRuntime</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a12e83b7d2e568aee1ebbfb0bbb577093">Create</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, byte[] bytes, List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt; theActors)</td></tr>
-<tr class="memdesc:a12e83b7d2e568aee1ebbfb0bbb577093"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new runtime from previously serialized bytes, using the specified actors.  <a href="#a12e83b7d2e568aee1ebbfb0bbb577093">More...</a><br /></td></tr>
-<tr class="separator:a12e83b7d2e568aee1ebbfb0bbb577093"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1a4bcbbd4d29ae00a4f1ee5243167f8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_dialogic_1_1_chat_runtime.html">ChatRuntime</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#ae1a4bcbbd4d29ae00a4f1ee5243167f8">Create</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, FileInfo file, <a class="el" href="interface_dialogic_1_1_i_app_config.html">IAppConfig</a> config)</td></tr>
+<tr class="memdesc:ae1a4bcbbd4d29ae00a4f1ee5243167f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new runtime from previously serialized bytes loaded from a file, using the specified actors.  <a href="#ae1a4bcbbd4d29ae00a4f1ee5243167f8">More...</a><br /></td></tr>
+<tr class="separator:ae1a4bcbbd4d29ae00a4f1ee5243167f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af754a8e5b79a3a5995c2c329206f692c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_dialogic_1_1_chat_runtime.html">ChatRuntime</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#af754a8e5b79a3a5995c2c329206f692c">Create</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, byte[] bytes, <a class="el" href="interface_dialogic_1_1_i_app_config.html">IAppConfig</a> config)</td></tr>
+<tr class="memdesc:af754a8e5b79a3a5995c2c329206f692c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new runtime from previously serialized bytes, using the specified config.  <a href="#af754a8e5b79a3a5995c2c329206f692c">More...</a><br /></td></tr>
+<tr class="separator:af754a8e5b79a3a5995c2c329206f692c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -273,8 +273,8 @@ Properties</h2></td></tr>
 
 </div>
 </div>
-<a id="a1e34034892740b878ae7887a1ba5cc77"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1e34034892740b878ae7887a1ba5cc77">&#9670;&nbsp;</a></span>Create() <span class="overload">[1/2]</span></h2>
+<a id="ae1a4bcbbd4d29ae00a4f1ee5243167f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1a4bcbbd4d29ae00a4f1ee5243167f8">&#9670;&nbsp;</a></span>Create() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -297,8 +297,8 @@ Properties</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt;&#160;</td>
-          <td class="paramname"><em>theActors</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="interface_dialogic_1_1_i_app_config.html">IAppConfig</a>&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -319,15 +319,15 @@ Properties</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">serializer</td><td>Serializer.</td></tr>
     <tr><td class="paramname">file</td><td>File.</td></tr>
-    <tr><td class="paramname">theActors</td><td>The actors.</td></tr>
+    <tr><td class="paramname">config</td><td>Config.</td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a12e83b7d2e568aee1ebbfb0bbb577093"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a12e83b7d2e568aee1ebbfb0bbb577093">&#9670;&nbsp;</a></span>Create() <span class="overload">[2/2]</span></h2>
+<a id="af754a8e5b79a3a5995c2c329206f692c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af754a8e5b79a3a5995c2c329206f692c">&#9670;&nbsp;</a></span>Create() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -350,8 +350,8 @@ Properties</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">List&lt; <a class="el" href="interface_dialogic_1_1_i_actor.html">IActor</a> &gt;&#160;</td>
-          <td class="paramname"><em>theActors</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="interface_dialogic_1_1_i_app_config.html">IAppConfig</a>&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -366,13 +366,13 @@ Properties</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Create a new runtime from previously serialized bytes, using the specified actors. </p>
-<dl class="section return"><dt>Returns</dt><dd>The new <a class="el" href="class_dialogic_1_1_chat_runtime.html" title="The main entry point for Dialogic. Construct a runtime instance as follows: ">ChatRuntime</a></dd></dl>
+<p>Create a new runtime from previously serialized bytes, using the specified config. </p>
+<dl class="section return"><dt>Returns</dt><dd>The create.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">serializer</td><td>Serializer.</td></tr>
     <tr><td class="paramname">bytes</td><td>Bytes.</td></tr>
-    <tr><td class="paramname">theActors</td><td>The actors.</td></tr>
+    <tr><td class="paramname">config</td><td>Config.</td></tr>
   </table>
   </dd>
 </dl>

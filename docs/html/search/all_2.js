@@ -16,11 +16,12 @@ var searchData=
   ['command',['Command',['../class_dialogic_1_1_command.html',1,'Dialogic']]],
   ['commanddata',['CommandData',['../class_dialogic_1_1_command_data.html',1,'Dialogic']]],
   ['commanddef',['CommandDef',['../class_dialogic_1_1_command_def.html',1,'Dialogic']]],
+  ['configadaptor',['ConfigAdaptor',['../class_dialogic_1_1_config_adaptor.html',1,'Dialogic']]],
   ['consoleapp',['ConsoleApp',['../class_dialogic_1_1_console_app.html',1,'Dialogic']]],
   ['constrain',['Constrain',['../class_dialogic_1_1_util.html#a62bf6e95d663b41267ba58f4e2176dad',1,'Dialogic::Util']]],
   ['constraint',['Constraint',['../class_dialogic_1_1_constraint.html',1,'Dialogic']]],
   ['constrainttype',['ConstraintType',['../namespace_dialogic.html#a6c19a14a5b18a1d8eedc29ce8c163631',1,'Dialogic']]],
   ['containskey',['ContainsKey',['../class_dialogic_1_1_chat_runtime.html#a1b622bd2bc0ac3d0d3628bb8cb7bf02f',1,'Dialogic::ChatRuntime']]],
-  ['create',['Create',['../class_dialogic_1_1_chat_runtime.html#a1e34034892740b878ae7887a1ba5cc77',1,'Dialogic.ChatRuntime.Create(ISerializer serializer, FileInfo file, List&lt; IActor &gt; theActors)'],['../class_dialogic_1_1_chat_runtime.html#a12e83b7d2e568aee1ebbfb0bbb577093',1,'Dialogic.ChatRuntime.Create(ISerializer serializer, byte[] bytes, List&lt; IActor &gt; theActors)'],['../class_dialogic_1_1_snapshot.html#ae8cd63481cb1db88310b5718e3c2864b',1,'Dialogic.Snapshot.Create()']]],
+  ['create',['Create',['../class_dialogic_1_1_chat_runtime.html#ae1a4bcbbd4d29ae00a4f1ee5243167f8',1,'Dialogic.ChatRuntime.Create(ISerializer serializer, FileInfo file, IAppConfig config)'],['../class_dialogic_1_1_chat_runtime.html#af754a8e5b79a3a5995c2c329206f692c',1,'Dialogic.ChatRuntime.Create(ISerializer serializer, byte[] bytes, IAppConfig config)'],['../class_dialogic_1_1_snapshot.html#ae8cd63481cb1db88310b5718e3c2864b',1,'Dialogic.Snapshot.Create()']]],
   ['currentcontext',['CurrentContext',['../class_dialogic_1_1_chat_runtime.html#a888dd1a2375de0d74d6315414d9e3c9a',1,'Dialogic::ChatRuntime']]]
 ];
