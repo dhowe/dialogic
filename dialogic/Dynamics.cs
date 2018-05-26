@@ -534,7 +534,7 @@ namespace Dialogic
             else
             {
                 // Regex replace here to avoid matching substrings (cache?)
-                var regex = Regex.Escape(reText) + @"(?![A-Za-z_-])";
+                var regex = Regex.Escape(reText) + @"(?![A-Za-z0-9_-])";
                 full = new Regex(regex).Replace(full, replaceWith);
             }
 

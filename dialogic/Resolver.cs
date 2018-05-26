@@ -94,7 +94,7 @@ namespace Dialogic
                 text = symbol.Replace(text, result, globals);
 
                 if (DBUG) Console.WriteLine("      " + symbol.Name() 
-                    + " -> " + result + " :: " + text);
+                    + " -> " + result + " (" + text+")");
 
                 // if we've made progress, and have no more symbols in our list, 
                 // but still have symbols in the text, then re-parse and repeat

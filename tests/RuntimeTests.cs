@@ -51,6 +51,16 @@ namespace Dialogic
         }
 
         [Test]
+        public void SubstringIssue()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            //Resolver.DBUG = true;
+            rt.ParseText("SET $a = A\nSET $b = $a1\nSET $a1 = B\nSAY $a $b\n", true);
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("A B"));
+        }
+
+        [Test]
         public void PreloadingBindingFunc()
         {
             string[] lines = new[] {
