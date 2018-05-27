@@ -141,7 +141,7 @@ namespace runner
             if (true) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
             {
                 var file = AppDomain.CurrentDomain.BaseDirectory;
-                file += Util.Millis() + ".ser";
+                file += Util.EpochMs() + ".ser";
 
                 Console.WriteLine("\n<save-event#file=" + file + ">" +
                     " after " + Util.Millis(now) + "ms\n");
