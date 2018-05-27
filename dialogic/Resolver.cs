@@ -31,9 +31,10 @@ namespace Dialogic
         {
             if (text.IsNullOrEmpty() || !IsDynamic(text)) return text;
 
-            if (DBUG) Console.WriteLine("------------------------\nBind: " + Info(text, context));
+            if (DBUG) Console.WriteLine("----------------------\nBind: " 
+                + Info(text, context));
 
-            string pretext, original = text;
+            string pretext;
             int depth = 0, maxRecursionDepth = Defaults.BIND_MAX_DEPTH;
 
             do
@@ -58,16 +59,7 @@ namespace Dialogic
             // if we still have dynamics, we've failed
             if (IsDynamic(text)) HandleFailure(ref text, context, globals);
 
-            // no more dynamics, now handle transforms         
-            text = BindTransforms(text, context);
-
-            if (DBUG) Console.WriteLine("Result(pre): " + text);
-
-            text = PostProcess(text);
-
-            if (DBUG) Console.WriteLine("Result(post): " + text + "\n");
-
-            return text;
+            return PostProcess(text, context);
         }
 
         ///// <summary>
@@ -163,8 +155,14 @@ namespace Dialogic
             return text;
         }
 
-        private string PostProcess(string text)
+        private string PostProcess(string text, Chat context)
         {
+            // no more dynamics, now handle transforms         
+            text = BindTransforms(text, context);
+
+            if (DBUG) Console.WriteLine("Result(pre): " + text);
+
+
             // keep () to display unbound functions
             text = text.Replace("()", "&lpar;&rpar;");
 
@@ -174,7 +172,11 @@ namespace Dialogic
             // replace multiple spaces with single
             text = RE.MultiSpace.Replace(text, " ");
 
-            return Entities.Decode(text.Trim());
+            text = Entities.Decode(text.Trim());
+
+            if (DBUG) Console.WriteLine("Result(post): " + text + "\n");
+
+            return text;
         }
 
         private void HandleFailure(ref string text, Chat context, IDictionary<string, object> globals)
