@@ -61,20 +61,6 @@ namespace Dialogic
         }
 
         [Test]
-        public void PartialTransformIssue()
-        {
-            ChatRuntime rt = new ChatRuntime();
-            Resolver.DBUG = true;
-            rt.ParseText("SET $test = (a) (b)\nSAY $test.Cap()", true);
-            Assert.That(rt.InvokeImmediate(globals), Is.EqualTo("A b"));
-
-            rt = new ChatRuntime();
-            //Resolver.DBUG = true;
-            rt.ParseText("SET $test = (a | a) (b | b)\nSAY $test.Cap()", true);
-            Assert.That(rt.InvokeImmediate(globals), Is.EqualTo("A b"));
-        }
-
-        [Test]
         public void PreloadingBindingFunc()
         {
             string[] lines = new[] {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Dialogic
 {
@@ -34,6 +35,26 @@ namespace Dialogic
         {
             return type;
         }
+    }
+
+    /// <summary>
+    /// Basic implementation of ISave: tells Dialogic to save the current state,
+    /// using the specified serializer and file-info path
+    /// </summary>
+    public class SaveEvent : GameEvent, ISave
+    {
+        protected readonly ISerializer serializer;
+        protected readonly FileInfo file;
+
+        public SaveEvent(ISerializer serializer, FileInfo file) : base()
+        {
+            this.serializer = serializer;
+            this.file = file;
+        }
+
+        public ISerializer GetSerializer() => serializer;
+
+        public FileInfo GetFile() => file;
     }
 
     /// <summary>

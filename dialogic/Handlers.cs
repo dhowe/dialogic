@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 
 namespace Dialogic
 {
@@ -25,6 +26,7 @@ namespace Dialogic
             if (ea is IResume) return ResumeHandler(ref ea, globals);
             if (ea is IChoice) return ChoiceHandler(ref ea, globals);
             if (ea is IClear) return ClearHandler(ref ea, globals);
+            if (ea is ISave) return SaveHandler(ref ea, globals);
 
             // ea = null; TODO:
 
@@ -79,6 +81,15 @@ namespace Dialogic
         {
             ea = null;
             scheduler.Clear();
+            return null;
+        }
+
+        private IUpdateEvent SaveHandler(ref EventArgs ea, IDictionary<string, object> globals)
+        {
+            ISave se = (ISave)ea;
+            ea = null;
+            runtime.SaveAsync(se.GetSerializer(), se.GetFile(), 
+                (bytes) => Console.WriteLine("SAVED: "+bytes.Length+" bytes"));
             return null;
         }
 

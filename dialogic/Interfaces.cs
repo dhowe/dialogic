@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Dialogic
 {
@@ -125,6 +126,15 @@ namespace Dialogic
     /// </summary>
     public interface IClear
     {
+    }
+
+    /// <summary>
+    /// Tells Dialogic to serialize the current start of the game
+    /// </summary>
+    public interface ISave
+    {
+        ISerializer GetSerializer();
+        FileInfo GetFile();
     }
 
     /// <summary>

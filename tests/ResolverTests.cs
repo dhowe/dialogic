@@ -9,69 +9,6 @@ namespace Dialogic
     public class ResolverTests : GenericTests
     {
         [Test]
-        public void TransformIssue()
-        {
-            string res;
-
-            res = new Resolver(null).Bind("(ab).Cap()", CreateParentChat("c"), null);
-            Console.WriteLine("1: "+res);
-            Assert.That(res, Is.EqualTo("Ab"));
-
-            res = new Resolver(null).Bind("(a b).Cap()", CreateParentChat("c"), null);
-            Console.WriteLine("2: " +res);
-            Assert.That(res, Is.EqualTo("A b"));
-
-            res = new Resolver(null).Bind("((a b)).Cap()", CreateParentChat("c"), null);
-            Console.WriteLine("3: " +res);
-            Assert.That(res, Is.EqualTo("A b"));
-
-            Resolver.DBUG = true;
-
-            res = new Resolver(null).Bind("((a) (b)).Cap()", CreateParentChat("c"), null);
-            Console.WriteLine("4: " +res);
-            Assert.That(res, Is.EqualTo("A b"));
-
-            res = new Resolver(null).Bind("((a)(b)).Cap()", CreateParentChat("c"), null);
-            Console.WriteLine("5: " +res);
-            Assert.That(res, Is.EqualTo("Ab"));
-        }
-
-        [Test]
-        public void TransformIssues()
-        {
-            ChatRuntime rt;
-            string txt;
-            Say say;
-            Chat chat;
-
-            txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.Pluralize()";
-            rt = new ChatRuntime();
-            rt.ParseText(txt);
-            chat = rt.Chats().First();
-            say = (Say)chat.commands[1];
-            chat.Resolve(globals);
-            //Console.WriteLine(res);
-            Assert.That(say.Text(), Is.EqualTo("A cat, many cats"));
-
-            txt = "SET $thing1 = (cat | cat | cat)\nSAY A $thing1 $thing1";
-            rt = new ChatRuntime();
-            rt.ParseText(txt);
-            chat = rt.Chats().First();
-            say = (Say)chat.commands[1];
-            chat.Resolve(globals);
-            Assert.That(say.Text(), Is.EqualTo("A cat cat"));
-
-
-            txt = "SET $thing1 = (cat | crow | cow)\nSAY A [save=$thing1], many $save.Pluralize()";
-            rt = new ChatRuntime();
-            rt.ParseText(txt);
-            chat = rt.Chats().First();
-            say = (Say)chat.commands[1];
-            chat.Resolve(globals);
-            Assert.That(say.Text(), Is.EqualTo("A cat, many cats").Or.EqualTo("A crow, many crows").Or.EqualTo("A cow, many cows"));
-        }
-
-        [Test]
         public void ASimpleVar()
         {
             var res = new Resolver(null).BindSymbols("$a", null, new Dictionary<string, object>()

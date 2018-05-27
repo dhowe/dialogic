@@ -44,7 +44,7 @@ namespace Dialogic
 			{ "FIND",   typeof(Find) },
 		};
 
-		internal bool validatorsDisabled, strictMode = true;
+        internal bool validatorsDisabled, saving, strictMode = true;
 		internal IDictionary<string, Choice> choiceCache;
 		internal IDictionary<string, Chat> chats;
 		internal ChatScheduler scheduler;
@@ -54,21 +54,13 @@ namespace Dialogic
 		private List<IActor> actors;
 		private List<Action<Chat>> findListeners;
 		private List<Func<Command, bool>> validators;
+        private Thread searchThread, saveThread;
 		private ChatEventHandler chatEvents;
 		private AppEventHandler appEvents;
-		private Thread searchThread;
 		private FuzzySearch search;
 		private ChatParser parser;
 
 		public ChatRuntime() : this(null, null) { }
-
-		//public ChatRuntime(List<IActor> theActors) : this(null, theActors) { }
-
-		//public ChatRuntime(List<Chat> theChats, List<IActor> theActors = null)
-		//{
-		//	this.Reset(theChats);
-		//	this.actors = InitActors(theActors);
-		//}
 
         public ChatRuntime(IAppConfig config) : this(null, config) { }
 
@@ -302,13 +294,38 @@ namespace Dialogic
 		/// </summary>
 		public List<Chat> Chats() => chats.Values.ToList();
 
+        public void SaveAsync(ISerializer serializer, FileInfo file, Action<byte[]> callback = null)
+        {
+            (saveThread = new Thread(() =>
+            {
+//Console.WriteLine("Starting thread @" + Util.Millis());
+                Thread.CurrentThread.IsBackground = true;
+                var bytes = Save(serializer, file);
+//Console.WriteLine("Calling invoke @" + Util.Millis());
+                callback.Invoke(bytes);
+            })).Start();
+        }
+            
 		/// <summary>
 		/// Save this instance to a serialized byte array
 		/// </summary>
-		public byte[] Save(ISerializer serializer, FileInfo file = null)
+		public byte[] Save(ISerializer serializer, FileInfo file)
 		{
+            if (saving)
+            {
+                Warn("Ignoring Save() call while already saving");
+                return null;
+            }
+
+            this.saving = true;
+//Console.WriteLine("Starting save @"+Util.Millis());
 			byte[] bytes = serializer.ToBytes(this);
+//Thread.Sleep(5000);
+//Console.WriteLine("Serialized data @" + Util.Millis());
 			if (file != null) File.WriteAllBytes(file.FullName, bytes);
+//Console.WriteLine("Wrote file @" + Util.Millis());
+            this.saving = false;
+
 			return bytes;
 		}
 
