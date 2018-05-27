@@ -294,22 +294,38 @@ namespace Dialogic
 		/// </summary>
 		public List<Chat> Chats() => chats.Values.ToList();
 
-        public void SaveAsync(ISerializer serializer, FileInfo file, Action<byte[]> callback = null)
+
+        /// <summary>
+        /// Asynchronously saves the instance to a serialized byte array and optionally writes it to a file.
+        /// Returns the byte array via the optional callback.
+        /// </summary>
+        /// <param name="serializer">Serializer to use.</param>
+        /// <param name="file">Optional File where the data should be written.</param>
+        /// <param name="callback">Optional callback to be invoked on completion.</param>
+        public void SaveAsync(ISerializer serializer, 
+            FileInfo file = null, Action<byte[]> callback = null)
         {
             (saveThread = new Thread(() =>
             {
-//Console.WriteLine("Starting thread @" + Util.Millis());
-                Thread.CurrentThread.IsBackground = true;
+                //Console.WriteLine("Starting save @"+Util.Millis());
+                //Thread.Sleep(5000); // simulate a longer save
+
                 var bytes = Save(serializer, file);
-//Console.WriteLine("Calling invoke @" + Util.Millis());
-                callback.Invoke(bytes);
+
+                //Console.WriteLine("Serialized data @" + Util.Millis());
+
+                if (callback != null) callback.Invoke(bytes);
+
             })).Start();
         }
-            
-		/// <summary>
-		/// Save this instance to a serialized byte array
-		/// </summary>
-		public byte[] Save(ISerializer serializer, FileInfo file)
+
+        /// <summary>
+        /// Save the instance to a serialized byte array, and optionally write it to a file
+        /// </summary>
+        /// <returns>The serialized byte array</returns>
+        /// <param name="serializer">Serializer to use.</param>
+        /// <param name="file">Optional File where the data should be written.</param>
+		public byte[] Save(ISerializer serializer, FileInfo file = null)
 		{
             if (saving)
             {
@@ -318,26 +334,14 @@ namespace Dialogic
             }
 
             this.saving = true;
-//Console.WriteLine("Starting save @"+Util.Millis());
+
 			byte[] bytes = serializer.ToBytes(this);
-//Thread.Sleep(5000);
-//Console.WriteLine("Serialized data @" + Util.Millis());
 			if (file != null) File.WriteAllBytes(file.FullName, bytes);
-//Console.WriteLine("Wrote file @" + Util.Millis());
+
             this.saving = false;
 
 			return bytes;
 		}
-
-		/// <summary>
-		/// Save all chats in the runtime to a serialized byte array
-		/// </summary>
-		/*public byte[] SaveChats(ISerializer serializer, FileInfo file = null)
-        {
-            byte[] bytes = serializer.ToBytes(Chats());
-            if (file != null) File.WriteAllBytes(file.FullName, bytes);
-            return bytes;
-        }*/
 
 		/// <summary>
 		/// Update this instance with new data from a serialized byte array

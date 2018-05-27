@@ -143,8 +143,7 @@ namespace runner
                 var file = AppDomain.CurrentDomain.BaseDirectory;
                 file += Util.EpochMs() + ".ser";
 
-                Console.WriteLine("\n<save-event#file=" + file + ">" +
-                    " after " + Util.Millis(now) + "ms\n");
+                Console.WriteLine("\n<save-event#file=" + file + ">\n");
 
                 gameEvent = new SaveEvent(serializer, new FileInfo(file));
             });
