@@ -119,7 +119,6 @@ namespace runner
             var config = AppConfig.TAC;
             var saveFile = new FileInfo("./runtime.ser");
 
-
             ChatRuntime tmp = new ChatRuntime(config);
             tmp.ParseFile(fileOrFolder);
 
@@ -151,7 +150,6 @@ namespace runner
             // a 'Tap' event
             if (false) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
              {
-                 interrupted = true;
                  Console.WriteLine("\n<user-event#tap>" +
                      " after " + Util.Millis(now) + "ms\n");
 
@@ -191,17 +189,12 @@ namespace runner
                 Thread.Sleep(30);
                 IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
                 if (ue != null) HandleEvent(ref ue);
-                //if (Util.Millis(ts) > 1000)
-                //{
-
+                //if (Util.Millis(ts) > 1000) {
                 //    ts = Util.Millis();
-                //    if (++count < 5)
-                //    {
+                //    if (++count < 5) {
                 //        FuzzySearch.DBUG = count == 4;
                 //        gameEvent = new ResumeEvent("{type = test}");
-
-                //    }
-                //}
+                //    }}
             }
         }
 

@@ -565,18 +565,12 @@ namespace Dialogic
                 // leave any alias and transforms in place
                 reText = Name();
 
-                if (!transforms.IsNullOrEmpty())
-                {
-                    if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
-                        replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
-                }
+                //if (!transforms.IsNullOrEmpty())
+                replaceWith = CheckParens(replaceWith);
             }
             else if (!transforms.IsNullOrEmpty() && alias == null)  // B
             {
-                // add an enclosing group if needed
-                if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
-                    replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
-
+                replaceWith = CheckParens(replaceWith);
                 reText = Name();
             }
             else if (transforms.IsNullOrEmpty() && alias != null)   // C
@@ -590,14 +584,22 @@ namespace Dialogic
                 HandleAlias(replaceWith, globals);
 
                 // leave the transforms in place               
-                replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP + TransformText();
+                replaceWith = CheckParens(replaceWith) + TransformText();
             }
 
             // before replacing, make sure groups are properly bounded
-            if (replaceWith.Contains(Ch.OR) && !replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
+            if (replaceWith.Contains(Ch.OR)) CheckParens(replaceWith);
+        }
+
+        internal static string CheckParens(string replaceWith)
+        {
+            // add an enclosing group for the transform
+            if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP, true))
             {
                 replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
             }
+
+            return replaceWith;
         }
 
         private void HandleAlias(object resolved, IDictionary<string, object> scope)
@@ -684,7 +686,7 @@ namespace Dialogic
 
     public class TxForm : Resolvable
     {
-        public string content, transformText;
+        public string content, origContent, transformText;
         public List<string> transforms;
 
         private TxForm(Chat context, Match m) : this(context, m.Groups) { }
@@ -692,7 +694,7 @@ namespace Dialogic
         private TxForm(Chat context, GroupCollection gc) : base(context)
         {
             this.text = gc[0].Value;
-            this.content = gc[1].Value.Trim();
+            this.content = gc[1].Value.Trim().Replace("(", "").Replace(")", "");
             this.transformText = gc[2].Value.Trim();
             if (!this.transformText.IsNullOrEmpty())
             {
@@ -707,24 +709,27 @@ namespace Dialogic
 
         public override string ToString()
         {
-            return content + " -> " + transformText;
+            return "[" + content + " -> " + transformText + "]";
         }
 
-        public static void Parse(List<TxForm> tforms, string text, Chat context)
+        public static void Parse(List<TxForm> tforms,
+            string text, Chat context, bool showMatches = false)
         {
             var matches = RE.ParseTransforms.Matches(text);
 
+            if (showMatches) Util.ShowMatches(matches);
+
             foreach (Match match in matches)
             {
-                // Create a new Symbol and add it to the result
                 tforms.Add(new TxForm(context, match));
             }
         }
 
-        public static List<TxForm> Parse(string text, Chat context)
+        public static List<TxForm> Parse(string text,
+            Chat context, bool showMatches = false)
         {
             var tforms = new List<TxForm>();
-            Parse(tforms, text, context);
+            Parse(tforms, text, context, showMatches);
             return tforms;
         }
 
@@ -736,7 +741,9 @@ namespace Dialogic
 
         internal string Resolve()
         {
-            //Console.WriteLine(text + " " + content + " " + transformText + " " + transforms.Stringify());
+            //Console.WriteLine(text + " " + content + " " 
+            //+ transformText + " " + transforms.Stringify());
+
             if (text.ContainsAny(Ch.SYMBOL, Ch.OR)) throw new BindException
                 ("Invalid state: " + this);
 

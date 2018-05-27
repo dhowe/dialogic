@@ -7,7 +7,17 @@ namespace Dialogic
 {
 	[TestFixture]
 	public class DialogicTests : GenericTests
-	{      
+	{
+        [Test]
+        public void EnclosedByStrictTest()
+        {
+            Assert.That("(hello)".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.True);
+            Assert.That("(he)llo)".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.False);
+            Assert.That("((a) (b))".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.False);
+            Assert.That("((a b))".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.False);
+            Assert.That("(a b)".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.True);
+        }
+
 		//[Test]
         public void AngerFortunes()
         {

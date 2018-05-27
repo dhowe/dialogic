@@ -9,29 +9,40 @@ namespace Dialogic
     public class RegexTests : GenericTests
     {
         [Test]
-        public void MatchTransforms()
+        public void MatchTransformText()
         {
-            TxForm tx;
-            Chat c = CreateParentChat("c1");
             Regex re = RE.ParseTransforms;
+            Match match;
 
-            tx = TxForm.Parse("(a).Cap()", c)[0];
-            Assert.That(tx.text, Is.EqualTo("(a).Cap()"));
-            Assert.That(tx.content, Is.EqualTo("a"));
-            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+            string[] tests = {
+                ".abc()", "",
+                "a.abc()", "",
+                "a).abc()", "",
+                "(a.abc()", "",
+                "(a)).abc()", "",
+                "(a).abc()", "(a).abc()",
+                "((a).abc()", "(a).abc()",
+                "(a b).abc()", "(a b).abc()",
+                "((a b)).abc()", "((a b)).abc()",
+                "(((a b))).abc()", "(((a b))).abc()",
+                "((a) (b)).abc()", "((a) (b)).abc()",
+                "((a)(b)).abc()", "((a)(b)).abc()",
+                "((ab)).abc()", "((ab)).abc()",
+                ")((ab)).abc()(", "((ab)).abc()",
+                "(((a b)).abc())", "((a b)).abc()",
+                "(((a b)).abc()", "((a b)).abc()",
+            };
 
-            tx = TxForm.Parse("(a b).Cap()", c)[0];
-            Assert.That(tx.text, Is.EqualTo("(a b).Cap()"));
-            Assert.That(tx.content, Is.EqualTo("a b"));
-            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
-
-            //List<TxForm> txs = TxForm.Parse("((a b)).Cap()", c);
-            //Console.WriteLine(txs.Count);
-            //Assert.That(tx.text, Is.EqualTo("(a b).Cap()"));
-            //Assert.That(tx.content, Is.EqualTo("a b"));
-            //Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+            for (int i = 0; i < tests.Length; i += 2)
+            {
+                match = re.Match(tests[i]);
+                //Console.WriteLine("\n" +i / 2 + ") " + tests[i]);// + " -> " + match.Groups[0].Value+"\n");
+                Assert.That(match.Groups[0].Value, Is.EqualTo(tests[i + 1]));
+            }
         }
-            
+
+
+
         [Test]
         public void MatchGroups()
         {

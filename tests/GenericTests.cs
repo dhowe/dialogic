@@ -98,6 +98,15 @@ namespace Dialogic
             return false;
         }
 
+        public static bool IsOneOf(this string candidate, params string[] expected)
+        {
+            if (expected.Contains(candidate)) return true;
+            var msg = string.Format("Expected one of: [{0}]. Actual: '{1}'", ", "
+                .InsertBetween(expected.Select(x => "'" + Convert.ToString(x) + "'")), candidate);
+            Assert.Fail(msg);
+            return false;
+        }
+
         private static string InsertBetween(this string delimiter, IEnumerable<string> items)
         {
             var builder = new StringBuilder();

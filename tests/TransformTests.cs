@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -8,6 +8,101 @@ namespace Dialogic
 	[TestFixture]
 	class TransformTests : GenericTests
 	{
+        [Test]
+        public void PartialTransformIssue()
+        {
+            ChatRuntime rt = new ChatRuntime();
+
+            rt.ParseText("SET $test = (a) (b)\nSAY $test.Cap()", true);
+            Assert.That(rt.InvokeImmediate(globals), Is.EqualTo("A b"));
+
+            Resolver.DBUG = false;
+
+            rt = new ChatRuntime();
+            rt.ParseText("SET $test = (a | a) (b | b)\nSAY $test.Cap()", true);
+            Assert.That(rt.InvokeImmediate(globals), Is.EqualTo("A b"));
+        }
+
+        [Test]
+        public void TransformIssue()
+        {
+            string res;
+
+            res = new Resolver(null).Bind("(ab).Cap()", CreateParentChat("c"), null);
+            //Console.WriteLine("1: " + res);
+            Assert.That(res, Is.EqualTo("Ab"));
+
+            res = new Resolver(null).Bind("(a b).Cap()", CreateParentChat("c"), null);
+            ///Console.WriteLine("2: " + res);
+            Assert.That(res, Is.EqualTo("A b"));
+
+
+            Resolver.DBUG = false;
+            res = new Resolver(null).Bind("((a b)).Cap()", CreateParentChat("c"), null);
+            //Console.WriteLine("3: " + res);
+            Assert.That(res, Is.EqualTo("A b"));
+
+            res = new Resolver(null).Bind("((a) (b)).Cap()", CreateParentChat("c"), null);
+            //Console.WriteLine("4: " + res);
+            Assert.That(res, Is.EqualTo("A b"));
+
+            res = new Resolver(null).Bind("((a)(b)).Cap()", CreateParentChat("c"), null);
+            //Console.WriteLine("5: " + res);
+            Assert.That(res, Is.EqualTo("Ab"));
+        }
+
+        [Test]
+        public void MatchTransforms()
+        {
+            Chat c = CreateParentChat("c1");
+            TxForm tx;
+
+            tx = TxForm.Parse("(a).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("(a).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("a"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("(a b).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("(a b).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("a b"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("((a b)).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("((a b)).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("a b"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("((a) (b)).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("((a) (b)).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("a b"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("((a)(b)).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("((a)(b)).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("ab"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("((ab)).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("((ab)).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("ab"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("(((ab)).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("((ab)).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("ab"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("((((ab)).Cap()))", c)[0];
+            Assert.That(tx.text, Is.EqualTo("((ab)).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("ab"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse(")((ab)).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("((ab)).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("ab"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+        }
+
         [Test]
         public void TransformIssues()
         {
@@ -43,11 +138,47 @@ namespace Dialogic
             Assert.That(say.Text(), Is.EqualTo("A cat, many cats").Or.EqualTo("A crow, many crows").Or.EqualTo("A cow, many cows"));
         }
 
+        [Test]
+        public void SimpleTransformResolveOnly()
+        {
+            string result, text;
+            TxForm tran;
+            Chat c1 = null;
+
+            text = "The so-called (dog).Quotify() ran.";
+            tran = TxForm.Parse(text, c1)[0];
+            result = tran.Resolve();
+            Assert.That(result.ToString(), Is.EqualTo("&quot;dog&quot;"));
+
+            text = "The (dog).Cap() ran.";
+            tran = TxForm.Parse(text, c1)[0];
+            result = tran.Resolve();
+            Assert.That(result.ToString(), Is.EqualTo("Dog"));
+
+            text = "(ant).Articlize().Cap() ran.";
+            tran = TxForm.Parse(text, c1)[0];
+            result = tran.Resolve();
+            Assert.That(result.ToString(), Is.EqualTo("An ant"));
+
+            text = "Today (ant).Cap().Articlize() ran.";
+            tran = TxForm.Parse(text, c1)[0];
+            result = tran.Resolve();
+            Assert.That(result.ToString(), Is.EqualTo("an Ant"));
+
+            text = "Today (an ant).Cap() ran.";
+            tran = TxForm.Parse(text, c1)[0];
+            result = tran.Resolve();
+            Assert.That(result.ToString(), Is.EqualTo("An ant"));
+
+            text = "(a (then).Cap())";
+            tran = TxForm.Parse(text, c1)[0];
+            result = tran.Resolve();
+            Assert.That(result.ToString(), Is.EqualTo("Then"));
+        }
+
 		[Test]
 		public void SimpleTransformResolution()
-		{
-			var ti = Transforms.Instance;
-   
+		{   
 			string result, text;
 			TxForm tran;
 			Chat c1 = null;

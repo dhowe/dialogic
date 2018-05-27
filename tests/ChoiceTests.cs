@@ -315,8 +315,24 @@ namespace Dialogic
 		[Test]
 		public void GroupsWithMissingSymbol()
 		{
-			var txt = "CHAT c1\nSET a = $object | $object.Call() | honk\nSAY $a";
-			ChatRuntime rt = new ChatRuntime();
+            ChatRuntime rt;
+            string txt;
+
+            txt = "a | b | c";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+
+            Resolver.DBUG = false;
+
+            for (int i = 0; i < 5; i++)
+            {
+                var s = rt.InvokeImmediate(globals);
+                //Console.WriteLine("#" + i + ": " + s);
+                Assert.That(s.IsOneOf(new[] { "a", "b", "c" }));
+            }
+
+			txt = "CHAT c1\nSET a = $object | $object.Call() | honk\nSAY $a";
+			rt = new ChatRuntime();
 			rt.ParseText(txt);
 			//Resolver.DBUG = true;
 			rt.strictMode = false;
@@ -324,7 +340,7 @@ namespace Dialogic
 			for (int i = 0; i < 5; i++)
 			{
 				var s = rt.InvokeImmediate(globals);
-				//Console.WriteLine(s);
+                //Console.WriteLine("#"+i+": "+s);
 				Assert.That(s.IsOneOf(new[] { "$object", "$object.Call()", "honk" }));
 			}
 			ChatRuntime.SILENT = false;
