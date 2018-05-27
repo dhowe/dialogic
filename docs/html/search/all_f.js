@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['save',['Save',['../class_dialogic_1_1_chat_runtime.html#a6fa91c8841267f2533f4f93a0a52563c',1,'Dialogic::ChatRuntime']]],
+  ['save',['Save',['../class_dialogic_1_1_chat_runtime.html#a2923def703022860311919f61d97245b',1,'Dialogic::ChatRuntime']]],
+  ['saveasync',['SaveAsync',['../class_dialogic_1_1_chat_runtime.html#a5fbfb30c01ee9ef0676a934853d9cb0f',1,'Dialogic::ChatRuntime']]],
   ['saveevent',['SaveEvent',['../class_dialogic_1_1_save_event.html',1,'Dialogic']]],
   ['say_5fduration',['SAY_DURATION',['../class_dialogic_1_1_defaults.html#ad8ef6a7453dcac7a87b5304c3590a3fa',1,'Dialogic::Defaults']]],
   ['set',['Set',['../class_dialogic_1_1_set.html',1,'Dialogic']]],

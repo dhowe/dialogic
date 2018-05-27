@@ -129,14 +129,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseFile</b> (string
 <tr class="memitem:a85f723d0b3156a8de035772dc07365dc"><td class="memItemLeft" align="right" valign="top">List&lt; <a class="el" href="class_dialogic_1_1_chat.html">Chat</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a85f723d0b3156a8de035772dc07365dc">Chats</a> ()</td></tr>
 <tr class="memdesc:a85f723d0b3156a8de035772dc07365dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the current chat data to a flat List  <a href="#a85f723d0b3156a8de035772dc07365dc">More...</a><br /></td></tr>
 <tr class="separator:a85f723d0b3156a8de035772dc07365dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5c7d88f5a4004ef54fdf744a9ea5d50c"><td class="memItemLeft" align="right" valign="top"><a id="a5c7d88f5a4004ef54fdf744a9ea5d50c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>SaveAsync</b> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, FileInfo file, Action&lt; byte[]&gt; callback=null)</td></tr>
-<tr class="separator:a5c7d88f5a4004ef54fdf744a9ea5d50c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6fa91c8841267f2533f4f93a0a52563c"><td class="memItemLeft" align="right" valign="top">byte []&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a6fa91c8841267f2533f4f93a0a52563c">Save</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, FileInfo file)</td></tr>
-<tr class="memdesc:a6fa91c8841267f2533f4f93a0a52563c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save this instance to a serialized byte array  <a href="#a6fa91c8841267f2533f4f93a0a52563c">More...</a><br /></td></tr>
-<tr class="separator:a6fa91c8841267f2533f4f93a0a52563c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fbfb30c01ee9ef0676a934853d9cb0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a5fbfb30c01ee9ef0676a934853d9cb0f">SaveAsync</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, FileInfo file=null, Action&lt; byte[]&gt; callback=null)</td></tr>
+<tr class="memdesc:a5fbfb30c01ee9ef0676a934853d9cb0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously saves the instance to a serialized byte array and optionally writes it to a file. Returns the byte array via the optional callback.  <a href="#a5fbfb30c01ee9ef0676a934853d9cb0f">More...</a><br /></td></tr>
+<tr class="separator:a5fbfb30c01ee9ef0676a934853d9cb0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2923def703022860311919f61d97245b"><td class="memItemLeft" align="right" valign="top">byte []&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a2923def703022860311919f61d97245b">Save</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, FileInfo file=null)</td></tr>
+<tr class="memdesc:a2923def703022860311919f61d97245b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save the instance to a serialized byte array, and optionally write it to a file  <a href="#a2923def703022860311919f61d97245b">More...</a><br /></td></tr>
+<tr class="separator:a2923def703022860311919f61d97245b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a649f69fd76d6f090438b1fa048b95d49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a649f69fd76d6f090438b1fa048b95d49">UpdateFrom</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, byte[] bytes)</td></tr>
-<tr class="memdesc:a649f69fd76d6f090438b1fa048b95d49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save all chats in the runtime to a serialized byte array  <a href="#a649f69fd76d6f090438b1fa048b95d49">More...</a><br /></td></tr>
+<tr class="memdesc:a649f69fd76d6f090438b1fa048b95d49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update this instance with new data from a serialized byte array  <a href="#a649f69fd76d6f090438b1fa048b95d49">More...</a><br /></td></tr>
 <tr class="separator:a649f69fd76d6f090438b1fa048b95d49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a401fdcd2aa377cd4a2e0831424098a93"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_chat_runtime.html#a401fdcd2aa377cd4a2e0831424098a93">UpdateFrom</a> (<a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a> serializer, <a class="el" href="class_dialogic_1_1_chat_runtime.html">ChatRuntime</a> rt)</td></tr>
 <tr class="memdesc:a401fdcd2aa377cd4a2e0831424098a93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update this instance with new data from a serialized byte array  <a href="#a401fdcd2aa377cd4a2e0831424098a93">More...</a><br /></td></tr>
@@ -593,8 +593,8 @@ Properties</h2></td></tr>
 
 </div>
 </div>
-<a id="a6fa91c8841267f2533f4f93a0a52563c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6fa91c8841267f2533f4f93a0a52563c">&#9670;&nbsp;</a></span>Save()</h2>
+<a id="a2923def703022860311919f61d97245b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2923def703022860311919f61d97245b">&#9670;&nbsp;</a></span>Save()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -612,7 +612,7 @@ Properties</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">FileInfo&#160;</td>
-          <td class="paramname"><em>file</em>&#160;</td>
+          <td class="paramname"><em>file</em> = <code>null</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -627,7 +627,67 @@ Properties</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Save this instance to a serialized byte array </p>
+<p>Save the instance to a serialized byte array, and optionally write it to a file </p>
+<dl class="section return"><dt>Returns</dt><dd>The serialized byte array</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">serializer</td><td>Serializer to use.</td></tr>
+    <tr><td class="paramname">file</td><td>Optional File where the data should be written.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5fbfb30c01ee9ef0676a934853d9cb0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fbfb30c01ee9ef0676a934853d9cb0f">&#9670;&nbsp;</a></span>SaveAsync()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Dialogic.ChatRuntime.SaveAsync </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="interface_dialogic_1_1_i_serializer.html">ISerializer</a>&#160;</td>
+          <td class="paramname"><em>serializer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FileInfo&#160;</td>
+          <td class="paramname"><em>file</em> = <code>null</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Action&lt; byte[]&gt;&#160;</td>
+          <td class="paramname"><em>callback</em> = <code>null</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Asynchronously saves the instance to a serialized byte array and optionally writes it to a file. Returns the byte array via the optional callback. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">serializer</td><td>Serializer to use.</td></tr>
+    <tr><td class="paramname">file</td><td>Optional File where the data should be written.</td></tr>
+    <tr><td class="paramname">callback</td><td>Optional callback to be invoked on completion.</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -723,7 +783,6 @@ Properties</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Save all chats in the runtime to a serialized byte array </p>
 <p>Update this instance with new data from a serialized byte array </p>
 
 </div>
