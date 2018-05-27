@@ -9,6 +9,30 @@ namespace Dialogic
     public class RegexTests : GenericTests
     {
         [Test]
+        public void MatchTransforms()
+        {
+            TxForm tx;
+            Chat c = CreateParentChat("c1");
+            Regex re = RE.ParseTransforms;
+
+            tx = TxForm.Parse("(a).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("(a).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("a"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            tx = TxForm.Parse("(a b).Cap()", c)[0];
+            Assert.That(tx.text, Is.EqualTo("(a b).Cap()"));
+            Assert.That(tx.content, Is.EqualTo("a b"));
+            Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+
+            //List<TxForm> txs = TxForm.Parse("((a b)).Cap()", c);
+            //Console.WriteLine(txs.Count);
+            //Assert.That(tx.text, Is.EqualTo("(a b).Cap()"));
+            //Assert.That(tx.content, Is.EqualTo("a b"));
+            //Assert.That(tx.transformText, Is.EqualTo(".Cap()"));
+        }
+            
+        [Test]
         public void MatchGroups()
         {
             Match match;
@@ -839,7 +863,7 @@ namespace Dialogic
         }
 
         private static void TestInner(Regex re, string full,
-          string expected, bool showMatches = false)
+          string expected, int groupIdx = 2, bool showMatches = false)
         {
             Match match = re.Match(full);
             if (showMatches) Util.ShowMatch(match);

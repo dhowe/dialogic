@@ -9,6 +9,34 @@ namespace Dialogic
     public class ResolverTests : GenericTests
     {
         [Test]
+        public void TransformIssue()
+        {
+            string res;
+
+            res = new Resolver(null).Bind("(ab).Cap()", CreateParentChat("c"), null);
+            Console.WriteLine("1: "+res);
+            Assert.That(res, Is.EqualTo("Ab"));
+
+            res = new Resolver(null).Bind("(a b).Cap()", CreateParentChat("c"), null);
+            Console.WriteLine("2: " +res);
+            Assert.That(res, Is.EqualTo("A b"));
+
+            res = new Resolver(null).Bind("((a b)).Cap()", CreateParentChat("c"), null);
+            Console.WriteLine("3: " +res);
+            Assert.That(res, Is.EqualTo("A b"));
+
+            Resolver.DBUG = true;
+
+            res = new Resolver(null).Bind("((a) (b)).Cap()", CreateParentChat("c"), null);
+            Console.WriteLine("4: " +res);
+            Assert.That(res, Is.EqualTo("A b"));
+
+            res = new Resolver(null).Bind("((a)(b)).Cap()", CreateParentChat("c"), null);
+            Console.WriteLine("5: " +res);
+            Assert.That(res, Is.EqualTo("Ab"));
+        }
+
+        [Test]
         public void TransformIssues()
         {
             ChatRuntime rt;
