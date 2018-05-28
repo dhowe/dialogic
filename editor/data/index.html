@@ -3,20 +3,27 @@
 <head>
   <title>Dialogic v0.7.71</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<!--   <script src="http://rednoise.org/js/jquery-linedtextarea-dialogic.js"></script> -->
+  <script src="http://rednoise.org/js/jquery-linedtextarea-dialogic.js"></script>
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.js"></script>
   <style>
-      .CodeMirror {
-      border: 1px solid #eee;
-      min-height: 400px;
-/*      height: auto;*/
-    }
-
     body {
       padding: 0 2em;
+    }
+
+    .line-error {
+      position: absolute;
+      width: 90%;
+      height: 14px;
+      margin-top: -14px;
+      padding-right: 557px !important;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .linedtextarea textarea {
+      outline: none !important;
+      background-color: transparent !important;
     }
 
     .sub-title {
@@ -197,32 +204,6 @@
       color: #333 !important;
       margin: 10px 20px 0 0 !important;
     }
-
-    .handle {
-      margin-top:-15px;
-      background: #f7f7f7;
-      height: 20px;
-      user-select: none;
-      cursor: row-resize;
-      border-top: 1px solid #ddd;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .handle:before {
-      content: '\2261'; /* https://en.wikipedia.org/wiki/Triple_bar */
-      color: #999;
-      position: absolute;
-      left: 50%;
-    }
-
-    .handle:hover {
-      background: #f0f0f0;
-    }
-
-    .handle:hover:before {
-      color: #000;
-    }
-
   </style>
 </head>
 
@@ -241,9 +222,6 @@
   <form name="main" id="form">
     <div class="input-area">
       <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false">%%CODE%%</textarea>
-      <div class="handle">
-      </div>
-     
     </div>
     <div id="button-div" class="validate">
       <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
@@ -253,7 +231,6 @@
       <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
     </div>
   </form>
-
   <section id="result-container" class="%%CCLASS%%">
     <pre id="executeResult" style="font-size: 13px" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
     <pre id="result" style="font-size: 13px" class="%%RCLASS%%">%%RESULT%%</pre>
@@ -274,27 +251,14 @@
     </div>
   </div>
   <script>
-
-    
-
     $(function ()
-    {  
-      var myTextarea =  $("#main")[0];
-      var editor = CodeMirror.fromTextArea(myTextarea, {
-              lineNumbers: true,
-              styleSelectedText: true
-      });
-
-      editor.on("change", function(cm, change) {
-        // update the textarea
-        $("#main").val(editor.getValue());
-        toggleValidateButtons(editor.getValue());
-      })
+    {
+      $("#main").linedtextarea();
 
       // setup button handlers
       $("#clear").click(function ()
       {
-        editor.setValue("");
+        $("#main").empty();
       });
 
       $("#execute").click(function ()
@@ -321,20 +285,18 @@
       });
 
       $("#closeDialog").click(closeURLDialog);
-      
-      // $("#main").on('input', toggleValidateButtons);
-   
+
+      $("#main").on('input', toggleValidateButtons);
 
       (function ()
       {
-        toggleValidateButtons(editor.getValue());
+        toggleValidateButtons();
 
         // highlight line on which error happened
-
         if (!$("#errorLine").text().includes("ERRORLINE"))
         {
           var idx = $("#errorLine").text() - 1;
-          editor.addLineClass(idx, "background", 'line-error');
+          $(".lineno:eq(" + idx + ")").append("<div class='line-error'></div>");
         }
 
         adjustLineErrorWidth();
@@ -348,12 +310,13 @@
       // functions ---------------------------------------------
       function adjustLineErrorWidth()
       {
-        // $('.line-error').css('width', $('.linedtextarea').outerWidth().toString());
+        $('.line-error').css('width', $('.linedtextarea').outerWidth().toString());
       }
 
-      function toggleValidateButtons(input)
+      function toggleValidateButtons()
       {
-    
+        var $main = $("#main");
+        var input = $main.val();
         if (input.length && input != 'Enter your script here')
         {
           $("#validate").prop("disabled", false);
@@ -384,37 +347,41 @@
           value: execute ? 'execute' : 'validate'
         });
 
-        var selection = editor.getSelection();
-        
-         if (selection)
+        if (!execute)
+        {
+          var $main = $("#main");
+          var startIdx = $main[0].selectionStart;
+          var endIdx = $main[0].selectionEnd;
+
+          var selection = $main.getSelectedText(startIdx, endIdx);
+
+          if (selection)
           {
+            formData.push(
+            {
+              name: "selectionStart",
+              value: startIdx
+            });
+            formData.push(
+            {
+              name: "selectionEnd",
+              value: endIdx
+            });
             formData.push(
             {
               name: "selection",
               value: selection
             });
           }
-
-        // Question: why differienciate execute and validate button for selection?
-        // if (!execute)
-        // {
-          //  if (selection)
-          // {
-          //   formData.push(
-          //   {
-          //     name: "selection",
-          //     value: selection
-          //   });
-          // }
-        // }
-        // else
-        // {
-        //   formData.push(
-        //   {
-        //     name: "selection",
-        //     value: $("#result").text()
-        //   });
-        // }
+        }
+        else
+        {
+          formData.push(
+          {
+            name: "selection",
+            value: $("#result").text()
+          });
+        }
 
         sendRequest(formData);
       }
@@ -464,42 +431,6 @@
           }
         }
       }
-
-      // Verticle resize
-      // Based on: https://jsfiddle.net/mindplay/rs2L2vtb/2/
-      let $handle =  document.querySelector(".handle");
-      let $container = document.querySelector(".CodeMirror");
-
-      function height_of($el) {
-        return parseInt(window.getComputedStyle($el).height.replace(/px$/, ""));
-      }
-
-      const MIN_HEIGHT = 200;
-
-      var start_x;
-      var start_y;
-      var start_h;
-
-      function on_drag(e) {
-        var height = Math.max(MIN_HEIGHT, (start_h + e.y - start_y)) + "px";
-        editor.setSize(null, height);
-        $(".CodeMirror-gutters").height(height);
-      }
-
-      function on_release(e) {
-        document.body.removeEventListener("mousemove", on_drag);
-        window.removeEventListener("mouseup", on_release);
-      }
-
-      $handle.addEventListener("mousedown", function (e) {    
-        start_x = e.x;
-        start_y = e.y;
-        start_h = height_of($container);
-
-        document.body.addEventListener("mousemove", on_drag);
-        window.addEventListener("mouseup", on_release);
-      });
-
 
     });
   </script>
