@@ -37,11 +37,24 @@ namespace Dialogic
         }
     }
 
+    public class LoadEvent : GameEvent, ILoadEvent
+    {
+        protected readonly List<Chat> chats;
+
+        public LoadEvent(List<Chat> chats) : base()
+        {
+            this.chats = chats;
+        }
+
+        public List<Chat> GetChats() => chats;
+
+    }
+
     /// <summary>
     /// Basic implementation of ISave: tells Dialogic to save the current state,
     /// using the specified serializer and file-info path
     /// </summary>
-    public class SaveEvent : GameEvent, ISave
+    public class SaveEvent : GameEvent, ISaveEvent
     {
         protected readonly ISerializer serializer;
         protected readonly FileInfo file;

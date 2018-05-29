@@ -26,9 +26,8 @@ namespace Dialogic
             if (ea is IResume) return ResumeHandler(ref ea, globals);
             if (ea is IChoice) return ChoiceHandler(ref ea, globals);
             if (ea is IClear) return ClearHandler(ref ea, globals);
-            if (ea is ISave) return SaveHandler(ref ea, globals);
-
-            // ea = null; TODO:
+            if (ea is ISaveEvent) return SaveHandler(ref ea, globals);
+            if (ea is ILoadEvent) return LoadHandler(ref ea, globals);
 
             throw new DialogicException("Unexpected event-type: " + ea.GetType());
         }
@@ -86,10 +85,21 @@ namespace Dialogic
 
         private IUpdateEvent SaveHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
-            ISave se = (ISave)ea;
+            ISaveEvent evt = (ISaveEvent)ea;
             ea = null;
-            runtime.SaveAsync(se.GetSerializer(), se.GetFile(), 
-                (bytes) => Console.WriteLine("SAVED: "+bytes.Length+" bytes"));
+            runtime.SaveAsync(evt.GetSerializer(), evt.GetFile(), (bytes) =>
+            {
+                var msg = "SAVE: " + (bytes != null ? bytes.Length + " bytes" : "Failed");
+                Console.WriteLine(msg);
+            });
+            return null;
+        }
+
+        private IUpdateEvent LoadHandler(ref EventArgs ea, IDictionary<string, object> globals)
+        {
+            ILoadEvent evt = (ILoadEvent)ea;
+            ea = null;
+            runtime.AddChatsAsync(evt.GetChats());
             return null;
         }
 

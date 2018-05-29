@@ -7,7 +7,8 @@ namespace Dialogic
 
 	public class DialogicException : Exception
 	{
-		public DialogicException(string msg = "") : base(msg) { }
+        public DialogicException(string msg = "", 
+            Exception e = null) : base(msg, e) { }
 	}
 
 	public class BindException : DialogicException

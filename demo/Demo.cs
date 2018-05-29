@@ -136,8 +136,21 @@ namespace runner
         {
             var now = Util.Millis();
 
+            // a 'Load' event
+            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+            {
+                Console.WriteLine("\n<load-event#chats>\n");
+
+                var runtime = new ChatRuntime(TendAR.AppConfig.TAC);
+                runtime.ParseText(string.Join('\n', new[] {
+                    "CHAT GScriptTest {type=a,stage=b}",
+                    "*** Welcome to my updated world!!!"
+                }));
+                gameEvent = new LoadEvent(runtime.Chats());
+            });
+
             // a 'Save' event
-            if (true) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
             {
                 var file = AppDomain.CurrentDomain.BaseDirectory;
                 file += Util.EpochMs() + ".ser";
