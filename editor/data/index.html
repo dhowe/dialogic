@@ -413,7 +413,10 @@
         if (window.getSelection)
         {
           var code = this.val();
-
+          
+          // we need to maintain correct line numbers for error-reporting,  
+          // so if we have a partial selection, we comment out any lines 
+          // NOT included in the highlighted portion
           if (startIdx != endIdx)
           {
             var lines = code.split("\n"),
