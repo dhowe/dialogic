@@ -1,29 +1,24 @@
 <html>
 
 <head>
-  <title>Dialogic</title>
+ <title>Dialogic</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <script src="http://rednoise.org/js/jquery-linedtextarea-dialogic.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<!--   <script src="http://rednoise.org/js/jquery-linedtextarea-dialogic.js"></script> -->
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.js"></script>
   <style>
+    .CodeMirror {
+      border: 1px solid #eee;
+      min-height: 400px;
+      line-height: 16px;
+/*      height: auto;*/
+    }
+
     body {
       padding: 0 2em;
-    }
-
-    .line-error {
-      position: absolute;
-      width: 90%;
-      height: 14px;
-      margin-top: -14px;
-      padding-right: 557px !important;
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    .linedtextarea textarea {
-      outline: none !important;
-      background-color: transparent !important;
     }
 
     .sub-title {
@@ -204,6 +199,32 @@
       color: #333 !important;
       margin: 10px 20px 0 0 !important;
     }
+
+    .handle {
+      margin-top:-15px;
+      background: #f7f7f7;
+      height: 20px;
+      user-select: none;
+      cursor: row-resize;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .handle:before {
+      content: '\2261'; /* https://en.wikipedia.org/wiki/Triple_bar */
+      color: #999;
+      position: absolute;
+      left: 50%;
+    }
+
+    .handle:hover {
+      background: #f0f0f0;
+    }
+
+    .handle:hover:before {
+      color: #000;
+    }
+
   </style>
 </head>
 
@@ -217,20 +238,26 @@
         </p>
         <img id="fish" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
         <span id="title">Dialogic</span><br>
+
   </span>
   <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
   <form name="main" id="form">
     <div class="input-area">
       <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false">%%CODE%%</textarea>
+      <div class="handle">
+      </div>
+
     </div>
     <div id="button-div" class="validate">
       <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
+     <!--  <button class="button" type="button" id="loadFromCookie" disabled title="Load from Cookie">Load From Cookie</button> -->
       <button class="button" type="reset" id="clear">Clear</button>
       <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
     </div>
   </form>
+
   <section id="result-container" class="%%CCLASS%%">
     <pre id="executeResult" style="font-size: 13px" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
     <pre id="result" style="font-size: 13px" class="%%RCLASS%%">%%RESULT%%</pre>
@@ -251,14 +278,36 @@
     </div>
   </div>
   <script>
+
     $(function ()
     {
-      $("#main").linedtextarea();
+      // ******** Editor Related ************//
 
+      var myTextarea = $("#main")[0];
+      var editor = CodeMirror.fromTextArea(myTextarea, {
+              lineNumbers: true,
+              styleSelectedText: true
+      });
+
+      loadFromCookie();
+
+      editor.on("change", function(cm, change) {
+        // update the textarea
+        var content = editor.getValue();
+        $("#main").val(content);
+        toggleButtons(content);
+        // save current change to cookie
+        if( content != "Enter your script here") {
+          $.cookie("guppyScript", content);
+        }
+      })
+      // ******** End Editor Related ************//
+
+      // ******** Click Handlers ************//
       // setup button handlers
       $("#clear").click(function ()
       {
-        $("#main").empty();
+        editor.setValue("");
       });
 
       $("#execute").click(function ()
@@ -285,38 +334,28 @@
       });
 
       $("#closeDialog").click(closeURLDialog);
+      // ******** End Click Handlers ************//
 
-      $("#main").on('input', toggleValidateButtons);
-
-      (function ()
-      {
-        toggleValidateButtons();
-
-        // highlight line on which error happened
-        if (!$("#errorLine").text().includes("ERRORLINE"))
-        {
-          var idx = $("#errorLine").text() - 1;
-          $(".lineno:eq(" + idx + ")").append("<div class='line-error'></div>");
-        }
-
-        adjustLineErrorWidth();
-      })();
-
-      $(window).resize(function ()
-      {
-        adjustLineErrorWidth();
-      })
+      adjustUI();
 
       // functions ---------------------------------------------
-      function adjustLineErrorWidth()
+      function adjustUI()
       {
-        $('.line-error').css('width', $('.linedtextarea').outerWidth().toString());
+        toggleButtons(editor.getValue());
+        highlightErrorLine();
       }
 
-      function toggleValidateButtons()
+      function highlightErrorLine()
       {
-        var $main = $("#main");
-        var input = $main.val();
+        if (!$("#errorLine").text().includes("ERRORLINE")) {
+          var idx = $("#errorLine").text() - 1;
+          editor.addLineClass(idx, "background", 'line-error');
+        }
+      }
+
+      function toggleButtons(input)
+      {
+
         if (input.length && input != 'Enter your script here')
         {
           $("#validate").prop("disabled", false);
@@ -324,10 +363,14 @@
 
         var resText = $("#result").text(),
           validated;
-        if (resText.length && resText.indexOf('%RESULT%') < 0)
+
+        // only show execute if validation is successfull
+        if (resText.length && resText.indexOf('%RESULT%') < 0 && $("#result").attr('class') =="success")
         {
           $("#execute").prop("disabled", false);
         }
+
+     
       }
 
       function closeURLDialog()
@@ -349,14 +392,13 @@
 
         if (!execute)
         {
-          var $main = $("#main");
-          var startIdx = $main[0].selectionStart;
-          var endIdx = $main[0].selectionEnd;
 
-          var selection = $main.getSelectedText(startIdx, endIdx);
-
-          if (selection)
+           if (editor.somethingSelected())
           {
+            var content = editor.getValue();
+            var startIdx = editor.getCursor(true).line;
+            var endIdx = editor.getCursor(false).line;
+            
             formData.push(
             {
               name: "selectionStart",
@@ -370,7 +412,7 @@
             formData.push(
             {
               name: "selection",
-              value: selection
+              value: processSelectedText(content, startIdx, endIdx)
             });
           }
         }
@@ -391,6 +433,15 @@
         sendRequest($("#loadUrlPathDiv").serialize());
       }
 
+      function loadFromCookie()
+      {  var cookieContent = $.cookie("guppyScript");
+         if(cookieContent != undefined && cookieContent != 'Enter your script here')  {
+           console.log(cookieContent);
+           editor.setValue(cookieContent);
+         }
+         
+      }
+
       function sendRequest(data)
       {
         $.ajax(
@@ -408,32 +459,63 @@
         });
       }
 
-      jQuery.fn.getSelectedText = function (startIdx, endIdx)
+      function processSelectedText(code, startIdx, endIdx)
       {
-        if (window.getSelection)
+        if (code)
         {
-          var code = this.val();
 
           // we need to maintain correct line numbers for error-reporting,  
           // so if we have a partial selection, we comment out any lines 
           // NOT included in the highlighted portion
           if (startIdx != endIdx)
           {
-            var lines = code.split("\n"),
-              count = 0;
+            var lines = code.split("\n");
 
             for (var i = 0; i < lines.length; i++)
             {
-              var lastChar = count + lines[i].length;
-              if (lastChar < startIdx) lines[i] = "//" + lines[i];
-              if (endIdx < count) lines[i] = "//" + lines[i];
-              count = lastChar + 1;
+              if (i < startIdx) lines[i] = "//" + lines[i];
+              if (endIdx < i) lines[i] = "//" + lines[i];
             }
-
             return lines.join("\n");
           }
         }
       }
+
+      // Verticle resize
+      // Based on: https://jsfiddle.net/mindplay/rs2L2vtb/2/
+      let $handle =  document.querySelector(".handle");
+      let $container = document.querySelector(".CodeMirror");
+
+      function height_of($el) {
+        return parseInt(window.getComputedStyle($el).height.replace(/px$/, ""));
+      }
+
+      const MIN_HEIGHT = 200;
+
+      var start_x;
+      var start_y;
+      var start_h;
+
+      function on_drag(e) {
+        var height = Math.max(MIN_HEIGHT, (start_h + e.y - start_y)) + "px";
+        editor.setSize(null, height);
+        $(".CodeMirror-gutters").height(height);
+      }
+
+      function on_release(e) {
+        document.body.removeEventListener("mousemove", on_drag);
+        window.removeEventListener("mouseup", on_release);
+      }
+
+      $handle.addEventListener("mousedown", function (e) {
+        start_x = e.x;
+        start_y = e.y;
+        start_h = height_of($container);
+
+        document.body.addEventListener("mousemove", on_drag);
+        window.addEventListener("mouseup", on_release);
+      });
+
 
     });
   </script>
