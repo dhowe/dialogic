@@ -292,6 +292,7 @@
       loadFromCookie();
 
       editor.on("change", function(cm, change) {
+
         // update the textarea
         var content = editor.getValue();
         $("#main").val(content);
@@ -299,6 +300,12 @@
         // save current change to cookie
         if( content != "Enter your script here") {
           $.cookie("guppyScript", content);
+        }
+
+        // change validate button if necessary
+         if (content.length && content != 'Enter your script here')
+        {
+          $("#validate").prop("disabled", false);
         }
       })
       // ******** End Editor Related ************//
@@ -361,6 +368,7 @@
           $("#validate").prop("disabled", false);
         }
 
+
         var resText = $("#result").text(),
           validated;
 
@@ -368,6 +376,7 @@
         if (resText.length && resText.indexOf('%RESULT%') < 0 && $("#result").attr('class') =="success")
         {
           $("#execute").prop("disabled", false);
+          $("#validate").prop("disabled", true);
         }
 
      
@@ -436,7 +445,6 @@
       function loadFromCookie()
       {  var cookieContent = $.cookie("guppyScript");
          if(cookieContent != undefined && cookieContent != 'Enter your script here')  {
-           console.log(cookieContent);
            editor.setValue(cookieContent);
          }
          
