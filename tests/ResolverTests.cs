@@ -211,28 +211,6 @@ namespace Dialogic
         }
 
         [Test]
-        public void ReplaceGroups()
-        {
-            Chat c1 = CreateParentChat("c1");
-
-            var txt = "The boy was (sad | happy)";
-            string[] ok = { "The boy was sad", "The boy was happy" };
-            for (int i = 0; i < 10; i++)
-            {
-                CollectionAssert.Contains(ok, new Resolver(null).BindChoices(txt, c1));
-            }
-
-            txt = "The boy was (sad | happy | dead)";
-            ok = new string[] { "The boy was sad", "The boy was happy", "The boy was dead" };
-            for (int i = 0; i < 10; i++)
-            {
-                string s = new Resolver(null).BindChoices(txt, c1);
-                //Console.WriteLine(i + ") " + s);
-                CollectionAssert.Contains(ok, s);
-            }
-        }
-
-        [Test]
         public void MetaReplaceGroups()
         {
             List<Chat> chats = ChatParser.ParseText("DO emote {type=(A|B)}");

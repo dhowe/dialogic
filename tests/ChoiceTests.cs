@@ -257,31 +257,44 @@ namespace Dialogic
             List<Choice> choices;
             Choice choice;
 
-            choices = Choice.Parse("you (a | b | c) a", c, false);
-            choice = choices[0];
+            choices = Choice.Parse("(a | b).Cap()", c, false);
             Assert.That(choices.Count, Is.EqualTo(1));
+            choice = choices[0];
+            Assert.That(choice.text, Is.EqualTo("(a | b).Cap()"));
+            Assert.That(choice.options.Count, Is.EqualTo(2));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
+
+            choices = Choice.Parse("you (a | b | c) a", c, false);
+            Assert.That(choices.Count, Is.EqualTo(1));
+            choice = choices[0];
             Assert.That(choice.text, Is.EqualTo("(a | b | c)"));
             Assert.That(choice.options.Count, Is.EqualTo(3));
             Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b", "c" }));
 
+            choices = Choice.Parse("you (a | a) a", c, false);
+            Assert.That(choices.Count, Is.EqualTo(1));
+            choice = choices[0];
+            Assert.That(choice.text, Is.EqualTo("(a | a)"));
+            Assert.That(choice.options.Count, Is.EqualTo(1));
+            Assert.That(choice.options, Is.EquivalentTo(new[] { "a" }));
 
             choices = Choice.Parse("you (a | (b | c)) a", c, false);
-            choice = choices[0];
             Assert.That(choices.Count, Is.EqualTo(1));
+            choice = choices[0];
             Assert.That(choice.text, Is.EqualTo("(b | c)"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EquivalentTo(new[] { "b", "c" }));
 
             choices = Choice.Parse("you (then | (a | b))", c, false);
-            choice = choices[0];
             Assert.That(choices.Count, Is.EqualTo(1));
+            choice = choices[0];
             Assert.That(choice.text, Is.EqualTo("(a | b)"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
 
             choices = Choice.Parse("you ((a | b) | then) a", c, false);
-            choice = choices[0];
             Assert.That(choices.Count, Is.EqualTo(1));
+            choice = choices[0];
             Assert.That(choice.text, Is.EqualTo("(a | b)"));
             Assert.That(choice.options.Count, Is.EqualTo(2));
             Assert.That(choice.options, Is.EquivalentTo(new[] { "a", "b" }));
@@ -346,8 +359,39 @@ namespace Dialogic
 			ChatRuntime.SILENT = false;
 		}
 
+
+        [Test]
+        public void BindChoicesTest()
+        {
+            Chat c1 = CreateParentChat("c1");
+            string txt;
+            string[] ok;
+
+            // FAILS:
+            //Resolver.DBUG = true;
+            txt = "(ok (a).Cap() | ok (a).Cap()).Cap()";
+            Assert.That(new Resolver(null).BindChoices(txt, c1), Is.EqualTo("(ok (a).Cap()).Cap()"));
+ 
+
+            txt = "The boy was (sad | happy)";
+            ok = new[]{ "The boy was sad", "The boy was happy" };
+            for (int i = 0; i < 10; i++)
+            {
+                CollectionAssert.Contains(ok, new Resolver(null).BindChoices(txt, c1));
+            }
+
+            txt = "The boy was (sad | happy | dead)";
+            ok = new[] { "The boy was sad", "The boy was happy", "The boy was dead" };
+            for (int i = 0; i < 10; i++)
+            {
+                string s = new Resolver(null).BindChoices(txt, c1);
+                //Console.WriteLine(i + ") " + s);
+                CollectionAssert.Contains(ok, s);
+            }
+        }
+
 		[Test]
-		public void BindChoicesTest()
+		public void BindTests()
 		{
 			string res;
 			var c = CreateParentChat("c");

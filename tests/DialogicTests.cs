@@ -11,7 +11,11 @@ namespace Dialogic
         [Test]
         public void EnclosedByStrictTest()
         {
+            Assert.That("(a() b())".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.True);
+            Assert.That("(a() b)".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.True);
+            Assert.That("(a b())".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.True);
             Assert.That("(hello)".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.True);
+            Assert.That("(he()llo)".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.True);
             Assert.That("(he)llo)".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.False);
             Assert.That("((a) (b))".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.False);
             Assert.That("((a b))".EnclosedBy(Ch.OGROUP, Ch.CGROUP, true), Is.False);

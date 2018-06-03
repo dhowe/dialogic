@@ -132,10 +132,19 @@ namespace Dialogic
         }
 
         [Test]
-        public void MatchValidText1()
+        public void ComplexMatchGroups()
         {
-            Regex regex = new Regex(RE.TXT);
-            Assert.That(regex.Match("$($emo)_rule").Value.Trim(), Is.EqualTo("$($emo)_rule"));
+            MatchCollection matches;
+
+            matches = RE.ParseChoices.Matches("((a) | (b))");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("((a) | (b))")); // text
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo(""));            // alias
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("(a) | (b)"));   // content
+
+            matches = RE.ParseChoices.Matches("((a) | (b).Cap())");
+            Assert.That(matches[0].Groups[0].Value.Trim(), Is.EqualTo("((a) | (b).Cap())")); 
+            Assert.That(matches[0].Groups[1].Value.Trim(), Is.EqualTo(""));            
+            Assert.That(matches[0].Groups[2].Value.Trim(), Is.EqualTo("(a) | (b).Cap()"));
         }
 
         [Test]
@@ -163,79 +172,12 @@ namespace Dialogic
             match = regex.Match("a=$b{");
             Assert.That(match.Value.Trim(), Is.EqualTo("a=$b"));
 
-            //match = regex.Match("a=${b}");
-            //Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
-            //match = regex.Match("a=${b} {}");
-            //Assert.That(match.Value.Trim(), Is.EqualTo("a=${b}"));
-            //match = regex.Match("a=${b.c} {}");
-            //Assert.That(match.Value.Trim(), Is.EqualTo("a=${b.c}"));
-            //match = regex.Match("a=${b->c} {");
-            //Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
-            //match = regex.Match("a=${b->c} #");
-            //Assert.That(match.Value.Trim(), Is.EqualTo("a=${b->c}"));
+            Assert.That(regex.Match("$($emo)_rule").Value.Trim(), Is.EqualTo("$($emo)_rule"));
 
             match = regex.Match("$a=$b");
             //Util.ShowMatch(match);
             Assert.That(match.Value.Trim(), Is.EqualTo("$a=$b"));
         }
-
-        /*[Test]
-        public void EnclosedVarSets()
-        {
-            var cp = new ChatRuntime().Parser();
-
-            string text;
-            LineContext lc;
-
-            text = "SET a=$b";
-            lc = new LineContext(cp, text);
-            Assert.That(lc, Is.Not.Null);
-            Assert.That(lc.command, Is.EqualTo("SET"));
-            Assert.That(lc.text, Is.EqualTo("a=$b"));
-            Assert.That(lc.meta, Is.EqualTo(""));
-
-            text = "SET a=${b}";
-            lc = new LineContext(cp, text);
-            Assert.That(lc, Is.Not.Null);
-            Assert.That(lc.command, Is.EqualTo("SET"));
-            Assert.That(lc.text, Is.EqualTo("a=${b}"));
-            Assert.That(lc.meta, Is.EqualTo(""));
-
-            text = "SET a=${b} {meta=val}";
-            lc = new LineContext(cp, text);
-            Assert.That(lc, Is.Not.Null);
-            Assert.That(lc.command, Is.EqualTo("SET"));
-            Assert.That(lc.text, Is.EqualTo("a=${b}"));
-            Assert.That(lc.meta, Is.EqualTo("meta=val"));
-
-            text = "SET a=${b.c} {meta=val}";
-            lc = new LineContext(cp, text);
-            Assert.That(lc, Is.Not.Null);
-            Assert.That(lc.command, Is.EqualTo("SET"));
-            Assert.That(lc.text, Is.EqualTo("a=${b.c}"));
-            Assert.That(lc.meta, Is.EqualTo("meta=val"));
-
-            text = "SET a=${b->c} {meta=val}";
-            lc = new LineContext(cp, text);
-            Assert.That(lc, Is.Not.Null);
-            Assert.That(lc.command, Is.EqualTo("SET"));
-            Assert.That(lc.text, Is.EqualTo("a=${b->c}"));
-            Assert.That(lc.meta, Is.EqualTo("meta=val"));
-
-            text = "SET a=${b->c->d} {meta=val}";
-            lc = new LineContext(cp, text);
-            Assert.That(lc, Is.Not.Null);
-            Assert.That(lc.command, Is.EqualTo("SET"));
-            Assert.That(lc.text, Is.EqualTo("a=${b->c->d}"));
-            Assert.That(lc.meta, Is.EqualTo("meta=val"));
-
-            text = "SET a=${b&c&d} {meta=val}";
-            lc = new LineContext(cp, text);
-            Assert.That(lc, Is.Not.Null);
-            Assert.That(lc.command, Is.EqualTo("SET"));
-            Assert.That(lc.text, Is.EqualTo("a=${b&c&d}"));
-            Assert.That(lc.meta, Is.EqualTo("meta=val"));
-        }*/
 
         [Test]
         public void DollarPathVariations()

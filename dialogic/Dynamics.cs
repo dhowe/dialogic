@@ -295,12 +295,13 @@ namespace Dialogic
                 var expr = m.Groups[2].Value;
                 var trans = ParseTransforms(m.Groups[3]);
 
-                if (expr.Contains(Ch.CGROUP)) // TODO: fix this hack
-                {
-                    var oidx = full.IndexOf(Ch.OGROUP);
-                    var cidx = full.LastIndexOf(Ch.CGROUP);
-                    expr = full.Substring(oidx + 1, cidx - oidx - 1);
-                }
+                // TODO: Why was this here ??
+                //if (expr.Contains(Ch.CGROUP))
+                //{
+                //    var oidx = full.IndexOf(Ch.OGROUP);
+                //    var cidx = full.LastIndexOf(Ch.CGROUP);
+                //    expr = full.Substring(oidx + 1, cidx - oidx - 1);
+                //}
 
                 if (CacheEnabled(context))
                 {
@@ -374,16 +375,31 @@ namespace Dialogic
             // if we have transforms, save them for later resolution
             if (!transforms.IsNullOrEmpty())
             {
-                //Console.Write("Choice.chop: " + toReplace);
-                toReplace = toReplace.Substring(0, toReplace.IndexOf(").", Util.IC)) + ")";
+                //toReplace = toReplace.Substring(0, toReplace.LastIndexOf(").", Util.IC)) + ")";
+
                 if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
                 {
+                    var pre = replaceWith;
                     replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
+                    //Console.WriteLine("Choice.ENCLOSED: " + pre + " -> " + replaceWith);
                 }
                 //Console.WriteLine(" -> " + toReplace);
+
+                foreach (var t in transforms)
+                {
+                    replaceWith += '.' + t + "()";
+                }
             }
 
-            return full.ReplaceFirst(toReplace, replaceWith);
+            //Console.WriteLine("ToReplace: " + toReplace);
+            //Console.WriteLine("ReplaceWith: " + replaceWith);
+
+            var tmp = full.ReplaceFirst(toReplace, replaceWith);
+
+            //Console.WriteLine("ReplaceFirst -> " + tmp);
+
+
+            return tmp;
         }
 
         internal static List<string> ParseTransforms(Group g)
@@ -596,7 +612,9 @@ namespace Dialogic
             // add an enclosing group for the transform
             if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP, true))
             {
+                var pre = replaceWith;
                 replaceWith = Ch.OGROUP + replaceWith + Ch.CGROUP;
+                //Console.WriteLine("Symbol.ENCLOSED: " + pre + " -> " + replaceWith);
             }
 
             return replaceWith;
@@ -689,27 +707,36 @@ namespace Dialogic
         public string content, origContent, transformText;
         public List<string> transforms;
 
-        private TxForm(Chat context, Match m) : this(context, m.Groups) { }
+        //private TxForm(Chat context, Match m) : this(context, m.Groups) { }
 
-        private TxForm(Chat context, GroupCollection gc) : base(context)
+        private TxForm(Chat context, string text, string content,
+           string transformText, List<string> trans) : base(context)
         {
-            this.text = gc[0].Value;
-            this.content = gc[1].Value.Trim().Replace("(", "").Replace(")", "");
-            this.transformText = gc[2].Value.Trim();
-            if (!this.transformText.IsNullOrEmpty())
-            {
-                if (transforms == null) transforms = new List<string>();
-                if (transforms.Count > 0) transforms.Clear();
-                foreach (Capture c in gc[3].Captures)
-                {
-                    transforms.Add(c.Value.TrimFirst(Ch.SCOPE).Replace("()", ""));
-                }
-            }
+            this.text = text;
+            this.content = content;
+            this.transformText = transformText;
+            this.transforms = trans;
         }
+
+        //private TxForm(Chat context, GroupCollection gc) : base(context)
+        //{
+        //    this.text = gc[0].Value;
+        //    this.content = gc[1].Value.Trim().Replace("(", "").Replace(")", "");
+        //    this.transformText = gc[2].Value.Trim();
+        //    if (!this.transformText.IsNullOrEmpty())
+        //    {
+        //        if (transforms == null) transforms = new List<string>();
+        //        if (transforms.Count > 0) transforms.Clear();
+        //        foreach (Capture c in gc[3].Captures)
+        //        {
+        //            transforms.Add(c.Value.TrimFirst(Ch.SCOPE).Replace("()", ""));
+        //        }
+        //    }
+        //}
 
         public override string ToString()
         {
-            return "[" + content + " -> " + transformText + "]";
+            return content + transformText;
         }
 
         public static void Parse(List<TxForm> tforms,
@@ -719,11 +746,50 @@ namespace Dialogic
 
             if (showMatches) Util.ShowMatches(matches);
 
+            List<string> funs = null;
+
             foreach (Match match in matches)
             {
-                tforms.Add(new TxForm(context, match));
+                var theText = match.Groups[0].Value;
+                var content = match.Groups[1].Value.Trim();
+
+                if (!content.Contains("()"))
+                {
+                    content = new Regex(@"\(([^\)]+)\)").Replace(content, "$1");
+                }
+                else
+                {
+                    //Console.WriteLine("HIT: " + content);
+                    //var rec = RE.ParseTransforms.Matches(content);
+                    //Util.ShowMatches(rec);
+                    Parse(tforms, content, context, showMatches);
+                }
+
+                var transformText = match.Groups[2].Value.Trim();
+                if (!transformText.IsNullOrEmpty())
+                {
+                    if (funs == null) funs = new List<string>();
+                    if (funs.Count > 0) funs.Clear();
+                    foreach (Capture c in match.Groups[3].Captures)
+                    {
+                        funs.Add(c.Value.TrimFirst(Ch.SCOPE).Replace("()", ""));
+                    }
+                }
+                tforms.Add(new TxForm(context, theText, content, transformText, funs));
             }
         }
+        //public static void Parse(List<TxForm> tforms,
+        //    string text, Chat context, bool showMatches = false)
+        //{
+        //    var matches = RE.ParseTransforms.Matches(text);
+
+        //    if (showMatches) Util.ShowMatches(matches);
+
+        //    foreach (Match match in matches)
+        //    {
+        //        tforms.Add(new TxForm(context, match));
+        //    }
+        //}
 
         public static List<TxForm> Parse(string text,
             Chat context, bool showMatches = false)

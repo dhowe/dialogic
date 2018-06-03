@@ -41,11 +41,11 @@ namespace Dialogic
             {
                 pretext = text;
 
-                // resolve any symbols in the input
-                text = BindSymbols(text, context, globals, depth);
-
                 // resolve any groups in the input
                 text = BindChoices(text, context, depth);
+
+                // resolve any symbols in the input
+                text = BindSymbols(text, context, globals, depth);
 
                 // throw if we've hit max recursion depth
                 if (++depth > maxRecursionDepth)
@@ -116,7 +116,9 @@ namespace Dialogic
                 // add a grouping if we don't have one
                 if (!text.ContainsAll(Ch.OGROUP, Ch.CGROUP))
                 {
+                    var pre = text;
                     text = Ch.OGROUP + text + Ch.CGROUP;
+                    //Console.WriteLine("BindChoices.ENCLOSED: "+pre+" -> "+text);
                 }
 
                 ParseChoices(text, context);
@@ -129,7 +131,7 @@ namespace Dialogic
                     var result = choice.Resolve();
                     text = choice.Replace(text, result);
 
-                    if (DBUG) Console.WriteLine("      " + choice + " -> " + result);
+                    if (DBUG) Console.WriteLine("      " + choice.text + " -> " + result + "   text='" + text + "'");
                 }
             }
 
@@ -144,19 +146,43 @@ namespace Dialogic
             //if (DBUG) Console.WriteLine("  Transforms(" + level + ") " + text);
             //if (text.ContainsAny(Ch.OR, Ch.SYMBOL)) return text; // remove?
 
-            if (DBUG) Console.WriteLine("  Trans() " + text);
+            if (DBUG) Console.WriteLine("  Transforms: " + text);
 
             var original = text;
 
-            ParseTransforms(text, context);
-            if (DBUG) Console.WriteLine("    Found: " + trans.Stringify());
+            //ParseTransforms(text, context);
 
-            foreach (var tran in trans)
+            //if (DBUG) Console.WriteLine("    Found: " + trans.Stringify());
+
+            //foreach (var tran in trans)
+            //{
+            //    var result = tran.Resolve();
+            //    text = tran.Replace(text, result);
+
+            //    if (DBUG) Console.WriteLine("      " + tran + " -> " + result);
+            //}
+
+            ParseTransforms(text, context);
+            while (trans.Count > 0)
             {
+                if (DBUG) Console.WriteLine("    Found: " + trans.Stringify());
+
+                var tran = trans.Pop();
+                if (DBUG) Console.WriteLine("    Pop:    " + tran);
+
+                // resolve the symbol and replace it in the text
                 var result = tran.Resolve();
                 text = tran.Replace(text, result);
 
                 if (DBUG) Console.WriteLine("      " + tran + " -> " + result);
+
+                // if we've made progress, and have no more transforms in our list, 
+                // but still have calls in the text, then re-parse and repeat
+                if (trans.Count == 0 && original != text && text.Contains("()"))
+                {
+                    ParseSymbols(text, context);
+                    original = text;
+                }
             }
 
             return text;
@@ -167,8 +193,7 @@ namespace Dialogic
             // no more dynamics, now handle transforms         
             text = BindTransforms(text, context);
 
-            if (DBUG) Console.WriteLine("Result(pre): " + text);
-
+            if (DBUG) Console.WriteLine("Pre-Result: " + text);
 
             // keep () to display unbound functions
             text = text.Replace("()", "&lpar;&rpar;");
@@ -179,9 +204,10 @@ namespace Dialogic
             // replace multiple spaces with single
             text = RE.MultiSpace.Replace(text, " ");
 
+            // resolve any intentional special chars
             text = Entities.Decode(text.Trim());
 
-            if (DBUG) Console.WriteLine("Result(post): " + text + "\n");
+            if (DBUG) Console.WriteLine("Post-Result: " + text + "\n");
 
             return text;
         }

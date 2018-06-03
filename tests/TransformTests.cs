@@ -52,7 +52,53 @@ namespace Dialogic
         }
 
         [Test]
-        public void MatchTransforms()
+        public void ParseMultiTransforms()
+        {
+            Chat c = CreateParentChat("c1");
+            List<TxForm> txs;
+
+            txs = TxForm.Parse("(a).Cap() (b).Cap()", c);
+            Assert.That(txs.Count, Is.EqualTo(2));
+            Assert.That(txs[0].text, Is.EqualTo("(a).Cap()"));
+            Assert.That(txs[0].content, Is.EqualTo("a"));
+            Assert.That(txs[0].transformText, Is.EqualTo(".Cap()"));
+
+            Assert.That(txs[1].text, Is.EqualTo("(b).Cap()"));
+            Assert.That(txs[1].content, Is.EqualTo("b"));
+            Assert.That(txs[1].transformText, Is.EqualTo(".Cap()"));
+
+
+            txs = TxForm.Parse("((a).Cap()).Cap()", c);
+
+            Assert.That(txs.Count, Is.EqualTo(2));
+            Assert.That(txs[0].text, Is.EqualTo("(a).Cap()"));
+            Assert.That(txs[0].content, Is.EqualTo("a"));
+            Assert.That(txs[0].transformText, Is.EqualTo(".Cap()"));
+
+            Assert.That(txs[1].text, Is.EqualTo("((a).Cap()).Cap()"));
+            Assert.That(txs[1].content, Is.EqualTo("(a).Cap()"));
+            Assert.That(txs[1].transformText, Is.EqualTo(".Cap()"));
+
+
+            txs = TxForm.Parse("(((a).Cap()).Cap()).Cap()", c);
+            //Console.WriteLine(txs.Stringify());
+
+            Assert.That(txs.Count, Is.EqualTo(3));
+            Assert.That(txs[0].text, Is.EqualTo("(a).Cap()"));
+            Assert.That(txs[0].content, Is.EqualTo("a"));
+            Assert.That(txs[0].transformText, Is.EqualTo(".Cap()"));
+
+            Assert.That(txs[1].text, Is.EqualTo("((a).Cap()).Cap()"));
+            Assert.That(txs[1].content, Is.EqualTo("(a).Cap()"));
+            Assert.That(txs[1].transformText, Is.EqualTo(".Cap()"));
+
+            Assert.That(txs[2].text, Is.EqualTo("(((a).Cap()).Cap()).Cap()"));
+            Assert.That(txs[2].content, Is.EqualTo("((a).Cap()).Cap()"));
+            Assert.That(txs[2].transformText, Is.EqualTo(".Cap()"));
+        }
+
+        [Test]
+        public void ParseTransforms()
         {
             Chat c = CreateParentChat("c1");
             TxForm tx;
@@ -110,6 +156,39 @@ namespace Dialogic
             string txt;
             Say say;
             Chat chat;
+
+            Resolver.DBUG = false;
+
+            // FAILS:
+            txt = "SET $x = (a|a|a|a)\nSET test = (ok $x.Cap() | ok $x.Cap())\nSAY ($test).Cap()";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            say = (Say)chat.commands[2];
+            chat.Resolve(globals);
+            //Console.WriteLine(res);
+            Assert.That(say.Text(), Is.EqualTo("Ok A"));
+
+            txt = "SET $x = (a|a|a|a)\nSET test = (ok $x.Cap() | ok $x.Cap())\nSAY $test.Cap()";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            say = (Say)chat.commands[2];
+            chat.Resolve(globals);
+            //Console.WriteLine(res);
+            Assert.That(say.Text(), Is.EqualTo("Ok A"));
+
+            txt = "SAY (ok (a).Cap()).Cap()";
+            rt = new ChatRuntime();
+            rt.ParseText(txt);
+            chat = rt.Chats().First();
+            say = (Say)chat.commands[0];
+            chat.Resolve(globals);
+            //Console.WriteLine(res);
+            Assert.That(say.Text(), Is.EqualTo("Ok A"));
+
+
+            /////////////////////////////////////////////////////////////////
 
             txt = "SET $thing1 = (cat | cat)\nSAY A $thing1, many $thing1.Pluralize()";
             rt = new ChatRuntime();

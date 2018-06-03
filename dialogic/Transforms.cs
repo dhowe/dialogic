@@ -28,6 +28,8 @@ namespace Dialogic
         /// </summary>
         public static string Capitalize(string str)
         {
+            var idx = 0;
+            while (str[idx] == '(') idx++;
             return char.ToUpper(str[0]) + str.Substring(1);
         }
 

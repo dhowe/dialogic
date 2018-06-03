@@ -1134,7 +1134,8 @@ namespace Dialogic
             if (strict && ok)
             {
                 var tmp = str.Substring(1, str.Length - 2);
-                ok = !tmp.Contains(c) && !tmp.Contains(d);
+                //ok = !tmp.Contains(c) && !tmp.Contains(d);
+                ok = !(new Regex(@"(?:\([^)]|[^(]\))").IsMatch(tmp));
             }
             return ok;
         }
