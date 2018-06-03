@@ -23,4 +23,4 @@ perl -p0e 's%Dialogic</title>%Dialogic v$ENV{version}</title>%igs' editor/data/t
 #head docs/html/index.html
 #head -n 70 docs/html/index.html
 
-echo $version
+echo git-tag.sh $version
