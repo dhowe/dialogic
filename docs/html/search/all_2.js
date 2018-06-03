@@ -13,6 +13,7 @@ var searchData=
   ['chatupdate',['ChatUpdate',['../class_dialogic_1_1_chat_update.html',1,'Dialogic']]],
   ['choiceevent',['ChoiceEvent',['../class_dialogic_1_1_choice_event.html',1,'Dialogic']]],
   ['clearevent',['ClearEvent',['../class_dialogic_1_1_clear_event.html',1,'Dialogic']]],
+  ['client',['Client',['../namespace_client.html',1,'']]],
   ['command',['Command',['../class_dialogic_1_1_command.html',1,'Dialogic']]],
   ['commanddata',['CommandData',['../class_dialogic_1_1_command_data.html',1,'Dialogic']]],
   ['commanddef',['CommandDef',['../class_dialogic_1_1_command_def.html',1,'Dialogic']]],

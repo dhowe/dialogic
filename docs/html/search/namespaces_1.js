@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tendar',['TendAR',['../namespace_tend_a_r.html',1,'']]]
+  ['dialogic',['Dialogic',['../namespace_dialogic.html',1,'']]]
 ];

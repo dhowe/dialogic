@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['tendar',['TendAR',['../namespace_tend_a_r.html',1,'']]],
   ['text',['Text',['../class_dialogic_1_1_chat.html#a16fff9365f2cd8a9e35d84e1c28bffbb',1,'Dialogic.Chat.Text()'],['../class_dialogic_1_1_command.html#a2f0d2008a75524201d5760844064bd58',1,'Dialogic.Command.Text()']]],
   ['this_5bstring_20key_5d',['this[string key]',['../class_dialogic_1_1_chat_runtime.html#addc40533bd6cdad85225e24e1f580255',1,'Dialogic::ChatRuntime']]],
   ['tojson',['ToJSON',['../class_dialogic_1_1_chat_runtime.html#a91fb97c7b02757c5c13cf0f69e3dd2cc',1,'Dialogic::ChatRuntime']]],
