@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Dialogic;
 
-namespace TendAR
+namespace Client
 {
     /// <summary>
-    /// Specifies custom behavior for the Tendar application, including Actors,
-    /// validators, and custom command types.
+    /// An example config class for a client appliation, including actors,
+    /// validators, transforms, and custom command types.
     /// </summary>
     public class AppConfig : IAppConfig
     {
@@ -27,7 +27,7 @@ namespace TendAR
                 new Actor("Guppy", true), new Actor("TendAR") };
 
             this.commands = new List<CommandDef> {
-                new CommandDef("NVM", typeof(TendAR.Nvm)) };
+                new CommandDef("NVM", typeof(Client.Nvm)) };
 
             this.validators = new List<Func<Command, bool>> { ValidateCommand };
 

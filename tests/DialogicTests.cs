@@ -30,7 +30,7 @@ namespace Dialogic
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
             testfile += "../../../../dialogic/data/judgement/anger.gs";
 
-            rt = new ChatRuntime(TendAR.AppConfig.TAC);
+            rt = new ChatRuntime(Client.AppConfig.TAC);
             rt.ParseFile(new FileInfo(testfile));
 
             var chat = rt["judgement"];
@@ -59,7 +59,7 @@ namespace Dialogic
 			var testfile = AppDomain.CurrentDomain.BaseDirectory;
 			testfile += "../../../../dialogic/data/judgement/amusement.gs";
 
-			rt = new ChatRuntime(TendAR.AppConfig.TAC);
+			rt = new ChatRuntime(Client.AppConfig.TAC);
 			rt.ParseFile(new FileInfo(testfile));
 
 			var chat = rt["judgement"];
@@ -290,7 +290,7 @@ namespace Dialogic
 				 "GO #Test"
 			 };
 
-			ChatRuntime rt = new ChatRuntime(TendAR.AppConfig.TAC);
+			ChatRuntime rt = new ChatRuntime(Client.AppConfig.TAC);
 			rt.ParseText(String.Join("\n", lines));
 
 			var s = rt.InvokeImmediate(null);

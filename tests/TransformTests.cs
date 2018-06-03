@@ -159,7 +159,6 @@ namespace Dialogic
 
             Resolver.DBUG = false;
 
-            // FAILS:
             txt = "SET $x = (a|a|a|a)\nSET test = (ok $x.Cap() | ok $x.Cap())\nSAY ($test).Cap()";
             rt = new ChatRuntime();
             rt.ParseText(txt);

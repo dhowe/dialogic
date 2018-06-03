@@ -557,7 +557,7 @@ namespace Dialogic
 				"SET antelope = C",
 				"SAY $ant $antelope"
 			};
-			ChatRuntime runtime = new ChatRuntime(TendAR.AppConfig.TAC);
+			ChatRuntime runtime = new ChatRuntime(Client.AppConfig.TAC);
 			runtime.ParseText(string.Join("\n", lines), false);
 			var chat = runtime.Chats()[0];
 
@@ -757,7 +757,7 @@ namespace Dialogic
 				"CHAT External {type=a,stage=b}",
 				"SAY $review",
 			};
-			ChatRuntime rt = new ChatRuntime(TendAR.AppConfig.TAC);
+			ChatRuntime rt = new ChatRuntime(Client.AppConfig.TAC);
 			rt.ParseText(String.Join("\n", lines));
 			var chats = rt.Chats();
 			//Console.WriteLine(rt);
@@ -942,7 +942,7 @@ namespace Dialogic
 				"SET b = c",
 				"SAY $a"
 			};
-			runtime = new ChatRuntime(TendAR.AppConfig.TAC);
+			runtime = new ChatRuntime(Client.AppConfig.TAC);
 			runtime.ParseText(string.Join("\n", lines), false);
 			//string content = "";
 			//runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });

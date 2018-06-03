@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using TendAR;
+using Client;
 
 namespace Dialogic
 {
@@ -204,7 +204,7 @@ namespace Dialogic
             Assert.That(say.GetMeta("stage"), Is.EqualTo("b"));
             Assert.That(say.GetMeta("delay"), Is.EqualTo("1"));
             Assert.That(say.GetMeta("actor"), Is.EqualTo("TendAR"));
-            Assert.That(say.actor, Is.EqualTo(TendAR.AppConfig.TAC.GetActors()[1]));
+            Assert.That(say.actor, Is.EqualTo(Client.AppConfig.TAC.GetActors()[1]));
             Assert.That(say.delay, Is.EqualTo(1));
 
             say.Resolve(null);
@@ -214,7 +214,7 @@ namespace Dialogic
             Assert.That(say.Resolved("stage"), Is.EqualTo("b"));
             Assert.That(say.Resolved("delay"), Is.EqualTo("1"));
             Assert.That(say.Resolved("actor"), Is.EqualTo("TendAR"));
-            Assert.That(say.actor, Is.EqualTo(TendAR.AppConfig.TAC.GetActors()[1]));
+            Assert.That(say.actor, Is.EqualTo(Client.AppConfig.TAC.GetActors()[1]));
             Assert.That(say.delay, Is.EqualTo(1));
 
             //Assert.That(say.ComputeDuration(), Is.EqualTo(1));
@@ -1169,7 +1169,7 @@ namespace Dialogic
             Assert.That(chats[0].commands[0].GetMeta("c"), Is.EqualTo("d"));
 
             chats = ChatParser.ParseText("NVM 1.1", AppConfig.TAC);
-            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(TendAR.Nvm)));
+            Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Client.Nvm)));
             Assert.That(chats[0].commands[0].TypeName(), Is.EqualTo("Nvm"));
             Assert.That(chats[0].commands[0].text, Is.EqualTo("1.1"));
             Assert.That(chats[0].commands[0].delay, Is.EqualTo(1.1));

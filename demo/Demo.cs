@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using Dialogic;
 using MessagePack;
-using TendAR;
+using Client;
 
 namespace runner
 {
@@ -141,7 +141,7 @@ namespace runner
             {
                 Console.WriteLine("\n<load-event#chats>\n");
 
-                var runtime = new ChatRuntime(TendAR.AppConfig.TAC);
+                var runtime = new ChatRuntime(Client.AppConfig.TAC);
                 runtime.ParseText(string.Join('\n', new[] {
                     "CHAT GScriptTest {type=a,stage=b}",
                     "*** Welcome to my updated world!!!"
