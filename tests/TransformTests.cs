@@ -311,6 +311,17 @@ namespace Dialogic
             Assert.That(Transforms.Pluralize("front tooth"), Is.EqualTo("front teeth"));
         }
 
+        [Test]
+        public void MultiTransformResolution()
+        {
+            var str = "(well|well).cap() don't you look (anger).emoadj().";
+            var rt = new ChatRuntime(Client.AppConfig.TAC);
+            rt.ParseText(str);
+            rt.strictMode = false;
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s.StartsWith("Well don't you look ", Util.IC), Is.True);
+        }
+
 		[Test]
         public void TestPluralize()
         {

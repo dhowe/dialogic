@@ -165,7 +165,7 @@ namespace Dialogic
          */
         internal static object InvokeTransform(object target, string methodName)
         {
-            var type = typeof(Transforms);
+            var type = typeof(Transforms); // wrong, transforms can be anywhere
             if (!Cache.ContainsKey(type))
             {
                 Cache[type] = new Dictionary<string, MethodInfo>();
@@ -746,8 +746,6 @@ namespace Dialogic
 
             if (showMatches) Util.ShowMatches(matches);
 
-            List<string> funs = null;
-
             foreach (Match match in matches)
             {
                 var theText = match.Groups[0].Value;
@@ -755,26 +753,24 @@ namespace Dialogic
 
                 if (!content.Contains("()"))
                 {
-                    content = new Regex(@"\(([^\)]+)\)").Replace(content, "$1");
+                    content = new Regex(@"\(([^\)]+)\)").Replace(content, "$1"); // TODO: compile
                 }
                 else
                 {
-                    //Console.WriteLine("HIT: " + content);
-                    //var rec = RE.ParseTransforms.Matches(content);
-                    //Util.ShowMatches(rec);
                     Parse(tforms, content, context, showMatches);
                 }
 
+                List<string> funs = null;
                 var transformText = match.Groups[2].Value.Trim();
                 if (!transformText.IsNullOrEmpty())
                 {
-                    if (funs == null) funs = new List<string>();
-                    if (funs.Count > 0) funs.Clear();
+                    funs = new List<string>();
                     foreach (Capture c in match.Groups[3].Captures)
                     {
                         funs.Add(c.Value.TrimFirst(Ch.SCOPE).Replace("()", ""));
                     }
                 }
+
                 tforms.Add(new TxForm(context, theText, content, transformText, funs));
             }
         }

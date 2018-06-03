@@ -101,6 +101,11 @@ namespace Client
         /// </summary>
         private static string EmoSyn(string emotion)
         {
+            if (!synNouns.ContainsKey(emotion))
+            {
+                Console.WriteLine("[WARN] no syns for: " + emotion);
+                return emotion;
+            }
             return (string)Util.RandItem(synNouns[emotion]);
         }
 
@@ -109,6 +114,10 @@ namespace Client
         /// </summary>
         private static string EmoAdj(string emotion)
         {
+            if (!synAdjs.ContainsKey(emotion)) {
+                Console.WriteLine("[WARN] no adjs for: " + emotion);
+                return emotion;
+            }
             return (string)Util.RandItem(synAdjs[emotion]);
         }
 
