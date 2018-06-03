@@ -144,7 +144,7 @@ namespace Client
             {"anger",        new[]{ "irritated", "furious", "angry", "outraged", "pissed" }},
             {"elation",      new[]{ "blissed", "elated", "blissful", "euphoric", "ecstatic"}},
             {"sadness",      new[]{ "melancholic", "miserable", "sad", "sorrowful", "anguished" }},
-            {"surprise",     new[]{ "wonderous", "amazed", "surprised", "shocked", "awed" }},
+            {"surprise",     new[]{ "wide-eyed", "amazed", "surprised", "shocked", "awed" }},
             {"fear",         new[]{ "dismayed", "afraid", "fearful", "panicked", "scared" }},
             {"worry",        new[]{ "concerned", "angsty", "worried", "anxious", "skeptical" }},
             {"amusement",    new[]{ "delighted", "blissed", "amused", "tickled", "pleased" }},

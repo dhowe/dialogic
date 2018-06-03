@@ -718,22 +718,6 @@ namespace Dialogic
             this.transforms = trans;
         }
 
-        //private TxForm(Chat context, GroupCollection gc) : base(context)
-        //{
-        //    this.text = gc[0].Value;
-        //    this.content = gc[1].Value.Trim().Replace("(", "").Replace(")", "");
-        //    this.transformText = gc[2].Value.Trim();
-        //    if (!this.transformText.IsNullOrEmpty())
-        //    {
-        //        if (transforms == null) transforms = new List<string>();
-        //        if (transforms.Count > 0) transforms.Clear();
-        //        foreach (Capture c in gc[3].Captures)
-        //        {
-        //            transforms.Add(c.Value.TrimFirst(Ch.SCOPE).Replace("()", ""));
-        //        }
-        //    }
-        //}
-
         public override string ToString()
         {
             return content + transformText;
@@ -774,18 +758,6 @@ namespace Dialogic
                 tforms.Add(new TxForm(context, theText, content, transformText, funs));
             }
         }
-        //public static void Parse(List<TxForm> tforms,
-        //    string text, Chat context, bool showMatches = false)
-        //{
-        //    var matches = RE.ParseTransforms.Matches(text);
-
-        //    if (showMatches) Util.ShowMatches(matches);
-
-        //    foreach (Match match in matches)
-        //    {
-        //        tforms.Add(new TxForm(context, match));
-        //    }
-        //}
 
         public static List<TxForm> Parse(string text,
             Chat context, bool showMatches = false)
@@ -803,11 +775,10 @@ namespace Dialogic
 
         internal string Resolve()
         {
-            //Console.WriteLine(text + " " + content + " " 
-            //+ transformText + " " + transforms.Stringify());
-
             if (text.ContainsAny(Ch.SYMBOL, Ch.OR)) throw new BindException
                 ("Invalid state: " + this);
+
+            if (content.Length < 1) return string.Empty;
 
             object result = content;
             transforms.ForEach(t => result = Methods.Invoke

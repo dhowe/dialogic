@@ -317,12 +317,24 @@ namespace Dialogic
             var str = "(well|well).cap() don't you look (anger).emoadj().";
             var rt = new ChatRuntime(Client.AppConfig.TAC);
             rt.ParseText(str);
-            rt.strictMode = false;
+            //rt.strictMode = false;
             var s = rt.InvokeImmediate(globals);
             //Console.WriteLine(s);
             Assert.That(s.StartsWith("Well don't you look ", Util.IC), Is.True);
             Assert.That(s.Contains("anger"), Is.False);
             Assert.That(s.Contains("emoadj"), Is.False);
+
+            str = "The (dog|).Cap() ran.";
+            rt = new ChatRuntime(Client.AppConfig.TAC);
+            rt.ParseText(str);
+
+            //rt.strictMode = false;
+            for (int i = 0; i < 5; i++)
+            {
+                s = rt.InvokeImmediate(globals);
+                Console.WriteLine(i + ") " + s);
+                Assert.That(s.IsOneOf("The Dog ran.", "The ran."));
+            }
         }
 
 		[Test]
