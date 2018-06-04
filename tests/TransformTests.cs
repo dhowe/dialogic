@@ -332,7 +332,7 @@ namespace Dialogic
             for (int i = 0; i < 5; i++)
             {
                 s = rt.InvokeImmediate(globals);
-                Console.WriteLine(i + ") " + s);
+                //Console.WriteLine(i + ") " + s);
                 Assert.That(s.IsOneOf("The Dog ran.", "The ran."));
             }
         }
