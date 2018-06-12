@@ -4,7 +4,6 @@
  <title>Dialogic</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-<!--   <script src="http://rednoise.org/js/jquery-linedtextarea-dialogic.js"></script> -->
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
@@ -12,9 +11,7 @@
   <style>
     .CodeMirror {
       border: 1px solid #eee;
-      min-height: 400px;
       line-height: 16px;
-/*      height: auto;*/
     }
 
     body {
@@ -253,7 +250,7 @@
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
      <!--  <button class="button" type="button" id="loadFromCookie" disabled title="Load from Cookie">Load From Cookie</button> -->
-      <button class="button" type="reset" id="clear">Clear</button>
+      <button class="button" type="reset" id="clear" disabled >Clear</button>
       <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
     </div>
   </form>
@@ -310,11 +307,11 @@
         // update the textarea
         var content = editor.getValue();
         $("#main").val(content);
-       
         // save current change to cookie
         if( content != "Enter your script here") {
           $.cookie("guppyScript", content);
         }
+        toggleValidation();
       });
 
       // ******** End Editor ************//
@@ -323,13 +320,13 @@
       // setup button handlers
       $("#clear").click(function ()
       {
-        editor.setValue("");
+        $.cookie("guppyScript", "");
+        location.reload(true);
       });
 
       $("#execute").click(function ()
       {
         onButtonClicked(true);
-
       });
 
       $("#validate").click(function ()
@@ -375,11 +372,16 @@
       {   
         var input = editor.getValue(),
             selection = editor.getSelection();
-        
-        if ((input.length && input != 'Enter your script here') || selection != lastSelection)
+        if ((input.length > 0 && input != 'Enter your script here') || selection != lastSelection)
         { 
           $("#validate").prop("disabled", false);
           $("#execute").prop("disabled", true);
+        }
+        if (input.length == 0 ) {
+            $("#clear").prop("disabled", true);
+            $("#validate").prop("disabled", true);
+        } else {
+            $("#clear").prop("disabled", false);
         }
       }
 
@@ -479,6 +481,8 @@
           }
         });
       }
+
+
 
       function processSelectedText(code, startIdx, endIdx)
       {
