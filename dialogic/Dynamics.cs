@@ -951,7 +951,7 @@ namespace Dialogic
             else if (this == OE)
             {
                 if (!scope.ContainsKey(s1)) throw new ParseException
-                    ("Variable " + s1 + " not found in globals:\n  " + scope.Stringify());
+                    ("Variable $" + s1 + " not found in globals:\n  " + scope.Stringify());
 
                 var now = (string)scope[s1];
                 if (now.StartsWith('(') && now.EndsWith(')'))
@@ -966,7 +966,7 @@ namespace Dialogic
             else if (this == PE)
             {
                 if (!scope.ContainsKey(s1)) throw new ParseException
-                    ("Variable " + s1 + " not found in globals:\n  " + scope.Stringify());
+                    ("Variable $" + s1 + " not found in globals:\n  " + scope.Stringify());
 
                 result = scope[s1] + " " + s2;
             }
