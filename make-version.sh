@@ -18,9 +18,12 @@ perl -i.bak -p0e 's%: Dialogic :fish:</title>% v$ENV{version}</title>%igs' docs/
 perl -i.bak -p0e 's%:fish:%%igs' docs/html/index.html
 rm docs/html/index.html.bak
 
-perl -p0e 's%Dialogic</title>%Dialogic v$ENV{version}</title>%igs' editor/data/template.html > editor/data/index.html
+pushd editor && ./update-index-version.sh && popd editor
+
+#perl -p0e 's%Dialogic</title>%Dialogic v$ENV{version}</title>%igs' editor/data/template.html > editor/data/index.html
 
 #head docs/html/index.html
 #head -n 70 docs/html/index.html
 
+echo
 echo git-tag.sh $version

@@ -1,10 +1,9 @@
 <html>
 
 <head>
- <title>Dialogic v0.8.11</title>
+  <title>Dialogic v0.8.11</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-<!--   <script src="http://rednoise.org/js/jquery-linedtextarea-dialogic.js"></script> -->
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
@@ -12,9 +11,7 @@
   <style>
     .CodeMirror {
       border: 1px solid #eee;
-      min-height: 400px;
       line-height: 16px;
-/*      height: auto;*/
     }
 
     body {
@@ -201,7 +198,7 @@
     }
 
     .handle {
-      margin-top:-15px;
+      margin-top: -15px;
       background: #f7f7f7;
       height: 20px;
       user-select: none;
@@ -211,7 +208,8 @@
     }
 
     .handle:before {
-      content: '\2261'; /* https://en.wikipedia.org/wiki/Triple_bar */
+      content: '\2261';
+      /* https://en.wikipedia.org/wiki/Triple_bar */
       color: #999;
       position: absolute;
       left: 50%;
@@ -224,7 +222,6 @@
     .handle:hover:before {
       color: #000;
     }
-
   </style>
 </head>
 
@@ -252,8 +249,8 @@
       <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
-     <!--  <button class="button" type="button" id="loadFromCookie" disabled title="Load from Cookie">Load From Cookie</button> -->
-      <button class="button" type="reset" id="clear" disabled >Clear</button>
+      <!--  <button class="button" type="button" id="loadFromCookie" disabled title="Load from Cookie">Load From Cookie</button> -->
+      <button class="button" type="reset" id="clear" disabled>Clear</button>
       <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
     </div>
   </form>
@@ -278,42 +275,48 @@
     </div>
   </div>
   <script>
-
     $(function ()
     {
       // ******** Editor ************//
-      
+
       var myTextarea = $("#main")[0];
-      var editor = CodeMirror.fromTextArea(myTextarea, {
-              lineNumbers: true,
-              styleSelectedText: true
+      var editor = CodeMirror.fromTextArea(myTextarea,
+      {
+        lineNumbers: true,
+        styleSelectedText: true
       });
 
-      loadFromCookie();
+      //loadFromCookie();
 
       var lastSelection = "";
       // var lastEdit = editor.getValue();
-      
-      editor.on("beforeSelectionChange", function(cm, change) {
+
+      editor.on("beforeSelectionChange", function (cm, change)
+      {
         lastSelection = editor.getSelection();
       });
 
-      editor.on("cursorActivity", function(cm) {
+      editor.on("cursorActivity", function (cm)
+      {
         toggleValidation();
       });
 
       // editor.on("beforeChange", function(cm, change) {
-      //   lastEdit = editor.getValue();  
+      //   lastEdit = editor.getValue();
       // });
 
-      editor.on("change", function(cm, change) {
+      editor.on("change", function (cm, change)
+      {
         // update the textarea
         var content = editor.getValue();
         $("#main").val(content);
-        // save current change to cookie
-        if( content != "Enter your script here") {
+
+        /* save current change to cookie
+        if (content != "Enter your script here")
+        {
           $.cookie("guppyScript", content);
-        }
+        }*/
+
         toggleValidation();
       });
 
@@ -323,7 +326,7 @@
       // setup button handlers
       $("#clear").click(function ()
       {
-        $.cookie("guppyScript", "");
+        //$.cookie("guppyScript", "");
         location.reload(true);
       });
 
@@ -365,33 +368,38 @@
 
       function highlightErrorLine()
       {
-        if (!$("#errorLine").text().includes("ERRORLINE")) {
+        if (!$("#errorLine").text().includes("ERRORLINE"))
+        {
           var idx = $("#errorLine").text() - 1;
           editor.addLineClass(idx, "background", 'line-error');
         }
       }
 
       function toggleValidation()
-      {   
+      {
         var input = editor.getValue(),
-            selection = editor.getSelection();
+          selection = editor.getSelection();
         if ((input.length > 0 && input != 'Enter your script here') || selection != lastSelection)
-        { 
+        {
           $("#validate").prop("disabled", false);
           $("#execute").prop("disabled", true);
         }
-        if (input.length == 0 ) {
-            $("#clear").prop("disabled", true);
-            $("#validate").prop("disabled", true);
-        } else {
-            $("#clear").prop("disabled", false);
+        if (input.length == 0)
+        {
+          $("#clear").prop("disabled", true);
+          $("#validate").prop("disabled", true);
+        }
+        else
+        {
+          $("#clear").prop("disabled", false);
         }
       }
 
-      function toggleExe(){
+      function toggleExe()
+      {
         var resText = $("#result").text();
         // only show execute if validation is successfull
-        if (resText.length && resText.indexOf('%RESULT%') < 0 && $("#result").attr('class') =="success")
+        if (resText.length && resText.indexOf('%RESULT%') < 0 && $("#result").attr('class') == "success")
         {
           $("#execute").prop("disabled", false);
           $("#validate").prop("disabled", true);
@@ -418,12 +426,12 @@
         if (!execute)
         {
 
-           if (editor.somethingSelected())
+          if (editor.somethingSelected())
           {
             var content = editor.getValue();
             var startIdx = editor.getCursor(true).line;
             var endIdx = editor.getCursor(false).line;
-            
+
             formData.push(
             {
               name: "selectionStart",
@@ -458,15 +466,15 @@
         sendRequest($("#loadUrlPathDiv").serialize());
       }
 
-      function loadFromCookie()
-      {  var cookieContent = $.cookie("guppyScript");
-         if(cookieContent != undefined && cookieContent != 'Enter your script here'){
-           editor.setValue(cookieContent);
-           $("#main").val(cookieContent);
-         }
-
-         
-      }
+      /*function loadFromCookie()
+      {
+        var cookieContent = $.cookie("guppyScript");
+        if (cookieContent != undefined && cookieContent != 'Enter your script here')
+        {
+          editor.setValue(cookieContent);
+          $("#main").val(cookieContent);
+        }
+      }*/
 
       function sendRequest(data)
       {
@@ -485,15 +493,13 @@
         });
       }
 
-
-
       function processSelectedText(code, startIdx, endIdx)
       {
         if (code)
         {
 
-          // we need to maintain correct line numbers for error-reporting,  
-          // so if we have a partial selection, we comment out any lines 
+          // we need to maintain correct line numbers for error-reporting,
+          // so if we have a partial selection, we comment out any lines
           // NOT included in the highlighted portion
           if (startIdx != endIdx)
           {
@@ -511,10 +517,11 @@
 
       // Verticle resize
       // Based on: https://jsfiddle.net/mindplay/rs2L2vtb/2/
-      let $handle =  document.querySelector(".handle");
+      let $handle = document.querySelector(".handle");
       let $container = document.querySelector(".CodeMirror");
 
-      function height_of($el) {
+      function height_of($el)
+      {
         return parseInt(window.getComputedStyle($el).height.replace(/px$/, ""));
       }
 
@@ -524,18 +531,21 @@
       var start_y;
       var start_h;
 
-      function on_drag(e) {
+      function on_drag(e)
+      {
         var height = Math.max(MIN_HEIGHT, (start_h + e.y - start_y)) + "px";
         editor.setSize(null, height);
         $(".CodeMirror-gutters").height(height);
       }
 
-      function on_release(e) {
+      function on_release(e)
+      {
         document.body.removeEventListener("mousemove", on_drag);
         window.removeEventListener("mouseup", on_release);
       }
 
-      $handle.addEventListener("mousedown", function (e) {
+      $handle.addEventListener("mousedown", function (e)
+      {
         start_x = e.x;
         start_y = e.y;
         start_h = height_of($container);
@@ -543,7 +553,6 @@
         document.body.addEventListener("mousemove", on_drag);
         window.addEventListener("mouseup", on_release);
       });
-
 
     });
   </script>
