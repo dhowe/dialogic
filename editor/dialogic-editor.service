@@ -1,4 +1,6 @@
 # /etc/systemd/system/dialogic-editor.service
+# RESTART: sudo systemctl restart dialogic-editor
+
 # LIST: systemctl list-units | grep -E 'service.*running'
 # STATUS: sudo systemctl status dialogic-editor
 # DISABLE: sudo systemctl disable dialogic-editor
