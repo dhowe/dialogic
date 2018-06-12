@@ -3,7 +3,7 @@
 <head>
   <title>Dialogic</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <!--script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script-->
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
@@ -249,7 +249,6 @@
       <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
-      <!--  <button class="button" type="button" id="loadFromCookie" disabled title="Load from Cookie">Load From Cookie</button> -->
       <button class="button" type="reset" id="clear" disabled>Clear</button>
       <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
     </div>
@@ -279,6 +278,7 @@
     {
       // ******** Editor ************//
 
+      var storageKey = 'dialogic-editor-code';
       var myTextarea = $("#main")[0];
       var editor = CodeMirror.fromTextArea(myTextarea,
       {
@@ -286,7 +286,7 @@
         styleSelectedText: true
       });
 
-      //loadFromCookie();
+      loadFromStorage();
 
       var lastSelection = "";
       // var lastEdit = editor.getValue();
@@ -317,6 +317,12 @@
           $.cookie("guppyScript", content);
         }*/
 
+        // save current change to storage
+        if (content != "Enter your script here")
+        {
+          localStorage.setItem(storageKey, content);
+        }
+
         toggleValidation();
       });
 
@@ -327,6 +333,8 @@
       $("#clear").click(function ()
       {
         //$.cookie("guppyScript", "");
+        localStorage.removeItem(storageKey);
+
         location.reload(true);
       });
 
@@ -466,13 +474,26 @@
         sendRequest($("#loadUrlPathDiv").serialize());
       }
 
+      function loadFromStorage()
+      {
+        if (localStorage)
+        {
+          var content = localStorage.getItem(storageKey);
+          if (content != undefined && content != 'Enter your script here')
+          {
+            editor.setValue(content);
+            $("#main").val(content);
+          }
+        }
+      }
+
       /*function loadFromCookie()
       {
-        var cookieContent = $.cookie("guppyScript");
-        if (cookieContent != undefined && cookieContent != 'Enter your script here')
+        var content = $.cookie("guppyScript");
+        if (content != undefined && content != 'Enter your script here')
         {
-          editor.setValue(cookieContent);
-          $("#main").val(cookieContent);
+          editor.setValue(content);
+          $("#main").val(content);
         }
       }*/
 
