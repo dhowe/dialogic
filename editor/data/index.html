@@ -253,7 +253,7 @@
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
      <!--  <button class="button" type="button" id="loadFromCookie" disabled title="Load from Cookie">Load From Cookie</button> -->
-      <button class="button" type="reset" id="clear" disabled >Clear</button>
+      <button class="button" type="reset" id="clear">Clear</button>
       <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
     </div>
   </form>
@@ -310,11 +310,11 @@
         // update the textarea
         var content = editor.getValue();
         $("#main").val(content);
+       
         // save current change to cookie
         if( content != "Enter your script here") {
           $.cookie("guppyScript", content);
         }
-        toggleValidation();
       });
 
       // ******** End Editor ************//
@@ -323,13 +323,13 @@
       // setup button handlers
       $("#clear").click(function ()
       {
-        $.cookie("guppyScript", "");
-        location.reload(true);
+        editor.setValue("");
       });
 
       $("#execute").click(function ()
       {
         onButtonClicked(true);
+
       });
 
       $("#validate").click(function ()
@@ -375,16 +375,11 @@
       {   
         var input = editor.getValue(),
             selection = editor.getSelection();
-        if ((input.length > 0 && input != 'Enter your script here') || selection != lastSelection)
+        
+        if ((input.length && input != 'Enter your script here') || selection != lastSelection)
         { 
           $("#validate").prop("disabled", false);
           $("#execute").prop("disabled", true);
-        }
-        if (input.length == 0 ) {
-            $("#clear").prop("disabled", true);
-            $("#validate").prop("disabled", true);
-        } else {
-            $("#clear").prop("disabled", false);
         }
       }
 
@@ -484,8 +479,6 @@
           }
         });
       }
-
-
 
       function processSelectedText(code, startIdx, endIdx)
       {
