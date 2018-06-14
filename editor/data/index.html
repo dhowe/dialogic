@@ -13,6 +13,9 @@
       border: 1px solid #eee;
       line-height: 16px;
     }
+    .CodeMirror-gutters {
+      height:100% !important; /* fix the gutter issue*/
+    }
 
     body {
       padding: 0 2em;
@@ -238,6 +241,7 @@
 
   </span>
   <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
+  <span id="selection" style="display:none;">%%STARTINDEX%%;%%ENDINDEX%%</span>
   <form name="main" id="form">
     <div class="input-area">
       <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false">%%CODE%%</textarea>
@@ -279,6 +283,7 @@
       // ******** Editor ************//
 
       var storageKey = 'dialogic-editor-code';
+
       var myTextarea = $("#main")[0];
       var editor = CodeMirror.fromTextArea(myTextarea,
       {
@@ -364,12 +369,13 @@
       $("#closeDialog").click(closeURLDialog);
       // ******** End Click Handlers ************//
 
-      adjustUI();
+      onLoad();
 
       // functions ---------------------------------------------
-      function adjustUI()
-      {
+      function onLoad()
+      { 
         toggleValidation();
+        showSelection(); // This must be placed before toggleExe
         toggleExe();
         highlightErrorLine();
       }
@@ -380,6 +386,16 @@
         {
           var idx = $("#errorLine").text() - 1;
           editor.addLineClass(idx, "background", 'line-error');
+        }
+      }
+
+      function showSelection() {
+         if (!$("#selection").text().includes("STARTINDEX"))
+        {
+          var idx = $("#selection").text().split(";");
+          idx[0] = idx[0].split(",");
+          idx[1] = idx[1].split(",");
+          editor.setSelection({line:idx[0][0], ch:idx[0][1]}, {line:idx[1][0], ch:idx[1][1]});
         }
       }
 
@@ -431,39 +447,29 @@
           value: execute ? 'execute' : 'validate'
         });
 
-        if (!execute)
-        {
 
-          if (editor.somethingSelected())
+        if (editor.somethingSelected())
+        {
+          var content = editor.getValue();
+          var startIdx = editor.getCursor(true);
+          var endIdx = editor.getCursor(false);
+
+          formData.push(
           {
-            var content = editor.getValue();
-            var startIdx = editor.getCursor(true).line;
-            var endIdx = editor.getCursor(false).line;
-
-            formData.push(
-            {
-              name: "selectionStart",
-              value: startIdx
-            });
-            formData.push(
-            {
-              name: "selectionEnd",
-              value: endIdx
-            });
-            formData.push(
-            {
-              name: "selection",
-              value: processSelectedText(content, startIdx, endIdx)
-            });
-          }
-        }
-        else
-        {
+            name: "selectionStart",
+            value: startIdx.line + "," + startIdx.ch
+          });
+          formData.push(
+          {
+            name: "selectionEnd",
+            value: endIdx.line + "," + endIdx.ch
+          });
           formData.push(
           {
             name: "selection",
-            value: $("#result").text()
+            value: execute ? $("#result").text() : processSelectedText(content, startIdx.line, endIdx.line)
           });
+          
         }
 
         sendRequest(formData);
@@ -483,6 +489,11 @@
           {
             editor.setValue(content);
             $("#main").val(content);
+          }
+          var editorHeight = localStorage.getItem("editorHeight");
+          if (editorHeight != null )
+          {
+           editor.setSize(null, editorHeight);
           }
         }
       }
@@ -522,8 +533,7 @@
           // we need to maintain correct line numbers for error-reporting,
           // so if we have a partial selection, we comment out any lines
           // NOT included in the highlighted portion
-          if (startIdx != endIdx)
-          {
+         
             var lines = code.split("\n");
 
             for (var i = 0; i < lines.length; i++)
@@ -532,7 +542,7 @@
               if (endIdx < i) lines[i] = "//" + lines[i];
             }
             return lines.join("\n");
-          }
+
         }
       }
 
@@ -555,8 +565,8 @@
       function on_drag(e)
       {
         var height = Math.max(MIN_HEIGHT, (start_h + e.y - start_y)) + "px";
+        localStorage.setItem("editorHeight", height);
         editor.setSize(null, height);
-        $(".CodeMirror-gutters").height(height);
       }
 
       function on_release(e)

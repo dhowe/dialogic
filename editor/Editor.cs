@@ -173,8 +173,12 @@ namespace Dialogic.Server
             html = html.Replace("%%CCLASS%%", "shown");
 
             // only process the selection if there is one
-            code = kvs.ContainsKey("selection") ? kvs["selection"] : code;
-
+            if (kvs.ContainsKey("selectionStart")) {
+                 code = kvs["selection"];
+                 html = html.Replace("%%STARTINDEX%%", kvs["selectionStart"]);
+                 html = html.Replace("%%ENDINDEX%%", kvs["selectionEnd"]);
+            }
+           
             try
             {
                 string content = String.Empty;
