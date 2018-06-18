@@ -187,6 +187,10 @@
       font-size:12px;
     }
 
+    #checkText a {
+      color:black;
+    }
+
     .button,
     button[type="button"] {
       cursor: pointer;
@@ -255,7 +259,7 @@
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
       <button class="button" type="reset" id="clear" disabled>Clear</button>
-      <input type="checkbox" class="checkbox" id="VRcheckbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span>
+      <input type="checkbox" class="checkbox" id="VRcheckbox" name="useValidators" value="true" checked><span id="checkText">Use <a href="http://tenderclaws.com/press/sheet.php?p=tendAR">TendAR</a> Validators</span>
     </div>
   </form>
 
@@ -370,6 +374,7 @@
       $("#VRcheckbox").click(function ()
       { 
         localStorage.setItem("useValidators", $("#VRcheckbox").prop('checked'));
+         toggleValidation();
       });
 
 
