@@ -185,7 +185,7 @@ namespace Dialogic.Server
                 var globals = new Dictionary<string, object>();
                 runtime = new ChatRuntime(Client.AppConfig.TAC);
                 runtime.strictMode = false; // allow unbound symbols/functions
-                runtime.ParseText(code, false); // true to disable validators
+                runtime.ParseText(code, kvs.ContainsKey("useValidators") && kvs["useValidators"].Equals("true") ? false : true); // true to disable validators
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
 
                 var result = string.Empty;
