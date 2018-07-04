@@ -7,6 +7,55 @@
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.js"></script>
+  <script type="text/javascript" src="https://codemirror.net/addon/mode/simple.js"></script>
+  <script type="text/javascript">
+    // define Language Mode
+    CodeMirror.defineSimpleMode("dialogic", {
+  // The start state contains the rules that are intially used
+  start: [
+    // The regex matches the token, the token property contains the type
+    {regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string"},
+    // You can match multiple tokens at once. Note that the captured
+    // groups must span the whole string in this case
+    {regex: /(function)(\s+)([a-z$][\w$]*)/, token: ["keyword", null, "variable-2"]},
+    // Rules are matched in the order in which they appear, so there is
+    // no ambiguity between this one and the one above
+
+    // ! DIALOGIC
+    {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "keyword"}, //Command
+    {regex: /([^=]*):(?=CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)/, token: "actor"},
+    {regex: /\$/, token: "symbol"},
+    {regex: /#/, token: "label"}, 
+    {regex: /[-+\/*=<>!^()|]+/, token: "operator"},
+    // ! DIALOGIC
+
+    {regex: /true|false|null|undefined/, token: "atom"},
+    // {regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: "number"},
+    {regex: /\/\/.*/, token: "comment"},
+    {regex: /\/(?:[^\\]|\\.)*?\//, token: "variable-3"},
+    // A next property will cause the mode to move to a different state
+    {regex: /\/\*/, token: "comment", next: "comment"},
+    // indent and dedent properties guide autoindentation
+    // {regex: /[a-z$][\w$]*/, token: "variable"},
+    {regex: /[\{\[\(]/, indent: true},
+    {regex: /[\}\]\)]/, dedent: true}
+
+  ],
+  // The multi-line comment state.
+  comment: [
+    {regex: /.*?\*\//, token: "comment", next: "start"},
+    {regex: /.*/, token: "comment"}
+  ],
+  // The meta property contains global information about the mode. It
+  // can contain properties like lineComment, which are supported by
+  // all modes, and also directives like dontIndentStates, which are
+  // specific to simple modes.
+  meta: {
+    dontIndentStates: ["comment"],
+    lineComment: "//"
+  }
+});
+  </script>
   <style>
     .CodeMirror {
       border: 1px solid #eee;
@@ -15,6 +64,11 @@
     .CodeMirror-gutters {
       height:100% !important; /* fix the gutter issue*/
     }
+    /*additional theme*/
+    .cm-s-default .cm-actor {color: #2B91AF;}
+    .cm-s-default .cm-symbol {color: red;}
+    .cm-s-default .cm-operator {color: red;}
+    .cm-s-default .cm-label {color: #32CD32;}
 
     body {
       padding: 0 2em;
@@ -335,7 +389,6 @@
 
         toggleValidation();
       });
-
       // ******** End Editor ************//
 
       // ******** Click Handlers ************//
