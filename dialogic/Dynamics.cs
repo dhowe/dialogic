@@ -351,7 +351,8 @@ namespace Dialogic
                     }
                     while (Equals(lastResolved, resolved));
 
-                    // See #134 here we should check (med < maxMed) instead
+                    // See #134 here we should check:
+                    //   (Util.MinEditDist(lastResolved, resolved) < MaxMED) instead
 
                     break;
             }
