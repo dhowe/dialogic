@@ -205,38 +205,6 @@ namespace Dialogic
             return Math.Max(Math.Min(n, high), low);
         }
 
-        internal static List<String> NestedParens(string value)
-        {
-            List<string> groups = new List<string>();
-
-            if (string.IsNullOrEmpty(value)) return groups;
-
-            Stack<int> brackets = new Stack<int>();
-
-            for (int i = 0; i < value.Length; ++i)
-            {
-                char ch = value[i];
-
-                if (ch == '(')
-                {
-                    brackets.Push(i);
-                }
-                else if (ch == ')')
-                {
-                    //TODO: you may want to check if close ']' has corresponding open '['
-                    // i.e. stack has values: if (!brackets.Any()) throw ...
-                    int openBracket = brackets.Pop();
-
-                    groups.Add(value.Substring(openBracket + 1, i - openBracket - 1));
-                }
-            }
-
-            //TODO: you may want to check here if there're too many '['
-            // i.e. stack still has values: if (brackets.Any()) throw ... 
-
-            return groups;
-        }
-
         /// <summary>
         /// Maps a number from one range to another.
         /// </summary>
@@ -460,7 +428,29 @@ namespace Dialogic
             return false;
         }
 
-        ////////////////////////////////////////////////////////////////////
+        /// <summary>
+        ///  Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target strings 
+        /// </summary>
+        public static int MinEditDist(string s, string t) => MinEditDistance.Compute(s, t);
+
+        /// <summary>
+        ///  Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target arrays 
+        /// </summary>
+        public static int MinEditDist(string[] s, string[] t) => MinEditDistance.Compute(s, t);
+
+        /// <summary>
+        ///  Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target strings divided by the length of the longer string
+        /// </summary>
+        public static double MinEditDistAdj(string s, string t) => MinEditDistance.ComputeAdjusted(s, t);
+
+        /// <summary>
+        ///  Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target arrays divided by the length of the longer array
+        /// </summary>
+        public static double MinEditDistAdj(string[] s, string[] t) => MinEditDistance.ComputeAdjusted(s, t);
+
+
+        ////////////////////////////////////////////////////////////////////////
+
 
         internal static string JavaSubstr(string s, int beginIndex, int endIndex)
         {
@@ -656,8 +646,70 @@ namespace Dialogic
         {
             return from s in e orderby s.Length descending select s;
         }
+
     }
 
+    /// <summary>
+    /// Minimum-Edit-Distance (or Levenshtein distance) is a measure of the similarity 
+    /// between two strings, the source string and the target string. The distance
+    /// is the number of deletions, insertions, or substitutions required to transform
+    /// the source into the target. The adjusted distance divides this value by the max
+    /// length of the two strings<br/><br/>
+    /// Adapted from Michael Gilleland's algorithm
+    /// </summary>
+    public static class MinEditDistance
+    {
+        public static double ComputeAdjusted(string source, string target)
+        {
+            return Compute(source, target)
+                / (double)Math.Max(source.Length, target.Length);
+        }
+
+        public static double ComputeAdjusted(string[] source, string[] target)
+        {
+            return Compute(source, target)
+                / (double)Math.Max(source.Length, target.Length);
+        }
+
+        public static int Compute(string s, string t)
+        {
+            return Compute(
+                s.Select(c => c.ToString()).ToArray(),
+                t.Select(c => c.ToString()).ToArray());
+        }
+
+        public static int Compute(string[] s, string[] t)
+        {
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1];
+
+            // Step 1
+            if (n == 0) return m;
+            if (m == 0) return n;
+
+            // Step 2
+            for (int i = 0; i <= n; d[i, 0] = i++) { }
+            for (int j = 0; j <= m; d[0, j] = j++) { }
+
+            // Step 3
+            for (int i = 1; i <= n; i++)
+            {
+                //Step 4
+                for (int j = 1; j <= m; j++)
+                {
+                    // Step 5
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+
+                    // Step 6
+                    d[i, j] = Math.Min(Math.Min(d[i - 1,
+                        j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + cost);
+                }
+            }
+            // Step 7
+            return d[n, m];
+        }
+    }
 
     /// <summary>
     /// Refers to the Contraints behavior during search, specifically whether

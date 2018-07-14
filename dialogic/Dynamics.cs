@@ -219,12 +219,6 @@ namespace Dialogic
             this.text = text;
         }
 
-        //protected static bool IsStrictMode(Chat context)
-        //{
-        //    return context == null || context.runtime == null
-        //        || context.runtime.strictMode;
-        //}
-
         protected bool IsStrictMode()
         {
             return context == null || context.runtime == null
@@ -356,6 +350,9 @@ namespace Dialogic
                         resolved = (string)Util.RandItem(options);
                     }
                     while (Equals(lastResolved, resolved));
+
+                    // See #134 here we should check (med < maxMed) instead
+
                     break;
             }
 
@@ -375,8 +372,6 @@ namespace Dialogic
             // if we have transforms, save them for later resolution
             if (!transforms.IsNullOrEmpty())
             {
-                //toReplace = toReplace.Substring(0, toReplace.LastIndexOf(").", Util.IC)) + ")";
-
                 if (!replaceWith.EnclosedBy(Ch.OGROUP, Ch.CGROUP))
                 {
                     var pre = replaceWith;
@@ -393,11 +388,8 @@ namespace Dialogic
 
             //Console.WriteLine("ToReplace: " + toReplace);
             //Console.WriteLine("ReplaceWith: " + replaceWith);
-
             var tmp = full.ReplaceFirst(toReplace, replaceWith);
-
             //Console.WriteLine("ReplaceFirst -> " + tmp);
-
 
             return tmp;
         }
