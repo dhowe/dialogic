@@ -1,3 +1,5 @@
+*** Interested in trying Dialogic in your game or voice-app? Send me a note at <img src="https://camo.githubusercontent.com/3d0142bb95a02890eb5c8bad633b0227acf15bcf/68747470733a2f2f7265646e6f6973652e6f72672f64616e69656c2f656d61696c2e6769663f6464" alt="email-gif" align="top"> with your idea! ***
+
 # Dialogic :fish:
 
 [![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) ![license](https://img.shields.io/badge/license-GPL-orange.svg)
@@ -6,7 +8,7 @@
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It enables writers to craft compelling dialog that responds organically both to user prompts and to events in the environment. The system supports abitrarily complex interactions between multiple actors, but makes no assumptions about how text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
 
-*** Interested in trying Dialogic in your game or voice-app? Send me a note at <img src="https://camo.githubusercontent.com/3d0142bb95a02890eb5c8bad633b0227acf15bcf/68747470733a2f2f7265646e6f6973652e6f72672f64616e69656c2f656d61696c2e6769663f6464" alt="email-gif" align="top"> with your idea! ***
+
 
 Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each CHAT has a unique LABEL and contains one or more COMMANDs. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system branches to a new CHAT. 
 
