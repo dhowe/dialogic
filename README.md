@@ -214,7 +214,7 @@ SAY Where was I? Oh, yes
 
 
 ### Special Characters
-As in most scripting languages, certain charactes have special meaning in Dialogic scripts. These include the following: !, #, }, {, ", =, etc. If you need to use these characters in your scripts, you can use [HTML entities](https://dev.w3.org/html5/html-author/charref), which will be replaced in Dialogic's output. This also applies to leading and trailing spaces and multiple consecutive spaces, for which you can use the `&nbsp;` entity.
+As in most scripting languages, certain characters have special meaning in Dialogic scripts. These include the following: !, #, }, {, ", =, etc. If you need to use these characters in your scripts, you can use [HTML entities](https://dev.w3.org/html5/html-author/charref), which will be replaced in Dialogic's output. This also applies to leading and trailing spaces and multiple consecutive spaces, for which you can use the `&nbsp;` entity.
 
 ````
 CHAT TestSpecial
