@@ -20,23 +20,27 @@
     {regex: /(function)(\s+)([a-z$][\w$]*)/, token: ["keyword", null, "variable-2"]},
     // Rules are matched in the order in which they appear, so there is
     // no ambiguity between this one and the one above
-
     // ! DIALOGIC
-    {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "keyword"}, //Command
-    {regex: /([^=]*):(?=CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)/, token: "actor"},
-    {regex: /\$/, token: "symbol"},
-    {regex: /#/, token: "label"}, 
+    {regex: /CHAT\b/, token: "command-chat"}, 
+    {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "command"}, 
+    {regex: /([^=]*):/, token: "actor"},
+    {regex: /\$.*?(?=\s|$)/, token: "variable"},
+    {regex: /\#(_|[a-zA-Z]).*?(?=\s|$)/, token: "label"},
+    {regex: /(?<=CHAT )(_|[a-zA-Z]).*/, token: "label"}, // Positive look behind does not work in javascript
+    {regex: /(\(.+\|.+\))/, token: "group"},
     {regex: /[-+\/*=<>!^()|]+/, token: "operator"},
+    {regex: /{.*?}/, token: "metadata"}, 
+    //TODO: Transforms
     // ! DIALOGIC
 
     {regex: /true|false|null|undefined/, token: "atom"},
     // {regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: "number"},
     {regex: /\/\/.*/, token: "comment"},
+    
     {regex: /\/(?:[^\\]|\\.)*?\//, token: "variable-3"},
     // A next property will cause the mode to move to a different state
     {regex: /\/\*/, token: "comment", next: "comment"},
     // indent and dedent properties guide autoindentation
-    // {regex: /[a-z$][\w$]*/, token: "variable"},
     {regex: /[\{\[\(]/, indent: true},
     {regex: /[\}\]\)]/, dedent: true}
 
@@ -65,10 +69,18 @@
       height:100% !important; /* fix the gutter issue*/
     }
     /*additional theme*/
-    .cm-s-default .cm-actor {color: #2B91AF;}
-    .cm-s-default .cm-symbol {color: red;}
+    .cm-s-default .cm-command, .cm-s-default .cm-command-chat{
+      font-weight: bold;
+      color:#d73a49 !important; /* dark red */
+    }
+    .cm-s-default .cm-actor {color:#a06a34;} /*brown*/
+    .cm-s-default .cm-group {color: orange;}
+
+    .cm-s-default .cm-variable {color: #6f42c1;} /*purple*/
     .cm-s-default .cm-operator {color: red;}
-    .cm-s-default .cm-label {color: #32CD32;}
+
+    .cm-s-default .cm-metadata {color: #006400;} /*green*/
+    .cm-s-default .cm-label {color: #005cc5;} /*blue*/
 
     body {
       padding: 0 2em;
