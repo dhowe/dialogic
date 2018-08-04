@@ -13,7 +13,7 @@ namespace runner
     /// </summary>
     class Demo
     {
-        public static void Main(string[] args)
+        public static void Mainx(string[] args)
         {
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
             testfile += "../../../../dialogic/data/gscript-loop.gs";

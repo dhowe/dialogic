@@ -23,4 +23,9 @@
     <None Remove="runtime.ser" />
     <None Remove="Dialogic.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="ConsoleClient.cs" />
+    <Compile Remove="ConsoleReader.cs" />
+    <Compile Remove="ConsoleClient.cs" />
+  </ItemGroup>
 </Project>

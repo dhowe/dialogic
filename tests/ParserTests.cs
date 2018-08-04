@@ -1234,6 +1234,7 @@ namespace Dialogic
             Assert.Throws<ParseException>(() => ChatParser.ParseText("DO {no=label}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("DO #a {ha s=label}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("DO #a {has=la bel}"));
+            Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND {a = (b|c)}"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND hello"));
             Assert.Throws<ParseException>(() => ChatParser.ParseText("FIND {d=e d}"));

@@ -153,17 +153,19 @@ namespace Dialogic
             {
                 // bad index, so reprompt for now
                 ChatRuntime.Info("Invalid index " + idx + ", reprompting\n");
-                //scheduler.prompt.Resolve(globals); // re-resolve
+
                 return new UpdateEvent(scheduler.prompt.Resolve(globals));
             }
             else
             {
                 Opt opt = scheduler.prompt.Selected(idx);
 
-
                 if (opt.action != Command.NOP)
                 {
                     // We've gotten a response with a branch, so finish & take it
+
+                    // Question: what if the Chat is unfinished (and resumable)?
+                    // Shouldn't we return to it later? See ticket #
                     scheduler.Completed(false);
                     opt.action.Resolve(globals);
                     runtime.FindAsync((Find)opt.action); // find next

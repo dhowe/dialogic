@@ -15,9 +15,10 @@ namespace Dialogic
     ///     dialogic.Run("#FirstChat");
     /// \endcode
     /// 
-    /// Or configure with a List of Actors
+    /// Or set up the runtime according to a specific configuration
     /// \code
-    ///     ChatRuntime dialogic = new ChatRuntime(theActors);
+    ///     IAppConfig theConfig = new MyCustomConfig();
+    ///     ChatRuntime dialogic = new ChatRuntime(theConfig);
     ///     dialogic.ParseFile(scriptFolder);
     ///     dialogic.Run("#FirstChat");
     /// \endcode
@@ -97,7 +98,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Create a new runtime from previously serialized bytes loaded from a file, using the specified actors.
+        /// Create a new runtime from previously serialized bytes loaded from a file, using the specified confi.
         /// </summary>
         /// <returns>The new ChatRuntime</returns>
         /// <param name="serializer">Serializer.</param>
@@ -515,6 +516,7 @@ namespace Dialogic
             theChats.ForEach(AddChat);
         }
 
+        // called only from InvokeImmediate
         private static void ProcessSay(ref string result,
             ref Command cmd, IDictionary<string, object> globals)
         {
@@ -606,12 +608,6 @@ namespace Dialogic
 
         internal void FindAsync(Find f, IDictionary<string, object> globals = null)
         {
-            //if (f is Go) // no need for a thread here ?
-            //{
-            //    scheduler.Launch(FindChatByLabel(f.Text()));
-            //    return;
-            //}
-
             if (f.Resolved().Count < 1) f.Resolve(globals); // tmp
 
             (searchThread = new Thread(() =>

@@ -19,11 +19,11 @@ namespace Dialogic
 
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
-		private ChatRuntime runtime;
+        private ChatRuntime runtime;
         private Regex lineParser;
-		private Chat activeChat;
-		private Ask lastAsk;
-              
+        private Chat activeChat;
+        private Ask lastAsk;
+
         internal ChatParser(ChatRuntime runtime)
         {
             this.runtime = runtime;
@@ -38,11 +38,11 @@ namespace Dialogic
             return lineParser;
         }
 
-        internal static List<Chat> ParseText(string s, IAppConfig config = null)
+        internal static List<Chat> ParseText(string s, 
+            IAppConfig config = null, bool disableValidators = false)
         {
-            //ChatRuntime rt = new ChatRuntime(Tendar.TendarConfig.Actors); // tmp: testing
             ChatRuntime rt = new ChatRuntime(config);
-            rt.ParseText(s, false);
+            rt.ParseText(s, disableValidators);
             return rt.Chats();
         }
 
@@ -78,7 +78,8 @@ namespace Dialogic
 
             try
             {
-                c = CreateCommand(new LineContext(this, line, lineNo));
+                var lc = new LineContext(this, line, lineNo);
+                c = CreateCommand(lc);
             }
             catch (Exception ex)
             //catch (ParseException ex)
@@ -115,11 +116,11 @@ namespace Dialogic
         {
             Type type = lc.command.Length > 0 ? runtime.typeMap[lc.command]
                 : Chat.DefaultCommandType(activeChat);
-            
+
             Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
             c.lineContext = lc;
-            
-			HandleActor(c, lc.actor);
+
+            HandleActor(c, lc.actor);
             HandleCommand(c);
             RunValidators(c);
 
@@ -131,7 +132,7 @@ namespace Dialogic
             return meta.IsNullOrEmpty() ? null : RE.MetaSplit.Split(meta);
         }
 
-		private void HandleActor(Command c, string spkr)
+        private void HandleActor(Command c, string spkr)
         {
             c.SetActor(Actor.Default);
 
@@ -142,10 +143,10 @@ namespace Dialogic
                 if (c.actor == null) throw new ParseException
                     ("Unknown actor: '" + spkr + "'");
 
-				if (!Equals(c.actor, Actor.Default))
-				{
-					c.SetMeta(Meta.ACTOR, c.actor.Name());
-				}
+                if (!Equals(c.actor, Actor.Default))
+                {
+                    c.SetMeta(Meta.ACTOR, c.actor.Name());
+                }
             }
         }
 
@@ -153,26 +154,25 @@ namespace Dialogic
         {
             if (c is Chat) // add chat to runtime list
             {
-				activeChat = (Chat)c;            
-				runtime.AddChat(activeChat);
+                activeChat = (Chat)c;
+                runtime.AddChat(activeChat);
                 return;
             }
 
-			if (runtime.chats.Count == 0) CreateDefaultChat();
+            if (runtime.chats.Count == 0) CreateDefaultChat();
 
-			// add option data to last Ask
-			if (c is Opt)
-			{
-				lastAsk.AddOption((Opt)c);
-				//Opt opt = (Opt)c;            
-                //Command last = LastOfType(parsedCommands, typeof(Ask));
-                //if (!(last is Ask)) throw new ParseException
-                //(line, lineNo, "OPT must follow ASK");
-			}
+            // add option data to last Ask
+            if (c is Opt)
+            {
+                if (lastAsk == null) throw new ParseException
+                    ("OPT must follow ASK");
+
+                lastAsk.AddOption((Opt)c);
+            }
             else  // add command to last Chat
             {
-				if (c is Ask) lastAsk = (Ask)c;
-				activeChat.AddCommand(c);
+                if (c is Ask) lastAsk = (Ask)c;
+                activeChat.AddCommand(c);
             }
         }
 
@@ -246,7 +246,7 @@ namespace Dialogic
             RunInternalValidators(c);
             //parsedCommands.Push(c);
             runtime.AddChat(c);
-			activeChat = c;
+            activeChat = c;
         }
     }
 

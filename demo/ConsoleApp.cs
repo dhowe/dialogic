@@ -8,15 +8,18 @@ namespace Dialogic
 {
     public class ConsoleApp
     {
+        public static void Main(string[] args)
+        {
+            var testfile = AppDomain.CurrentDomain.BaseDirectory;
+            testfile += "../../../../dialogic/data/console.gs";
+            new ConsoleApp(new FileInfo(testfile)).Run();
+        }
+
         static Dictionary<string, object> globals =
             new Dictionary<string, object>() {
-                { "emotion", "special" },
-                { "place", "my tank" },
-                { "Happy", "HappyFlip" },
-                { "verb", "play" },
-                { "neg", "(nah|no|nope)" },
-                { "var3", 2 }
-            };
+                { "userName", "" },
+                { "emotion", "" }
+        };
 
         ChatRuntime dialogic;
         EventArgs gameEvent;
@@ -26,7 +29,7 @@ namespace Dialogic
 
         public ConsoleApp(FileInfo fileOrFolder)
         {
-            dialogic = new ChatRuntime(AppConfig.TAC);
+            dialogic = new ChatRuntime();
             dialogic.ParseFile(fileOrFolder);
             dialogic.Preload(globals);
             dialogic.Run();
@@ -36,9 +39,9 @@ namespace Dialogic
         {
             while (true)
             {
-                Thread.Sleep(30);
                 IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
                 if (ue != null) HandleEvent(ref ue);
+                Thread.Sleep(30);
             }
         }
 
@@ -48,7 +51,8 @@ namespace Dialogic
             evtType = ue.Type();
             evtActor = ue.Actor();
 
-            //evtText = "["+evtActor + "] " + evtText;
+            if (evtActor != null
+               ) evtText = evtActor + ": " + evtText;
 
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.ACTOR);
 
@@ -76,7 +80,38 @@ namespace Dialogic
 
             Console.WriteLine(evtText);
 
+            if (evtType == "Ask")
+            {
+                int timeout = Util.ToMillis(ue.GetDouble(Meta.TIMEOUT));
+                while (!DoResponse(timeout))
+                {
+                    // default is to reprompt
+                    Console.WriteLine(evtText);
+                }
+            }
+
             ue = null;  // dispose event 
+        }
+
+        private bool DoResponse(int timeout)
+        {
+            string response = null;
+            try
+            {
+                response = ConsoleReader.ReadLine(timeout);
+                int choice = (int)Convert.ChangeType(response, typeof(int));
+                this.gameEvent = new ChoiceEvent(choice);
+                return true;
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Invalid response '" + response + "', reprompting\n");
+            }
+            catch (TimeoutException)
+            {
+                Console.WriteLine("Timeout after "+timeout+"ms, reprompting\n");
+            }
+            return false;
         }
 
         private void DoPrompt(IUpdateEvent ue)

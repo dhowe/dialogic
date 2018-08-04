@@ -74,6 +74,39 @@ namespace Dialogic
             Assert.That(chat.text, Is.EqualTo("CORE_Tap"));
         }
 
+
+        [Test]
+        public void SearchHardDashedConstraint()
+        {
+            string[] lines = {
+                "CHAT CORE_Shake {type=sha-ke, stage=CO-RE}",
+                "SAY Core shake!",
+
+                "CHAT CORE_Tap {type=ta-p, stage=CO-RE}",
+                "SAY Core tap!",
+
+                "CHAT CORE_Stale_Fast {type=cri-tic, stage=CO-RE}",
+                "SAY Core critic!",
+
+                "CHAT NV_Shake {type=sha-ke, stage=N-V}",
+                "SAY NV shake!",
+
+                "CHAT NV_Tap {type=ta-p, stage=N-V}",
+                "SAY NV tap!",
+
+                "CHAT NV_Stale_Fast {type=cri-tic, stage=N-V}",
+                "SAY NV critic!",
+            };
+
+            string contents = String.Join("\n", lines);
+            ChatRuntime rt = new ChatRuntime(AppConfig.TAC);
+            rt.ParseText(contents);
+            var finder = new Find().Init("{!!type=ta-p,!stage=CO-RE}");
+
+            var chat = rt.DoFind((Dialogic.Find)finder);
+            Assert.That(chat.text, Is.EqualTo("CORE_Tap"));
+        }
+
         [Test]
         public void FindChatByLabel()
         {
@@ -110,6 +143,15 @@ namespace Dialogic
             c.SetMeta("day", "hello");
             chats.Add(c = Chat.Create("c3"));
             Chat res = new ChatRuntime(chats).DoFind(null, new Constraint("dev", "1"));
+            Assert.That(res.text, Is.EqualTo("c2"));
+
+            chats = new List<Chat>();
+            chats.Add(c = Chat.Create("c1"));
+            chats.Add(c = Chat.Create("c2"));
+            c.SetMeta("dev", "1-3");
+            c.SetMeta("day", "hello-me");
+            chats.Add(c = Chat.Create("c3"));
+            res = new ChatRuntime(chats).DoFind(null, new Constraint("dev", "1-3"));
             Assert.That(res.text, Is.EqualTo("c2"));
         }
 

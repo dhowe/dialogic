@@ -1336,13 +1336,12 @@ namespace Dialogic
             }
         }
 
-        // omit the parameter to read a line without a timeout
-        public static string ReadLine(Command source, int timeOutMillisecs = -1)
+        public static string ReadLine(int timeOutMillisecs = -1)
         {
             getInput.Set();
             bool success = gotInput.WaitOne(timeOutMillisecs);
             if (success) return input;
-            throw new Exception("ReadLine error");
+            throw new TimeoutException("Prompt timeout expired after "+timeOutMillisecs+"ms");
         }
 
     } //@endcond

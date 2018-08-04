@@ -634,17 +634,21 @@ namespace Dialogic
 			return resolved;
 		}
 
-		///  All Find commands must have a 'staleness' value
+
 		protected internal override Command Validate()
 		{
+            if (!HasMeta()) throw new ParseException
+                ("FIND requires one or more constraints");
+            
+            //  All Find commands must have a 'staleness' value
 			SetMeta(new Constraint(Operator.LT, Meta.STALENESS,
-					Defaults.FIND_STALENESS.ToString()), true);
+				Defaults.FIND_STALENESS.ToString()), true);
 
 			Constraint staleness = (Constraint)GetMeta(Meta.STALENESS);
 
 			if (staleness.op != Operator.LT && staleness.op != Operator.LE)
 			{
-				throw new FindException("Find staleness op must be < or <=");
+				throw new FindException("Find staleness Op must be < or <=");
 			}
 
 			return this;
@@ -847,6 +851,8 @@ namespace Dialogic
 				 + prs.Length + ": " + prs.Stringify());
 
 			for (int i = 0; i < prs.Length; i++) prs[i] = prs[i].Trim();
+
+            // TODO: handle any illegal meta characters here (see #140)
 
 			if (prs[0].IndexOf(' ') > -1) throw new ParseException
 				("Meta keys cannot contains spaces: '" + prs[0] + "'");
