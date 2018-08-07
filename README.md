@@ -84,7 +84,7 @@ SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
 
 &nbsp;
 
-You can also save the results of these expansions for later use. Lets say that you wanted to pick a character to be reused seveal times in a paragraph. You could do the following:
+You can also save the results of an expansion for later use. For example, lets say that you wanted to pick a character name to be reused several times in a paragraph. You could do the following:
 
 ````
 SAY Once there was a girl called [hero=(Jane | Mary)].
@@ -120,7 +120,7 @@ SAY $hero liked living in $home.
 
 
 
-### Transformations
+### Transforms
 
 Dialogic also supports _transformation functions_ (called transforms) for modifying the results of expanded symbols and groups. Built-in transforms include Pluralize(), Articlize(), and [others](http://rednoise.org/dialogic/class_dialogic_1_1_transforms.html), which can be called from scripts as follows:
 
