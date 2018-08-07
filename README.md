@@ -230,9 +230,9 @@ which will output:
 
 ### Integrating Dialogic
 
-Dialogic can be run alone or with a game engine, such as Unity3D (see example below). The system includes two main components: the domain-specific language (DSL) described above, and a runtime environment, which is responsible for passing events between the runtime and the application. 
+Dialogic can be run alone or with a game engine, such as Unity3D (see example below). The system includes two main components: the scripting language described above, and the runtime environment, which is responsible for passing events between the runtime and the application. 
 
-In the C# example below, a [_ChatRuntime_](http://rednoise.org/dialogic/class_dialogic_1_1_chat_runtime.html) is created and reads in a number of chat descriptions from a plain-text file (or folder) and compiles them into a list of _Chat_ objects. The runtime's Run() function is called to start execution, specifying the Chat to run first.
+In the C# example below, a [_ChatRuntime_](http://rednoise.org/dialogic/class_dialogic_1_1_chat_runtime.html) is created that reads in a chat descriptions from a plain-text file (or folder) and compiles them into a list of _Chat_ objects. The runtime's Run() function is called to start execution, specifying the Chat to run first.
 
 The application calls the runtime's Update() function each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occurred during that frame. If a Dialogic event occurs during the frame, it is returned from the Update function.
 ````C#
@@ -281,17 +281,17 @@ rt2.Run();
 
 
 
-
+&nbsp;
 
 ### Building Dialogic with Visual Studio
 
 1. Clone this respository to your local file system ```` $ git clone https://github.com/dhowe/dialogic.git````
 
-1. From Visual Studio 2017 do Menu->File->Open, then select dialogic.sln from the top-level of the cloned dir
+1. From Visual Studio, do Menu->File->Open, then select dialogic.sln from the top-level of the cloned dir
 
 1. The solution should open with 3-4 sub-projects, as in the image below. 
 
-1. To run tests, right-click 'tests' and select 'Run Item'
+1. To run the tests, right-click 'tests' and select 'Run Item'
 
 ![](http://rednoise.org/images/vsloaded.png?raw=true)
 
