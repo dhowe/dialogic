@@ -13,7 +13,7 @@ namespace runner
     /// </summary>
     class Demo
     {
-        public static void Mainx(string[] args)
+        public static void Main(string[] args)
         {
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
             testfile += "../../../../dialogic/data/gscript-loop.gs";
@@ -44,7 +44,7 @@ namespace runner
 
         public static void Profiling(string[] args)
         {
-            ChatRuntime.DISABLE_UNIQUE_CHAT_LABELS = true;
+            ChatRuntime.VERIFY_UNIQUE_CHAT_LABELS = false;
 
             AppConfig config = AppConfig.TAC;
             ISerializer serializer = new SerializerMessagePack();

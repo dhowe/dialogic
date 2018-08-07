@@ -27,7 +27,7 @@ namespace Dialogic
     {
         public static string LOG_FILE;
         public static bool SILENT = false;
-        public static bool DISABLE_UNIQUE_CHAT_LABELS = false;
+        public static bool VERIFY_UNIQUE_CHAT_LABELS = true;
 
         internal static bool DebugLifecycle = false;
 
@@ -161,7 +161,7 @@ namespace Dialogic
         /// </summary>
         public void ParseText(string text, bool disableValidators = false)
         {
-            if (text.EndsWith(".gs", Util.IC)) Warn("This text looks " // tmp
+            if (text.EndsWith(".gs", Util.INV)) Warn("This text looks " // tmp
                 + "like a file name, did you mean to use ParseFile()?\n");
             this.validatorsDisabled = disableValidators;
             parser.Parse(text.Split(ChatParser.LineBreaks, StringSplitOptions.None));
@@ -221,7 +221,7 @@ namespace Dialogic
         /// </summary>
         public void Run(string chatLabel = null)
         {
-            if (chats.Count < 1) throw new Exception("No chats found");
+            if (chats.Count < 1) throw new DialogicException("No chats found");
 
             scheduler.Launch(FindChatByLabel(chatLabel ?? firstChat));
         }
@@ -537,14 +537,20 @@ namespace Dialogic
 
             c.runtime = this;
 
-            if (chats.Count < 1) firstChat = c.text;
-
             if (c.text.IsNullOrEmpty())
             {
                 throw new ParseException("Invalid chat label: " + c.text);
             }
 
-            if (DISABLE_UNIQUE_CHAT_LABELS) c.text += Util.EpochNs();
+            if (chats.Count < 1 || c.text.Equals("start", Util.IC))
+            {
+                firstChat = c.text;
+            }
+
+            if (!VERIFY_UNIQUE_CHAT_LABELS)
+            {
+                c.text += Util.EpochNs();
+            }
 
             if (chats.ContainsKey(c.text))
             {

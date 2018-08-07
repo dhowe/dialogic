@@ -568,7 +568,7 @@ namespace Dialogic
 		{
 			this.text = txt;
 
-			if (lbl.Length > 0 && !lbl.StartsWith(Util.LABEL_IDENT, Util.IC))
+			if (lbl.Length > 0 && !lbl.StartsWith(Util.LABEL_IDENT, Util.INV))
 			{
 				throw BadArg("OPT requires a literal #Label");
 			}

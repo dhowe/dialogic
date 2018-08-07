@@ -323,7 +323,7 @@ namespace Dialogic
 
             foreach (var k in globals.Keys)
             {
-                if (k.StartsWith(name, Util.IC))
+                if (k.StartsWith(name, Util.INV))
                 {
                     string key = k;
                     string val = (string)globals[k];

@@ -320,7 +320,7 @@ namespace Dialogic
             //rt.strictMode = false;
             var s = rt.InvokeImmediate(globals);
             //Console.WriteLine(s);
-            Assert.That(s.StartsWith("Well don't you look ", Util.IC), Is.True);
+            Assert.That(s.StartsWith("Well don't you look ", Util.INV), Is.True);
             Assert.That(s.Contains("anger"), Is.False);
             Assert.That(s.Contains("emoadj"), Is.False);
 

@@ -44,7 +44,7 @@ namespace Dialogic
             {
                 runtime.Chats().ForEach(action);
             }
-            else if (findBy.StartsWith(Util.LABEL_IDENT, Util.IC)) // to one chat
+            else if (findBy.StartsWith(Util.LABEL_IDENT, Util.INV)) // to one chat
             {
                 action.Invoke(runtime.FindChatByLabel(findBy));
             }
@@ -114,7 +114,7 @@ namespace Dialogic
             {
                 scheduler.nextEventTime = scheduler.Resume();
             }
-            else if (label.StartsWith(Util.LABEL_IDENT, Util.IC)) // resume specified
+            else if (label.StartsWith(Util.LABEL_IDENT, Util.INV)) // resume specified
             {
                 scheduler.Suspend();
                 scheduler.Launch(label);

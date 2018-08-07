@@ -177,7 +177,8 @@ namespace Dialogic
     /// </summary>
     public static class Util
     {
-        public static StringComparison IC = StringComparison.InvariantCulture;
+        public static StringComparison INV = StringComparison.InvariantCulture;
+        public static StringComparison IC = StringComparison.CurrentCultureIgnoreCase;
 
         internal static double INFINITE = -1;
         internal static string LABEL_IDENT = "#";
@@ -563,7 +564,7 @@ namespace Dialogic
 
         internal static void ValidateLabel(ref string lbl)
         {
-            if (lbl.StartsWith(LABEL_IDENT, IC)) lbl = lbl.Substring(1);
+            if (lbl.StartsWith(LABEL_IDENT, INV)) lbl = lbl.Substring(1);
         }
 
         internal static string[] StripSingleLineComments(string[] lines)
@@ -571,7 +572,7 @@ namespace Dialogic
             for (int i = 0; i < lines.Length; i++)
             {
                 lines[i] = lines[i].Trim();
-                int idx = lines[i].IndexOf("//", Util.IC);
+                int idx = lines[i].IndexOf("//", Util.INV);
                 if (idx > -1) lines[i] = lines[i].Substring(0, idx);
             }
             return lines;
@@ -586,7 +587,7 @@ namespace Dialogic
 
                 if (commentOpen)
                 {
-                    int endIdx = line.IndexOf("*/", Util.IC);
+                    int endIdx = line.IndexOf("*/", Util.INV);
                     if (endIdx < 0)
                     {
                         line = String.Empty;
@@ -598,10 +599,10 @@ namespace Dialogic
                     commentOpen = false;
                 }
 
-                int startIdx = line.IndexOf("/*", Util.IC);
+                int startIdx = line.IndexOf("/*", Util.INV);
                 if (startIdx > -1)
                 {
-                    int endIdx = line.IndexOf("*/", Util.IC);
+                    int endIdx = line.IndexOf("*/", Util.INV);
 
                     if (endIdx < 0) // only open, no close
                     {
@@ -1207,7 +1208,7 @@ namespace Dialogic
             if (str.IsNullOrEmpty()) return false;
             for (int i = 0; i < c.Length; i++)
             {
-                if (str.StartsWith(c[i], Util.IC)) return true;
+                if (str.StartsWith(c[i], Util.INV)) return true;
             }
             return false;
         }

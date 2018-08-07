@@ -828,8 +828,8 @@ namespace Dialogic
 			Say say = (Dialogic.Say)last;
 			var text = say.Text();
 			//Console.WriteLine("GOT: "+text);
-			Assert.That(text.StartsWith("You look tasty: gushing", Util.IC), Is.True);
-			Assert.That(text.EndsWith("Goodbye!", Util.IC), Is.True);
+			Assert.That(text.StartsWith("You look tasty: gushing", Util.INV), Is.True);
+			Assert.That(text.EndsWith("Goodbye!", Util.INV), Is.True);
 		}
 
 		[Test]
@@ -870,8 +870,8 @@ namespace Dialogic
 			{
 				var text = (string)say.Resolve(globals)[Meta.TEXT];
 				//Console.WriteLine(i+") "+text);
-				Assert.That(text.StartsWith("You look tasty", Util.IC), Is.True);
-				Assert.That(text.EndsWith("with the poverty.", Util.IC), Is.True);
+				Assert.That(text.StartsWith("You look tasty", Util.INV), Is.True);
+				Assert.That(text.EndsWith("with the poverty.", Util.INV), Is.True);
 			}
 		}
 

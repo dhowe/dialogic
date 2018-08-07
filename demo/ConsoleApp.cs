@@ -8,10 +8,10 @@ namespace Dialogic
 {
     public class ConsoleApp
     {
-        public static void Main(string[] args)
+        public static void Mainx(string[] a)
         {
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
-            testfile += "../../../../dialogic/data/console.gs";
+            testfile += "../../../../dialogic/data/gscript.gs";
             new ConsoleApp(new FileInfo(testfile)).Run();
         }
 
@@ -51,8 +51,7 @@ namespace Dialogic
             evtType = ue.Type();
             evtActor = ue.Actor();
 
-            if (evtActor != null
-               ) evtText = evtActor + ": " + evtText;
+            if (evtActor != null) evtText = evtActor + ": " + evtText;
 
             ue.RemoveKeys(Meta.TEXT, Meta.TYPE, Meta.ACTOR);
 
@@ -78,16 +77,13 @@ namespace Dialogic
                     break;
             }
 
-            Console.WriteLine(evtText);
+            Display(evtText);
 
             if (evtType == "Ask")
             {
+                // default is to reprompt on timeout
                 int timeout = Util.ToMillis(ue.GetDouble(Meta.TIMEOUT));
-                while (!DoResponse(timeout))
-                {
-                    // default is to reprompt
-                    Console.WriteLine(evtText);
-                }
+                while (!DoResponse(timeout)) Display(evtText);
             }
 
             ue = null;  // dispose event 
@@ -105,12 +101,13 @@ namespace Dialogic
             }
             catch (FormatException)
             {
-                Console.WriteLine("Invalid response '" + response + "', reprompting\n");
+                Display("Invalid response '" + response + "', reprompting\n");
             }
             catch (TimeoutException)
             {
-                Console.WriteLine("Timeout after "+timeout+"ms, reprompting\n");
+                Display("Timeout after " + timeout + "ms, reprompting\n");
             }
+
             return false;
         }
 
@@ -128,6 +125,11 @@ namespace Dialogic
             {
                 evtText += "\n  (" + i + ") " + evtOpts[i];
             }
+        }
+
+        private void Display(string msg)
+        {
+            Console.WriteLine(msg);
         }
     }
 }

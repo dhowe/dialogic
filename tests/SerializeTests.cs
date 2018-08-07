@@ -20,7 +20,7 @@ namespace Dialogic
 		{
 			if (!RUN_PROFILING_TESTS) return;
 
-			ChatRuntime.DISABLE_UNIQUE_CHAT_LABELS = true;
+			ChatRuntime.VERIFY_UNIQUE_CHAT_LABELS = false;
 
 			ChatRuntime rtOut, rtIn;
 			byte[] bytes = null;
