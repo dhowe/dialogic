@@ -479,7 +479,7 @@
           formData.push(
           {
             name: "selection",
-            value: execute ? $("#result").text() : processSelectedText(content, startIdx.line, endIdx.line)
+            value: execute ? $("#result").text() : processSelectedText(content, startIdx, endIdx)
           });
           
         }
@@ -555,8 +555,10 @@
 
             for (var i = 0; i < lines.length; i++)
             {
-              if (i < startIdx) lines[i] = "//" + lines[i];
-              if (endIdx < i) lines[i] = "//" + lines[i];
+              if (i < startIdx.line) lines[i] = "//" + lines[i];
+
+              // edge case: selecting entire line
+              if ( endIdx.line - (endIdx.ch == 0 ? 1 : 0) < i) lines[i] = "//" + lines[i];
             }
             return lines.join("\n");
 
