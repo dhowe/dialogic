@@ -18,38 +18,49 @@
     // You can match multiple tokens at once. Note that the captured
     // groups must span the whole string in this case
     {regex: /(function)(\s+)([a-z$][\w$]*)/, token: ["keyword", null, "variable-2"]},
+
     // Rules are matched in the order in which they appear, so there is
     // no ambiguity between this one and the one above
     // ! DIALOGIC
-    {regex: /CHAT\b/, token: "command-chat"}, 
+    {regex: /CHAT(?= )/, token: "command-chat", next:"labelafterchat"}, // Positive look behind does not work in javascript
     {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "command"}, 
     {regex: /([^=]*):/, token: "actor"},
-    {regex: /\$.*?(?=\s|$)/, token: "variable"},
+    {regex: /\$.+?(?=\s|$)/, token: "variable"},
+    {regex: /\(/, token: "group", next:"group"},
     {regex: /\#(_|[a-zA-Z]).*?(?=\s|$)/, token: "label"},
-    {regex: /(?<=CHAT )(_|[a-zA-Z]).*/, token: "label"}, // Positive look behind does not work in javascript
-    {regex: /(\(.+\|.+\))/, token: "group"},
-    {regex: /[-+\/*=<>!^()|]+/, token: "operator"},
     {regex: /{.*?}/, token: "metadata"}, 
     //TODO: Transforms
     // ! DIALOGIC
-
     {regex: /true|false|null|undefined/, token: "atom"},
     // {regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: "number"},
-    {regex: /\/\/.*/, token: "comment"},
-    
-    {regex: /\/(?:[^\\]|\\.)*?\//, token: "variable-3"},
+    {regex: /\/\/.*/, token: "comment"}, //
     // A next property will cause the mode to move to a different state
-    {regex: /\/\*/, token: "comment", next: "comment"},
+    {regex: /\/\*/, token: "comment", next: "comment"}, /* */
+    {regex: /[-+\/*=<>!^()|]+/, token: "operator"},
     // indent and dedent properties guide autoindentation
     {regex: /[\{\[\(]/, indent: true},
     {regex: /[\}\]\)]/, dedent: true}
 
+  ],
+  // DIALOGIC: hack - label after chat
+  labelafterchat:[
+     {regex: / .+?\b/, token: "label", next: "start"}
+  ],
+  group:[
+      {regex: /\$.+?(?=\s|\||\))/, token: "variable"},
+      {regex: /[^$]*?\)/, token: "group", next: "start"}, 
+      {regex: /[^$]*/g, token: "group"}
+  ],
+  //DIALOGIC: metadata state
+  metadata:[
+  
   ],
   // The multi-line comment state.
   comment: [
     {regex: /.*?\*\//, token: "comment", next: "start"},
     {regex: /.*/, token: "comment"}
   ],
+
   // The meta property contains global information about the mode. It
   // can contain properties like lineComment, which are supported by
   // all modes, and also directives like dontIndentStates, which are
@@ -71,7 +82,6 @@
     /*additional theme*/
     .cm-s-default .cm-command, .cm-s-default .cm-command-chat{
       font-weight: bold;
-      color:#d73a49 !important; /* dark red */
     }
     .cm-s-default .cm-actor {color:#a06a34;} /*brown*/
     .cm-s-default .cm-group {color: orange;}
@@ -81,6 +91,7 @@
 
     .cm-s-default .cm-metadata {color: #006400;} /*green*/
     .cm-s-default .cm-label {color: #005cc5;} /*blue*/
+    .cm-s-default .cm-comment{color:grey;}
 
     body {
       padding: 0 2em;
