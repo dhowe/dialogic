@@ -26,7 +26,7 @@
     {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "command"}, 
     {regex: /([^=]*):/, token: "actor"},
     {regex: /\$.+?(?=\s|$)/, token: "variable"},
-    {regex: /\(/, token: "group", next:"group"},
+    {regex: /(\(.+\|.+\))/, token: "group"},
     {regex: /\#(_|[a-zA-Z]).*?(?=\s|$)/, token: "label"},
     {regex: /{.*?}/, token: "metadata"}, 
     //TODO: Transforms
@@ -46,11 +46,11 @@
   labelafterchat:[
      {regex: / .+?\b/, token: "label", next: "start"}
   ],
-  group:[
-      {regex: /\$.+?(?=\s|\||\))/, token: "variable"},
-      {regex: /[^$]*?\)/, token: "group", next: "start"}, 
-      {regex: /[^$]*/g, token: "group"}
-  ],
+  // group:[
+  //     {regex: /\$.+?(?=\s|\||\))/, token: "variable"},
+  //     {regex: /[^$]*?\)/, token: "group", next: "start"}, 
+  //     {regex: /[^$]*/g, token: "group"}
+  // ],
   //DIALOGIC: metadata state
   metadata:[
   
@@ -84,13 +84,13 @@
       font-weight: bold;
     }
     .cm-s-default .cm-actor {color:#a06a34;} /*brown*/
-    .cm-s-default .cm-group {color: orange;}
+    .cm-s-default .cm-group {color: #004600;} /*green*/
+    .cm-s-default .cm-variable {color: #4d2e87;} /*purple*/
 
-    .cm-s-default .cm-variable {color: #6f42c1;} /*purple*/
-    .cm-s-default .cm-operator {color: red;}
+    .cm-s-default .cm-metadata {color: #005cc5;} /*blue*/
+    .cm-s-default .cm-label {color: #d73a49;} /*red*/
 
-    .cm-s-default .cm-metadata {color: #006400;} /*green*/
-    .cm-s-default .cm-label {color: #005cc5;} /*blue*/
+    .cm-s-default .cm-operator {color: #d73a49;} /*red*/
     .cm-s-default .cm-comment{color:grey;}
 
     body {
