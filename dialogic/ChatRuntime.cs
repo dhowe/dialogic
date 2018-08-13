@@ -623,7 +623,14 @@ namespace Dialogic
                 //Chat chat = DoFind(f, globals);
                 var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
 
-                scheduler.Launch(chat);
+                if (chat != null)
+                {
+                    scheduler.Launch(chat);
+                }
+                else
+                {
+                    Warn("Failed Find: " + f);
+                }
 
             })).Start();
         }
