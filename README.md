@@ -260,7 +260,7 @@ The application calls the runtime's Update() function each frame, passing the cu
 
 
 ### Serialization
-The Dialogic system can be paused and resumed, with state saved to a file or an array of bytes. The specific serialization package is up to you (we generally use [MessagePack](https://github.com/neuecc/MessagePack-CSharp)), but other options can be used, as long as they  implement the [ISerializer](http://rednoise.org/dialogic/interface_dialogic_1_1_i_serializer.html) interface. In the example below, current state is saved to a file, then reloaded into a new ChatRuntime.
+The Dialogic system can be paused and resumed, with state saved to a file or an array of bytes. The specific serialization package is up to you (we generally use [MessagePack](https://github.com/neuecc/MessagePack-CSharp), but other options can be used, as long as they  implement the [ISerializer](http://rednoise.org/dialogic/interface_dialogic_1_1_i_serializer.html) interface.) In the example below, current state is saved to a file, then reloaded into a new ChatRuntime.
 
 ```C#
 
