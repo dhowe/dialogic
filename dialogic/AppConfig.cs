@@ -12,6 +12,7 @@ namespace Client
     /// </summary>
     public class AppConfig : IAppConfig
     {
+        // TODO: factor out DefaultConfig class 
         public static AppConfig TAC = new AppConfig();
 
         private IDictionary<string, Func<string, string>> transforms;
@@ -45,25 +46,25 @@ namespace Client
 
         //--------------------- interface --------------------------
 
-        public List<IActor> GetActors()
-        {
-            return actors;
-        }
+        public List<IActor> GetActors() => actors;
 
-        public List<CommandDef> GetCommands()
-        {
-            return commands;
-        }
+        public List<CommandDef> GetCommands() => commands;
 
         public IDictionary<string, Func<string, string>> GetTransforms()
-        {
-            return transforms;
-        }
+            => transforms;
 
-        public List<Func<Command, bool>> GetValidators()
-        {
-            return validators;
-        }
+        public List<Func<Command, bool>> GetValidators() => validators;
+
+        public void AddActor(IActor actor) => actors.Add(actor);
+
+        public void AddValidator(Func<Command, bool> func) 
+            => validators.Add(func);
+
+        public void AddCommand(string name, Type t) 
+            => commands.Add(new CommandDef(name, t));
+
+        public void AddTransform(string name, Func<string, string> f) 
+            => transforms.Add(name, f);
 
         //----------------------------------------------------------
 
@@ -114,7 +115,8 @@ namespace Client
         /// </summary>
         private static string EmoAdj(string emotion)
         {
-            if (!synAdjs.ContainsKey(emotion)) {
+            if (!synAdjs.ContainsKey(emotion))
+            {
                 Console.WriteLine("[WARN] no adjs for: " + emotion);
                 return emotion;
             }

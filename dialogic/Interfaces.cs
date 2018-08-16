@@ -31,6 +31,11 @@ namespace Dialogic
     /// </summary>
     public interface IAppConfig
     {
+        void AddActor(IActor a);
+        void AddCommand(string name, Type t);
+        void AddValidator(Func<Command, bool> func);
+        void AddTransform(string name, Func<string, string> func);
+
         List<IActor> GetActors();
         List<CommandDef> GetCommands();
         List<Func<Command, bool>> GetValidators();
