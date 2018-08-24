@@ -55,7 +55,7 @@ namespace Dialogic
         private List<IActor> actors;
         private List<Action<Chat>> findListeners;
         private List<Func<Command, bool>> validators;
-        private Thread searchThread, saveThread, loadThread;
+        private Thread deserializeThread, searchThread, saveThread, loadThread;
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private FuzzySearch search;
@@ -378,13 +378,30 @@ namespace Dialogic
         }
 
         /// <summary>
+        /// Update this instance asynchronously with new data from a serialized byte array
+        /// </summary>
+        public void UpdateFromAsync(ISerializer serializer, byte[] bytes, Action callback = null)
+        {
+            (deserializeThread = new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+
+                serializer.FromBytes(this, bytes);
+
+                if (callback != null) callback.Invoke();
+
+            })).Start();
+
+        }
+
+        /// <summary>
         /// Update this instance with new data from a serialized byte array
         /// </summary>
         public void UpdateFrom(ISerializer serializer, byte[] bytes)
             => serializer.FromBytes(this, bytes);
 
         /// <summary>
-        /// Update this instance with new data from a serialized byte array
+        /// Update this instance with data from an existing runtime
         /// </summary>
         public void UpdateFrom(ISerializer serializer, ChatRuntime rt)
             => serializer.FromBytes(this, serializer.ToBytes(rt));
