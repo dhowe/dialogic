@@ -37,11 +37,11 @@ namespace Dialogic
         }
     }
 
-    public class LoadEvent : GameEvent, ILoadEvent
+    public class LoadChatsEvent : GameEvent, ILoadChatsEvent
     {
         protected readonly List<Chat> chats;
 
-        public LoadEvent(List<Chat> chats) : base()
+        public LoadChatsEvent(List<Chat> chats) : base()
         {
             this.chats = chats;
         }
@@ -60,6 +60,22 @@ namespace Dialogic
         protected readonly FileInfo file;
 
         public SaveEvent(ISerializer serializer, FileInfo file) : base()
+        {
+            this.serializer = serializer;
+            this.file = file;
+        }
+
+        public ISerializer GetSerializer() => serializer;
+
+        public FileInfo GetFile() => file;
+    }
+
+    public class LoadEvent : GameEvent, ILoadEvent
+    {
+        protected readonly ISerializer serializer;
+        protected readonly FileInfo file;
+
+        public LoadEvent(ISerializer serializer, FileInfo file) : base()
         {
             this.serializer = serializer;
             this.file = file;

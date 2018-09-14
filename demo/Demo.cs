@@ -134,21 +134,18 @@ namespace runner
         /// </summary>
         public void Run()
         {
-            var now = Util.Millis();
+            TestEvents(Util.Millis());
 
-            // a 'Load' event
-            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+            while (true)
             {
-                Console.WriteLine("\n<load-event#chats>\n");
+                Thread.Sleep(30);
+                IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
+                if (ue != null) HandleEvent(ref ue);
+            }
+        }
 
-                var runtime = new ChatRuntime(Client.AppConfig.TAC);
-                runtime.ParseText(string.Join('\n', new[] {
-                    "CHAT GScriptTest {type=a,stage=b}",
-                    "*** Welcome to my updated world!!!"
-                }));
-                gameEvent = new LoadEvent(runtime.Chats());
-            });
-
+        public void TestEvents(int now)
+        {
             // a 'Save' event
             if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
             {
@@ -160,6 +157,29 @@ namespace runner
                 gameEvent = new SaveEvent(serializer, new FileInfo(file));
             });
 
+
+            // a 'Load' event
+            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+            {
+                Console.WriteLine("\n<new-chat-event#chats>\n");
+                var file = AppDomain.CurrentDomain.BaseDirectory;
+                file += Util.EpochMs() + ".ser";
+                gameEvent = new LoadEvent(serializer, new FileInfo(file));
+            });
+
+            // a 'LoadChats' event
+            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+            {
+                Console.WriteLine("\n<new-chat-event#chats>\n");
+
+                var runtime = new ChatRuntime(Client.AppConfig.TAC);
+                runtime.ParseText(string.Join('\n', new[] {
+                    "CHAT GScriptTest {type=a,stage=b}",
+                    "*** Welcome to my updated world!!!"
+                }));
+                gameEvent = new LoadChatsEvent(runtime.Chats());
+            });
+
             // a 'Tap' event
             if (false) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
              {
@@ -169,12 +189,13 @@ namespace runner
                  gameEvent = new UserEvent("Tap");
              });
 
-            var types = new[] { "critic", "shake", "tap" };
-            var count = 0;
 
             // a 'Resume' event
+            var count = 0;
+            var types = new[] { "critic", "shake", "tap" };
             if (false) Timers.SetInterval(1000, () =>
             {
+
                 interrupted = true;
                 var data = "{!!type = TYPE,!stage = CORE}";
                 data = data.Replace("TYPE", types[++count % 3]);
@@ -184,13 +205,6 @@ namespace runner
 
                 gameEvent = new ResumeEvent(data);
             });
-
-            while (true)
-            {
-                Thread.Sleep(30);
-                IUpdateEvent ue = dialogic.Update(globals, ref gameEvent);
-                if (ue != null) HandleEvent(ref ue);
-            }
         }
 
         internal void RunInLoop() // repeated events

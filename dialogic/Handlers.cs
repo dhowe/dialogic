@@ -28,6 +28,7 @@ namespace Dialogic
             if (ea is IClear) return ClearHandler(ref ea, globals);
             if (ea is ISaveEvent) return SaveHandler(ref ea, globals);
             if (ea is ILoadEvent) return LoadHandler(ref ea, globals);
+            if (ea is ILoadChatsEvent) return LoadChatsHandler(ref ea, globals);
 
             throw new DialogicException("Unexpected event-type: " + ea.GetType());
         }
@@ -99,7 +100,19 @@ namespace Dialogic
         {
             ILoadEvent evt = (ILoadEvent)ea;
             ea = null;
-            runtime.AddChatsAsync(evt.GetChats());
+            runtime.LoadAsync(evt.GetSerializer(), evt.GetFile(), (bytes) =>
+            {
+                var msg = "LOADED: " + (bytes != null ? bytes.Length + " bytes" : "Failed");
+                Console.WriteLine(msg);
+            });
+            return null;
+        }
+
+        private IUpdateEvent LoadChatsHandler(ref EventArgs ea, IDictionary<string, object> globals)
+        {
+            ILoadChatsEvent evt = (ILoadChatsEvent)ea;
+            ea = null;
+            runtime.LoadChatsAsync(evt.GetChats());
             return null;
         }
 

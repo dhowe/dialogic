@@ -147,6 +147,12 @@ namespace Dialogic
     /// </summary>
     public interface ILoadEvent
     {
+        ISerializer GetSerializer();
+        FileInfo GetFile();
+    }
+
+    public interface ILoadChatsEvent
+    {
         List<Chat> GetChats();
     }
 

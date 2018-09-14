@@ -45,7 +45,7 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal bool validatorsDisabled, saving, strictMode = true;
+        internal bool validatorsDisabled, loading, saving, strictMode = true;
         internal IDictionary<string, Choice> choiceCache;
         internal IDictionary<string, Chat> chats;
         internal ChatScheduler scheduler;
@@ -295,22 +295,26 @@ namespace Dialogic
         /// </summary>
         public List<Chat> Chats() => chats.Values.ToList();
 
-        internal void AddChatsAsync(List<Chat> newChats, Action<List<Chat>> callback = null)
+        public void LoadChatsAsync(List<Chat> newChats, Action<List<Chat>> callback = null)
         {
             (loadThread = new Thread(() =>
             {
                 this.scheduler.Suspend();
-                AddChats(newChats);
+                LoadChats(newChats);
                 if (callback != null) callback.Invoke(chats.Values.ToList());
                 this.scheduler.Resume();
 
             })).Start();
         }
 
-        internal void AddChats(List<Chat> newChats)
+        public void LoadChats(List<Chat> newChats)
         {
             foreach (var chat in newChats)
             {
+                if (!SILENT && chats.ContainsKey(chat.text))
+                {
+                    Warn("Overwriting existing chat with label: " + chat.text);
+                }
                 chats[chat.text] = chat;
             }
         }
@@ -380,31 +384,74 @@ namespace Dialogic
         /// <summary>
         /// Update this instance asynchronously with new data from a serialized byte array
         /// </summary>
-        public void UpdateFromAsync(ISerializer serializer, byte[] bytes, Action callback = null)
+        [Obsolete("Use LoadAsync() or fire a LoadEvent instead")]
+        public void UpdateFromAsync(ISerializer serializer, byte[] bytes, 
+            Action<byte[]> callback = null) => LoadAsync(serializer, bytes, callback);
+
+        /// <summary>
+        /// Update this instance with new data from a serialized byte array
+        /// </summary>
+        [Obsolete("Use Load(ISerializer, byte[]) instead")]
+        public void UpdateFrom(ISerializer serializer, byte[] bytes) => Load(serializer, bytes);
+
+        /// <summary>
+        /// Update this instance asynchronously with new data from a serialized byte array
+        /// </summary>
+        public void LoadAsync(ISerializer serializer, byte[] bytes, Action<byte[]> callback = null)
         {
-            (deserializeThread = new Thread(() =>
+            (loadThread = new Thread(() =>
             {
-                Thread.CurrentThread.IsBackground = true;
+                try
+                {
+                    Load(serializer, bytes);
+                }
+                catch (Exception ex)
+                {
+                    Warn(ex.Message);
+                }
 
-                serializer.FromBytes(this, bytes);
+                //Console.WriteLine("Serialized data @" + Util.Millis());
 
-                if (callback != null) callback.Invoke();
+                if (callback != null) callback.Invoke(bytes);
 
             })).Start();
+        }
 
+        /// <summary>
+        /// Update this instance asynchronously with new data from a file containing serialized bytes
+        /// </summary>
+        public void LoadAsync(ISerializer serializer, FileInfo file, Action<byte[]> callback = null)
+        {
+            LoadAsync(serializer, File.ReadAllBytes(file.FullName), callback);
         }
 
         /// <summary>
         /// Update this instance with new data from a serialized byte array
         /// </summary>
-        public void UpdateFrom(ISerializer serializer, byte[] bytes)
-            => serializer.FromBytes(this, bytes);
+        public void Load(ISerializer serializer, byte[] bytes)
+        {
+            if (loading)
+            {
+                Warn("Ignoring Load() call while already loading");
+                return;
+            }
+
+            this.loading = true;
+
+            serializer.FromBytes(this, bytes);
+        }
+
+        /// <summary>
+        /// Update this instance with new data from a serialized file
+        /// </summary>
+        public void Load(ISerializer serializer, FileInfo file)
+            => serializer.FromBytes(this, File.ReadAllBytes(file.FullName));
 
         /// <summary>
         /// Update this instance with data from an existing runtime
         /// </summary>
-        public void UpdateFrom(ISerializer serializer, ChatRuntime rt)
-            => serializer.FromBytes(this, serializer.ToBytes(rt));
+        public void Load(ISerializer serializer, ChatRuntime rt)
+            => Load(serializer, serializer.ToBytes(rt));
 
         /// <summary>
         /// Serialize this runtime and return the data as a JSON string
