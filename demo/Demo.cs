@@ -146,40 +146,6 @@ namespace runner
 
         public void TestEvents(int now)
         {
-            // a 'Save' event
-            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
-            {
-                var file = AppDomain.CurrentDomain.BaseDirectory;
-                file += Util.EpochMs() + ".ser";
-
-                Console.WriteLine("\n<save-event#file=" + file + ">\n");
-
-                gameEvent = new SaveEvent(serializer, new FileInfo(file));
-            });
-
-
-            // a 'Load' event
-            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
-            {
-                Console.WriteLine("\n<new-chat-event#chats>\n");
-                var file = AppDomain.CurrentDomain.BaseDirectory;
-                file += Util.EpochMs() + ".ser";
-                gameEvent = new LoadEvent(serializer, new FileInfo(file));
-            });
-
-            // a 'LoadChats' event
-            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
-            {
-                Console.WriteLine("\n<new-chat-event#chats>\n");
-
-                var runtime = new ChatRuntime(Client.AppConfig.TAC);
-                runtime.ParseText(string.Join('\n', new[] {
-                    "CHAT GScriptTest {type=a,stage=b}",
-                    "*** Welcome to my updated world!!!"
-                }));
-                gameEvent = new LoadChatsEvent(runtime.Chats());
-            });
-
             // a 'Tap' event
             if (false) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
              {
@@ -205,6 +171,42 @@ namespace runner
 
                 gameEvent = new ResumeEvent(data);
             });
+
+            /* pending ----------------------------
+                // a 'Save' event
+                if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+                {
+                    var file = AppDomain.CurrentDomain.BaseDirectory;
+                    file += Util.EpochMs() + ".ser";
+
+                    Console.WriteLine("\n<save-event#file=" + file + ">\n");
+
+                    gameEvent = new SaveEvent(serializer, new FileInfo(file));
+                });
+
+
+                // a 'Load' event
+                if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+                {
+                    Console.WriteLine("\n<new-chat-event#chats>\n");
+                    var file = AppDomain.CurrentDomain.BaseDirectory;
+                    file += Util.EpochMs() + ".ser";
+                    gameEvent = new LoadEvent(serializer, new FileInfo(file));
+                });
+
+                // an 'AppendChats' event
+                if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+                {
+                    Console.WriteLine("\n<new-chat-event#chats>\n");
+
+                    var runtime = new ChatRuntime(Client.AppConfig.TAC);
+                    runtime.ParseText(string.Join('\n', new[] {
+                        "CHAT GScriptTest {type=a,stage=b}",
+                        "*** Welcome to my updated world!!!"
+                    }));
+                    gameEvent = new LoadChatsEvent(runtime.Chats());
+                });
+            */
         }
 
         internal void RunInLoop() // repeated events

@@ -1,10 +1,12 @@
 ﻿using System;
 using NUnit.Framework;
-using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Threading;
+
 using Client;
 using MessagePack;
+using Abbotware.Interop.NUnit;
 
 namespace Dialogic
 {
@@ -57,6 +59,67 @@ namespace Dialogic
                     + watch.ElapsedMilliseconds / 1000.0 + "s");
             }
         }
+        
+        [Test,Timeout(1000)]
+        public void SaveAsync()
+        {
+            var blocker = new AutoResetEvent(false);
+
+            var file = new FileInfo(AppDomain.CurrentDomain.BaseDirectory + Util.EpochMs() + ".ser");
+            var lines = new[] {
+                 "CHAT switch {type=a,stage=b,other=c}",
+                 "SAY async",
+             };
+            ChatRuntime rt = new ChatRuntime(Client.AppConfig.TAC);
+            rt.ParseText(String.Join("\n", lines));
+            rt.SaveAsync(serializer, file, (bytes) =>
+            {
+
+                blocker.Set();
+                //Console.WriteLine("CALLBACK: "+ (bytes != null ? bytes.Length + " bytes" : "Failed"));
+                Assert.That(bytes, Is.Not.Null);
+                Assert.That(bytes.Length, Is.GreaterThan(0));
+
+                // create a new runtime from the bytes
+                var rt2 = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
+
+                // and verify they are the same
+                CheckEquals(rt, rt2);
+
+            });
+            blocker.WaitOne();
+        }
+
+        [Test, Timeout(1000)]
+        public void MergeAsync()
+        {
+            var blocker = new AutoResetEvent(false);
+
+            var lines = new[] {
+                 "CHAT Test {type=a,stage=b}",
+                 "SET ab = hello",
+                 "DO flip",
+                 "SAY ab",
+             };
+
+            var file = new FileInfo(AppDomain.CurrentDomain.BaseDirectory + Util.EpochMs() + ".ser");
+            ChatRuntime rt = new ChatRuntime(Client.AppConfig.TAC);
+            rt.ParseText(String.Join("\n", lines));
+            rt.Save(serializer, file);
+
+            ChatRuntime rt2 = new ChatRuntime(Client.AppConfig.TAC);
+            rt2.MergeAsync(serializer, file, () =>
+            {
+
+                blocker.Set();
+                //Console.WriteLine("CALLBACK: "+ (rt2.chats != null ? rt2.chats.Count + " chats" : "Failed"));
+                Assert.That(rt2.chats, Is.Not.Null);
+                Assert.That(rt2.chats.Count, Is.GreaterThan(0));
+            });
+
+            blocker.WaitOne();
+        }
+
 
         [Test]
         public void SaveAndRestoreChat()
@@ -67,25 +130,29 @@ namespace Dialogic
                  "DO flip",
                  "SAY ab",
              };
-            Chat c1, c2;
-            ChatRuntime rtOut, rtIn;
 
             var text = String.Join("\n", lines);
-            rtIn = new ChatRuntime(Client.AppConfig.TAC);
+            var rtIn = new ChatRuntime(Client.AppConfig.TAC);
             rtIn.ParseText(text);
 
             // serialize the runtime to bytes
             var bytes = serializer.ToBytes(rtIn);
 
             // create a new runtime from the bytes
-            rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
+            var rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
 
+            // and verify they are the same
+            CheckEquals(rtOut, rtIn);
+        }
+
+        private void CheckEquals(ChatRuntime r1, ChatRuntime r2, bool hasDynamics = false)
+        {
             // check they are identical
-            Assert.That(rtIn, Is.EqualTo(rtOut));
+            Assert.That(r2, Is.EqualTo(r1));
 
             // double-check the chats themselves
-            c1 = rtIn.Chats().First();
-            c2 = rtOut.Chats().First();
+            Chat c1 = r2.Chats().First();
+            Chat c2 = r1.Chats().First();
 
             Assert.That(c1, Is.EqualTo(c2));
             Assert.That(c1.ToTree(), Is.EqualTo(c2.ToTree()));
@@ -98,13 +165,14 @@ namespace Dialogic
                 Assert.That(c1.commands[i], Is.EqualTo(c2.commands[i]));
             }
 
-            // no dynamics, so output should be the same
-            var res1 = rtIn.InvokeImmediate(globals);
-            var res2 = rtOut.InvokeImmediate(globals);
-            Assert.That(res1, Is.EqualTo(res2));
+            if (!hasDynamics)
+            {
+                // no dynamics, so output should be the same
+                var res1 = r2.InvokeImmediate(globals);
+                var res2 = r1.InvokeImmediate(globals);
+                Assert.That(res1, Is.EqualTo(res2));
+            }
         }
-
-
 
         [Test]
         public void SaveAndRestoreChats()
@@ -215,7 +283,7 @@ namespace Dialogic
 
             // Add more chats via Update, with higher search score
             var lines2 = new[] {
-                 "CHAT switch {type=a,stage=b,other=c,statelness=}",
+                 "CHAT switch {type=a,stage=b,other=c}",
                  "SAY Added",
              };
 
@@ -223,7 +291,7 @@ namespace Dialogic
             rt2.ParseText(String.Join("\n", lines2));
 
             // append the 2nd runtime to the first
-            rt.Load(serializer, rt2);
+            rt.Merge(serializer, rt2);
 
             s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nAdded"));
@@ -259,7 +327,7 @@ namespace Dialogic
             rt2.ParseText(String.Join("\n", lines2));
 
             // append the 2nd runtime to the first
-            rt.Load(serializer, serializer.ToBytes(rt2));
+            rt.Merge(serializer, serializer.ToBytes(rt2));
 
             s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nAdded"));
@@ -300,43 +368,7 @@ namespace Dialogic
             rt2.Save(serializer, file);
 
             // append the 2nd runtime to the first
-            rt.Load(serializer, file);
-
-            s = rt.InvokeImmediate(null);
-            Assert.That(s, Is.EqualTo("Find\nAdded"));
-        }
-
-        [Test]
-        public void UpdateFromObsolete()
-        {
-            var lines = new[] {
-                 "CHAT Test {type=a,stage=b}",
-                 "SAY Find",
-                 "FIND {type=a,stage=b,other=c}",
-                 "CHAT next {type=a,stage=b}",
-                 "SAY Done",
-             };
-
-            ChatRuntime rt;
-
-            rt = new ChatRuntime(Client.AppConfig.TAC);
-            rt.ParseText(String.Join("\n", lines));
-
-            var s = rt.InvokeImmediate(null);
-            Assert.That(s, Is.EqualTo("Find\nDone"));
-
-
-            // Add more chats via Update, with higher search score
-            var lines2 = new[] {
-                 "CHAT switch {type=a,stage=b,other=c,statelness=}",
-                 "SAY Added",
-             };
-
-            ChatRuntime rt2 = new ChatRuntime(Client.AppConfig.TAC);
-            rt2.ParseText(String.Join("\n", lines2));
-
-            // append the 2nd runtime to the first
-            rt.UpdateFrom(serializer, serializer.ToBytes(rt2));
+            rt.Merge(serializer, file);
 
             s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nAdded"));

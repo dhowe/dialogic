@@ -27,4 +27,9 @@
   <ItemGroup>
     <None Remove="TestResult.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Abbotware.Interop.NUnit">
+      <HintPath>..\..\..\Desktop\Abbotware.Interop.NUnit.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

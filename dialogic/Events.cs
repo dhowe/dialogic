@@ -5,24 +5,19 @@ using System.IO;
 namespace Dialogic
 {
     /// <summary>
-    /// Superclass for specific GameEvents
+    /// Basic implementation of ISuspend that suspends the current Chat. The current chat (or a new chat) can be resumed by  sending a ResumeEvent.
     /// </summary>
-    public abstract class GameEvent : EventArgs { }
+    public class SuspendEvent : EventArgs, ISuspend { }
 
     /// <summary>
-    /// Basic implementation of ISuspend
+    /// Basic implementation of IClear: clears the stack of past chats, leaving none to be resumed.
     /// </summary>
-    public class SuspendEvent : GameEvent, ISuspend { }
+    public class ClearEvent : EventArgs, IClear { }
 
     /// <summary>
-    /// Basic implementation of IClear
+    /// Basic implementation of IUserEvent: tells dialogic the user has performed a specific action, represented by the eventType.
     /// </summary>
-    public class ClearEvent : GameEvent, IClear { }
-
-    /// <summary>
-    /// Basic implementation of IUserEvent
-    /// </summary>
-    public class UserEvent : GameEvent, IUserEvent
+    public class UserEvent : EventArgs, IUserEvent
     {
         protected readonly string type;
 
@@ -37,60 +32,11 @@ namespace Dialogic
         }
     }
 
-    public class LoadChatsEvent : GameEvent, ILoadChatsEvent
-    {
-        protected readonly List<Chat> chats;
-
-        public LoadChatsEvent(List<Chat> chats) : base()
-        {
-            this.chats = chats;
-        }
-
-        public List<Chat> GetChats() => chats;
-
-    }
-
-    /// <summary>
-    /// Basic implementation of ISave: tells Dialogic to save the current state,
-    /// using the specified serializer and file-info path
-    /// </summary>
-    public class SaveEvent : GameEvent, ISaveEvent
-    {
-        protected readonly ISerializer serializer;
-        protected readonly FileInfo file;
-
-        public SaveEvent(ISerializer serializer, FileInfo file) : base()
-        {
-            this.serializer = serializer;
-            this.file = file;
-        }
-
-        public ISerializer GetSerializer() => serializer;
-
-        public FileInfo GetFile() => file;
-    }
-
-    public class LoadEvent : GameEvent, ILoadEvent
-    {
-        protected readonly ISerializer serializer;
-        protected readonly FileInfo file;
-
-        public LoadEvent(ISerializer serializer, FileInfo file) : base()
-        {
-            this.serializer = serializer;
-            this.file = file;
-        }
-
-        public ISerializer GetSerializer() => serializer;
-
-        public FileInfo GetFile() => file;
-    }
-
     /// <summary>
     /// Basic implementation of IResume: tells Dialogic to Resume running the last suspended Chat.
     /// If label or finder string is provided, then it will be used to specify the Chat to resume.
     /// </summary>
-    public class ResumeEvent : GameEvent, IResume
+    public class ResumeEvent : EventArgs, IResume
     {
         protected readonly string data;
 
@@ -108,7 +54,7 @@ namespace Dialogic
     /// <summary>
     /// Basic implementation of IChoice: tells Dialogic that the User has made a specific choice in response to a prompt
     /// </summary>
-    public class ChoiceEvent : GameEvent, IChoice
+    public class ChoiceEvent : EventArgs, IChoice
     {
         protected int choiceIndex;
 
@@ -131,7 +77,7 @@ namespace Dialogic
     /// <summary>
     /// Basic implementation of IChatUpdate: tells Dialogic to execute the specified 'action' on all Chats matching the the find criteria
     /// </summary>
-    public class ChatUpdate : GameEvent, IChatUpdate
+    public class ChatUpdate : EventArgs, IChatUpdate
     {
         private readonly string findBy;
         private readonly Action<Chat> action;
@@ -245,4 +191,54 @@ namespace Dialogic
         }
     }
 
+    /*
+    public class LoadChatsEvent : EventArgs, ILoadChatsEvent
+    {
+        protected readonly List<Chat> chats;
+
+        public LoadChatsEvent(List<Chat> chats) : base()
+        {
+            this.chats = chats;
+        }
+
+        public List<Chat> GetChats() => chats;
+
+    }
+
+    /// <summary>
+    /// Basic implementation of ISave: tells Dialogic to save the current state,
+    /// using the specified serializer and file-info path
+    /// </summary>
+    public class SaveEvent : EventArgs, ISaveEvent
+    {
+        protected readonly ISerializer serializer;
+        protected readonly FileInfo file;
+
+        public SaveEvent(ISerializer serializer, FileInfo file) : base()
+        {
+            this.serializer = serializer;
+            this.file = file;
+        }
+
+        public ISerializer GetSerializer() => serializer;
+
+        public FileInfo GetFile() => file;
+    }
+
+    public class LoadEvent : EventArgs, ILoadEvent
+    {
+        protected readonly ISerializer serializer;
+        protected readonly FileInfo file;
+
+        public LoadEvent(ISerializer serializer, FileInfo file) : base()
+        {
+            this.serializer = serializer;
+            this.file = file;
+        }
+
+        public ISerializer GetSerializer() => serializer;
+
+        public FileInfo GetFile() => file;
+    }
+    */
 }

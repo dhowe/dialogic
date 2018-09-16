@@ -98,7 +98,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Create a new runtime from previously serialized bytes loaded from a file, using the specified confi.
+        /// Create a new runtime from previously serialized bytes stored in a file, using the specified config.
         /// </summary>
         /// <returns>The new ChatRuntime</returns>
         /// <param name="serializer">Serializer.</param>
@@ -140,7 +140,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Clear all chats and resets all runtime state
+        /// Clear all chats and reset the runtime state
         /// </summary>
         public void Reset(List<Chat> theChats = null)
         {
@@ -205,7 +205,7 @@ namespace Dialogic
         public RuntimeContext CurrentContext() => RuntimeContext.Update(scheduler);
 
         /// <summary>
-        /// To be called bt client application each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occurred during that frame. If a Dialogic event (e.g., a Chat command) occurs during the frame it is returned from the Update function.
+        /// To be called by client application each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occurred during that frame. If a Dialogic event (e.g., a Chat command) occurs during the frame it is returned from the Update function.
         /// </summary>
         /// <returns>The update.</returns>
         /// <param name="globals">Globals.</param>
@@ -381,29 +381,21 @@ namespace Dialogic
             return bytes;
         }
 
-        /// <summary>
-        /// Update this instance asynchronously with new data from a serialized byte array
-        /// </summary>
-        [Obsolete("Use LoadAsync() or fire a LoadEvent instead")]
+        [Obsolete("Use MergeAsync() instead")]
         public void UpdateFromAsync(ISerializer serializer, byte[] bytes, 
-            Action<byte[]> callback = null) => LoadAsync(serializer, bytes, callback);
+            Action callback = null) => MergeAsync(serializer, bytes, callback);
+
 
         /// <summary>
-        /// Update this instance with new data from a serialized byte array
+        /// Merge this instance asynchronously with data from a runtime serialized to a byte array
         /// </summary>
-        [Obsolete("Use Load(ISerializer, byte[]) instead")]
-        public void UpdateFrom(ISerializer serializer, byte[] bytes) => Load(serializer, bytes);
-
-        /// <summary>
-        /// Update this instance asynchronously with new data from a serialized byte array
-        /// </summary>
-        public void LoadAsync(ISerializer serializer, byte[] bytes, Action<byte[]> callback = null)
+        public void MergeAsync(ISerializer serializer, byte[] bytes, Action callback = null)
         {
             (loadThread = new Thread(() =>
             {
                 try
                 {
-                    Load(serializer, bytes);
+                    Merge(serializer, bytes);
                 }
                 catch (Exception ex)
                 {
@@ -412,23 +404,23 @@ namespace Dialogic
 
                 //Console.WriteLine("Serialized data @" + Util.Millis());
 
-                if (callback != null) callback.Invoke(bytes);
+                if (callback != null) callback.Invoke();
 
             })).Start();
         }
 
         /// <summary>
-        /// Update this instance asynchronously with new data from a file containing serialized bytes
+        /// Merge this instance asynchronously with data from a runtime serialized to a file
         /// </summary>
-        public void LoadAsync(ISerializer serializer, FileInfo file, Action<byte[]> callback = null)
+        public void MergeAsync(ISerializer serializer, FileInfo file, Action callback = null)
         {
-            LoadAsync(serializer, File.ReadAllBytes(file.FullName), callback);
+            MergeAsync(serializer, File.ReadAllBytes(file.FullName), callback);
         }
 
         /// <summary>
-        /// Update this instance with new data from a serialized byte array
+        // Merge this instance with data from a runtime serialized to a byte array
         /// </summary>
-        public void Load(ISerializer serializer, byte[] bytes)
+        public void Merge(ISerializer serializer, byte[] bytes)
         {
             if (loading)
             {
@@ -439,19 +431,21 @@ namespace Dialogic
             this.loading = true;
 
             serializer.FromBytes(this, bytes);
+
+            this.loading = false;
         }
 
         /// <summary>
-        /// Update this instance with new data from a serialized file
+        // Merge this instance with data from a runtime serialized to a file
         /// </summary>
-        public void Load(ISerializer serializer, FileInfo file)
+        public void Merge(ISerializer serializer, FileInfo file)
             => serializer.FromBytes(this, File.ReadAllBytes(file.FullName));
 
         /// <summary>
-        /// Update this instance with data from an existing runtime
+        // Merge this instance with data from another runtime
         /// </summary>
-        public void Load(ISerializer serializer, ChatRuntime rt)
-            => Load(serializer, serializer.ToBytes(rt));
+        public void Merge(ISerializer serializer, ChatRuntime rt)
+            => Merge(serializer, serializer.ToBytes(rt));
 
         /// <summary>
         /// Serialize this runtime and return the data as a JSON string
@@ -565,7 +559,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Resets the cursor for each Chat.
+        /// Resets the cursor for each Chat
         /// </summary>
         internal void ResetChats()
         {
@@ -753,12 +747,6 @@ namespace Dialogic
 
         ///////////////////////////// testing /////////////////////////////////
 
-
-        internal void AddFindListener(Action<Chat> callback) // ?
-        {
-            if (findListeners == null) findListeners = new List<Action<Chat>>();
-            findListeners.Add(callback);
-        }
 
         internal Chat DoFind(Chat parent, params Constraint[] constraints)
         {

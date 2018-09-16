@@ -26,9 +26,10 @@ namespace Dialogic
             if (ea is IResume) return ResumeHandler(ref ea, globals);
             if (ea is IChoice) return ChoiceHandler(ref ea, globals);
             if (ea is IClear) return ClearHandler(ref ea, globals);
-            if (ea is ISaveEvent) return SaveHandler(ref ea, globals);
-            if (ea is ILoadEvent) return LoadHandler(ref ea, globals);
-            if (ea is ILoadChatsEvent) return LoadChatsHandler(ref ea, globals);
+
+            //if (ea is ISaveEvent) return SaveHandler(ref ea, globals);
+            //if (ea is ILoadEvent) return MergeHandler(ref ea, globals);
+            //if (ea is ILoadChatsEvent) return UpdateChatsHandler(ref ea, globals);
 
             throw new DialogicException("Unexpected event-type: " + ea.GetType());
         }
@@ -84,37 +85,38 @@ namespace Dialogic
             return null;
         }
 
+        /*
         private IUpdateEvent SaveHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
             ISaveEvent evt = (ISaveEvent)ea;
             ea = null;
             runtime.SaveAsync(evt.GetSerializer(), evt.GetFile(), (bytes) =>
             {
-                var msg = "SAVE: " + (bytes != null ? bytes.Length + " bytes" : "Failed");
-                Console.WriteLine(msg);
+                if (!ChatRuntime.SILENT) Console.WriteLine
+                    ("SAVE: " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
             });
             return null;
         }
 
-        private IUpdateEvent LoadHandler(ref EventArgs ea, IDictionary<string, object> globals)
+        private IUpdateEvent MergeHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
             ILoadEvent evt = (ILoadEvent)ea;
             ea = null;
-            runtime.LoadAsync(evt.GetSerializer(), evt.GetFile(), (bytes) =>
+            runtime.MergeAsync(evt.GetSerializer(), evt.GetFile(), () =>
             {
-                var msg = "LOADED: " + (bytes != null ? bytes.Length + " bytes" : "Failed");
-                Console.WriteLine(msg);
+                if (!ChatRuntime.SILENT) Console.WriteLine
+                    ("LOAD: " + (runtime.chats != null ? runtime.chats.Count+ " chats" : "Failed"));
             });
             return null;
         }
 
-        private IUpdateEvent LoadChatsHandler(ref EventArgs ea, IDictionary<string, object> globals)
+        private IUpdateEvent UpdateChatsHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
             ILoadChatsEvent evt = (ILoadChatsEvent)ea;
             ea = null;
             runtime.LoadChatsAsync(evt.GetChats());
             return null;
-        }
+        }*/
 
         private IUpdateEvent ResumeHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
