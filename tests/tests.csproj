@@ -28,8 +28,11 @@
     <None Remove="TestResult.xml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="lib\" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Abbotware.Interop.NUnit">
-      <HintPath>..\..\..\Desktop\Abbotware.Interop.NUnit.dll</HintPath>
+      <HintPath>lib\Abbotware.Interop.NUnit.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
