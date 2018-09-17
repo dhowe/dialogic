@@ -187,7 +187,8 @@ namespace Dialogic
 
 				resolved[Meta.TEXT] = Resolver().Bind(text, parent, globals);
 				resolved[Meta.TYPE] = TypeName();
-				if (this is IAssignable && actor != null)
+                resolved[Meta.DURATION] = ComputeDuration();
+                if (this is IAssignable && actor != null)
 				{
 					resolved[Meta.ACTOR] = GetActor().Name();
 				}
@@ -535,8 +536,9 @@ namespace Dialogic
 			Options().ForEach(o => o.Resolve(globals));
 			resolved[Meta.TIMEOUT] = timeout.ToString();
 			resolved[Meta.OPTS] = JoinOptions();
+            resolved[Meta.DURATION] = ComputeDuration();
 
-			return resolved;
+            return resolved;
 		}
 
 		public override string ToString()
@@ -766,7 +768,8 @@ namespace Dialogic
 		public const string DELAY = "delay";
 		public const string PRELOAD = "preload";
 		public const string TIMEOUT = "timeout";
-		public const string ON_RESUME = "onResume";
+        public const string DURATION = "duration";
+        public const string ON_RESUME = "onResume";
 		public const string CHAT_MODE = "chatMode";
 		public const string STALENESS = "staleness";
 		public const string RESUMABLE = "resumable";
