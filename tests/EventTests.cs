@@ -15,21 +15,9 @@ namespace Dialogic
         // ClearEvent, ChatUpdate, UserEvent
         // ChoiceEvent, SuspendEvent
 
-        [Test]
-        public void ClearEventTest()
-        {
-        }
 
-        [Test]
-        public void ChatUpdateTest()
-        { 
-        }
+        // Tendar: SuspendEvent, ResumeEvent, ChoiceEvent, SaveEvent
 
-
-        [Test]
-        public void UserEventTest()
-        {
-        }
 
         [Test]
         public void ChoiceEventTest()
@@ -41,7 +29,7 @@ namespace Dialogic
         {
         }
 
-        //[Test]
+        [Test]
         public void ResumeEventTest()
         {
             string[] lines = {
@@ -98,6 +86,24 @@ namespace Dialogic
             Assert.That(rt.FindChatByLabel("c4").Staleness(), Is.EqualTo(100));
         }
 
-  
+        [Test]
+        public void ClearEventTest()
+        {
+            // TODO
+        }
+
+        [Test]
+        public void ChatUpdateTest()
+        {
+            // TODO
+        }
+
+
+        [Test]
+        public void UserEventTest()
+        {
+            // TODO
+        }
+
     }
 }

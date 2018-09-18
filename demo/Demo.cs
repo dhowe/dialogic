@@ -172,26 +172,27 @@ namespace runner
                 gameEvent = new ResumeEvent(data);
             });
 
+            // a 'Save' event
+            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+            {
+                var file = AppDomain.CurrentDomain.BaseDirectory;
+                file += Util.EpochMs() + ".ser";
+
+                Console.WriteLine("\n<save-event#file=" + file + ">\n");
+
+                gameEvent = new SaveEvent(serializer, new FileInfo(file));
+            });
+
+
             /* pending ----------------------------
-                // a 'Save' event
-                if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
-                {
-                    var file = AppDomain.CurrentDomain.BaseDirectory;
-                    file += Util.EpochMs() + ".ser";
 
-                    Console.WriteLine("\n<save-event#file=" + file + ">\n");
-
-                    gameEvent = new SaveEvent(serializer, new FileInfo(file));
-                });
-
-
-                // a 'Load' event
+                // a 'Merge' event
                 if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
                 {
                     Console.WriteLine("\n<new-chat-event#chats>\n");
                     var file = AppDomain.CurrentDomain.BaseDirectory;
                     file += Util.EpochMs() + ".ser";
-                    gameEvent = new LoadEvent(serializer, new FileInfo(file));
+                    gameEvent = new MergeEvent(serializer, new FileInfo(file));
                 });
 
                 // an 'AppendChats' event

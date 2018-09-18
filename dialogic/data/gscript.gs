@@ -7,7 +7,7 @@ DO #Twirl
 //Tendar: DO #TendarSpin
 //Tendar: Thanks
 
-WAIT {ForAnimation=true}
+//WAIT {ForAnimation=true}
 Thanks for visiting $place {speed=fast,style=whisper}
 GO #Prompt
 

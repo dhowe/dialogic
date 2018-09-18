@@ -26,8 +26,8 @@ namespace Dialogic
             if (ea is IResume) return ResumeHandler(ref ea, globals);
             if (ea is IChoice) return ChoiceHandler(ref ea, globals);
             if (ea is IClear) return ClearHandler(ref ea, globals);
+            if (ea is ISaveEvent) return SaveHandler(ref ea, globals);
 
-            //if (ea is ISaveEvent) return SaveHandler(ref ea, globals);
             //if (ea is ILoadEvent) return MergeHandler(ref ea, globals);
             //if (ea is ILoadChatsEvent) return UpdateChatsHandler(ref ea, globals);
 
@@ -85,7 +85,6 @@ namespace Dialogic
             return null;
         }
 
-        /*
         private IUpdateEvent SaveHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
             ISaveEvent evt = (ISaveEvent)ea;
@@ -98,6 +97,7 @@ namespace Dialogic
             return null;
         }
 
+        /*
         private IUpdateEvent MergeHandler(ref EventArgs ea, IDictionary<string, object> globals)
         {
             ILoadEvent evt = (ILoadEvent)ea;

@@ -136,16 +136,17 @@ namespace Dialogic
     /// <summary>
     /// Tells Dialogic to serialize the current start of the game
     /// </summary>
-    /*
     public interface ISaveEvent
     {
         ISerializer GetSerializer();
         FileInfo GetFile();
     }
+
+    /*
     /// <summary>
     /// Add a new set of Chats to the current runtime, potentially overwriting one or more of those already loaded
     /// </summary>
-    public interface ILoadEvent
+    public interface IMergeEvent
     {
         ISerializer GetSerializer();
         FileInfo GetFile();

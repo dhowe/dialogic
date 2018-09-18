@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Client;
 
 namespace Dialogic
 {
@@ -11,7 +10,8 @@ namespace Dialogic
         public static void Mainx(string[] a)
         {
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
-            testfile += "../../../../dialogic/data/gscript.gs";
+            testfile += "../../../../dialogic/data/console.gs";
+
             new ConsoleApp(new FileInfo(testfile)).Run();
         }
 

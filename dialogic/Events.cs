@@ -191,19 +191,6 @@ namespace Dialogic
         }
     }
 
-    /*
-    public class LoadChatsEvent : EventArgs, ILoadChatsEvent
-    {
-        protected readonly List<Chat> chats;
-
-        public LoadChatsEvent(List<Chat> chats) : base()
-        {
-            this.chats = chats;
-        }
-
-        public List<Chat> GetChats() => chats;
-
-    }
 
     /// <summary>
     /// Basic implementation of ISave: tells Dialogic to save the current state,
@@ -223,6 +210,21 @@ namespace Dialogic
         public ISerializer GetSerializer() => serializer;
 
         public FileInfo GetFile() => file;
+    }
+
+
+    /*
+    public class LoadChatsEvent : EventArgs, ILoadChatsEvent
+    {
+        protected readonly List<Chat> chats;
+
+        public LoadChatsEvent(List<Chat> chats) : base()
+        {
+            this.chats = chats;
+        }
+
+        public List<Chat> GetChats() => chats;
+
     }
 
     public class LoadEvent : EventArgs, ILoadEvent
