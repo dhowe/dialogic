@@ -17,6 +17,7 @@
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="coverlet.msbuild" Version="1.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
+    <PackageReference Include="Abbotware.Interop.NUnit" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
@@ -26,5 +27,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestResult.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="lib\" />
   </ItemGroup>
 </Project>

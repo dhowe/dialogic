@@ -21,7 +21,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Create a new snapshot from the specified runtime
+        /// Create a new snapshot with Chat data from the specified runtime
         /// </summary>
         public static Snapshot Create(ChatRuntime rt)
         {
@@ -33,7 +33,7 @@ namespace Dialogic
         }
 
         /// <summary>
-        /// Update this snapshot with data from the specified runtime
+        /// Update this snapshot with Chat data from the specified runtime
         /// </summary>
         public void Update(ChatRuntime rt)
         {

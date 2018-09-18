@@ -7,8 +7,7 @@ using System.Text.RegularExpressions;
 namespace Dialogic
 {
 	/// <summary>
-	/// Superclass for all Commands. When created by the parser, the default constructor is called first,
-	/// followed by Init(text,label,meta), followed by any app-specific validators, followed by Validate().
+	/// Superclass for the various command types. When created by the parser, the default constructor is called first, followed by Init(text,label,meta), followed by any app-specific validators, followed by Validate().
 	/// </summary>
 	public abstract class Command : Meta
 	{

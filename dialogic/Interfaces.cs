@@ -84,7 +84,7 @@ namespace Dialogic
     }
 
     /// <summary>
-    /// Tells Dialogic that the user has performed a specific action, repesented by the eventType.
+    /// Tells Dialogic that the user has performed a specific action, represented by the eventType.
     /// </summary>
     public interface IUserEvent
     {
@@ -142,13 +142,19 @@ namespace Dialogic
         FileInfo GetFile();
     }
 
+    /*
     /// <summary>
     /// Add a new set of Chats to the current runtime, potentially overwriting one or more of those already loaded
     /// </summary>
-    public interface ILoadEvent
+    public interface IMergeEvent
+    {
+        ISerializer GetSerializer();
+        FileInfo GetFile();
+    }
+    public interface ILoadChatsEvent
     {
         List<Chat> GetChats();
-    }
+    }*/
 
     /// <summary>
     /// Sent by Dialogic whenever an ISendable Command (e.g., Say, Ask, Do, Wait) is invoked so that it may be handled by the client application
@@ -171,5 +177,5 @@ namespace Dialogic
 
     /////////////////////////////// Other ////////////////////////////////////
 
-    internal interface IResolvable { }// Choice and Symbol
+    internal interface IResolvable { } // Choice and Symbol
 }
