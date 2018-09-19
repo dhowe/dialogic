@@ -7,7 +7,6 @@ var searchData=
   ['ichoice',['IChoice',['../interface_dialogic_1_1_i_choice.html',1,'Dialogic']]],
   ['iclear',['IClear',['../interface_dialogic_1_1_i_clear.html',1,'Dialogic']]],
   ['iconfigevent',['IConfigEvent',['../interface_dialogic_1_1_i_config_event.html',1,'Dialogic']]],
-  ['iloadevent',['ILoadEvent',['../interface_dialogic_1_1_i_load_event.html',1,'Dialogic']]],
   ['iresume',['IResume',['../interface_dialogic_1_1_i_resume.html',1,'Dialogic']]],
   ['isaveevent',['ISaveEvent',['../interface_dialogic_1_1_i_save_event.html',1,'Dialogic']]],
   ['isendable',['ISendable',['../interface_dialogic_1_1_i_sendable.html',1,'Dialogic']]],

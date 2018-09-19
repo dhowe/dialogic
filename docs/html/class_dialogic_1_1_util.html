@@ -139,11 +139,26 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a913c5e22d8656af9263c9fb442e4d351"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a913c5e22d8656af9263c9fb442e4d351">TrimLast</a> (ref string s, params char[] c)</td></tr>
 <tr class="memdesc:a913c5e22d8656af9263c9fb442e4d351"><td class="mdescLeft">&#160;</td><td class="mdescRight">First trims white-space, then trim the last character if the string ends with any of those specified  <a href="#a913c5e22d8656af9263c9fb442e4d351">More...</a><br /></td></tr>
 <tr class="separator:a913c5e22d8656af9263c9fb442e4d351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17c2fc42a77d0b0d652e796b31177bc7"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a17c2fc42a77d0b0d652e796b31177bc7">MinEditDist</a> (string s, string t)</td></tr>
+<tr class="memdesc:a17c2fc42a77d0b0d652e796b31177bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target strings  <a href="#a17c2fc42a77d0b0d652e796b31177bc7">More...</a><br /></td></tr>
+<tr class="separator:a17c2fc42a77d0b0d652e796b31177bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9af8a909559f250b8361df7fe2e0e865"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a9af8a909559f250b8361df7fe2e0e865">MinEditDist</a> (string[] s, string[] t)</td></tr>
+<tr class="memdesc:a9af8a909559f250b8361df7fe2e0e865"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target arrays  <a href="#a9af8a909559f250b8361df7fe2e0e865">More...</a><br /></td></tr>
+<tr class="separator:a9af8a909559f250b8361df7fe2e0e865"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d90314135cf6863d45d99f70583e221"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a4d90314135cf6863d45d99f70583e221">MinEditDistAdj</a> (string s, string t)</td></tr>
+<tr class="memdesc:a4d90314135cf6863d45d99f70583e221"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target strings divided by the length of the longer string  <a href="#a4d90314135cf6863d45d99f70583e221">More...</a><br /></td></tr>
+<tr class="separator:a4d90314135cf6863d45d99f70583e221"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a362fe88204b47c9942e1f961d8c5e412"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_dialogic_1_1_util.html#a362fe88204b47c9942e1f961d8c5e412">MinEditDistAdj</a> (string[] s, string[] t)</td></tr>
+<tr class="memdesc:a362fe88204b47c9942e1f961d8c5e412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target arrays divided by the length of the longer array  <a href="#a362fe88204b47c9942e1f961d8c5e412">More...</a><br /></td></tr>
+<tr class="separator:a362fe88204b47c9942e1f961d8c5e412"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
+<tr class="memitem:a4b26c5eb9523cba06fe03d173492b557"><td class="memItemLeft" align="right" valign="top"><a id="a4b26c5eb9523cba06fe03d173492b557"></a>
+static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>INV</b> = StringComparison.InvariantCulture</td></tr>
+<tr class="separator:a4b26c5eb9523cba06fe03d173492b557"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa909bdf34f86b0090a4f2e7a7f2056f6"><td class="memItemLeft" align="right" valign="top"><a id="aa909bdf34f86b0090a4f2e7a7f2056f6"></a>
-static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC</b> = StringComparison.InvariantCulture</td></tr>
+static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC</b> = StringComparison.CurrentCultureIgnoreCase</td></tr>
 <tr class="separator:aa909bdf34f86b0090a4f2e7a7f2056f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -464,6 +479,158 @@ static StringComparison&#160;</td><td class="memItemRight" valign="bottom"><b>IC
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a17c2fc42a77d0b0d652e796b31177bc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17c2fc42a77d0b0d652e796b31177bc7">&#9670;&nbsp;</a></span>MinEditDist() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int Dialogic.Util.MinEditDist </td>
+          <td>(</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>t</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target strings </p>
+
+</div>
+</div>
+<a id="a9af8a909559f250b8361df7fe2e0e865"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9af8a909559f250b8361df7fe2e0e865">&#9670;&nbsp;</a></span>MinEditDist() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int Dialogic.Util.MinEditDist </td>
+          <td>(</td>
+          <td class="paramtype">string []&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string []&#160;</td>
+          <td class="paramname"><em>t</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target arrays </p>
+
+</div>
+</div>
+<a id="a4d90314135cf6863d45d99f70583e221"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d90314135cf6863d45d99f70583e221">&#9670;&nbsp;</a></span>MinEditDistAdj() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.MinEditDistAdj </td>
+          <td>(</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>t</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target strings divided by the length of the longer string </p>
+
+</div>
+</div>
+<a id="a362fe88204b47c9942e1f961d8c5e412"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a362fe88204b47c9942e1f961d8c5e412">&#9670;&nbsp;</a></span>MinEditDistAdj() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double Dialogic.Util.MinEditDistAdj </td>
+          <td>(</td>
+          <td class="paramtype">string []&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string []&#160;</td>
+          <td class="paramname"><em>t</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computes the distance (the number of deletions, insertions, or substitutions required to transform one into the other) between the source and target arrays divided by the length of the longer array </p>
 
 </div>
 </div>

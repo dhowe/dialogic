@@ -277,7 +277,7 @@
     </div>
   </div>
   <script>
-    $(function ()
+$(function ()
     {
       // ******** Editor ************//
 
@@ -372,7 +372,7 @@
 
       // functions ---------------------------------------------
       function onLoad()
-      { 
+      {
         toggleValidation();
         showSelection(); // This must be placed before toggleExe
         toggleExe();
@@ -435,15 +435,17 @@
         $("#urlPath").html("Paste your url");
       }
 
-      function onButtonClicked(execute)
+      function onButtonClicked(event)
       {
+
+        // working here ***
         event.preventDefault();
 
         var formData = $("#form").serializeArray();
         formData.push(
         {
           name: 'mode',
-          value: execute ? 'execute' : 'validate'
+          value: event ? 'execute' : 'validate'
         });
 
 
@@ -466,9 +468,10 @@
           formData.push(
           {
             name: "selection",
-            value: execute ? $("#result").text() : processSelectedText(content, startIdx.line, endIdx.line)
+            value: event ? $("#result").text() : 
+                processSelectedText(content, startIdx.line, endIdx.line)
           });
-          
+
         }
 
         sendRequest(formData);
@@ -532,7 +535,7 @@
           // we need to maintain correct line numbers for error-reporting,
           // so if we have a partial selection, we comment out any lines
           // NOT included in the highlighted portion
-         
+
             var lines = code.split("\n");
 
             for (var i = 0; i < lines.length; i++)
@@ -584,8 +587,7 @@
         window.addEventListener("mouseup", on_release);
       });
 
-    });
-  </script>
+    });</script>
 </body>
 
 </html>

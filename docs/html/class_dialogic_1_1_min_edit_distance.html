@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Dialogic: Dialogic.UserEvent Class Reference</title>
+<title>Dialogic: Dialogic.MinEditDistance Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -64,50 +64,44 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespace_dialogic.html">Dialogic</a></li><li class="navelem"><a class="el" href="class_dialogic_1_1_user_event.html">UserEvent</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespace_dialogic.html">Dialogic</a></li><li class="navelem"><a class="el" href="class_dialogic_1_1_min_edit_distance.html">MinEditDistance</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="class_dialogic_1_1_user_event-members.html">List of all members</a>  </div>
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="class_dialogic_1_1_min_edit_distance-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Dialogic.UserEvent Class Reference</div>  </div>
+<div class="title">Dialogic.MinEditDistance Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Basic implementation of <a class="el" href="interface_dialogic_1_1_i_user_event.html" title="Tells Dialogic that the user has performed a specific action, represented by the eventType. ">IUserEvent</a>: tells dialogic the user has performed a specific action, represented by the eventType.  
- <a href="class_dialogic_1_1_user_event.html#details">More...</a></p>
-<div class="dynheader">
-Inheritance diagram for Dialogic.UserEvent:</div>
-<div class="dyncontent">
- <div class="center">
-  <img src="class_dialogic_1_1_user_event.png" usemap="#Dialogic.UserEvent_map" alt=""/>
-  <map id="Dialogic.UserEvent_map" name="Dialogic.UserEvent_map">
-<area href="interface_dialogic_1_1_i_user_event.html" title="Tells Dialogic that the user has performed a specific action, represented by the eventType. " alt="Dialogic.IUserEvent" shape="rect" coords="133,0,256,24"/>
-</map>
- </div></div>
+<p>Minimum-Edit-Distance (or Levenshtein distance) is a measure of the similarity between two strings, the source string and the target string. The distance is the number of deletions, insertions, or substitutions required to transform the source into the target. The adjusted distance divides this value by the max length of the two strings<br />
+<br />
+ Adapted from Michael Gilleland's algorithm  
+ <a href="class_dialogic_1_1_min_edit_distance.html#details">More...</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:a57490767e7d5c129701c331ba98fc1c6"><td class="memItemLeft" align="right" valign="top"><a id="a57490767e7d5c129701c331ba98fc1c6"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>UserEvent</b> (string type)</td></tr>
-<tr class="separator:a57490767e7d5c129701c331ba98fc1c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d28ca4ee0b98022a806da950e30a220"><td class="memItemLeft" align="right" valign="top"><a id="a9d28ca4ee0b98022a806da950e30a220"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>GetEventType</b> ()</td></tr>
-<tr class="separator:a9d28ca4ee0b98022a806da950e30a220"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
-Protected Attributes</h2></td></tr>
-<tr class="memitem:adde729834be9dce037eabb580f47de96"><td class="memItemLeft" align="right" valign="top"><a id="adde729834be9dce037eabb580f47de96"></a>
-readonly string&#160;</td><td class="memItemRight" valign="bottom"><b>type</b></td></tr>
-<tr class="separator:adde729834be9dce037eabb580f47de96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ab0eee59752e8216b102080c5d92c01e8"><td class="memItemLeft" align="right" valign="top"><a id="ab0eee59752e8216b102080c5d92c01e8"></a>
+static double&#160;</td><td class="memItemRight" valign="bottom"><b>ComputeAdjusted</b> (string source, string target)</td></tr>
+<tr class="separator:ab0eee59752e8216b102080c5d92c01e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e7d29f044657eb03bef5164cdb176ea"><td class="memItemLeft" align="right" valign="top"><a id="a8e7d29f044657eb03bef5164cdb176ea"></a>
+static double&#160;</td><td class="memItemRight" valign="bottom"><b>ComputeAdjusted</b> (string[] source, string[] target)</td></tr>
+<tr class="separator:a8e7d29f044657eb03bef5164cdb176ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a042d60e118c7063dc53dd25884088d0f"><td class="memItemLeft" align="right" valign="top"><a id="a042d60e118c7063dc53dd25884088d0f"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>Compute</b> (string s, string t)</td></tr>
+<tr class="separator:a042d60e118c7063dc53dd25884088d0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad61f26de9f47efe462510066bcd77eb7"><td class="memItemLeft" align="right" valign="top"><a id="ad61f26de9f47efe462510066bcd77eb7"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>Compute</b> (string[] s, string[] t)</td></tr>
+<tr class="separator:ad61f26de9f47efe462510066bcd77eb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Basic implementation of <a class="el" href="interface_dialogic_1_1_i_user_event.html" title="Tells Dialogic that the user has performed a specific action, represented by the eventType. ">IUserEvent</a>: tells dialogic the user has performed a specific action, represented by the eventType. </p>
+<div class="textblock"><p>Minimum-Edit-Distance (or Levenshtein distance) is a measure of the similarity between two strings, the source string and the target string. The distance is the number of deletions, insertions, or substitutions required to transform the source into the target. The adjusted distance divides this value by the max length of the two strings<br />
+<br />
+ Adapted from Michael Gilleland's algorithm </p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
-<li>dialogic/Events.cs</li>
+<li>dialogic/Utilities.cs</li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

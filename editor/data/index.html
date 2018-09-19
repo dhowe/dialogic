@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Dialogic v0.8.13</title>
+  <title>Dialogic v0.8.41</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
@@ -152,7 +152,8 @@
       -webkit-appearance: none;
       background-color: #fafafa;
       border: 1px solid #cacece;
-      padding: 7px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
+      padding: 9px;
       border-radius: 3px;
       display: inline-block;
       position: relative;
@@ -162,9 +163,7 @@
     .checkbox:checked:active {
       border: 1px solid #cacece;
     }
-    input[type="checkbox"]:focus{
-        outline:0;
-    }
+
     .checkbox:checked {
       color: #99a1a7;
       border: 1px solid #cacece;
@@ -172,10 +171,10 @@
 
     .checkbox:checked:after {
       content: '\2714';
-      font-size: 12px;
+      font-size: 14px;
       position: absolute;
       top: 0px;
-      left: 2px;
+      left: 3px;
       color: #99a1a7;
     }
 
@@ -184,11 +183,6 @@
       margin-left: 8px;
       display: inline-block;
       position: relative;
-      font-size:12px;
-    }
-
-    #checkText a {
-      color:black;
     }
 
     .button,
@@ -259,7 +253,7 @@
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
       <button class="button" type="reset" id="clear" disabled>Clear</button>
-      <input type="checkbox" class="checkbox" id="VRcheckbox" name="useValidators" value="true"><span id="checkText">Use <a href="http://tenderclaws.com/press/sheet.php?p=tendAR" target="_blank">TendAR</a> Validators</span>
+      <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
     </div>
   </form>
 
@@ -283,7 +277,7 @@
     </div>
   </div>
   <script>
-    $(function ()
+$(function ()
     {
       // ******** Editor ************//
 
@@ -371,13 +365,6 @@
         $("#urlPath").val('');
       });
 
-      $("#VRcheckbox").click(function ()
-      { 
-        localStorage.setItem("useValidators", $("#VRcheckbox").prop('checked'));
-         toggleValidation();
-      });
-
-
       $("#closeDialog").click(closeURLDialog);
       // ******** End Click Handlers ************//
 
@@ -385,7 +372,7 @@
 
       // functions ---------------------------------------------
       function onLoad()
-      { 
+      {
         toggleValidation();
         showSelection(); // This must be placed before toggleExe
         toggleExe();
@@ -448,7 +435,7 @@
         $("#urlPath").html("Paste your url");
       }
 
-      function onButtonClicked(execute)
+      function onButtonClicked(event)
       {
         event.preventDefault();
 
@@ -456,7 +443,7 @@
         formData.push(
         {
           name: 'mode',
-          value: execute ? 'execute' : 'validate'
+          value: event ? 'execute' : 'validate'
         });
 
 
@@ -479,9 +466,10 @@
           formData.push(
           {
             name: "selection",
-            value: execute ? $("#result").text() : processSelectedText(content, startIdx, endIdx)
+            value: event ? $("#result").text() : 
+                processSelectedText(content, startIdx.line, endIdx.line)
           });
-          
+
         }
 
         sendRequest(formData);
@@ -506,11 +494,6 @@
           if (editorHeight != null )
           {
            editor.setSize(null, editorHeight);
-          }
-          var useValidators = localStorage.getItem("useValidators");
-           if (useValidators != null )
-          {
-           $("#VRcheckbox").prop('checked', useValidators === "true" ? true : false);
           }
         }
       }
@@ -550,15 +533,13 @@
           // we need to maintain correct line numbers for error-reporting,
           // so if we have a partial selection, we comment out any lines
           // NOT included in the highlighted portion
-         
+
             var lines = code.split("\n");
 
             for (var i = 0; i < lines.length; i++)
             {
-              if (i < startIdx.line) lines[i] = "//" + lines[i];
-
-              // edge case: selecting entire line
-              if ( endIdx.line - (endIdx.ch == 0 ? 1 : 0) < i) lines[i] = "//" + lines[i];
+              if (i < startIdx) lines[i] = "//" + lines[i];
+              if (endIdx < i) lines[i] = "//" + lines[i];
             }
             return lines.join("\n");
 
@@ -604,8 +585,7 @@
         window.addEventListener("mouseup", on_release);
       });
 
-    });
-  </script>
+    });</script>
 </body>
 
 </html>

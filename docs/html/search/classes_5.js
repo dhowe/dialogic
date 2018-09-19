@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['gameevent',['GameEvent',['../class_dialogic_1_1_game_event.html',1,'Dialogic']]],
   ['go',['Go',['../class_dialogic_1_1_go.html',1,'Dialogic']]]
 ];

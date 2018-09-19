@@ -19,7 +19,7 @@ namespace Dialogic
 
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
-        private ChatRuntime runtime;
+        private readonly ChatRuntime runtime;
         private Regex lineParser;
         private Chat activeChat;
         private Ask lastAsk;
