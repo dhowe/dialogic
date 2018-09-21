@@ -27,8 +27,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestResult.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="lib\" />
+    <None Remove="lib\Abbotware.Interop.NUnit.dll" />
   </ItemGroup>
 </Project>

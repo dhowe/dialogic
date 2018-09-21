@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csproj", "{F3C34625-EADB-4AE3-A654-CD0624C9697B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "parser", "parser\parser.csproj", "{6A147D7B-682E-49C2-ADDF-5C86EF0D458A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,5 +37,9 @@ Global
 		{F3C34625-EADB-4AE3-A654-CD0624C9697B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3C34625-EADB-4AE3-A654-CD0624C9697B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3C34625-EADB-4AE3-A654-CD0624C9697B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A147D7B-682E-49C2-ADDF-5C86EF0D458A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A147D7B-682E-49C2-ADDF-5C86EF0D458A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A147D7B-682E-49C2-ADDF-5C86EF0D458A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A147D7B-682E-49C2-ADDF-5C86EF0D458A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
