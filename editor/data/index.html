@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.js"></script>
   <script type="text/javascript" src="https://codemirror.net/addon/mode/simple.js"></script>
   <script type="text/javascript">
-  
+
   // define Language Mode
   CodeMirror.defineSimpleMode("dialogic", {
 
@@ -27,7 +27,7 @@
         // no ambiguity between this one and the one above
         // ! DIALOGIC
         {regex: /CHAT(?= )/, token: "command-chat", next:"labelafterchat"}, // Positive look behind does not work in javascript
-        {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "command"}, 
+        {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "command"},
         {regex: /([^=]*):/, token: "actor"},
 
         {regex: /\$.+?(?=\s|$|\.)\./, token: "variable", next:"transformation"},
@@ -39,7 +39,7 @@
         //  {regex: /\$.+(\..+(.*))/, token: "transformation"},
 
         {regex: /\#(_|[a-zA-Z]).*?(?=\s|$)/, token: "label"},
-        {regex: /{/, token: "metadata", next:"metadata"}, 
+        {regex: /{/, token: "metadata", next:"metadata"},
 
         // ! DIALOGIC
         {regex: /true|false|null|undefined/, token: "atom"},
@@ -63,7 +63,7 @@
 
     // group:[
     //     {regex: /\$.+?(?=\s|\||\))/, token: "variable"},
-    //     {regex: /[^$]*?\)/, token: "group", next: "start"}, 
+    //     {regex: /[^$]*?\)/, token: "group", next: "start"},
     //     {regex: /[^$]*/g, token: "group"}
     // ],
 
@@ -211,8 +211,8 @@
         width: 500px;
         border: 1px solid #c0c0c0;
         margin: auto;
-        top: 300px;
-        left: -600px;
+        top: 200px;
+        left: 0px;
         display: none;
         background-color: rgba(255, 255, 255, 0.95)
     }
@@ -490,14 +490,14 @@
         location.reload(true);
       });
 
-      $("#execute").click(function ()
+      $("#execute").click(function (event)
       {
-        onButtonClicked(true);
+        onButtonClicked(event, true);
       });
 
       $("#validate").click(function ()
       {
-        onButtonClicked(false);
+        onButtonClicked(event, false);
       });
 
       // handle dialog show/hide
@@ -514,7 +514,7 @@
       });
 
       $("#VRcheckbox").click(function ()
-      { 
+      {
         localStorage.setItem("useValidators", $("#VRcheckbox").prop('checked'));
          toggleValidation();
       });
@@ -528,7 +528,7 @@
 
       // ******** Start Functions ************//
       function onLoad()
-      { 
+      {
         toggleValidation();
         showSelection(); // This must be placed before toggleExe
         toggleExe();
@@ -591,7 +591,7 @@
         $("#urlPath").html("Paste your url");
       }
 
-      function onButtonClicked(execute)
+      function onButtonClicked(event, execute)
       {
         event.preventDefault();
 
@@ -627,7 +627,7 @@
             value: execute ? $("#result").text() :
                 processSelectedText(content, startIdx.line, endIdx.line)
           });
-          
+
         }
 
         sendRequest(formData);
@@ -698,7 +698,7 @@
           // we need to maintain correct line numbers for error-reporting,
           // so if we have a partial selection, we comment out any lines
           // NOT included in the highlighted portion
-         
+
             var lines = code.split("\n");
 
             for (var i = 0; i < lines.length; i++)
