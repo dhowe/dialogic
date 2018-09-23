@@ -1,0 +1,26 @@
+Build script: 
+1. update version # if needed
+2. run-all tests
+3. run Demo app
+4. enable nuget pkgs (dialogic-proj->options) and rebuild
+5. run make-version.sh
+6. run git-tag.sh v#
+7. ssh red; dia; (should be in www/dialogic-gh) && gpl 
+8. make-release on github
+9. add files in /dialogic/dialogic/bin/debug/netcoreapp2.0
+10. run $ pnuget [0.4.55]  (from anywhere)
+11. test local linter
+12. run linter on rednoise:  pull, dotnet clean/build/run 
+13. restart systemctl (see below), test
+
+Unity package:
+1. need to run pdb2mdb on generated pdb file
+2. then copy .dll, and (generated) .mdb to Unity proj Assets folder
+3. export as unity package (how to automate this?)
+
+# LIST: systemctl list-units | grep -E 'service.*running'
+# STATUS: sudo systemctl status dialogic-editor
+# DISABLE: sudo systemctl disable dialogic-editor
+# ENABLE:sudo systemctl enable dialogic-editor
+# START: sudo systemctl start dialogic-editor
+# STOP: sudo systemctl stop dialogic-editor
