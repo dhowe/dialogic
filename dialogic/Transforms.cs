@@ -47,7 +47,7 @@ namespace Dialogic
         /// </summary>
         public static string Pluralize(string word)
         {
-            return word.Contains(' ') ? string.Join(' ',
+            return word.Contains(' ') ? string.Join(" ",
                 PluralizePhrase(word.Split(' '))) : PluralizeWord(word);
         }
 

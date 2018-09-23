@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Dialogic</RootNamespace>
     <AssemblyName>Dialogic</AssemblyName>
     <PackageId>org.rednoise.dialogic</PackageId>

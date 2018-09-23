@@ -2,7 +2,7 @@ Build script:
 1. update version # if needed
 2. run-all tests
 3. run Demo app
-4. enable nuget pkgs (dialogic-proj->options) and rebuild
+4. enable nuget pkgs (dialogic-proj->options), release config, rebuild
 5. run make-version.sh
 6. run git-tag.sh v#
 7. ssh red; dia; (should be in www/dialogic-gh) && gpl 
