@@ -3,11 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Timers;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 
 [assembly: InternalsVisibleTo("DialogicTests")]
 [assembly: InternalsVisibleTo("DialogicEditor")]
@@ -996,56 +994,6 @@ namespace Dialogic
         private static ILookup<string, string> LOOKUP;
     }
 
-    // adapted from:
-    //   https://codereview.stackexchange.com/questions/113596
-    //   /writing-cs-analog-of-settimeout-setinterval-and-clearinterval
-    public static class Timers //@cond hidden
-    {
-        static IInterruptable timer;
-
-        public static IInterruptable SetInterval(int ms, Action function)
-        {
-            return timer = ms > -1 ? StartTimer(ms, function, true) : null;
-        }
-
-        public static IInterruptable SetTimeout(int ms, Action function)
-        {
-            return timer = ms > -1 ? StartTimer(ms, function, false) : null;
-        }
-
-        private static IInterruptable StartTimer(int interval, Action function, bool autoReset)
-        {
-            Action functionCopy = (Action)function.Clone();
-            System.Timers.Timer t = new System.Timers.Timer
-            { Interval = interval, AutoReset = autoReset };
-            t.Elapsed += (sender, e) => functionCopy();
-            t.Start();
-
-            return new TimerInterrupter(t);
-        }
-    }//@endcond
-
-    public interface IInterruptable //@cond hidden
-    {
-        void Stop();
-    }
-
-    public class TimerInterrupter : IInterruptable
-    {
-        private readonly System.Timers.Timer t;
-
-        public TimerInterrupter(System.Timers.Timer timer)
-        {
-            if (timer == null) throw new ArgumentNullException();
-            t = timer;
-        }
-
-        public void Stop()
-        {
-            t.Stop();
-        }
-    }//@endcond
-
     public class ObjectPool<T> //@cond unused
     {
         private readonly Func<T> generator;
@@ -1311,40 +1259,5 @@ namespace Dialogic
         }
 
     }//@endcond
-
-
-    public static class ConsoleReader //@cond hidden
-    {
-        private static Thread inputThread;
-        private static AutoResetEvent getInput, gotInput;
-        private static string input;
-
-        static ConsoleReader()
-        {
-            getInput = new AutoResetEvent(false);
-            gotInput = new AutoResetEvent(false);
-            inputThread = new Thread(Reader) { IsBackground = true };
-            inputThread.Start();
-        }
-
-        private static void Reader()
-        {
-            while (true)
-            {
-                getInput.WaitOne();
-                input = Console.ReadKey(true).KeyChar.ToString();
-                gotInput.Set();
-            }
-        }
-
-        public static string ReadLine(int timeOutMillisecs = -1)
-        {
-            getInput.Set();
-            bool success = gotInput.WaitOne(timeOutMillisecs);
-            if (success) return input;
-            throw new TimeoutException("Prompt timeout expired after "+timeOutMillisecs+"ms");
-        }
-
-    } //@endcond
 
 }
