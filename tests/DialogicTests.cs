@@ -429,6 +429,22 @@ namespace Dialogic
         }
 
         [Test]
+        public void ContinueAskTest()
+        {
+            string[] lines = {
+                "CHAT c",
+                "ASK Hello?",
+                "OPT Yes",
+                "OPT No",
+                "SAY Ok"
+            };
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText(String.Join("\n", lines));
+            var s = rt.InvokeImmediate(globals);
+            Assert.That(s, Is.EqualTo("Hello?\nOk"));
+        }
+
+        [Test]
         public void ImmediateAskTest()
         {
             string[] lines = {

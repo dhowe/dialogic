@@ -53,9 +53,8 @@ namespace Dialogic
         internal string firstChat;
 
         private List<IActor> actors;
-        private List<Action<Chat>> findListeners;
         private List<Func<Command, bool>> validators;
-        private Thread deserializeThread, searchThread, saveThread, loadThread;
+        private Thread searchThread, saveThread, loadThread;
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private FuzzySearch search;
@@ -911,28 +910,28 @@ namespace Dialogic
             {
                 Warn("Ignoring attempt to resume while Chat#"
                      + chat.text + " is active & running\n");
+                return (nextEventTime = Util.Millis());
             }
 
-            if (chat == null)
+            //if (chat == null)  { // fix for #154
+            if (!resumables.IsNullOrEmpty())
             {
-                if (!resumables.IsNullOrEmpty())
-                {
-                    // grab top Chat on stack
-                    chat = resumables.Pop();
+                // grab top Chat on stack
+                chat = resumables.Pop();
 
-                    // check for a smoothing Chat to run first
-                    var trans = FindTransitionChat();
+                // check for a smoothing Chat to run first
+                var trans = FindTransitionChat();
 
-                    if (trans != null) chat = trans;
+                if (trans != null) chat = trans;
 
-                    return Launch(chat, trans != null);
-                }
-                else
-                {
-                    //Console.WriteLine("Nothing to resume... waiting");
-                    return -1;
-                }
+                return Launch(chat, trans != null);
             }
+            else
+            {
+                Console.WriteLine("Nothing to resume... waiting");
+                return -1;
+            }
+            //}
 
             return Util.Millis(); // unsuspend non-null current chat
         }
