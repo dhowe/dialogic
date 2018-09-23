@@ -381,7 +381,7 @@ namespace Dialogic
         }
 
         [Obsolete("Use MergeAsync() instead")]
-        public void UpdateFromAsync(ISerializer serializer, byte[] bytes, 
+        public void UpdateFromAsync(ISerializer serializer, byte[] bytes,
             Action callback = null) => MergeAsync(serializer, bytes, callback);
 
 
@@ -582,7 +582,12 @@ namespace Dialogic
                 result += Entities.Decode(cmd.Text()) + "\n";
                 if (cmd is Ask)
                 {
-                    cmd = Util.RandItem(((Ask)cmd).Options()).action;
+                    var opt = Util.RandItem(((Ask)cmd).Options());
+
+                    // output the response in brackets
+                    result += "[" + Entities.Decode(opt.Text()) + "]\n";
+
+                    cmd = opt.action;
                     cmd.Resolve(globals); // follow random option
                 }
             }

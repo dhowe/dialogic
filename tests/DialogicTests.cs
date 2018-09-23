@@ -441,7 +441,7 @@ namespace Dialogic
             ChatRuntime rt = new ChatRuntime();
             rt.ParseText(String.Join("\n", lines));
             var s = rt.InvokeImmediate(globals);
-            Assert.That(s, Is.EqualTo("Hello?\nOk"));
+            Assert.That(s, Is.EqualTo("Hello?\n[No]\nOk").Or.EqualTo("Hello?\n[Yes]\nOk"));
         }
 
         [Test]
@@ -462,10 +462,16 @@ namespace Dialogic
             rt.ParseText(String.Join("\n", lines));
 
             var s = rt.InvokeImmediate(globals);
-            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            //Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            //Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\n[No]\ngoodbye.")
+                        .Or.EqualTo("hello dog.\nare you a dog?\n[Yes]\ngoodbye."));
+
 
             s = rt.InvokeImmediate(globals, "c");
-            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\n[No]\ngoodbye.")
+                        .Or.EqualTo("hello dog.\nare you a dog?\n[Yes]\ngoodbye."));
+            //Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
 
             s = rt.InvokeImmediate(globals, "c2");
             Assert.That(s, Is.EqualTo("goodbye."));
@@ -477,7 +483,8 @@ namespace Dialogic
             rt.strictMode = false;
             s = rt.InvokeImmediate(null);
             ChatRuntime.SILENT = false;
-            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\n[No]\ngoodbye.")
+                        .Or.EqualTo("hello $animal.\nare you a $animal?\n[Yes]\ngoodbye."));
         }
 
         [Test]
@@ -498,10 +505,12 @@ namespace Dialogic
             rt.ParseText(String.Join("\n", lines));
 
             var s = rt.InvokeImmediate(globals);
-            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\n[No]\ngoodbye.")
+                         .Or.EqualTo("hello dog.\nare you a dog?\n[Yes]\ngoodbye."));
 
             s = rt.InvokeImmediate(globals, "c");
-            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\n[No]\ngoodbye.")
+                         .Or.EqualTo("hello dog.\nare you a dog?\n[Yes]\ngoodbye."));
 
             s = rt.InvokeImmediate(globals, "c2");
             Assert.That(s, Is.EqualTo("goodbye."));
@@ -512,7 +521,8 @@ namespace Dialogic
             rt.strictMode = false;
             s = rt.InvokeImmediate(null);
             ChatRuntime.SILENT = false;
-            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\n[No]\ngoodbye.")
+                        .Or.EqualTo("hello $animal.\nare you a $animal?\n[Yes]\ngoodbye."));
         }
 
         [Test]
@@ -530,10 +540,12 @@ namespace Dialogic
             rt.ParseText(String.Join("\n", lines));
 
             var s = rt.InvokeImmediate(globals);
-            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\n[No]\ngoodbye.")
+                         .Or.EqualTo("hello dog.\nare you a dog?\n[Yes]\ngoodbye."));
 
             s = rt.InvokeImmediate(globals, "c");
-            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello dog.\nare you a dog?\n[No]\ngoodbye.")
+                         .Or.EqualTo("hello dog.\nare you a dog?\n[Yes]\ngoodbye."));
 
             s = rt.InvokeImmediate(globals, "c1");
             Assert.That(s, Is.EqualTo("goodbye."));
@@ -545,7 +557,8 @@ namespace Dialogic
 
             s = rt.InvokeImmediate(null);
             ChatRuntime.SILENT = false;
-            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\ngoodbye."));
+            Assert.That(s, Is.EqualTo("hello $animal.\nare you a $animal?\n[No]\ngoodbye.")
+                        .Or.EqualTo("hello $animal.\nare you a $animal?\n[Yes]\ngoodbye."));
         }
 
         [Test]
@@ -565,7 +578,6 @@ namespace Dialogic
             Assert.That(Methods.InvokeTransform("taxi", "pluralize"), Is.EqualTo("taxis"));
             Assert.That(Methods.InvokeTransform("Chinese", "pluralize"), Is.EqualTo("Chinese"));
             Assert.That(Methods.InvokeTransform("bonsai", "pluralize"), Is.EqualTo("bonsai"));
-
         }
 
         [Test]
@@ -844,62 +856,5 @@ namespace Dialogic
             Assert.Throws<OperatorException>(() => Operator.SW.Invoke(null, "hello"));
             Assert.Throws<OperatorException>(() => Operator.SW.Invoke(null, null));
         }
-        /*[Test]
-        public void AngerFortunes()
-        {
-            ChatRuntime rt;
-
-            var testfile = AppDomain.CurrentDomain.BaseDirectory;
-            testfile += "../../../../dialogic/data/judgement/anger.gs";
-
-            rt = new ChatRuntime(Client.AppConfig.TAC);
-            rt.ParseFile(new FileInfo(testfile));
-
-            var chat = rt["judgement"];
-            chat.Resolve(globals);
-
-            //string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
-            //foreach (var k in keys) Console.WriteLine(k + ":" + chat.scope[k]);
-
-            Console.WriteLine();
-
-            //Resolver.DBUG = true;
-            for (int i = 0; i < 15; i++)
-            {
-                var s = rt.InvokeImmediate(globals);
-                var opts = StringSplitOptions.RemoveEmptyEntries;
-                string[] sents = s.Split(new[] { "?", "." }, opts);
-                Console.WriteLine(i + "(" + sents.Length + "): " + s);
-            }
-        }      
-
-        //[Test]
-        public void AmusementFortunes()
-        {
-            ChatRuntime rt;
-
-            var testfile = AppDomain.CurrentDomain.BaseDirectory;
-            testfile += "../../../../dialogic/data/judgement/amusement.gs";
-
-            rt = new ChatRuntime(Client.AppConfig.TAC);
-            rt.ParseFile(new FileInfo(testfile));
-
-            var chat = rt["judgement"];
-            chat.Resolve(globals);
-
-            //string[] keys = { "start", "open", "ques", "col", "pos", "neg" };
-            //foreach (var k in keys) Console.WriteLine(k + ":" + chat.scope[k]);
-
-            //Console.WriteLine();
-
-            //Resolver.DBUG = true;
-            for (int i = 0; i < 15; i++)
-            {
-                var s = rt.InvokeImmediate(globals);
-                var opts = StringSplitOptions.RemoveEmptyEntries;
-                string[] sents = s.Split(new[]{"?","."}, opts);            
-                Console.WriteLine(i + "("+sents.Length+"): " + s);
-            }         
-        }*/
     }
 }
