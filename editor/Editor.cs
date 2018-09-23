@@ -46,7 +46,7 @@ namespace Dialogic.Server
                 listener.Start();
             }
             else
-            {            
+            {
                 while (true) // choose a random port
                 {
                     listener = new HttpListener();
@@ -138,7 +138,9 @@ namespace Dialogic.Server
                 listener.Stop();
                 listener.Close();
             }
+#pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
             catch (Exception) { /* ignore */ }
+#pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
         }
 
         public static string SendResponse(HttpListenerRequest request)
@@ -173,19 +175,21 @@ namespace Dialogic.Server
             html = html.Replace("%%CCLASS%%", "shown");
 
             // only process the selection if there is one
-            if (kvs.ContainsKey("selectionStart")) {
-                 code = kvs["selection"];
-                 html = html.Replace("%%STARTINDEX%%", kvs["selectionStart"]);
-                 html = html.Replace("%%ENDINDEX%%", kvs["selectionEnd"]);
+            if (kvs.ContainsKey("selectionStart"))
+            {
+                code = kvs["selection"];
+                html = html.Replace("%%STARTINDEX%%", kvs["selectionStart"]);
+                html = html.Replace("%%ENDINDEX%%", kvs["selectionEnd"]);
             }
-           
+
             try
             {
                 string content = String.Empty;
                 var globals = new Dictionary<string, object>();
                 runtime = new ChatRuntime(Client.AppConfig.TAC);
                 runtime.strictMode = false; // allow unbound symbols/functions
-                runtime.ParseText(code, kvs.ContainsKey("useValidators") && kvs["useValidators"].Equals("true") ? false : true); // true to disable validators
+                runtime.ParseText(code, !kvs.ContainsKey("useValidators")
+                    || !kvs["useValidators"].Equals("true")); // true to disable validators
                 runtime.Chats().ForEach(c => { content += c.ToTree() + "\n\n"; });
 
                 var result = string.Empty;

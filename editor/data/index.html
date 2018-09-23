@@ -7,224 +7,370 @@
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.js"></script>
-  <style>
-    .CodeMirror {
-      border: 1px solid #eee;
-      line-height: 16px;
+  <script type="text/javascript" src="https://codemirror.net/addon/mode/simple.js"></script>
+  <script type="text/javascript">
+
+  // define Language Mode
+  CodeMirror.defineSimpleMode("dialogic", {
+
+    // The start state contains the rules that are intially used
+    start: [
+
+        // The regex matches the token, the token property contains the type
+        {regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string"},
+
+        // You can match multiple tokens at once. Note that the captured
+        // groups must span the whole string in this case
+        {regex: /(function)(\s+)([a-z$][\w$]*)/, token: ["keyword", null, "variable-2"]},
+
+        // Rules are matched in the order in which they appear, so there is
+        // no ambiguity between this one and the one above
+        // ! DIALOGIC
+        {regex: /CHAT(?= )/, token: "command-chat", next:"labelafterchat"}, // Positive look behind does not work in javascript
+        {regex: /(?:CHAT|SAY|ASK|OPT|DO|GO|FIND|WAIT|SET)\b/, token: "command"},
+        {regex: /([^=]*):/, token: "actor"},
+
+        {regex: /\$.+?(?=\s|$|\.)\./, token: "variable", next:"transformation"},
+        {regex: /(\(.+\|.+\))\./, token: "group", next:"transformation"},
+        {regex: /\$.+?(?=\s|$|\.)/, token: "variable"},
+        {regex: /(\(.+\|.+\))/, token: "group"},
+
+        // {regex: /\(.+\)(\..+(.*))/, token: "transformation"},
+        //  {regex: /\$.+(\..+(.*))/, token: "transformation"},
+
+        {regex: /\#(_|[a-zA-Z]).*?(?=\s|$)/, token: "label"},
+        {regex: /{/, token: "metadata", next:"metadata"},
+
+        // ! DIALOGIC
+        {regex: /true|false|null|undefined/, token: "atom"},
+
+        // {regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: "number"},
+        {regex: /\/\/.*/, token: "comment"},
+
+        // A next property will cause the mode to move to a different state
+        {regex: /\/\*/, token: "comment", next: "comment"},
+        {regex: /[-+\/*=<>!^()|]+/, token: "operator"},
+
+        // indent and dedent properties guide autoindentation
+        {regex: /[\{\[\(]/, indent: true},
+        {regex: /[\}\]\)]/, dedent: true}
+    ],
+
+    // DIALOGIC: hack - label after chat
+    labelafterchat:[
+        {regex: / .+?\b/, token: "label", next: "start"}
+    ],
+
+    // group:[
+    //     {regex: /\$.+?(?=\s|\||\))/, token: "variable"},
+    //     {regex: /[^$]*?\)/, token: "group", next: "start"},
+    //     {regex: /[^$]*/g, token: "group"}
+    // ],
+
+    // DIALOGIC: metadata state
+    metadata:[
+        {regex: /}/, token: "metadata", next: "start"},
+        {regex: /\w+(?= *(=|>=|<=|>|<|!=|\$=|\^=|\*=))/, token: "key"},
+        {regex: /=|<|>|!|\$|\^|\*|!|,| /, token: "metadata"},
+        {regex: /.*?(?=,| ,|}| })/, token: "value"}
+    ],
+    transformation:[
+        {regex: /.+\(.*\)/, token: "transformation", next: "start"},
+        {regex: /.*/, token: "transformation"}
+    ],
+
+    // The multi-line comment state.
+    comment: [
+        {regex: /.*?\*\//, token: "comment", next: "start"},
+        {regex: /.*/, token: "comment"}
+    ],
+
+    // The meta property contains global information about the mode. It
+    // can contain properties like lineComment, which are supported by
+    // all modes, and also directives like dontIndentStates, which are
+    // specific to simple modes.
+    meta: {
+        dontIndentStates: ["comment"],
+        lineComment: "//"
     }
+  });
+  </script>
+  <style>
+
+    .CodeMirror {
+        border: 1px solid #eee;
+        line-height: 16px;
+    }
+
     .CodeMirror-gutters {
-      height:100% !important; /* fix the gutter issue*/
+        height: 100% !important; /* fix the gutter issue*/
+    }
+    /*additional theme*/
+    .cm-s-default .cm-command, .cm-s-default .cm-command-chat {
+        font-weight: bold;
+    }
+
+    .cm-s-default .cm-actor {
+        color: #a06a34;
+    }
+    /*brown*/
+    .cm-s-default .cm-group {
+        color: #004600;
+    }
+    /*green*/
+    .cm-s-default .cm-variable {
+        color: #4d2e87;
+    }
+    /*purple*/
+    .cm-s-default .cm-transformation {
+        color: #8b0000;
+    }
+    /*dark red*/
+
+    .cm-s-default .cm-metadata {
+        color: orange;
+    }
+
+    .cm-s-default .cm-key {
+        color: #005cc5;
+    }
+    /*blue*/
+    .cm-s-default .cm-value {
+        color: #00c548
+    }
+    /*bright green*/
+
+    .cm-s-default .cm-label {
+        color: #d73a49;
+    }
+    /*red*/
+
+    .cm-s-default .cm-operator {
+        color: #d73a49;
+    }
+    /*red*/
+    .cm-s-default .cm-comment {
+        color: grey;
     }
 
     body {
-      padding: 0 2em;
+        padding: 0 2em;
     }
 
     .sub-title {
-      line-height: 42px;
-      font-size: 20px;
+        line-height: 42px;
+        font-size: 20px;
     }
 
     .input-area {
-      margin-top: 5px !important;
+        margin-top: 5px !important;
     }
 
     #result-container pre {
-      width: 95%;
-      margin-left: 13px;
-      min-width: 620px;
-      overflow: auto;
+        width: 95%;
+        margin-left: 13px;
+        min-width: 620px;
+        overflow: auto;
     }
 
     #executeResult {
-      border: 1px solid transparent;
-      padding: 0.8em;
+        border: 1px solid transparent;
+        padding: 0.8em;
     }
 
     #executeResult:empty {
-      display: none;
+        display: none;
     }
 
     #executeResult.success {
-      background: #c3d4ef;
-      color: #144594;
-      border-color: #7ea0d7;
+        background: #c3d4ef;
+        color: #144594;
+        border-color: #7ea0d7;
     }
 
     #executeResult.error {
-      background: #FBE3E4;
-      color: #D12F19;
-      border-color: #FBC2C4;
+        background: #FBE3E4;
+        color: #D12F19;
+        border-color: #FBC2C4;
     }
 
     pre.executeResult {
-      white-space: pre-wrap;
-      /* Since CSS 2.1 */
-      white-space: -moz-pre-wrap;
-      /* Mozilla, since 1999 */
-      white-space: -pre-wrap;
-      /* Opera 4-6 */
-      white-space: -o-pre-wrap;
-      /* Opera 7 */
-      word-wrap: break-word;
-      /* Internet Explorer 5.5+ */
+        white-space: pre-wrap;
+        /* Since CSS 2.1 */
+        white-space: -moz-pre-wrap;
+        /* Mozilla, since 1999 */
+        white-space: -pre-wrap;
+        /* Opera 4-6 */
+        white-space: -o-pre-wrap;
+        /* Opera 7 */
+        word-wrap: break-word;
+        /* Internet Explorer 5.5+ */
     }
 
     #loadURLDialog {
-      width: 500px;
-      border: 1px solid #c0c0c0;
-      margin: auto;
-      top: 300px;
-      left: -600px;
-      display: none;
-      background-color: rgba(255, 255, 255, 0.95)
+        width: 500px;
+        border: 1px solid #c0c0c0;
+        margin: auto;
+        top: 200px;
+        left: 0px;
+        display: none;
+        background-color: rgba(255, 255, 255, 0.95)
     }
 
     #closeDialog {
-      float: right;
+        float: right;
     }
 
     #loadUrlPathDiv input {
-      margin: 10px 0;
-      font-size: 14px;
-      width: 100% !important;
+        margin: 10px 0;
+        font-size: 14px;
+        width: 100% !important;
     }
 
     button:disabled {
-      opacity: .5;
+        opacity: .5;
     }
 
-    button:disabled:hover {
-      background: white !important;
-    }
+        button:disabled:hover {
+            background: white !important;
+        }
 
     .navlink:link,
     .navlink:visited {
-      text-decoration: none;
-      font-size: 12px;
-      font-family: Open Sans, sans-serif;
-      font-weight: 500;
-      color: #2F6465;
+        text-decoration: none;
+        font-size: 12px;
+        font-family: Open Sans, sans-serif;
+        font-weight: 500;
+        color: #2F6465;
     }
 
     .navlink:hover,
     .navlink:active {
-      color: #088;
+        color: #088;
     }
 
     .button:hover,
     button[type="button"]:hover {
-      background: #f3f3f3 !important;
+        background: #f3f3f3 !important;
     }
 
     p.navlinks {
-      margin-left: 185px;
+        margin-left: 185px;
     }
 
     #button-div {
-      margin-left: 100px;
+        margin-left: 100px;
     }
 
     #title {
-      font-family: Open Sans, sans-serif;
-      font-size: 24px;
-      margin-left: -3px;
+        font-family: Open Sans, sans-serif;
+        font-size: 24px;
+        margin-left: -3px;
     }
 
     #fish {
-      margin-top: 5px;
-      margin-left: 13px;
+        margin-top: 5px;
+        margin-left: 13px;
     }
 
     linedwrap {
-      width: 95% !important;
-      min-width: 700px;
-      margin-left: 13px;
+        width: 95% !important;
+        min-width: 700px;
+        margin-left: 13px;
     }
 
     #main {
-      width: 90% !important;
+        width: 90% !important;
     }
 
     .checkbox {
-      margin-left: 3px;
-      margin-top: 16px;
-      -webkit-appearance: none;
-      background-color: #fafafa;
-      border: 1px solid #cacece;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
-      padding: 9px;
-      border-radius: 3px;
-      display: inline-block;
-      position: relative;
+        margin-left: 3px;
+        margin-top: 16px;
+        -webkit-appearance: none;
+        background-color: #fafafa;
+        border: 1px solid #cacece;
+        padding: 7px;
+        border-radius: 3px;
+        display: inline-block;
+        position: relative;
     }
 
-    .checkbox:active,
-    .checkbox:checked:active {
-      border: 1px solid #cacece;
+        .checkbox:active,
+        .checkbox:checked:active {
+            border: 1px solid #cacece;
+        }
+
+    input[type="checkbox"]:focus {
+        outline: 0;
     }
 
     .checkbox:checked {
-      color: #99a1a7;
-      border: 1px solid #cacece;
+        color: #99a1a7;
+        border: 1px solid #cacece;
     }
 
     .checkbox:checked:after {
-      content: '\2714';
-      font-size: 14px;
-      position: absolute;
-      top: 0px;
-      left: 3px;
-      color: #99a1a7;
+        content: '\2714';
+        font-size: 12px;
+        position: absolute;
+        top: 0px;
+        left: 2px;
+        color: #99a1a7;
     }
 
     #checkText {
-      margin-top: 13px;
-      margin-left: 8px;
-      display: inline-block;
-      position: relative;
+        margin-top: 13px;
+        margin-left: 8px;
+        display: inline-block;
+        position: relative;
+        font-size: 12px;
     }
+
+        #checkText a {
+            color: black;
+        }
 
     .button,
     button[type="button"] {
-      cursor: pointer;
-      background-color: #fff !important;
-      padding: 5px 15px !important;
-      text-decoration: none !important;
-      border: 1px solid #e1e1e1 !important;
-      font-size: 14px !important;
-      font-family: Open Sans, sans-serif !important;
-      font-weight: 500 !important;
-      color: #333 !important;
-      margin: 10px 20px 0 0 !important;
+        cursor: pointer;
+        background-color: #fff !important;
+        padding: 5px 15px !important;
+        text-decoration: none !important;
+        border: 1px solid #e1e1e1 !important;
+        font-size: 14px !important;
+        font-family: Open Sans, sans-serif !important;
+        font-weight: 500 !important;
+        color: #333 !important;
+        margin: 10px 20px 0 0 !important;
     }
 
     .handle {
-      margin-top: -15px;
-      background: #f7f7f7;
-      height: 20px;
-      user-select: none;
-      cursor: row-resize;
-      border-top: 1px solid #ddd;
-      border-bottom: 1px solid #ddd;
+        margin-top: -15px;
+        background: #f7f7f7;
+        height: 20px;
+        user-select: none;
+        cursor: row-resize;
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
     }
 
     .handle:before {
-      content: '\2261';
-      /* https://en.wikipedia.org/wiki/Triple_bar */
-      color: #999;
-      position: absolute;
-      left: 50%;
+        content: '\2261';
+        /* https://en.wikipedia.org/wiki/Triple_bar */
+        color: #999;
+        position: absolute;
+        left: 50%;
     }
 
     .handle:hover {
-      background: #f0f0f0;
+        background: #f0f0f0;
     }
 
     .handle:hover:before {
-      color: #000;
+        color: #000;
     }
-  </style>
+
+    </style>
 </head>
 
 <body>
@@ -239,8 +385,8 @@
         <span id="title">Dialogic</span><br>
 
   </span>
-  <span id="errorLine" style="display:none;">%%ERRORLINE%%</span>
-  <span id="selection" style="display:none;">%%STARTINDEX%%;%%ENDINDEX%%</span>
+  <span id="errorLine" style="        display: none;">%%ERRORLINE%%</span>
+  <span id="selection" style="        display: none;">%%STARTINDEX%%;%%ENDINDEX%%</span>
   <form name="main" id="form">
     <div class="input-area">
       <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false">%%CODE%%</textarea>
@@ -253,13 +399,13 @@
       <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
       <button class="button" type="button" id="showDialog" title="Load from Url">Load URL</button>
       <button class="button" type="reset" id="clear" disabled>Clear</button>
-      <!--input type="checkbox" class="checkbox" name="useValidators" value="true" checked><span id="checkText">Use TendAr Validators</span><br-->
+      <input type="checkbox" class="checkbox" id="VRcheckbox" name="useValidators" value="true"><span id="checkText">Use <a href="http://tenderclaws.com/press/sheet.php?p=tendAR" target="_blank">TendAR</a> Validators</span>
     </div>
   </form>
 
   <section id="result-container" class="%%CCLASS%%">
-    <pre id="executeResult" style="font-size: 13px" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
-    <pre id="result" style="font-size: 13px" class="%%RCLASS%%">%%RESULT%%</pre>
+    <pre id="executeResult" style="        font-size: 13px" class="executeResult %%RCLASS%%">%%EXECUTE%%</pre>
+    <pre id="result" style="        font-size: 13px" class="%%RCLASS%%">%%RESULT%%</pre>
   </section>
   <div class="CodeMirror-dialog" id="loadURLDialog">
     <div class="CodeMirror-dialog-top">
@@ -277,9 +423,9 @@
     </div>
   </div>
   <script>
-$(function ()
+    $(function ()
     {
-      // ******** Editor ************//
+      // ******** State Editor ************//
 
       var storageKey = 'dialogic-editor-code';
 
@@ -329,10 +475,12 @@ $(function ()
 
         toggleValidation();
       });
-
       // ******** End Editor ************//
 
-      // ******** Click Handlers ************//
+
+
+      // ******** Click Handlers **********//
+
       // setup button handlers
       $("#clear").click(function ()
       {
@@ -342,14 +490,14 @@ $(function ()
         location.reload(true);
       });
 
-      $("#execute").click(function ()
+      $("#execute").click(function (event)
       {
-        onButtonClicked(true);
+        onButtonClicked(event, true);
       });
 
-      $("#validate").click(function ()
+      $("#validate").click(function (event)
       {
-        onButtonClicked(false);
+        onButtonClicked(event, false);
       });
 
       // handle dialog show/hide
@@ -365,12 +513,20 @@ $(function ()
         $("#urlPath").val('');
       });
 
+      $("#VRcheckbox").click(function ()
+      {
+        localStorage.setItem("useValidators", $("#VRcheckbox").prop('checked'));
+         toggleValidation();
+      });
+
+
       $("#closeDialog").click(closeURLDialog);
+
       // ******** End Click Handlers ************//
 
       onLoad();
 
-      // functions ---------------------------------------------
+      // ******** Start Functions ************//
       function onLoad()
       {
         toggleValidation();
@@ -435,17 +591,15 @@ $(function ()
         $("#urlPath").html("Paste your url");
       }
 
-      function onButtonClicked(event)
+      function onButtonClicked(event, execute)
       {
-
-        // working here ***
         event.preventDefault();
 
         var formData = $("#form").serializeArray();
         formData.push(
         {
           name: 'mode',
-          value: event ? 'execute' : 'validate'
+          value: execute ? 'execute' : 'validate'
         });
 
 
@@ -460,15 +614,17 @@ $(function ()
             name: "selectionStart",
             value: startIdx.line + "," + startIdx.ch
           });
+
           formData.push(
           {
             name: "selectionEnd",
             value: endIdx.line + "," + endIdx.ch
           });
+
           formData.push(
           {
             name: "selection",
-            value: event ? $("#result").text() : 
+            value: execute ? $("#result").text() :
                 processSelectedText(content, startIdx.line, endIdx.line)
           });
 
@@ -492,10 +648,17 @@ $(function ()
             editor.setValue(content);
             $("#main").val(content);
           }
+
           var editorHeight = localStorage.getItem("editorHeight");
           if (editorHeight != null )
           {
-           editor.setSize(null, editorHeight);
+            editor.setSize(null, editorHeight);
+          }
+
+          var useValidators = localStorage.getItem("useValidators");
+          if (useValidators != null )
+          {
+            $("#VRcheckbox").prop('checked', useValidators === "true" ? true : false);
           }
         }
       }
@@ -587,7 +750,8 @@ $(function ()
         window.addEventListener("mouseup", on_release);
       });
 
-    });</script>
+    });
+  </script>
 </body>
 
 </html>

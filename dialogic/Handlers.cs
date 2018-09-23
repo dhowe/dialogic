@@ -175,32 +175,22 @@ namespace Dialogic
             {
                 Opt opt = scheduler.prompt.Selected(idx);
 
-Console.WriteLine("CHOICE: "+idx+" "+opt.text+" ");
                 if (opt.action != Command.NOP)
                 {
-Console.WriteLine("ACTION: "+opt.text+" "+opt.action.text);
-
                     // We've gotten a response with a branch, so finish & take it
                     scheduler.Completed(false);
                     opt.action.Resolve(globals);
                     runtime.FindAsync((Find)opt.action); // find next
 
-                    // Question: what if the Chat is unfinished (and resumable)?
-                    // Shouldn't we return to it later? See ticket #154
+                    // Question: if the Chat is unfinished (and resumable)
+                    // shouldn't we return to it later? See #154
                 }
                 else
                 {
-
-Console.WriteLine("CONTINUING: "+ scheduler.chat.text);
+                    // No action chosen so continue the current chat
                     scheduler.Resume();
-//scheduler.chat = scheduler.prompt.parent; // just continue
-//Console.WriteLine("CONTINUING: " + scheduler.resumables, scheduler.Waiting());
-//Console.WriteLine("--- Stack contents ---");
-//foreach (var i in scheduler.resumables)
-//{
-//Console.WriteLine(i);
-//}
                 }
+
                 return null;
             }
         }
