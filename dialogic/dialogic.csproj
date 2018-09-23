@@ -18,6 +18,7 @@
     <Owners>Daniel C Howe</Owners>
     <Summary>A library for generative interactive dialog</Summary>
     <PackageTags>dialog, unity, games, interactive, language</PackageTags>
+    <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

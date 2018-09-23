@@ -516,7 +516,7 @@
       $("#VRcheckbox").click(function ()
       {
         localStorage.setItem("useValidators", $("#VRcheckbox").prop('checked'));
-         toggleValidation();
+        toggleValidation();
       });
 
 
@@ -558,11 +558,13 @@
       {
         var input = editor.getValue(),
           selection = editor.getSelection();
+
         if ((input.length > 0 && input != 'Enter your script here') || selection != lastSelection)
         {
           $("#validate").prop("disabled", false);
           $("#execute").prop("disabled", true);
         }
+
         if (input.length == 0)
         {
           $("#clear").prop("disabled", true);
