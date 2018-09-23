@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
 
 namespace Dialogic
 {
@@ -54,7 +52,7 @@ namespace Dialogic
 
         private List<IActor> actors;
         private List<Func<Command, bool>> validators;
-        private Thread searchThread, saveThread, loadThread;
+        private System.Threading.Thread searchThread, saveThread, loadThread;
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private FuzzySearch search;
@@ -296,7 +294,7 @@ namespace Dialogic
 
         public void LoadChatsAsync(List<Chat> newChats, Action<List<Chat>> callback = null)
         {
-            (loadThread = new Thread(() =>
+            (loadThread = new System.Threading.Thread(() =>
             {
                 this.scheduler.Suspend();
                 LoadChats(newChats);
@@ -328,7 +326,7 @@ namespace Dialogic
         public void SaveAsync(ISerializer serializer,
             FileInfo file = null, Action<byte[]> callback = null)
         {
-            (saveThread = new Thread(() =>
+            (saveThread = new System.Threading.Thread(() =>
             {
                 //Console.WriteLine("Starting save @"+Util.Millis());
                 //Thread.Sleep(5000); // simulate a longer save
@@ -390,7 +388,7 @@ namespace Dialogic
         /// </summary>
         public void MergeAsync(ISerializer serializer, byte[] bytes, Action callback = null)
         {
-            (loadThread = new Thread(() =>
+            (loadThread = new System.Threading.Thread(() =>
             {
                 try
                 {
@@ -649,9 +647,9 @@ namespace Dialogic
         internal void FindAllAsync(Find finder, Action<Chat> action,
             IDictionary<string, object> globals = null)
         {
-            (searchThread = new Thread(() =>
+            (searchThread = new System.Threading.Thread(() =>
             {
-                Thread.CurrentThread.IsBackground = true;
+                System.Threading.Thread.CurrentThread.IsBackground = true;
                 if (finder is Go)
                 {
                     action.Invoke(FindChatByLabel(((Go)finder).text));
@@ -678,9 +676,9 @@ namespace Dialogic
         {
             if (f.Resolved().Count < 1) f.Resolve(globals); // tmp
 
-            (searchThread = new Thread(() =>
+            (searchThread = new System.Threading.Thread(() =>
             {
-                Thread.CurrentThread.IsBackground = true;
+                System.Threading.Thread.CurrentThread.IsBackground = true;
 
                 //Chat chat = DoFind(f, globals);
                 var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
