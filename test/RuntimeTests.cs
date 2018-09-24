@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
 	[TestFixture]
 	public class RuntimeTests : GenericTests

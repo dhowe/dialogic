@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System;
 using System.IO;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
     [TestFixture]
     public class DialogicTests : GenericTests

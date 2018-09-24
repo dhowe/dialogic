@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
     public class GenericTests
     {

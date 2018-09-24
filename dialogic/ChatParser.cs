@@ -259,6 +259,15 @@ namespace Dialogic
 
         private readonly ChatParser parser;
 
+        public LineContext(string actor, string command, string text, string label, string meta)
+        {
+            this.actor = actor;
+            this.command = command;
+            this.text = text;
+            this.label = label;
+            this.meta = meta;
+        }
+
         public LineContext(ChatParser parser, string actor, string command, string text, string label, string meta)
         {
             this.parser = parser;
