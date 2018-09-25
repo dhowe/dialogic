@@ -18,6 +18,7 @@ ironmeta Calc<char, int> : Matcher<char, int>
     
     Add = BinaryOp(Additive, '+', Multiplicative) 
        -> { return _IM_Result.Results.Aggregate((total, n) => total + n); };
+       
     Sub = BinaryOp(Additive, '-', Multiplicative) 
        -> { return _IM_Result.Results.Aggregate((total, n) => total - n); };
     
@@ -26,6 +27,7 @@ ironmeta Calc<char, int> : Matcher<char, int>
     
     Multiply = BinaryOp(Multiplicative, "*", Number, DecimalDigit) 
             -> { return _IM_Result.Results.Aggregate((p, n) => p * n); };
+            
     Divide = BinaryOp(Multiplicative, "/", Number, DecimalDigit) 
           -> { return _IM_Result.Results.Aggregate((q, n) => q / n); };
         

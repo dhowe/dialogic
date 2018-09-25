@@ -20,11 +20,11 @@ namespace Dialogic.Test
         public void SimpleCommands()
         {
             var input = "SAY";
-            Console.WriteLine(Parse(input).Result);
+            Console.WriteLine("1: "+Parse(input).Result);
             Assert.That(Parse(input).Result, Is.EqualTo(input));
 
             input = "SAY hello";
-            Console.WriteLine(Parse(input).Result);
+            Console.WriteLine("2: " + Parse(input).Result);
             Assert.That(Parse(input).Result, Is.EqualTo(input));
         }
     }

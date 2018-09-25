@@ -259,7 +259,7 @@ namespace Dialogic
 
         private readonly ChatParser parser;
 
-        public LineContext(string actor, string command, string text, string label, string meta)
+        public LineContext(string actor=null, string command = null, string text = null, string label = null, string meta = null)
         {
             this.actor = actor;
             this.command = command;

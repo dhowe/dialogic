@@ -5,11 +5,11 @@ using IronMeta.Matcher;
 // input: stream of char, output: string
 ironmeta PegParser<char, string> : Matcher<char, string>
 {
-    Expression = Command (WS+ TEXT)? -> { return new string(_IM_Result.Inputs.ToArray()); };
+    Expression = (Command:c WS* TEXT?:t) -> { return new List<string> { c, t }; };
     
-    Command = ("SAY" | "ASK" | "OPT");// -> { return new string(_IM_Result.Inputs.ToArray()); };
+    Command = ("SAY" | "ASK" | "OPT");
     
-    TEXT = /[^{}]+/;// -> { return new string(_IM_Result.Inputs.ToArray()); };
+    TEXT = /[^{}]+/;
     
     WS = ' ' | '\t';
 }

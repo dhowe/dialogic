@@ -1,5 +1,5 @@
 //
-// IronMeta PegParser Parser; Generated 2018-09-24 05:15:42Z UTC
+// IronMeta PegParser Parser; Generated 2018-09-25 12:32:43Z UTC
 //
 
 using System;
@@ -54,23 +54,29 @@ namespace Dialogic
             int _arg_index = 0;
             int _arg_input_index = 0;
 
+            _PegParser_Item c = null;
+            _PegParser_Item t = null;
+
             // AND 1
             int _start_i1 = _index;
 
+            // AND 2
+            int _start_i2 = _index;
+
             // CALLORVAR Command
-            _PegParser_Item _r2;
+            _PegParser_Item _r4;
 
-            _r2 = _MemoCall(_memo, "Command", _index, Command, null);
+            _r4 = _MemoCall(_memo, "Command", _index, Command, null);
 
-            if (_r2 != null) _index = _r2.NextIndex;
+            if (_r4 != null) _index = _r4.NextIndex;
+
+            // BIND c
+            c = _memo.Results.Peek();
 
             // AND shortcut
-            if (_memo.Results.Peek() == null) { _memo.Results.Push(null); goto label1; }
+            if (_memo.Results.Peek() == null) { _memo.Results.Push(null); goto label2; }
 
-            // AND 4
-            int _start_i4 = _index;
-
-            // PLUS 5
+            // STAR 5
             int _start_i5 = _index;
             var _res5 = Enumerable.Empty<string>();
         label5:
@@ -82,7 +88,7 @@ namespace Dialogic
 
             if (_r6 != null) _index = _r6.NextIndex;
 
-            // PLUS 5
+            // STAR 5
             var _r5 = _memo.Results.Pop();
             if (_r5 != null)
             {
@@ -91,38 +97,38 @@ namespace Dialogic
             }
             else
             {
-                if (_index > _start_i5)
-                    _memo.Results.Push(new _PegParser_Item(_start_i5, _index, _memo.InputEnumerable, _res5.Where(_NON_NULL), true));
-                else
-                    _memo.Results.Push(null);
+                _memo.Results.Push(new _PegParser_Item(_start_i5, _index, _memo.InputEnumerable, _res5.Where(_NON_NULL), true));
             }
 
-            // AND shortcut
-            if (_memo.Results.Peek() == null) { _memo.Results.Push(null); goto label4; }
+        label2: // AND
+            var _r2_2 = _memo.Results.Pop();
+            var _r2_1 = _memo.Results.Pop();
 
-            // CALLORVAR TEXT
-            _PegParser_Item _r7;
-
-            _r7 = _MemoCall(_memo, "TEXT", _index, TEXT, null);
-
-            if (_r7 != null) _index = _r7.NextIndex;
-
-        label4: // AND
-            var _r4_2 = _memo.Results.Pop();
-            var _r4_1 = _memo.Results.Pop();
-
-            if (_r4_1 != null && _r4_2 != null)
+            if (_r2_1 != null && _r2_2 != null)
             {
-                _memo.Results.Push( new _PegParser_Item(_start_i4, _index, _memo.InputEnumerable, _r4_1.Results.Concat(_r4_2.Results).Where(_NON_NULL), true) );
+                _memo.Results.Push( new _PegParser_Item(_start_i2, _index, _memo.InputEnumerable, _r2_1.Results.Concat(_r2_2.Results).Where(_NON_NULL), true) );
             }
             else
             {
                 _memo.Results.Push(null);
-                _index = _start_i4;
+                _index = _start_i2;
             }
+
+            // AND shortcut
+            if (_memo.Results.Peek() == null) { _memo.Results.Push(null); goto label1; }
+
+            // CALLORVAR TEXT
+            _PegParser_Item _r9;
+
+            _r9 = _MemoCall(_memo, "TEXT", _index, TEXT, null);
+
+            if (_r9 != null) _index = _r9.NextIndex;
 
             // QUES
             if (_memo.Results.Peek() == null) { _memo.Results.Pop(); _memo.Results.Push(new _PegParser_Item(_index, _memo.InputEnumerable)); }
+
+            // BIND t
+            t = _memo.Results.Peek();
 
         label1: // AND
             var _r1_2 = _memo.Results.Pop();
@@ -143,7 +149,7 @@ namespace Dialogic
             if (_r0 != null)
             {
                 _memo.Results.Pop();
-                _memo.Results.Push( new _PegParser_Item(_r0.StartIndex, _r0.NextIndex, _memo.InputEnumerable, _Thunk(_IM_Result => { return new string(_IM_Result.Inputs.ToArray()); }, _r0), true) );
+                _memo.Results.Push( new _PegParser_Item(_r0.StartIndex, _r0.NextIndex, _memo.InputEnumerable, _Thunk(_IM_Result => { return new List<string> { c, t }; }, _r0), true) );
             }
 
         }
