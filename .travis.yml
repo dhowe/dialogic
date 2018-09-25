@@ -1,6 +1,6 @@
 language: csharp
 solution: dialogic.sln
-mono:latest
+mono: latest
 before_install:
 before_script:
   - nuget restore dialogic.sln
