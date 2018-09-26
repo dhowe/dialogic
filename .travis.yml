@@ -1,6 +1,6 @@
 language: csharp
-solution: dialogic.sln
-before_script:
-  - nuget restore dialogic.sln
-after_script:
-  - dotnet test tests/tests.csproj
+mono: none
+dotnet: 2.0.0
+install: dotnet restore
+script: dotnet test tests/tests.cspro
+
