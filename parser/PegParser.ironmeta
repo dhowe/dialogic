@@ -1,0 +1,15 @@
+﻿using System;
+using System.Linq;
+using IronMeta.Matcher;
+
+// input: stream of char, output: string
+ironmeta PegParser<char, string> : Matcher<char, string>
+{
+    Expression = (Command:c WS* TEXT?:t) -> { return new List<string> { c, t }; };
+    
+    Command = ("SAY" | "ASK" | "OPT");
+    
+    TEXT = /[^{}]+/;
+    
+    WS = ' ' | '\t';
+}

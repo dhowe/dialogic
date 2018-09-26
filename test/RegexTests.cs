@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
     [TestFixture]
     public class RegexTests : GenericTests

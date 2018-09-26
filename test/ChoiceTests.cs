@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
     [TestFixture]
     class ChoiceTests : GenericTests

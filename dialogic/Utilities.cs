@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-[assembly: InternalsVisibleTo("DialogicTests")]
+[assembly: InternalsVisibleTo("DialogicTest")]
 [assembly: InternalsVisibleTo("DialogicEditor")]
 
 namespace Dialogic

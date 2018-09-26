@@ -18,7 +18,6 @@
     <Owners>Daniel C Howe</Owners>
     <Summary>A library for generative interactive dialog</Summary>
     <PackageTags>dialog, unity, games, interactive, language</PackageTags>
-    <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -36,6 +35,7 @@
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Packaging" Version="0.2.2" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
+    <PackageReference Include="IronMeta" Version="4.4.0" />
   </ItemGroup>
 </Project>
 

@@ -8,7 +8,7 @@ using Client;
 using MessagePack;
 using Abbotware.Interop.NUnit;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
     [TestFixture]
     public class SerializeTests : GenericTests

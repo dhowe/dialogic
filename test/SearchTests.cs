@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using Client;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
     [TestFixture]
     public class SearchTests : GenericTests
