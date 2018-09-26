@@ -16,7 +16,7 @@ namespace Dialogic.Test
             return result;
         }
 
-        [Test]
+        //[Test]
         public void SimpleCommands()
         {
             var input = "SAY";
