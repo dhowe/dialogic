@@ -5,29 +5,29 @@ using NUnit.Framework;
 
 namespace Dialogic.Test
 {
-    [TestFixture]
-    public class PegParserTests : GenericTests
-    {
-        private static IronMeta.Matcher.MatchResult<char, string> Parse(string input)
-        {
-            var parser = new Dialogic.PegParser();
-            var result = parser.GetMatch(input, parser.Expression);
-            Assert.That(result.Success, Is.True, "Error: " + result.Error + ", at char " + result.ErrorIndex);
-            return result;
-        }
+    //[TestFixture]
+    //public class PegParserTests : GenericTests
+    //{
+    //    private static IronMeta.Matcher.MatchResult<char, string> Parse(string input)
+    //    {
+    //        var parser = new Dialogic.PegParser();
+    //        var result = parser.GetMatch(input, parser.Expression);
+    //        Assert.That(result.Success, Is.True, "Error: " + result.Error + ", at char " + result.ErrorIndex);
+    //        return result;
+    //    }
 
-        //[Test]
-        public void SimpleCommands()
-        {
-            var input = "SAY";
-            Console.WriteLine("1: "+Parse(input).Result);
-            Assert.That(Parse(input).Result, Is.EqualTo(input));
+    //    //[Test]
+    //    public void SimpleCommands()
+    //    {
+    //        var input = "SAY";
+    //        Console.WriteLine("1: "+Parse(input).Result);
+    //        Assert.That(Parse(input).Result, Is.EqualTo(input));
 
-            input = "SAY hello";
-            Console.WriteLine("2: " + Parse(input).Result);
-            Assert.That(Parse(input).Result, Is.EqualTo(input));
-        }
-    }
+    //        input = "SAY hello";
+    //        Console.WriteLine("2: " + Parse(input).Result);
+    //        Assert.That(Parse(input).Result, Is.EqualTo(input));
+    //    }
+    //}
 
     [TestFixture]
     public class RegexParserTests : GenericTests

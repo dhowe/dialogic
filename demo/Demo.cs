@@ -147,19 +147,21 @@ namespace runner
         public void TestEvents(int now)
         {
             // a 'Tap' event
-            if (false) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
+
+            /*Timers.SetTimeout(Util.Rand(2000, 9999), () =>
              {
                  Console.WriteLine("\n<user-event#tap>" +
                      " after " + Util.Millis(now) + "ms\n");
 
                  gameEvent = new UserEvent("Tap");
-             });
+             });*/
 
 
             // a 'Resume' event
-            var count = 0;
+
+            /*var count = 0;
             var types = new[] { "critic", "shake", "tap" };
-            if (false) Timers.SetInterval(1000, () =>
+            Timers.SetInterval(1000, () =>
             {
 
                 interrupted = true;
@@ -170,10 +172,11 @@ namespace runner
                     " after " + Util.Millis(now) + "ms\n");
 
                 gameEvent = new ResumeEvent(data);
-            });
+            });*/
 
             // a 'Save' event
-            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+
+            /*Timers.SetTimeout(Util.Rand(4000, 6000), () =>
             {
                 var file = AppDomain.CurrentDomain.BaseDirectory;
                 file += Util.EpochMs() + ".ser";
@@ -181,8 +184,7 @@ namespace runner
                 Console.WriteLine("\n<save-event#file=" + file + ">\n");
 
                 gameEvent = new SaveEvent(serializer, new FileInfo(file));
-            });
-
+            });*/
 
             /* pending ----------------------------
 

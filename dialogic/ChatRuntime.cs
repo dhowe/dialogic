@@ -935,8 +935,7 @@ namespace Dialogic
                 return -1;
             }
             //}
-
-            return Util.Millis(); // unsuspend non-null current chat
+            //return Util.Millis(); // unsuspend non-null current chat
         }
 
         // If a Chat has a Meta.ON_RESUME tag, then we will invoke the specified
