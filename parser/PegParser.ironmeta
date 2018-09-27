@@ -2,14 +2,24 @@
 using System.Linq;
 using IronMeta.Matcher;
 
+// string actor, string command, string text, string label, string meta
+
 // input: stream of char, output: string
 ironmeta PegParser<char, string> : Matcher<char, string>
 {
-    Expression = (Command:c WS* TEXT?:t) -> { return new List<string> { c, t }; };
+    Line = Command
+    Line = Command WS* Label WS* Meta
+    Line = Command WS* TEXT WS* Meta
     
-    Command = ("SAY" | "ASK" | "OPT");
+    Command = ('SAY' | 'ASK' | 'OPT' | 'WAIT' | 'SET' | 'DO' | 'GO' | 'FIND');
     
-    TEXT = /[^{}]+/;
+    Ident = /[A-Za-z_][A-Za-z0-9_]*/
+    Meta = '{' KeyVal+ '}'
+    KeyVal = WS* Ident WS* '=' WS* Val WS* 
     
+    NUM =
+    WORD = /[^ \t{}]+/;
+    //TEXT = /[^{}]+/;
+    TEXT = WS* WORD+ WS*
     WS = ' ' | '\t';
 }
