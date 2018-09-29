@@ -17,5 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
+    <ProjectReference Include="..\parser\parser.csproj" />
   </ItemGroup>
 </Project>

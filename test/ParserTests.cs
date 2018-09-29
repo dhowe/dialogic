@@ -3,8 +3,51 @@ using System.Collections.Generic;
 using Client;
 using NUnit.Framework;
 
+using Parser;
+using System.Linq;
+
 namespace Dialogic.Test
 {
+    [TestFixture]
+    public class SuperParserTests : GenericTests
+    {
+        [Test]
+        public void TokenizeCommands()
+        {
+            var result = DiaTokenizer.Instance.TryTokenize("SAY");
+            Assert.That(result.HasValue, Is.True);
+            Assert.That(result.Value.Count(), Is.EqualTo(1));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+
+            result = DiaTokenizer.Instance.TryTokenize("SAY ");
+            Assert.That(result.HasValue, Is.True);
+            Assert.That(result.Value.Count(), Is.EqualTo(1));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+
+            result = DiaTokenizer.Instance.TryTokenize("SAY Hello");
+            Assert.That(result.HasValue, Is.True);
+            Assert.That(result.Value.Count(), Is.EqualTo(2));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+
+            result = DiaTokenizer.Instance.TryTokenize("SAY Hello you");
+            Assert.That(result.HasValue, Is.True);
+            Assert.That(result.Value.Count(), Is.EqualTo(2));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.String));
+            Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you"));
+
+            // WORKING HERE... should fail, next add DiaToken.Meta
+            result = DiaTokenizer.Instance.TryTokenize("SAY Hello you {");
+            Assert.That(result.HasValue, Is.True);
+            Assert.That(result.Value.Count(), Is.EqualTo(3));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.String));
+            //Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you"));
+            Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you "));
+
+        }
+    }
+
     //[TestFixture]
     //public class PegParserTests : GenericTests
     //{
