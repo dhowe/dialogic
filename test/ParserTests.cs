@@ -32,7 +32,14 @@ namespace Dialogic.Test
             Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.CHAT));
             Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.Label));
 
-     
+            result = DiaTokenizer.Instance.TryTokenize("SAY $chatLabel");
+            Assert.That(result.HasValue, Is.True);
+            DumpTokens(result.Value);
+            Assert.That(result.Value.Count(), Is.EqualTo(2));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.Variable));
+
+
             result = DiaTokenizer.Instance.TryTokenize("SAY ");
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(1));
@@ -50,7 +57,7 @@ namespace Dialogic.Test
             Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.String));
             Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you"));
 
-            // WORKING HERE... next do meta/keyvals
+            // WORKING HERE... next do meta
             result = DiaTokenizer.Instance.TryTokenize("SAY Hello you {");
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(3));
