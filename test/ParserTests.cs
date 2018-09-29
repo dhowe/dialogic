@@ -11,6 +11,12 @@ namespace Dialogic.Test
     [TestFixture]
     public class SuperParserTests : GenericTests
     {
+        public void DumpTokens(Superpower.Model.TokenList<DiaToken> vals)
+        {
+            var count = 0;
+            foreach (var v in vals) Console.WriteLine(++count + ": " + v);
+        }
+
         [Test]
         public void TokenizeCommands()
         {
@@ -19,6 +25,14 @@ namespace Dialogic.Test
             Assert.That(result.Value.Count(), Is.EqualTo(1));
             Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
 
+            result = DiaTokenizer.Instance.TryTokenize("CHAT #chatLabel");
+            Assert.That(result.HasValue, Is.True);
+            //DumpTokens(result.Value);
+            Assert.That(result.Value.Count(), Is.EqualTo(2));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.CHAT));
+            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.Label));
+
+     
             result = DiaTokenizer.Instance.TryTokenize("SAY ");
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(1));
@@ -36,15 +50,15 @@ namespace Dialogic.Test
             Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.String));
             Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you"));
 
-            // WORKING HERE... should fail, next add DiaToken.Meta
+            // WORKING HERE... next do meta/keyvals
             result = DiaTokenizer.Instance.TryTokenize("SAY Hello you {");
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(3));
             Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
             Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.String));
-            //Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you"));
             Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you "));
-
+            Assert.That(result.Value.ElementAt(2).Kind, Is.EqualTo(DiaToken.LBrace));
+            //Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you"));
         }
     }
 
