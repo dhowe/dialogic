@@ -61,7 +61,6 @@ namespace Parser
                 .Match(Character.EqualTo(':'), DiaToken.Colon)
 
                 .Match(Span.WithoutAny(NonString), DiaToken.String)
-
                 .Build();
 
         static void Main(string[] args)

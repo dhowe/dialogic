@@ -13,6 +13,16 @@ namespace Parser
 {
     public static class DiaParser
     {
+
+        public static string ParseLabel(string text)
+        {
+            return ParseLabel(DiaTokenizer.Instance.Tokenize(text));
+        }
+        public static string ParseLabel(TokenList<DiaToken> tokens)
+        {
+            return LabelParser.Parse(tokens);
+        }
+
         public static IEnumerable<DiaLine> Parse(string text)
         {
             return Parse(DiaTokenizer.Instance.Tokenize(text));
@@ -20,7 +30,7 @@ namespace Parser
 
         public static IEnumerable<DiaLine> Parse(TokenList<DiaToken> tokens)
         {
-            return Lines.Parse(tokens);
+            return LinesParser.Parse(tokens);
         }
 
         public struct DiaLine // actor, command, text, label, meta;
@@ -32,25 +42,46 @@ namespace Parser
             }
         }
 
-        public static readonly TokenListParser<DiaToken, string> SAY =
-            from cmd in Token.EqualTo(DiaToken.SAY) select cmd.ToStringValue();
-            
-        public static readonly TokenListParser<DiaToken, string> Text =
+        //public static TokenListParser<DiaToken, string> EqualToAny<DiaToken>(params DiaToken[] kinds) {
+        //    foreach(var k in kinds) {
+        //        var res = Token.EqualTo(k);
+        //        if (res) return res;
+        //    }
+        //    return null;
+        //}
+
+        public static readonly TokenListParser<DiaToken, string> CmdParser =
+            from cmd in Token.EqualTo(DiaToken.SAY)
+                .Or(Token.EqualTo(DiaToken.GO))
+                .Or(Token.EqualTo(DiaToken.DO))
+                .Or(Token.EqualTo(DiaToken.SAY))
+                .Or(Token.EqualTo(DiaToken.SET))
+                .Or(Token.EqualTo(DiaToken.ASK))
+                .Or(Token.EqualTo(DiaToken.CHAT))
+                .Or(Token.EqualTo(DiaToken.FIND))
+                .Or(Token.EqualTo(DiaToken.WAIT))
+            select cmd.ToStringValue();
+
+        public static readonly TokenListParser<DiaToken, string> TextParser =
             from s in Token.EqualTo(DiaToken.String) select s.ToStringValue();
 
-        public static readonly TokenListParser<DiaToken, DiaLine> Line =
-            //from lp in Token.EqualTo(DiaToken.LParen)
-            from cmd in SAY//.Or(ASK).Or(Wait)
-            from txt in Text
+        public static readonly TokenListParser<DiaToken, string> LabelParser =
+            from s in Token.EqualTo(DiaToken.Label) select s.ToStringValue();
+
+        public static readonly TokenListParser<DiaToken, DiaLine> LineParser =
+            from cmd in CmdParser
+            from txt in TextParser.OptionalOrDefault("")
+            from lbl in LabelParser.OptionalOrDefault("")
                 //from rp in Token.EqualTo(DiaToken.RParen)
             select new DiaLine()
             {
                 command = cmd,// text, label, meta;
-                text = txt
+                text = txt,
+                label = lbl
             };
 
-        public static readonly TokenListParser<DiaToken, DiaLine[]> Lines =
-            Line.ManyDelimitedBy(Token.EqualTo(DiaToken.NewLine));
+        public static readonly TokenListParser<DiaToken, DiaLine[]> LinesParser =
+            LineParser.ManyDelimitedBy(Token.EqualTo(DiaToken.NewLine));
 
         //public static readonly TokenListParser<DiaToken, string> CommandLabel =
         //    from text in Token.EqualTo(DiaToken.Label)

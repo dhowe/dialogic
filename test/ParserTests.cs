@@ -13,16 +13,59 @@ namespace Dialogic.Test
     public class SuperParserTests : GenericTests
     {
         [Test]
+        public void TestParsers()
+        {
+            Assert.That(DiaParser.ParseLabel("#Hello"), Is.EqualTo("#Hello"));
+            Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("#1Hello"));
+            //Assert.That(DiaParser.ParseLabel("abc #Hello xyz"), Is.EqualTo("#Hello"));
+        }
+
+        [Test]
         public void ParseSimple()
         {
-            var text = "SAY Hello";
-            var tokens = DiaTokenizer.Instance.Tokenize(text);
+            string text;
+            TokenList<DiaToken> tokens;
+            DiaParser.DiaLine dline;
+
+            // WORKING HERE
+            //text = "OPT Yes #Hello";
+            //tokens = DiaTokenizer.Instance.Tokenize(text);
+            //DumpTokens(tokens);
+            //dline = DiaParser.Parse(tokens).ElementAt(0);
+            //Console.WriteLine(dline);
+            //Assert.That(dline.command, Is.EqualTo("OPT"));
+            //Assert.That(dline.text, Is.EqualTo("Yes"));
+            //Assert.That(dline.label, Is.EqualTo("#Hello"));
+
+            text = "CHAT #Hello";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
             DumpTokens(tokens);
-            Console.WriteLine();
-            var dlines = DiaParser.Parse(tokens);
-            foreach (var l in dlines) {
-                Console.WriteLine(l);
-            }
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Console.WriteLine(dline);
+            Assert.That(dline.command, Is.EqualTo("CHAT"));
+            Assert.That(dline.text, Is.EqualTo(""));
+            Assert.That(dline.label, Is.EqualTo("#Hello"));
+
+
+            text = "SAY Hello";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("Hello"));
+
+            text = "SAY Is this a parser?";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("Is this a parser?"));
+
+            text = "ASK Is this a parser?";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            //DumpTokens(tokens);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            //Console.WriteLine(dline);
+            Assert.That(dline.command, Is.EqualTo("ASK"));
+            Assert.That(dline.text, Is.EqualTo("Is this a parser?"));
         }
 
         [Test]
