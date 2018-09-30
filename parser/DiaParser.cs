@@ -18,9 +18,20 @@ namespace Parser
         {
             return ParseLabel(DiaTokenizer.Instance.Tokenize(text));
         }
+
         public static string ParseLabel(TokenList<DiaToken> tokens)
         {
             return LabelParser.Parse(tokens);
+        }
+
+        public static object ParseMeta(string text)
+        {
+            return ParseMeta(DiaTokenizer.Instance.Tokenize(text));
+        }
+
+        public static object ParseMeta(TokenList<DiaToken> tokens)
+        {
+            return MetaParser.Parse(tokens);
         }
 
         public static IEnumerable<DiaLine> Parse(string text)
@@ -54,6 +65,7 @@ namespace Parser
             from cmd in Token.EqualTo(DiaToken.SAY)
                 .Or(Token.EqualTo(DiaToken.GO))
                 .Or(Token.EqualTo(DiaToken.DO))
+                .Or(Token.EqualTo(DiaToken.OPT))
                 .Or(Token.EqualTo(DiaToken.SAY))
                 .Or(Token.EqualTo(DiaToken.SET))
                 .Or(Token.EqualTo(DiaToken.ASK))
@@ -68,21 +80,69 @@ namespace Parser
         public static readonly TokenListParser<DiaToken, string> LabelParser =
             from s in Token.EqualTo(DiaToken.Label) select s.ToStringValue();
 
+        public static readonly TokenListParser<DiaToken, string> SymbolParser =
+            from s in Token.EqualTo(DiaToken.Symbol) select s.ToStringValue();
+
+        public static readonly TokenListParser<DiaToken, string> MetaCharParser =
+            from s in Token.EqualTo(DiaToken.Comma).Or(Token.EqualTo(DiaToken.Equal))
+            select s.ToStringValue();
+
+        public static readonly TokenListParser<DiaToken, string> BoolParser =
+            from s in Token.EqualTo(DiaToken.True).Or(Token.EqualTo(DiaToken.False))
+            select s.ToStringValue();
+
+        //public static readonly TokenListParser<DiaToken, string> MetaParser =
+        //from lb in Token.EqualTo(DiaToken.LBrace)
+        //                from con in Token.EqualTo()
+        //from rb in Token.EqualTo(DiaToken.RBrace)
+
+        //static TokenListParser<DiaToken, object> DiaString { get; } =
+        //Token.EqualTo(DiaToken.String)
+        //.Apply(JsonTextParsers.String)
+        //.Select(s => (object)s);
+
+        public static TokenListParser<DiaToken, object> MetaParser =
+            from begin in Token.EqualTo(DiaToken.LBrace)
+            from properties in TextParser
+                .Named("property name")
+                    .Then(name => Token.EqualTo(DiaToken.Equal)
+                          .IgnoreThen(Superpower.Parse.Ref(() => DiaValue)
+                    .Select(value => KeyValuePair.Create((string)name, value))))
+                .ManyDelimitedBy(Token.EqualTo(DiaToken.Comma),
+                    end: Token.EqualTo(DiaToken.RBrace))
+            select (object)new Dictionary<string, string>(properties);
+
         public static readonly TokenListParser<DiaToken, DiaLine> LineParser =
-            from cmd in CmdParser
+            from cmd in CmdParser//.OptionalOrDefault("SAY")
             from txt in TextParser.OptionalOrDefault("")
             from lbl in LabelParser.OptionalOrDefault("")
                 //from rp in Token.EqualTo(DiaToken.RParen)
             select new DiaLine()
             {
-                command = cmd,// text, label, meta;
+                command = cmd, //actor, meta;
                 text = txt,
                 label = lbl
             };
 
+        static TokenListParser<DiaToken, object> DiaTrue { get; } =
+            Token.EqualToValue(DiaToken.True, "true").Value((object)true);
+
+        static TokenListParser<DiaToken, object> DiaFalse { get; } =
+            Token.EqualToValue(DiaToken.False, "false").Value((object)false);
+
+        static TokenListParser<DiaToken, object> DiaNull { get; } =
+            Token.EqualToValue(DiaToken.Null, "null").Value((object)null);
+
+
         public static readonly TokenListParser<DiaToken, DiaLine[]> LinesParser =
             LineParser.ManyDelimitedBy(Token.EqualTo(DiaToken.NewLine));
 
+        static TokenListParser<DiaToken, string> DiaValue { get; } =
+            TextParser
+                .Or(SymbolParser)
+                .Or(MetaCharParser)
+                .Or(BoolParser)
+                .Named("JSON value");
         //public static readonly TokenListParser<DiaToken, string> CommandLabel =
         //    from text in Token.EqualTo(DiaToken.Label)
         //    select text.ToStringValue();

@@ -39,6 +39,7 @@ namespace Parser
                 .Ignore(Span.WhiteSpace)
                 .Match(Span.EqualTo("GO"), DiaToken.GO, true)
                 .Match(Span.EqualTo("DO"), DiaToken.DO, true)
+                .Match(Span.EqualTo("OPT"), DiaToken.OPT, true)
                 .Match(Span.EqualTo("SAY"), DiaToken.SAY, true)
                 .Match(Span.EqualTo("SET"), DiaToken.SET, true)
                 .Match(Span.EqualTo("ASK"), DiaToken.ASK, true)
@@ -47,7 +48,7 @@ namespace Parser
                 .Match(Span.EqualTo("WAIT"), DiaToken.WAIT, true)
 
                 .Match(Label, DiaToken.Label, true) // ?
-                .Match(Variable, DiaToken.Variable)
+                .Match(Variable, DiaToken.Symbol)
 
                 .Match(Character.EqualTo('{'), DiaToken.LBrace)
                 .Match(Character.EqualTo('}'), DiaToken.RBrace)
@@ -91,7 +92,7 @@ namespace Parser
         Label,
 
         [Token(Description = "$variable")]
-        Variable,
+        Symbol,
 
 
         [Token(Example = "[")]
@@ -163,6 +164,11 @@ namespace Parser
         WAIT,
 
 
+        [Token(Category = "keyword", Example = "true")]
+        True,
+
+        [Token(Category = "keyword", Example = "false")]
+        False,
 
         [Token(Category = "keyword", Example = "null")]
         Null,

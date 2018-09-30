@@ -16,6 +16,11 @@ namespace Dialogic.Test
         public void TestParsers()
         {
             Assert.That(DiaParser.ParseLabel("#Hello"), Is.EqualTo("#Hello"));
+
+            // WORKING HERE
+            Assert.That(DiaParser.ParseMeta("{a=b}"), Is.EqualTo("a=b"));
+
+
             Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("#1Hello"));
             //Assert.That(DiaParser.ParseLabel("abc #Hello xyz"), Is.EqualTo("#Hello"));
         }
@@ -28,20 +33,38 @@ namespace Dialogic.Test
             DiaParser.DiaLine dline;
 
             // WORKING HERE
-            //text = "OPT Yes #Hello";
-            //tokens = DiaTokenizer.Instance.Tokenize(text);
-            //DumpTokens(tokens);
-            //dline = DiaParser.Parse(tokens).ElementAt(0);
-            //Console.WriteLine(dline);
-            //Assert.That(dline.command, Is.EqualTo("OPT"));
-            //Assert.That(dline.text, Is.EqualTo("Yes"));
-            //Assert.That(dline.label, Is.EqualTo("#Hello"));
+            text = "OPT Yes #Hello";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            Out(tokens);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Console.WriteLine(dline);
+            Assert.That(dline.command, Is.EqualTo("OPT"));
+            Assert.That(dline.text, Is.EqualTo("Yes "));
+            Assert.That(dline.label, Is.EqualTo("#Hello"));
+
+            text = "OPT #Hello";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            Out(tokens);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Console.WriteLine(dline);
+            Assert.That(dline.command, Is.EqualTo("OPT"));
+            Assert.That(dline.text, Is.EqualTo(""));
+            Assert.That(dline.label, Is.EqualTo("#Hello"));
+
+            text = "OPT Hello";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            Out(tokens);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Console.WriteLine(dline);
+            Assert.That(dline.command, Is.EqualTo("OPT"));
+            Assert.That(dline.text, Is.EqualTo("Hello"));
+            Assert.That(dline.label, Is.EqualTo(""));
+
+            //return;
 
             text = "CHAT #Hello";
             tokens = DiaTokenizer.Instance.Tokenize(text);
-            DumpTokens(tokens);
             dline = DiaParser.Parse(tokens).ElementAt(0);
-            Console.WriteLine(dline);
             Assert.That(dline.command, Is.EqualTo("CHAT"));
             Assert.That(dline.text, Is.EqualTo(""));
             Assert.That(dline.label, Is.EqualTo("#Hello"));
@@ -61,7 +84,7 @@ namespace Dialogic.Test
 
             text = "ASK Is this a parser?";
             tokens = DiaTokenizer.Instance.Tokenize(text);
-            //DumpTokens(tokens);
+            Out(tokens);
             dline = DiaParser.Parse(tokens).ElementAt(0);
             //Console.WriteLine(dline);
             Assert.That(dline.command, Is.EqualTo("ASK"));
@@ -138,7 +161,7 @@ namespace Dialogic.Test
             Assert.That(result.Value.ElementAt(3).Kind, Is.EqualTo(DiaToken.String));
             Assert.That(result.Value.ElementAt(3).Span.ToString(), Is.EqualTo("at"));
             Assert.That(result.Value.ElementAt(4).Kind, Is.EqualTo(DiaToken.Equal));
-            Assert.That(result.Value.ElementAt(5).Kind, Is.EqualTo(DiaToken.Variable));
+            Assert.That(result.Value.ElementAt(5).Kind, Is.EqualTo(DiaToken.Symbol));
             Assert.That(result.Value.ElementAt(5).Span.ToString(), Is.EqualTo("$boy"));
             Assert.That(result.Value.ElementAt(6).Kind, Is.EqualTo(DiaToken.RBrace));
         }
@@ -161,7 +184,7 @@ namespace Dialogic.Test
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(2));
             Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
-            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.Variable));
+            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.Symbol));
             Assert.That(DiaTokenizer.Instance.TryTokenize("SAY $chat2Label").HasValue, Is.True);
             Assert.That(DiaTokenizer.Instance.TryTokenize("SAY $chat_Label").HasValue, Is.True);
             Assert.That(DiaTokenizer.Instance.TryTokenize("SAY $_chat2Label2").HasValue, Is.True);
@@ -197,7 +220,7 @@ namespace Dialogic.Test
 
         // ---------------------------------------------------------------------
 
-        private void DumpTokens(TokenList<DiaToken> vals)
+        private void Out(TokenList<DiaToken> vals)
         {
             var count = 0;
             foreach (var v in vals) Console.WriteLine((count++) + ": [" + v+"]");
@@ -210,7 +233,7 @@ namespace Dialogic.Test
                 Console.WriteLine("Null");
                 return;
             }
-            DumpTokens(result.Value);
+            Out(result.Value);
         }
     }
 
