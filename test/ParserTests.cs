@@ -13,6 +13,19 @@ namespace Dialogic.Test
     public class SuperParserTests : GenericTests
     {
         [Test]
+        public void ParseSimple()
+        {
+            var text = "SAY Hello";
+            var tokens = DiaTokenizer.Instance.Tokenize(text);
+            DumpTokens(tokens);
+            Console.WriteLine();
+            var dlines = DiaParser.Parse(tokens);
+            foreach (var l in dlines) {
+                Console.WriteLine(l);
+            }
+        }
+
+        [Test]
         public void TokenizeFails()
         {
             Result<TokenList<DiaToken>> result;

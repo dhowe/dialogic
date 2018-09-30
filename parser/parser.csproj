@@ -15,4 +15,7 @@
   <ItemGroup>
     <None Include="DiaCustomTokenizer.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\dialogic\dialogic.csproj" />
+  </ItemGroup>
 </Project>

@@ -27,7 +27,7 @@ namespace Parser
             from first in Character.EqualTo('$')
                 //from second in Character.Letter.Or(Character.EqualTo('_'))
                 //from rest in Character.LetterOrDigit.Or(Character.EqualTo('_')).Many()
-            from rest in Identifier.CStyle
+            from rest in Identifier.CStyle//.Or(Character.In('(',')',))
             select Unit.Value;
 
         static readonly Func<char, bool> NonString = c =>
@@ -37,29 +37,31 @@ namespace Parser
         public static Tokenizer<DiaToken> Instance { get; } =
             new TokenizerBuilder<DiaToken>()
                 .Ignore(Span.WhiteSpace)
-                .Match(Span.EqualTo("GO"), DiaToken.GO)
-                .Match(Span.EqualTo("DO"), DiaToken.DO)
-                .Match(Span.EqualTo("SAY"), DiaToken.SAY)
-                .Match(Span.EqualTo("SET"), DiaToken.SET)
-                .Match(Span.EqualTo("ASK"), DiaToken.ASK)
-                .Match(Span.EqualTo("CHAT"), DiaToken.CHAT)
-                .Match(Span.EqualTo("FIND"), DiaToken.FIND)
-                .Match(Span.EqualTo("WAIT"), DiaToken.WAIT)
-                //.Match(Character.EqualTo('#'), DiaToken.Hash)
-                //.Match(Character.EqualTo('$'), DiaToken.Dollar)
+                .Match(Span.EqualTo("GO"), DiaToken.GO, true)
+                .Match(Span.EqualTo("DO"), DiaToken.DO, true)
+                .Match(Span.EqualTo("SAY"), DiaToken.SAY, true)
+                .Match(Span.EqualTo("SET"), DiaToken.SET, true)
+                .Match(Span.EqualTo("ASK"), DiaToken.ASK, true)
+                .Match(Span.EqualTo("CHAT"), DiaToken.CHAT, true)
+                .Match(Span.EqualTo("FIND"), DiaToken.FIND, true)
+                .Match(Span.EqualTo("WAIT"), DiaToken.WAIT, true)
+
+                .Match(Label, DiaToken.Label, true) // ?
+                .Match(Variable, DiaToken.Variable)
+
                 .Match(Character.EqualTo('{'), DiaToken.LBrace)
                 .Match(Character.EqualTo('}'), DiaToken.RBrace)
+                .Match(Character.EqualTo('['), DiaToken.LBracket)
+                .Match(Character.EqualTo(']'), DiaToken.RBracket)
                 .Match(Character.EqualTo('('), DiaToken.LParen)
                 .Match(Character.EqualTo(')'), DiaToken.RParen)
                 .Match(Character.EqualTo('|'), DiaToken.Pipe)
                 .Match(Character.EqualTo('='), DiaToken.Equal)
                 .Match(Character.EqualTo(','), DiaToken.Comma)
-                //.Match(DiaNumberToken, DiaToken.Number)\
-                //.Match(Identifier.CStyle, DiaToken.Identifier)
-                .Match(Label, DiaToken.Label)
-                .Match(Variable, DiaToken.Variable)
+                .Match(Character.EqualTo(':'), DiaToken.Colon)
+
                 .Match(Span.WithoutAny(NonString), DiaToken.String)
-                //.Match(Character.ExceptIn('{', '}', '#', '$', '=', ','), DiaToken.String)
+
                 .Build();
 
         static void Main(string[] args)
@@ -129,6 +131,9 @@ namespace Parser
         [Token(Example = ",")]
         Comma,
 
+        [Token(Example = ":")]
+        Colon,
+
 
 
         [Token(Category = "command", Example = "SAY")]
@@ -159,7 +164,12 @@ namespace Parser
         WAIT,
 
 
+
         [Token(Category = "keyword", Example = "null")]
-        Null
+        Null,
+
+        [Token(Category = "separator")]
+        NewLine,
+
     }
 }
