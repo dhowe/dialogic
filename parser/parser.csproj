@@ -10,5 +10,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="SpParser.cs" />
+    <Compile Remove="DiaCustomTokenizer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DiaCustomTokenizer.cs" />
   </ItemGroup>
 </Project>
