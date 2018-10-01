@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Superpower;
 using Superpower.Display;
 using Superpower.Model;
@@ -12,7 +11,7 @@ namespace Parser
 {
     public class DiaTokenizer : Tokenizer<DiaToken>
     {
-        static TextParser<Unit> NumberToken { get; } =
+        static TextParser<Unit> Number { get; } =
             from sign in Character.EqualTo('-').OptionalOrDefault()
             from first in Character.Digit
             from rest in Character.Digit.Or(Character.In('.', 'e', 'E', '+', '-')).IgnoreMany()
@@ -25,14 +24,10 @@ namespace Parser
 
         static TextParser<Unit> Variable { get; } =
             from first in Character.EqualTo('$')
-                //from second in Character.Letter.Or(Character.EqualTo('_'))
-                //from rest in Character.LetterOrDigit.Or(Character.EqualTo('_')).Many()
-            from rest in Identifier.CStyle//.Or(Character.In('(',')',))
+            from rest in Identifier.CStyle
             select Unit.Value;
 
-        static readonly Func<char, bool> NonString = c =>
-            c == '{' || c == '}' || c == '#' || c == '$' || c == '=' || c == ',';
-        //static readonly Func<char, bool> Whitespace = c => c == ' ' || c == '\t';
+        static readonly Func<char, bool> NonString = c => IsOneOf(c, '{', '}', '#', '$', '=', ',', '(', ')');
 
         public static Tokenizer<DiaToken> Instance { get; } =
             new TokenizerBuilder<DiaToken>()
@@ -47,7 +42,10 @@ namespace Parser
                 .Match(Span.EqualTo("FIND"), DiaToken.FIND, true)
                 .Match(Span.EqualTo("WAIT"), DiaToken.WAIT, true)
 
-                .Match(Label, DiaToken.Label, true) // ?
+                .Match(Label, DiaToken.Label, true /*?*/)
+                .Match(Span.EqualTo("true"), DiaToken.True, true)
+                .Match(Span.EqualTo("false"), DiaToken.True, true)
+                .Match(Span.EqualTo("()"), DiaToken.ParenPair)
                 .Match(Variable, DiaToken.Symbol)
 
                 .Match(Character.EqualTo('{'), DiaToken.LBrace)
@@ -60,23 +58,23 @@ namespace Parser
                 .Match(Character.EqualTo('='), DiaToken.Equal)
                 .Match(Character.EqualTo(','), DiaToken.Comma)
                 .Match(Character.EqualTo(':'), DiaToken.Colon)
+                .Match(Character.EqualTo('.'), DiaToken.Dot)
 
                 .Match(Span.WithoutAny(NonString), DiaToken.String)
                 .Build();
 
+        static bool IsOneOf(char c, params char[] candidates)
+        {
+            foreach (var i in candidates)
+            {
+                if (c == i) return true;
+            }
+            return false;
+        }
+
         static void Main(string[] args)
         {
-            var tokens1 = DiaTokenizer.Instance.TryTokenize("SAY Hello you");
-
-            Result<TokenList<DiaToken>> result = DiaTokenizer.Instance.TryTokenize("$2badname");
-
-            var tokens = DiaTokenizer.Instance.Tokenize("SAY Hello you");
-
-            var count = 0;
-            foreach (var emp in tokens)
-            {
-                Console.WriteLine(++count + ": " + emp);
-            }
+            Console.WriteLine("Main()");
         }
     }
 
@@ -134,7 +132,11 @@ namespace Parser
         [Token(Example = ":")]
         Colon,
 
+        [Token(Example = ".")]
+        Dot,
 
+        [Token(Example = "()")]
+        ParenPair,
 
         [Token(Category = "command", Example = "SAY")]
         SAY,

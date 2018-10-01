@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
+using Parser;
+using Superpower.Model;
+
 namespace Dialogic.Test
 {
     public class GenericTests
@@ -20,7 +23,23 @@ namespace Dialogic.Test
             c.Resolve(globals);
             return c;
         }
-        
+
+        protected static void Out(TokenList<DiaToken> vals)
+        {
+            var count = 0;
+            foreach (var v in vals) Console.WriteLine((count++) + ": [" + v + "]");
+        }
+
+        protected static void Out(Result<TokenList<DiaToken>> result)
+        {
+            if (!result.HasValue)
+            {
+                Console.WriteLine("Null");
+                return;
+            }
+            Out(result.Value);
+        }
+
         [SetUp]
         public void Init()
         {
