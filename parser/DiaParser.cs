@@ -48,6 +48,21 @@ namespace Parser
 
         // ------------------------------------ Parsers ------------------------------------- //
 
+        /* note: instead of parsing all commands together here, we can parse each separately
+           and enforce the presense of valid argument types
+           though how to handle custom Command types?  */
+
+/*
+SAY:  actor? text meta*
+ASK:  actor? text meta*
+OPT:  text #label? meta*
+SET:  ident = (bool | num | text)
+GO:   #label
+DO:   actor? #label meta*
+WAIT: number?
+CHAT: (ident | #label) meta*
+FIND: meta
+*/
 
         public static readonly TokenListParser<DiaToken, string> CmdParser =
             from cmd in Token.EqualTo(DiaToken.SAY)
@@ -63,13 +78,13 @@ namespace Parser
             select cmd.ToStringValue();
 
         public static readonly TokenListParser<DiaToken, string> TextParser =
-            from s in Token.EqualTo(DiaToken.String) select s.ToStringValue();
+            from s in Token.EqualTo(DiaToken.String) select s.ToStringValue().Trim();
 
         public static readonly TokenListParser<DiaToken, string> LabelParser =
-            from s in Token.EqualTo(DiaToken.Label) select s.ToStringValue();
+            from s in Token.EqualTo(DiaToken.Label) select s.ToStringValue().Trim();
 
         public static readonly TokenListParser<DiaToken, string> SymbolParser =
-            from s in Token.EqualTo(DiaToken.Symbol) select s.ToStringValue();
+            from s in Token.EqualTo(DiaToken.Symbol) select s.ToStringValue().Trim();
 
         public static readonly TokenListParser<DiaToken, string> MetaCharParser =
             from s in Token.EqualTo(DiaToken.Comma).Or(Token.EqualTo(DiaToken.Equal))
@@ -93,7 +108,7 @@ namespace Parser
                 .Named("meta-key")
                     .Then(name => Token.EqualTo(DiaToken.Equal)
                           .IgnoreThen(Superpower.Parse.Ref(() => DiaValue)
-                    .Select(value => KeyValuePair.Create((string)name, value))))
+                    .Select(value => KeyValuePair.Create(((string)name).Trim(), value.Trim()))))
                 .ManyDelimitedBy(Token.EqualTo(DiaToken.Comma),
                     end: Token.EqualTo(DiaToken.RBrace))
             select (object)new Dictionary<string, string>(properties);
@@ -110,7 +125,7 @@ namespace Parser
                 //actor = atr,
                 command = cmd,
                 text = txt,
-                label = lbl,
+                label = lbl.Trim(),
                 meta = (IDictionary<string, string>)mta
             };
 

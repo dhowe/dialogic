@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Client;
 using NUnit.Framework;
-
 using Parser;
 using System.Linq;
 using Superpower.Model;
@@ -19,6 +18,15 @@ namespace Dialogic.Test
             Assert.That(DiaParser.ParseGroup("(a | b | c)"), Is.EqualTo("a | b | c"));
         }
 
+        //public static EqualConstraint EqualToDict(IDictionary<string, string> actual, IDictionary<string, string> expected) {
+        //    var eq = new EqualConstraint(expected);
+        //    var result = eq.ApplyTo<IDictionary<string, string>>(actual);
+        //    result.
+        //    return eq;
+        //}
+
+
+        [Test]
         public void MetaParserTest()
         {
             Assert.That(DiaParser.ParseMeta("{a=b}"), Is.EqualTo(new Dictionary<string, string>(){
@@ -33,11 +41,36 @@ namespace Dialogic.Test
                 {"a", "$b"}
             }));
 
+            Assert.That(DiaParser.ParseMeta("{a1=false}"), Is.EqualTo(new Dictionary<string, string>(){
+                {"a1", "false"}
+            }));
+
+            Assert.That(DiaParser.ParseMeta("{}"), Is.EqualTo(new Dictionary<string, string>(){}));
+
+
+
+            Assert.That(DiaParser.ParseMeta("{ type = a, stage = b }"), Is.EqualTo(new Dictionary<string, string>(){
+                {"type", "a"}, {"stage", "b"}
+            }));
+
+            Assert.That(DiaParser.ParseMeta("{ staleness = 1,type = a,stage = b}"), Is.EqualTo(new Dictionary<string, string>(){
+                {"staleness", "1"}, {"type", "a"},  {"stage", "b"}
+            }));
+
+
+            Assert.That(DiaParser.ParseMeta(" { resumeAfterInt=false,type = a,stage = b}"), Is.EqualTo(new Dictionary<string, string>(){
+                 {"resumeAfterInt", "false"}, {"type", "a"},  {"stage", "b"}
+            }));
+
+            Assert.That(DiaParser.ParseMeta("{ resumable=false,type = a,stage = b} "), Is.EqualTo(new Dictionary<string, string>(){
+                 {"resumable", "false"}, {"type", "a"},  {"stage", "b"}
+            }));
+
             // NEXT
 
-            //Assert.That(DiaParser.ParseMeta("{a=(b|c)}"), Is.EqualTo(new Dictionary<string, string>(){
-            //    {"a", "(b|c)"}
-            //}));
+            /*Assert.That(DiaParser.ParseMeta("{a=(b|c)}"), Is.EqualTo(new Dictionary<string, string>(){
+                {"a", "(b|c)"}
+            })); */
         }
 
         [Test]
@@ -45,20 +78,11 @@ namespace Dialogic.Test
         {
             Assert.That(DiaParser.ParseLabel("#Hello"), Is.EqualTo("#Hello"));
             Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("#1Hello"));
-        }
-
-        [Test]
-        public void BoolParserTest()
-        {
             Assert.That(DiaParser.ParseBool("true"), Is.EqualTo("true"));
             Assert.That(DiaParser.ParseBool("false"), Is.EqualTo("false"));
-        }
-
-
-        [Test]
-        public void SymbolParserTest()
-        {
             Assert.That(DiaParser.ParseSymbol("$sym"), Is.EqualTo("$sym"));
+            Assert.That(DiaParser.ParseSymbol("$$A"), Is.EqualTo("$$A"));
+            Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("$"));
         }
 
 
@@ -69,16 +93,16 @@ namespace Dialogic.Test
             TokenList<DiaToken> tokens;
             DiaParser.DiaLine dline;
 
-            text = "OPT Yes #Hello";
+            //text = "OPT Yes #Hello";
             tokens = DiaTokenizer.Instance.Tokenize(text);
             //Out(tokens);
             dline = DiaParser.Parse(tokens).ElementAt(0);
-            //Console.WriteLine(dline);
+            Console.WriteLine(dline);
             Assert.That(dline.command, Is.EqualTo("OPT"));
-            Assert.That(dline.text, Is.EqualTo("Yes "));
+            Assert.That(dline.text, Is.EqualTo("Yes"));
             Assert.That(dline.label, Is.EqualTo("#Hello"));
 
-            text = "OPT #Hello";
+            text = "OPT #Hello"; // should fail?
             tokens = DiaTokenizer.Instance.Tokenize(text);
             dline = DiaParser.Parse(tokens).ElementAt(0);
             Assert.That(dline.command, Is.EqualTo("OPT"));
@@ -228,6 +252,15 @@ namespace Dialogic.Test
             Assert.That(result.Value.Count(), Is.EqualTo(2));
             Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
             Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.Symbol));
+            Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("$chatLabel"));
+
+            result = DiaTokenizer.Instance.TryTokenize("SAY $$chatLabel");
+            Assert.That(result.HasValue, Is.True);
+            Assert.That(result.Value.Count(), Is.EqualTo(2));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.Symbol));
+            Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("$$chatLabel"));
+
 
             Assert.That(DiaTokenizer.Instance.TryTokenize("SAY $chat2Label").HasValue, Is.True);
             Assert.That(DiaTokenizer.Instance.TryTokenize("SAY $chat_Label").HasValue, Is.True);
@@ -304,7 +337,6 @@ namespace Dialogic.Test
             chat.Resolve(null);
             var s = chat.commands[1].Text();
             Assert.That(s, Is.EqualTo("hello"));
-
         }
 
         [Test]

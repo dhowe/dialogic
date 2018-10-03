@@ -22,8 +22,8 @@ namespace Parser
             from rest in Identifier.CStyle
             select Unit.Value;
 
-        static TextParser<Unit> Variable { get; } =
-            from first in Character.EqualTo('$')
+        static TextParser<Unit> Symbol { get; } =
+            from first in Character.EqualTo('$').AtLeastOnce() // support $$abc?
             from rest in Identifier.CStyle
             select Unit.Value;
 
@@ -46,7 +46,7 @@ namespace Parser
                 .Match(Span.EqualTo("true"), DiaToken.True, true)
                 .Match(Span.EqualTo("false"), DiaToken.True, true)
                 .Match(Span.EqualTo("()"), DiaToken.ParenPair)
-                .Match(Variable, DiaToken.Symbol)
+                .Match(Symbol, DiaToken.Symbol)
 
                 .Match(Character.EqualTo('{'), DiaToken.LBrace)
                 .Match(Character.EqualTo('}'), DiaToken.RBrace)
