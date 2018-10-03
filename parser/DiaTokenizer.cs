@@ -22,6 +22,12 @@ namespace Parser
             from rest in Identifier.CStyle
             select Unit.Value;
 
+        static TextParser<Unit> Actor { get; } =
+            from first in Character.LetterOrDigit.Many()
+            from last in Character.EqualTo(':')
+            select Unit.Value;
+
+
         static TextParser<Unit> Symbol { get; } =
             from first in Character.EqualTo('$').AtLeastOnce() // support $$abc?
             from rest in Identifier.CStyle
@@ -47,6 +53,8 @@ namespace Parser
                 .Match(Span.EqualTo("false"), DiaToken.True, true)
                 .Match(Span.EqualTo("()"), DiaToken.ParenPair)
                 .Match(Symbol, DiaToken.Symbol)
+                .Match(Actor, DiaToken.Actor)
+                //.Match(Identifier.CStyle, DiaToken.Ident)
 
                 .Match(Character.EqualTo('{'), DiaToken.LBrace)
                 .Match(Character.EqualTo('}'), DiaToken.RBrace)
@@ -86,11 +94,14 @@ namespace Parser
 
         Number,
 
-        [Token(Description = "#identifier")]
+        [Token(Description = "#label")]
         Label,
 
         [Token(Description = "$variable")]
         Symbol,
+
+        [Token(Description = "actor:")]
+        Actor,
 
 
         [Token(Example = "[")]

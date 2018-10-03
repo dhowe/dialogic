@@ -8,6 +8,8 @@ using Superpower.Model;
 
 namespace Dialogic.Test
 {
+    // NEXT: Fix comma issue in FailingTests, remove Delims, then create Commands, then revisit Groups
+
     [TestFixture]
     public class SuperParserTests : GenericTests
     {
@@ -25,10 +27,11 @@ namespace Dialogic.Test
         //    return eq;
         //}
 
-
         [Test]
         public void MetaParserTest()
         {
+            Assert.That(DiaParser.ParseMeta("{}"), Is.EqualTo(new Dictionary<string, string>() { }));
+
             Assert.That(DiaParser.ParseMeta("{a=b}"), Is.EqualTo(new Dictionary<string, string>(){
                 {"a", "b"}
             }));
@@ -41,13 +44,13 @@ namespace Dialogic.Test
                 {"a", "$b"}
             }));
 
+            Assert.That(DiaParser.ParseMeta("{a=$$b}"), Is.EqualTo(new Dictionary<string, string>(){
+                {"a", "$$b"}
+            }));
+
             Assert.That(DiaParser.ParseMeta("{a1=false}"), Is.EqualTo(new Dictionary<string, string>(){
                 {"a1", "false"}
             }));
-
-            Assert.That(DiaParser.ParseMeta("{}"), Is.EqualTo(new Dictionary<string, string>(){}));
-
-
 
             Assert.That(DiaParser.ParseMeta("{ type = a, stage = b }"), Is.EqualTo(new Dictionary<string, string>(){
                 {"type", "a"}, {"stage", "b"}
@@ -57,18 +60,16 @@ namespace Dialogic.Test
                 {"staleness", "1"}, {"type", "a"},  {"stage", "b"}
             }));
 
-
-            Assert.That(DiaParser.ParseMeta(" { resumeAfterInt=false,type = a,stage = b}"), Is.EqualTo(new Dictionary<string, string>(){
-                 {"resumeAfterInt", "false"}, {"type", "a"},  {"stage", "b"}
+            Assert.That(DiaParser.ParseMeta(" { resume=false,type = a,stage = b}"), Is.EqualTo(new Dictionary<string, string>(){
+                 {"resume", "false"}, {"type", "a"},  {"stage", "b"}
             }));
 
             Assert.That(DiaParser.ParseMeta("{ resumable=false,type = a,stage = b} "), Is.EqualTo(new Dictionary<string, string>(){
                  {"resumable", "false"}, {"type", "a"},  {"stage", "b"}
             }));
 
-            // NEXT
-
-            /*Assert.That(DiaParser.ParseMeta("{a=(b|c)}"), Is.EqualTo(new Dictionary<string, string>(){
+            /* TODO:
+               Assert.That(DiaParser.ParseMeta("{a=(b|c)}"), Is.EqualTo(new Dictionary<string, string>(){
                 {"a", "(b|c)"}
             })); */
         }
@@ -76,28 +77,67 @@ namespace Dialogic.Test
         [Test]
         public void TestParsers()
         {
+            Assert.That(DiaParser.ParseActor("Hello:"), Is.EqualTo("Hello:"));
+            Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel(":Hello"));
+            Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("Hello:"));
+            Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("1Hello:"));
             Assert.That(DiaParser.ParseLabel("#Hello"), Is.EqualTo("#Hello"));
             Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("#1Hello"));
             Assert.That(DiaParser.ParseBool("true"), Is.EqualTo("true"));
             Assert.That(DiaParser.ParseBool("false"), Is.EqualTo("false"));
             Assert.That(DiaParser.ParseSymbol("$sym"), Is.EqualTo("$sym"));
-            Assert.That(DiaParser.ParseSymbol("$$A"), Is.EqualTo("$$A"));
+            Assert.That(DiaParser.ParseSymbol("$$A"), Is.EqualTo("$$A")); // ??
             Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("$"));
         }
 
-
-        [Test]
-        public void ParseSimple()
+        //[Test]
+        public void FailingTests()
         {
             string text;
             TokenList<DiaToken> tokens;
             DiaParser.DiaLine dline;
 
-            //text = "OPT Yes #Hello";
+            text = "SAY My List: 1,2,3";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
+            Assert.That(dline.actor, Is.EqualTo(""));
+        }
+
+        [Test]
+        public void ParseLine()
+        {
+            string text;
+            TokenList<DiaToken> tokens;
+            DiaParser.DiaLine dline;
+
+            //text = "SAY My List: 1,2,3";
+            //tokens = DiaTokenizer.Instance.Tokenize(text);
+            //dline = DiaParser.Parse(tokens).ElementAt(0);
+            //Assert.That(dline.command, Is.EqualTo("SAY"));
+            //Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
+            //Assert.That(dline.actor, Is.EqualTo(""));
+
+            text = "Dave:SAY Hello";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("Hello"));
+            Assert.That(dline.actor, Is.EqualTo("Dave:"));
+
+            text = "Dave: ASK Hello";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("ASK"));
+            Assert.That(dline.text, Is.EqualTo("Hello"));
+            Assert.That(dline.actor, Is.EqualTo("Dave:"));
+
+            text = "OPT Yes #Hello";
             tokens = DiaTokenizer.Instance.Tokenize(text);
             //Out(tokens);
             dline = DiaParser.Parse(tokens).ElementAt(0);
-            Console.WriteLine(dline);
+            //Console.WriteLine(dline);
             Assert.That(dline.command, Is.EqualTo("OPT"));
             Assert.That(dline.text, Is.EqualTo("Yes"));
             Assert.That(dline.label, Is.EqualTo("#Hello"));

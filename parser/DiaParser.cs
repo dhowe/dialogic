@@ -16,6 +16,9 @@ namespace Parser
 
         // ------------------------------- Helpers: keep at top ------------------------------- //
 
+        public static string ParseActor(string text) => ParseActor(DiaTokenizer.Instance.Tokenize(text));
+        public static string ParseActor(TokenList<DiaToken> tokens) => ActorParser.Parse(tokens);
+
         public static string ParseSymbol(string text) => ParseSymbol(DiaTokenizer.Instance.Tokenize(text));
         public static string ParseSymbol(TokenList<DiaToken> tokens) => SymbolParser.Parse(tokens);
 
@@ -52,17 +55,17 @@ namespace Parser
            and enforce the presense of valid argument types
            though how to handle custom Command types?  */
 
-/*
-SAY:  actor? text meta*
-ASK:  actor? text meta*
-OPT:  text #label? meta*
-SET:  ident = (bool | num | text)
-GO:   #label
-DO:   actor? #label meta*
-WAIT: number?
-CHAT: (ident | #label) meta*
-FIND: meta
-*/
+        /*
+        SAY:  actor? text meta*
+        ASK:  actor? text meta*
+        OPT:  text #label? meta*
+        SET:  ident = (bool | num | text)
+        GO:   #label
+        DO:   actor? #label meta*
+        WAIT: number?
+        CHAT: (ident | #label) meta*
+        FIND: meta
+        */
 
         public static readonly TokenListParser<DiaToken, string> CmdParser =
             from cmd in Token.EqualTo(DiaToken.SAY)
@@ -85,6 +88,9 @@ FIND: meta
 
         public static readonly TokenListParser<DiaToken, string> SymbolParser =
             from s in Token.EqualTo(DiaToken.Symbol) select s.ToStringValue().Trim();
+
+        public static readonly TokenListParser<DiaToken, string> ActorParser =
+           from s in Token.EqualTo(DiaToken.Actor) select s.ToStringValue().Trim();
 
         public static readonly TokenListParser<DiaToken, string> MetaCharParser =
             from s in Token.EqualTo(DiaToken.Comma).Or(Token.EqualTo(DiaToken.Equal))
@@ -112,22 +118,25 @@ FIND: meta
                 .ManyDelimitedBy(Token.EqualTo(DiaToken.Comma),
                     end: Token.EqualTo(DiaToken.RBrace))
             select (object)new Dictionary<string, string>(properties);
-        //select(object)new Dictionary<string, object>(properties);
+            //select(object)new Dictionary<string, object>(properties); ?
 
         public static readonly TokenListParser<DiaToken, DiaLine> LineParser =
-            //from atr in ActorParser.OptionalOrDefault("")
-            from cmd in CmdParser//.OptionalOrDefault("SAY")
-            from txt in TextParser.OptionalOrDefault("")
-            from lbl in LabelParser.OptionalOrDefault("")
+            from atr in ActorParser.OptionalOrDefault(string.Empty)
+            from cmd in CmdParser.OptionalOrDefault(string.Empty)
+            from txt in TextParser.OptionalOrDefault(string.Empty)
+            from lbl in LabelParser.OptionalOrDefault(string.Empty)
             from mta in MetaParser.OptionalOrDefault()
             select new DiaLine()
             {
-                //actor = atr,
+                actor = atr,
                 command = cmd,
-                text = txt,
+                text = txt.Trim(),//?
                 label = lbl.Trim(),
                 meta = (IDictionary<string, string>)mta
             };
+
+        static readonly TokenListParser<DiaToken, DiaLine[]> LinesParser =
+            LineParser.ManyDelimitedBy(Token.EqualTo(DiaToken.NewLine));
 
         static TokenListParser<DiaToken, object> DiaTrue { get; } =
             Token.EqualToValue(DiaToken.True, "true").Value((object)true);
@@ -137,10 +146,6 @@ FIND: meta
 
         static TokenListParser<DiaToken, object> DiaNull { get; } =
             Token.EqualToValue(DiaToken.Null, "null").Value((object)null);
-
-
-        public static readonly TokenListParser<DiaToken, DiaLine[]> LinesParser =
-            LineParser.ManyDelimitedBy(Token.EqualTo(DiaToken.NewLine));
 
         static TokenListParser<DiaToken, string> DiaValue { get; } =
             TextParser
