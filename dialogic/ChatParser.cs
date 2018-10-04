@@ -9,7 +9,7 @@ namespace Dialogic
     /// <summary>
     /// Handles parsing of scripts via a ChatRuntime instance - no public API
     /// </summary>
-    public class ChatParser
+    internal class ChatParser : IParser
     {
         /// <summary>
         /// Whether the parser should preserve incoming line numbers for debugging;
@@ -17,11 +17,12 @@ namespace Dialogic
         /// </summary>
         public static bool PRESERVE_LINE_NUMBERS = true;
 
+        public Chat ActiveChat { get; set; }
+
         internal static string[] LineBreaks = { "\r\n", "\r", "\n" };
 
         private readonly ChatRuntime runtime;
         private Regex lineParser;
-        private Chat activeChat;
         private Ask lastAsk;
 
         internal ChatParser(ChatRuntime runtime)
@@ -29,7 +30,7 @@ namespace Dialogic
             this.runtime = runtime;
         }
 
-        internal Regex LineParser()
+        public Regex LineParser()
         {
             if (lineParser == null)
             {
@@ -38,7 +39,7 @@ namespace Dialogic
             return lineParser;
         }
 
-        internal static List<Chat> ParseText(string s, 
+        internal static List<Chat> ParseText(string s,
             IAppConfig config = null, bool disableValidators = false)
         {
             ChatRuntime rt = new ChatRuntime(config);
@@ -46,7 +47,7 @@ namespace Dialogic
             return rt.Chats();
         }
 
-        internal void Parse(string[] lines)
+        public void Parse(string[] lines)
         {
             lines = Util.StripMultiLineComments(lines);
             lines = Util.StripSingleLineComments(lines);
@@ -60,7 +61,7 @@ namespace Dialogic
             }
         }
 
-        internal string TypesRegex()
+        public string TypesRegex()
         {
             string s = @"(";
             var cmds = runtime.typeMap.Keys;
@@ -112,10 +113,30 @@ namespace Dialogic
             }
         }
 
-        internal Command CreateCommand(LineContext lc)
+        //public Command CreateCommand(string[] parts)
+        //{
+        //    return CreateCommand(parts[0], parts[1], parts[2], parts[3], parts[4]);
+        //}
+
+        //private Command CreateCommand(string actor, string command, string text, string label, string meta)
+        //{
+        //    Type type = command.Length > 0 ? runtime.typeMap[command]
+        //        : Chat.DefaultCommandType(ActiveChat);
+
+        //    Command c = Command.Create(type, text, label, SplitMeta(meta));
+
+        //    HandleActor(c, actor);
+        //    HandleCommand(c);
+        //    RunValidators(c);
+
+        //    return c;
+        //}
+
+
+        public Command CreateCommand(ILine lc)
         {
             Type type = lc.command.Length > 0 ? runtime.typeMap[lc.command]
-                : Chat.DefaultCommandType(activeChat);
+                : Chat.DefaultCommandType(ActiveChat);
 
             Command c = Command.Create(type, lc.text, lc.label, SplitMeta(lc.meta));
             c.lineContext = lc;
@@ -150,12 +171,12 @@ namespace Dialogic
             }
         }
 
-        internal void HandleCommand(Command c)
+        public void HandleCommand(Command c)
         {
             if (c is Chat) // add chat to runtime list
             {
-                activeChat = (Chat)c;
-                runtime.AddChat(activeChat);
+                ActiveChat = (Chat)c;
+                runtime.AddChat(ActiveChat);
                 return;
             }
 
@@ -172,7 +193,7 @@ namespace Dialogic
             else  // add command to last Chat
             {
                 if (c is Ask) lastAsk = (Ask)c;
-                activeChat.AddCommand(c);
+                ActiveChat.AddCommand(c);
             }
         }
 
@@ -246,20 +267,26 @@ namespace Dialogic
             RunInternalValidators(c);
             //parsedCommands.Push(c);
             runtime.AddChat(c);
-            activeChat = c;
+            ActiveChat = c;
         }
+
     }
 
-    public class LineContext
+
+    public class LineContext : ILine
     {
-        internal string actor, command, text, label, meta;
+        public string actor { get; set; }
+        public string command { get; set; }
+        public string text { get; set; }
+        public string label { get; set; }
+        public string meta { get; set; }
 
         internal readonly string line;
         internal readonly int lineNo;
 
-        private readonly ChatParser parser;
+        private readonly IParser parser;
 
-        public LineContext(string actor=null, string command = null, string text = null, string label = null, string meta = null)
+        internal LineContext(string actor = null, string command = null, string text = null, string label = null, string meta = null)
         {
             this.actor = actor;
             this.command = command;
@@ -268,7 +295,7 @@ namespace Dialogic
             this.meta = meta;
         }
 
-        public LineContext(ChatParser parser, string actor, string command, string text, string label, string meta)
+        internal LineContext(IParser parser, string actor, string command, string text, string label, string meta)
         {
             this.parser = parser;
             this.actor = actor;
@@ -278,7 +305,7 @@ namespace Dialogic
             this.meta = meta;
         }
 
-        public LineContext(ChatParser parser, string line, int lineNo = -1, bool showMatch = false)
+        internal LineContext(IParser parser, string line, int lineNo = -1, bool showMatch = false)
         {
             this.parser = parser;
             this.line = line;
@@ -304,5 +331,10 @@ namespace Dialogic
             this.label = match.Groups[4].Value.Trim();
             this.meta = match.Groups[5].Value.Trim();
         }
+
+        //public string[] ToArray()
+        //{
+        //    return new string[] { actor, command, text, label, meta };
+        //}
     }
 }

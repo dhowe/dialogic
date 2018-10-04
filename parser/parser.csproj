@@ -11,8 +11,20 @@
   <ItemGroup>
     <Compile Remove="SpParser.cs" />
     <Compile Remove="DiaCustomTokenizer.cs" />
+    <Compile Remove="Parser.cs" />
+    <Compile Remove="ParsingHelper.cs" />
+    <Compile Remove="AsmToken.cs" />
+    <Compile Remove="JsonParser.cs" />
+    <Compile Remove="Tokenizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Parser.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <None Include="ParsingHelper.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <None Include="AsmToken.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <None Include="JsonParser.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <None Include="Tokenizer.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
   </ItemGroup>
 </Project>

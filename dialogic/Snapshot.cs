@@ -82,8 +82,8 @@ namespace Dialogic
 
         internal Chat ToGameObject(ChatRuntime rt)
         {
-            ChatParser parser = rt.Parser();
-            LineContext lc = new LineContext(parser, null, "CHAT", text, null, meta);
+            IParser parser = rt.Parser();
+            ILine lc = new LineContext(parser, null, "CHAT", text, null, meta);
             Chat chat = (Dialogic.Chat)parser.CreateCommand(lc);
 
             chat.Staleness(this.staleness);
@@ -120,7 +120,7 @@ namespace Dialogic
         {
             this.command = c.TypeName().ToUpper();
 
-            LineContext lc = c.lineContext;
+            ILine lc = c.lineContext;
             this.actor = lc.actor;
             this.text = lc.text;
             this.label = lc.label;
@@ -144,7 +144,7 @@ namespace Dialogic
 
         internal Command ToGameObject(ChatRuntime rt)
         {
-            ChatParser parser = rt.Parser();
+            IParser parser = rt.Parser();
             LineContext lc = new LineContext(parser, actor, command, text, label, meta);
             var cmd = parser.CreateCommand(lc);
 

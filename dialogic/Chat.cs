@@ -30,12 +30,15 @@ namespace Dialogic
             resolved = null; // not relevant for chats
             Reset();
         }
+
         internal static Chat Create(string name, ChatRuntime rt = null)
         {
             Chat c = new Chat();
             c.Init(name, String.Empty, new string[0]);
             if (rt == null) rt = new ChatRuntime();
-            rt.Parser().HandleCommand(c);
+            //rt.Parser().HandleCommand(c);
+            rt.Parser().ActiveChat = (Chat)c;
+            rt.AddChat(c);
             return c;
         }
 

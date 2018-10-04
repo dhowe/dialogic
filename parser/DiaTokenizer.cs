@@ -17,23 +17,24 @@ namespace Parser
             from rest in Character.Digit.Or(Character.In('.', 'e', 'E', '+', '-')).IgnoreMany()
             select Unit.Value;
 
-        static TextParser<Unit> Label { get; } =
-            from first in Character.EqualTo('#')
-            from rest in Identifier.CStyle
-            select Unit.Value;
+        static TextParser<TextSpan> Symbol { get; } =
+            Character.EqualTo('$').AtLeastOnce().IgnoreThen(Identifier.CStyle);
+
+        static TextParser<TextSpan> Label { get; } = 
+            Character.EqualTo('#').IgnoreThen(Identifier.CStyle);
 
         static TextParser<Unit> Actor { get; } =
-            from first in Character.LetterOrDigit.Many()
+            from name in Character.LetterOrDigit.Many()
             from last in Character.EqualTo(':')
             select Unit.Value;
 
+        //static TextParser<Unit> Symbol { get; } =
+            //from first in Character.EqualTo('$').AtLeastOnce() // support $$abc?
+            //from rest in Identifier.CStyle
+            //select Unit.Value;
 
-        static TextParser<Unit> Symbol { get; } =
-            from first in Character.EqualTo('$').AtLeastOnce() // support $$abc?
-            from rest in Identifier.CStyle
-            select Unit.Value;
 
-        static readonly Func<char, bool> NonString = c => IsOneOf(c, '{', '}', '#', '$', '=', ',', '(', ')');
+        static readonly Func<char, bool> NotString = c => IsOneOf(c, '{', '}', '#', '$', '=', '(', ')', ',');
 
         public static Tokenizer<DiaToken> Instance { get; } =
             new TokenizerBuilder<DiaToken>()
@@ -68,7 +69,7 @@ namespace Parser
                 .Match(Character.EqualTo(':'), DiaToken.Colon)
                 .Match(Character.EqualTo('.'), DiaToken.Dot)
 
-                .Match(Span.WithoutAny(NonString), DiaToken.String)
+                .Match(Span.WithoutAny(NotString), DiaToken.String)
                 .Build();
 
         static bool IsOneOf(char c, params char[] candidates)
@@ -80,7 +81,7 @@ namespace Parser
             return false;
         }
 
-        static void Main(string[] args)
+        static void Main(string[] s)
         {
             Console.WriteLine("Main()");
         }
@@ -103,6 +104,8 @@ namespace Parser
         [Token(Description = "actor:")]
         Actor,
 
+        [Token(Description = "^[)]")]
+        NotRParen,
 
         [Token(Example = "[")]
         LBracket,
@@ -188,6 +191,5 @@ namespace Parser
 
         [Token(Category = "separator")]
         NewLine,
-
     }
 }

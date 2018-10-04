@@ -8,24 +8,63 @@ using Superpower.Model;
 
 namespace Dialogic.Test
 {
-    // NEXT: Fix comma issue in FailingTests, remove Delims, then create Commands, then revisit Groups
+    // NEXT: Fix comma issue in FailingTests
+    //       Create Commands, then revisit Groups
 
     [TestFixture]
     public class SuperParserTests : GenericTests
     {
         //[Test]
-        public void GroupParserTest() // failing
+        public void FailingTests()
+        {
+            string text;
+            TokenList<DiaToken> tokens;
+            DiaParser.DiaLine dline;
+
+            text = "SAY My List: 1,2,3";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
+            Assert.That(dline.actor, Is.EqualTo(""));
+
+            Out(DiaTokenizer.Instance.Tokenize("(a | #b)"));
+            Assert.That(DiaParser.ParseGroup("(a | #b)"), Is.EqualTo("a | #b"));
+
+            Assert.That(DiaParser.ParseGroup("(a | b | c #dd)"), Is.EqualTo("a | b | c #dd"));
+
+            Assert.That(DiaParser.ParseGroup("((a | b) | $c)"), Is.EqualTo("(a | b) | $c"));
+            Assert.That(DiaParser.ParseGroup("(a | b.c())"), Is.EqualTo("a | b.c()"));
+
+            Assert.That(DiaParser.ParseGroup("((a | b) | (c | d))"), Is.EqualTo("(a | b) | (c | d)"));
+            Assert.That(DiaParser.ParseGroup("(((a | b) | c) | d))"), Is.EqualTo("((a | b) | c) | d"));
+        }
+
+        [Test]
+        public void GroupParserTest() 
         {
             Assert.That(DiaParser.ParseGroup("(a | b)"), Is.EqualTo("a | b"));
             Assert.That(DiaParser.ParseGroup("(a | b | c)"), Is.EqualTo("a | b | c"));
+            Assert.That(DiaParser.ParseGroup("(a |)"), Is.EqualTo("a |"));
+            Assert.That(DiaParser.ParseGroup("(a | b)"), Is.EqualTo("a | b"));
+            Assert.That(DiaParser.ParseGroup("(aa | bb cc)"), Is.EqualTo("aa | bb cc"));
         }
 
-        //public static EqualConstraint EqualToDict(IDictionary<string, string> actual, IDictionary<string, string> expected) {
-        //    var eq = new EqualConstraint(expected);
-        //    var result = eq.ApplyTo<IDictionary<string, string>>(actual);
-        //    result.
-        //    return eq;
-        //}
+        //[Test]
+        public void GroupParserFail()
+        {
+            Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseGroup("()"));
+            //())
+            //(()
+            //(|)
+            //(| ())
+            //(.)
+            //(())
+            //(() | ())
+            //(abc)
+            //(a bc)
+            //(a.bc())
+        }
 
         [Test]
         public void MetaParserTest()
@@ -90,34 +129,12 @@ namespace Dialogic.Test
             Assert.Throws<Superpower.ParseException>(() => DiaParser.ParseLabel("$"));
         }
 
-        //[Test]
-        public void FailingTests()
-        {
-            string text;
-            TokenList<DiaToken> tokens;
-            DiaParser.DiaLine dline;
-
-            text = "SAY My List: 1,2,3";
-            tokens = DiaTokenizer.Instance.Tokenize(text);
-            dline = DiaParser.Parse(tokens).ElementAt(0);
-            Assert.That(dline.command, Is.EqualTo("SAY"));
-            Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
-            Assert.That(dline.actor, Is.EqualTo(""));
-        }
-
         [Test]
         public void ParseLine()
         {
             string text;
             TokenList<DiaToken> tokens;
             DiaParser.DiaLine dline;
-
-            //text = "SAY My List: 1,2,3";
-            //tokens = DiaTokenizer.Instance.Tokenize(text);
-            //dline = DiaParser.Parse(tokens).ElementAt(0);
-            //Assert.That(dline.command, Is.EqualTo("SAY"));
-            //Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
-            //Assert.That(dline.actor, Is.EqualTo(""));
 
             text = "Dave:SAY Hello";
             tokens = DiaTokenizer.Instance.Tokenize(text);
@@ -135,9 +152,7 @@ namespace Dialogic.Test
 
             text = "OPT Yes #Hello";
             tokens = DiaTokenizer.Instance.Tokenize(text);
-            //Out(tokens);
             dline = DiaParser.Parse(tokens).ElementAt(0);
-            //Console.WriteLine(dline);
             Assert.That(dline.command, Is.EqualTo("OPT"));
             Assert.That(dline.text, Is.EqualTo("Yes"));
             Assert.That(dline.label, Is.EqualTo("#Hello"));
@@ -209,6 +224,50 @@ namespace Dialogic.Test
         {
             Result<TokenList<DiaToken>> result;
 
+            result = DiaTokenizer.Instance.TryTokenize("SAY Hello, you { key=val,key2=val2 } ");
+            //Out(result);
+            Assert.That(result.HasValue, Is.True);
+            //Assert.That(result.Value.Count(), Is.EqualTo(11));
+            //Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+            //Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.String));
+            //Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello, you "));
+            //Assert.That(result.Value.ElementAt(2).Kind, Is.EqualTo(DiaToken.LBrace));
+            //Assert.That(result.Value.ElementAt(3).Kind, Is.EqualTo(DiaToken.String));
+            //Assert.That(result.Value.ElementAt(3).Span.ToString(), Is.EqualTo("key"));
+            //Assert.That(result.Value.ElementAt(4).Kind, Is.EqualTo(DiaToken.Equal));
+            //Assert.That(result.Value.ElementAt(5).Kind, Is.EqualTo(DiaToken.String));
+            //Assert.That(result.Value.ElementAt(5).Span.ToString(), Is.EqualTo("val"));
+            //Assert.That(result.Value.ElementAt(6).Kind, Is.EqualTo(DiaToken.Comma));
+            //Assert.That(result.Value.ElementAt(7).Kind, Is.EqualTo(DiaToken.String));
+            //Assert.That(result.Value.ElementAt(7).Span.ToString(), Is.EqualTo("key2"));
+            //Assert.That(result.Value.ElementAt(8).Kind, Is.EqualTo(DiaToken.Equal));
+            //Assert.That(result.Value.ElementAt(9).Kind, Is.EqualTo(DiaToken.String));
+            //Assert.That(result.Value.ElementAt(9).Span.ToString(), Is.EqualTo("val2 "));
+            //Assert.That(result.Value.ElementAt(10).Kind, Is.EqualTo(DiaToken.RBrace));
+
+            Assert.That(result.Value.Count(), Is.EqualTo(13));
+            Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
+            Assert.That(result.Value.ElementAt(1).Kind, Is.EqualTo(DiaToken.String));
+            Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello"));
+            Assert.That(result.Value.ElementAt(2).Kind, Is.EqualTo(DiaToken.Comma));
+            Assert.That(result.Value.ElementAt(3).Kind, Is.EqualTo(DiaToken.String));
+            Assert.That(result.Value.ElementAt(3).Span.ToString(), Is.EqualTo("you "));
+            Assert.That(result.Value.ElementAt(4).Kind, Is.EqualTo(DiaToken.LBrace));
+            Assert.That(result.Value.ElementAt(5).Kind, Is.EqualTo(DiaToken.String));
+            Assert.That(result.Value.ElementAt(5).Span.ToString(), Is.EqualTo("key"));
+            Assert.That(result.Value.ElementAt(6).Kind, Is.EqualTo(DiaToken.Equal));
+            Assert.That(result.Value.ElementAt(7).Kind, Is.EqualTo(DiaToken.String));
+            Assert.That(result.Value.ElementAt(7).Span.ToString(), Is.EqualTo("val"));
+            Assert.That(result.Value.ElementAt(8).Kind, Is.EqualTo(DiaToken.Comma));
+            Assert.That(result.Value.ElementAt(9).Kind, Is.EqualTo(DiaToken.String));
+            Assert.That(result.Value.ElementAt(9).Span.ToString(), Is.EqualTo("key2"));
+            Assert.That(result.Value.ElementAt(10).Kind, Is.EqualTo(DiaToken.Equal));
+            Assert.That(result.Value.ElementAt(11).Kind, Is.EqualTo(DiaToken.String));
+            Assert.That(result.Value.ElementAt(11).Span.ToString(), Is.EqualTo("val2 "));
+            Assert.That(result.Value.ElementAt(12).Kind, Is.EqualTo(DiaToken.RBrace));
+
+
+            //return;
             result = DiaTokenizer.Instance.TryTokenize("SAY Hello you { key=val } ");
 
             Assert.That(result.HasValue, Is.True);
@@ -226,6 +285,8 @@ namespace Dialogic.Test
 
 
             result = DiaTokenizer.Instance.TryTokenize("SAY Hello { key=val,key2=val2 } ");
+            //Out(result);
+
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(11));
             Assert.That(result.Value.ElementAt(0).Kind, Is.EqualTo(DiaToken.SAY));
@@ -335,6 +396,8 @@ namespace Dialogic.Test
             Assert.That(result.Value.ElementAt(1).Span.ToString(), Is.EqualTo("Hello you"));
         }
     }
+
+
 
     [TestFixture]
     public class RegexParserTests : GenericTests

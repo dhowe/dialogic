@@ -21,7 +21,7 @@ namespace Dialogic
 		protected internal readonly int id;
 		protected internal Chat parent;
 
-		protected internal LineContext lineContext;
+        internal ILine lineContext;
 
 		protected Command()
 		{

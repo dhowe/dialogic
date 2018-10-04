@@ -56,7 +56,7 @@ namespace Dialogic
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private FuzzySearch search;
-        private ChatParser parser;
+        private IParser parser;
 
         public ChatRuntime() : this(null, null) { }
 
@@ -633,7 +633,7 @@ namespace Dialogic
             return validators;
         }
 
-        internal ChatParser Parser()
+        internal IParser Parser()
         {
             return parser;
         }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Dialogic
 {
@@ -24,6 +26,25 @@ namespace Dialogic
         bool IsDefault();
         CommandDef[] Commands();
         Func<Command, bool> Validator();
+    }
+
+    internal interface IParser
+    {
+        void Parse(string[] lines);
+        Command CreateCommand(ILine l);
+        Chat ActiveChat { get; set; }
+        Regex LineParser();
+        string TypesRegex();
+    }
+
+    internal interface ILine
+    {
+        string actor { get; set; }
+        string command { get; set; }
+        string text { get; set; }
+        string label { get; set; }
+        string meta { get; set; }
+        //string[] ToArray();
     }
 
     /// <summary>

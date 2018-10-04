@@ -42,11 +42,21 @@ namespace Parser
             public string actor, command, text, label;
             public IDictionary<string, string> meta;
 
+            public string MetaString() {
+                var s = "";
+                foreach (KeyValuePair<string,string> kv in meta) {
+                    s += kv.Key + "=" + kv.Value + ",";
+                }
+                return s.Substring(s.Length-1);
+            }
+
             public override string ToString()
             {
-                return "[" + command + " " + text + " " + label
-                    + " meta#" + (meta != null ? meta.Count : 0) + "]";
+                return "[" + command + (" " + text).Trim() + (" " + label).Trim()
+                    + (meta != null ? " " + MetaString() : "")+"]";
+                // +" meta#" + (meta != null ? meta.Count : 0) + "]";
             }
+
         }
 
         // ------------------------------------ Parsers ------------------------------------- //
@@ -81,7 +91,8 @@ namespace Parser
             select cmd.ToStringValue();
 
         public static readonly TokenListParser<DiaToken, string> TextParser =
-            from s in Token.EqualTo(DiaToken.String) select s.ToStringValue().Trim();
+            from s in Token.EqualTo(DiaToken.String).Or(Token.EqualTo(DiaToken.Comma))
+            select s.ToStringValue().Trim();
 
         public static readonly TokenListParser<DiaToken, string> LabelParser =
             from s in Token.EqualTo(DiaToken.Label) select s.ToStringValue().Trim();
@@ -99,14 +110,16 @@ namespace Parser
         public static readonly TokenListParser<DiaToken, string> BoolParser =
             from s in Token.EqualTo(DiaToken.True).Or(Token.EqualTo(DiaToken.False))
             select s.ToStringValue();
-
+                           
         public static readonly TokenListParser<DiaToken, string> GroupParser =
-            from lp in Token.EqualTo(DiaToken.LParen)
+            from lp in Token.EqualTo(DiaToken.LParen).AtLeastOnce()
             from content in Token.EqualTo(DiaToken.String).Or
-                            (Token.EqualTo(DiaToken.Symbol)).Or
-                            (Token.EqualTo(DiaToken.Pipe)).Many()
-            from rp in Token.EqualTo(DiaToken.RParen)
-            select content.ToString();
+                (Token.EqualTo(DiaToken.Symbol)).Or
+                (Token.EqualTo(DiaToken.Label)).Or
+                (Token.EqualTo(DiaToken.Comma)).Or
+                (Token.EqualTo(DiaToken.Pipe))
+            from rp in Token.EqualTo(DiaToken.RParen).AtLeastOnce()
+            select content.ToStringValue();
 
         public static TokenListParser<DiaToken, object> MetaParser =
             from begin in Token.EqualTo(DiaToken.LBrace)
