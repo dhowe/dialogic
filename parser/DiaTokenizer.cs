@@ -28,12 +28,6 @@ namespace Parser
             from last in Character.EqualTo(':')
             select Unit.Value;
 
-        //static TextParser<Unit> Symbol { get; } =
-            //from first in Character.EqualTo('$').AtLeastOnce() // support $$abc?
-            //from rest in Identifier.CStyle
-            //select Unit.Value;
-
-
         static readonly Func<char, bool> NotString = c => IsOneOf(c, '{', '}', '#', '$', '=', '(', ')', ',');
 
         public static Tokenizer<DiaToken> Instance { get; } =

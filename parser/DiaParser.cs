@@ -16,6 +16,9 @@ namespace Parser
 
         // ------------------------------- Helpers: keep at top ------------------------------- //
 
+        public static string ParseText(string text) => ParseText(DiaTokenizer.Instance.Tokenize(text));
+        public static string ParseText(TokenList<DiaToken> tokens) => TextParser.Parse(tokens);
+
         public static string ParseActor(string text) => ParseActor(DiaTokenizer.Instance.Tokenize(text));
         public static string ParseActor(TokenList<DiaToken> tokens) => ActorParser.Parse(tokens);
 
