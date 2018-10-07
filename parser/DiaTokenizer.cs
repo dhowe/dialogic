@@ -6,26 +6,44 @@ using Superpower.Parsers;
 using Superpower.Tokenizers;
 
 using System.Linq;
+using System.Text.RegularExpressions;
+
+using static Superpower.Parsers.Character;
 
 namespace Parser
 {
     public class DiaTokenizer : Tokenizer<DiaToken>
     {
-        static TextParser<Unit> Number { get; } =
-            from sign in Character.EqualTo('-').OptionalOrDefault()
-            from first in Character.Digit
-            from rest in Character.Digit.Or(Character.In('.', 'e', 'E', '+', '-')).IgnoreMany()
-            select Unit.Value;
+
+        public static TextParser<TextSpan> StartsLine { get; } =
+            Span.Regex(@"^.+", RegexOptions.Singleline);
+            //select s;
+
+        public static TextParser<string> Text { get; } =
+            from chars in ExceptIn('{', '}', '#', '$', '=', '(', ')', ',').AtLeastOnce()
+            select new string(chars);
 
         static TextParser<TextSpan> Symbol { get; } =
-            Character.EqualTo('$').AtLeastOnce().IgnoreThen(Identifier.CStyle);
+            EqualTo('$').AtLeastOnce().IgnoreThen(Identifier.CStyle);
 
-        static TextParser<TextSpan> Label { get; } = 
-            Character.EqualTo('#').IgnoreThen(Identifier.CStyle);
+        static TextParser<TextSpan> Label { get; } =
+            EqualTo('#').IgnoreThen(Identifier.CStyle);
 
         static TextParser<Unit> Actor { get; } =
-            from name in Character.LetterOrDigit.Many()
-            from last in Character.EqualTo(':')
+            from name in LetterOrDigit.Many()
+            from last in EqualTo(':')
+            select Unit.Value;
+
+        static TextParser<Unit> ActorRE { get; } =
+            from start in StartsLine
+                //from name in LetterOrDigit.
+                from last in EqualTo(':')
+            select Unit.Value;
+
+        public static TextParser<Unit> Number { get; } =
+            from sign in EqualTo('-').OptionalOrDefault()
+            from first in Digit
+            from rest in Digit.Or(In('.', 'e', 'E', '+', '-')).IgnoreMany()
             select Unit.Value;
 
         static readonly Func<char, bool> NotString = c => IsOneOf(c, '{', '}', '#', '$', '=', '(', ')', ',');
@@ -43,27 +61,28 @@ namespace Parser
                 .Match(Span.EqualTo("FIND"), DiaToken.FIND, true)
                 .Match(Span.EqualTo("WAIT"), DiaToken.WAIT, true)
 
-                .Match(Label, DiaToken.Label, true /*?*/)
+                .Match(Symbol, DiaToken.Symbol)
+                .Match(Actor, DiaToken.Actor)
+                .Match(Label, DiaToken.Label, true)
                 .Match(Span.EqualTo("true"), DiaToken.True, true)
                 .Match(Span.EqualTo("false"), DiaToken.True, true)
                 .Match(Span.EqualTo("()"), DiaToken.ParenPair)
-                .Match(Symbol, DiaToken.Symbol)
-                .Match(Actor, DiaToken.Actor)
+   
                 //.Match(Identifier.CStyle, DiaToken.Ident)
 
-                .Match(Character.EqualTo('{'), DiaToken.LBrace)
-                .Match(Character.EqualTo('}'), DiaToken.RBrace)
-                .Match(Character.EqualTo('['), DiaToken.LBracket)
-                .Match(Character.EqualTo(']'), DiaToken.RBracket)
-                .Match(Character.EqualTo('('), DiaToken.LParen)
-                .Match(Character.EqualTo(')'), DiaToken.RParen)
-                .Match(Character.EqualTo('|'), DiaToken.Pipe)
-                .Match(Character.EqualTo('='), DiaToken.Equal)
-                .Match(Character.EqualTo(','), DiaToken.Comma)
-                .Match(Character.EqualTo(':'), DiaToken.Colon)
-                .Match(Character.EqualTo('.'), DiaToken.Dot)
+                .Match(EqualTo('{'), DiaToken.LBrace)
+                .Match(EqualTo('}'), DiaToken.RBrace)
+                .Match(EqualTo('['), DiaToken.LBracket)
+                .Match(EqualTo(']'), DiaToken.RBracket)
+                .Match(EqualTo('('), DiaToken.LParen)
+                .Match(EqualTo(')'), DiaToken.RParen)
+                .Match(EqualTo('|'), DiaToken.Pipe)
+                .Match(EqualTo('='), DiaToken.Equal)
+                .Match(EqualTo(','), DiaToken.Comma)
+                .Match(EqualTo(':'), DiaToken.Colon)
+                .Match(EqualTo('.'), DiaToken.Dot)
 
-                .Match(Span.WithoutAny(NotString), DiaToken.String)
+                .Match(Text, DiaToken.Text)
                 .Build();
 
         static bool IsOneOf(char c, params char[] candidates)
@@ -85,7 +104,7 @@ namespace Parser
     {
         None,
 
-        String,
+        Text,
 
         Number,
 
@@ -186,4 +205,5 @@ namespace Parser
         [Token(Category = "separator")]
         NewLine,
     }
+
 }

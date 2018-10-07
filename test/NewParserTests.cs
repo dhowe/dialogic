@@ -17,16 +17,8 @@ namespace Dialogic.Test
         //[Test]
         public void FailingTests()
         {
-            string text;
-            TokenList<DiaToken> tokens;
-            DiaParser.DiaLine dline;
-
-            text = "SAY My List: 1,2,3";
-            tokens = DiaTokenizer.Instance.Tokenize(text);
-            dline = DiaParser.Parse(tokens).ElementAt(0);
-            Assert.That(dline.command, Is.EqualTo("SAY"));
-            Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
-            Assert.That(dline.actor, Is.EqualTo(""));
+            Out(DiaTokenizer.Instance.Tokenize("Hello:"));
+            Assert.That(DiaParser.ParseFree("Hello:"), Is.EqualTo("Hello:"));
 
             Out(DiaTokenizer.Instance.Tokenize("(a | #b)"));
             Assert.That(DiaParser.ParseGroup("(a | #b)"), Is.EqualTo("a | #b"));
@@ -38,10 +30,36 @@ namespace Dialogic.Test
 
             Assert.That(DiaParser.ParseGroup("((a | b) | (c | d))"), Is.EqualTo("(a | b) | (c | d)"));
             Assert.That(DiaParser.ParseGroup("(((a | b) | c) | d))"), Is.EqualTo("((a | b) | c) | d"));
+
+
+            // ParseLine
+            var text = "Dave: SAY My $List: 1,2,3 {a=b,c=d}";
+            var tokens = DiaTokenizer.Instance.Tokenize(text);
+            var dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("My $List: 1,2,3"));
+            Assert.That(dline.actor, Is.EqualTo("Dave:"));
+            Assert.That(dline.meta, Is.EqualTo(new Dictionary<string, string>(){
+                {"a", "b"}, {"c", "d"}
+            }));
         }
 
         [Test]
-        public void GroupParserTest()
+        public void SuperSimpleTest()
+        {
+            var text = "Hello";
+            var tokens = DiaTokenizer.Instance.Tokenize(text);
+            var result = DiaParser.ParseFree(tokens);
+            Assert.That(result, Is.EqualTo("Hello"));
+
+            text = "Hello,";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            result = DiaParser.ParseFree(tokens);
+            Assert.That(result, Is.EqualTo("Hello,"));
+        }
+
+        [Test]
+        public void ParseGroupOnly()
         {
             Assert.That(DiaParser.ParseGroup("(a | b)"), Is.EqualTo("a | b"));
             Assert.That(DiaParser.ParseGroup("(a | b | c)"), Is.EqualTo("a | b | c"));
@@ -67,7 +85,17 @@ namespace Dialogic.Test
         }
 
         [Test]
-        public void MetaParserTest()
+        public void ParseFreeOnly()
+        {
+            Assert.That(DiaParser.ParseFree("Hello"), Is.EqualTo("Hello"));
+            Assert.That(DiaParser.ParseFree("Hello,"), Is.EqualTo("Hello,"));
+            Assert.That(DiaParser.ParseFree("Hello="), Is.EqualTo("Hello="));
+            Assert.That(DiaParser.ParseFree("Hello ,"), Is.EqualTo("Hello ,"));
+
+        }
+
+        [Test]
+        public void ParseMetaOnly()
         {
             Assert.That(DiaParser.ParseMeta("{}"), Is.EqualTo(new Dictionary<string, string>() { }));
 
@@ -117,7 +145,7 @@ namespace Dialogic.Test
         public void TestParsers()
         {
             // Text
-            Assert.That(DiaParser.ParseText("Hello"), Is.EqualTo("Hello"));
+            //Assert.That(DiaParser.ParseText("Hello"), Is.EqualTo("Hello"));
 
             // Text - Fails
             //Assert.That(DiaParser.ParseText("Hello,"), Is.EqualTo("Hello,"));
@@ -210,6 +238,41 @@ namespace Dialogic.Test
             dline = DiaParser.Parse(tokens).ElementAt(0);
             Assert.That(dline.command, Is.EqualTo("ASK"));
             Assert.That(dline.text, Is.EqualTo("Is this a parser?"));
+
+
+            text = "Dave: SAY My List: 1,2,3 {a=b,c=d}";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
+            Assert.That(dline.actor, Is.EqualTo("Dave:"));
+            Assert.That(dline.meta, Is.EqualTo(new Dictionary<string, string>(){
+                {"a", "b"}, {"c", "d"}
+            }));
+
+            text = "Dave:SAY My List";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("My List"));
+            Assert.That(dline.actor, Is.EqualTo("Dave:"));
+
+            text = "SAY My List: 1,2,3";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
+            Assert.That(dline.actor, Is.EqualTo(""));
+
+            text = "SAY My List: 1,2,3 {a=b,c=d}";
+            tokens = DiaTokenizer.Instance.Tokenize(text);
+            dline = DiaParser.Parse(tokens).ElementAt(0);
+            Assert.That(dline.command, Is.EqualTo("SAY"));
+            Assert.That(dline.text, Is.EqualTo("My List: 1,2,3"));
+            Assert.That(dline.actor, Is.EqualTo(""));
+            Assert.That(dline.meta, Is.EqualTo(new Dictionary<string, string>(){
+                {"a", "b"}, {"c", "d"}
+            }));
         }
     }
 }

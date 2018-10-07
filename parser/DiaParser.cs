@@ -13,11 +13,13 @@ namespace Parser
 {
     public static class DiaParser
     {
-
         // ------------------------------- Helpers: keep at top ------------------------------- //
 
-        public static string ParseText(string text) => ParseText(DiaTokenizer.Instance.Tokenize(text));
-        public static string ParseText(TokenList<DiaToken> tokens) => TextParser.Parse(tokens);
+        public static string ParseFree(string text) => ParseFree(DiaTokenizer.Instance.Tokenize(text));
+        public static string ParseFree(TokenList<DiaToken> tokens) => FreeText.Parse(tokens);
+
+        //public static string ParseText(string text) => ParseText(DiaTokenizer.Instance.Tokenize(text));
+        //public static string ParseText(TokenList<DiaToken> tokens) => TextParser.Parse(tokens);
 
         public static string ParseActor(string text) => ParseActor(DiaTokenizer.Instance.Tokenize(text));
         public static string ParseActor(TokenList<DiaToken> tokens) => ActorParser.Parse(tokens);
@@ -39,6 +41,18 @@ namespace Parser
 
         public static IEnumerable<DiaLine> Parse(string text) => Parse(DiaTokenizer.Instance.Tokenize(text));
         public static IEnumerable<DiaLine> Parse(TokenList<DiaToken> tokens) => LinesParser.Parse(tokens);
+
+        private static string TokensToString(Token<DiaToken>[] tokens) // tmp
+        {
+            var s = "";
+            var i = 0;
+            foreach (var t in tokens)
+            {
+                //Console.WriteLine((i++) + ") " + t.ToStringValue());
+                s += t.ToStringValue();
+            }
+            return s;
+        }
 
         public struct DiaLine
         {
@@ -66,7 +80,7 @@ namespace Parser
 
         /* note: instead of parsing all commands together here, we can parse each separately
            and enforce the presense of valid argument types
-           though how to handle custom Command types?  */
+           though how to handle custom Command types?  allow them by default  */
 
         /*
         SAY:  actor? text meta*
@@ -92,16 +106,28 @@ namespace Parser
                 .Or(Token.EqualTo(DiaToken.FIND))
                 .Or(Token.EqualTo(DiaToken.WAIT))
             select cmd.ToStringValue();
+                             
+        static readonly TokenListParser<DiaToken, string> SymbolParser =
+            from s in Token.EqualTo(DiaToken.Symbol) select s.ToStringValue().Trim();
+
+        public static TokenListParser<DiaToken, string> TextPunct { get; } =
+            from txt in Token.EqualTo(DiaToken.Text)
+                .Or(Token.EqualTo(DiaToken.Comma))
+                .Or(Token.EqualTo(DiaToken.Colon))
+                .Or(Token.EqualTo(DiaToken.Equal))
+                .Many()
+            select TokensToString(txt);
+
+        public static TokenListParser<DiaToken, string> FreeText { get; } =
+            from txt in TextPunct.Or(SymbolParser)
+            select txt;
 
         public static readonly TokenListParser<DiaToken, string> TextParser =
-            from s in Token.EqualTo(DiaToken.String).Or(Token.EqualTo(DiaToken.Comma))
+            from s in Token.EqualTo(DiaToken.Text).Or(Token.EqualTo(DiaToken.Comma))
             select s.ToStringValue().Trim();
 
         public static readonly TokenListParser<DiaToken, string> LabelParser =
             from s in Token.EqualTo(DiaToken.Label) select s.ToStringValue().Trim();
-
-        public static readonly TokenListParser<DiaToken, string> SymbolParser =
-            from s in Token.EqualTo(DiaToken.Symbol) select s.ToStringValue().Trim();
 
         public static readonly TokenListParser<DiaToken, string> ActorParser =
            from s in Token.EqualTo(DiaToken.Actor) select s.ToStringValue().Trim();
@@ -116,7 +142,7 @@ namespace Parser
                            
         public static readonly TokenListParser<DiaToken, string> GroupParser =
             from lp in Token.EqualTo(DiaToken.LParen).AtLeastOnce()
-            from content in Token.EqualTo(DiaToken.String).Or
+            from content in Token.EqualTo(DiaToken.Text).Or
                 (Token.EqualTo(DiaToken.Symbol)).Or
                 (Token.EqualTo(DiaToken.Label)).Or
                 (Token.EqualTo(DiaToken.Comma)).Or
@@ -139,7 +165,7 @@ namespace Parser
         public static readonly TokenListParser<DiaToken, DiaLine> LineParser =
             from atr in ActorParser.OptionalOrDefault(string.Empty)
             from cmd in CmdParser.OptionalOrDefault(string.Empty)
-            from txt in TextParser.OptionalOrDefault(string.Empty)
+            from txt in FreeText.OptionalOrDefault(string.Empty)
             from lbl in LabelParser.OptionalOrDefault(string.Empty)
             from mta in MetaParser.OptionalOrDefault()
             select new DiaLine()
@@ -169,6 +195,7 @@ namespace Parser
             .Or(MetaCharParser)
             .Or(BoolParser)
             .Named("meta-value");
+
     }
 
 
