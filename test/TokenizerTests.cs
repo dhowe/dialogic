@@ -53,10 +53,8 @@ namespace Dialogic.Test
             Assert.That(result.Value.Count(), Is.EqualTo(1));
 
             result = DiaTokenizer.Instance.TryTokenize("Dave: x");
-            Out(result);
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(2));
-
         }
 
         [Test]

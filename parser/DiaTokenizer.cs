@@ -14,11 +14,6 @@ namespace Parser
 {
     public class DiaTokenizer : Tokenizer<DiaToken>
     {
-
-        public static TextParser<TextSpan> StartsLine { get; } =
-            Span.Regex(@"^.+", RegexOptions.Singleline);
-            //select s;
-
         public static TextParser<string> Text { get; } =
             from chars in ExceptIn('{', '}', '#', '$', '=', '(', ')', ',').AtLeastOnce()
             select new string(chars);
@@ -30,14 +25,9 @@ namespace Parser
             EqualTo('#').IgnoreThen(Identifier.CStyle);
 
         static TextParser<Unit> Actor { get; } =
+            //from start in Span.Regex(@"^[A-Za-z][A-Za-z0-9_]+:")
             from name in LetterOrDigit.Many()
             from last in EqualTo(':')
-            select Unit.Value;
-
-        static TextParser<Unit> ActorRE { get; } =
-            from start in StartsLine
-                //from name in LetterOrDigit.
-                from last in EqualTo(':')
             select Unit.Value;
 
         public static TextParser<Unit> Number { get; } =
@@ -48,8 +38,7 @@ namespace Parser
 
         static readonly Func<char, bool> NotString = c => IsOneOf(c, '{', '}', '#', '$', '=', '(', ')', ',');
 
-        public static Tokenizer<DiaToken> Instance { get; } =
-            new TokenizerBuilder<DiaToken>()
+        public static Tokenizer<DiaToken> Instance { get; } = new TokenizerBuilder<DiaToken>()
                 .Ignore(Span.WhiteSpace)
                 .Match(Span.EqualTo("GO"), DiaToken.GO, true)
                 .Match(Span.EqualTo("DO"), DiaToken.DO, true)
@@ -61,13 +50,14 @@ namespace Parser
                 .Match(Span.EqualTo("FIND"), DiaToken.FIND, true)
                 .Match(Span.EqualTo("WAIT"), DiaToken.WAIT, true)
 
-                .Match(Symbol, DiaToken.Symbol)
                 .Match(Actor, DiaToken.Actor)
+                .Match(Symbol, DiaToken.Symbol)
                 .Match(Label, DiaToken.Label, true)
                 .Match(Span.EqualTo("true"), DiaToken.True, true)
                 .Match(Span.EqualTo("false"), DiaToken.True, true)
                 .Match(Span.EqualTo("()"), DiaToken.ParenPair)
-   
+
+
                 //.Match(Identifier.CStyle, DiaToken.Ident)
 
                 .Match(EqualTo('{'), DiaToken.LBrace)
