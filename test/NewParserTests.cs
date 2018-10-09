@@ -8,8 +8,11 @@ using Superpower.Model;
 
 namespace Dialogic.Test
 {
-    // NEXT: Fix comma issue in FailingTests
-    //       Create Commands, then revisit Groups
+    // NEXT: 
+    //       Create Commands
+    //       Then revisit Groups
+    //       Then fix comma issue in FailingTests
+    //       Deal with custom/default commands
 
     [TestFixture]
     public class NewParserTests : GenericTests

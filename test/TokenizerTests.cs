@@ -12,10 +12,12 @@ namespace Dialogic.Test
     [TestFixture]
     public class TokenizerTests : GenericTests
     {
-        //[Test]
+        [Test]
         public void FailingTests()
         {
-            var result = DiaTokenizer.Instance.TryTokenize("SAY Hello:");
+            var tok = DiaTokenizer.Instance;
+            var x= tok.Tokenize("SAY Hello:");
+            var result = tok.TryTokenize("SAY Hello:");
             Out(result);
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value.Count(), Is.EqualTo(2));
