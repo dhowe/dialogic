@@ -94,6 +94,12 @@ namespace Dialogic
             }
         }
 
+        public ICollection<string> TypeNames()
+        {
+            return typeMap.Keys;
+        }
+
+
         /// <summary>
         /// Create a new runtime from previously serialized bytes stored in a file, using the specified config.
         /// </summary>

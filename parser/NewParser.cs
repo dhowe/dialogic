@@ -58,9 +58,9 @@ namespace NewParser
 
         public static readonly TokenListParser<DiaToken, string> TextParser =
             from a in (Token.EqualTo(DiaToken.Word)
-                .Or(Token.EqualTo(DiaToken.Ident))
-                .Or(Apply(NewTokenizer.WordChars))
-                .Many()
+                       .Or(Token.EqualTo(DiaToken.Ident)))
+                //.Or(NewTokenizer.WordChars))
+                       //.Many()
             select TokStr(a);
 
         public static TokenListParser<DiaToken, object> MetaParser =

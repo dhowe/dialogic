@@ -61,6 +61,7 @@ namespace Dialogic
             }
         }
 
+   
         public string TypesRegex()
         {
             string s = @"(";

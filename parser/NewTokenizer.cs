@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 using Superpower;
@@ -17,7 +20,7 @@ namespace NewParser
              from s in Span.WhiteSpace
              select s.ToStringValue();
 
-        public static readonly TextParser<TextSpan> WordChars = Span.Regex(@"[\[\]?-]", RegexOptions.Multiline);
+        public static readonly TextParser<TextSpan> WordChars = Span.Regex(@"[\[\]?0-9-]", RegexOptions.Multiline);
         //Span.Regex(@"[^\[\]{}=,.#$:\s|]+", RegexOptions.Multiline)
 
         static readonly TextParser<TextSpan> WordT = Span.MatchedBy(Identifier.CStyle).Or(WordChars);
@@ -39,7 +42,8 @@ namespace NewParser
         static readonly TextParser<TextSpan> LabelT =
             EqualTo('#').IgnoreThen(Identifier.CStyle);
 
-        public static Tokenizer<DiaToken> Instance { get; } = new TokenizerBuilder<DiaToken>()
+
+        private static Tokenizer<DiaToken> Instance = new TokenizerBuilder<DiaToken>()
 
             //.Match(ActorT, DiaToken.Actor)
             //.Match(SymbolT, DiaToken.Symbol)
@@ -71,13 +75,64 @@ namespace NewParser
 
             .Match(Identifier.CStyle, DiaToken.Ident)
             .Match(SpaceT, DiaToken.Space)
-            //.Match(NumberT, DiaToken.Number)
+            //.Match(NumberT, DiaToken.Number, true)
             .Match(WordT, DiaToken.Word)
 
             .Build();
 
+        //public static TokenList<DiaToken> GetTokens(string source)
+        //{
+        //    var tokens = Instance.Tokenize(ts);
+      
+        //    //TokenList<DiaToken> result = new TokenList<DiaToken>();
+
+        //    //if (tokens.Count() == 0) return result;
+        //    //foreach (var t in tokens)
+        //    //{
+        //    //    result.Append(t);
+        //    //}
+        //    ////var e = tokens.GetEnumerator();
+
+        //    ////var tok = e.Current;
+        //    ////while (tok.HasValue) {
+        //    ////    e.MoveNext();
+        //    ////    Console.WriteLine(e.Current.ToStringValue());
+        //    ////}
+
+        //    return result;
+        //}
+
+
         public static void Main(string[] args)
         {
+            //var values = Enum.GetValues(typeof(DiaToken));
+            //foreach (DiaToken t in values)
+            //{
+            //    //Console.WriteLine(t);
+
+            //    var attr = t.GetDisplayAttributeFrom(t.GetType());
+            //    System.Console.WriteLine(attr);
+            //}
+            //return;
+
+            // Using reflection.  
+            //System.Attribute[] attrs = System.Attribute.GetCustomAttributes();  // Reflection.  
+
+            //// Displaying output.  
+            //foreach (System.Attribute attr in attrs)
+            //{
+            //    System.Console.WriteLine(attr);
+            //    //if (attr is Token)
+            //    //{
+            //    //    Author a = (Author)attr;
+            //    //    System.Console.WriteLine("   {0}, version {1:f}", a.GetName(), a.version);
+            //    //}
+            //}
+
+            //var x = GetTokens("ABC:");
+            //Out(x);
+
+            //return;
             var x = Instance.Tokenize("ABC:");
             Out(x);
 
