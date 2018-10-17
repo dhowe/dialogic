@@ -83,7 +83,7 @@ namespace NewParser
         //public static TokenList<DiaToken> GetTokens(string source)
         //{
         //    var tokens = Instance.Tokenize(ts);
-      
+
         //    //TokenList<DiaToken> result = new TokenList<DiaToken>();
 
         //    //if (tokens.Count() == 0) return result;
@@ -105,6 +105,19 @@ namespace NewParser
 
         public static void Main(string[] args)
         {
+            Result<TokenList<DiaToken>> result = Instance.TryTokenize("SAY ABC: hello");
+            if (!result.HasValue) throw new Exception("FAIL-DED");
+            TokenList<DiaToken> tokens = result.Value;
+            foreach (var tok in tokens)
+            {
+                Console.WriteLine(tok.Kind + "@" + tok.Position + ": '" + tok.ToStringValue()+"'");
+            }
+            return;
+            //foreach (var res in tokens)
+            //{
+
+            //}
+
             //var values = Enum.GetValues(typeof(DiaToken));
             //foreach (DiaToken t in values)
             //{
