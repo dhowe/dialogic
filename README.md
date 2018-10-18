@@ -1,4 +1,4 @@
-_Interested in trying Dialogic in your game or voice-app? Send me a note at <img src="https://camo.githubusercontent.com/3d0142bb95a02890eb5c8bad633b0227acf15bcf/68747470733a2f2f7265646e6f6973652e6f72672f64616e69656c2f656d61696c2e6769663f6464" alt="email-gif" align="top">..._
+_Interested in trying Dialogic in your game or voice-app? Send me a note at daniel @ rednoise-dot-org..._
 
 # Dialogic :fish:
 
