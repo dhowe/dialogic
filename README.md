@@ -10,7 +10,7 @@ Dialogic is a system designed to help writers easily create interactive scripts 
 
 
 
-Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each CHAT has a unique LABEL and contains one or more COMMANDs. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system branches to a new CHAT. 
+Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each chat has a unique name and contains one or more commands. When a chat is run, each command is executed in order, until all have been run, or the system branches to a new chat. 
 
 The simplest command is [SAY](https://github.com/dhowe/dialogic/wiki/Commands#say) which simply echoes the given output:
 
