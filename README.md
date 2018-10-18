@@ -28,7 +28,7 @@ Welcome to your first Dialogic script!
 
 ### Basic Commands
 
-COMMANDs generally begin a line. Common COMMANDs include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
+Commands generally begin a line. Common commands include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
 
 Here is a short example:
 
@@ -54,7 +54,7 @@ OPT Sure #Game1
 OPT No Thanks
 ````
 
-If the user selects the first option, Dialogic jumps to the CHAT named "Game1". If not, the CHAT continues.
+If the user selects the first option, Dialogic jumps to the chat named "Game1". If not, the current chat continues.
 
 
 
@@ -76,7 +76,7 @@ You look depressed.
 ```
 
 
-Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
+Writers may also specify weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
 
 ````
 SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
