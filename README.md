@@ -1,4 +1,4 @@
-_Interested in trying Dialogic in your game or voice-app? Send me a note at daniel @ rednoise-dot-org..._
+_Interested in trying Dialogic in your game or voice-app? Send me a note at daniel-@-rednoise-dot-org..._
 
 # Dialogic :fish:
 
