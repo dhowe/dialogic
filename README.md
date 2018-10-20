@@ -1,16 +1,16 @@
-_Interested in trying Dialogic in your game or voice-app? Send me a note at <img src="https://camo.githubusercontent.com/3d0142bb95a02890eb5c8bad633b0227acf15bcf/68747470733a2f2f7265646e6f6973652e6f72672f64616e69656c2f656d61696c2e6769663f6464" alt="email-gif" align="top">..._
+_Interested in trying Dialogic in your game or voice-app? Send me a note at daniel-@-rednoise-dot-org..._
 
 # Dialogic :fish:
 
-[![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) ![license](https://img.shields.io/badge/license-GPL-orange.svg)
+[![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) ![license](https://img.shields.io/badge/license-GPL-orange.svg) [![Gitter](https://badges.gitter.im/dhowe/dialogic.svg)](https://gitter.im/dhowe/dialogic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge)
 
 [FAQ](https://github.com/dhowe/dialogic/wiki) &nbsp;::&nbsp; [Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Documentation](http://rednoise.org/dialogic/) &nbsp;::&nbsp; [Web Editor](http://rednoise.org:8082/dialogic/editor/) &nbsp;::&nbsp; [NuGet Package](https://www.nuget.org/packages/org.rednoise.dialogic/)
 
-Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It enables writers to craft compelling dialog that responds organically both to user prompts and to events in the environment. The system supports abitrarily complex interactions between multiple actors, but makes no assumptions about how text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity3D).
+Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It enables writers to craft compelling dialog that responds organically both to user prompts and to events in the environment. The system supports abitrarily complex interactions between multiple actors, but makes no assumptions about how text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity).
 
 
 
-Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each CHAT has a unique LABEL and contains one or more COMMANDs. When a CHAT is run, each COMMAND is executed in order, until all have been run, or the system branches to a new CHAT. 
+Each section of text in a Dialogic script is known as a [CHAT](https://github.com/dhowe/dialogic/wiki/Command-Reference#chat). Each chat has a unique name and contains one or more commands. When a chat is run, each command is executed in order, until all have been run, or the system branches to a new chat. 
 
 The simplest command is [SAY](https://github.com/dhowe/dialogic/wiki/Commands#say) which simply echoes the given output:
 
@@ -28,7 +28,7 @@ Welcome to your first Dialogic script!
 
 ### Basic Commands
 
-COMMANDs generally begin a line. Common COMMANDs include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
+Commands generally begin a line. Common commands include [SAY](https://github.com/dhowe/dialogic/wiki/Command-Reference#say), [DO](https://github.com/dhowe/dialogic/wiki/Command-Reference#do), [ASK](https://github.com/dhowe/dialogic/wiki/Command-Reference#ask), [OPT](https://github.com/dhowe/dialogic/wiki/Command-Reference#opt), [FIND](https://github.com/dhowe/dialogic/wiki/Command-Reference#find), [SET](https://github.com/dhowe/dialogic/wiki/Command-Reference#set), and [others](https://github.com/dhowe/dialogic/wiki/Command-Reference)
 
 Here is a short example:
 
@@ -54,7 +54,7 @@ OPT Sure #Game1
 OPT No Thanks
 ````
 
-If the user selects the first option, Dialogic jumps to the CHAT named "Game1". If not, the CHAT continues.
+If the user selects the first option, Dialogic jumps to the chat named "Game1". If not, the current chat continues.
 
 
 
@@ -76,7 +76,7 @@ You look depressed.
 ```
 
 
-Writers may also specify probability weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
+Writers may also specify weightings for various choices, as well as favoring choices that have not been recently selected. Another example, demonstrating nested OR constructions:
 
 ````
 SAY I'm (very | super | really) glad to ((meet | know) you | learn about you).
