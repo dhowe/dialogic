@@ -333,7 +333,13 @@ namespace Dialogic.Test
             Assert.That(s, Is.EqualTo("Find\nAdded"));
         }
 
-
+        [Test]
+        public void SerializeToJSON()
+        {
+            ChatRuntime rt = new ChatRuntime();
+            rt.ParseText("CHAT Test { type = a,stage = b}");
+            Assert.That(rt.ToJSON(serializer), Is.Not.Null);
+        }
 
         [Test]
         public void MergeFromFile()
@@ -393,7 +399,7 @@ namespace Dialogic.Test
 
             public string ToJSON(ChatRuntime rt)
             {
-                return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
+                return MessagePackSerializer.ToJson(ToBytes(rt));
             }
         }
     }
