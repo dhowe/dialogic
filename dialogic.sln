@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "editor", "editor\editor.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{1D55B77F-A7BF-43FD-BC7C-4A57F3C5D1FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "visualizer", "visualizer\visualizer.csproj", "{980E78AB-70F7-4FE9-AEB2-5B8B5D1B5859}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,9 +35,5 @@ Global
 		{1D55B77F-A7BF-43FD-BC7C-4A57F3C5D1FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D55B77F-A7BF-43FD-BC7C-4A57F3C5D1FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D55B77F-A7BF-43FD-BC7C-4A57F3C5D1FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{980E78AB-70F7-4FE9-AEB2-5B8B5D1B5859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{980E78AB-70F7-4FE9-AEB2-5B8B5D1B5859}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{980E78AB-70F7-4FE9-AEB2-5B8B5D1B5859}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{980E78AB-70F7-4FE9-AEB2-5B8B5D1B5859}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
