@@ -14,7 +14,8 @@ namespace Dialogic.Server
         public static string SERVER_URL;
         public static int SERVER_PORT;
 
-        static string IndexPageContent;
+        static string EditorPageContent;
+        static string VisualizerPageContent;
 
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responderFunc;
@@ -143,9 +144,13 @@ namespace Dialogic.Server
 #pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
         }
 
-        public static string SendResponse(HttpListenerRequest request)
+        public static string SendVisualizerResponse(HttpListenerRequest request)
         {
-            var html = IndexPageContent.Replace("%%URL%%", SERVER_URL);
+        }
+
+        public static string SendEditorResponse(HttpListenerRequest request)
+        {
+            var html = EditorPageContent.Replace("%%URL%%", SERVER_URL);
 
             IDictionary<string, string> kvs = new Dictionary<string, string>();
             try
@@ -279,9 +284,9 @@ namespace Dialogic.Server
         public static void Main(string[] args)
         {
             var host = args.Length > 0 ? args[0] : "localhost";
-            Editor ws = new Editor(SendResponse, host);
+            Editor ws = new Editor(SendEditorResponse, host);
 
-            Editor.IndexPageContent = String.Join
+            Editor.EditorPageContent = String.Join
                 ("\n", File.ReadAllLines("data/index.html", Encoding.UTF8));
 
             ws.Run();

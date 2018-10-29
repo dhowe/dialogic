@@ -9,6 +9,7 @@ using System.Text;
 
 [assembly: InternalsVisibleTo("DialogicTest")]
 [assembly: InternalsVisibleTo("DialogicEditor")]
+[assembly: InternalsVisibleTo("DialogicVisualizer")]
 
 namespace Dialogic
 {
