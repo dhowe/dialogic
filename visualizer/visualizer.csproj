@@ -10,9 +10,7 @@
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="data\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="data\test.gs" />
+    <None Remove="data\.DS_Store" />
   </ItemGroup>
 </Project>

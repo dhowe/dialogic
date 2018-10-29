@@ -14,8 +14,7 @@ namespace Dialogic.Server
         public static string SERVER_URL;
         public static int SERVER_PORT;
 
-        static string EditorPageContent;
-        static string VisualizerPageContent;
+        static string PageContent;
 
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responderFunc;
@@ -146,11 +145,26 @@ namespace Dialogic.Server
 
         public static string SendVisualizerResponse(HttpListenerRequest request)
         {
+            var html = PageContent.Replace("%%URL%%", SERVER_URL);
+            var data = "var nodes = new vis.DataSet([\n";
+            for (int i = 1; i < 6; i++)
+            {
+                data += "  { id: " + i + ", label: 'N" + i + "' },\n";
+            }
+            data += "]);\n\nvar edges = new vis.DataSet([\n";
+            for (int i = 1; i < 6; i++)
+            {
+                data += "  { from: " + i + ", to: "+(i+1)%5 + " },\n";
+            }
+            data += "]);\n";
+            html = html.Replace("%%DATA%%", data);
+            Console.WriteLine(data);
+            return html;
         }
 
         public static string SendEditorResponse(HttpListenerRequest request)
         {
-            var html = EditorPageContent.Replace("%%URL%%", SERVER_URL);
+            var html = PageContent.Replace("%%URL%%", SERVER_URL);
 
             IDictionary<string, string> kvs = new Dictionary<string, string>();
             try
@@ -166,12 +180,12 @@ namespace Dialogic.Server
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
             var mode = kvs.ContainsKey("mode") ? kvs["mode"] : "validate";
 
-            if (!String.IsNullOrEmpty(path)) // fetch code from file
+            if (!string.IsNullOrEmpty(path)) // fetch code from file
             {
                 using (var wb = new WebClient()) code = wb.DownloadString(path);
             }
 
-            if (String.IsNullOrEmpty(code))
+            if (string.IsNullOrEmpty(code))
             {
                 return html.Replace("%%CODE%%", "Enter your script here");
             }
@@ -189,7 +203,7 @@ namespace Dialogic.Server
 
             try
             {
-                string content = String.Empty;
+                string content = string.Empty;
                 var globals = new Dictionary<string, object>();
                 runtime = new ChatRuntime(Client.AppConfig.TAC);
                 runtime.strictMode = false; // allow unbound symbols/functions
@@ -283,11 +297,19 @@ namespace Dialogic.Server
 
         public static void Main(string[] args)
         {
+            var runViz = true;
+            var pageContent = "data/index.html";
             var host = args.Length > 0 ? args[0] : "localhost";
-            Editor ws = new Editor(SendEditorResponse, host);
+            Func<HttpListenerRequest, string> listener = SendEditorResponse;
 
-            Editor.EditorPageContent = String.Join
-                ("\n", File.ReadAllLines("data/index.html", Encoding.UTF8));
+            if (runViz) {
+                pageContent = "data/network.html";
+                listener = SendVisualizerResponse;
+            }
+
+            Editor ws = new Editor(listener, host);
+            Editor.PageContent = string.Join
+                ("\n", File.ReadAllLines(pageContent, Encoding.UTF8));
 
             ws.Run();
         }

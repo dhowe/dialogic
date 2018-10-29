@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <title>Dialogic</title>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+
+  <style type="text/css">
+      #network {
+          width: 600px;
+          height: 600px;
+          border: 1px solid lightgray;
+      }
+  </style>
+</head>
+<body>
+
+<div id="network"></div>
+
+<script type="text/javascript">%%DATA%%</script>
+
+<script type="text/javascript">
+  // create the network
+  var container = document.getElementById('network');
+  var data = {
+    nodes: nodes,
+    edges: edges
+  };
+  var options = {};
+  var network = new vis.Network(container, data, options);
+</script>
+
+
+</body>
+</html>
