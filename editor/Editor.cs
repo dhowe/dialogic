@@ -142,24 +142,60 @@ namespace Dialogic.Server
             catch (Exception) { /* ignore */ }
 #pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
         }
+         
+        class ChatNode {
+
+            private static int IDGEN = 0;
+
+            public ChatNode(string name, List<string> labels) {
+                this.Id = ++IDGEN;
+                this.Name = name;
+                this.Labels = labels;
+            }
+
+            public int Id { get; }
+            public string Name { get; }
+            public List<string> Labels { get; }
+        }
 
         public static string SendVisualizerResponse(HttpListenerRequest request)
         {
+            var testfile = "data/network.gs";
             var html = PageContent.Replace("%%URL%%", SERVER_URL);
-            var data = "var nodes = new vis.DataSet([\n";
-            for (int i = 1; i < 6; i++)
+            var labels = new Dictionary<string, ChatNode>();
+
+            runtime = new ChatRuntime(Client.AppConfig.TAC);
+            runtime.ParseFile(new FileInfo(testfile));
+            runtime.Chats().ForEach(c =>
             {
-                data += "  { id: " + i + ", label: 'N" + i + "' },\n";
-            }
-            data += "]);\n\nvar edges = new vis.DataSet([\n";
-            for (int i = 1; i < 6; i++)
-            {
-                data += "  { from: " + i + ", to: "+(i+1)%5 + " },\n";
-            }
-            data += "]);\n";
-            html = html.Replace("%%DATA%%", data);
-            Console.WriteLine(data);
+                labels[c.text] = new ChatNode(c.text, c.OutgoingLabels());
+            });
+
+            var json = NodesToJSON(labels);
+
+            html = html.Replace("%%DATA%%", json);
+
+            Console.WriteLine(json);
+
             return html;
+        }
+
+        private static string NodesToJSON(Dictionary<string, ChatNode> chatNodes)
+        {
+            var nodes = "var nodes = new vis.DataSet([\n";
+            var edges = "var edges = new vis.DataSet([\n";
+            foreach (var node in chatNodes.Values)
+            {
+                nodes += "  { id: " + node.Id + ", label: '" + node.Name + "' },\n";
+                node.Labels.ForEach(l =>
+                {
+                    edges += "  { from: " + node.Id + ", to: " + chatNodes[l].Id + " },\n";
+                });
+            }
+            nodes += "]);\n";
+            edges += "]);\n";
+
+            return nodes + edges;
         }
 
         public static string SendEditorResponse(HttpListenerRequest request)
@@ -297,7 +333,7 @@ namespace Dialogic.Server
 
         public static void Main(string[] args)
         {
-            var runViz = true;
+            var runViz = false;
             var pageContent = "data/index.html";
             var host = args.Length > 0 ? args[0] : "localhost";
             Func<HttpListenerRequest, string> listener = SendEditorResponse;

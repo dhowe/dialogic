@@ -100,18 +100,20 @@ namespace Dialogic
             return null; // nothing to return;
         }
 
-		internal bool ValidateParens()
-		{
-			int open = 0, close = 0;
-			this.commands.ForEach(c =>{
-				if (c is Set) {
-					open += ((Set)c).value.Count(ch => ch == Ch.OGROUP);
-					close += ((Set)c).value.Count(ch => ch == Ch.CGROUP);               
-				} 
-			});
-			if (open != close) throw new MismatchedParens();
-			return true;
-		}
+        internal bool ValidateParens()
+        {
+            int open = 0, close = 0;
+            this.commands.ForEach(c =>
+            {
+                if (c is Set)
+                {
+                    open += ((Set)c).value.Count(ch => ch == Ch.OGROUP);
+                    close += ((Set)c).value.Count(ch => ch == Ch.CGROUP);
+                }
+            });
+            if (open != close) throw new MismatchedParens();
+            return true;
+        }
 
         protected internal override Command Validate()
         {
@@ -179,6 +181,36 @@ namespace Dialogic
             }
 
             return false; // refactor this ugliness
+        }
+
+        // for visualizer
+        internal List<string> OutgoingLabels()
+        {
+            List<string> labels = new List<string>();
+            commands.ForEach(cmd =>
+            {
+                if (cmd is Ask)
+                {
+                    var opts = ((Ask)cmd).Options();
+                    opts.ForEach(o =>
+                    {
+                        if (!o.action.text.IsNullOrEmpty())
+                        {
+                            labels.Add(o.action.text);
+                        }
+                    });
+                }
+                else if (cmd is Go)
+                {
+                    labels.Add(cmd.text);
+                }
+                else if (cmd is Find)
+                {
+                    // pending
+                }
+            });
+
+            return labels;
         }
 
         internal Chat LastRunAt(int ms)
