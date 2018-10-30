@@ -491,8 +491,7 @@
        <form name="main" id="form">
         <div class="input-area">
           <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false">%%CODE%%</textarea>
-          <div class="handle">
-          </div>
+          <div class="handle"></div>
         </div>
         <div id="button-div" class="validate">
           <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
@@ -862,19 +861,70 @@
 
     });
 
-    function showNetworkView(val)
+    function toggleNetworkView(val)
     {
       $("#editor").toggle(!val);
       $("#network").toggle(val);
+      !val && setTimeout(function() {
+        console.log("TRIGGER!");
+        $("#editor").focus();
+        $('#editor').trigger('click');
+      }, 1000);
+    }
+
+    function editChat(data, callback) {
+
+      console.log("editChat: ", data, chats[data.id]);
+
+      // load the editor with id=data.id, name=data.label
+      $("#main").val(chats[data.id]);
+
+      console.log("editChat."+data.id+": ",$("#main").val());
+
+      toggleNetworkView(false);
+      /*document.getElementById('operation').innerHTML = "Edit Node";
+      document.getElementById('node-id').value = data.id;
+      document.getElementById('node-label').value = data.label;
+      document.getElementById('saveButton').onclick = saveData.bind(this, data, callback);
+      document.getElementById('cancelButton').onclick = cancelEdit.bind(this,callback);
+      document.getElementById('network-popUp').style.display = 'block';*/
     }
 
   </script>
 
-  <script type="text/javascript">%%DATA%%</script>
+  <!--script type="text/javascript">%%DATA%%</script-->
   <script type="text/javascript">
-    showNetworkView(true);
+  var chats = {
+    "1": "CHAT start {preload=true}\n  SET $emotion = simple | lost\n  SET $place = Purgatory\n  SET $neg = Nah | No | Nyet\n  SET $verb = play | start | begin",
+    "2": "CHAT GScriptTest {type=a,stage=b}\n  SAY Welcome to my $emotion world\n  NVM 1.1\n  WAIT 3\n  DO #Twirl\n  WAIT {ForAnimation=true}\n  SAY Thanks for visiting $place {speed=fast,style=whisper}\n  GO #Prompt",
+    "3": "CHAT RePrompt {type=a,stage=b}\n  DO #SadSpin\n  ASK (Really|Awww), don't you want to play a game?\n  OPT sure #Game\n  OPT $neg #RePrompt",
+    "4": "CHAT Prompt {notPlayed=true,type=a,stage=b}\n  ASK Do you want to $verb a game? {timeout=4,speed=fast}\n  OPT Sure #Game\n  OPT Nope #RePrompt",
+    "5": "CHAT Game {type=a,stage=b,last=true}\n  DO #HappyFlip {axis=y}\n  SAY Great, let's play! {speed=slow,style=loud}\n  SAY Bye! {speed=fast}",
+    "6": "CHAT OnTapEvent {noStart=true,resumeAfter=true}\n  DO #TapResponse\n  SAY Ok, I see you!\n  SAY Wait, is that (cat | dog | artichoke).articlize()?",
+    "7": "CHAT MyWorld {noStart=true,chatMode=grammar}\n  SET start = My world is a $adj, $adj place.\n  SET adj = creepy | lonely | dark | forgotten | crepuscular\n  SAY $start",
+  };
+  var nodes = new vis.DataSet([
+    { id: 1, label: 'start' },
+    { id: 2, label: 'GScriptTest' },
+    { id: 3, label: 'RePrompt' },
+    { id: 4, label: 'Prompt' },
+    { id: 5, label: 'Game' },
+    { id: 6, label: 'OnTapEvent' },
+    { id: 7, label: 'MyWorld' },
+  ]);
+  var edges = new vis.DataSet([
+    { from: 2, to: 4 },
+    { from: 3, to: 5 },
+    { from: 3, to: 3 },
+    { from: 4, to: 5 },
+    { from: 4, to: 3 },
+  ]);
+</script>
+  <script type="text/javascript">
+    toggleNetworkView(true);
+    var opts = { manipulation: { editNode: editChat, initiallyActive: true } };
     new vis.Network(document.getElementById('network'),
-      { nodes: nodes, edges: edges}, {});
+      { nodes: nodes, edges: edges}, opts);
   </script>
 
 </body>

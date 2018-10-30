@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Dialogic;
+using Newtonsoft.Json;
 
 namespace Dialogic.Server
 {
@@ -142,33 +143,94 @@ namespace Dialogic.Server
             catch (Exception) { /* ignore */ }
 #pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
         }
-         
-        class ChatNode {
+
+        class JsonNode
+        {
 
             private static int IDGEN = 0;
 
-            public ChatNode(string name, List<string> labels) {
+            public JsonNode(string name, List<string> labels, string data = null)
+            {
                 this.Id = ++IDGEN;
                 this.Name = name;
                 this.Labels = labels;
+                this.Data = Escape(data);
             }
 
             public int Id { get; }
+            public string Data { get; }
             public string Name { get; }
             public List<string> Labels { get; }
+
+            private string Escape(string s)
+            {
+                if (string.IsNullOrEmpty(s)) return string.Empty;
+
+                char c = '\0';
+                StringBuilder sb = new StringBuilder(s.Length + 4);
+                String t;
+
+                for (var i = 0; i < s.Length; i += 1)
+                {
+                    c = s[i];
+                    switch (c)
+                    {
+                        case '\\':
+                        case '"':
+                            sb.Append('\\');
+                            sb.Append(c);
+                            break;
+                        case '/':
+                            sb.Append('\\');
+                            sb.Append(c);
+                            break;
+                        case '\b':
+                            sb.Append("\\b");
+                            break;
+                        case '\t':
+                            sb.Append("\\t");
+                            break;
+                        case '\n':
+                            sb.Append("\\n");
+                            break;
+                        case '\f':
+                            sb.Append("\\f");
+                            break;
+                        case '\r':
+                            sb.Append("\\r");
+                            break;
+                        default:
+                            if (c < ' ')
+                            {
+                                t = "000" + String.Format("X", c);
+                                sb.Append("\\u" + t.Substring(t.Length - 4));
+                            }
+                            else
+                            {
+                                sb.Append(c);
+                            }
+                            break;
+                    }
+                }
+
+                return sb.ToString();
+            }
         }
 
         public static string SendVisualizerResponse(HttpListenerRequest request)
         {
             var testfile = "data/network.gs";
             var html = PageContent.Replace("%%URL%%", SERVER_URL);
-            var labels = new Dictionary<string, ChatNode>();
+            var labels = new Dictionary<string, JsonNode>();
+
+            ISerializer serial = new Client.SerializerMessagePack();
 
             runtime = new ChatRuntime(Client.AppConfig.TAC);
             runtime.ParseFile(new FileInfo(testfile));
-            runtime.Chats().ForEach(c =>
+            runtime.Chats().ForEach(chat =>
             {
-                labels[c.text] = new ChatNode(c.text, c.OutgoingLabels());
+                labels[chat.text] = new JsonNode(chat.text, chat.OutgoingLabels(), chat.ToTree());
+                //JsonConvert.SerializeObject(ChatData.Create(chat)));
             });
 
             var json = NodesToJSON(labels);
@@ -180,51 +242,40 @@ namespace Dialogic.Server
             return html;
         }
 
-        private static string NodesToJSON(Dictionary<string, ChatNode> chatNodes)
+        private static string NodesToJSON(Dictionary<string, JsonNode> chatNodes)
         {
-            var nodes = "var nodes = new vis.DataSet([\n";
-            var edges = "var edges = new vis.DataSet([\n";
+            var chats = "\nvar chats = {\n";
+            var nodes = "\nvar nodes = new vis.DataSet([\n";
+            var edges = "\nvar edges = new vis.DataSet([\n";
             foreach (var node in chatNodes.Values)
             {
+                chats += "  \"" + node.Id + "\": \"" + node.Data + "\",\n";
                 nodes += "  { id: " + node.Id + ", label: '" + node.Name + "' },\n";
-                node.Labels.ForEach(l =>
-                {
-                    edges += "  { from: " + node.Id + ", to: " + chatNodes[l].Id + " },\n";
-                });
+                node.Labels.ForEach(l => edges += "  { from: " + node.Id + ", to: "
+                    + chatNodes[l].Id + " },\n");
             }
+            chats += "};\n";
             nodes += "]);\n";
             edges += "]);\n";
 
-            return nodes + edges;
+            return chats + nodes + edges;
         }
 
         public static string SendEditorResponse(HttpListenerRequest request)
         {
             var html = PageContent.Replace("%%URL%%", SERVER_URL);
+            var wmsg = "Enter your script here";
 
-            IDictionary<string, string> kvs = new Dictionary<string, string>();
-            try
-            {
-                kvs = ParsePostData(request);
-            }
-            catch (Exception ex)
-            {
-                ChatRuntime.Warn(ex);
-            }
-
+            IDictionary<string, string> kvs = ParsePostData(request);
             var path = kvs.ContainsKey("path") ? kvs["path"] : null;
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
             var mode = kvs.ContainsKey("mode") ? kvs["mode"] : "validate";
 
-            if (!string.IsNullOrEmpty(path)) // fetch code from file
-            {
-                using (var wb = new WebClient()) code = wb.DownloadString(path);
-            }
+            // fetch code from file
+            if (!string.IsNullOrEmpty(path)) code = new WebClient().DownloadString(path);
 
-            if (string.IsNullOrEmpty(code))
-            {
-                return html.Replace("%%CODE%%", "Enter your script here");
-            }
+            // default info message
+            if (string.IsNullOrEmpty(code)) return html.Replace("%%CODE%%", wmsg);
 
             html = html.Replace("%%CODE%%", WebUtility.HtmlEncode(code));
             html = html.Replace("%%CCLASS%%", "shown");
@@ -291,55 +342,59 @@ namespace Dialogic.Server
         {
             var result = new Dictionary<string, string>();
 
-            if (request.HasEntityBody)
+            try
             {
-                Stream body = request.InputStream;
-                Encoding encoding = request.ContentEncoding;
-                StreamReader reader = new System.IO.StreamReader(body, encoding);
-
-                if (request.ContentType == "application/x-www-form-urlencoded")
+                if (request.HasEntityBody)
                 {
-                    string s = reader.ReadToEnd();
-                    string[] pairs = s.Split('&');
+                    Stream body = request.InputStream;
+                    Encoding encoding = request.ContentEncoding;
+                    StreamReader reader = new System.IO.StreamReader(body, encoding);
 
-                    foreach (var p in pairs)
+                    if (request.ContentType == "application/x-www-form-urlencoded")
                     {
-                        var pair = p.Split('=');
-                        if (pair.Length == 2)
+                        string s = reader.ReadToEnd();
+                        string[] pairs = s.Split('&');
+
+                        foreach (var p in pairs)
                         {
-                            //Console.WriteLine(pair[0] + ": " + pair[1]);
-                            result.Add(WebUtility.UrlDecode(pair[0]),
-                                WebUtility.UrlDecode(pair[1]));
-                        }
-                        else
-                        {
-                            ChatRuntime.Warn("BAD KV - PAIR: " + p);
-                            //throw new Exception("BAD-PAIR: " + p);
+                            var pair = p.Split('=');
+                            if (pair.Length == 2)
+                            {
+                                //Console.WriteLine(pair[0] + ": " + pair[1]);
+                                result.Add(WebUtility.UrlDecode(pair[0]),
+                                    WebUtility.UrlDecode(pair[1]));
+                            }
+                            else
+                            {
+                                ChatRuntime.Warn("BAD KV-PAIR: " + p);
+                                //throw new Exception("BAD-PAIR: " + p);
+                            }
                         }
                     }
-                }
 
-                body.Close();
-                reader.Close();
+                    body.Close();
+                    reader.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ChatRuntime.Warn(ex);
             }
 
             return result;
         }
 
-        //private static string MakeServerUrl(string host)
-        //{
-        //    return "http://" + host + ":8082/dialogic/editor/";
-        //}
 
         public static void Main(string[] args)
         {
-            var runViz = false;
+            var runViz = true;
             var pageContent = "data/index.html";
             var host = args.Length > 0 ? args[0] : "localhost";
             Func<HttpListenerRequest, string> listener = SendEditorResponse;
 
-            if (runViz) {
-                pageContent = "data/network.html";
+            if (runViz)
+            {
+                pageContent = "data/combined.html";
                 listener = SendVisualizerResponse;
             }
 

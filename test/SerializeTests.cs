@@ -379,29 +379,6 @@ namespace Dialogic.Test
             s = rt.InvokeImmediate(null);
             Assert.That(s, Is.EqualTo("Find\nAdded"));
         }
-
-
-        // Pass instance to ChatRuntime serialization methods
-        private class SerializerMessagePack : ISerializer
-        {
-            static readonly IFormatterResolver ifr = MessagePack.Resolvers
-                .ContractlessStandardResolverAllowPrivate.Instance;
-
-            public byte[] ToBytes(ChatRuntime rt)
-            {
-                return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
-            }
-
-            public void FromBytes(ChatRuntime rt, byte[] bytes)
-            {
-                MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
-            }
-
-            public string ToJSON(ChatRuntime rt)
-            {
-                return MessagePackSerializer.ToJson(ToBytes(rt));
-            }
-        }
     }
 }
 
