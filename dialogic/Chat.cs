@@ -136,7 +136,8 @@ namespace Dialogic
         {
             string s = TypeName().ToUpper() + " "
                 + text + (" " + MetaStr()).TrimEnd();
-            commands.ForEach(c => s += "\n  " + c);
+            //commands.ForEach(c => s += "\n  " + c);
+            commands.ForEach(c => s += "\n" + c); // remove indent, Oct 30 [viz]
             return s;
         }
 
