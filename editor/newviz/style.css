@@ -1,0 +1,313 @@
+#network {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #eee;
+    margin-top: 20px;
+    background-color: #fff;
+    float:left;
+}
+#editor {
+  float:left;
+  position:relative;
+  margin-top: 20px;
+}
+#editor .editor-close {
+  position:absolute;
+ right:0;
+ top:0;
+ width:30px;
+ height:30px;
+ background-position:20px 3px;
+ background-repeat:no-repeat;
+ background-image:url(cross.png);
+ cursor:pointer;
+ -webkit-touch-callout:none;
+ -webkit-user-select:none;
+ -khtml-user-select:none;
+ -moz-user-select:none;
+ -ms-user-select:none;
+ user-select:none
+}
+#form{
+  margin-top:-14px;
+}
+.CodeMirror {
+    border: 1px solid #eee;
+    line-height: 16px;
+}
+
+.CodeMirror-sizer{
+  margin-left: 30px !important;
+}
+
+.CodeMirror-gutters {
+    height: 100% !important; /* fix the gutter issue*/
+}
+/*additional theme*/
+.cm-s-default .cm-command, .cm-s-default .cm-command-chat {
+    font-weight: bold;
+}
+
+.cm-s-default .cm-actor {
+    color: #a06a34;
+}
+/*brown*/
+.cm-s-default .cm-group {
+    color: #004600;
+}
+/*green*/
+.cm-s-default .cm-variable {
+    color: #4d2e87;
+}
+/*purple*/
+.cm-s-default .cm-transformation {
+    color: #8b0000;
+}
+/*dark red*/
+
+.cm-s-default .cm-metadata {
+    color: orange;
+}
+
+.cm-s-default .cm-key {
+    color: #005cc5;
+}
+/*blue*/
+.cm-s-default .cm-value {
+    color: #00c548
+}
+/*bright green*/
+
+.cm-s-default .cm-label {
+    color: #d73a49;
+}
+/*red*/
+
+.cm-s-default .cm-operator {
+    color: #d73a49;
+}
+/*red*/
+.cm-s-default .cm-comment {
+    color: grey;
+}
+
+body {
+    padding: 0 2em;
+}
+
+#navbar {
+    line-height: 42px;
+    font-size: 20px;
+}
+
+.input-area {
+    margin-top: 5px !important;
+}
+
+#result-container pre {
+    width: 95%;
+    margin-left: 13px;
+    min-width: 620px;
+    overflow: auto;
+}
+
+#executeResult {
+    border: 1px solid transparent;
+    padding: 0.8em;
+}
+
+#executeResult:empty {
+    display: none;
+}
+
+#executeResult.success {
+    background: #c3d4ef;
+    color: #144594;
+    border-color: #7ea0d7;
+}
+
+#executeResult.error {
+    background: #FBE3E4;
+    color: #D12F19;
+    border-color: #FBC2C4;
+}
+
+pre.executeResult {
+    white-space: pre-wrap;
+    /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;
+    /* Mozilla, since 1999 */
+    white-space: -pre-wrap;
+    /* Opera 4-6 */
+    white-space: -o-pre-wrap;
+    /* Opera 7 */
+    word-wrap: break-word;
+    /* Internet Explorer 5.5+ */
+}
+
+#loadURLDialog {
+    width: 500px;
+    border: 1px solid #c0c0c0;
+    margin: auto;
+    position:relative;
+    top: -300px;
+    left: 0px;
+    display: none;
+    background-color: rgba(255, 255, 255, 0.95)
+}
+
+#closeDialog {
+    float: right;
+}
+
+#loadUrlPathDiv input {
+    margin: 10px 0;
+    font-size: 14px;
+    width: 100% !important;
+}
+
+button:disabled {
+    opacity: .5;
+}
+
+button:disabled:hover {
+    background: white !important;
+}
+
+.navlink:link,
+.navlink:visited {
+    text-decoration: none;
+    font-size: 12px;
+    font-family: Open Sans, sans-serif;
+    font-weight: 500;
+    color: #2F6465;
+}
+
+.navlink:hover,
+.navlink:active {
+    color: #088;
+}
+
+.button:hover,
+button[type="button"]:hover {
+    background: #f3f3f3 !important;
+}
+
+p.navlinks {
+    margin-left: 185px;
+}
+
+#button-div {
+    margin-left: 100px;
+    min-width:575px;
+    padding:0 !important;
+}
+
+#title {
+    font-family: Open Sans, sans-serif;
+    font-size: 24px;
+    margin-left: -3px;
+    margin-right: 50px;
+}
+
+#fish {
+    margin-top: 5px;
+    margin-left: 0px;
+}
+
+linedwrap {
+    width: 95% !important;
+    min-width: 700px;
+    margin-left: 13px;
+}
+
+#main {
+    width: 90% !important;
+}
+
+.checkbox {
+    margin-left: 3px;
+    margin-top: 16px;
+    -webkit-appearance: none;
+    background-color: #fafafa;
+    border: 1px solid #cacece;
+    padding: 7px;
+    border-radius: 3px;
+    display: inline-block;
+    position: relative;
+}
+
+.checkbox:active,
+.checkbox:checked:active {
+    border: 1px solid #cacece;
+}
+
+input[type="checkbox"]:focus {
+    outline: 0;
+}
+
+.checkbox:checked {
+    color: #99a1a7;
+    border: 1px solid #cacece;
+}
+
+.checkbox:checked:after {
+    content: '\2714';
+    font-size: 12px;
+    position: absolute;
+    top: 0px;
+    left: 2px;
+    color: #99a1a7;
+}
+
+#checkText {
+    margin-top: 13px;
+    margin-left: 8px;
+    display: inline-block;
+    position: relative;
+    font-size: 12px;
+}
+
+#checkText a {
+    color: black;
+}
+
+.button,
+button[type="button"] {
+    cursor: pointer;
+    background-color: #fff !important;
+    padding: 5px 15px !important;
+    text-decoration: none !important;
+    border: 1px solid #e1e1e1 !important;
+    font-size: 14px !important;
+    font-family: Open Sans, sans-serif !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    margin: 10px 20px 0 0 !important;
+}
+
+.handle {
+    margin-top: -15px;
+    background: #f7f7f7;
+    height: 20px;
+    user-select: none;
+    cursor: row-resize;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+
+.handle:before {
+    content: '\2261';
+    /* https://en.wikipedia.org/wiki/Triple_bar */
+    color: #999;
+    position: absolute;
+    left: 50%;
+}
+
+.handle:hover {
+    background: #f0f0f0;
+}
+
+.handle:hover:before {
+    color: #000;
+}
