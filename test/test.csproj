@@ -17,5 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
+    <ProjectReference Include="..\editor\editor.csproj" />
   </ItemGroup>
 </Project>
