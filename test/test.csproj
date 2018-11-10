@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="Abbotware.Interop.NUnit" Version="1.0.0" />
+    <PackageReference Include="Flurl.Http" Version="2.4.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Class1.cs" />

@@ -8,24 +8,23 @@ using System.Threading;
 using Dialogic;
 using Newtonsoft.Json;
 
+#pragma warning disable RECS0022
+
 namespace Dialogic.NewServer
 {
     public class DialogicServer
     {
+        const string SERVER_PATH = "/dialogic/editor/";
+
         public static string SERVER_URL;
         public static int SERVER_PORT;
 
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responder;
 
-        static ChatRuntime runtime;
-
         public DialogicServer(Func<HttpListenerRequest, string> func, string host)
         {
-            if (func == null) throw new ArgumentException
-                ("Responder Func required");
-
-            responder = func;
+            this.responder = func ?? throw new ArgumentException("Responder required");
             CreateNewListener(host).Start();
         }
 
@@ -35,10 +34,11 @@ namespace Dialogic.NewServer
         public HttpListener CreateNewListener(string hostname)
         {
             string uri = null;
+
             int newPort = -1;
             if (hostname == "rednoise.org")
             {
-                uri = "http://rednoise.org:8082/dialogic/editor/";
+                uri = "http://rednoise.org:8082" + SERVER_PATH;
                 Console.WriteLine("Trying: " + uri + "...");
                 listener = new HttpListener();
                 listener.Prefixes.Add(uri);
@@ -49,13 +49,15 @@ namespace Dialogic.NewServer
                 while (true) // choose a random port
                 {
                     listener = new HttpListener();
-                    // IANA suggests the range 49152 to 65535 for private ports
+
+                    // IANA suggests 49152-65535 for private ports
                     newPort = r.Next(49152, 65535);
-                    if (usedPorts.Contains(newPort))
-                    {
-                        continue;
-                    }
-                    uri = "http://" + hostname + ":" + newPort + "/dialogic/editor/";
+
+                    if (usedPorts.Contains(newPort)) continue;
+
+                    newPort = 8082;
+
+                    uri = "http://" + hostname + ":" + newPort + SERVER_PATH;
 
                     listener.Prefixes.Add(uri);
                     try
@@ -70,7 +72,7 @@ namespace Dialogic.NewServer
                     break;
                 }
             }
-            Console.WriteLine("Running editor on " + uri);
+            Console.WriteLine("Running dialogic-server on " + uri);
 
             return listener;
         }
@@ -137,15 +139,10 @@ namespace Dialogic.NewServer
                 listener.Stop();
                 listener.Close();
             }
-#pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
             catch (Exception) { /* ignore */ }
-#pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
         }
 
-     
-
-
-        public static string RequestHandlerX(HttpListenerRequest request)
+        /*public static string RequestHandlerX(HttpListenerRequest request)
         {
 
             IDictionary<string, string> kvs = ParsePostData(request);
@@ -215,7 +212,7 @@ namespace Dialogic.NewServer
             }
 
             return html;
-        }
+        }*/
 
         public static void Main(string[] args)
         {

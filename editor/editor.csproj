@@ -12,10 +12,4 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="DialogicServer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DialogicServer.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-  </ItemGroup>
 </Project>

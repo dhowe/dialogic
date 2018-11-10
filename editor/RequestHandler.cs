@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace Dialogic.NewServer
 {
@@ -23,13 +22,16 @@ namespace Dialogic.NewServer
 
             var labels = new Dictionary<string, JsonNode>();
 
+            JsonNode.IDGEN = 0; // hack for new ids each request
+
             runtime.Chats().ForEach(chat =>
             {
                 labels[chat.text] = new JsonNode(chat.text,
                     chat.OutgoingLabels(), chat.ToTree());
             });
 
-            return NodesToJSON(labels);
+            var jsCode = JsonNode.Escape(NodesToJS(labels));
+            return Result.Success(jsCode).ToJSON(); 
         }
 
         public static string Validate(IDictionary<string, string> kvs)
@@ -54,7 +56,7 @@ namespace Dialogic.NewServer
             }
             catch (Exception e)
             {
-                return Result.Error(e.Message, e, -1).ToJSON();
+                return Result.Error(e.Message).ToJSON();
             }
 
             if (result.IsNullOrEmpty()) result = "\"\"";
@@ -67,22 +69,23 @@ namespace Dialogic.NewServer
             IDictionary<string, string> kvs = ParsePostData(request);
             string type = kvs.ContainsKey("type") ? kvs["type"] : null;
 
-            if (string.IsNullOrEmpty(type))
-            {
-                return Result.Error("Empty request 'type': " + kvs.Stringify()).ToJSON();
-            }
+            if (string.IsNullOrEmpty(type)) return Result.Error
+                ("Empty request 'type': " + kvs.Stringify()).ToJSON();
 
-            if (!ValidateKeys(type, kvs))
-            {
-                return Result.Error("Badly-formed request" + kvs.Stringify()).ToJSON();
-            }
+            if (!ValidateKeys(type, kvs)) return Result.Error
+                ("Badly-formed request" + kvs.Stringify()).ToJSON();
 
+            Console.WriteLine("REQ: " + kvs.Stringify().Replace("\n", "\\n"));
 
-            if (type == "visualize") return Visualize(kvs);
-            if (type == "validate") return Validate(kvs);
-            if (type == "execute") return Execute(kvs);
+            var result = "Invalid request type: " + type;
 
-            return "Invalid request type: " + type;
+            if (type == "visualize") result = Visualize(kvs);
+            if (type == "validate") result = Validate(kvs);
+            if (type == "execute") result = Execute(kvs);
+
+            Console.WriteLine("RES: " + result.Replace("\n","\\n") + "\n");
+
+            return result;
         }
 
         // -------------–-------------–-------------–-------------–-------------–-----------
@@ -124,17 +127,17 @@ namespace Dialogic.NewServer
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
         {
+            //Console.WriteLine("ParsePostData: " + request.HasEntityBody + " " + request.ContentType);
+
             var result = new Dictionary<string, string>();
 
             try
             {
                 if (request.HasEntityBody)
                 {
-                    Stream body = request.InputStream;
-                    Encoding encoding = request.ContentEncoding;
-                    StreamReader reader = new System.IO.StreamReader(body, encoding);
+                    StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding);
 
-                    if (request.ContentType == "application/x-www-form-urlencoded")
+                    if (request.ContentType.StartsWith("application/x-www-form-urlencoded", StringComparison.InvariantCulture)) // DCH: startsWith 11/10
                     {
                         string s = reader.ReadToEnd();
                         string[] pairs = s.Split('&');
@@ -155,8 +158,12 @@ namespace Dialogic.NewServer
                             }
                         }
                     }
+                    else
+                    {
+                        Console.WriteLine("Unexpected Content-type: " + request.ContentType);
+                    }
 
-                    body.Close();
+                    request.InputStream.Close();
                     reader.Close();
                 }
             }
@@ -164,6 +171,9 @@ namespace Dialogic.NewServer
             {
                 ChatRuntime.Warn(ex);
             }
+
+            //Console.WriteLine("RESULT: " + request.Stringify());
+
 
             return result;
         }
@@ -191,60 +201,56 @@ namespace Dialogic.NewServer
             return "ERROR: " + msg;
         }
 
-        private static string NodesToJSON(Dictionary<string, JsonNode> chatNodes)
+        private static string NodesToJS(Dictionary<string, JsonNode> chatNodes)
         {
-            var chats = "\nvar chats = {\n";
-            var nodes = "\nvar nodes = new vis.DataSet([\n";
-            var edges = "\nvar edges = new vis.DataSet([\n";
+            var chats = "var chats = {\n";
+            var nodes = "var nodes = new vis.DataSet([\n";
+            var edges = "var edges = new vis.DataSet([\n";
             foreach (var node in chatNodes.Values)
             {
                 chats += "  \"" + node.Id + "\": \"" + node.Data + "\",\n";
                 nodes += "  { id: " + node.Id + ", label: '" + node.Name + "' },\n";
                 node.Labels.ForEach(l => edges += "  { from: " + node.Id + ", to: "
-                    + chatNodes[l].Id + " },\n");
+                    + LookupNodeId(chatNodes, l) + " },\n");
             }
             chats += "};\n";
             nodes += "]);\n";
-            edges += "]);\n";
+            edges += "]);";
 
             return chats + nodes + edges;
         }
 
+        private static int LookupNodeId(Dictionary<string, JsonNode> dict, string key)
+        {
+            return dict.ContainsKey(key) ? dict[key].Id : -1; // TODO: editor should show warning here
+        }
     }
 
-    internal class Result
+    public class Result
     {
-        internal static string OK = "OK";
-        internal static string ERR = "ERROR";
+        public static string OK = "OK", ERR = "ERROR";
 
-        Result()
+        public string Status;
+        public string Data;
+        public int LineNo = -1;
+
+        public string ToJSON()
         {
+            return "{ \"status\": \"" + Status + "\", \"lineNo\": "
+                + LineNo + ", \"data\": \"" +  Data + "\" }";
         }
 
-        internal string Status;
-        internal string Data;
-        internal int LineNo = -1;
-        //Exception Exception;
-
-        internal string ToJSON()
-        {
-
-            //return JsonConvert.SerializeObject(this);
-            return "{ \"status\": \"" + Status + "\", \"lineNo\":"
-                + LineNo + ", \"data\": \"" + Data + "\" }";
-        }
-
-        internal static Result Error(string error, Exception e = null, int lineNo = -1)
+        public static Result Error(string error, Exception e = null, int lineNo = -1)
         {
             return new Result()
             {
-                Status = ERR,
-                Data = e.Message,
-                LineNo = lineNo
+                Data = e != null ? e.Message : error,
+                LineNo = lineNo,
+                Status = ERR
             };
         }
 
-        internal static Result Success(string code)
+        public static Result Success(string code)
         {
             return new Result()
             {
@@ -254,9 +260,9 @@ namespace Dialogic.NewServer
         }
     }
 
-    class JsonNode
+    public class JsonNode
     {
-        private static int IDGEN = 0;
+        public static int IDGEN = 0;
 
         public JsonNode(string name, List<string> labels, string data = null)
         {
@@ -271,7 +277,12 @@ namespace Dialogic.NewServer
         public string Name { get; }
         public List<string> Labels { get; }
 
-        private string Escape(string s)
+        public override string ToString()
+        {
+            return "[" + Id + ": " + Name + " " + Labels.Stringify() + "]";
+        }
+
+        public static string Escape(string s)
         {
             if (string.IsNullOrEmpty(s)) return string.Empty;
 
@@ -300,7 +311,7 @@ namespace Dialogic.NewServer
                         sb.Append("\\t");
                         break;
                     case '\n':
-                        sb.Append("\\n");
+                        sb.Append("\n");
                         break;
                     case '\f':
                         sb.Append("\\f");

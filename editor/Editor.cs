@@ -385,7 +385,7 @@ namespace Dialogic.Server
         }
 
 
-        public static void Main(string[] args)
+        public static void MainX(string[] args)
         {
             var runViz = true;
             var pageContent = "data/index.html";
