@@ -12,6 +12,19 @@ using Newtonsoft.Json;
 
 namespace Dialogic.NewServer
 {
+    /**
+     * To run, enter the editor directory and do $ dotnet build && dotnet run
+     * which will start the server at: http://localhost:8082/dialogic/editor/
+     * 
+     * There are 3 server functions, validate, execute, and visualize, each of which can be called via an HTTP Post
+     * request. Each returns a JSON object with 3 fields: 'status', 'data', and 'lineNo'.
+     * 
+     * If the request was successful, 'status' will be 'OK', and the requested data will be in the 'data' field.
+     * If the 'status' is 'ERROR', then 'data' will contain the message to display, and 'lineNo' will have the line number.
+     * 
+     * Each request include key-value pairs (as Post data). The only required key is 'type', whose value must be 'validate', 'execute', or 'visualize'.
+     * Additional valid parameters for each type follow below:
+     */
     public class DialogicServer
     {
         const string SERVER_PATH = "/dialogic/editor/";
@@ -24,7 +37,9 @@ namespace Dialogic.NewServer
 
         public DialogicServer(Func<HttpListenerRequest, string> func, string host)
         {
-            this.responder = func ?? throw new ArgumentException("Responder required");
+            if (func == null) throw new ArgumentException("Responder required");
+
+            this.responder = func;
             CreateNewListener(host).Start();
         }
 

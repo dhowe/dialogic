@@ -7,6 +7,7 @@ using Flurl.Http;
 namespace Dialogic.Test
 {
     // NEXT: selectionStart/End, File/URL loading
+    // TODO: disable tests automatically on travis
 
     [TestFixture]
     public class ServerTests : GenericTests
