@@ -6,6 +6,7 @@ using Flurl.Http;
 
 namespace Dialogic.Test
 {
+    // NEXT: selectionStart/End, File/URL loading
 
     [TestFixture]
     public class ServerTests : GenericTests
@@ -90,6 +91,8 @@ namespace Dialogic.Test
         [Test]
         public void VisualizeHttp2()
         {
+            if (!DO_HTTP_TESTS) return;
+
             var expect = "var chats = {\n  \"1\": \"CHAT A\nSAY a\nGO #b\",\n  \"2\": \"CHAT B\nSAY b\",\n};\nvar nodes = new vis.DataSet([\n  { id: 1, label: 'A' },\n  { id: 2, label: 'B' },\n]);\nvar edges = new vis.DataSet([\n  { from: 1, to: -1 },\n]);";
 
             var task = ServerUrl
