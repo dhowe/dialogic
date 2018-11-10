@@ -6,6 +6,12 @@
     <AssemblyName>DialogicEditor</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
   </ItemGroup>

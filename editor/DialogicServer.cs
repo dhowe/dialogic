@@ -22,8 +22,14 @@ namespace Dialogic.NewServer
      * If the request was successful, 'status' will be 'OK', and the requested data will be in the 'data' field.
      * If the 'status' is 'ERROR', then 'data' will contain the message to display, and 'lineNo' will have the line number.
      * 
-     * Each request include key-value pairs (as Post data). The only required key is 'type', whose value must be 'validate', 'execute', or 'visualize'.
-     * Additional valid parameters for each type follow below:
+     * Each request include key-value pairs (as Post data). The only required key is 'type', whose value must be one of 'validate', 'execute', or 'visualize'.
+     * Additional valid parameters for each type are included below.
+     * 
+     * 'validate': type = validate, code = codeToValidate, useValidators = true|false
+     * 
+     * 'execute': type = execute, code = codeToExecute, useValidators = true|false
+     * 
+     * 'visualize': type = visualize, code = codeToVisualize (all chats)
      */
     public class DialogicServer
     {
