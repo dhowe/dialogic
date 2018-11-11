@@ -66,6 +66,7 @@ namespace Dialogic.NewServer
 
         public static string HandleRequest(HttpListenerRequest request)
         {
+            Console.WriteLine("HandleRequest: "+request.Stringify());
             IDictionary<string, string> kvs = ParsePostData(request);
             string type = kvs.ContainsKey("type") ? kvs["type"] : null;
 
@@ -75,15 +76,16 @@ namespace Dialogic.NewServer
             if (!ValidateKeys(type, kvs)) return Result.Error
                 ("Badly-formed request: " + kvs.Stringify()).ToJSON();
 
-            Console.WriteLine("REQ: " + kvs.Stringify().Replace("\n", "\\n"));
 
+            Console.WriteLine("REQ: " + kvs.Stringify().Replace(System.Environment.NewLine, "\\n"));
+           
             var result = "Invalid request type: " + type;
 
             if (type == "visualize") result = Visualize(kvs);
             if (type == "validate") result = Validate(kvs);
             if (type == "execute") result = Execute(kvs);
 
-            Console.WriteLine("RES: " + result.Replace("\n","\\n") + "\n");
+            Console.WriteLine("RES: " + result.Replace(System.Environment.NewLine, "\\n") + "\n");
 
             return result;
         }

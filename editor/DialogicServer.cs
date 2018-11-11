@@ -28,7 +28,7 @@ namespace Dialogic.NewServer
      */
     public class DialogicServer
     {
-        const string SERVER_PATH = "/dialogic/editor/";
+        const string SERVER_PATH = "/dialogic/server/";
 
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responder;

@@ -1,16 +1,18 @@
-var storageKey = 'dialogic-editor-code';
-var lastSelection = "";
-var myTextarea = $("#main")[0];
-var editor = CodeMirror.fromTextArea(myTextarea,
-{
-  lineNumbers: true,
-  styleSelectedText: true
-});
+  var storageKey = 'dialogic-editor-code';
+  var lastSelection = "";
+  var myTextarea = $("#main")[0];
+
+  var editor = CodeMirror.fromTextArea(myTextarea,
+  {
+      lineNumbers: true,
+      styleSelectedText: true
+  });
 
   $(function ()
   {
     // ******** General UI ************//
-   // Resizing
+
+    // Resizing
     var isResizing = false,
     lastDownX = 0;
 
@@ -326,7 +328,7 @@ var editor = CodeMirror.fromTextArea(myTextarea,
     function sendRequest(data, type)
     {
       //tmp
-      var server = "http://localhost:8082/dialogic/editor/";
+      var server = "http://localhost:8082/dialogic/server/";
       $.ajax(
       {
         type: "POST",
@@ -437,15 +439,18 @@ var editor = CodeMirror.fromTextArea(myTextarea,
     updateContent(chats[data.id]);
   }
 
+  /* TEST DATA
+
   var chats = {
     "1": "CHAT start {preload=true}\nSET $emotion = simple | lost\nSET $place = Purgatory\nSET $neg = Nah | No | Nyet\nSET $verb = play | start | begin",
     "2": "CHAT GScriptTest {type=a,stage=b}\nSAY Welcome to my $emotion world\nNVM 1.1\nWAIT 3\nDO #Twirl\nWAIT {ForAnimation=true}\nSAY Thanks for visiting $place {speed=fast,style=whisper}\nGO #Prompt",
-    "3": "CHAT RePrompt {type=a,stage=b}\nDO #SadSpin\nASK (Really|Awww), don't you want to play a game?\n  OPT sure #Game\n  OPT $neg #RePrompt",
-    "4": "CHAT Prompt {notPlayed=true,type=a,stage=b}\nASK Do you want to $verb a game? {timeout=4,speed=fast}\n  OPT Sure #Game\n  OPT Nope #RePrompt",
+    "3": "CHAT RePrompt {type=a,stage=b}\nDO #SadSpin\nASK (Really|Awww), don't you want to play a game?\nOPT sure #Game\nOPT $neg #RePrompt",
+    "4": "CHAT Prompt {notPlayed=true,type=a,stage=b}\nASK Do you want to $verb a game? {timeout=4,speed=fast}\nOPT Sure #Game\n  OPT Nope #RePrompt",
     "5": "CHAT Game {type=a,stage=b,last=true}\nDO #HappyFlip {axis=y}\nSAY Great, let's play! {speed=slow,style=loud}\nSAY Bye! {speed=fast}",
     "6": "CHAT OnTapEvent {noStart=true,resumeAfter=true}\nDO #TapResponse\nSAY Ok, I see you!\nSAY Wait, is that (cat | dog | artichoke).articlize()?",
     "7": "CHAT MyWorld {noStart=true,chatMode=grammar}\nSET start = My world is a $adj, $adj place.\nSET adj = creepy | lonely | dark | forgotten | crepuscular\nSAY $start",
   };
+
   var nodes = new vis.DataSet([
     { id: 1, label: 'start' },
     { id: 2, label: 'GScriptTest' },
@@ -455,6 +460,7 @@ var editor = CodeMirror.fromTextArea(myTextarea,
     { id: 6, label: 'OnTapEvent' },
     { id: 7, label: 'MyWorld' },
   ]);
+
   var edges = new vis.DataSet([
     { from: 2, to: 4 },
     { from: 3, to: 5 },
@@ -467,3 +473,5 @@ var editor = CodeMirror.fromTextArea(myTextarea,
   var opts = { manipulation: { editNode: editChat, initiallyActive: true } };
   new vis.Network(document.getElementById('network'),
     { nodes: nodes, edges: edges}, opts);
+
+  */

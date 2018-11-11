@@ -16,7 +16,7 @@ namespace Dialogic.Test
         const string ServerUrl = "http://localhost:8082/dialogic/editor/";
 
         // Set to true to test the running editor via http (always false in travis)
-        public static bool DO_HTTP_TESTS = false && Environment.GetEnvironmentVariable("CI") != "true";
+        public static bool DO_HTTP_TESTS = true && Environment.GetEnvironmentVariable("CI") != "true";
 
         // ------------------------------- HTTP Tests --------------------------------
 
@@ -27,19 +27,32 @@ namespace Dialogic.Test
 
             var expect = "CHAT Hello\nSAY Hi";
             var task = ServerUrl
-                .PostUrlEncodedAsync(new { type = "validate", code = "CHAT Hello\nSAY Hi" })
+                .PostUrlEncodedAsync(new { type = "validate", code = expect })
                 .ReceiveJson<Result>();
             task.Wait();
             Assert.AreEqual(Result.OK, task.Result.Status);
             Assert.AreEqual(expect, task.Result.Data);
 
-
             task = ServerUrl
-                .PostUrlEncodedAsync(new { type = "validate", code = "CHAT Hello\nSAY Hi", useValidators = "false" })
+                .PostUrlEncodedAsync(new { type = "validate", code = expect, useValidators = "false" })
                 .ReceiveJson<Result>();
             task.Wait();
             Assert.AreEqual(Result.OK, task.Result.Status);
             //Console.WriteLine(task.Result.Data);
+            Assert.AreEqual(expect, task.Result.Data);
+
+            expect = string.Join("\n", new[] {
+                "CHAT RePrompt",
+                "DO #SadSpin",
+                "ASK(Really| Awww), don't you want to play a game?",
+                "OPT sure #Game",
+                "OPT $neg #RePrompt"});
+            task = ServerUrl
+                .PostUrlEncodedAsync(new { type = "validate", code = expect, useValidators = "false" })
+                .ReceiveJson<Result>();
+            task.Wait();
+            Console.WriteLine(task.Result.Data);
+            Assert.AreEqual(Result.OK, task.Result.Status);
             Assert.AreEqual(expect, task.Result.Data);
         }
 
@@ -137,6 +150,22 @@ namespace Dialogic.Test
                 { "type", "validate" }, { "code", lines }, { "useValidators", "true" }};
             result = RequestHandler.Validate(kvs);
             Assert.That(result, Is.EqualTo(JSONResult(lines)));
+        }
+
+        [Test]
+        public void ValidateDirect2()
+        {
+
+            var text = string.Join("\n", new [] {
+                "CHAT RePrompt",
+                "DO #SadSpin",
+                "ASK(Really| Awww), don't you want to play a game?",
+                "OPT sure #Game",
+                "OPT $neg #RePrompt"});
+            var kvs = new Dictionary<string, string>() {
+                { "type", "validate" }, { "code", string.Join("\n", text) }, { "useValidators", "false" }};
+            var result = RequestHandler.Validate(kvs);
+            Assert.That(result, Is.EqualTo(JSONResult(text)));
         }
 
         [Test]
