@@ -24,10 +24,13 @@
       <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
       <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
   </div>
-
+<div id="container">
   <div id="network"></div>
 
   <div id="editor">
+    <div class="showNetwork" title="Show Network" ><<</div>
+    <div id="drag"></div>
+
   <div class="editor-close"></div>
 
       <span id="errorLine" style="display: none;"></span>
@@ -48,9 +51,9 @@
 
       </form>
 
-      <section id="result-container" class="%%CCLASS%%">
-        <pre id="executeResult" style="font-size: 13px" class="executeResult %%RCLASS%%"></pre>
-        <pre id="result" style="font-size: 13px" class="%%RCLASS%%"></pre>
+      <section id="result-container">
+        <pre id="executeResult" style="font-size: 13px" class=""></pre>
+        <pre id="result" style="font-size: 13px" class=""></pre>
       </section>
       <div class="CodeMirror-dialog" id="loadURLDialog">
         <div class="CodeMirror-dialog-top">
@@ -70,6 +73,7 @@
 
   </div>
 
+</div>
 <script src="main.js"></script>
 
 </body>

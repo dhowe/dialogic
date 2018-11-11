@@ -9,6 +9,33 @@ var editor = CodeMirror.fromTextArea(myTextarea,
 
   $(function ()
   {
+    // ******** General UI ************//
+   // Resizing
+    var isResizing = false,
+    lastDownX = 0;
+
+    var container = $('#container'),
+        left = $('#network'),
+        right = $('#editor'),
+        handle = $('#drag');
+
+    handle.on('mousedown', function (e) {
+        isResizing = true;
+        lastDownX = e.clientX;
+    });
+
+    $(document).on('mousemove', function (e) {
+        if (!isResizing)
+            return;
+        var offsetRight = container.width() - (e.clientX - container.offset().left);
+        left.css('right', offsetRight);
+        left.css('width', window.innerWidth - offsetRight);
+        right.css('width', offsetRight);
+    }).on('mouseup', function (e) {
+        // stop resizing
+        isResizing = false;
+    });
+
     // ******** State Editor ************//
     loadFromStorage();
     // var lastEdit = editor.getValue();
@@ -52,8 +79,15 @@ var editor = CodeMirror.fromTextArea(myTextarea,
     // ******** Click Handlers **********//
     $(".editor-close").click(function ()
     {
-      console.log("close")
       toggleNetworkView(true);
+    });
+    $(".vis-close").click(function ()
+    {
+      toggleNetworkView(false);
+    });
+    $(".showNetwork").click(function ()
+    {
+      toggleNetworkView("split");
     });
 
     // setup button handlers
@@ -108,9 +142,41 @@ var editor = CodeMirror.fromTextArea(myTextarea,
       // highlightErrorLine();
     }
 
-    function updateEditor(data){
+    function updateEditor(data, type) {
+      var response = JSON.parse(jsonEscape(data));
+      $("#result-container").show();
+
+      switch (type) {
+        case "validate":
+        $("#result").text(inverseJsonEscape(response.data));
+        if (response.status == "OK") {
+            $("#result").attr("class","success");
+        } else {
+          $("#result").attr("class","error");
+        }
+        break;
+        case "execute":
+        $("#executeResult").text(inverseJsonEscape(response.data));
+        if (response.status == "OK") {
+            $("#executeResult").attr("class","success");
+        } else {
+          $("#executeResult").attr("class","error");
+        }
+        break;
+        default:
+      }
+      onLoad();
 
     }
+
+    function jsonEscape(str)  {
+      return str.replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t");
+    }
+
+    function inverseJsonEscape(str) {
+      return str.replace(/\\\\n/g, "\n").replace(/\\\\r/g, "\r").replace(/\\\\t/g, "\t");
+    }
+
 
     function highlightErrorLine()
     {
@@ -166,7 +232,7 @@ var editor = CodeMirror.fromTextArea(myTextarea,
     {
       var resText = $("#result").text();
       // only show execute if validation is successfull
-      if (resText.length && resText.indexOf('%RESULT%') < 0 && $("#result").attr('class') == "success")
+      if (resText.length && $("#result").attr('class') == "success")
       {
         $("#execute").prop("disabled", false);
         $("#validate").prop("disabled", true);
@@ -186,7 +252,7 @@ var editor = CodeMirror.fromTextArea(myTextarea,
       var formData = $("#form").serializeArray();
       formData.push(
       {
-        name: 'mode',
+        name: 'type',
         value: execute ? 'execute' : 'validate'
       });
 
@@ -195,7 +261,6 @@ var editor = CodeMirror.fromTextArea(myTextarea,
         var content = editor.getValue();
         var startIdx = editor.getCursor(true);
         var endIdx = editor.getCursor(false);
-
         formData.push(
         {
           name: "selectionStart",
@@ -211,12 +276,12 @@ var editor = CodeMirror.fromTextArea(myTextarea,
         formData.push(
         {
           name: "selection",
-          value: execute ? $("#result").text() : processSelectedText(content, startIdx.line, endIdx.line)
+          value: execute ? $("#result").text() :
+              processSelectedText(content, startIdx.line, endIdx.line)
         });
 
       }
-
-      sendRequest(formData);
+      sendRequest(formData, execute ? 'execute' : 'validate');
     }
 
     function onLoadURLClicked()
@@ -258,22 +323,24 @@ var editor = CodeMirror.fromTextArea(myTextarea,
       }
     }*/
 
-    function sendRequest(data)
+    function sendRequest(data, type)
     {
       //tmp
-      updateEditor(fakeData);
+      var server = "http://localhost:8082/dialogic/editor/";
+      $.ajax(
+      {
+        type: "POST",
+        data: data,
+        url: server,
+        crossDomain: true,
+        contentType: 'application/x-www-form-urlencoded',
+        success: function (data) {
+          updateEditor(data, type)
+        },
+        error: function (xhr, status) {
+        }
+      });
 
-      // $.ajax(
-      // {
-      //   type: "POST",
-      //   data: data,
-      //   url: "%%URL%%", //TODO: new server address
-      //   contentType: 'application/x-www-form-urlencoded',
-      //   success: function (data)
-      //   {
-      //     updateEditor(data)
-      //   }
-      // });
     }
 
     function processSelectedText(code, startIdx, endIdx)
@@ -343,23 +410,21 @@ var editor = CodeMirror.fromTextArea(myTextarea,
     if (typeof val != 'string'){
       $("#editor").toggle(!val);
       $("#network").toggle(val);
+      $(".showNetwork").toggle(!val);
       $("#editor, #network").width("100%");
       !val && setTimeout(function() {
-        console.log("TRIGGER!");
         $("#editor").focus();
         $('#editor').trigger('click');
       }, 1000);
-    } else if(val == "split") {
+    } else if (val == "split") {
       $("#editor").toggle(true);
       $("#network").toggle(true);
       $("#editor").width("49%");
       $("#network").width("49%");
     }
-
   }
 
   function updateContent(content){
-      console.log(editor);
       editor.setValue(content);
       $("#main").val(content);
   }
@@ -368,8 +433,8 @@ var editor = CodeMirror.fromTextArea(myTextarea,
 
     console.log("editChat: ", data, chats[data.id]);
     // load the editor with id=data.id, name=data.label
-    updateContent(chats[data.id]);
     toggleNetworkView("split");
+    updateContent(chats[data.id]);
   }
 
   var chats = {

@@ -15,20 +15,20 @@ namespace Dialogic.NewServer
     /**
      * To run, enter the editor directory and do $ dotnet build && dotnet run
      * which will start the server at: http://localhost:8082/dialogic/editor/
-     * 
+     *
      * There are 3 server functions, validate, execute, and visualize, each of which can be called via an HTTP Post
      * request. Each returns a JSON object with 3 fields: 'status', 'data', and 'lineNo'.
-     * 
+     *
      * If the request was successful, 'status' will be 'OK', and the requested data will be in the 'data' field.
      * If the 'status' is 'ERROR', then 'data' will contain the message to display, and 'lineNo' will have the line number.
-     * 
+     *
      * Each request include key-value pairs (as Post data). The only required key is 'type', whose value must be one of 'validate', 'execute', or 'visualize'.
      * Additional valid parameters for each type are included below.
-     * 
+     *
      * 'validate': type = validate, code = codeToValidate, useValidators = true|false
-     * 
+     *
      * 'execute': type = execute, code = codeToExecute, useValidators = true|false
-     * 
+     *
      * 'visualize': type = visualize, code = codeToVisualize (all chats)
      */
     public class DialogicServer
@@ -135,6 +135,7 @@ namespace Dialogic.NewServer
                         var buf = Encoding.UTF8.GetBytes(rstr);
                         ctx.Response.ContentLength64 = buf.Length;
                         ctx.Response.OutputStream.Write(buf, 0, buf.Length);
+                        ctx.Response.AppendHeader("Access-Control-Allow-Origin", "*");
                     }
                     catch (Exception e)
                     {
@@ -242,4 +243,3 @@ namespace Dialogic.NewServer
         }
     }
 }
-

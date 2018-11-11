@@ -31,7 +31,7 @@ namespace Dialogic.NewServer
             });
 
             var jsCode = JsonNode.Escape(NodesToJS(labels));
-            return Result.Success(jsCode).ToJSON(); 
+            return Result.Success(jsCode).ToJSON();
         }
 
         public static string Validate(IDictionary<string, string> kvs)
@@ -59,7 +59,7 @@ namespace Dialogic.NewServer
                 return Result.Error(e.Message).ToJSON();
             }
 
-            if (result.IsNullOrEmpty()) result = "\"\"";
+            if (result.IsNullOrEmpty()) result = " ";
 
             return Result.Success(result).ToJSON();
         }
