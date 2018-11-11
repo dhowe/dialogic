@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Dialogic.NewServer
 {
@@ -22,7 +22,7 @@ namespace Dialogic.NewServer
 
             var labels = new Dictionary<string, JsonNode>();
 
-            JsonNode.IDGEN = 0; // hack for new ids each request
+            JsonNode.ResetIds(); // new ids each request
 
             runtime.Chats().ForEach(chat =>
             {
@@ -48,7 +48,7 @@ namespace Dialogic.NewServer
 
             try
             {
-                if (runtime == null) throw new Exception("null runtime");
+                if (runtime == null) throw new Exception("no runtime");
 
                 runtime.Preload(globals);
                 result = runtime.InvokeImmediate(globals);
@@ -73,7 +73,7 @@ namespace Dialogic.NewServer
                 ("Empty request 'type': " + kvs.Stringify()).ToJSON();
 
             if (!ValidateKeys(type, kvs)) return Result.Error
-                ("Badly-formed request" + kvs.Stringify()).ToJSON();
+                ("Badly-formed request: " + kvs.Stringify()).ToJSON();
 
             Console.WriteLine("REQ: " + kvs.Stringify().Replace("\n", "\\n"));
 
@@ -120,15 +120,11 @@ namespace Dialogic.NewServer
                 return Result.Error(code, e, -1);
             }
 
-            //Console.WriteLine("PARSE: "+ code);
-
             return Result.Success(code);
         }
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
         {
-            //Console.WriteLine("ParsePostData: " + request.HasEntityBody + " " + request.ContentType);
-
             var result = new Dictionary<string, string>();
 
             try
@@ -137,7 +133,8 @@ namespace Dialogic.NewServer
                 {
                     StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding);
 
-                    if (request.ContentType.StartsWith("application/x-www-form-urlencoded", StringComparison.InvariantCulture)) // DCH: startsWith 11/10
+                    if (request.ContentType.StartsWith("application/x-www-form-urlencoded",
+                        StringComparison.InvariantCulture)) //== -> startsWith 11/10
                     {
                         string s = reader.ReadToEnd();
                         string[] pairs = s.Split('&');
@@ -172,33 +169,13 @@ namespace Dialogic.NewServer
                 ChatRuntime.Warn(ex);
             }
 
-            //Console.WriteLine("RESULT: " + request.Stringify());
-
-
             return result;
         }
 
-
-        static bool ValidateKeys(string type, IDictionary<string, string> kvs)
+        private static bool ValidateKeys(string type, IDictionary<string, string> kvs)
         {
-            if (type == "visualize")
-            {
-                return true;
-            }
-            if (type == "validate")
-            {
-                return true;
-            }
-            if (type == "execute")
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private static string OnError(string msg, Exception ex, int lineno = -1)
-        {
-            return "ERROR: " + msg;
+            // must have non-empty code key
+            return !string.IsNullOrEmpty(kvs["code"]); 
         }
 
         private static string NodesToJS(Dictionary<string, JsonNode> chatNodes)
@@ -311,7 +288,7 @@ namespace Dialogic.NewServer
                         sb.Append("\\t");
                         break;
                     case '\n':
-                        sb.Append("\n");
+                        sb.Append("\n"); // not-escaped
                         break;
                     case '\f':
                         sb.Append("\\f");
@@ -334,6 +311,11 @@ namespace Dialogic.NewServer
             }
 
             return sb.ToString();
+        }
+
+        internal static void ResetIds()
+        {
+            IDGEN = 0;
         }
     }
 }

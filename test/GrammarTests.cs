@@ -1702,24 +1702,6 @@ namespace Dialogic.Test
                 .Or.EqualTo("The angry cat bit the tiny child"));
         }
 
-        [Test]
-        public void GenerativeGrammarTendar()
-        {
-            string[] lines = {
-                "CHAT MS1_capRequest_Generative { type = capReq, stage = S1, length = short}",
-                "SET whatif = (what if| hypothetical | proposition | guppy proposition | thinking)",
-                "SET scans = (scan time | scans | scans for food | scan fresh flake | replenish flake | food resupply scan)",
-                "SET emotions = (emotion | facefeels | human expressive profile| feelings)",
-                "SAY($whatif.capitalize() you |$whatif.capitalize())(($scans |$scans ?) |$emotions $scans)"
-            };
-            ChatRuntime rt = new ChatRuntime();
-            rt.ParseText(string.Join("\n", lines));
-            var s = rt.InvokeImmediate(globals);
-            Console.WriteLine(s);
-            //Assert.That(s.IsOneOf(new[] { "a Dog", "a Then" }));
-        }
-
-
         public static string _AllCaps(string s) => s.ToUpper();
     }
 }

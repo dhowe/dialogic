@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
@@ -32,9 +30,6 @@ namespace Dialogic.NewServer
     {
         const string SERVER_PATH = "/dialogic/editor/";
 
-        public static string SERVER_URL;
-        public static int SERVER_PORT;
-
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responder;
 
@@ -46,14 +41,9 @@ namespace Dialogic.NewServer
             CreateNewListener(host).Start();
         }
 
-        static List<int> usedPorts = new List<int>();
-        static Random r = new Random();
-
         public HttpListener CreateNewListener(string hostname)
         {
-            string uri = "http://"+hostname+":8082" + SERVER_PATH;
-
-            //Console.WriteLine("Trying: " + uri + "...");
+            string uri = "http://" + hostname + ":8082" + SERVER_PATH;
 
             listener = new HttpListener();
             listener.Prefixes.Add(uri);
@@ -62,28 +52,6 @@ namespace Dialogic.NewServer
             Console.WriteLine("Running dialogic-server on " + uri);
 
             return listener;
-        }
-
-        public static string LocalIPAddress() // not used now
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    var local = ip.ToString();
-                    if (local.StartsWithAny("127.", "192.168.", "10.", "172."))
-                    {
-                        local = "localhost";
-                    }
-                    else if (local == "138.16.162.17")
-                    {
-                        local = "rednoise.org";
-                    }
-                    return local;
-                }
-            }
-            throw new Exception("No IPv4 network adapters with a valid address");
         }
 
         public void Run()
@@ -97,8 +65,7 @@ namespace Dialogic.NewServer
                     {
                         if (ctx == null) return;
 
-                        var rstr = responder(ctx.Request);
-                        var buf = Encoding.UTF8.GetBytes(rstr);
+                        var buf = Encoding.UTF8.GetBytes(responder(ctx.Request));
                         ctx.Response.ContentLength64 = buf.Length;
                         ctx.Response.OutputStream.Write(buf, 0, buf.Length);
                         ctx.Response.AppendHeader("Access-Control-Allow-Origin", "*");

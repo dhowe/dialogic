@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+
 using Dialogic.NewServer;
 using NUnit.Framework;
 using Flurl.Http;
@@ -13,7 +15,7 @@ namespace Dialogic.Test
     {
         const string ServerUrl = "http://localhost:8082/dialogic/editor/";
 
-        public static bool DO_HTTP_TESTS = false;
+        public static bool DO_HTTP_TESTS = true;
 
         // ------------------------------- HTTP Tests --------------------------------
 
@@ -28,7 +30,6 @@ namespace Dialogic.Test
                 .ReceiveJson<Result>();
             task.Wait();
             Assert.AreEqual(Result.OK, task.Result.Status);
-            //Console.WriteLine(task.Result.Data);
             Assert.AreEqual(expect, task.Result.Data);
 
 
@@ -68,6 +69,7 @@ namespace Dialogic.Test
                 .PostUrlEncodedAsync(new { type = "execute", code = "CHAT Hello\nSAY Hi" })
                 .ReceiveJson<Result>();
             task.Wait();
+            //Console.WriteLine(task.Result.Data);
             Assert.AreEqual(Result.OK, task.Result.Status);
             Assert.AreEqual(expect, task.Result.Data);
         }
