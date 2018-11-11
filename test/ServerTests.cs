@@ -15,7 +15,7 @@ namespace Dialogic.Test
     {
         const string ServerUrl = "http://localhost:8082/dialogic/editor/";
 
-        public static bool DO_HTTP_TESTS = false;
+        public static bool DO_HTTP_TESTS = true && Environment.GetEnvironmentVariable("CI") != "true";
 
         // ------------------------------- HTTP Tests --------------------------------
 
