@@ -99,7 +99,7 @@ namespace Dialogic.NewServer
             var validators = kvs.ContainsKey("useValidators")
                 && kvs["useValidators"].Equals("true");
 
-            if (kvs.ContainsKey("selectionStart"))
+            if (kvs.ContainsKey("selectionStart")) // TODO or JS?
             {
                 code = kvs["selection"];
                 var startIdx = kvs["selectionStart"];
