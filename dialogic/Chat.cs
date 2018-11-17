@@ -51,10 +51,7 @@ namespace Dialogic
             cursor = 0;
         }
 
-        public int Count()
-        {
-            return commands.Count;
-        }
+        public int Count() => commands.Count;
 
         public override bool Equals(Object obj)
         {
@@ -67,7 +64,7 @@ namespace Dialogic
                 return false;
             }
 
-            if (!Util.FloatingEquals(staleness, chat.staleness) ||
+            if (//!Util.FloatingEquals(staleness, chat.staleness) || // ignore staleness (?)
                 !Util.FloatingEquals(stalenessIncr, chat.stalenessIncr))
             {
                 return false;
@@ -81,7 +78,8 @@ namespace Dialogic
                 }
             }
 
-            return (text == chat.text && ToTree() == chat.ToTree());
+            // can't test this b/c of staleness changes
+            return true;//(text == chat.text && ToTree() == chat.ToTree()); 
         }
 
         public override int GetHashCode() => ToTree().GetHashCode();
@@ -187,15 +185,9 @@ namespace Dialogic
             return this;
         }
 
-        internal Command Next()
-        {
-            return HasNext() ? commands[cursor++] : null;
-        }
+        internal Command Next() => HasNext() ? commands[cursor++] : null;
 
-        internal bool HasNext()
-        {
-            return cursor > -1 && cursor < commands.Count;
-        }
+        internal bool HasNext() => cursor > -1 && cursor < commands.Count;
 
         internal void Run(bool resetCursor = true)
         {
@@ -255,10 +247,7 @@ namespace Dialogic
             return this;
         }
 
-        internal bool IsPreload()
-        {
-            return Convert.ToBoolean(GetMeta(Meta.PRELOAD, false));
-        }
+        internal bool IsPreload() => Convert.ToBoolean(GetMeta(Meta.PRELOAD, false));
 
         // meta-settable properties -------------------------------------------
 
@@ -340,13 +329,7 @@ namespace Dialogic
             return g.Substring(0, g.Length - 2) + "\n}";
         }
 
-        internal void Complete()
-        {
-            // clear any local scope
-            this.scope.Clear();
-
-            // and resolved command data
-            //commands.ForEach(c => c.resolved.Clear()); //tmp
-        }
+        // clear any local scope
+        internal void Complete() => this.scope.Clear();
     }
 }

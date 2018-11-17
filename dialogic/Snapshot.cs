@@ -157,6 +157,10 @@ namespace Dialogic
                     if (parts.Length != 2) throw new DialogicException
                         ("Bad option:" + options[i]);
                     Opt opt = new Opt();
+                    parts[1].TrimFirst(Ch.LABEL);
+                    //if (parts[1].StartsWith(Ch.LABEL))
+                    //    parts[1] = parts[1].Substring(1);
+                    //}
                     opt.Init(parts[0], Ch.LABEL + parts[1], null);
                     ask.AddOption(opt);
                 }

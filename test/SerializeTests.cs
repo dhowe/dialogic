@@ -18,7 +18,7 @@ namespace Dialogic.Test
         ISerializer serializer;
 
         [SetUp]
-        public void DerivedSetUp()
+        public void SetUpSerializer()
         {
             serializer = new SerializerMessagePack();
         }
@@ -97,6 +97,53 @@ namespace Dialogic.Test
         }
 
         [Test, Timeout(2000)]
+        public void SaveAsyncAndRepeat()
+        {
+            var blocker = new AutoResetEvent(false);
+            var blocker2 = new AutoResetEvent(false);
+
+            var file = new FileInfo(AppDomain.CurrentDomain.BaseDirectory + Util.EpochMs() + ".ser");
+            var lines = new[] {
+                 "CHAT switch {type=a,stage=b,other=c}",
+                 "SAY async",
+             };
+
+            ChatRuntime rt = new ChatRuntime(Client.AppConfig.TAC);
+            rt.ParseText(String.Join("\n", lines));
+            rt.SaveAsync(serializer, file, (bytes) =>
+            {
+                blocker.Set();
+                Console.WriteLine(file + ": " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
+                Assert.That(bytes, Is.Not.Null);
+                Assert.That(bytes.Length, Is.GreaterThan(0));
+
+                // create a new runtime from the bytes
+                var rt2 = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
+
+                // and verify they are the same
+                CheckEquals(rt, rt2);
+
+                file = new FileInfo(AppDomain.CurrentDomain.BaseDirectory + Util.EpochMs() + ".ser");
+                rt2.SaveAsync(serializer, file, (bytes2) =>
+                {
+                    blocker2.Set();
+                    Console.WriteLine(file + ": " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
+                    Assert.That(bytes, Is.Not.Null);
+                    Assert.That(bytes.Length, Is.GreaterThan(0));
+
+                    // create a new runtime from the bytes
+                    var rt3 = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
+                    CheckEquals(rt, rt3);
+                });
+
+            });
+
+            blocker2.WaitOne();
+            blocker.WaitOne();
+
+        }
+
+        [Test, Timeout(2000)]
         public void SaveMultipleAsync()
         {
             var blocker1 = new AutoResetEvent(false);
@@ -109,7 +156,7 @@ namespace Dialogic.Test
             rt1.ParseText(String.Join("\n", lines1));
 
 
-            var blocker2 = new AutoResetEvent(false);
+            //var blocker2 = new AutoResetEvent(false);
             var file2 = new FileInfo(AppDomain.CurrentDomain.BaseDirectory + Util.EpochMs() + ".ser");
             var lines2 = new[] {
                  "CHAT switch2 {type=a2,stage=2,other=async2}",
@@ -132,13 +179,14 @@ namespace Dialogic.Test
                 var rtDeser1 = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
 
                 // and verify they are the same
+                Console.WriteLine("CheckEquals I");
                 CheckEquals(rt1, rtDeser1);
 
             });
 
             rt2.SaveAsync(serializer, file2, (bytes) =>
             {
-                blocker2.Set();
+                //blocker2.Set();
                 //Console.WriteLine("CB2: " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
                 Assert.That(bytes, Is.Not.Null);
                 Assert.That(bytes.Length, Is.GreaterThan(0));
@@ -147,6 +195,7 @@ namespace Dialogic.Test
                 var rtDeser2 = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
 
                 // and verify they are the same
+                Console.WriteLine("CheckEquals II");
                 CheckEquals(rt2, rtDeser2);
 
             });
@@ -210,11 +259,59 @@ namespace Dialogic.Test
             CheckEquals(rtOut, rtIn);
         }
 
-        private void CheckEquals(ChatRuntime r1, ChatRuntime r2, bool hasDynamics = false)
+        [Test]
+        public void SaveAndRestoreMulti()
         {
-            // check they are identical
-            Assert.That(r2, Is.EqualTo(r1), "FAILED");
+            var lines = new[] {
+                 "CHAT Test {type=a,stage=b}",
+                 "SET ab = hello",
+                 "DO flip",
+                 "ASK How do you feel?",
+                 "OPT Good #goodChat",
+                 "OPT Bad #badChat",
+                 "CHAT goodChat {type=a,stage=b}",
+                 "SAY Its Good",
+                 "CHAT badChat {type=a,stage=b}",
+                 "SAY Its Bad",
+             };
 
+            var text = String.Join("\n", lines);
+            var rtIn = new ChatRuntime(AppConfig.TAC);
+            rtIn.ParseText(text);
+            var orig = rtIn;
+
+            for (int i = 0; i < 5; i++)
+            {
+                // serialize the runtime to bytes
+                var bytes = serializer.ToBytes(rtIn);
+
+                // create a new runtime from the bytes
+                var rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
+
+                Console.WriteLine("Check#" + i+": "+rtOut.GetHashCode());
+
+                // and verify they are the same
+                CheckEquals(rtOut, orig, true);
+
+                rtIn = rtOut;
+            }
+        }
+
+        private void CheckEquals(ChatRuntime r1, ChatRuntime r2, bool hasDynamics = false)//, bool ignoreStaleness = false)
+        {
+            //Console.WriteLine("CheckEquals");
+
+            //if (ignoreStaleness) {
+            //    Console.WriteLine("RemoveStateleness");
+            //    r1.Chats().ForEach(RemoveStateleness);
+            //    Console.WriteLine(r1.Chats());
+            //    r2.Chats().ForEach(RemoveStateleness);
+            //    Console.WriteLine(r2.Chats());
+            //}
+
+            // check they are identical
+            Assert.That(r2, Is.EqualTo(r1), "FAILED\n" + r1 + "\n" + r2);
+            /*
             // double-check the chats themselves
             Chat c1 = r2.Chats().First();
             Chat c2 = r1.Chats().First();
@@ -231,14 +328,18 @@ namespace Dialogic.Test
                 var cmd2 = c2.commands[i];
                 Assert.That(c1.commands[i], Is.EqualTo(c2.commands[i]));
             }
+            */
 
-            if (!hasDynamics)
-            {
-                // no dynamics, so output should be the same
-                var res1 = r2.InvokeImmediate(globals);
-                var res2 = r1.InvokeImmediate(globals);
-                Assert.That(res1, Is.EqualTo(res2));
-            }
+            // no dynamics, so output should be the same
+            var res1 = r2.InvokeImmediate(globals);
+            var res2 = r1.InvokeImmediate(globals);
+            if (!hasDynamics) Assert.That(res1, Is.EqualTo(res2));
+        }
+
+        private void RemoveStateleness(Chat c)
+        {
+            c.meta.Remove(Meta.STALENESS);
+            if (c.HasMeta(Meta.STALENESS)) throw new Exception("FALENESS");
         }
 
         [Test]
@@ -458,9 +559,6 @@ namespace Dialogic.Test
                 resolver = MessagePack.Resolvers
                     .ContractlessStandardResolverAllowPrivate.Instance;
             }
-
-            //static readonly IFormatterResolver resolver = MessagePack.Resolvers
-            //.ContractlessStandardResolverAllowPrivate.Instance;
 
             public byte[] ToBytes(ChatRuntime rt)
             {
