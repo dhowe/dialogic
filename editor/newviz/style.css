@@ -169,22 +169,32 @@ pre#executeResult {
     border: 1px solid #c0c0c0;
     margin: auto;
     position:relative;
-    top: -300px;
+    top: 80px;
     left: 0px;
     display: none;
     background-color: rgba(255, 255, 255, 0.95)
 }
-
+#showDialog {
+  float:right;
+}
 #closeDialog {
     float: right;
 }
 
-#loadUrlPathDiv input {
-    margin: 10px 0;
+#loadPathDiv input {
+    margin: 8px 0;
     font-size: 14px;
     width: 100% !important;
+    font-family: sans-serif;
+    color: grey;
 }
-
+#urlPath {
+  border:solid 1px #ddd;
+  padding: 4px;
+}
+.buttonset {
+  padding: 8px 0;
+}
 button:disabled {
     opacity: .5;
 }
@@ -311,6 +321,20 @@ button[type="button"] {
     font-weight: 500 !important;
     color: #333 !important;
     margin: 2px 20px 0 0 !important;
+}
+button:focus, canvas:focus, div:focus{
+  outline:0;
+}
+
+.button.top{
+  border: 2px solid #2F6465 !important;
+  color:#2F6465 !important;
+  font-size: 16px;
+  font-weight: 600 !important;
+}
+.button.top:hover {
+  background-color:#2F6465 !important;
+  color:white !important;
 }
 
 .handle {

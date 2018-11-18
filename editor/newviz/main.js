@@ -1,18 +1,28 @@
-  var storageKey = 'dialogic-editor-code';
-  var lastSelection = "";
-  var myTextarea = $("#main")[0];
+$(function () {
 
-  var editor = CodeMirror.fromTextArea(myTextarea,
-  {
-      lineNumbers: true,
-      styleSelectedText: true
-  });
+var storageKey = 'dialogic-editor-code';
+var lastSelection = "";
+var myTextarea = $("#main")[0];
+var chatData = {
+      chats: [],
+      nodes: [],
+      edges: []
+    };
+var opts = {
+  manipulation: {
+    editNode: editChat,
+    initiallyActive: true }
+};
+var network = new vis.Network(document.getElementById('network'),
+  { nodes: chatData.nodes, edges: chatData.edges}, opts);
+var editor = CodeMirror.fromTextArea(myTextarea,
+{
+  lineNumbers: true,
+  styleSelectedText: true
+});
 
-  $(function ()
-  {
-    // ******** General UI ************//
-
-    // Resizing
+// ******** General UI ************//
+   // Resizing
     var isResizing = false,
     lastDownX = 0;
 
@@ -39,7 +49,10 @@
     });
 
     // ******** State Editor ************//
-    loadFromStorage();
+    // loadFromStorage();
+    toggleNetworkView(false);
+    updateContent("Enter your code here");
+
     // var lastEdit = editor.getValue();
 
     editor.on("beforeSelectionChange", function (cm, change)
@@ -69,7 +82,7 @@
       }*/
 
       // save current change to storage
-      if (content != "Enter your script here")
+      if (content != "Enter your code here")
       {
         localStorage.setItem(storageKey, content);
       }
@@ -83,13 +96,17 @@
     {
       toggleNetworkView(true);
     });
+
     $(".vis-close").click(function ()
     {
-      toggleNetworkView(false);
+      // TODO: this is not working
+      closeNetWorkView();
     });
+
     $(".showNetwork").click(function ()
     {
       toggleNetworkView("split");
+      $(".showNetwork").hide();
     });
 
     // setup button handlers
@@ -116,11 +133,14 @@
       $("#loadURLDialog").show();
     });
 
-    $("#loadURL").click(onLoadURLClicked);
+    $('#importFilePicker').on('change', handleFileLoader);
 
-    $("#clearURL").click(function ()
+    $("#loadChats").click(onLoadClicked);
+
+    $("#clearLoad").click(function ()
     {
       $("#urlPath").val('');
+      $("#importFilePicker").val('');
     });
 
     $("#VRcheckbox").click(function ()
@@ -134,6 +154,7 @@
     // ******** End Click Handlers ************//
 
     onLoad();
+    updateNetworkViewer();
 
     // ******** Start Functions ************//
     function onLoad()
@@ -169,6 +190,11 @@
       }
       onLoad();
 
+    }
+
+    function closeNetWorkView(){
+      toggleNetworkView(false);
+      $(".showNetwork").show();
     }
 
     function jsonEscape(str)  {
@@ -213,7 +239,7 @@
       var input = editor.getValue(),
         selection = editor.getSelection();
 
-      if ((input.length > 0 && input != 'Enter your script here') || selection != lastSelection)
+      if ((input.length > 0 && input != 'Enter your code here') || selection != lastSelection)
       {
         $("#validate").prop("disabled", false);
         $("#execute").prop("disabled", true);
@@ -286,9 +312,45 @@
       sendRequest(formData, execute ? 'execute' : 'validate');
     }
 
-    function onLoadURLClicked()
+    function onLoadClicked()
     {
-      sendRequest($("#loadUrlPathDiv").serialize());
+      // console.log($("#loadPathDiv").serialize())
+      sendRequest($("#loadPathDiv").serialize());
+    }
+
+    function handleFileLoader(evt) {
+      var files = evt.target.files;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+           var dialogData;
+           try {
+             var data = JSON.parse(e.target.result);
+           } catch (e) {
+             console.log(e);
+             return;
+           }
+           chatsOnLoadHandler(data);
+      }
+      // TODO: folder
+      reader.readAsText(files[0]);
+      $("#loadURLDialog").hide();
+  }
+
+    function chatsOnLoadHandler(data) {
+        if (isValidData(data)) chatData = data;
+        updateNetworkViewer();
+        editChat({id:1})
+        //TODO: focus on the node
+    }
+
+    function updateNetworkViewer(){
+      network.setData(chatData);
+    }
+
+    function isValidData(data) {
+      // TODO: better validation?
+      if (data.chats != undefined && data.edges != undefined && data.nodes != undefined) return true;
+      else return false;
     }
 
     function loadFromStorage()
@@ -296,7 +358,7 @@
       if (localStorage)
       {
         var content = localStorage.getItem(storageKey);
-        if (content != undefined && content != 'Enter your script here')
+        if (content != undefined && content != 'Enter your code here')
         {
           updateContent(content)
         }
@@ -405,7 +467,7 @@
       window.addEventListener("mouseup", on_release);
     });
 
-  });
+
 
   function toggleNetworkView(val)
   {
@@ -432,46 +494,11 @@
   }
 
   function editChat(data, callback) {
-
-    console.log("editChat: ", data, chats[data.id]);
+    console.log("editChat: ", data, chatData.chats[data.id]);
     // load the editor with id=data.id, name=data.label
     toggleNetworkView("split");
-    updateContent(chats[data.id]);
+    updateContent(chatData.chats[data.id]);
   }
 
-  /* TEST DATA
-
-  var chats = {
-    "1": "CHAT start {preload=true}\nSET $emotion = simple | lost\nSET $place = Purgatory\nSET $neg = Nah | No | Nyet\nSET $verb = play | start | begin",
-    "2": "CHAT GScriptTest {type=a,stage=b}\nSAY Welcome to my $emotion world\nNVM 1.1\nWAIT 3\nDO #Twirl\nWAIT {ForAnimation=true}\nSAY Thanks for visiting $place {speed=fast,style=whisper}\nGO #Prompt",
-    "3": "CHAT RePrompt {type=a,stage=b}\nDO #SadSpin\nASK (Really|Awww), don't you want to play a game?\nOPT sure #Game\nOPT $neg #RePrompt",
-    "4": "CHAT Prompt {notPlayed=true,type=a,stage=b}\nASK Do you want to $verb a game? {timeout=4,speed=fast}\nOPT Sure #Game\n  OPT Nope #RePrompt",
-    "5": "CHAT Game {type=a,stage=b,last=true}\nDO #HappyFlip {axis=y}\nSAY Great, let's play! {speed=slow,style=loud}\nSAY Bye! {speed=fast}",
-    "6": "CHAT OnTapEvent {noStart=true,resumeAfter=true}\nDO #TapResponse\nSAY Ok, I see you!\nSAY Wait, is that (cat | dog | artichoke).articlize()?",
-    "7": "CHAT MyWorld {noStart=true,chatMode=grammar}\nSET start = My world is a $adj, $adj place.\nSET adj = creepy | lonely | dark | forgotten | crepuscular\nSAY $start",
-  };
-
-  var nodes = new vis.DataSet([
-    { id: 1, label: 'start' },
-    { id: 2, label: 'GScriptTest' },
-    { id: 3, label: 'RePrompt' },
-    { id: 4, label: 'Prompt' },
-    { id: 5, label: 'Game' },
-    { id: 6, label: 'OnTapEvent' },
-    { id: 7, label: 'MyWorld' },
-  ]);
-
-  var edges = new vis.DataSet([
-    { from: 2, to: 4 },
-    { from: 3, to: 5 },
-    { from: 3, to: 3 },
-    { from: 4, to: 5 },
-    { from: 4, to: 3 },
-  ]);
-
-  toggleNetworkView(true);
-  var opts = { manipulation: { editNode: editChat, initiallyActive: true } };
-  new vis.Network(document.getElementById('network'),
-    { nodes: nodes, edges: edges}, opts);
-
-  */
+}
+);
