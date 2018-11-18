@@ -66,7 +66,6 @@ namespace Dialogic.NewServer
 
         public static string HandleRequest(HttpListenerRequest request)
         {
-            Console.WriteLine("HandleRequest: "+request.Stringify());
             IDictionary<string, string> kvs = ParsePostData(request);
             string type = kvs.ContainsKey("type") ? kvs["type"] : null;
 
@@ -76,6 +75,7 @@ namespace Dialogic.NewServer
             if (!ValidateKeys(type, kvs)) return Result.Error
                 ("Badly-formed request: " + kvs.Stringify()).ToJSON();
 
+            // NOTE: logging incorrect in OS X terminal, use built-in console if needed
 
             Console.WriteLine("REQ: " + kvs.Stringify().Replace(System.Environment.NewLine, "\\n"));
            
@@ -99,12 +99,12 @@ namespace Dialogic.NewServer
             var validators = kvs.ContainsKey("useValidators")
                 && kvs["useValidators"].Equals("true");
 
-            if (kvs.ContainsKey("selectionStart")) // TODO or JS?
-            {
-                code = kvs["selection"];
-                var startIdx = kvs["selectionStart"];
-                var endIdx = kvs["selectionEnd"];
-            }
+            //if (kvs.ContainsKey("selectionStart")) // TODO: handle in JS
+            //{
+            //    code = kvs["selection"];
+            //    var startIdx = kvs["selectionStart"];
+            //    var endIdx = kvs["selectionEnd"];
+            //}
 
             try
             {
