@@ -449,20 +449,21 @@ namespace Dialogic
         /// </summary>
         public string ToJSON(ISerializer serializer) => serializer.ToJSON(this);
 
-        public override string ToString()
-        {
-            return "{ context: " + CurrentContext() +
-                ", chats:" + Chats().Stringify() + " }";
-        }
+        public override string ToString() => "{ context: "
+            + CurrentContext() + ", chats: " + Chats().Stringify() + " }";
 
         public override int GetHashCode()
         {
 #pragma warning disable RECS0025 // Non-readonly field referenced in 'GetHashCode()'
+
             var hash = firstChat.GetHashCode()
                 ^ validatorsDisabled.GetHashCode()
                 ^ strictMode.GetHashCode();
-            foreach (var chat in chats.Values) hash ^= chat.GetHashCode();
-#pragma warning restore RECS0025 // Non-readonly field referenced in 'GetHashCode()'
+
+            foreach (var chat in chats.Values)
+            {
+                hash ^= chat.GetHashCode();
+            }
 
             return hash;
         }
@@ -494,7 +495,8 @@ namespace Dialogic
         ///////////////////////////////////////////////////////////////////////
 
 
-        internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
+        internal string InvokeImmediate(IDictionary<string, object> globals,
+            string label = null, bool throwOnError = false)
         {
             if (chats.Count < 1) throw new DialogicException("No chats");
 
@@ -535,6 +537,7 @@ namespace Dialogic
                     }
                     catch (Exception ex)
                     {
+                        if (throwOnError) throw ex;
                         Warn(ex);
                         return result + "\n" + toFind + " failed";
                     }

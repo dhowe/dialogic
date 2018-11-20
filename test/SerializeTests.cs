@@ -82,7 +82,7 @@ namespace Dialogic.Test
             {
 
                 blocker.Set();
-                Console.WriteLine("CB: " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
+                //Console.WriteLine("CB: " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
                 Assert.That(bytes, Is.Not.Null);
                 Assert.That(bytes.Length, Is.GreaterThan(0));
 
@@ -113,7 +113,7 @@ namespace Dialogic.Test
             rt.SaveAsync(serializer, file, (bytes) =>
             {
                 blocker.Set();
-                Console.WriteLine(file + ": " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
+                //Console.WriteLine(file + ": " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
                 Assert.That(bytes, Is.Not.Null);
                 Assert.That(bytes.Length, Is.GreaterThan(0));
 
@@ -127,7 +127,7 @@ namespace Dialogic.Test
                 rt2.SaveAsync(serializer, file, (bytes2) =>
                 {
                     blocker2.Set();
-                    Console.WriteLine(file + ": " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
+                    //Console.WriteLine(file + ": " + (bytes != null ? bytes.Length + " bytes" : "Failed"));
                     Assert.That(bytes, Is.Not.Null);
                     Assert.That(bytes.Length, Is.GreaterThan(0));
 
@@ -179,7 +179,6 @@ namespace Dialogic.Test
                 var rtDeser1 = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
 
                 // and verify they are the same
-                Console.WriteLine("CheckEquals I");
                 CheckEquals(rt1, rtDeser1);
 
             });
@@ -195,7 +194,6 @@ namespace Dialogic.Test
                 var rtDeser2 = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
 
                 // and verify they are the same
-                Console.WriteLine("CheckEquals II");
                 CheckEquals(rt2, rtDeser2);
 
             });
@@ -288,51 +286,26 @@ namespace Dialogic.Test
                 // create a new runtime from the bytes
                 var rtOut = ChatRuntime.Create(serializer, bytes, AppConfig.TAC);
 
-                Console.WriteLine("Check#" + i+": "+rtOut.GetHashCode());
+                //Console.WriteLine("Check#" + i + ": " + rtOut.GetHashCode());
 
                 // and verify they are the same
                 CheckEquals(rtOut, orig, true);
 
                 rtIn = rtOut;
             }
+
+            //Console.WriteLine(rtIn);
         }
 
         private void CheckEquals(ChatRuntime r1, ChatRuntime r2, bool hasDynamics = false)//, bool ignoreStaleness = false)
         {
-            //Console.WriteLine("CheckEquals");
-
-            //if (ignoreStaleness) {
-            //    Console.WriteLine("RemoveStateleness");
-            //    r1.Chats().ForEach(RemoveStateleness);
-            //    Console.WriteLine(r1.Chats());
-            //    r2.Chats().ForEach(RemoveStateleness);
-            //    Console.WriteLine(r2.Chats());
-            //}
-
             // check they are identical
             Assert.That(r2, Is.EqualTo(r1), "FAILED\n" + r1 + "\n" + r2);
-            /*
-            // double-check the chats themselves
-            Chat c1 = r2.Chats().First();
-            Chat c2 = r1.Chats().First();
+       
+            // if no dynamics, output should be the same
+            var res1 = r2.InvokeImmediate(globals, null, true);
+            var res2 = r1.InvokeImmediate(globals, null, true);
 
-            Assert.That(c1, Is.EqualTo(c2));
-
-            //Console.WriteLine("TREES:\n" + c1.ToTree() + "\n" + c2.ToTree());
-
-            Assert.That(c1.ToTree(), Is.EqualTo(c2.ToTree()));
-            Assert.That(c1.text, Is.EqualTo(c2.text));
-            for (int i = 0; i < c1.commands.Count; i++)
-            {
-                var cmd1 = c1.commands[i];
-                var cmd2 = c2.commands[i];
-                Assert.That(c1.commands[i], Is.EqualTo(c2.commands[i]));
-            }
-            */
-
-            // no dynamics, so output should be the same
-            var res1 = r2.InvokeImmediate(globals);
-            var res2 = r1.InvokeImmediate(globals);
             if (!hasDynamics) Assert.That(res1, Is.EqualTo(res2));
         }
 
