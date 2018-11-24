@@ -3,23 +3,34 @@ $(function () {
 var storageKey = 'dialogic-editor-code';
 var lastSelection = "";
 var myTextarea = $("#main")[0];
-var chatData = {
-      chats: [],
-      nodes: [],
-      edges: []
-    };
-var opts = {
-  manipulation: {
-    editNode: editChat,
-    initiallyActive: true }
-};
-var network = new vis.Network(document.getElementById('network'),
-  { nodes: chatData.nodes, edges: chatData.edges}, opts);
 var editor = CodeMirror.fromTextArea(myTextarea,
 {
   lineNumbers: true,
   styleSelectedText: true
 });
+
+// network
+var chats = {"1": ""}; //dictionary
+var nodes = new vis.DataSet([{"id":1, "label":"new chat"}]);
+var edges = new vis.DataSet();
+var chatData = {
+  chats: chats,
+  nodes: nodes,
+  edges: edges
+}
+
+var opts = {
+  nodes:{
+    shape:'box'
+  },
+  manipulation: false
+};
+
+
+var network = new vis.Network(document.getElementById('network'),
+  { nodes: nodes,
+    edges: edges
+  }, opts);
 
 // ******** General UI ************//
    // Resizing
@@ -50,7 +61,7 @@ var editor = CodeMirror.fromTextArea(myTextarea,
 
     // ******** State Editor ************//
     // loadFromStorage();
-    toggleNetworkView(false);
+    toggleNetworkView("split");
     updateContent("Enter your code here");
 
     // var lastEdit = editor.getValue();
@@ -131,6 +142,11 @@ var editor = CodeMirror.fromTextArea(myTextarea,
     $("#showDialog").click(function ()
     {
       $("#loadURLDialog").show();
+    });
+
+    $("#saveChats").click(function ()
+    {
+       saveChats();
     });
 
     $('#importFilePicker').on('change', handleFileLoader);
@@ -318,33 +334,68 @@ var editor = CodeMirror.fromTextArea(myTextarea,
       sendRequest($("#loadPathDiv").serialize());
     }
 
+    function saveChats(){
+      // TODO
+      var filename = 'chat.json',
+      url = URL.createObjectURL(new Blob([ chatData ], { type: "text/plain" }));
+      chrome.downloads.download({
+        url : url,
+        filename : filename
+      });
+
+    }
+
     function handleFileLoader(evt) {
       var files = evt.target.files;
       var reader = new FileReader();
-      reader.onload = function(e) {
-           var dialogData;
-           try {
-             var data = JSON.parse(e.target.result);
-           } catch (e) {
-             console.log(e);
-             return;
-           }
-           chatsOnLoadHandler(data);
-      }
-      // TODO: folder
-      reader.readAsText(files[0]);
+      var fileList = [];
+      var allData;
+
+      // clear all the old data
+      chats = []
+      nodes.clear();
+      edges.clear();
+
+      [].forEach.call(files, function(file) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+             var dialogData;
+             try {
+               var data = JSON.parse(e.target.result);
+               chatsOnLoadHandler(data);
+             } catch (e) {
+               console.log(e);
+               return;
+             }
+        }
+
+        reader.readAsText(file);
+      });
+
       $("#loadURLDialog").hide();
   }
 
     function chatsOnLoadHandler(data) {
-        if (isValidData(data)) chatData = data;
+        if (isValidData(data)) {
+          chats  = Object.assign({}, chats, data.chats); // TODO: key conflict?
+          nodes.update(data.nodes);
+          edges.update(data.edges);
+        }
+
         updateNetworkViewer();
-        editChat({id:1})
-        //TODO: focus on the node
+
+        var nodeId = nodes.get()[0].id;
+        editChat(nodeId);
+        network.focus(nodeId + "");
+        network.selectNodes([nodeId])
     }
 
     function updateNetworkViewer(){
-      network.setData(chatData);
+      network.setData({
+            nodes: nodes,
+            edges: edges
+      });
     }
 
     function isValidData(data) {
@@ -467,8 +518,6 @@ var editor = CodeMirror.fromTextArea(myTextarea,
       window.addEventListener("mouseup", on_release);
     });
 
-
-
   function toggleNetworkView(val)
   {
     if (typeof val != 'string'){
@@ -493,12 +542,98 @@ var editor = CodeMirror.fromTextArea(myTextarea,
       $("#main").val(content);
   }
 
-  function editChat(data, callback) {
-    console.log("editChat: ", data, chatData.chats[data.id]);
+  function editChat(nodeId, callback) {
+    // console.log("editChat: ", nodeId, nodes.get(nodeId), chats[nodeId]);
     // load the editor with id=data.id, name=data.label
     toggleNetworkView("split");
-    updateContent(chatData.chats[data.id]);
+    $("#chatLabel").text(nodes.get(nodeId).label);
+    updateContent(chats[nodeId]);
   }
+
+  /**** Network UI ***/
+  network.on('doubleClick', function(event) {
+    if (event.nodes.length > 0) {
+      // On node: open editor
+      editChat(event.nodes[0]);
+
+    } else {
+      var newId = addNode(event);
+      network.disableEditMode();
+      editNode(event, {id:newId, label:'new'}, cancelNodeEdit);
+    }
+  });
+
+  // Right click / Ctrl click
+  network.on('oncontext', function(e){
+    e.event.preventDefault();
+    console.log("context", e);
+    if (e.nodes.length > 0) {
+      updatePopUpPosition(e, $('.popupMenu')[0])
+      $('.popupMenu').show();
+    }
+  });
+
+  network.on('click', function(e){
+
+    var clickOutsideMenu = function() {
+      var networkDiv = $('.vis-network')[0];
+      var popup = $('.popupMenu');
+      var left = popup.position().left + networkDiv.offsetLeft;
+      var top = popup.position().top + networkDiv.offsetTop;
+      var right = left + popup.width();
+      var bottom = top + popup.height();
+      return e.event.center.x < left || e.event.center.x > right || e.event.center.y < top || e.event.center.y > bottom;
+    }
+
+    if ( $('.popupMenu').is(":visible") && clickOutsideMenu() ) {
+      $('.popupMenu').hide();
+    }
+
+  });
+
+  $('#deleteNode').on('click', function(e){
+    network.deleteSelected(event.nodes);
+    $('.popupMenu').hide();
+  });
+
+  function updatePopUpPosition(e, popup) {
+    var networkDiv = $('.vis-network')[0];
+    mouseX = e.event.x ? e.event.x : e.event.center.x;
+    mouseY = e.event.y ? e.event.y : e.event.center.y;
+    popup.style.left = mouseX - networkDiv.offsetLeft + 'px';
+    popup.style.top = mouseY - networkDiv.offsetTop +'px';
+  }
+
+  function addNode(event) {
+    var updatedIds = nodes.add([{
+        label:'new',
+        x:event.pointer.canvas.x,
+        y:event.pointer.canvas.y
+    }]);
+    // initialize chats
+    chats[updatedIds[0]] = "";
+    // console.log(updatedIds[0], network)
+    network.selectNodes([updatedIds[0]]);
+    return updatedIds[0];
+  }
+
+  function cancelNodeEdit(callback) {
+    $('#node-popUp').hide();
+  }
+
+  function saveNodeData(data, callback) {
+      // console.log(data, data.id, $('#node-label')[0].value)
+      nodes.update(  { "id": data.id, "label":  $('#node-label')[0].value})
+      $('#node-popUp').hide();
+  }
+
+  function editNode(event, data, cancelAction, callback) {
+     document.getElementById('node-label').value = data.label;
+     document.getElementById('node-saveButton').onclick = saveNodeData.bind(this, data, callback);
+     document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
+     updatePopUpPosition(event, $('#node-popUp')[0]);
+     $('#node-popUp').show();
+   }
 
 }
 );
