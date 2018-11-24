@@ -26,10 +26,28 @@
       <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/wiki/Command-Reference">Command Reference</a> &nbsp;|&nbsp;
       <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
       <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
-      <button class="button top" type="button" id="showDialog" title="Load">Load Chats</button>
+      <button class="button top" type="button" id="saveChats" title="Save Chats">Save Chats</button>
+      <button class="button top" type="button" id="showDialog" title="Load Chats">Load Chats</button>
+
   </div>
 <div id="container">
-  <div id="network"></div>
+  <div id="network">
+
+  </div>
+  <div id="node-popUp" style="display: none;">
+  <span id="node-operation">Edit Node</span> <br>
+  <table style="margin:auto;">
+    <tbody>
+    <tr>
+      <td>label</td><td><input id="node-label" value="new value"></td>
+    </tr>
+  </tbody></table>
+  <input type="button" value="save" id="node-saveButton">
+  <input type="button" value="cancel" id="node-cancelButton">
+</div>
+  <ul class="popupMenu">
+    <li id="deleteNode">Delete Node</li>
+  </ul>
 
   <div id="editor">
     <div class="showNetwork" title="Show Network" ><<</div>
@@ -41,6 +59,9 @@
       <span id="selection" style="display: none;"></span>
 
        <form name="main" id="form">
+         <h3 id="chatLabel">
+           New Chat
+         </h3>
          <div id="button-div" class="validate">
            <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
            <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
@@ -67,7 +88,7 @@
       <h4>Load Chats</h4>
     </div>
     <form id="loadPathDiv" class="dialog-content">
-      <input id="importFilePicker" type="file" name="filePath" accept="application/json" class="hiddenFileInput">
+      <input id="importFilePicker" type="file" multiple="multiple" name="filePath" accept="application/json" class="hiddenFileInput">
       <input type="text" name="path" id="urlPath" placeholder="Load from URL">
     </form>
       <div class="CodeMirror-dialog-bottom">
