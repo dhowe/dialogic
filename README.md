@@ -1,4 +1,5 @@
-_Interested in trying Dialogic in your game or voice-app? Send me a note at daniel-@-rednoise-dot-org..._
+Check our [Tendar](https://play.google.com/store/apps/details?id=com.TenderClaws.Tendar.home), the new AR game using Dialogic.
+Interested in using the tools in your game or voice-app? Send me a note at daniel-@-rednoise-dot-org..._
 
 # Dialogic :fish:
 
