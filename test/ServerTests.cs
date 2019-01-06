@@ -13,7 +13,7 @@ namespace Dialogic.Test
     [TestFixture]
     public class ServerTests : GenericTests
     {
-        const string ServerUrl = "http://localhost:8082/dialogic/editor/";
+        const string ServerUrl = "http://localhost:8082/dialogic/server/";
 
         // Set to true to test the running editor via http (always false in travis)
         public static bool DO_HTTP_TESTS = true && Environment.GetEnvironmentVariable("CI") != "true";
