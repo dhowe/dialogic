@@ -67,10 +67,9 @@ namespace Dialogic.NewServer
 
                         var buf = Encoding.UTF8.GetBytes(responder(ctx.Request));
                         ctx.Response.ContentLength64 = buf.Length;
-                        ctx.Response.OutputStream.Write(buf, 0, buf.Length);
+                        ctx.Response.ContentType = "application/json";
                         ctx.Response.AppendHeader("Access-Control-Allow-Origin", "*");
-                        ctx.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST");
-                        ctx.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
+                        ctx.Response.OutputStream.Write(buf, 0, buf.Length);
 
                     }
                     catch (Exception e)

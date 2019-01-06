@@ -186,7 +186,11 @@ var currentTextId = 1;
 
 
     function updateEditor(data, type) {
-      var response = JSON.parse(jsonEscape(data));
+      // var response = JSON.parse(jsonEscape(data));
+      // server sends back a JSON object
+
+      var response = data;
+
       $("#result-container").show();
 
       switch (type) {
