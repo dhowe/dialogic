@@ -69,6 +69,9 @@ namespace Dialogic.NewServer
                         ctx.Response.ContentLength64 = buf.Length;
                         ctx.Response.OutputStream.Write(buf, 0, buf.Length);
                         ctx.Response.AppendHeader("Access-Control-Allow-Origin", "*");
+                        ctx.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST");
+                        ctx.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
+
                     }
                     catch (Exception e)
                     {

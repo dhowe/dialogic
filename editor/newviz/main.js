@@ -191,7 +191,9 @@ var currentTextId = 1;
 
       switch (type) {
         case "validate":
-        $("#result").text(inverseJsonEscape(response.data));
+
+        $("#result").html(inverseJsonEscape(response.data));
+
         if (response.status == "OK") {
             $("#result").attr("class","success");
         } else {
@@ -306,9 +308,11 @@ var currentTextId = 1;
 
       if (editor.somethingSelected())
       {
-        var content = editor.getValue();
         var startIdx = editor.getCursor(true);
         var endIdx = editor.getCursor(false);
+        var content = execute ? $("#result").text() :
+            processSelectedText(content, startIdx.line, endIdx.line);
+
         formData.push(
         {
           name: "selectionStart",
