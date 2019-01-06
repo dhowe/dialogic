@@ -149,7 +149,7 @@ var currentTextId = 1;
 
     $("#saveChats").click(function ()
     {
-       saveChats();
+      saveFile(chatDada,"chats");
     });
 
     $('#importFilePicker').on('change', handleFileLoader);
@@ -338,14 +338,12 @@ var currentTextId = 1;
       sendRequest($("#loadPathDiv").serialize());
     }
 
-    function saveChats(){
-      console.log(JSON.stringify(chatData));
-      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chatData));
+    function saveFile(obj, name) {
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
       var dlAnchorElem = document.getElementById('downloadAnchorElem');
       dlAnchorElem.setAttribute("href", dataStr);
-      dlAnchorElem.setAttribute("download", "scene.json");
+      dlAnchorElem.setAttribute("download", name + ".json");
       dlAnchorElem.click();
-
     }
 
     function handleFileLoader(evt) {
