@@ -3,9 +3,11 @@
 <head>
   <title>Dialogic</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <!-- <script src="jquery-1.8.2.min.js"></script> -->
   <!--  VIS -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+
   <!--  Code Mirror -->
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
@@ -27,6 +29,7 @@
       <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
       <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
       <button class="button top" type="button" id="saveChats" title="Save Chats">Save Chats</button>
+      <a id="downloadAnchorElem" style="display:none"></a>
       <button class="button top" type="button" id="showDialog" title="Load Chats">Load Chats</button>
 
   </div>
@@ -35,15 +38,7 @@
 
   </div>
   <div id="node-popUp" style="display: none;">
-  <span id="node-operation">Edit Node</span> <br>
-  <table style="margin:auto;">
-    <tbody>
-    <tr>
-      <td>label</td><td><input id="node-label" value="new value"></td>
-    </tr>
-  </tbody></table>
-  <input type="button" value="save" id="node-saveButton">
-  <input type="button" value="cancel" id="node-cancelButton">
+<input id="node-label" value="new value">
 </div>
   <ul class="popupMenu">
     <li id="deleteNode">Delete Node</li>
@@ -59,7 +54,7 @@
       <span id="selection" style="display: none;"></span>
 
        <form name="main" id="form">
-         <h3 id="chatLabel">
+         <h3 id="chatLabel" contenteditable="true" spellcheck="false">
            New Chat
          </h3>
          <div id="button-div" class="validate">

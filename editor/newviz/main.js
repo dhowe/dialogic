@@ -9,15 +9,16 @@ var editor = CodeMirror.fromTextArea(myTextarea,
   styleSelectedText: true
 });
 
-// network
-var chats = {"1": ""}; //dictionary
-var nodes = new vis.DataSet([{"id":1, "label":"new chat"}]);
-var edges = new vis.DataSet();
+//data -> json
 var chatData = {
-  chats: chats,
-  nodes: nodes,
-  edges: edges
+  chats: {"1": ""},
+  nodes: {"id":1, "label":"new chat"},
+  edges: {}
 }
+// network
+var chats = {"1": ""};
+var nodes = new vis.DataSet([chatData.nodes]);
+var edges = new vis.DataSet();
 
 var opts = {
   nodes:{
@@ -26,12 +27,14 @@ var opts = {
   manipulation: false
 };
 
-
 var network = new vis.Network(document.getElementById('network'),
   { nodes: nodes,
     edges: edges
   }, opts);
 
+// Variables
+var isEditMode = false;
+var currentTextId = 1;
 // ******** General UI ************//
    // Resizing
     var isResizing = false,
@@ -180,6 +183,7 @@ var network = new vis.Network(document.getElementById('network'),
       toggleExe();
       // highlightErrorLine();
     }
+
 
     function updateEditor(data, type) {
       var response = JSON.parse(jsonEscape(data));
@@ -335,13 +339,12 @@ var network = new vis.Network(document.getElementById('network'),
     }
 
     function saveChats(){
-      // TODO
-      var filename = 'chat.json',
-      url = URL.createObjectURL(new Blob([ chatData ], { type: "text/plain" }));
-      chrome.downloads.download({
-        url : url,
-        filename : filename
-      });
+      console.log(JSON.stringify(chatData));
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chatData));
+      var dlAnchorElem = document.getElementById('downloadAnchorElem');
+      dlAnchorElem.setAttribute("href", dataStr);
+      dlAnchorElem.setAttribute("download", "scene.json");
+      dlAnchorElem.click();
 
     }
 
@@ -363,6 +366,7 @@ var network = new vis.Network(document.getElementById('network'),
              var dialogData;
              try {
                var data = JSON.parse(e.target.result);
+               chatData = data;
                chatsOnLoadHandler(data);
              } catch (e) {
                console.log(e);
@@ -548,6 +552,7 @@ var network = new vis.Network(document.getElementById('network'),
     toggleNetworkView("split");
     $("#chatLabel").text(nodes.get(nodeId).label);
     updateContent(chats[nodeId]);
+    currentTextId = nodeId;
   }
 
   /**** Network UI ***/
@@ -559,14 +564,13 @@ var network = new vis.Network(document.getElementById('network'),
     } else {
       var newId = addNode(event);
       network.disableEditMode();
-      editNode(event, {id:newId, label:'new'}, cancelNodeEdit);
+      editNode(event, {id:newId, label:'new'});
     }
   });
 
   // Right click / Ctrl click
   network.on('oncontext', function(e){
     e.event.preventDefault();
-    console.log("context", e);
     if (e.nodes.length > 0) {
       updatePopUpPosition(e, $('.popupMenu')[0])
       $('.popupMenu').show();
@@ -596,19 +600,24 @@ var network = new vis.Network(document.getElementById('network'),
     $('.popupMenu').hide();
   });
 
+   $('#chatLabel').keyup(function() {
+       nodes.update({ "id": currentTextId, "label": $("#chatLabel").text()})
+  });
+
   function updatePopUpPosition(e, popup) {
     var networkDiv = $('.vis-network')[0];
     mouseX = e.event.x ? e.event.x : e.event.center.x;
     mouseY = e.event.y ? e.event.y : e.event.center.y;
     popup.style.left = mouseX - networkDiv.offsetLeft + 'px';
-    popup.style.top = mouseY - networkDiv.offsetTop +'px';
+    popup.style.top = mouseY - networkDiv.offsetTop  +'px';
   }
 
   function addNode(event) {
     var updatedIds = nodes.add([{
         label:'new',
         x:event.pointer.canvas.x,
-        y:event.pointer.canvas.y
+        y:event.pointer.canvas.y,
+
     }]);
     // initialize chats
     chats[updatedIds[0]] = "";
@@ -617,22 +626,26 @@ var network = new vis.Network(document.getElementById('network'),
     return updatedIds[0];
   }
 
-  function cancelNodeEdit(callback) {
-    $('#node-popUp').hide();
+  function saveNodeData(data,event) {
+      if (isEditMode) {
+        nodes.update(  { "id": data.id, "label":  $('#node-label')[0].value})
+        if (event.keyCode ==13) {
+          $('#node-popUp').hide();
+          isEditMode = false;
+        }
+      }
   }
 
-  function saveNodeData(data, callback) {
-      // console.log(data, data.id, $('#node-label')[0].value)
-      nodes.update(  { "id": data.id, "label":  $('#node-label')[0].value})
-      $('#node-popUp').hide();
-  }
 
-  function editNode(event, data, cancelAction, callback) {
+  function editNode(event, data) {
+     isEditMode = true;
      document.getElementById('node-label').value = data.label;
-     document.getElementById('node-saveButton').onclick = saveNodeData.bind(this, data, callback);
-     document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
+     // $(document).keypress(function(e) {
+       document.onkeypress = saveNodeData.bind(this, data);
+     // document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
      updatePopUpPosition(event, $('#node-popUp')[0]);
      $('#node-popUp').show();
+
    }
 
 }
