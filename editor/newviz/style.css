@@ -30,7 +30,7 @@
     text-align: center;
 }
 #node-popUp input {
-  width:40px !important;
+  width:100px !important;
 }
 
 #node-popup input:focus, #node-popup:focus{

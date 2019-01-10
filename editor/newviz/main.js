@@ -9,16 +9,15 @@ var editor = CodeMirror.fromTextArea(myTextarea,
   styleSelectedText: true
 });
 
-//data -> json
 var chatData = {
-  chats: {"1": ""},
-  nodes: {"id":1, "label":"new chat"},
-  edges: {}
+  chats: ["CHAT NewChat"],
+  nodes: [{"id":0, "label":"NewChat"}],
+  edges: []
 }
 // network
-var chats = {"1": ""};
-var nodes = new vis.DataSet([chatData.nodes]);
+var nodes = new vis.DataSet(chatData.nodes);
 var edges = new vis.DataSet();
+
 
 var opts = {
   nodes:{
@@ -51,16 +50,19 @@ var currentTextId = 1;
     });
 
     $(document).on('mousemove', function (e) {
-        if (!isResizing)
-            return;
-        var offsetRight = container.width() - (e.clientX - container.offset().left);
-        left.css('right', offsetRight);
-        left.css('width', window.innerWidth - offsetRight);
-        right.css('width', offsetRight);
-    }).on('mouseup', function (e) {
-        // stop resizing
-        isResizing = false;
-    });
+         if (!isResizing)
+             return;
+         var offsetRight = container.width() - (e.clientX - container.offset().left);
+         left.css('right', offsetRight);
+         var newLeft = (window.innerWidth - offsetRight) / window.innerWidth * 100 + "%";
+         var newRight = offsetRight / window.innerWidth * 100 + "%";
+         left.css('width', newLeft);
+         right.css('width', newRight);
+         console.log(newLeft, newRight)
+     }).on('mouseup', function (e) {
+         // stop resizing
+         isResizing = false;
+     });
 
     // ******** State Editor ************//
     // loadFromStorage();
@@ -149,7 +151,8 @@ var currentTextId = 1;
 
     $("#saveChats").click(function ()
     {
-      saveFile(chatDada,"chats");
+       var toSave = chatData.chats.join("\n")
+       saveFile(toSave,"chats");
     });
 
     $('#importFilePicker').on('change', handleFileLoader);
@@ -346,13 +349,13 @@ var currentTextId = 1;
       sendRequest($("#loadPathDiv").serialize());
     }
 
-    function saveFile(obj, name) {
-      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
-      var dlAnchorElem = document.getElementById('downloadAnchorElem');
-      dlAnchorElem.setAttribute("href", dataStr);
-      dlAnchorElem.setAttribute("download", name + ".json");
-      dlAnchorElem.click();
-    }
+    function saveFile(data, name) {
+     var dataStr = "data:text/plain;charset=utf-8," + data;
+     var dlAnchorElem = document.getElementById('downloadAnchorElem');
+     dlAnchorElem.setAttribute("href", dataStr);
+     dlAnchorElem.setAttribute("download", name + ".gs");
+     dlAnchorElem.click();
+   }
 
     function handleFileLoader(evt) {
       var files = evt.target.files;
@@ -361,9 +364,13 @@ var currentTextId = 1;
       var allData;
 
       // clear all the old data
-      chats = []
       nodes.clear();
-      edges.clear();
+       edges.clear();
+       var newData = chatData = {
+         chats: [],
+         nodes: [],
+         edges: []
+       };
 
       [].forEach.call(files, function(file) {
         var reader = new FileReader();
@@ -371,9 +378,19 @@ var currentTextId = 1;
         reader.onload = function(e) {
              var dialogData;
              try {
-               var data = JSON.parse(e.target.result);
-               chatData = data;
-               chatsOnLoadHandler(data);
+               var chats = e.target.result.split(/(?=CHAT)/g);
+               for (var i = 0; i < chats.length; i++) {
+                 if (chats[i].indexOf("CHAT") != 0) continue;
+                 newData.chats.push(chats[i]);
+                 label =  /(?<=CHAT )[a-zA-Z_\d]+(?= |\n)/g.exec(chats[i].split("/n")[0])[0];
+                 var node = {};
+                 node["id"] = newData.chats.length-1;
+                 node["label"] = label;
+                 newData.nodes.push(node);
+                 //TODO: parse edges
+               }
+               // console.log(newData)
+               chatsOnLoadHandler(newData);
              } catch (e) {
                console.log(e);
                return;
@@ -381,14 +398,17 @@ var currentTextId = 1;
         }
 
         reader.readAsText(file);
-      });
+      });// Finish all the files
 
       $("#loadURLDialog").hide();
   }
 
     function chatsOnLoadHandler(data) {
         if (isValidData(data)) {
-          chats  = Object.assign({}, chats, data.chats); // TODO: key conflict?
+          //add to current chatData
+          chatData.chats.concat(data.chats);
+          chatData.nodes.concat(data.nodes);
+          chatData.edges.concat(data.edges);
           nodes.update(data.nodes);
           edges.update(data.edges);
         }
@@ -421,7 +441,7 @@ var currentTextId = 1;
         var content = localStorage.getItem(storageKey);
         if (content != undefined && content != 'Enter your code here')
         {
-          updateContent(content)
+           updateContent(chatData.chats[nodeId]);
         }
 
         var editorHeight = localStorage.getItem("editorHeight");
@@ -556,21 +576,22 @@ var currentTextId = 1;
     // console.log("editChat: ", nodeId, nodes.get(nodeId), chats[nodeId]);
     // load the editor with id=data.id, name=data.label
     toggleNetworkView("split");
-    $("#chatLabel").text(nodes.get(nodeId).label);
-    updateContent(chats[nodeId]);
-    currentTextId = nodeId;
+    updateContent(chatData.chats[nodeId]);
+    currentTextId = nodeId
   }
+
 
   /**** Network UI ***/
   network.on('doubleClick', function(event) {
     if (event.nodes.length > 0) {
       // On node: open editor
+      console.log(event)
       editChat(event.nodes[0]);
 
     } else {
       var newId = addNode(event);
       network.disableEditMode();
-      editNode(event, {id:newId, label:'new'});
+      editNode(event, {id:newId, label:'C(' + Date.now() + ")"});
     }
   });
 
@@ -615,33 +636,63 @@ var currentTextId = 1;
     mouseX = e.event.x ? e.event.x : e.event.center.x;
     mouseY = e.event.y ? e.event.y : e.event.center.y;
     popup.style.left = mouseX - networkDiv.offsetLeft + 'px';
-    popup.style.top = mouseY - networkDiv.offsetTop  +'px';
+    popup.style.top = mouseY - networkDiv.offsetTop - 50 +'px';
   }
 
   function addNode(event) {
-    var updatedIds = nodes.add([{
-        label:'new',
+    var label = 'C(' + Date.now() + ")";
+    var id = chatData.chats.length;
+    nodes.add([{
+        id: id,
+        label:label,
         x:event.pointer.canvas.x,
         y:event.pointer.canvas.y,
-
     }]);
     // initialize chats
-    chats[updatedIds[0]] = "";
-    // console.log(updatedIds[0], network)
-    network.selectNodes([updatedIds[0]]);
-    return updatedIds[0];
+    chatData.chats.push("");
+    chatData.nodes.push({
+      id:id ,
+      label:label
+    });
+    network.selectNodes([id]);
+    return id;
   }
 
-  function saveNodeData(data,event) {
-      if (isEditMode) {
-        nodes.update(  { "id": data.id, "label":  $('#node-label')[0].value})
-        if (event.keyCode ==13) {
-          $('#node-popUp').hide();
-          isEditMode = false;
-        }
-      }
-  }
+  function saveNodeData(node,event) {
 
+       if (isEditMode) {
+           var label = $('#node-label')[0].value;
+           nodes.update({ "id": node.id, "label":  label});
+         if (event.keyCode ==13) {
+           if (isValidLabel(label)) {
+             //update chatData.chats chatData.nodes,
+             chatData.nodes[node.id]["label"] = label;
+             chatData.chats[node.id] = "CHAT " + label; 
+           }
+           $('#node-popUp').hide();
+           isEditMode = false;
+         }
+       }
+   }
+
+   function updateChatLabelInScript(originalScript, label) {
+     return originalScript.replace(/(?<=CHAT )[a-zA-Z_\d]+(?= |\n)/g,label);
+   }
+
+   function isValidLabel(label) {
+   if (label == "" ) {
+     alert("Chat label can't be empty.");
+     return false
+   }
+   // check all the chat labels
+   for (var i = 0; i < chatData.nodes.length; i++) {
+     if (label == chatData.nodes[i].label) {
+       alert("Duplicate chat label, please use another chat label.");
+       return false
+     }
+   }
+   return true;
+ }
 
   function editNode(event, data) {
      isEditMode = true;
