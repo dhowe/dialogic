@@ -58,7 +58,6 @@ var currentTextId = 1;
          var newRight = offsetRight / window.innerWidth * 100 + "%";
          left.css('width', newLeft);
          right.css('width', newRight);
-         console.log(newLeft, newRight)
      }).on('mouseup', function (e) {
          // stop resizing
          isResizing = false;
@@ -585,7 +584,6 @@ var currentTextId = 1;
   network.on('doubleClick', function(event) {
     if (event.nodes.length > 0) {
       // On node: open editor
-      console.log(event)
       editChat(event.nodes[0]);
 
     } else {
@@ -667,7 +665,7 @@ var currentTextId = 1;
            if (isValidLabel(label)) {
              //update chatData.chats chatData.nodes,
              chatData.nodes[node.id]["label"] = label;
-             chatData.chats[node.id] = "CHAT " + label; 
+             chatData.chats[node.id] = "CHAT " + label;
            }
            $('#node-popUp').hide();
            isEditMode = false;
