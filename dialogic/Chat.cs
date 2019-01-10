@@ -30,6 +30,7 @@ namespace Dialogic
             resolved = null; // not relevant for chats
             Reset();
         }
+
         internal static Chat Create(string name, ChatRuntime rt = null)
         {
             Chat c = new Chat();

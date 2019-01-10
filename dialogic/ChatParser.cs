@@ -231,20 +231,10 @@ namespace Dialogic
             }
         }
 
-        //private static Command LastOfType(Stack<Command> s, Type typeToFind)
-        //{
-        //    foreach (Command c in s)
-        //    {
-        //        if (c.GetType() == typeToFind) return c;
-        //    }
-        //    return null;
-        //}
-
         private void CreateDefaultChat()
         {
             var c = Chat.Create("C" + Util.EpochMs());
             RunInternalValidators(c);
-            //parsedCommands.Push(c);
             runtime.AddChat(c);
             activeChat = c;
         }
