@@ -589,7 +589,7 @@ var currentTextId = 1;
     } else {
       var newId = addNode(event);
       network.disableEditMode();
-      editNode(event, {id:newId, label:'C(' + Date.now() + ")"});
+      editNode(event, newId);
     }
   });
 
@@ -656,16 +656,16 @@ var currentTextId = 1;
     return id;
   }
 
-  function saveNodeData(node,event) {
+  function saveNodeData(id,event) {
 
        if (isEditMode) {
            var label = $('#node-label')[0].value;
-           nodes.update({ "id": node.id, "label":  label});
+           nodes.update({ "id": id, "label":  label});
          if (event.keyCode ==13) {
            if (isValidLabel(label)) {
              //update chatData.chats chatData.nodes,
-             chatData.nodes[node.id]["label"] = label;
-             chatData.chats[node.id] = "CHAT " + label;
+             chatData.nodes[id]["label"] = label;
+             chatData.chats[id] = "CHAT " + label;
            }
            $('#node-popUp').hide();
            isEditMode = false;
@@ -692,11 +692,20 @@ var currentTextId = 1;
    return true;
  }
 
-  function editNode(event, data) {
+ function getChatLabelFromId(id) {
+   console.log(chatData.nodes)
+  for (var i = 0; i < chatData.nodes.length; i++) {
+    if (id == chatData.nodes[i].id) {
+      return chatData.nodes[i].label;
+    }
+  }
+}
+
+  function editNode(event, id) {
      isEditMode = true;
-     document.getElementById('node-label').value = data.label;
+     document.getElementById('node-label').value = getChatLabelFromId(id);
      // $(document).keypress(function(e) {
-       document.onkeypress = saveNodeData.bind(this, data);
+       document.onkeypress = saveNodeData.bind(this, id);
      // document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
      updatePopUpPosition(event, $('#node-popUp')[0]);
      $('#node-popUp').show();
