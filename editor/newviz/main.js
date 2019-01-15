@@ -381,7 +381,7 @@ var currentTextId = 1;
                for (var i = 0; i < chats.length; i++) {
                  if (chats[i].indexOf("CHAT") != 0) continue;
                  newData.chats.push(chats[i]);
-                 label =  /(?<=CHAT )[a-zA-Z_\d]+(?= |\n)/g.exec(chats[i].split("/n")[0])[0];
+                 label =  /CHAT\s+([a-zA-Z_\d]+)/g.exec(chats[i].split("/n")[0])[0];
                  var node = {};
                  node["id"] = newData.chats.length-1;
                  node["label"] = label;
@@ -674,7 +674,7 @@ var currentTextId = 1;
    }
 
    function updateChatLabelInScript(originalScript, label) {
-     return originalScript.replace(/(?<=CHAT )[a-zA-Z_\d]+(?= |\n)/g,label);
+     return originalScript.replace(/CHAT\s+([a-zA-Z_\d]+)/g,label);
    }
 
    function isValidLabel(label) {
