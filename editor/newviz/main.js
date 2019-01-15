@@ -180,10 +180,12 @@ $(function () {
     switch (type) {
 
     case "validate":
-
-
       if (response.status == "OK") {
         $("#result").attr("class", "success");
+        if (!editor.somethingSelected()) {
+          //Only updateViz if the whole script of a single chat pass validation
+          updateViz(parseVizFromScript(editor.getValue()));
+        }
       } else {
         $("#result").attr("class", "error");
         //if something is selected, update line number
@@ -361,12 +363,15 @@ $(function () {
           for (var i = 0; i < chats.length; i++) {
             if (chats[i].indexOf("CHAT") != 0) continue;
             newData.chats.push(chats[i]);
-            label = /CHAT\s+([a-zA-Z_\d]+)/g.exec(chats[i].split("/n")[0])[0];
+            var parsedData = parseVizFromScript(chats[i]);
             var node = {};
             node["id"] = newData.chats.length - 1;
-            node["label"] = label;
+            node["label"] = parsedData.label;
             newData.nodes.push(node);
-            //TODO: parse edges
+            for  (var j = 0; j < parsedData.edges.length; j++) {
+              newData.edges.push(parsedData.edges[j]);
+            }
+
           }
           // console.log(newData)
           chatsOnLoadHandler(newData);
@@ -380,6 +385,29 @@ $(function () {
     }); // Finish all the files
 
     $("#loadURLDialog").hide();
+  }
+
+  function parseVizFromScript(chat){
+    var label = /CHAT\s+([a-zA-Z_\d]+)/g.exec(chat.split("/n")[0])[0];
+    //TODO: GO or ASK/OPT
+    //Example: GO #Chat27 , OPT No Thanks #Goodbye
+    var edges_go = /[GO]\s#([a-zA-Z_\d]+)/g.exec(chat);
+    var edges_opt = /[OPT]*#([a-zA-Z_\d]+)/g.exec(chat);
+    // console.log("GO:", edges_go);
+    // console.log("OPT:", edges_opt);
+    return {
+      label:label,
+      edges:edges
+    }
+  }
+
+  function updateViz(data){
+    //update label currentTextId
+    data.label && nodes.update({ "id": currentTextId, "label": data.label});
+    if (edges.length > 0) {
+      //update edges
+    }
+
   }
 
   function chatsOnLoadHandler(data) {
