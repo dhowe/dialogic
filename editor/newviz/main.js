@@ -171,7 +171,6 @@ $(function () {
     toggleValidation();
     // showSelection(); // This must be placed before toggleExe
     toggleExe();
-    // highlightErrorLine();
   }
 
   function updateEditor(response, type) {
@@ -182,13 +181,21 @@ $(function () {
 
     case "validate":
 
-      $("#result").html(jsonUnescape(response.data));
 
       if (response.status == "OK") {
         $("#result").attr("class", "success");
       } else {
         $("#result").attr("class", "error");
+        //if something is selected, update line number
+        if (editor.somethingSelected()) {
+          var startIdx = editor.getCursor(true);
+          var errorLine = parseInt(/Line\s+([\d]+)/g.exec(response.data)[1]);
+          errorLine = startIdx.line + errorLine;
+          response.data = "Line " + response.data.replace(/Line\s+([\d]+)/g, errorLine + "");
+        }
+        highlightErrorLine(errorLine);
       }
+      $("#result").html(jsonUnescape(response.data));
       break;
 
     case "execute":
@@ -220,9 +227,9 @@ $(function () {
     return str.replace(/\\\\n/g, "\n").replace(/\\\\r/g, "\r").replace(/\\\\t/g, "\t");
   }
 
-  function highlightErrorLine() {
-    if (!$("#errorLine").text().includes("ERRORLINE")) {
-      var idx = $("#errorLine").text() - 1;
+  function highlightErrorLine(errorLine) {
+    if (errorLine > 0) {
+      var idx = errorLine - 1;
       editor.addLineClass(idx, "background", 'line-error');
     }
   }
@@ -277,17 +284,15 @@ $(function () {
     event.preventDefault();
 
     var formData = $("#form").serializeArray(); //json
+
     formData.push({
       name: 'type',
       value: execute ? 'execute' : 'validate'
     });
 
     if (editor.somethingSelected()) {
-      var startIdx = editor.getCursor(true);
-      var endIdx = editor.getCursor(false);
-      var content = execute ? $("#result").text() :
-        processSelectedText(content, startIdx.line, endIdx.line);
-
+      formData[0].value = editor.getSelection();
+      // var content = processSelectedText(formData[0].value, startIdx.line, endIdx.line);
       // formData.push(
       // {
       //   name: "selectionStart",
@@ -306,7 +311,6 @@ $(function () {
       //   value: execute ? $("#result").text() :
       //       processSelectedText(content, startIdx.line, endIdx.line)
       // });
-
     }
     sendRequest(formToObj(formData));
   }
