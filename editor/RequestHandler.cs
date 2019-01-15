@@ -78,7 +78,7 @@ namespace Dialogic.NewServer
             // NOTE: logging incorrect in OS X terminal, use built-in console if needed
 
             Console.WriteLine("REQ: " + kvs.Stringify().Replace(System.Environment.NewLine, "\\n"));
-           
+
             var result = "Invalid request type: " + type;
 
             if (type == "visualize") result = Visualize(kvs);
@@ -135,9 +135,10 @@ namespace Dialogic.NewServer
                 {
                     StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding);
 
-                    if (request.ContentType.StartsWith("application/x-www-form-urlencoded",
+                    if (request.ContentType.StartsWith("application/json",
                         StringComparison.InvariantCulture)) //== -> startsWith 11/10
                     {
+                        //TODO: parse JSON object
                         string s = reader.ReadToEnd();
                         string[] pairs = s.Split('&');
 
@@ -177,7 +178,7 @@ namespace Dialogic.NewServer
         private static bool ValidateKeys(string type, IDictionary<string, string> kvs)
         {
             // must have non-empty code key
-            return !string.IsNullOrEmpty(kvs["code"]); 
+            return !string.IsNullOrEmpty(kvs["code"]);
         }
 
         private static string NodesToJS(Dictionary<string, JsonNode> chatNodes)
