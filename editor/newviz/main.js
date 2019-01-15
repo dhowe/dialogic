@@ -192,6 +192,7 @@ var currentTextId = 1;
       // server sends back a JSON object
 
       var response = data;
+      console.log(response)
 
       $("#result-container").show();
 
@@ -305,7 +306,7 @@ var currentTextId = 1;
     {
       event.preventDefault();
 
-      var formData = $("#form").serializeArray();
+      var formData = $("#form").serializeArray(); //json
       formData.push(
       {
         name: 'type',
@@ -319,26 +320,27 @@ var currentTextId = 1;
         var content = execute ? $("#result").text() :
             processSelectedText(content, startIdx.line, endIdx.line);
 
-        formData.push(
-        {
-          name: "selectionStart",
-          value: startIdx.line + "," + startIdx.ch
-        });
-
-        formData.push(
-        {
-          name: "selectionEnd",
-          value: endIdx.line + "," + endIdx.ch
-        });
-
-        formData.push(
-        {
-          name: "selection",
-          value: execute ? $("#result").text() :
-              processSelectedText(content, startIdx.line, endIdx.line)
-        });
+        // formData.push(
+        // {
+        //   name: "selectionStart",
+        //   value: startIdx.line + "," + startIdx.ch
+        // });
+        //
+        // formData.push(
+        // {
+        //   name: "selectionEnd",
+        //   value: endIdx.line + "," + endIdx.ch
+        // });
+        //
+        // formData.push(
+        // {
+        //   name: "selection",
+        //   value: execute ? $("#result").text() :
+        //       processSelectedText(content, startIdx.line, endIdx.line)
+        // });
 
       }
+      console.log(formData)
       sendRequest(formData, execute ? 'execute' : 'validate');
     }
 
@@ -470,6 +472,7 @@ var currentTextId = 1;
     function sendRequest(data, type)
     {
       //tmp
+      console.log(data)
       var server = "http://localhost:8082/dialogic/server/";
       $.ajax(
       {
@@ -477,11 +480,12 @@ var currentTextId = 1;
         data: data,
         url: server,
         crossDomain: true,
-        contentType: 'application/x-www-form-urlencoded',
+        contentType: 'application/json',
         success: function (data) {
           updateEditor(data, type)
         },
         error: function (xhr, status) {
+          console.log(xhr, status)
         }
       });
 
