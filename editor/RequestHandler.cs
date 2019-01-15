@@ -3,6 +3,8 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace Dialogic.NewServer
 {
@@ -66,6 +68,7 @@ namespace Dialogic.NewServer
 
         public static string HandleRequest(HttpListenerRequest request)
         {
+
             IDictionary<string, string> kvs = ParsePostData(request);
             string type = kvs.ContainsKey("type") ? kvs["type"] : null;
 
@@ -77,7 +80,9 @@ namespace Dialogic.NewServer
 
             // NOTE: logging incorrect in OS X terminal, use built-in console if needed
 
-            Console.WriteLine("REQ: " + kvs.Stringify().Replace(System.Environment.NewLine, "\\n"));
+            var regex = new Regex(@"\r?\n");
+
+            Console.WriteLine("REQ: " + regex.Replace(kvs.Stringify(), "\\n"));
 
             var result = "Invalid request type: " + type;
 
@@ -85,7 +90,9 @@ namespace Dialogic.NewServer
             if (type == "validate") result = Validate(kvs);
             if (type == "execute") result = Execute(kvs);
 
-            Console.WriteLine("RES: " + result.Replace(System.Environment.NewLine, "\\n") + "\n");
+            result = regex.Replace(result, "\\n");
+
+            Console.WriteLine("RES: " + result + "\n");
 
             return result;
         }
@@ -127,7 +134,7 @@ namespace Dialogic.NewServer
 
         private static IDictionary<string, string> ParsePostData(HttpListenerRequest request)
         {
-            var result = new Dictionary<string, string>();
+            Dictionary<string, string> result = null; //new Dictionary<string, string>();
 
             try
             {
@@ -138,25 +145,9 @@ namespace Dialogic.NewServer
                     if (request.ContentType.StartsWith("application/json",
                         StringComparison.InvariantCulture)) //== -> startsWith 11/10
                     {
-                        //TODO: parse JSON object
-                        string s = reader.ReadToEnd();
-                        string[] pairs = s.Split('&');
-
-                        foreach (var p in pairs)
-                        {
-                            var pair = p.Split('=');
-                            if (pair.Length == 2)
-                            {
-                                //Console.WriteLine(pair[0] + ": " + pair[1]);
-                                result.Add(WebUtility.UrlDecode(pair[0]),
-                                    WebUtility.UrlDecode(pair[1]));
-                            }
-                            else
-                            {
-                                ChatRuntime.Warn("BAD KV-PAIR: " + p);
-                                //throw new Exception("BAD-PAIR: " + p);
-                            }
-                        }
+                        string json = reader.ReadToEnd();
+                        //Console.WriteLine("json: " + json);
+                        result = JsonConvert.DeserializeObject <Dictionary<string, string>> (json);
                     }
                     else
                     {
@@ -165,6 +156,10 @@ namespace Dialogic.NewServer
 
                     request.InputStream.Close();
                     reader.Close();
+                }
+                else
+                {
+                    result = new Dictionary<string, string>(); // no-op
                 }
             }
             catch (Exception ex)
