@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
@@ -22,18 +21,21 @@ namespace Dialogic.NewServer
             var parsed = ParseScript(kvs);
             if (parsed.Status != Result.OK) return parsed.ToJSON();
 
-            var labels = new Dictionary<string, JsonNode>();
+            var nodes = new List<JsonNode>();
+            var chats = runtime.Chats();
 
-            JsonNode.ResetIds(); // new ids each request
-
-            runtime.Chats().ForEach(chat =>
+            chats.ForEach(chat =>
             {
-                labels[chat.text] = new JsonNode(chat.text,
-                    chat.OutgoingLabels(), chat.ToTree());
+                nodes.Add(new JsonNode(chat.text, chat.OutgoingLabels(), chat.ToTree()));
             });
 
-            var jsCode = JsonNode.Escape(NodesToJS(labels));
-            return Result.Success(jsCode).ToJSON();
+            var json = JsonConvert.SerializeObject(nodes);
+            json = json.Replace("\"", "\\\""); // yuck
+            //Console.WriteLine("JSN: " + json);
+
+            var result = Result.Success(json).ToJSON();
+            //Console.WriteLine("Res: " + result);
+            return result;
         }
 
         public static string Validate(IDictionary<string, string> kvs)
@@ -90,7 +92,9 @@ namespace Dialogic.NewServer
             if (type == "validate") result = Validate(kvs);
             if (type == "execute") result = Execute(kvs);
 
-            result = regex.Replace(result, "\\n");
+            //Console.WriteLine("PRE: " + result + "\n");
+
+            result = regex.Replace(result, "\\\n");
 
             Console.WriteLine("RES: " + result + "\n");
 
@@ -147,7 +151,7 @@ namespace Dialogic.NewServer
                     {
                         string json = reader.ReadToEnd();
                         //Console.WriteLine("json: " + json);
-                        result = JsonConvert.DeserializeObject <Dictionary<string, string>> (json);
+                        result = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                     }
                     else
                     {
@@ -175,30 +179,6 @@ namespace Dialogic.NewServer
             // must have non-empty code key
             return !string.IsNullOrEmpty(kvs["code"]);
         }
-
-        private static string NodesToJS(Dictionary<string, JsonNode> chatNodes)
-        {
-            var chats = "var chats = {\n";
-            var nodes = "var nodes = new vis.DataSet([\n";
-            var edges = "var edges = new vis.DataSet([\n";
-            foreach (var node in chatNodes.Values)
-            {
-                chats += "  \"" + node.Id + "\": \"" + node.Data + "\",\n";
-                nodes += "  { id: " + node.Id + ", label: '" + node.Name + "' },\n";
-                node.Labels.ForEach(l => edges += "  { from: " + node.Id + ", to: "
-                    + LookupNodeId(chatNodes, l) + " },\n");
-            }
-            chats += "};\n";
-            nodes += "]);\n";
-            edges += "]);";
-
-            return chats + nodes + edges;
-        }
-
-        private static int LookupNodeId(Dictionary<string, JsonNode> dict, string key)
-        {
-            return dict.ContainsKey(key) ? dict[key].Id : -1; // TODO: editor should show warning here
-        }
     }
 
     public class Result
@@ -212,7 +192,7 @@ namespace Dialogic.NewServer
         public string ToJSON()
         {
             return "{ \"status\": \"" + Status + "\", \"lineNo\": "
-                + LineNo + ", \"data\": \"" +  Data + "\" }";
+                + LineNo + ", \"data\": \"" + Data + "\" }";
         }
 
         public static Result Error(string error, Exception e = null, int lineNo = -1)
@@ -237,27 +217,35 @@ namespace Dialogic.NewServer
 
     public class JsonNode
     {
-        public static int IDGEN = 0;
+        //public static int IDGEN = 0;
 
         public JsonNode(string name, List<string> labels, string data = null)
         {
-            this.Id = ++IDGEN;
+            //this.Id = ++IDGEN;
             this.Name = name;
-            this.Labels = labels;
-            this.Data = Escape(data);
+            this.Labels = labels; //new List<int>();
+            //labels.ForEach(l => this.Labels.Add())
+            this.Data = data; //Escape(data);
         }
 
-        public int Id { get; }
+        //public int Id { get; }
         public string Data { get; }
         public string Name { get; }
         public List<string> Labels { get; }
 
+  
         public override string ToString()
         {
-            return "[" + Id + ": " + Name + " " + Labels.Stringify() + "]";
+            //return "[" + Id + ": " + Name + " " + Labels.Stringify() + "]";
+            return "[" + Name + ": " + Labels.Stringify() + "]";
         }
 
-        public static string Escape(string s)
+        /*public override string ToJSON()
+        {
+            var json = "{ \"id\": \"" + Id + "\", \"name\":\"" + Name + "\", \"data\": " + Data + " " + Labels.Stringify() + "]";
+        }
+
+        public static string EscapXe(string s)
         {
             if (string.IsNullOrEmpty(s)) return string.Empty;
 
@@ -314,6 +302,6 @@ namespace Dialogic.NewServer
         internal static void ResetIds()
         {
             IDGEN = 0;
-        }
+        }*/
     }
 }

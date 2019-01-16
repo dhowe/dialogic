@@ -147,7 +147,7 @@ $(function () {
 
   $('#importFilePicker').on('change', handleFileLoader);
 
-  $("#loadChats").click(onLoadClicked);
+  //$("#loadChats").click(onLoadClicked);
 
   $("#clearLoad").click(function () {
     $("#urlPath").val('');
@@ -164,43 +164,87 @@ $(function () {
   // ******** End Click Handlers ************//
 
   onLoad();
-  updateNetworkViewer();
+  //updateNetworkViewer();
 
   // ******** Start Functions ************//
   function onLoad() {
     toggleValidation();
-    // showSelection(); // This must be placed before toggleExe
-    toggleExe();
+    // showSelection(); // This must be placed before toggleExecute
+    toggleExecute();
   }
 
-  function updateEditor(response, type) {
+  function toNetworkData(chats) {
+    var nodes = [],
+      edges = [];
+    var labelToIdLookup = {};
 
-    $("#result-container").show();
+    for (var i = 0; i < chats.length; i++) {
+      labelToIdLookup[chats[i].Name] = i;
+    }
 
-    switch (type) {
-
-    case "validate":
-      if (response.status == "OK") {
-        $("#result").attr("class", "success");
-        if (!editor.somethingSelected()) {
-          //Only updateViz if the whole script of a single chat pass validation
-          updateViz(parseVizFromScript(editor.getValue()));
-        }
-      } else {
-        $("#result").attr("class", "error");
-        //if something is selected, update line number
-        if (editor.somethingSelected()) {
-          var startIdx = editor.getCursor(true);
-          var errorLine = parseInt(/Line\s+([\d]+)/g.exec(response.data)[1]);
-          errorLine = startIdx.line + errorLine;
-          response.data = "Line " + response.data.replace(/Line\s+([\d]+)/g, errorLine + "");
-        }
-        highlightErrorLine(errorLine);
+    for (var i = 0; i < chats.length; i++) {
+      nodes.push({ id: i, label: chats[i].Name });
+      for (var j = 0; j < chats[i].Labels.length; j++) {
+        edges.push({ from: i, to: labelToIdLookup[chats[i].Labels[j]] });
       }
-      $("#result").html(jsonUnescape(response.data));
+    }
+
+    return {
+      nodes: nodes,
+      edges: edges
+    };
+  }
+
+  function updateEditor(response, data) {
+    //console.log("RAW",data.code);
+    switch (data.type) {
+
+    case "visualize":
+      //console.log('visualize', response.data);
+
+      $("#result-container").show();
+
+      if (response.status == "OK") {
+
+        $("#result").attr("class", "success");
+        $("#result").html(data.code);
+
+        updateContent(data.code);
+
+        var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
+        var chats = JSON.parse(json);
+        var data = toNetworkData(chats);
+        network.setData(data);
+
+      } else {
+        ("#result").attr("class", "error");
+      }
       break;
 
+      // case "validate":  // DO WE NEED THIS?
+      //   $("#result-container").show();
+      //   if (response.status == "OK") {
+      //     $("#result").attr("class", "success");
+      //     if (!editor.somethingSelected()) {
+      //       //Only updateViz if the whole script of a single chat pass validation
+      //       updateViz(parseVizFromScript(editor.getValue()));
+      //     }
+      //   } else {
+      //     $("#result").attr("class", "error");
+      //     //if something is selected, update line number
+      //     if (editor.somethingSelected()) {
+      //       var startIdx = editor.getCursor(true);
+      //       var errorLine = parseInt(/Line\s+([\d]+)/g.exec(response.data)[1]);
+      //       errorLine = startIdx.line + errorLine;
+      //       response.data = "Line " + response.data.replace(/Line\s+([\d]+)/g, errorLine + "");
+      //     }
+      //     highlightErrorLine(errorLine);
+      //   }
+      //   $("#result").html(jsonUnescape(response.data));
+      //   break;
+
     case "execute":
+      $("#result-container").show();
       $("#executeResult").text(jsonUnescape(response.data));
       if (response.status == "OK") {
         $("#executeResult").attr("class", "success");
@@ -268,7 +312,7 @@ $(function () {
     }
   }
 
-  function toggleExe() {
+  function toggleExecute() {
     var resText = $("#result").text();
     // only show execute if validation is successfull
     if (resText.length && $("#result").attr('class') == "success") {
@@ -325,10 +369,9 @@ $(function () {
     return obj;
   }
 
-  function onLoadClicked() {
-    // console.log($("#loadPathDiv").serialize())
-    sendRequest($("#loadPathDiv").serialize());
-  }
+  // function onLoadClicked() {
+  //   sendRequest($("#loadPathDiv").serialize());
+  // }
 
   function saveFile(data, name) {
     var dataStr = "data:text/plain;charset=utf-8," + data;
@@ -338,107 +381,27 @@ $(function () {
     dlAnchorElem.click();
   }
 
-  function handleFileLoader(evt) {
-    var files = evt.target.files;
-    var reader = new FileReader();
-    var fileList = [];
-    var allData;
+  function readFiles(files, cb) {
+    var text = '';
 
-    // clear all the old data
-    nodes.clear();
-    edges.clear();
-    var newData = chatData = {
-      chats: [],
-      nodes: [],
-      edges: []
-    };
-
-    Array.prototype.forEach.call(files, function (file) {
+    function readFile(idx) {
       var reader = new FileReader();
-
       reader.onload = function (e) {
-        var dialogData;
-        try {
-          var chats = e.target.result.split(/(?=CHAT)/g);
-          for (var i = 0; i < chats.length; i++) {
-            if (chats[i].indexOf("CHAT") != 0) continue;
-            newData.chats.push(chats[i]);
-            var parsedData = parseVizFromScript(chats[i]);
-            var node = {};
-            node["id"] = newData.chats.length - 1;
-            node["label"] = parsedData.label;
-            newData.nodes.push(node);
-            for  (var j = 0; j < parsedData.edges.length; j++) {
-              newData.edges.push(parsedData.edges[j]);
-            }
-
-          }
-          // console.log(newData)
-          chatsOnLoadHandler(newData);
-        } catch (e) {
-          console.log(e);
-          return;
-        }
+        //console.log(idx + ').onload: ', e.target.result);
+        text += e.target.result;
+        if (idx == files.length - 1) cb(text);
+        else readFile(idx + 1);
       }
-
-      reader.readAsText(file);
-    }); // Finish all the files
-
-    $("#loadURLDialog").hide();
-  }
-
-  function parseVizFromScript(chat){
-    var label = /CHAT\s+([a-zA-Z_\d]+)/g.exec(chat.split("/n")[0])[0];
-    //TODO: GO or ASK/OPT
-    //Example: GO #Chat27 , OPT No Thanks #Goodbye
-    var edges_go = /[GO]\s#([a-zA-Z_\d]+)/g.exec(chat);
-    var edges_opt = /[OPT]*#([a-zA-Z_\d]+)/g.exec(chat);
-    // console.log("GO:", edges_go);
-    // console.log("OPT:", edges_opt);
-    return {
-      label:label,
-      edges:edges
+      reader.readAsText(files[idx]);
     }
+    readFile(0);
   }
 
-  function updateViz(data){
-    //update label currentTextId
-    data.label && nodes.update({ "id": currentTextId, "label": data.label});
-    if (edges.length > 0) {
-      //update edges
-    }
-
-  }
-
-  function chatsOnLoadHandler(data) {
-    if (isValidData(data)) {
-      //add to current chatData
-      chatData.chats.concat(data.chats);
-      chatData.nodes.concat(data.nodes);
-      chatData.edges.concat(data.edges);
-      nodes.update(data.nodes);
-      edges.update(data.edges);
-    }
-
-    updateNetworkViewer();
-
-    var nodeId = nodes.get()[0].id;
-    editChat(nodeId);
-    network.focus(nodeId + "");
-    network.selectNodes([nodeId])
-  }
-
-  function updateNetworkViewer() {
-    network.setData({
-      nodes: nodes,
-      edges: edges
+  function handleFileLoader(evt) {
+    readFiles(evt.target.files, function (ctext) {
+      sendRequest({ type: 'visualize', code: ctext });
+      $("#loadURLDialog").hide();
     });
-  }
-
-  function isValidData(data) {
-    // TODO: better validation?
-    if (data.chats != undefined && data.edges != undefined && data.nodes != undefined) return true;
-    else return false;
   }
 
   function loadFromStorage() {
@@ -471,27 +434,23 @@ $(function () {
   }*/
 
   function sendRequest(data) {
-    //tmp
-    //console.log('payload', data, data.type);
-    //var  = data.type;
-    ///data = JSON.stringify(data);
+
+    //console.log('sendRequest', data, data.type);
 
     var server = "http://localhost:8082/dialogic/server/";
     $.ajax({
       type: 'POST',
       data: JSON.stringify(data),
-      //data: "{'type':'validate','code':'Hello'}",
       url: server,
       crossDomain: true,
       processData: false,
       dataType: 'json',
       contentType: "application/json",
       success: function (result) {
-        updateEditor(result, data.type);
+        updateEditor(result, data);
       },
       error: function (xhr, status, err) {
-
-        console.log("ERROR", status, err, xhr);
+        console.log("ERROR", status, err, xhr.responseText);
       }
     });
 
