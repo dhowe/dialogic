@@ -12,7 +12,7 @@ namespace Dialogic.NewServer
         static ChatRuntime runtime;
         static IDictionary<string, object> globals;
 
-        public static string Visualize(IDictionary<string, string> kvs)
+        public static string Validate(IDictionary<string, string> kvs)
         {
             var code = kvs.ContainsKey("code") ? kvs["code"] : null;
             if (code.IsNullOrEmpty()) return Result.Error
@@ -38,10 +38,10 @@ namespace Dialogic.NewServer
             return result;
         }
 
-        public static string Validate(IDictionary<string, string> kvs)
-        {
-            return ParseScript(kvs).ToJSON();
-        }
+        //public static string Validate(IDictionary<string, string> kvs)
+        //{
+        //    return ParseScript(kvs).ToJSON();
+        //}
 
         public static string Execute(IDictionary<string, string> kvs)
         {
@@ -52,8 +52,6 @@ namespace Dialogic.NewServer
 
             try
             {
-                if (runtime == null) throw new Exception("no runtime");
-
                 runtime.Preload(globals);
                 result = runtime.InvokeImmediate(globals);
                 result = WebUtility.HtmlEncode(result);
@@ -64,6 +62,10 @@ namespace Dialogic.NewServer
             }
 
             if (result.IsNullOrEmpty()) result = " ";
+
+            result = result.Replace("\"", "\\\""); // yuck
+            result = result.Replace("\n", "\\n"); // yuck
+
 
             return Result.Success(result).ToJSON();
         }
@@ -88,7 +90,7 @@ namespace Dialogic.NewServer
 
             var result = "Invalid request type: " + type;
 
-            if (type == "visualize") result = Visualize(kvs);
+            //if (type == "visualize") result = Visualize(kvs);
             if (type == "validate") result = Validate(kvs);
             if (type == "execute") result = Execute(kvs);
 

@@ -9,26 +9,17 @@ $(function () {
     styleSelectedText: true
   });
 
-  var chatData = {
-    chats: ["CHAT NewChat"],
-    nodes: [{ "id": 0, "label": "NewChat" }],
-    edges: []
-  }
-
-  // network
-  var nodes = new vis.DataSet(chatData.nodes);
-  var edges = new vis.DataSet();
-
   var opts = {
     nodes: {
       shape: 'box'
     },
+    //layout: { improvedLayout: true },
+    autoResize: true,
     manipulation: false
   };
 
   var network = new vis.Network(document.getElementById('network'), {
-    nodes: nodes,
-    edges: edges
+    nodes: [{ "id": 0, "label": "Untitled" }]
   }, opts);
 
   // Variables
@@ -65,11 +56,6 @@ $(function () {
     // stop resizing
     isResizing = false;
   });
-
-  // ******** State Editor ************//
-  // loadFromStorage();
-  toggleNetworkView("split");
-  updateContent("Enter your code here");
 
   // var lastEdit = editor.getValue();
 
@@ -125,6 +111,7 @@ $(function () {
     updateContent("");
     editor.clearHistory();
     localStorage.removeItem(storageKey);
+    network.setData();
   });
 
   $("#execute").click(function (event) {
@@ -161,12 +148,18 @@ $(function () {
 
   $("#closeDialog").click(closeURLDialog);
 
-  // ******** End Click Handlers ************//
-
+  // loadFromStorage();
+  toggleNetworkView("split");
+  updateContent("CHAT Untitled\nEnter your code here");
   onLoad();
+
+  // zoom in on the single node
+  setTimeout(function () {
+    network.focus(0, { scale: 2.0 });
+  }, 1000);
   //updateNetworkViewer();
 
-  // ******** Start Functions ************//
+  // ============================ Functions ===================================
   function onLoad() {
     toggleValidation();
     // showSelection(); // This must be placed before toggleExecute
@@ -199,9 +192,9 @@ $(function () {
     //console.log("RAW",data.code);
     switch (data.type) {
 
-    case "visualize":
-      //console.log('visualize', response.data);
+    case "validate":
 
+      $("#executeResult").hide();
       $("#result-container").show();
 
       if (response.status == "OK") {
@@ -212,24 +205,15 @@ $(function () {
         updateContent(data.code);
 
         var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
-        var chats = JSON.parse(json);
-        var data = toNetworkData(chats);
-        network.setData(data);
+        var chats = tryParse(json);
+        network.setData(toNetworkData(chats));
 
       } else {
         ("#result").attr("class", "error");
       }
       break;
 
-      // case "validate":  // DO WE NEED THIS?
-      //   $("#result-container").show();
-      //   if (response.status == "OK") {
-      //     $("#result").attr("class", "success");
-      //     if (!editor.somethingSelected()) {
-      //       //Only updateViz if the whole script of a single chat pass validation
-      //       updateViz(parseVizFromScript(editor.getValue()));
-      //     }
-      //   } else {
+      // case "validate":
       //     $("#result").attr("class", "error");
       //     //if something is selected, update line number
       //     if (editor.somethingSelected()) {
@@ -241,16 +225,12 @@ $(function () {
       //     highlightErrorLine(errorLine);
       //   }
       //   $("#result").html(jsonUnescape(response.data));
-      //   break;
 
     case "execute":
       $("#result-container").show();
+      $("#executeResult").show();
       $("#executeResult").text(jsonUnescape(response.data));
-      if (response.status == "OK") {
-        $("#executeResult").attr("class", "success");
-      } else {
-        $("#executeResult").attr("class", "error");
-      }
+      $("#executeResult").attr("class", (response.status == "OK" ? "success" : "error"));
       break;
 
     default:
@@ -258,6 +238,18 @@ $(function () {
     }
 
     onLoad();
+  }
+
+  function tryParse(str) {
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      console.error("FAILED TO PARSE: '" + str + "'");
+      for (var i = 0; i < str.length; i++) {
+        console.error(i, str[i]);
+      }
+      throw e;
+    }
   }
 
   function closeNetWorkView() {
@@ -399,7 +391,7 @@ $(function () {
 
   function handleFileLoader(evt) {
     readFiles(evt.target.files, function (ctext) {
-      sendRequest({ type: 'visualize', code: ctext });
+      sendRequest({ type: 'validate', code: ctext });
       $("#loadURLDialog").hide();
     });
   }
