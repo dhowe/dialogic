@@ -30,7 +30,7 @@ namespace Dialogic.NewServer
             });
 
             var json = JsonConvert.SerializeObject(nodes);
-            json = json.Replace("\"", "\\\""); // yuck
+            //json = json.Replace("\"", "\\\""); // yuck
             //Console.WriteLine("JSN: " + json);
 
             var result = Result.Success(json).ToJSON();
@@ -55,16 +55,22 @@ namespace Dialogic.NewServer
                 runtime.Preload(globals);
                 result = runtime.InvokeImmediate(globals);
                 result = WebUtility.HtmlEncode(result);
+                //result = result.Replace("\"", "\\\""); // yuck
+                //result = result.Replace("\n", "\\n"); // yuck
             }
             catch (Exception e)
             {
+                Console.WriteLine("GOT ERROR");
+                result = WebUtility.HtmlEncode(result);
+                //result = result.Replace("\"", "\\\""); // yuck
+                //result = result.Replace("\n", "\\n"); // yuck
                 return Result.Error(e.Message).ToJSON();
             }
 
             if (result.IsNullOrEmpty()) result = " ";
 
-            result = result.Replace("\"", "\\\""); // yuck
-            result = result.Replace("\n", "\\n"); // yuck
+            //result = result.Replace("\"", "\\\""); // yuck
+            //result = result.Replace("\n", "\\n"); // yuck
 
 
             return Result.Success(result).ToJSON();
@@ -96,8 +102,8 @@ namespace Dialogic.NewServer
 
             //Console.WriteLine("PRE: " + result + "\n");
 
-            result = regex.Replace(result, "\\\n");
-
+            //result = regex.Replace(result, "\\\n");
+            //json = json.Replace("\"", "\\\"");
             Console.WriteLine("RES: " + result + "\n");
 
             return result;
@@ -199,9 +205,10 @@ namespace Dialogic.NewServer
 
         public static Result Error(string error, Exception e = null, int lineNo = -1)
         {
+            var data = (e != null ? e.Message : error).Replace("\"", "\\\"").Replace("\n", "\\n"); // yuck
             return new Result()
             {
-                Data = e != null ? e.Message : error,
+                Data = data,
                 LineNo = lineNo,
                 Status = ERR
             };
@@ -209,10 +216,11 @@ namespace Dialogic.NewServer
 
         public static Result Success(string code)
         {
+            var data = code.Replace("\"", "\\\"").Replace("\n", "\\n"); // yuck
             return new Result()
             {
                 Status = OK,
-                Data = code,
+                Data = data,
             };
         }
     }

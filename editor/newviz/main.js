@@ -151,16 +151,16 @@ $(function () {
   // loadFromStorage();
   toggleNetworkView("split");
   updateContent("CHAT Untitled\nEnter your code here");
-  onLoad();
+  updateButtons();
 
   // zoom in on the single node
   setTimeout(function () {
-    network.focus(0, { scale: 2.0 });
+    network.focus(0, { scale: 1.2 });
   }, 1000);
   //updateNetworkViewer();
 
   // ============================ Functions ===================================
-  function onLoad() {
+  function updateButtons() {
     toggleValidation();
     // showSelection(); // This must be placed before toggleExecute
     toggleExecute();
@@ -189,7 +189,7 @@ $(function () {
   }
 
   function updateEditor(response, data) {
-    //console.log("RAW",data.code);
+    console.log("RAW", response.status, response.data);
     switch (data.type) {
 
     case "validate":
@@ -202,14 +202,16 @@ $(function () {
         $("#result").attr("class", "success");
         $("#result").html(data.code);
 
-        updateContent(data.code);
+        updateContent(data.code); // needed for load-file
 
         var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
         var chats = tryParse(json);
         network.setData(toNetworkData(chats));
 
       } else {
-        ("#result").attr("class", "error");
+        $("#result").html(response.data.split('\n\n')[1]+" (line "+response.lineNo+")");
+        $("#result").attr("class", "error");
+        highlightErrorLine(response.lineNo);
       }
       break;
 
@@ -237,7 +239,7 @@ $(function () {
       throw Error('bad type: ' + type);
     }
 
-    onLoad();
+    updateButtons();
   }
 
   function tryParse(str) {
