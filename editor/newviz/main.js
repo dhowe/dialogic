@@ -113,6 +113,7 @@ $(function () {
     editor.clearHistory();
     localStorage.removeItem(storageKey);
     network.setData();
+    $("#result-container pre").html("");
   });
 
   $("#execute").click(function (event) {
@@ -129,8 +130,7 @@ $(function () {
   });
 
   $("#saveChats").click(function () {
-    var toSave = chatData.chats.join("\n")
-    saveFile(toSave, "chats");
+    saveFile(editor.getValue(), "chats");
   });
 
   $('#importFilePicker').on('change', handleFileLoader);
@@ -179,10 +179,13 @@ $(function () {
     for (var i = 0; i < chats.length; i++) {
       nodes.push({ id: i, label: chats[i].Name });
       for (var j = 0; j < chats[i].Labels.length; j++) {
-        edges.push({ from: i, to: labelToIdLookup[chats[i].Labels[j]] });
+        edges.push({
+          from: i,
+          to: labelToIdLookup[chats[i].Labels[j]],
+          arrows:'to'
+        });
       }
     }
-
     return {
       nodes: nodes,
       edges: edges
