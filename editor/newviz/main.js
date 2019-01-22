@@ -6,6 +6,7 @@ $(function () {
 
   var editor = CodeMirror.fromTextArea(myTextarea, {
     lineNumbers: true,
+    styleActiveLine: true,
     styleSelectedText: true
   });
 
@@ -206,7 +207,7 @@ $(function () {
 
         var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
         var chats = tryParse(json);
-        network.setData(toNetworkData(chats));
+        network.setData(toNetworkData(chats));  // Visualize
 
       } else {
         $("#result").html(response.data.split('\n\n')[1]+" (line "+response.lineNo+")");
@@ -530,20 +531,27 @@ $(function () {
     // console.log("editChat: ", nodeId, nodes.get(nodeId), chats[nodeId]);
     // load the editor with id=data.id, name=data.label
     toggleNetworkView("split");
-    updateContent(chatData.chats[nodeId]);
-    currentTextId = nodeId
+    // On node: scroll to position
+    currentTextId = nodeId;
+    var label = network.body.data.nodes._data[currentTextId].label;
+    var lines = editor.getValue().split("\n");
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf("CHAT " + label) == 0) {
+        editor.setCursor({line: i, ch: 0})
+      }
+    }
   }
 
   /**** Network UI ***/
   network.on('doubleClick', function (event) {
     if (event.nodes.length > 0) {
-      // On node: open editor
       editChat(event.nodes[0]);
-
     } else {
-      var newId = addNode(event);
-      network.disableEditMode();
-      editNode(event, newId);
+
+      // Onhold
+      // var newId = addNode(event);
+      // network.disableEditMode();
+      // editNode(event, newId);
     }
   });
 
