@@ -158,7 +158,6 @@ $(function () {
   setTimeout(function () {
     network.focus(0, { scale: 1.2 });
   }, 1000);
-  //updateNetworkViewer();
 
   // ============================ Functions ===================================
   function updateButtons() {
@@ -192,6 +191,12 @@ $(function () {
     };
   }
 
+  function updateNetwork(response) {
+    var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
+    var chats = tryParse(json);
+    network.setData(toNetworkData(chats));  // Visualize
+  }
+
   function updateEditor(response, data) {
     console.log("RAW", response.status, response.data);
     switch (data.type) {
@@ -206,11 +211,7 @@ $(function () {
         $("#result").attr("class", "success");
         $("#result").html(data.code);
 
-        updateContent(data.code); // needed for load-file
-
-        var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
-        var chats = tryParse(json);
-        network.setData(toNetworkData(chats));  // Visualize
+        data.selection != true && updateContent(data.code); // needed for load-file
 
       } else {
         $("#result").html(response.data.split('\n\n')[1]+" (line "+response.lineNo+")");
@@ -349,12 +350,11 @@ $(function () {
       //   value: endIdx.line + "," + endIdx.ch
       // });
       //
-      // formData.push(
-      // {
-      //   name: "selection",
-      //   value: execute ? $("#result").text() :
-      //       processSelectedText(content, startIdx.line, endIdx.line)
-      // });
+      formData.push(
+      {
+        name: "selection",
+        value: true
+      });
     }
     sendRequest(formToObj(formData));
   }
@@ -446,6 +446,8 @@ $(function () {
       contentType: "application/json",
       success: function (result) {
         updateEditor(result, data);
+        //only update network when validatting all the chats
+        if (data.type == "validate" && data.selection != true) updateNetwork(result);
       },
       error: function (xhr, status, err) {
         console.log("ERROR", status, err, xhr.responseText);
