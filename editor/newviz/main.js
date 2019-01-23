@@ -23,6 +23,8 @@ $(function () {
     nodes: [{ "id": 0, "label": "Untitled" }]
   }, opts);
 
+  //console.log(network);
+
   // Variables
   var isEditMode = false;
   var currentTextId = 1;
@@ -181,7 +183,7 @@ $(function () {
         edges.push({
           from: i,
           to: labelToIdLookup[chats[i].Labels[j]],
-          arrows:'to'
+          arrows: 'to'
         });
       }
     }
@@ -191,14 +193,74 @@ $(function () {
     };
   }
 
+  function getCreatedNodes(nodes) {
+    var nodesToAdd = [];
+    var graphNodeIndices = network.body.nodeIndices;
+    var graphNodeLookup = network.body.nodes;
+    FOR: for (var i = 0; i < nodes.length; i++) {
+      var newLabel = nodes[i].label;
+      for (var j = 0; j < graphNodeIndices.length; j++) {
+        var graphNode = graphNodeLookup[graphNodeIndices[j]];
+        if (newLabel === graphNode.options.label) continue FOR;
+      }
+      //if (!nodesToAdd) nodesToAdd = []; // opt
+      nodesToAdd.push(nodes[i]);
+    }
+    return nodesToAdd;
+  }
+
+  function getDeletedNodeIds(nodes) {
+    var nodesToDel = [];
+    var graphNodeIndices = network.body.nodeIndices;
+    var graphNodeLookup = network.body.nodes;
+    FOR: for (var i = 0; i < graphNodeIndices.length; i++) {
+      var graphNode = graphNodeLookup[graphNodeIndices[i]];
+      var graphLabel = graphNode.options.label;
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j].label === graphLabel) continue FOR;
+      }
+      //if (!nodesToDel) nodesToDel = []; // opt
+      nodesToDel.push(graphNode.id);
+    }
+    return nodesToDel;
+  }
+
   function updateNetwork(response) {
     var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
     var chats = tryParse(json);
-    network.setData(toNetworkData(chats));  // Visualize
+    var data = toNetworkData(chats);
+
+    // Compute the set of new nodes to add to the graph
+    var nodesToAdd = getCreatedNodes(data.nodes);
+
+    // Compute the set of deleted nodes to remove from the graph
+    var nodeIdsToDel = getDeletedNodeIds(data.nodes);
+
+    console.log("ADD: ", nodesToAdd ? nodesToAdd : '[]', "DEL: ", nodeIdsToDel ? nodeIdsToDel : '[]');
+
+    // TODO: now remove each deleted node from existing graph
+    for (var i = 0; i < nodeIdsToDel.length; i++) {
+      var idToDelete = nodeIdsToDel[i];
+      // ...
+    }
+
+    // TODO: now add any new nodes to the existing graph
+    for (var i = 0; i < nodesToAdd.length; i++) {
+      var nodeToAdd = nodesToAdd[i];
+      // ...
+    }
+
+    // TODO: now we have matching nodes in the two sets
+    // so loop over each node and update the edges with the new data
+    var graphEdgeIndices = network.body.edgeIndices;
+
+    // TODO: shouldn't need this as we have already updated all nodes/edges
+    // Perhaps we may need to call 'refresh' instead, not sure...
+    network.setData(data);
   }
 
   function updateEditor(response, data) {
-    console.log("RAW", response.status, response.data);
+    //console.log("RAW", response.status, response.data);
     switch (data.type) {
 
     case "validate":
@@ -214,7 +276,7 @@ $(function () {
         data.selection != true && updateContent(data.code); // needed for load-file
 
       } else {
-        $("#result").html(response.data.split('\n\n')[1]+" (line "+response.lineNo+")");
+        $("#result").html(response.data.split('\n\n')[1] + " (line " + response.lineNo + ")");
         $("#result").attr("class", "error");
         highlightErrorLine(response.lineNo);
       }
@@ -350,8 +412,7 @@ $(function () {
       //   value: endIdx.line + "," + endIdx.ch
       // });
       //
-      formData.push(
-      {
+      formData.push({
         name: "selection",
         value: true
       });
@@ -542,7 +603,7 @@ $(function () {
     var lines = editor.getValue().split("\n");
     for (var i = 0; i < lines.length; i++) {
       if (lines[i].indexOf("CHAT " + label) == 0) {
-        editor.setCursor({line: i, ch: 0})
+        editor.setCursor({ line: i, ch: 0 })
       }
     }
   }
