@@ -168,16 +168,16 @@ namespace Dialogic.Test
             Assert.That(result, Is.EqualTo(JSONResult(text)));
         }
 
-        [Test]
-        public void VisualizeDirect()
-        {
-            var lines = "CHAT Hello\nSAY Hi";
-            var expect = "var chats = {\n  \"1\": \"CHAT Hello\nSAY Hi\",\n};\nvar nodes = new vis.DataSet([\n  { id: 1, label: 'Hello' },\n]);\nvar edges = new vis.DataSet([\n]);";
-            var kvs = new Dictionary<string, string>() {
-                { "type", "visualize" }, { "code", lines }};
-            var result = RequestHandler.Visualize(kvs);
-            Assert.That(result, Is.EqualTo(Result.Success(JsonNode.Escape(expect)).ToJSON()));
-        }
+        //[Test]
+        //public void VisualizeDirect()
+        //{
+        //    var lines = "CHAT Hello\nSAY Hi";
+        //    var expect = "var chats = {\n  \"1\": \"CHAT Hello\nSAY Hi\",\n};\nvar nodes = new vis.DataSet([\n  { id: 1, label: 'Hello' },\n]);\nvar edges = new vis.DataSet([\n]);";
+        //    var kvs = new Dictionary<string, string>() {
+        //        { "type", "visualize" }, { "code", lines }};
+        //    var result = RequestHandler.Visualize(kvs);
+        //    Assert.That(result, Is.EqualTo(Result.Success(JsonNode.Escape(expect)).ToJSON()));
+        //}
 
 
         [Test]

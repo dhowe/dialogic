@@ -1,8 +1,9 @@
 $(function () {
 
   var storageKey = 'dialogic-editor-code';
-  var lastSelection = "";
   var myTextarea = $("#main")[0];
+  var lastSelection = "";
+  var defaultText = "CHAT Untitled\nEnter your code here";
 
   var editor = CodeMirror.fromTextArea(myTextarea, {
     lineNumbers: true,
@@ -157,7 +158,7 @@ $(function () {
 
   // loadFromStorage();
   toggleNetworkView("split");
-  updateContent("CHAT Untitled\nEnter your code here");
+  updateContent(defaultText);
   updateButtons();
 
   // zoom in on the single node
@@ -227,30 +228,60 @@ $(function () {
     return nodesToDel;
   }
 
-  function updateGraph(response) {
-    var json = response.data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
+  // NEXT: create unique labels for nodes
+  
+  function labelToId = function(str) {
+    var id = 0, i, chr, len;
+    if (str.length === 0) return id;
+    for (i = 0, len = str.length; i < len; i++) {
+      chr = str.charCodeAt(i);
+      id  = ((id << 5) - id) + chr;
+      id |= 0;
+    }
+    return id;
+  }
 
-    // Parse the returned data into chats
-    var chats = tryParse(json);
+  function updateGraph(response, isSelection) { // on validate only
 
-    // Convert to node-and-edge data
+    // Parse the returned data into nodes-and-edges
+    var chats = tryParse(response.data);
     var data = toNetworkData(chats);
 
-    // Remove all nodes not in returned set
-    var dIds = getDeletedNodeIds(data.nodes);
-    nodes.remove(dIds);
+    // Remove all nodes not in returned set (if not a selection)
+    if (!isSelection) {
+      var dIds = getDeletedNodeIds(data.nodes);
+      nodes.remove(dIds);
+    }
 
     // Add all nodes with new labels
-    nodes.add(getCreatedNodes(data.nodes));
+    var newNodes = getCreatedNodes(data.nodes);
+    try {
+      nodes.add(newNodes);
+    }
+    catch(e) {
+      if (isSelection) {
+        //for (var i = 0; i < newNodes.length; i++) {
+          //newNodes[i]
+        //}
+      }
+    }
+
+    console.log("NEXT-ID: "+nextNodeId());
 
     // OPT: handle nodes with label-changes
 
     // Now update all the edges
-    edges.clear();
-    edges.add(data.edges);
+    if (!isSelection) edges.clear();
+    edges.add(data.edges); // TODO: handle edges on selection
 
     // Now fit to the window
     network.fit(nodes);
+  }
+
+  function nextNodeId() {
+    var ids = nodes.getIds();
+    console.log(ids);
+    return ids[ids.length-1]+1;
   }
 
   function onDataChange(response, data) {
@@ -267,7 +298,12 @@ $(function () {
         $("#result").attr("class", "success");
         $("#result").html(data.code);
 
-        data.selection != true && updateContent(data.code); // needed for load-file
+        var isSelection = (data.selection === true);
+
+        // only needed for load-file
+        if (!isSelection) updateContent(data.code);
+
+        updateGraph(response, isSelection);
 
       } else {
         $("#result").html(response.data.split('\n\n')[1] + " (line " + response.lineNo + ")");
@@ -293,6 +329,8 @@ $(function () {
       $("#result-container").show();
       $("#executeResult").show();
       $("#executeResult").text(jsonUnescape(response.data));
+
+      // TODO: add warning for label-issues (loop or fail)
       $("#executeResult").attr("class", (response.status == "OK" ? "success" : "error"));
       break;
 
@@ -301,11 +339,11 @@ $(function () {
     }
 
     updateButtons();
-    updateGraph(response);
   }
 
   function tryParse(str) {
     try {
+      str = str.replace(/\\/g, "\\\\").replace(/\n/g, "\\n"); // yuck
       return JSON.parse(str);
     } catch (e) {
       console.error("FAILED TO PARSE: '" + str + "'");
@@ -355,7 +393,7 @@ $(function () {
     var input = editor.getValue(),
       selection = editor.getSelection();
 
-    if ((input.length > 0 && input != 'Enter your code here') || selection != lastSelection) {
+    if ((input.length > 0 /*&& input != defaultText */) || selection != lastSelection) {
       $("#validate").prop("disabled", false);
       $("#execute").prop("disabled", true);
     }
@@ -408,7 +446,7 @@ $(function () {
       // });
       //
       formData.push({
-        name: "selection",
+        name: 'selection',
         value: true
       });
     }

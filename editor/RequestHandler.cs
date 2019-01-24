@@ -191,10 +191,13 @@ namespace Dialogic.NewServer
 
     public class Result
     {
-        public static string OK = "OK", ERR = "ERROR";
+        // TODO: test warning case
+
+        public static string OK = "OK", ERR = "ERROR", WARN = "WARN";
 
         public string Status;
         public string Data;
+        public string Message; // so far, only for warnings
         public int LineNo = -1;
 
         public string ToJSON()
@@ -214,13 +217,24 @@ namespace Dialogic.NewServer
             };
         }
 
+        public static Result Warn(string code, string warning, int lineNo = -1)
+        {
+            var data = code.Replace("\"", "\\\"").Replace("\n", "\\n"); // yuck
+            return new Result()
+            {
+                Data = data,
+                Status = WARN,
+                Message =  warning
+            };
+        }
+
         public static Result Success(string code)
         {
             var data = code.Replace("\"", "\\\"").Replace("\n", "\\n"); // yuck
             return new Result()
             {
                 Status = OK,
-                Data = data,
+                Data = data
             };
         }
     }
@@ -243,7 +257,7 @@ namespace Dialogic.NewServer
         public string Name { get; }
         public List<string> Labels { get; }
 
-  
+
         public override string ToString()
         {
             //return "[" + Id + ": " + Name + " " + Labels.Stringify() + "]";
