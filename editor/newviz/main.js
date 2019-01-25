@@ -3,7 +3,8 @@ $(function () {
   var storageKey = 'dialogic-editor-code';
   var myTextarea = $("#main")[0];
   var lastSelection = "";
-  var defaultText = "CHAT Untitled\nEnter your code here";
+  var defaultLabel = "Untitled";
+  var defaultText = "CHAT " + defaultLabel + "\nEnter your code here";
 
   var editor = CodeMirror.fromTextArea(myTextarea, {
     lineNumbers: true,
@@ -21,7 +22,7 @@ $(function () {
   };
 
   var edges = new vis.DataSet();
-  var nodes = new vis.DataSet([{ id: 0, label: "Untitled" }]);
+  var nodes = new vis.DataSet([{ id: labelToId(defaultLabel), label: defaultLabel }]);
   var network = new vis.Network(document.getElementById('network'), {
     nodes: nodes,
     edges: edges
@@ -50,8 +51,7 @@ $(function () {
   });
 
   $(document).on('mousemove', function (e) {
-    if (!isResizing)
-      return;
+    if (!isResizing) return;
     var offsetRight = container.width() - (e.clientX - container.offset().left);
     left.css('right', offsetRight);
     var newLeft = (window.innerWidth - offsetRight) / window.innerWidth * 100 + "%";
@@ -163,7 +163,7 @@ $(function () {
 
   // zoom in on the single node
   setTimeout(function () {
-    network.focus(0, { scale: 1.2 });
+    network.focus(nodes.getIds()[0], { scale: 1.2 });
   }, 1000);
 
   // ============================ Functions ===================================
@@ -176,17 +176,20 @@ $(function () {
   function toNetworkData(chats) {
     var nodes = [],
       edges = [];
+
     var labelToIdLookup = {};
 
+    // NEXT: WORKING HERE *******
     for (var i = 0; i < chats.length; i++) {
-      labelToIdLookup[chats[i].Name] = i;
+      labelToIdLookup[chats[i].Name] = labelToId(chats[i].Name);
     }
 
     for (var i = 0; i < chats.length; i++) {
-      nodes.push({ id: i, label: chats[i].Name });
+      var id = labelToIdLookup[chats[i].Name];
+      nodes.push({ id: id, label: chats[i].Name });
       for (var j = 0; j < chats[i].Labels.length; j++) {
         edges.push({
-          from: i,
+          from: id,
           to: labelToIdLookup[chats[i].Labels[j]],
           arrows: 'to'
         });
@@ -223,19 +226,20 @@ $(function () {
       for (var j = 0; j < nodes.length; j++) {
         if (nodes[j].label === graphLabel) continue FOR;
       }
-      nodesToDel.push({id: graphNode.id, node: graphNode});
+      nodesToDel.push({ id: graphNode.id, node: graphNode });
     }
     return nodesToDel;
   }
 
   // NEXT: create unique labels for nodes
-  
-  function labelToId = function(str) {
-    var id = 0, i, chr, len;
+
+  function labelToId(str) {
+    var id = 0,
+      i, chr, len;
     if (str.length === 0) return id;
     for (i = 0, len = str.length; i < len; i++) {
       chr = str.charCodeAt(i);
-      id  = ((id << 5) - id) + chr;
+      id = ((id << 5) - id) + chr;
       id |= 0;
     }
     return id;
@@ -255,40 +259,31 @@ $(function () {
 
     // Add all nodes with new labels
     var newNodes = getCreatedNodes(data.nodes);
-    try {
-      nodes.add(newNodes);
-    }
-    catch(e) {
-      if (isSelection) {
-        //for (var i = 0; i < newNodes.length; i++) {
-          //newNodes[i]
-        //}
-      }
-    }
+    nodes.add(newNodes);
 
-    console.log("NEXT-ID: "+nextNodeId());
-
-    // OPT: handle nodes with label-changes
+    // OPT: handle nodes with label-changes?
 
     // Now update all the edges
     if (!isSelection) edges.clear();
     edges.add(data.edges); // TODO: handle edges on selection
 
     // Now fit to the window
-    network.fit(nodes);
+    network.fit();
   }
 
   function nextNodeId() {
     var ids = nodes.getIds();
     console.log(ids);
-    return ids[ids.length-1]+1;
+    return ids[ids.length - 1] + 1;
   }
 
   function onDataChange(response, data) {
-    //console.log("RAW", response.status, response.data);
+    console.log("RAW", response.status, response.data);
     switch (data.type) {
 
     case "validate":
+
+      console.log('validate', data.fileload == true);
 
       $("#executeResult").hide();
       $("#result-container").show();
@@ -298,12 +293,12 @@ $(function () {
         $("#result").attr("class", "success");
         $("#result").html(data.code);
 
-        var isSelection = (data.selection === true);
+        var selection = (data.selection === true);
 
         // only needed for load-file
-        if (!isSelection) updateContent(data.code);
+        if (!selection) updateContent(data.code);
 
-        updateGraph(response, isSelection);
+        updateGraph(response, selection);
 
       } else {
         $("#result").html(response.data.split('\n\n')[1] + " (line " + response.lineNo + ")");
@@ -393,7 +388,7 @@ $(function () {
     var input = editor.getValue(),
       selection = editor.getSelection();
 
-    if ((input.length > 0 /*&& input != defaultText */) || selection != lastSelection) {
+    if ((input.length > 0 /*&& input != defaultText */ ) || selection != lastSelection) {
       $("#validate").prop("disabled", false);
       $("#execute").prop("disabled", true);
     }
@@ -487,7 +482,7 @@ $(function () {
 
   function handleFileLoader(evt) {
     readFiles(evt.target.files, function (ctext) {
-      sendRequest({ type: 'validate', code: ctext });
+      sendRequest({ type: 'validate', code: ctext, fileload: true });
       $("#loadURLDialog").hide();
     });
   }
