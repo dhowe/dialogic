@@ -162,9 +162,7 @@ $(function () {
   updateButtons();
 
   // zoom in on the single node
-  setTimeout(function () {
-    network.focus(nodes.getIds()[0], { scale: 1.2 });
-  }, 1000);
+  setTimeout(bestFit, 1000);
 
   // ============================ Functions ===================================
   function updateButtons() {
@@ -245,6 +243,39 @@ $(function () {
     return id;
   }
 
+  function bestFit() {
+
+    network.moveTo({ scale: 1 });
+    network.stopSimulation();
+
+    var bigBB = { top: Infinity, left: Infinity, right: -Infinity, bottom: -Infinity }
+    nodes.getIds().forEach(function (i) {
+      var bb = network.getBoundingBox(i);
+      if (bb.top < bigBB.top) bigBB.top = bb.top;
+      if (bb.left < bigBB.left) bigBB.left = bb.left;
+      if (bb.right > bigBB.right) bigBB.right = bb.right;
+      if (bb.bottom > bigBB.bottom) bigBB.bottom = bb.bottom;
+    })
+
+    var canvasWidth = network.canvas.body.container.clientWidth;
+    var canvasHeight = network.canvas.body.container.clientHeight;
+
+    var scaleX = canvasWidth / (bigBB.right - bigBB.left);
+    var scaleY = canvasHeight / (bigBB.bottom - bigBB.top);
+    var scale = scaleX;
+    if (scale * (bigBB.bottom - bigBB.top) > canvasWidth) scale = scaleY;
+
+    if (scale > 1) scale = 0.9 * scale;
+
+    network.moveTo({
+      scale: Math.min(scale, 2),
+      position: {
+        x: (bigBB.right + bigBB.left) / 2,
+        y: (bigBB.bottom + bigBB.top) / 2
+      }
+    })
+  }
+
   function updateGraph(response, isSelection) { // on validate only
 
     // Parse the returned data into nodes-and-edges
@@ -268,7 +299,8 @@ $(function () {
     edges.add(data.edges); // TODO: handle edges on selection
 
     // Now fit to the window
-    network.fit();
+    bestFit();
+    //network.fit();
   }
 
   function nextNodeId() {
@@ -277,13 +309,22 @@ $(function () {
     return ids[ids.length - 1] + 1;
   }
 
+  // convert an array of Chats to text for editor pane
+  function updateContentFromChats(chats) { // not used
+    var txt = '';
+    var chats = tryParse(response.data);
+    for (var i = 0; i < chats.length; i++) {
+      txt += chats[i].Data + "\n\n";
+    }
+    updateContent(txt);
+  }
+
   function onDataChange(response, data) {
-    console.log("RAW", response.status, response.data);
+
+    //console.log("RAW", response.status, response.data);
     switch (data.type) {
 
     case "validate":
-
-      console.log('validate', data.fileload == true);
 
       $("#executeResult").hide();
       $("#result-container").show();
@@ -291,14 +332,14 @@ $(function () {
       if (response.status == "OK") {
 
         $("#result").attr("class", "success");
-        $("#result").html(data.code);
 
-        var selection = (data.selection === true);
+        // strip leading blank lines
+        var code = data.code.replace(/^(\r?\n)+/, '');
+        $("#result").html(code);
 
-        // only needed for load-file
-        if (!selection) updateContent(data.code);
+        if (data.fileload) updateContent(data.code);
 
-        updateGraph(response, selection);
+        updateGraph(response, data.selection === true);
 
       } else {
         $("#result").html(response.data.split('\n\n')[1] + " (line " + response.lineNo + ")");
@@ -354,11 +395,11 @@ $(function () {
     $(".showNetwork").show();
   }
 
-  function jsonEscape(str) {
+  function jsonEscape(str) { // ?
     return str.replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t");
   }
 
-  function jsonUnescape(str) {
+  function jsonUnescape(str) { // ?
     return str.replace(/\\\\n/g, "\n").replace(/\\\\r/g, "\r").replace(/\\\\t/g, "\t");
   }
 
@@ -457,11 +498,16 @@ $(function () {
   }
 
   function saveFile(data, name) {
+    //data = data.replace("\n", "\\\\n");
+    //console.log('1',data);
+    var pre = data;
+    data = data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n");
     var dataStr = "data:text/plain;charset=utf-8," + data;
     var dlAnchorElem = document.getElementById('downloadAnchorElem');
     dlAnchorElem.setAttribute("href", dataStr);
     dlAnchorElem.setAttribute("download", name + ".gs");
     dlAnchorElem.click();
+    console.log('2',data);
   }
 
   function readFiles(files, cb) {
@@ -531,7 +577,7 @@ $(function () {
       contentType: "application/json",
       success: function (result) { onDataChange(result, data) },
       error: function (xhr, status, err) {
-        console.log("ERROR", status, err, xhr.responseText);
+        console.error("ERROR", status, err, xhr.responseText, JSON.stringify(data));
       }
       //only update network when validatting all the chats
       //if (data.type == "validate" && data.selection != true) updateNetwork(result);
@@ -720,10 +766,6 @@ $(function () {
         isEditMode = false;
       }
     }
-  }
-
-  function updateChatLabelInScript(originalScript, label) {
-    return originalScript.replace(/CHAT\s+([a-zA-Z_\d]+)/g, label);
   }
 
   function isValidLabel(label) {
