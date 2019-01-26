@@ -498,21 +498,15 @@ $(function () {
   }
 
   function saveFile(data, name) {
-    //data = data.replace("\n", "\\\\n");
-    //console.log('1',data);
-    var pre = data;
-    data = data.replace(/\\/g, "\\\\").replace(/\n/g, "\\n");
-    var dataStr = "data:text/plain;charset=utf-8," + data;
-    var dlAnchorElem = document.getElementById('downloadAnchorElem');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", name + ".gs");
-    dlAnchorElem.click();
-    console.log('2',data);
+    var blob = new Blob([data], { type: 'text/plain' });
+    var anchor = document.getElementById('downloadAnchorElem');
+    anchor.setAttribute("href", (window.webkitURL || window.URL).createObjectURL(blob));
+    anchor.setAttribute("download", name + ".gs");
+    anchor.click();
   }
 
   function readFiles(files, cb) {
     var text = '';
-
     function readFile(idx) {
       var reader = new FileReader();
       reader.onload = function (e) {
