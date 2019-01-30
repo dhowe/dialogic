@@ -33,6 +33,10 @@ $(function () {
   // Variables
   var isEditMode = false;
   var currentTextId = 1;
+  var state = {
+    pos: undefined,
+    scale: undefined
+  };
 
   // ******** General UI ************//
 
@@ -70,30 +74,38 @@ $(function () {
     lastSelection = editor.getSelection();
   });
 
+  // Not trigger when on load
+
   editor.on("cursorActivity", function (cm) {
+    //remember both activeLine & scrollPosition
     toggleValidation();
+    //TODO: don't set editor state on load
+    localStorage.setItem("editorActiveLine", editor.getCursor().line);
+    localStorage.setItem("editorScrollPosition",JSON.stringify(editor.getScrollInfo()));
+  });
+
+  editor.on("scroll", function (cm) {
+    // TODO: only set storage after scroll?
+    localStorage.setItem("editorScrollPosition",JSON.stringify(editor.getScrollInfo()));
   });
 
   // editor.on("beforeChange", function(cm, change) {
   //   lastEdit = editor.getValue();
   // });
 
-  editor.on("change", function (cm, change) {
+  editor.on("changes", function (cm, changes) {
     // update the textarea
     var content = editor.getValue();
     $("#main").val(content);
-
     /* save current change to cookie
     if (content != "Enter your script here")
     {
       $.cookie("guppyScript", content);
     }*/
-
     // save current change to storage
     if (content != "Enter your code here") {
       localStorage.setItem(storageKey, content);
     }
-
     toggleValidation();
   });
   // ******** End Editor ************//
@@ -156,13 +168,12 @@ $(function () {
 
   $("#closeDialog").click(closeURLDialog);
 
-  // loadFromStorage();
+  loadFromStorage();
   toggleNetworkView("split");
-  updateContent(defaultText);
   updateButtons();
 
-  // zoom in on the single node
-  setTimeout(bestFit, 1000);
+  // // zoom in on the single node
+  // setTimeout(bestFit, 1000);
 
   // ============================ Functions ===================================
   function updateButtons() {
@@ -244,6 +255,17 @@ $(function () {
   }
 
   function bestFit() {
+    //resume pan and zoom
+    if (state.pos != undefined) {
+      // console.log(state.pos, state.scale)
+       network.moveTo({
+         position: state.pos,
+         scale: state.scale
+       })
+       state.pos = undefined;
+       state.scale = undefined;
+       return;
+     }
 
     network.moveTo({ scale: 1 });
     network.stopSimulation();
@@ -457,6 +479,9 @@ $(function () {
   }
 
   function onButtonClicked(event, execute) {
+    state.pos = state.pos == undefined ? network.getViewPosition() : state.pos;
+    state.scale = state.scale == undefined ? network.getScale() : state.scale;
+
     event.preventDefault();
 
     var formData = $("#form").serializeArray(); //json
@@ -529,20 +554,59 @@ $(function () {
 
   function loadFromStorage() {
     if (localStorage) {
-      var content = localStorage.getItem(storageKey);
-      if (content != undefined && content != 'Enter your code here') {
-        updateContent(chatData.chats[nodeId]);
-      }
 
-      var editorHeight = localStorage.getItem("editorHeight");
-      if (editorHeight != null) {
-        editor.setSize(null, editorHeight);
-      }
-
+      // Settings
       var useValidators = localStorage.getItem("useValidators");
       if (useValidators != null) {
         $("#VRcheckbox").prop('checked', useValidators === "true" ? true : false);
       }
+
+      // Content
+      var content = localStorage.getItem(storageKey);
+      if (content != undefined && content != 'Enter your code here') {
+          updateContent(content);
+      } else {
+          updateContent(defaultText);
+          return; // only continue if content != undefined
+      }
+
+      // TODO: Fix editor & network state resume
+
+      // Editor states
+      // var editorHeight = localStorage.getItem("editorHeight");
+      // if (editorHeight != null) {
+      //   editor.setSize(null, editorHeight);
+      // }
+      //
+      // var editorActiveLine = localStorage.getItem("editorActiveLine");
+      // if (editorActiveLine != null) {
+      //   console.log(editorActiveLine);
+      //   editor.setCursor({ line: editorActiveLine});
+      // }
+
+      // var editorScrollPosition = JSON.parse(localStorage.getItem("editorScrollPosition"));
+      // if (editorScrollPosition != null) {
+      //   var left = editorScrollPosition.left;
+      //   var top = editorScrollPosition.top;
+      //   var right = editorScrollPosition.width;
+      //   var bottom = editorScrollPosition.height;
+      //   editor.scrollIntoView({left, top, right, bottom});
+      // }
+
+      // Network states
+
+      // var networkPosition = localStorage.getItem("networkPosition");
+      // if (networkPosition != null) {
+      //   state.pos = JSON.parse(networkPosition);
+      // }
+      //
+      // var networkScale = localStorage.getItem("networkScale");
+      // if (networkScale != null) {
+      //   state.scale = parseInt(networkScale) != 0 ? parseInt(networkScale) : 1;
+      // }
+      //
+      // $("#validate").click();
+
     }
   }
 
@@ -654,6 +718,11 @@ $(function () {
     $("#main").val(content);
   }
 
+  function jumpToLine(i) {
+    var t = editor.charCoords({line: i, ch: 0}, "local").top;
+    editor.scrollTo(null, t - 5);
+  }
+
   function editChat(nodeId, callback) {
     // console.log("editChat: ", nodeId, nodes.get(nodeId), chats[nodeId]);
     // load the editor with id=data.id, name=data.label
@@ -666,6 +735,7 @@ $(function () {
       var parsedLabel = /CHAT\s+([a-zA-Z_\d]+)/g.exec(lines[i]);
       if (parsedLabel && label == parsedLabel[1]) {
         editor.setCursor({ line: i, ch: 0 })
+        jumpToLine(i);
       }
     }
   }
@@ -708,6 +778,16 @@ $(function () {
       $('.popupMenu').hide();
     }
 
+  });
+
+  // network on pan/zoom
+  network.on('zoom', function (e) {
+    console.log(network.getScale())
+    localStorage.setItem("networkScale", network.getScale());
+  });
+
+  network.on('dragEnd', function (e) {
+    localStorage.setItem("networkPosition", JSON.stringify(network.getViewPosition()));
   });
 
   $('#deleteNode').on('click', function (e) {
