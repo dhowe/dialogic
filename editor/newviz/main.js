@@ -663,7 +663,8 @@ $(function () {
     var label = network.body.data.nodes._data[currentTextId].label;
     var lines = editor.getValue().split("\n");
     for (var i = 0; i < lines.length; i++) {
-      if (lines[i].indexOf("CHAT " + label) == 0) {
+      var parsedLabel = /CHAT\s+([a-zA-Z_\d]+)/g.exec(lines[i]);
+      if (parsedLabel && label == parsedLabel[1]) {
         editor.setCursor({ line: i, ch: 0 })
       }
     }
