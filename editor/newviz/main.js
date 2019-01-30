@@ -77,9 +77,12 @@ $(function () {
   // Not trigger when on load
 
   editor.on("cursorActivity", function (cm) {
+
+    var selection = editor.getSelection();
+    if(selection != lastSelection) toggleValidation();
+
+    //TODO: don't set editor state on load'
     //remember both activeLine & scrollPosition
-    toggleValidation();
-    //TODO: don't set editor state on load
     localStorage.setItem("editorActiveLine", editor.getCursor().line);
     localStorage.setItem("editorScrollPosition",JSON.stringify(editor.getScrollInfo()));
   });
@@ -168,7 +171,7 @@ $(function () {
 
   $("#closeDialog").click(closeURLDialog);
 
-  loadFromStorage();
+  // loadFromStorage();
   toggleNetworkView("split");
   updateButtons();
 
@@ -448,10 +451,9 @@ $(function () {
   }
 
   function toggleValidation() {
-    var input = editor.getValue(),
-      selection = editor.getSelection();
+    var input = editor.getValue()
 
-    if ((input.length > 0 /*&& input != defaultText */ ) || selection != lastSelection) {
+    if (input.length > 0 ) {
       $("#validate").prop("disabled", false);
       $("#execute").prop("disabled", true);
     }
@@ -782,7 +784,6 @@ $(function () {
 
   // network on pan/zoom
   network.on('zoom', function (e) {
-    console.log(network.getScale())
     localStorage.setItem("networkScale", network.getScale());
   });
 
