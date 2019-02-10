@@ -37,6 +37,32 @@
   outline: none;
 }
 
+.downloadInterface {
+  width: 400px;
+  height:70px;
+  border: 1px solid #c0c0c0;
+  padding: 0px 10px;
+  margin: auto;
+  position: relative;
+  top: 80px;
+  left: 0px;
+  padding:20px;
+  display: none;
+  z-index: 50;
+  background-color: rgba(255, 255, 255, 0.95);
+}
+.downloadInterface input {
+  width:40px;
+  max-width:120px;
+  margin-top:4px;
+}
+.downloadInterface input:focus{
+  outline: none;
+}
+.downloadInterface button {
+  display: block;
+  float:right;
+}
 .popupMenu{
   display:none;
   position:absolute;

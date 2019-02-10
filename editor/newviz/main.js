@@ -152,8 +152,16 @@ $(function () {
   });
 
   $("#saveChats").click(function () {
+      $('.downloadInterface').show();
+  });
+  $(".downloadInterface button").click(function () {
+    $('.downloadInterface').hide();
     saveFile(editor.getValue(), "chats");
   });
+
+  $('#txt').on('keypress', function() {
+    if ($('#txt').width() < 120) this.style.width = ((this.value.length + 1) * 8) + 'px';
+  })
 
   $('#importFilePicker').on('change', handleFileLoader);
 
@@ -217,6 +225,7 @@ $(function () {
     var nodesToAdd = [];
     var graphNodeIndices = network.body.nodeIndices;
     var graphNodeLookup = network.body.nodes;
+
     FOR: for (var i = 0; i < nodes.length; i++) {
       var newLabel = nodes[i].label;
       for (var j = 0; j < graphNodeIndices.length; j++) {
@@ -305,6 +314,7 @@ $(function () {
 
     // Parse the returned data into nodes-and-edges
     var chats = tryParse(response.data);
+
     var data = toNetworkData(chats);
 
     // Remove all nodes not in returned set (if not a selection)
@@ -315,6 +325,15 @@ $(function () {
 
     // Add all nodes with new labels
     var newNodes = getCreatedNodes(data.nodes);
+
+    // remove node with timeStamp if it is caused by partial selection
+    if (isSelection && chats.length > 1) {
+      for (var i = 0; i < newNodes.length; i++) {
+        var isTimeStamp = /C\d{9}/g.exec(newNodes[i].label);
+        if (isTimeStamp != null) newNodes.splice(i, 1);
+      }
+    }
+
     nodes.add(newNodes);
 
     // OPT: handle nodes with label-changes?
@@ -811,12 +830,14 @@ $(function () {
   function addNode(event) {
     var label = 'C(' + Date.now() + ")";
     var id = chatData.chats.length;
+
     nodes.add([{
       id: id,
       label: label,
       x: event.pointer.canvas.x,
       y: event.pointer.canvas.y,
     }]);
+
     // initialize chats
     chatData.chats.push("");
     chatData.nodes.push({
