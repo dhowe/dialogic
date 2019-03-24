@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/dhowe/dialogic.svg?branch=master)](https://travis-ci.org/dhowe/dialogic) ![license](https://img.shields.io/badge/license-GPL-orange.svg) [![Gitter](https://badges.gitter.im/dhowe/dialogic.svg)](https://gitter.im/dhowe/dialogic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge)
 
-** Check our [Tendar](https://play.google.com/store/apps/details?id=com.TenderClaws.Tendar.home), the new free AR game using Dialogic on your Android device! Here's a [review](https://variety.com/2018/digital/news/tender-claws-tendar-ar-game-1203029351/)...
+* Check our [Tendar](https://play.google.com/store/apps/details?id=com.TenderClaws.Tendar.home), the new free AR game using Dialogic on your Android device! Here's a [review](https://variety.com/2018/digital/news/tender-claws-tendar-ar-game-1203029351/)...
 
 Interested in using Dialogic in your game or voice-app? Drop me a line at daniel-@-rednoise-dot-org..._
 
