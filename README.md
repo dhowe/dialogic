@@ -52,7 +52,7 @@ This script is called "Start" and performs a few simple functions; welcoming a v
 
 Of course in most cases we would want to _do something_ with this response. 
 
-In the code below we _branch_, based on the users response:
+In the code below we _branch_, based on the user's response:
 
 ````
 ASK Do you want to play a game?
@@ -66,7 +66,7 @@ If the user selects the first option, Dialogic jumps to the chat named "Game1". 
 
 ### Generative Elements
 
-Dialogic is designed to smoothly blend scripted and generated text to create the type of variation found in natural-sounding dialog. The simplest way to blend generative elements into a response is via the | (OR) operator, grouped with parentheses as follows:
+Dialogic is designed to smoothly blend scripted and generated text to create the type of variation found in natural-sounding dialog. The simplest way to blend generative elements into a response is via the OR operator (the pipe | character), grouped with parentheses as follows:
 
 ```
 SAY You look (sad | gloomy | depressed).
