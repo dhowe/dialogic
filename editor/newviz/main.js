@@ -16,9 +16,14 @@ $(function () {
     nodes: {
       shape: 'box'
     },
-    //layout: { improvedLayout: true },
+    layout: { improvedLayout: true },
     autoResize: true,
-    manipulation: false
+    manipulation: false,
+    physics:{
+      enabled:true,
+      solver:'forceAtlas2Based',
+      minVelocity:1
+    }
   };
 
   var edges = new vis.DataSet();
@@ -258,11 +263,8 @@ $(function () {
     var id = 0,
       i, chr, len;
     if (str.length === 0) return id;
-    for (i = 0, len = str.length; i < len; i++) {
-      chr = str.charCodeAt(i);
-      id = ((id << 5) - id) + chr;
-      id |= 0;
-    }
+    // generate unique ID https://gist.github.com/gordonbrander/2230317
+    id = Math.random().toString(36).substr(2, 9);
     return id;
   }
 
@@ -314,9 +316,7 @@ $(function () {
 
     // Parse the returned data into nodes-and-edges
     var chats = tryParse(response.data);
-
     var data = toNetworkData(chats);
-
     // Remove all nodes not in returned set (if not a selection)
     if (!isSelection) {
       var dIds = getDeletedNodeIds(data.nodes);
@@ -339,12 +339,10 @@ $(function () {
     // OPT: handle nodes with label-changes?
 
     // Now update all the edges
-    if (!isSelection) edges.clear();
     edges.add(data.edges); // TODO: handle edges on selection
 
     // Now fit to the window
-    bestFit();
-    //network.fit();
+    network.fit();
   }
 
   function nextNodeId() {
