@@ -18,7 +18,12 @@ $(function () {
     },
     layout: { improvedLayout: true },
     autoResize: true,
-    manipulation: false
+    manipulation: false,
+    physics:{
+      enabled:true,
+      solver:'forceAtlas2Based',
+      minVelocity:1
+    }
   };
 
   var edges = new vis.DataSet();
@@ -334,7 +339,6 @@ $(function () {
     // OPT: handle nodes with label-changes?
 
     // Now update all the edges
-    if (!isSelection) edges.clear();
     edges.add(data.edges); // TODO: handle edges on selection
 
     // Now fit to the window
