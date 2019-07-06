@@ -1,0 +1,27 @@
+{
+  "chats": {
+      "1": "CHAT start {preload=true}\nSET $emotion = simple | lost\nSET $place = Purgatory\nSET $neg = Nah | No | Nyet\nSET $verb = play | start | begin",
+      "2": "CHAT GScriptTest {type=a,stage=b}\nSAY Welcome to my $emotion world\nNVM 1.1\nWAIT 3\nDO #Twirl\nWAIT {ForAnimation=true}\nSAY Thanks for visiting $place {speed=fast,style=whisper}\nGO #Prompt",
+      "3": "CHAT RePrompt {type=a,stage=b}\nDO #SadSpin\nASK (Really|Awww), don't you want to play a game?\n  OPT sure #Game\n  OPT $neg #RePrompt",
+      "4": "CHAT Prompt {notPlayed=true,type=a,stage=b}\nASK Do you want to $verb a game? {timeout=4,speed=fast}\n  OPT Sure #Game\n  OPT Nope #RePrompt",
+      "5": "CHAT Game {type=a,stage=b,last=true}\nDO #HappyFlip {axis=y}\nSAY Great, let's play! {speed=slow,style=loud}\nSAY Bye! {speed=fast}",
+      "6": "CHAT OnTapEvent {noStart=true,resumeAfter=true}\nDO #TapResponse\nSAY Ok, I see you!\nSAY Wait, is that (cat | dog | artichoke).articlize()?",
+      "7": "CHAT MyWorld {noStart=true,chatMode=grammar}\nSET start = My world is a $adj, $adj place.\nSET adj = creepy | lonely | dark | forgotten | crepuscular\nSAY $start"
+},
+"nodes":[
+  { "id": 1, "label": "start" },
+  { "id": 2, "label": "GScriptTest" },
+  { "id": 3, "label": "RePrompt" },
+  { "id": 4, "label": "Prompt" },
+  { "id": 5, "label": "Game" },
+  { "id": 6, "label": "OnTapEvent" },
+  { "id": 7, "label": "MyWorld" }
+],
+"edges":[
+  { "from": 2, "to": 4 },
+  { "from": 3, "to": 5 },
+  { "from": 3, "to": 3 },
+  { "from": 4, "to": 5 },
+  { "from": 4, "to": 3 }
+]
+}

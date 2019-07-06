@@ -3,11 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Dialogic
+namespace Dialogic.Test
 {
     [TestFixture]
     class SymbolTests : GenericTests
     {
+        [Test]
+        public void RawCharacters()
+        {
+            ChatRuntime rt;
+            string s;
+
+            Resolver.DBUG = false;
+
+
+            string[] test = new[]
+            {
+                "SAY The = op",
+                "SAY cute**"    ,
+                "SAY <wait>",
+                "SAY ^-^",
+                "SAY =_="
+            };
+            for (int i = 0; i < test.Length; i++)
+            {
+                rt = new ChatRuntime();
+                rt.ParseText(test[i], true);
+                s = rt.InvokeImmediate(globals);
+                Console.WriteLine(i+": '"+s+ "' ?= '"+ test[i].Substring(4)+"'");
+                Assert.That(s.Equals(test[i].Substring(4)));
+            }
+        }
+
         [Test]
         public void ParensCheck()
         {

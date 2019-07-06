@@ -1,0 +1,111 @@
+﻿<html>
+
+<head>
+  <title>Dialogic</title>
+
+  <script src="res/lib/jquery-1.8.2.min.js"></script>
+
+  <!--  Network Vis -->
+  <script src="res/lib/vis.min.js"></script>
+  <link href="res/lib/vis.min.css" rel="stylesheet" type="text/css" />
+
+  <link href="res/lib/jquery-linedtextarea.css" rel="stylesheet" />
+  <link href="res/lib/jsonlint.css" rel="stylesheet">
+
+  <!--  Code Mirror -->
+  <link rel="stylesheet" href="res/lib/codeMirror/codemirror.css">
+  <script src="res/lib/codeMirror/codemirror.js"></script>
+  <script src="res/lib/codeMirror/simple.js"></script>
+  <script src="res/lib/codeMirror/active-line.js"></script>
+  
+  <script type="text/javascript" src="res/dialmode.js"></script>
+  <link href="res/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+  <div id="navbar">
+      <img id="fish" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
+      <span id="title">Dialogic</span>
+      <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/#dialogic">Home</a> &nbsp;|&nbsp;
+      <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/wiki/Command-Reference">Command Reference</a> &nbsp;|&nbsp;
+      <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
+      <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
+      <button class="button top" type="button" id="saveChats" title="Save Chats">Save Chats</button>
+      <a id="downloadAnchorElem" style="display:none"></a>
+      <button class="button top" type="button" id="showDialog" title="Load Chats">Load Chats</button>
+
+  </div>
+<div id="container">
+  <div id="network">
+
+  </div>
+  <div id="node-popUp" style="display: none;">
+<input id="node-label" value="new value">
+</div>
+  <ul class="popupMenu">
+    <li id="deleteNode">Delete Node</li>
+  </ul>
+  <div class="downloadInterface">
+    Save chats as <span><input id="txt" placeholder="name" class="form" type="text"  value="chats"></span>.gs
+    <button type="button" name="button">Download</button>
+  </div>
+
+
+  <div id="editor">
+    <div class="showNetwork" title="Show Network" ><<</div>
+    <div id="drag"></div>
+
+  <div class="editor-close"></div>
+
+      <span id="errorLine" style="display: none;"></span>
+      <span id="selection" style="display: none;"></span>
+
+       <form name="main" id="form">
+         <!--h3 id="chatLabel" contenteditable="true" spellcheck="false">
+           Untitled
+         </h3-->
+         <div id="button-div" class="validate">
+           <button class="button" type="submit" id="validate" disabled title="validate the syntax of your script">Validate</button>
+           <button class="button" type="submit" id="execute" disabled title="run the highlighted portion of the script">Execute</button>
+           <button class="button" type="reset" id="clear" disabled>Clear</button>
+           <input type="checkbox" class="checkbox" id="VRcheckbox" name="useValidators" value="true"><span id="checkText">Use <a href="http://tenderclaws.com/press/sheet.php?p=tendAR" target="_blank">TendAR</a> Validators</span>
+         </div>
+        <div class="input-area">
+          <textarea id="main" name="code" class="lined" rows="29" cols="100" spellcheck="false"></textarea>
+          <div class="handle"></div>
+        </div>
+
+      </form>
+
+      <section id="result-container">
+        <pre id="executeResult" style="font-size: 13px" class=""></pre>
+        <pre id="result" style="font-size: 13px" class=""></pre>
+      </section>
+
+
+  </div>
+
+  <div class="CodeMirror-dialog" id="loadURLDialog">
+    <div class="CodeMirror-dialog-top">
+      <h4>Load Chats</h4>
+    </div>
+    <form id="loadPathDiv" class="dialog-content">
+      <input id="importFilePicker" type="file" multiple="multiple" name="filePath" class="hiddenFileInput">
+      <input type="text" name="path" id="urlPath" placeholder="Load from URL">
+    </form>
+      <div class="CodeMirror-dialog-bottom">
+
+        <div class="buttonset">
+          <button type="button" id="loadChats">Load</button>
+          <button type="button" id="clearLoad">Clear</button>
+          <button type="button" id="closeDialog">Cancel</button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<script src="res/main.js"></script>
+
+</body>
+</html>

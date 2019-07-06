@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
 
 namespace Dialogic
 {
@@ -45,16 +43,17 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal bool validatorsDisabled, loading, saving, strictMode = true;
+        internal List<IActor> actors = new List<IActor>();
+        internal bool validatorsDisabled, loading, saving;
+        internal bool strictMode = true; // TODO: needs docs
         internal IDictionary<string, Choice> choiceCache;
         internal IDictionary<string, Chat> chats;
         internal ChatScheduler scheduler;
         internal Resolver resolver;
         internal string firstChat;
 
-        private List<IActor> actors;
         private List<Func<Command, bool>> validators;
-        private Thread searchThread, saveThread, loadThread;
+        private System.Threading.Thread searchThread, saveThread, loadThread;
         private ChatEventHandler chatEvents;
         private AppEventHandler appEvents;
         private FuzzySearch search;
@@ -296,7 +295,7 @@ namespace Dialogic
 
         public void LoadChatsAsync(List<Chat> newChats, Action<List<Chat>> callback = null)
         {
-            (loadThread = new Thread(() =>
+            (loadThread = new System.Threading.Thread(() =>
             {
                 this.scheduler.Suspend();
                 LoadChats(newChats);
@@ -328,7 +327,7 @@ namespace Dialogic
         public void SaveAsync(ISerializer serializer,
             FileInfo file = null, Action<byte[]> callback = null)
         {
-            (saveThread = new Thread(() =>
+            (saveThread = new System.Threading.Thread(() =>
             {
                 //Console.WriteLine("Starting save @"+Util.Millis());
                 //Thread.Sleep(5000); // simulate a longer save
@@ -390,7 +389,7 @@ namespace Dialogic
         /// </summary>
         public void MergeAsync(ISerializer serializer, byte[] bytes, Action callback = null)
         {
-            (loadThread = new Thread(() =>
+            (loadThread = new System.Threading.Thread(() =>
             {
                 try
                 {
@@ -451,20 +450,21 @@ namespace Dialogic
         /// </summary>
         public string ToJSON(ISerializer serializer) => serializer.ToJSON(this);
 
-        public override string ToString()
-        {
-            return "{ context: " + CurrentContext() +
-                ", chats:" + Chats().Stringify() + " }";
-        }
+        public override string ToString() => "{ context: "
+            + CurrentContext() + ", chats: " + Chats().Stringify() + " }";
 
         public override int GetHashCode()
         {
 #pragma warning disable RECS0025 // Non-readonly field referenced in 'GetHashCode()'
+
             var hash = firstChat.GetHashCode()
                 ^ validatorsDisabled.GetHashCode()
                 ^ strictMode.GetHashCode();
-            foreach (var chat in chats.Values) hash ^= chat.GetHashCode();
-#pragma warning restore RECS0025 // Non-readonly field referenced in 'GetHashCode()'
+
+            foreach (var chat in chats.Values)
+            {
+                hash ^= chat.GetHashCode();
+            }
 
             return hash;
         }
@@ -496,7 +496,8 @@ namespace Dialogic
         ///////////////////////////////////////////////////////////////////////
 
 
-        internal string InvokeImmediate(IDictionary<string, object> globals, string label = null)
+        internal string InvokeImmediate(IDictionary<string, object> globals,
+            string label = null, bool throwOnError = false)
         {
             if (chats.Count < 1) throw new DialogicException("No chats");
 
@@ -537,6 +538,7 @@ namespace Dialogic
                     }
                     catch (Exception ex)
                     {
+                        if (throwOnError) throw ex;
                         Warn(ex);
                         return result + "\n" + toFind + " failed";
                     }
@@ -649,9 +651,9 @@ namespace Dialogic
         internal void FindAllAsync(Find finder, Action<Chat> action,
             IDictionary<string, object> globals = null)
         {
-            (searchThread = new Thread(() =>
+            (searchThread = new System.Threading.Thread(() =>
             {
-                Thread.CurrentThread.IsBackground = true;
+                System.Threading.Thread.CurrentThread.IsBackground = true;
                 if (finder is Go)
                 {
                     action.Invoke(FindChatByLabel(((Go)finder).text));
@@ -678,9 +680,9 @@ namespace Dialogic
         {
             if (f.Resolved().Count < 1) f.Resolve(globals); // tmp
 
-            (searchThread = new Thread(() =>
+            (searchThread = new System.Threading.Thread(() =>
             {
-                Thread.CurrentThread.IsBackground = true;
+                System.Threading.Thread.CurrentThread.IsBackground = true;
 
                 //Chat chat = DoFind(f, globals);
                 var chat = (f is Go) ? FindChatByLabel(f.Text()) : DoFind(f, globals);
@@ -937,8 +939,7 @@ namespace Dialogic
                 return -1;
             }
             //}
-
-            return Util.Millis(); // unsuspend non-null current chat
+            //return Util.Millis(); // unsuspend non-null current chat
         }
 
         // If a Chat has a Meta.ON_RESUME tag, then we will invoke the specified

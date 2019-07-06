@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Dialogic;
-using MessagePack;
 using Client;
 
 namespace runner
@@ -18,28 +17,6 @@ namespace runner
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
             testfile += "../../../../dialogic/data/gscript-loop.gs";
             new MockGameEngine(new FileInfo(testfile)).Run();
-        }
-
-        // Pass instance to ChatRuntime serialization methods
-        private class SerializerMessagePack : ISerializer
-        {
-            static readonly IFormatterResolver ifr = MessagePack.Resolvers
-                .ContractlessStandardResolverAllowPrivate.Instance;
-
-            public byte[] ToBytes(ChatRuntime rt)
-            {
-                return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
-            }
-
-            public void FromBytes(ChatRuntime rt, byte[] bytes)
-            {
-                MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
-            }
-
-            public string ToJSON(ChatRuntime rt)
-            {
-                return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
-            }
         }
 
         public static void Profiling(string[] args)
@@ -147,19 +124,21 @@ namespace runner
         public void TestEvents(int now)
         {
             // a 'Tap' event
-            if (false) Timers.SetTimeout(Util.Rand(2000, 9999), () =>
+
+            /*Timers.SetTimeout(Util.Rand(2000, 9999), () =>
              {
                  Console.WriteLine("\n<user-event#tap>" +
                      " after " + Util.Millis(now) + "ms\n");
 
                  gameEvent = new UserEvent("Tap");
-             });
+             });*/
 
 
             // a 'Resume' event
-            var count = 0;
+
+            /*var count = 0;
             var types = new[] { "critic", "shake", "tap" };
-            if (false) Timers.SetInterval(1000, () =>
+            Timers.SetInterval(1000, () =>
             {
 
                 interrupted = true;
@@ -170,10 +149,11 @@ namespace runner
                     " after " + Util.Millis(now) + "ms\n");
 
                 gameEvent = new ResumeEvent(data);
-            });
+            });*/
 
             // a 'Save' event
-            if (false) Timers.SetTimeout(Util.Rand(4000, 6000), () =>
+
+            /*Timers.SetTimeout(Util.Rand(4000, 6000), () =>
             {
                 var file = AppDomain.CurrentDomain.BaseDirectory;
                 file += Util.EpochMs() + ".ser";
@@ -181,8 +161,7 @@ namespace runner
                 Console.WriteLine("\n<save-event#file=" + file + ">\n");
 
                 gameEvent = new SaveEvent(serializer, new FileInfo(file));
-            });
-
+            });*/
 
             /* pending ----------------------------
 
@@ -317,28 +296,6 @@ namespace runner
                     Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms\n");
                     gameEvent = new ChoiceEvent(choice);
                 });
-            }
-        }
-
-        // Implement ISerializer and then instance to ChatRuntime methods...
-        private class SerializerMessagePack : ISerializer
-        {
-            IFormatterResolver ifr = MessagePack.Resolvers.
-                ContractlessStandardResolverAllowPrivate.Instance;
-
-            public byte[] ToBytes(ChatRuntime rt)
-            {
-                return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
-            }
-
-            public void FromBytes(ChatRuntime rt, byte[] bytes)
-            {
-                MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
-            }
-
-            public string ToJSON(ChatRuntime rt)
-            {
-                return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Dialogic;
+using MessagePack;
 
 namespace Client
 {
@@ -20,7 +21,9 @@ namespace Client
         private List<CommandDef> commands;
         private List<IActor> actors;
 
-        private static string STAGE = "stage", TYPE = "type", NOSTART = "noStart";
+        private static readonly string STAGE = "stage";
+        private static readonly string TYPE = "type";
+        private static readonly string NOSTART = "noStart";
 
         private AppConfig()
         {
@@ -97,9 +100,7 @@ namespace Client
                 ("missing required meta-key '" + key + "', 'noStart' or 'preload'");
         }
 
-        /// <summary>
-        /// Returns a random synonym for the emotion
-        /// </summary>
+        // TODO: remove
         private static string EmoSyn(string emotion)
         {
             if (!synNouns.ContainsKey(emotion))
@@ -110,9 +111,8 @@ namespace Client
             return (string)Util.RandItem(synNouns[emotion]);
         }
 
-        /// <summary>
-        /// Returns a random adjective synonym for the emotion
-        /// </summary>
+        // TODO: remove
+
         private static string EmoAdj(string emotion)
         {
             if (!synAdjs.ContainsKey(emotion))
@@ -123,6 +123,7 @@ namespace Client
             return (string)Util.RandItem(synAdjs[emotion]);
         }
 
+        // TODO: remove
         private static IDictionary<string, string[]> synNouns
             = new Dictionary<string, string[]>
         {
@@ -140,6 +141,7 @@ namespace Client
             {"pride",        new[]{ "satisfaction", "confidence", "pride", "dignity", "ego" }},
         };
 
+        // TODO: remove
         private static IDictionary<string, string[]> synAdjs
             = new Dictionary<string, string[]>
         {
@@ -158,6 +160,7 @@ namespace Client
         };
     }
 
+    // Example custom command
     public class Nvm : Command, IAssignable
     {
         public static double NVM_DURATION = 5.0;
@@ -166,6 +169,28 @@ namespace Client
         {
             base.Init(txt, lbl, metas);
             delay = txt.Length == 0 ? NVM_DURATION : Convert.ToDouble(txt);
+        }
+    }
+
+    // Example serializer using MessagePack
+    public class SerializerMessagePack : ISerializer
+    {
+        static readonly IFormatterResolver ifr = MessagePack.Resolvers
+            .ContractlessStandardResolverAllowPrivate.Instance;
+
+        public byte[] ToBytes(ChatRuntime rt)
+        {
+            return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
+        }
+
+        public void FromBytes(ChatRuntime rt, byte[] bytes)
+        {
+            MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
+        }
+
+        public string ToJSON(ChatRuntime rt)
+        {
+            return MessagePackSerializer.ToJson(ToBytes(rt));
         }
     }
 }
