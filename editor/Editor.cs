@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace Dialogic.Server
+namespace Dialogic.ServerOrig
 {
     public class Editor
     {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 
-namespace Dialogic.NewServer
+namespace Dialogic.Server
 {
     public static class RequestHandler
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Dialogic.NewServer;
+using Dialogic.Server;
 using NUnit.Framework;
 using Flurl.Http;
 

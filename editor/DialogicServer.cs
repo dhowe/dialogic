@@ -5,7 +5,7 @@ using System.Threading;
 
 #pragma warning disable RECS0022
 
-namespace Dialogic.NewServer
+namespace Dialogic.Server
 {
     /*
      * To run, enter the editor directory and do $ dotnet build && dotnet run
