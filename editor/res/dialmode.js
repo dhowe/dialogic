@@ -52,6 +52,10 @@
         regex: /(\(.+\|.+\))/,
         token: "group"
       },
+      {
+        regex: /\&.+?\;/,
+        token: "html"
+      },
 
       // {regex: /\(.+\)(\..+(.*))/, token: "transformation"},
       //  {regex: /\$.+(\..+(.*))/, token: "transformation"},
