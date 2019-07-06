@@ -142,13 +142,17 @@
 .cm-s-default .cm-actor {
     color: #a06a34;
 }
-/*brown*/
+/*dark green*/
 .cm-s-default .cm-group {
-    color: #004600;
+    color: #007900;
+}
+/*pink*/
+.cm-s-default .cm-html{
+  color:#ff69b4;
 }
 /*green*/
 .cm-s-default .cm-variable {
-    color: #4d2e87;
+    color: #B300B3;
 }
 /*purple*/
 .cm-s-default .cm-transformation {
