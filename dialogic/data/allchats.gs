@@ -944,7 +944,7 @@ DO emote {type=puppyDog}
 ASK Could you please capture a pizza for me to see? {type = objectScan, object = pizza, timeOut = 10}
 OPT SUCCESS #CORE_Poke_4_ifpizzabrought
 OPT WRONG #CORE_Poke_4_pizzabad
-OPT TIMEOUT #CHAT CORE_Poke_4_timeout 
+OPT TIMEOUT #CORE_Poke_4_timeout 
 //CONDITIONAL CHAT #ifpizzabrought
 
 CHAT CORE_Poke_4_timeout {noStart=true} 
@@ -10070,7 +10070,7 @@ CHAT LOG_R3_1_2_failchat {noStart=true}
 Um. Seriously? You thought that was a door?
 I love it when you get creative, but I need a door. 
 SAY A REAL DOOR!!!
-GO #CHAT LOG_R3_1_takepicture
+GO #LOG_R3_1_takepicture
 
 CHAT LOG_R3_1_2_timedOutChat {noStart=true}
 DO emote {type=eyeRoll}
@@ -10300,10 +10300,10 @@ Or a (Tiffany lamp|(rare medieval|illuminated) manuscript|battleship|space rocke
 //Madlib_removeFromTank_1
 CHAT removeTank_1 {stage=CORE, type=objDelete}
 (((Hey!| Woah!| Oi!| Yo!| What!| No!) (Hang on a second!| Not so fast!| What the heck!| Are you nuts!| What are you doing?!| Auugh no!| Are you kidding me!?) (I was using that!| Not my $object!| You're ruining my tank!| Everything's off now!| That's my favorite $object!| I was just getting used to that!)| (Hang on a second!| Not so fast!| What the heck!| Are you nuts!| What are you doing?!| Auugh no!| Are you kidding me!?))
-GO (#removeTank_1_dontCare|#removeTank_1_angryReact|#removeTank_1_sadReact| #removeTank_1_happyReact)
+GO #(removeTank_1_dontCare|removeTank_1_angryReact|removeTank_1_sadReact| removeTank_1_happyReact)
 
 CHAT removeTank_1_dontCare {stage=CORE, type=objDelete, noStart=true}
-GO (#removeTank_holdStill|#removeTank_stillEmote|#removeTank_lookAt)
+GO #(removeTank_holdStill|removeTank_stillEmote|removeTank_lookAt)
 DO emote {type=shrug|meh}
 (Eh, nevermind.| Whatever.| No biggie.| Could be worse.| Meh.| Whatevs.| Ehhh...|Hmm...)
 (I'm over it.| Whatever. I can deal.| Stopped caring.| Don't care.| Not a big deal.)
@@ -10317,7 +10317,7 @@ DO emote {type=goth|frown|worried|singleTear|crying}
 (This is terrible.| This ruins my day.| I don't know how I'll go on without my $object.| Everything's terrible.| It's all ruined.| You don't even care.| What...am I going to do?| You're just (gonna| going to) take (everything from me| it all| all my stuff| all my things| the few things I have), aren't you?)
 
 CHAT removeTank_1_happyReact {stage=CORE, type=objDelete, noStart=true}
-GO (#removeTank_holdStill|#removeTank_stillEmote|#removeTank_lookAt)
+GO #(removeTank_holdStill|removeTank_stillEmote|removeTank_lookAt)
 DO emote {type=bigSmile|smile|bouncing|wink|clapping}
 (Hey this actually isn't so bad!| Hey, it kinda looks better now! Thanks!| Woah! Nice and airy now though!| Oo! It's...kinda nicer now! Spacey!| Huh! I actually like it better without the $object! Thanks!| Haha wow that's actually better thanks!)
 (Hey this actually isn't so bad!| Hey, it kinda looks better now! Thanks!| Woah! Nice and airy now though!| Oo! It's...kinda nicer now! Spacey!| Huh! I actually like it better without the $object! Thanks!| Haha wow that's actually better thanks!)

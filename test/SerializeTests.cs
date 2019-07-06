@@ -521,7 +521,6 @@ namespace Dialogic.Test
             Assert.That(s, Is.EqualTo("Find\nAdded"));
         }
 
-
         // Pass instance to ChatRuntime serialization methods
         private class SerializerMessagePack : ISerializer
         {
@@ -548,6 +547,7 @@ namespace Dialogic.Test
                 return MessagePackSerializer.ToJson(ToBytes(rt));
             }
         }
+
     }
 }
 

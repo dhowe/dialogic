@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+    <title>Dialogic</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        #network {
+            width: 600px;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+    <div class="global-nav">
+        <img id="fish" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
+        <span id="title">Dialogic</span>
+        <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/#dialogic">Home</a> &nbsp;|&nbsp;
+        <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/wiki/Command-Reference">Command Reference</a> &nbsp;|&nbsp;
+        <a class="navlink" target="new" href="http://rednoise.org/dialogic/" rel="nofollow">API Documentation</a> &nbsp;|&nbsp;
+        <a class="navlink" target="new" href="https://www.nuget.org/packages/org.rednoise.dialogic/" rel="nofollow">NuGet Package</a>
+    </div>
+
+    <div id="network"></div>
+
+    <script type="text/javascript">%%DATA%%</script>
+    <script type="text/javascript">
+      new vis.Network(document.getElementById('network'),
+        { nodes: nodes, edges: edges}, {});
+    </script>
+
+</body>
+</html>

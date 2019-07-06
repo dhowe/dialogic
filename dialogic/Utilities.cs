@@ -9,6 +9,7 @@ using System.Text;
 
 [assembly: InternalsVisibleTo("DialogicTest")]
 [assembly: InternalsVisibleTo("DialogicEditor")]
+[assembly: InternalsVisibleTo("DialogicVisualizer")]
 
 namespace Dialogic
 {
@@ -1157,7 +1158,7 @@ namespace Dialogic
                 if (id.Count > 0)
                 {
                     s += "{";
-                    foreach (var k in id.Keys) s += k + ":" + id[k] + ",";
+                    foreach (var k in id.Keys) s += k + ":" + id[k].Stringify() + ",";
                     s = s.Substring(0, s.Length - 1) + "}";
                 }
             }

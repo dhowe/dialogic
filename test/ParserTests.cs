@@ -58,7 +58,7 @@ namespace Dialogic.Test
             Assert.That(cmd, Is.Not.Null);
             Assert.That(cmd.GetType(), Is.EqualTo(typeof(Say)));
         }
-            
+
 
         [Test]
         public void SetNoGlobals()
@@ -161,7 +161,7 @@ namespace Dialogic.Test
             Assert.That(set.text, Is.EqualTo("a"));
             Assert.That(set.value, Is.EqualTo("$animal"));
             Assert.That(chat.scope["a"], Is.EqualTo("$animal"));
-            Assert.That(globals["animal"], Is.EqualTo("dog"));         
+            Assert.That(globals["animal"], Is.EqualTo("dog"));
             Assert.That(chat.commands[1].Text(), Is.EqualTo("The dog barked"));
         }
 
@@ -395,9 +395,9 @@ namespace Dialogic.Test
             Assert.That(c1.Staleness(), Is.EqualTo(2));
             Assert.That(c1.GetMeta(Meta.STALENESS), Is.EqualTo("2"));
             Assert.That(c1.staleness, Is.EqualTo(2));
-       
+
             chats = ChatParser.ParseText("CHAT c1\nCHAT c2\nSET $c1.staleness=2", NO_VALIDATORS);
-          
+
             c1 = (Dialogic.Chat)chats[0]; c1.Resolve(null);
             c2 = (Dialogic.Chat)chats[1]; c2.Resolve(null);
 
@@ -832,7 +832,7 @@ namespace Dialogic.Test
         [Test]
         public void ToGuppyScript()
         {
-            Assert.That(ChatParser.ParseText("CHAT c1", 
+            Assert.That(ChatParser.ParseText("CHAT c1",
                 NO_VALIDATORS)[0].ToString(), Is.EqualTo("CHAT c1"));
 
             string[] tests = {
@@ -842,7 +842,7 @@ namespace Dialogic.Test
 
             for (int i = 0; i < tests.Length; i++)
             {
-                Assert.That(ChatParser.ParseText(tests[i],AppConfig.TAC)[0].ToString(), Is.EqualTo(tests[i]));
+                Assert.That(ChatParser.ParseText(tests[i], AppConfig.TAC)[0].ToString(), Is.EqualTo(tests[i]));
             }
 
             tests = new[] {
@@ -1015,6 +1015,22 @@ namespace Dialogic.Test
             Assert.That(chats[0].commands[0].GetType(), Is.EqualTo(typeof(Do)));
             chats[0].commands[0].Resolve(null);
             Assert.That(chats[0].commands[0].Text(), Is.EqualTo("Spin"));
+
+            // from Tendar 
+
+            var text = "CHAT c1\nGO #";
+            var group = "removeTank_1_dontCare";
+            var chat = ChatParser.ParseText(text + group)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            Assert.That(chat.commands[0].text, Is.EqualTo(group));
+
+            text = "CHAT c1\nGO #";
+            group = "(removeTank_1_dontCare|removeTank_1_angryReact|removeTank_1_sadReact| removeTank_1_happyReact)";
+            chat = ChatParser.ParseText(text + group)[0];
+            Assert.That(chat, Is.Not.Null);
+            Assert.That(chat.commands[0].GetType(), Is.EqualTo(typeof(Go)));
+            Assert.That(chat.commands[0].text, Is.EqualTo(group));
         }
 
         [Test]

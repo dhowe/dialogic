@@ -138,15 +138,20 @@ namespace Dialogic
 
             if (!string.IsNullOrEmpty(spkr) && runtime != null)
             {
-                c.SetActor(runtime, spkr);
+                if (c.actor == null)
+                {
+                    if (runtime.strictMode) throw new ParseException
+                        ("Unknown actor: '" + spkr + "'");
 
-                if (c.actor == null) throw new ParseException
-                    ("Unknown actor: '" + spkr + "'");
+                    runtime.actors.Add(new Actor(spkr));
+                }
 
                 if (!Equals(c.actor, Actor.Default))
                 {
                     c.SetMeta(Meta.ACTOR, c.actor.Name());
                 }
+
+                c.SetActor(runtime, spkr);
             }
         }
 
@@ -231,20 +236,10 @@ namespace Dialogic
             }
         }
 
-        //private static Command LastOfType(Stack<Command> s, Type typeToFind)
-        //{
-        //    foreach (Command c in s)
-        //    {
-        //        if (c.GetType() == typeToFind) return c;
-        //    }
-        //    return null;
-        //}
-
         private void CreateDefaultChat()
         {
             var c = Chat.Create("C" + Util.EpochMs());
             RunInternalValidators(c);
-            //parsedCommands.Push(c);
             runtime.AddChat(c);
             activeChat = c;
         }

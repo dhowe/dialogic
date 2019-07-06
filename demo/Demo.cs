@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Dialogic;
-using MessagePack;
 using Client;
 
 namespace runner
@@ -18,28 +17,6 @@ namespace runner
             var testfile = AppDomain.CurrentDomain.BaseDirectory;
             testfile += "../../../../dialogic/data/gscript-loop.gs";
             new MockGameEngine(new FileInfo(testfile)).Run();
-        }
-
-        // Pass instance to ChatRuntime serialization methods
-        private class SerializerMessagePack : ISerializer
-        {
-            static readonly IFormatterResolver ifr = MessagePack.Resolvers
-                .ContractlessStandardResolverAllowPrivate.Instance;
-
-            public byte[] ToBytes(ChatRuntime rt)
-            {
-                return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
-            }
-
-            public void FromBytes(ChatRuntime rt, byte[] bytes)
-            {
-                MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
-            }
-
-            public string ToJSON(ChatRuntime rt)
-            {
-                return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
-            }
         }
 
         public static void Profiling(string[] args)
@@ -319,28 +296,6 @@ namespace runner
                     Console.WriteLine("\n<choice-index#" + choice + "> after " + delay + "ms\n");
                     gameEvent = new ChoiceEvent(choice);
                 });
-            }
-        }
-
-        // Implement ISerializer and then instance to ChatRuntime methods...
-        private class SerializerMessagePack : ISerializer
-        {
-            IFormatterResolver ifr = MessagePack.Resolvers.
-                ContractlessStandardResolverAllowPrivate.Instance;
-
-            public byte[] ToBytes(ChatRuntime rt)
-            {
-                return MessagePackSerializer.Serialize<Snapshot>(Snapshot.Create(rt), ifr);
-            }
-
-            public void FromBytes(ChatRuntime rt, byte[] bytes)
-            {
-                MessagePackSerializer.Deserialize<Snapshot>(bytes, ifr).Update(rt);
-            }
-
-            public string ToJSON(ChatRuntime rt)
-            {
-                return MessagePackSerializer.ToJson(ToBytes(rt), ifr);
             }
         }
     }
