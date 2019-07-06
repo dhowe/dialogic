@@ -6,7 +6,7 @@
 
 Check out [Tendar](https://play.google.com/store/apps/details?id=com.TenderClaws.Tendar.home), the award-winning free AR game using Dialogic on your Android device! Here's a [review](https://variety.com/2018/digital/news/tender-claws-tendar-ar-game-1203029351/)...
 
-Interested in using Dialogic in your game or voice-app? Drop me a line at daniel-@-rednoise-dot-org..._
+_Interested in using Dialogic in your game or voice-app? Drop me a line at daniel-@-rednoise-dot-org..._
 
 <hr/>
 
