@@ -54,7 +54,7 @@ namespace Dialogic.Server
             {
                 runtime.Preload(globals);
                 result = runtime.InvokeImmediate(globals);
-                result = WebUtility.HtmlEncode(result);
+                // result = WebUtility.HtmlEncode(result);
                 //result = result.Replace("\"", "\\\""); // yuck
                 //result = result.Replace("\n", "\\n"); // yuck
             }
