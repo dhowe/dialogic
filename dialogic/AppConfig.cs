@@ -21,7 +21,9 @@ namespace Client
         private List<CommandDef> commands;
         private List<IActor> actors;
 
-        private static string STAGE = "stage", TYPE = "type", NOSTART = "noStart";
+        private static readonly string STAGE = "stage";
+        private static readonly string TYPE = "type";
+        private static readonly string NOSTART = "noStart";
 
         private AppConfig()
         {

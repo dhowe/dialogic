@@ -43,14 +43,15 @@ namespace Dialogic
             { "FIND",   typeof(Find) },
         };
 
-        internal bool validatorsDisabled, loading, saving, strictMode = true;
+        internal List<IActor> actors = new List<IActor>();
+        internal bool validatorsDisabled, loading, saving;
+        internal bool strictMode = true; // TODO: needs docs
         internal IDictionary<string, Choice> choiceCache;
         internal IDictionary<string, Chat> chats;
         internal ChatScheduler scheduler;
         internal Resolver resolver;
         internal string firstChat;
 
-        private List<IActor> actors;
         private List<Func<Command, bool>> validators;
         private System.Threading.Thread searchThread, saveThread, loadThread;
         private ChatEventHandler chatEvents;
