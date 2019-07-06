@@ -30,6 +30,9 @@ namespace Dialogic.Test
                 .PostUrlEncodedAsync(new { type = "validate", code = expect })
                 .ReceiveJson<Result>();
             task.Wait();
+
+            Console.WriteLine(task);
+
             Assert.AreEqual(Result.OK, task.Result.Status);
             Assert.AreEqual(expect, task.Result.Data);
 
@@ -37,6 +40,7 @@ namespace Dialogic.Test
                 .PostUrlEncodedAsync(new { type = "validate", code = expect, useValidators = "false" })
                 .ReceiveJson<Result>();
             task.Wait();
+
             Assert.AreEqual(Result.OK, task.Result.Status);
             //Console.WriteLine(task.Result.Data);
             Assert.AreEqual(expect, task.Result.Data);
@@ -51,6 +55,7 @@ namespace Dialogic.Test
                 .PostUrlEncodedAsync(new { type = "validate", code = expect, useValidators = "false" })
                 .ReceiveJson<Result>();
             task.Wait();
+
             Console.WriteLine(task.Result.Data);
             Assert.AreEqual(Result.OK, task.Result.Status);
             Assert.AreEqual(expect, task.Result.Data);
@@ -167,18 +172,6 @@ namespace Dialogic.Test
             var result = RequestHandler.Validate(kvs);
             Assert.That(result, Is.EqualTo(JSONResult(text)));
         }
-
-        //[Test]
-        //public void VisualizeDirect()
-        //{
-        //    var lines = "CHAT Hello\nSAY Hi";
-        //    var expect = "var chats = {\n  \"1\": \"CHAT Hello\nSAY Hi\",\n};\nvar nodes = new vis.DataSet([\n  { id: 1, label: 'Hello' },\n]);\nvar edges = new vis.DataSet([\n]);";
-        //    var kvs = new Dictionary<string, string>() {
-        //        { "type", "visualize" }, { "code", lines }};
-        //    var result = RequestHandler.Visualize(kvs);
-        //    Assert.That(result, Is.EqualTo(Result.Success(JsonNode.Escape(expect)).ToJSON()));
-        //}
-
 
         [Test]
         public void ExecuteDirect()

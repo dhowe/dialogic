@@ -20,9 +20,6 @@
     <PackageReference Include="Flurl.Http" Version="2.4.0" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Class1.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\dialogic\dialogic.csproj" />
     <ProjectReference Include="..\editor\editor.csproj" />
   </ItemGroup>
