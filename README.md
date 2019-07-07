@@ -6,11 +6,11 @@
 
 Check out [Tendar](https://play.google.com/store/apps/details?id=com.TenderClaws.Tendar.home), the award-winning free AR game using Dialogic on your Android device! Here's a [review](https://variety.com/2018/digital/news/tender-claws-tendar-ar-game-1203029351/)...
 
-Interested in using Dialogic in your game or voice-app? Drop me a line at daniel-@-rednoise-dot-org..._
+_Interested in using Dialogic in your game or voice-app? Drop me a line at daniel-@-rednoise-dot-org..._
 
 <hr/>
 
-[FAQ](https://github.com/dhowe/dialogic/wiki) &nbsp;::&nbsp; [Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Documentation](http://rednoise.org/dialogic/) &nbsp;::&nbsp; [Web Editor](http://rednoise.org:8082/dialogic/editor/) &nbsp;::&nbsp; [NuGet Package](https://www.nuget.org/packages/org.rednoise.dialogic/)
+[FAQ](https://github.com/dhowe/dialogic/wiki) &nbsp;::&nbsp; [Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Docs](http://rednoise.org/dialogic/) &nbsp;::&nbsp; [Workbench](http://rednoise.org:8082/dialogic/editor/) &nbsp;::&nbsp; [NuGet Package](https://www.nuget.org/packages/org.rednoise.dialogic/)
 
 Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It enables writers to craft compelling dialog that responds organically both to user prompts and to events in the environment. The system supports abitrarily complex interactions between multiple actors, but makes no assumptions about how text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity).
 
