@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
@@ -41,15 +42,29 @@ namespace Dialogic.Server
             CreateNewListener(host).Start();
         }
 
+        public string getLocalIP()
+        {
+            string localIP;
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+            {
+                socket.Connect("8.8.8.8", 65530);
+                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                localIP = endPoint.Address.ToString();
+            }
+            return localIP;
+        }
+
+
         public HttpListener CreateNewListener(string hostname)
         {
             string uri = "http://" + hostname + ":8082" + SERVER_PATH;
 
             listener = new HttpListener();
             listener.Prefixes.Add(uri);
+            listener.Prefixes.Add(uri.Replace(":[0-9][0-9][0-9][0-9]", ""));
             listener.Start();
 
-            Console.WriteLine("Running dialogic-server on " + uri);
+            Console.WriteLine("Running dialogic-server on " + uri); //+" "+getLocalIP());
 
             return listener;
         }

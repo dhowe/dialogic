@@ -512,19 +512,6 @@ $(function () {
 
     if (editor.somethingSelected()) {
       formData[0].value = editor.getSelection();
-      // var content = processSelectedText(formData[0].value, startIdx.line, endIdx.line);
-      // formData.push(
-      // {
-      //   name: "selectionStart",
-      //   value: startIdx.line + "," + startIdx.ch
-      // });
-      //
-      // formData.push(
-      // {
-      //   name: "selectionEnd",
-      //   value: endIdx.line + "," + endIdx.ch
-      // });
-      //
       formData.push({
         name: 'selection',
         value: true
@@ -588,66 +575,18 @@ $(function () {
           updateContent(defaultText);
           return; // only continue if content != undefined
       }
-
-      // TODO: Fix editor & network state resume
-
-      // Editor states
-      // var editorHeight = localStorage.getItem("editorHeight");
-      // if (editorHeight != null) {
-      //   editor.setSize(null, editorHeight);
-      // }
-      //
-      // var editorActiveLine = localStorage.getItem("editorActiveLine");
-      // if (editorActiveLine != null) {
-      //   console.log(editorActiveLine);
-      //   editor.setCursor({ line: editorActiveLine});
-      // }
-
-      // var editorScrollPosition = JSON.parse(localStorage.getItem("editorScrollPosition"));
-      // if (editorScrollPosition != null) {
-      //   var left = editorScrollPosition.left;
-      //   var top = editorScrollPosition.top;
-      //   var right = editorScrollPosition.width;
-      //   var bottom = editorScrollPosition.height;
-      //   editor.scrollIntoView({left, top, right, bottom});
-      // }
-
-      // Network states
-
-      // var networkPosition = localStorage.getItem("networkPosition");
-      // if (networkPosition != null) {
-      //   state.pos = JSON.parse(networkPosition);
-      // }
-      //
-      // var networkScale = localStorage.getItem("networkScale");
-      // if (networkScale != null) {
-      //   state.scale = parseInt(networkScale) != 0 ? parseInt(networkScale) : 1;
-      // }
-      //
-      // $("#validate").click();
-
     }
   }
-
-  /*function loadFromCookie()
-  {
-    var content = $.cookie("guppyScript");
-    if (content != undefined && content != 'Enter your script here')
-    {
-      editor.setValue(content);
-      $("#main").val(content);
-    }
-  }*/
 
   function sendRequest(data) {
 
     //console.log('sendRequest', data, data.type);
-
-    var server = "http://localhost:8082/dialogic/server/";
+    var loc = window.location;
+    var serverUrl = loc.protocol + "//"+loc.hostname + ":8082/dialogic/server";
     $.ajax({
       type: 'POST',
       data: JSON.stringify(data),
-      url: server,
+      url: serverUrl,
       crossDomain: true,
       processData: false,
       dataType: 'json',
