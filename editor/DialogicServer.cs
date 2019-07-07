@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
@@ -30,7 +29,6 @@ namespace Dialogic.Server
     public class DialogicServer
     {
         const string SERVER_PATH = "/dialogic/server/";
-        const int SERVER_PORT = 8082;
 
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responder;
@@ -43,26 +41,12 @@ namespace Dialogic.Server
             CreateNewListener(host).Start();
         }
 
-        public string GetLocalIP()
-        {
-            string localIP;
-            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
-            {
-                socket.Connect("8.8.8.8", 65530);
-                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
-                localIP = endPoint.Address.ToString();
-            }
-            return localIP;
-        }
-
-
         public HttpListener CreateNewListener(string hostname)
         {
-            string uri = "http://+:" + SERVER_PORT + SERVER_PATH;
+            string uri = "http://" + hostname + ":8082" + SERVER_PATH;
 
             listener = new HttpListener();
             listener.Prefixes.Add(uri);
-            //listener.Prefixes.Add(uri.Replace(":[0-9][0-9][0-9][0-9]", ""));
             listener.Start();
 
             Console.WriteLine("Running dialogic-server on " + uri);
@@ -85,7 +69,7 @@ namespace Dialogic.Server
                         ctx.Response.ContentLength64 = buf.Length;
                         ctx.Response.ContentType = "application/json";
                         ctx.Response.AppendHeader("Access-Control-Allow-Origin", "*");
-                        ctx.Response.AppendHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
+                        ctx.Response.AppendHeader("Access-Control-Allow-Methods", "POST");
                         ctx.Response.AppendHeader("Access-Control-Allow-Headers", "Content-Type");
                         ctx.Response.OutputStream.Write(buf, 0, buf.Length);
 
