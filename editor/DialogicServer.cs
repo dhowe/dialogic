@@ -69,7 +69,7 @@ namespace Dialogic.Server
                         ctx.Response.ContentLength64 = buf.Length;
                         ctx.Response.ContentType = "application/json";
                         ctx.Response.AppendHeader("Access-Control-Allow-Origin", "*");
-                        ctx.Response.AppendHeader("Access-Control-Allow-Methods", "POST");
+                        ctx.Response.AppendHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
                         ctx.Response.AppendHeader("Access-Control-Allow-Headers", "Content-Type");
                         ctx.Response.OutputStream.Write(buf, 0, buf.Length);
 
