@@ -9,7 +9,7 @@ namespace Dialogic.Server
 {
     /*
      * To run, enter the editor directory and do $ dotnet build && dotnet run
-     * which will start the server at: http://localhost:8082/dialogic/editor/
+     * which will start the server at: http://localhost:8082/dialogic-workbench/
      *
      * There are 3 server functions, validate, execute, and visualize, each of which can be called via an HTTP Post
      * request. Each returns a JSON object with 3 fields: 'status', 'data', and 'lineNo'.
@@ -28,7 +28,7 @@ namespace Dialogic.Server
      */
     public class DialogicServer
     {
-        const string SERVER_PATH = "/dialogic/server/";
+        const string SERVER_PATH = "/dialogic-server/";
 
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responder;

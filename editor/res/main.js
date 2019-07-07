@@ -643,7 +643,7 @@ $(function () {
 
     //console.log('sendRequest', data, data.type);
 
-    var server = "http://localhost:8082/dialogic/server/";
+    var server = "http://localhost:8082/dialogic-server/";
     $.ajax({
       type: 'POST',
       data: JSON.stringify(data),
