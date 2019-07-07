@@ -30,6 +30,7 @@ namespace Dialogic.Server
     public class DialogicServer
     {
         const string SERVER_PATH = "/dialogic/server/";
+        const int SERVER_PORT = 8082;
 
         HttpListener listener;
         readonly Func<HttpListenerRequest, string> responder;
@@ -42,7 +43,7 @@ namespace Dialogic.Server
             CreateNewListener(host).Start();
         }
 
-        public string getLocalIP()
+        public string GetLocalIP()
         {
             string localIP;
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
@@ -57,14 +58,14 @@ namespace Dialogic.Server
 
         public HttpListener CreateNewListener(string hostname)
         {
-            string uri = "http://" + hostname + ":8082" + SERVER_PATH;
+            string uri = "http://+:" + SERVER_PORT + SERVER_PATH;
 
             listener = new HttpListener();
             listener.Prefixes.Add(uri);
-            listener.Prefixes.Add(uri.Replace(":[0-9][0-9][0-9][0-9]", ""));
+            //listener.Prefixes.Add(uri.Replace(":[0-9][0-9][0-9][0-9]", ""));
             listener.Start();
 
-            Console.WriteLine("Running dialogic-server on " + uri); //+" "+getLocalIP());
+            Console.WriteLine("Running dialogic-server on " + uri);
 
             return listener;
         }

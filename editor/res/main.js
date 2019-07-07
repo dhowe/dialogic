@@ -1,7 +1,7 @@
 $(function () {
 
   var SERVER_PORT = 8082;
-  var SERVER_PATH = "/dialogic/editor";
+  var SERVER_PATH = "/dialogic/editor/";
 
   var storageKey = 'dialogic-editor-code';
   var myTextarea = $("#main")[0];
@@ -585,6 +585,7 @@ $(function () {
 
     //console.log('sendRequest', data, data.type);
     var serverUrl = "http://" + window.location.hostname + ":" + SERVER_PORT + SERVER_PATH;
+console.log('FETCH', serverUrl);
     $.ajax({
       type: 'POST',
       data: JSON.stringify(data),
