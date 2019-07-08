@@ -17,7 +17,7 @@
   <script src="res/lib/codeMirror/codemirror.js"></script>
   <script src="res/lib/codeMirror/simple.js"></script>
   <script src="res/lib/codeMirror/active-line.js"></script>
-  
+
   <script type="text/javascript" src="res/dialmode.js"></script>
   <link href="res/style.css" rel="stylesheet" type="text/css" />
 </head>
@@ -25,7 +25,7 @@
 <body>
 
   <div id="navbar">
-      <img id="fish" src="http://rednoise.org/images/dialogic.png" width="32" />&nbsp;
+      <img id="fish" src="../dlogo-small.png" width="32" />&nbsp;
       <span id="title">Dialogic</span>
       <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/#dialogic">Home</a> &nbsp;|&nbsp;
       <a class="navlink" target="new" href="https://github.com/dhowe/dialogic/wiki/Command-Reference">Command Reference</a> &nbsp;|&nbsp;
@@ -37,8 +37,8 @@
 
   </div>
 <div id="container">
-  <div id="network">
 
+  <div id="network">
   </div>
   <div id="node-popUp" style="display: none;">
 <input id="node-label" value="new value">
@@ -51,12 +51,13 @@
     <button type="button" name="button">Download</button>
   </div>
 
-
+<!--  -->
   <div id="editor">
-    <div class="showNetwork" title="Show Network" ><<</div>
     <div id="drag"></div>
-
-  <div class="editor-close"></div>
+  <div id="network-close" class="close" title="close network view"></div>
+    <div id="network-show" class="show" title="show network view"></div>
+  <div id="editor-close" class="close" title="close editor"></div>
+  <div id="editor-show" class="show" title="show editor"></div>
 
       <span id="errorLine" style="display: none;"></span>
       <span id="selection" style="display: none;"></span>
