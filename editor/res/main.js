@@ -651,10 +651,10 @@ editor.setSize(null, document.getElementById("network").clientHeight - 85);
   function sendRequest(data) {
 
 
-    var loc = window.location;
-    var host = (loc.hostname && loc.hostname.length) || 'localhost';
+    var host = window.location.hostname;
+    if (!host || !host.length) host = 'localhost';
     var server = "http://" + host + ":8082/dialogic-server/";
-    //console.log('sendRequest', data, data.type, server);
+    console.log('sendRequest', data, data.type, server);
     $.ajax({
       type: 'POST',
       data: JSON.stringify(data),
