@@ -12,6 +12,8 @@ $(function () {
     styleSelectedText: true
   });
 
+editor.setSize(null, document.getElementById("network").clientHeight - 85);
+
   var opts = {
     nodes: {
       shape: 'box'
@@ -60,7 +62,8 @@ $(function () {
   });
 
   $(document).on('mousemove', function (e) {
-    if (!isResizing) return;
+    if (!isResizing | e.clientX < 50 | e.clientX > window.innerWidth -60) return;
+      console.log(e.clientX);
     var offsetRight = container.width() - (e.clientX - container.offset().left);
     left.css('right', offsetRight);
     var newLeft = (window.innerWidth - offsetRight) / window.innerWidth * 100 + "%";
@@ -119,8 +122,15 @@ $(function () {
   // ******** End Editor ************//
 
   // ******** Click Handlers **********//
-  $(".editor-close").click(function () {
+  $("#editor-close").click(function () {
     toggleNetworkView(true);
+  });
+  $("#network-close").click(function () {
+    toggleNetworkView(false);
+  });
+  $(".show").click(function () {
+    toggleNetworkView("split");
+    this.hide();
   });
 
   $(".vis-close").click(function () {
@@ -128,10 +138,7 @@ $(function () {
     closeNetWorkView();
   });
 
-  $(".showNetwork").click(function () {
-    toggleNetworkView("split");
-    $(".showNetwork").hide();
-  });
+
 
   // setup button handlers
   $("#clear").click(function () {
@@ -154,10 +161,12 @@ $(function () {
   // handle dialog show/hide
   $("#showDialog").click(function () {
     $("#loadURLDialog").show();
+    $('.downloadInterface').hide();
   });
 
   $("#saveChats").click(function () {
       $('.downloadInterface').show();
+      $("#loadURLDialog").hide();
   });
   $(".downloadInterface button").click(function () {
     $('.downloadInterface').hide();
@@ -718,19 +727,39 @@ $(function () {
 
   function toggleNetworkView(val) {
     if (typeof val != 'string') {
-      $("#editor").toggle(!val);
-      $("#network").toggle(val);
-      $(".showNetwork").toggle(!val);
-      $("#editor, #network").width("100%");
+      if(val) {
+        // hide editor, network full view
+        $("#editor").toggleClass("hidden");
+        $("#form").toggle(false);
+
+        $(".close").toggle(false);
+        $("#editor-show").toggle(true);
+
+        $("#network").width("100%");
+
+
+      } else {
+        $("#network").toggleClass("hidden");
+
+        $(".close").toggle(false);
+        $("#network-show").toggle(true);
+
+        $("#editor").width((window.innerWidth -24)+"px");
+
+      }
       !val && setTimeout(function () {
         $("#editor").focus();
         $('#editor').trigger('click');
       }, 1000);
     } else if (val == "split") {
-      $("#editor").toggle(true);
-      $("#network").toggle(true);
+      $("#editor, #network").removeClass("hidden");
+      $("#form").toggle(true);
+
       $("#editor").width("49%");
       $("#network").width("49%");
+
+      $(".show").toggle(false);
+      $(".close").toggle(true);
     }
   }
 

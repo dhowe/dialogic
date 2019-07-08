@@ -1,7 +1,10 @@
+body {
+    overflow-y: hidden;
+}
 #container {
     margin-top: 20px;
     width: 100%;
-    height: 100%;
+    height:95%;
     position:relative;
     border-top: 1px solid #eee;
 }
@@ -10,7 +13,7 @@
   border: 1px solid #eee;
   position:absolute;
   width: 100%;
-  height: 600px;
+  height: 95%;
   background-color: #fff;
   left: 0;
   top: 0;
@@ -86,7 +89,10 @@
   top: 0;
   bottom: 0;
   position:absolute;
-  height:100%;
+  height:95%;
+  background: white;
+  border: 1px solid #eee;
+}
 }
 #chatLabel {
   margin:10px 0 0 10px;
@@ -95,16 +101,34 @@
 #chatLabel:focus {
   outline:none;
 }
-
-#editor .editor-close {
+.showNetwork {
+  position:absolute;
+  left:0;
+  top:0;
+  width:30px;
+  height:30px;
+  background-repeat:no-repeat;
+  cursor:pointer;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  /* display: none; */
+}
+.hidden {
+  width:24px !important;
+}
+#editor .close {
+ opacity: .5;
  position:absolute;
- right:0;
  top:0;
- width:30px;
- height:30px;
- background-position:20px 3px;
+ width:10px;
+ height:10px;
+ margin:7px;
  background-repeat:no-repeat;
- background-image:url(cross.png);
+ background-image:url(close.svg);
  cursor:pointer;
  -webkit-touch-callout:none;
  -webkit-user-select:none;
@@ -112,6 +136,37 @@
  -moz-user-select:none;
  -ms-user-select:none;
  user-select:none
+}
+
+.show{
+  opacity: .6;
+  position:absolute;
+  top:0;
+  width:8px;
+  height:8px;
+  margin:8px;
+  background-repeat:no-repeat;
+  background-image:url(close.svg);
+  cursor:pointer;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  display:none;
+
+  transform: rotate(45deg);
+  transition: all 500ms;
+}
+.show:hover, .close:hover {
+  opacity:1 !important;
+}
+#editor-close, #editor-show{
+ right:0;
+}
+#network-close, #network-show{
+ left:-24px;
 }
 #drag{
     position: absolute;
@@ -196,8 +251,9 @@ body, html {
 }
 #navbar {
     line-height: 42px;
-    font-size: 20px;
-    margin:10px
+    font-size: 14px;
+    margin:10px;
+    height: 30px;
 }
 
 .input-area {
@@ -248,7 +304,7 @@ pre#executeResult {
 #loadURLDialog {
     width: 500px;
     border: 1px solid #c0c0c0;
-    padding: 0px 10px;
+    padding: 10px 20px;
     margin: auto;
     position:relative;
     top: 80px;
@@ -256,6 +312,15 @@ pre#executeResult {
     display: none;
     z-index:50;
     background-color: rgba(255, 255, 255, 0.95)
+}
+.CodeMirror-dialog-top {
+  padding:2px;
+  margin-bottom: 5px;
+  letter-spacing: .5px;
+}
+.CodeMirror-dialog-bottom {
+  border:none;
+  margin-right: -20px;
 }
 #navbar button {
   float:right;
@@ -292,12 +357,12 @@ button:disabled:hover {
     font-size: 12px;
     font-family: Open Sans, sans-serif;
     font-weight: 500;
-    color: #2F6465;
+    color: #E24660;
 }
 
 .navlink:hover,
 .navlink:active {
-    color: #088;
+    color: #E95978;
 }
 
 .button:hover,
@@ -312,19 +377,13 @@ p.navlinks {
 #button-div {
     height:28px;
     margin: 20px 10px;
-    min-width:575px;
     padding:0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
-.showNetwork {
-  position:absolute;
-  margin-left: 8px;
-  padding:3px;
-  color:grey;
-  display:none;
-  cursor:default;
-}
+
 #title {
-    font-family: Open Sans, sans-serif;
+    font-family: Gill Sans, sans-serif;
     font-size: 24px;
     margin-left: -3px;
     margin-right: 50px;
@@ -404,20 +463,21 @@ button[type="button"] {
     font-family: Open Sans, sans-serif !important;
     font-weight: 500 !important;
     color: #333 !important;
-    margin: 2px 20px 0 0 !important;
+    margin: 0px 20px 0 0 !important;
 }
 button:focus, canvas:focus, div:focus{
   outline:0;
 }
 
 .button.top{
-  border: 2px solid #2F6465 !important;
-  color:#2F6465 !important;
+  border: 2px solid #E24660 !important;
+  color:#E24660 !important;
   font-size: 16px;
   font-weight: 600 !important;
+  margin-top: 4px !important;
 }
 .button.top:hover {
-  background-color:#2F6465 !important;
+  background-color:#E24660 !important;
   color:white !important;
 }
 
