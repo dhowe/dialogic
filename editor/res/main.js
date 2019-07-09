@@ -11,8 +11,7 @@ $(function () {
     styleActiveLine: true,
     styleSelectedText: true
   });
-
-editor.setSize(null, document.getElementById("network").clientHeight - 85);
+ editor.setOption("theme", "twilight");
 
   var opts = {
     nodes: {
@@ -138,6 +137,10 @@ editor.setSize(null, document.getElementById("network").clientHeight - 85);
     closeNetWorkView();
   });
 
+  $("#colorTheme").click(function (input) {
+    $("body").toggleClass("darktheme");
+    editor.setOption("theme", $('#colorTheme').is(':checked') ? "default":"twilight");
+  });
 
 
   // setup button handlers
