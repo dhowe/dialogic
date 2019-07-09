@@ -89,7 +89,7 @@
         next: "comment"
       },
       {
-        regex: /[-+\/*=<>!^()|]+/,
+        regex: /=/,
         token: "operator"
       },
 
