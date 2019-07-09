@@ -845,6 +845,10 @@ $(function () {
   $('#deleteNode').on('click', function (e) {
     network.deleteSelected(event.nodes);
     $('.popupMenu').hide();
+
+    $("#execute").prop("disabled", true);
+    $("#validate").prop("disabled", false);
+
   });
 
   $('#chatLabel').keyup(function () {

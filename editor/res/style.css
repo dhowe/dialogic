@@ -14,8 +14,6 @@ body.darktheme {
 .darktheme .button{
   background-color:black;
   color:#EEE;
-  opacity:.9;
-
 }
 .darktheme .checkText a{
   color:#FFF;
@@ -26,6 +24,10 @@ body.darktheme {
 .darktheme #loadURLDialog, .darktheme .downloadInterface, .darktheme .popupMenu{
   background-color: rgba(30,30,30,.95);
   color:#EEE!important;
+}
+.darktheme button.disabled{
+  background-color: #111;
+  border-color:#333;
 }
 .darktheme .buttonset button, .darktheme .downloadInterface button{
   background-color: #222;
