@@ -1,6 +1,75 @@
+
+/* dark theme */
+body.darktheme {
+  background-color: black !important;
+  color:#EEE;
+}
+.darktheme #network, .darktheme #editor{
+  background-color:#111;
+  border-color:#333;
+}
+.darktheme #title{
+  color:#DDD;
+}
+.darktheme .button{
+  background-color:black;
+  color:#EEE;
+}
+.darktheme .checkText a{
+  color:#FFF;
+}
+.darktheme .button:hover {
+  color:black !important;
+}
+.darktheme #loadURLDialog, .darktheme .downloadInterface, .darktheme .popupMenu{
+  background-color: rgba(30,30,30,.95);
+  color:#EEE!important;
+}
+.darktheme button.disabled{
+  background-color: #111;
+  border-color:#333;
+}
+.darktheme .buttonset button, .darktheme .downloadInterface button{
+  background-color: #222;
+  color:#EEE;
+  border-color:#CCC;
+}
+.darktheme .buttonset button:hover, .darktheme .downloadInterface button:hover{
+  color:black;
+}
+.darktheme .handle{
+  background-color:#222
+}
+.darktheme .handle:hover{
+  background-color:#333;
+}
+.darktheme .popupMenu li:hover {
+  background: rgba(200, 200, 200, 0.2);
+}
+.darktheme .line-error {
+  background-color: #C2554E;
+}
+.darktheme .checkbox{
+  background-color: black;
+  border-color:#444;
+}
+.darktheme .show, .darktheme .close{
+  filter: invert(1);
+  -webkit-filter: invert(1);
+}
+/* .darktheme #executeResult.success{
+  background-color: #8794AA;
+}
+.darktheme #result.success{
+  background-color: #A3AB8E;
+} */
+/*  */
+
+
 body {
     overflow-y: hidden;
 }
+
 #container {
     margin-top: 20px;
     width: 100%;
@@ -190,56 +259,83 @@ body {
     height: 100% !important; /* fix the gutter issue*/
 }
 /*additional theme*/
-.cm-s-default .cm-command, .cm-s-default .cm-command-chat {
+.CodeMirror .cm-command, .CodeMirror .cm-command-chat {
     font-weight: bold;
+    color:#D8D8D8;
 }
 
 .cm-s-default .cm-actor {
-    color: #a06a34;
+    color: #a06a34; /*brown*/
 }
-/*dark green*/
+.cm-s-twilight .cm-actor {
+    color: #C576DC;/* purple */
+}
+
+/* */
+.cm-s-twilight .CodeMirror-line {
+  color:#AAB1BE;
+}
+
 .cm-s-default .cm-group {
-    color: #007900;
+    color: #007900; /*dark green*/
 }
-/*pink*/
+.cm-s-twilight .cm-group {
+    color: #A1C870; /*light green*/
+}
+
 .cm-s-default .cm-html{
-  color:#ff69b4;
+  color:#ff69b4; /*pink*/
 }
-/*green*/
+.cm-s-twilight .cm-html{
+  color:#87289C; /*pink*/
+}
+
 .cm-s-default .cm-variable {
-    color: #B300B3;
+    color: #B300B3; /*green*/
 }
-/*purple*/
+.cm-s-twilight .cm-variable {
+    color: #00c548; /*green*/
+}
+
+
 .cm-s-default .cm-transformation {
-    color: #8b0000;
+    color: #8b0000; /*dark red*/
 }
-/*dark red*/
+.cm-s-twilight .cm-transformation {
+    color: #EFEB4D;
+}
 
 .cm-s-default .cm-metadata {
     color: orange;
 }
-
-.cm-s-default .cm-key {
-    color: #005cc5;
+.cm-s-twilight .cm-metadata {
+    color: #61AEEF;
+    /* light blue */
 }
-/*blue*/
+.cm-s-default  .cm-key {
+    color: #005cc5;  /*blue*/
+}
+.cm-s-twilight  .cm-key {
+    color: #D19966;
+    /* orange */
+}
 .cm-s-default .cm-value {
-    color: #00c548
+    color: #00c548; /*blue*/
 }
-/*bright green*/
+.cm-s-twilight .cm-value {
+    color: #1FC3B5 ;
+}
 
-.cm-s-default .cm-label {
-    color: #d73a49;
+.cm-s-default .cm-label, .cm-s-default .cm-operator{
+    color: #d73a49; /*red*/
 }
-/*red*/
-
-.cm-s-default .cm-operator {
-    color: #d73a49;
+.cm-s-twilight .cm-operator, .cm-s-twilight .cm-label{
+    color: #E06C75; /*red*/
 }
-/*red*/
-.cm-s-default .cm-comment {
+.CodeMirror .cm-comment {
     color: grey;
 }
+
 
 body, html {
     width: 100%;
@@ -322,8 +418,11 @@ pre#executeResult {
   border:none;
   margin-right: -20px;
 }
-#navbar button {
+#navbar button, #navbar .wrapper{
   float:right;
+}
+#navbar .wrapper {
+  width:120px;
 }
 #closeDialog {
     float: right;
@@ -367,7 +466,7 @@ button:disabled:hover {
 
 .button:hover,
 button[type="button"]:hover {
-    background: #f3f3f3 !important;
+    background: #f3f3f3;
 }
 
 p.navlinks {
@@ -440,29 +539,30 @@ input[type="checkbox"]:focus {
     color: #99a1a7;
 }
 
-#checkText {
+.checkText {
     margin-top: 4px;
     margin-left: 8px;
     display: inline-block;
     position: relative;
     font-size: 12px;
+    line-height: 28px;
 }
 
-#checkText a {
+.checkText a {
     color: black;
 }
 
 .button,
 button[type="button"] {
     cursor: pointer;
-    background-color: #fff !important;
+    background-color: #fff;
     padding: 3px 15px !important;
     text-decoration: none !important;
-    border: 1px solid #e1e1e1 !important;
+    border: 1px solid #e1e1e1;
     font-size: 14px !important;
     font-family: Open Sans, sans-serif !important;
     font-weight: 500 !important;
-    color: #333 !important;
+    color: #333;
     margin: 0px 20px 0 0 !important;
 }
 button:focus, canvas:focus, div:focus{
