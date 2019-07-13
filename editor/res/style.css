@@ -261,20 +261,28 @@ body {
 /*additional theme*/
 .CodeMirror .cm-command, .CodeMirror .cm-command-chat {
     font-weight: bold;
-    color:#D8D8D8;
+}
+.cm-s-twilight .cm-command, .cm-s-twilight .cm-command-chat {
+  color:#D8D8D8; 
 }
 
 .cm-s-default .cm-actor {
     color: #a06a34; /*brown*/
 }
-.cm-s-twilight .cm-actor {
-    color: #C576DC;/* purple */
+.cm-s-twilight.CodeMirror{
+  background: #1C1E1F !important;
+}
+/* Normal lines*/
+.cm-s-twilight .CodeMirror-line {
+  color:#E0E2E1;
 }
 
-/* */
-.cm-s-twilight .CodeMirror-line {
-  color:#AAB1BE;
+
+.cm-s-twilight .cm-actor {
+    color: #9F79A4;/* purple */
 }
+
+
 
 .cm-s-default .cm-group {
     color: #007900; /*dark green*/
@@ -330,8 +338,9 @@ body {
     color: #d73a49; /*red*/
 }
 .cm-s-twilight .cm-operator, .cm-s-twilight .cm-label{
-    color: #E06C75; /*red*/
+    color: #B15862; /*red*/
 }
+
 .CodeMirror .cm-comment {
     color: grey;
 }
