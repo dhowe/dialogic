@@ -29,6 +29,7 @@ $(function () {
 
   var edges = new vis.DataSet();
   var nodes = new vis.DataSet([{ id: labelToId(defaultLabel), label: defaultLabel }]);
+
   var network = new vis.Network(document.getElementById('network'), {
     nodes: nodes,
     edges: edges
@@ -210,31 +211,65 @@ $(function () {
     toggleExecute();
   }
 
-  function toNetworkData(chats) {
-    var nodes = [],
-      edges = [];
+function labelToIdLookup(label) {
+  var id = "";
+  var ids = nodes.getIds();
 
-    var labelToIdLookup = {};
+  for (var j = 0; j < ids.length; j++) {
+    var node = nodes.get(ids[j]);
+    if (node.label == label){
+      id = node.id; // keep using old id if there is one
+    }
+  }
 
-    // NEXT: WORKING HERE *******
+  if (id == "") {
+    id = labelToId(label)
+  }
+
+  return id
+}
+
+function edgeToIdLookup(data){
+  var ids = edges.getIds();
+  for (var j = 0; j < ids.length; j++) {
+    var edge = edges.get(ids[j]);
+    if (edge.from == data.from && edge.to == data.to && edge.arrows == data.arrows){
+      return edge.id;
+    }
+  }
+  return null;
+}
+
+function toNetworkData(chats) {
+    // keep using old node/edge ids
+    var new_nodes = [],  new_edges = [], reference = {};
+
     for (var i = 0; i < chats.length; i++) {
-      labelToIdLookup[chats[i].Name] = labelToId(chats[i].Name);
+      var id = labelToIdLookup(chats[i].Name);
+      new_nodes.push({ id: id, label: chats[i].Name });
+      reference[chats[i].Name] = id;
     }
 
-    for (var i = 0; i < chats.length; i++) {
-      var id = labelToIdLookup[chats[i].Name];
-      nodes.push({ id: id, label: chats[i].Name });
+
+    for (var i = 0; i < new_nodes.length; i++) {
+      var id = new_nodes[i].id;
       for (var j = 0; j < chats[i].Labels.length; j++) {
-        edges.push({
+        var edgeData = {
           from: id,
-          to: labelToIdLookup[chats[i].Labels[j]],
+          to: reference[chats[i].Labels[j]],
           arrows: 'to'
-        });
+        };
+        var edgeId = edgeToIdLookup(edgeData);
+        if ( edgeId != null) {
+          edgeData.id = edgeId;
+        }
+        new_edges.push(edgeData);
       }
     }
+
     return {
-      nodes: nodes,
-      edges: edges
+      nodes: new_nodes,
+      edges: new_edges
     };
   }
 
@@ -329,10 +364,12 @@ $(function () {
     // Parse the returned data into nodes-and-edges
     var chats = tryParse(response.data);
     var data = toNetworkData(chats);
+
     // Remove all nodes not in returned set (if not a selection)
     if (!isSelection) {
       var dIds = getDeletedNodeIds(data.nodes);
       nodes.remove(dIds);
+      edges.clear();
     }
 
     // Add all nodes with new labels
@@ -347,11 +384,7 @@ $(function () {
     }
 
     nodes.add(newNodes);
-
-    // OPT: handle nodes with label-changes?
-
-    // Now update all the edges
-    edges.add(data.edges); // TODO: handle edges on selection
+    edges.update(data.edges);
 
     // Now fit to the window
     network.fit();
@@ -663,7 +696,7 @@ $(function () {
     var host = window.location.hostname;
     if (!host || !host.length) host = 'localhost';
     var server = "http://" + host + ":8082/dialogic-server/";
-    console.log('sendRequest', data, data.type, server);
+    // console.log('sendRequest', data, data.type, server);
     $.ajax({
       type: 'POST',
       data: JSON.stringify(data),
