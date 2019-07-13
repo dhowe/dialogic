@@ -374,7 +374,7 @@ $(function () {
   }
 
   function onDataChange(response, data) {
-
+    clearErrorLine();
     //console.log("RAW", response.status, response.data);
     switch (data.type) {
 
@@ -461,6 +461,12 @@ $(function () {
     if (errorLine > 0) {
       var idx = errorLine - 1;
       editor.addLineClass(idx, "background", 'line-error');
+    }
+  }
+
+  function clearErrorLine() {
+    for (var i = 0; i < editor.lineCount(); i++) {
+      editor.removeLineClass(i, "background", 'line-error');
     }
   }
 
