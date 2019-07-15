@@ -57,6 +57,18 @@ body.darktheme {
   filter: invert(1);
   -webkit-filter: invert(1);
 }
+.darktheme .button.top{
+  border: 2px solid #EEE;
+  color:#EEE;
+}
+.darktheme .button.top:hover {
+  background-color:white !important;
+  color:black !important;
+}
+.darktheme .navlink:hover,
+.navlink:active {
+    color: white;
+}
 /* .darktheme #executeResult.success{
   background-color: #8794AA;
 }
@@ -471,7 +483,7 @@ button:disabled:hover {
 
 .navlink:hover,
 .navlink:active {
-    color: white;
+    color: #E95978
 }
 
 .button:hover,
@@ -582,15 +594,16 @@ button:focus, canvas:focus, div:focus{
 }
 
 .button.top{
-  border: 2px solid #EEE !important;
-  color:#EEE !important;
+  border: 2px solid #E24660;
+  color:#E24660;
   font-size: 16px;
   font-weight: 600 !important;
   margin-top: 9px !important;
 }
+
 .button.top:hover {
-  background-color:white !important;
-  color:black !important;
+  background-color:#E24660;
+  color:white;
 }
 
 .handle {
