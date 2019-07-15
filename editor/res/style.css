@@ -263,7 +263,7 @@ body {
     font-weight: bold;
 }
 .cm-s-twilight .cm-command, .cm-s-twilight .cm-command-chat {
-  color:#D8D8D8; 
+  color:#D8D8D8;
 }
 
 .cm-s-default .cm-actor {
@@ -465,12 +465,13 @@ button:disabled:hover {
     font-size: 12px;
     font-family: Open Sans, sans-serif;
     font-weight: 500;
-    color: #E24660;
+    color: grey;
+    line-height: 49px;
 }
 
 .navlink:hover,
 .navlink:active {
-    color: #E95978;
+    color: white;
 }
 
 .button:hover,
@@ -515,7 +516,7 @@ linedwrap {
 .checkbox {
     margin-left: 3px;
     margin-top: 8px;
-    margin:8px 0 0 3px;
+    margin:6px 0 0 3px;
     -webkit-appearance: none;
     background-color: #fafafa;
     border: 1px solid #cacece;
@@ -547,14 +548,16 @@ input[type="checkbox"]:focus {
     left: 2px;
     color: #99a1a7;
 }
+#navbar .wrapper{
+  margin-top: 10px;
+}
 
 .checkText {
-    margin-top: 4px;
     margin-left: 8px;
     display: inline-block;
     position: relative;
     font-size: 12px;
-    line-height: 28px;
+    line-height: 30px;
 }
 
 .checkText a {
@@ -579,15 +582,15 @@ button:focus, canvas:focus, div:focus{
 }
 
 .button.top{
-  border: 2px solid #E24660 !important;
-  color:#E24660 !important;
+  border: 2px solid #EEE !important;
+  color:#EEE !important;
   font-size: 16px;
   font-weight: 600 !important;
-  margin-top: 4px !important;
+  margin-top: 9px !important;
 }
 .button.top:hover {
-  background-color:#E24660 !important;
-  color:white !important;
+  background-color:white !important;
+  color:black !important;
 }
 
 .handle {
