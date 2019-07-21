@@ -176,7 +176,7 @@ ASK How many $choices.ToUpper() do you have?
 Or arbitrarily chain multiple transforms:
 ````
 SET choices = (tooth | menu | child)
-ASK How many $choices.pluralize().ToUpper() do you have?
+ASK How many $choices.Pluralize().ToUpper() do you have?
 ````
 
 
