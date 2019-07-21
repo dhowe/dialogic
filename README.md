@@ -164,7 +164,7 @@ ASK How many $choices.Pluralize() do you have?
 
 Or on parenthesized words or phrases
 ````
-ASK How many (octopus).pluralize() do you have?
+ASK How many (octopus).Pluralize() do you have?
 ````
 
 You can also use built-in C# string functions:
