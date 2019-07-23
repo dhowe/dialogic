@@ -58,7 +58,7 @@
       },
 
       // {regex: /\(.+\)(\..+(.*))/, token: "transformation"},
-      //  {regex: /\$.+(\..+(.*))/, token: "transformation"},
+      // {regex: /\$.+(\..+(.*))/, token: "transformation"},
 
       {
         regex: /\#(_|[a-zA-Z]).*?(?=\s|$)/,
@@ -139,12 +139,17 @@
     }],
     transformation: [
     {
-      regex: /.+\(.*\)/,
+      regex: /.\w+\(.*\)/,
       token: "transformation",
       next: "start"
     },
     {
-      regex: /.*/,
+      regex: /.[^\w]/,
+      token: "",
+      next: "start"
+    },
+    {
+      regex: /.\w/,
       token: "transformation"
     }],
 
