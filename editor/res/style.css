@@ -171,6 +171,7 @@ body {
   bottom: 0;
   position:absolute;
   height:95%;
+  overflow-y: hidden;
   background: white;
   border: 1px solid #eee;
 }
@@ -268,7 +269,7 @@ body {
 }
 
 .CodeMirror-gutters {
-    height: 100% !important; /* fix the gutter issue*/
+    /* height: 100% !important; /* fix the gutter issue*/ */
 }
 /*additional theme*/
 .CodeMirror .cm-command, .CodeMirror .cm-command-chat {
@@ -381,7 +382,13 @@ body, html {
     width: 95%;
     margin-left: 13px;
     min-width: 620px;
-    overflow: auto;
+    overflow: scroll;
+}
+#executeResult {
+    max-height:15%;
+}
+#result {
+    max-height:35%;
 }
 
 #executeResult {
