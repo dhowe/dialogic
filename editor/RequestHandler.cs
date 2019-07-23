@@ -103,7 +103,7 @@ namespace Dialogic.Server
             //Console.WriteLine("PRE: " + result + "\n");
 
             //result = regex.Replace(result, "\\\n");
-            //json = json.Replace("\"", "\\\"");
+            result= result.Replace("\\\\\"", "\\\"");
             Console.WriteLine("RES: " + result + "\n");
 
             return result;
