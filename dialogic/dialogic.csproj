@@ -36,7 +36,7 @@
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Packaging" Version="0.2.2" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
-    <PackageReference Include="MessagePack" Version="1.7.3.4" />
+    <PackageReference Include="MessagePack" Version="1.9.3" />
   </ItemGroup>
 </Project>
 
