@@ -6,8 +6,6 @@
 
 Check out [Tendar](https://play.google.com/store/apps/details?id=com.TenderClaws.Tendar.home), the award-winning free AR game using Dialogic on your Android device! Here's a [review](https://variety.com/2018/digital/news/tender-claws-tendar-ar-game-1203029351/)...
 
-_Interested in using Dialogic in your game or voice-app? Drop me a line at daniel-@-rednoise-dot-org..._
-
 <hr/>
 
 [FAQ](https://github.com/dhowe/dialogic/wiki) &nbsp;::&nbsp; [Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Docs](http://rednoise.org/dialogic-api/) &nbsp;::&nbsp; [Workbench](http://rednoise.org/dialogic/editor/) &nbsp;::&nbsp; [NuGet Package](https://www.nuget.org/packages/org.rednoise.dialogic/)
