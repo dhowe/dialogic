@@ -13,8 +13,6 @@ editor/DialogicEditor-*.zip
 tests/*.xml
 tests/*.pdb
 
-# demo
-
 # Autosave files
 *~
 
