@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 
+
 namespace Dialogic
 {
     // Utility class for reading input from console

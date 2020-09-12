@@ -179,3 +179,4 @@ namespace Dialogic
 
     internal interface IResolvable { } // Choice and Symbol
 }
+
