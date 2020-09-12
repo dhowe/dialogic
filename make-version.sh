@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 export version=`cat dialogic/dialogic.csproj | grep "<PackageVersion" | sed 's/ *<PackageVersion>\([0-9.]*\).*/\1/'`
 
 #echo VERSION=$version
