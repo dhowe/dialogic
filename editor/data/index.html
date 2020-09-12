@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Dialogic v0.8.61</title>
+  <title>Dialogic v0.8.65</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <link href="http://files.aw20.net/jquery-linedtextarea/jquery-linedtextarea.css" rel="stylesheet" />
   <link href="https://jsonlint.com/css/style.css" rel="stylesheet">
@@ -13,7 +13,7 @@
   // define Language Mode
   CodeMirror.defineSimpleMode("dialogic", {
 
-    // The start state contains the rules that are intially used
+    // The start state contains the rules that are initially used
     start: [
 
         // The regex matches the token, the token property contains the type
@@ -423,7 +423,7 @@
     </div>
   </div>
   <script>
-    $(function ()
+$(function ()
     {
       // ******** State Editor ************//
 
@@ -677,17 +677,16 @@
 
       function sendRequest(data)
       {
+        var server = "http://localhost:8082/dialogic/editor/";
         $.ajax(
         {
           type: "POST",
           data: data,
-          url: "%%URL%%",
+          url: window.location.pathname, // or server
           contentType: 'application/x-www-form-urlencoded',
           success: function (data)
           {
-            document.open();
-            document.write(data);
-            document.close();
+            // handle the data
           }
         });
       }
@@ -752,8 +751,7 @@
         window.addEventListener("mouseup", on_release);
       });
 
-    });
-  </script>
+    });</script>
 </body>
 
 </html>

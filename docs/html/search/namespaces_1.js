@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dialogic',['Dialogic',['../namespace_dialogic.html',1,'']]]
+  ['dialogic_192',['Dialogic',['../namespace_dialogic.html',1,'']]]
 ];
