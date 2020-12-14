@@ -9,7 +9,7 @@ Check out [Tendar](https://play.google.com/store/apps/details?id=com.TenderClaws
 
 [FAQ](https://github.com/dhowe/dialogic/wiki) &nbsp;::&nbsp; [Command Reference](https://github.com/dhowe/dialogic/wiki/Command-Reference) &nbsp;::&nbsp; [API Docs](http://rednoise.org/dialogic-api/) &nbsp;::&nbsp; [Workbench](http://rednoise.org/dialogic/editor/) &nbsp;::&nbsp; [NuGet Package](https://www.nuget.org/packages/org.rednoise.dialogic/)
 
-Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It enables writers to craft compelling dialog that responds organically both to user prompts and to events in the environment. The system supports abitrarily complex interactions between multiple actors, but makes no assumptions about how text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity).
+Dialogic is a system designed to help writers easily create interactive scripts with generative elements. It enables writers to craft compelling dialog that responds organically both to user prompts and to events in the environment. The system supports arbitrarily complex interactions between multiple actors, but makes no assumptions about how text is displayed, or about how users will choose their responses. These tasks are left to game designers and programmers (using tools like Unity).
 
 
 
