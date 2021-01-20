@@ -848,7 +848,7 @@ namespace Dialogic
 
         public static String Decode(String input)
         {
-            if (!input.Contains('&')) return input;
+            if (input == null || !input.Contains('&')) return input;
 
 #pragma warning disable XS0001  //  Mono StringBuilder serialization warning
 
