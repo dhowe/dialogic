@@ -235,7 +235,7 @@ which will output:
 
 Dialogic can be run alone or with a game engine, such as Unity3D (see example below). The system includes two main components: the scripting language described above, and the runtime environment, which is responsible for passing events between the runtime and the application. 
 
-In the C# example below, a [_ChatRuntime_](http://rednoise.org/dialogic/class_dialogic_1_1_chat_runtime.html) is created that reads in a chat descriptions from a plain-text file (or folder) and compiles them into a list of _Chat_ objects. The runtime's Run() function is called to start execution, specifying the Chat to run first.
+In the C# example below, a [_ChatRuntime_](http://rednoise.org/dialogic/class_dialogic_1_1_chat_runtime.html) is created that reads in chat descriptions from a plain-text file (or folder) and compiles them into a list of _Chat_ objects. The runtime's Run() function is called to start execution, specifying the Chat to run first.
 
 The application calls the runtime's Update() function each frame, passing the current world-state (a dictionary of key-value pairs) and any event that occurred during that frame. If a Dialogic event occurs during the frame, it is returned from the Update function.
 ````C#
